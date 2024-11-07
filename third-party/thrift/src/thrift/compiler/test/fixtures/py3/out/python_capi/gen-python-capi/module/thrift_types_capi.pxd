@@ -64,6 +64,22 @@ cdef api int can_extract__module__BinaryUnionStruct(object) except -1
 
 cdef api object init__module__BinaryUnionStruct(object data)
 
+cdef api int can_extract__module__CustomFields(object) except -1
+
+cdef api __cIOBuf* extract__module__CustomFields(object) except NULL
+
+cdef api object construct__module__CustomFields(__unique_ptr[__cIOBuf])
+
+cdef api object init__module__CustomFields(object data)
+
+cdef api int can_extract__module__CustomTypedefFields(object) except -1
+
+cdef api __cIOBuf* extract__module__CustomTypedefFields(object) except NULL
+
+cdef api object construct__module__CustomTypedefFields(__unique_ptr[__cIOBuf])
+
+cdef api object init__module__CustomTypedefFields(object data)
+
 cdef api int can_extract__module__AnEnum(object) except -1
 
 cdef api object construct__module__AnEnum(int64_t)

@@ -121,6 +121,74 @@ inline void reset_field<::py3::simple::BinaryUnionStruct>(
 }
 
 template<>
+inline void reset_field<::py3::simple::CustomFields>(
+    ::py3::simple::CustomFields& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.bool_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().bool_field_ref());
+      return;
+    case 1:
+      obj.integer_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().integer_field_ref());
+      return;
+    case 2:
+      obj.double_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().double_field_ref());
+      return;
+    case 3:
+      obj.string_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().string_field_ref());
+      return;
+    case 4:
+      obj.binary_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().binary_field_ref());
+      return;
+    case 5:
+      obj.list_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().list_field_ref());
+      return;
+    case 6:
+      obj.set_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().set_field_ref());
+      return;
+    case 7:
+      obj.map_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().map_field_ref());
+      return;
+    case 8:
+      obj.struct_field_ref().copy_from(default_inst<::py3::simple::CustomFields>().struct_field_ref());
+      return;
+  }
+}
+
+template<>
+inline void reset_field<::py3::simple::CustomTypedefFields>(
+    ::py3::simple::CustomTypedefFields& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.bool_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().bool_field_ref());
+      return;
+    case 1:
+      obj.integer_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().integer_field_ref());
+      return;
+    case 2:
+      obj.double_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().double_field_ref());
+      return;
+    case 3:
+      obj.string_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().string_field_ref());
+      return;
+    case 4:
+      obj.binary_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().binary_field_ref());
+      return;
+    case 5:
+      obj.list_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().list_field_ref());
+      return;
+    case 6:
+      obj.set_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().set_field_ref());
+      return;
+    case 7:
+      obj.map_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().map_field_ref());
+      return;
+    case 8:
+      obj.struct_field_ref().copy_from(default_inst<::py3::simple::CustomTypedefFields>().struct_field_ref());
+      return;
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::SimpleException>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
@@ -185,6 +253,26 @@ inline const std::unordered_map<std::string_view, std::string_view>& PyStructTra
 template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::py3::simple::BinaryUnionStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::py3::simple::CustomFields>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::py3::simple::CustomTypedefFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

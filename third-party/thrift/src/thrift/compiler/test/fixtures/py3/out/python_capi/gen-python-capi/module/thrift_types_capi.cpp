@@ -902,6 +902,168 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
 }
 
 
+ExtractorResult<::py3::simple::CustomFields>
+Extractor<::py3::simple::CustomFields>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::py3::simple::CustomFields>(
+      "Module module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__CustomFields(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::py3::simple::CustomFields>(
+        "Thrift serialize error: CustomFields");
+  }
+  return detail::deserialize_iobuf<::py3::simple::CustomFields>(std::move(val));
+}
+
+
+ExtractorResult<::py3::simple::CustomFields>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::py3::simple::CustomFields>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::py3::simple::CustomFields>(
+      "Module module import error");
+  }
+  auto obj = StrongRef(init__module__CustomFields(fbthrift_data));
+  if (!obj) {
+      return extractorError<::py3::simple::CustomFields>(
+          "Init from fbthrift error: CustomFields");
+  }
+  return Extractor<::py3::simple::CustomFields>{}(*obj);
+}
+
+int Extractor<::py3::simple::CustomFields>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module module import error");
+  }
+  int result =
+      can_extract__module__CustomFields(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: CustomFields");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::py3::simple::CustomFields>::operator()(
+    const ::py3::simple::CustomFields& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__module__CustomFields(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomFields>>::operator()(
+    const ::py3::simple::CustomFields& val) {
+  auto obj = StrongRef(Constructor<::py3::simple::CustomFields>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
+ExtractorResult<::py3::simple::CustomTypedefFields>
+Extractor<::py3::simple::CustomTypedefFields>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::py3::simple::CustomTypedefFields>(
+      "Module module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__CustomTypedefFields(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::py3::simple::CustomTypedefFields>(
+        "Thrift serialize error: CustomTypedefFields");
+  }
+  return detail::deserialize_iobuf<::py3::simple::CustomTypedefFields>(std::move(val));
+}
+
+
+ExtractorResult<::py3::simple::CustomTypedefFields>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::py3::simple::CustomTypedefFields>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::py3::simple::CustomTypedefFields>(
+      "Module module import error");
+  }
+  auto obj = StrongRef(init__module__CustomTypedefFields(fbthrift_data));
+  if (!obj) {
+      return extractorError<::py3::simple::CustomTypedefFields>(
+          "Init from fbthrift error: CustomTypedefFields");
+  }
+  return Extractor<::py3::simple::CustomTypedefFields>{}(*obj);
+}
+
+int Extractor<::py3::simple::CustomTypedefFields>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module module import error");
+  }
+  int result =
+      can_extract__module__CustomTypedefFields(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: CustomTypedefFields");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::py3::simple::CustomTypedefFields>::operator()(
+    const ::py3::simple::CustomTypedefFields& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__module__CustomTypedefFields(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomTypedefFields>>::operator()(
+    const ::py3::simple::CustomTypedefFields& val) {
+  auto obj = StrongRef(Constructor<::py3::simple::CustomTypedefFields>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
 ExtractorResult<::py3::simple::AnEnum>
 Extractor<::py3::simple::AnEnum>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);

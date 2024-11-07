@@ -532,6 +532,46 @@ class List__AnEnum(thrift.py3.types.List):
 Sequence.register(List__AnEnum)
 __all__.append('List__AnEnum')
 
+class _MyType__List__i32(thrift.py3.types.List):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
+            _py_obj = items
+        elif isinstance(items, _MyType__List__i32):
+            _py_obj = list(items)
+        elif items is None:
+            _py_obj = []
+        else:
+            check_method = _MyType__List__i32._check_item_type_or_raise
+            _py_obj = [check_method(item) for item in items]
+
+        super().__init__(_py_obj, _MyType__List__i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___MyType__List__i32()
+
+
+Sequence.register(_MyType__List__i32)
+__all__.append('_MyType__List__i32')
+
 class List__Map__i32_double(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()

@@ -77,6 +77,7 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Map__string_string,
     List__binary,
     List__AnEnum,
+    _MyType__List__i32,
     List__Map__i32_double,
 )
 
@@ -1046,6 +1047,386 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.BinaryUnionStruct, self)
+
+@__cython.auto_pickle(False)
+cdef class CustomFields(thrift.py3.types.Struct):
+    def __init__(CustomFields self, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCustomFields]()
+        self._fields_setter = _fbthrift_types_fields.__CustomFields_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        super().__init__(**kwargs)
+
+    def __call__(CustomFields self, **kwargs):
+        if not kwargs:
+            return self
+        cdef CustomFields __fbthrift_inst = CustomFields.__new__(CustomFields)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCustomFields](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__CustomFields_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("CustomFields", {
+          "bool_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().has_value(),
+          "integer_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).integer_field_ref().has_value(),
+          "double_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).double_field_ref().has_value(),
+          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
+          "binary_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().has_value(),
+          "list_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().has_value(),
+          "set_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().has_value(),
+          "map_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().has_value(),
+          "struct_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomFields] cpp_obj):
+        __fbthrift_inst = <CustomFields>CustomFields.__new__(CustomFields)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline bool_field_impl(self):
+        return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().value()
+
+    @property
+    def bool_field(self):
+        return self.bool_field_impl()
+
+    cdef inline integer_field_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).integer_field_ref().value()
+
+    @property
+    def integer_field(self):
+        return self.integer_field_impl()
+
+    cdef inline double_field_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).double_field_ref().value()
+
+    @property
+    def double_field(self):
+        return self.double_field_impl()
+
+    cdef inline string_field_impl(self):
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().value()).decode('UTF-8')
+
+    @property
+    def string_field(self):
+        return self.string_field_impl()
+
+    cdef inline binary_field_impl(self):
+        return (<const char*>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().value().data())[:deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().value().size()]
+
+    @property
+    def binary_field(self):
+        return self.binary_field_impl()
+
+    cdef inline list_field_impl(self):
+        if self.__fbthrift_cached_list_field is None:
+            self.__fbthrift_cached_list_field = _MyType__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().ref())
+        return self.__fbthrift_cached_list_field
+
+    @property
+    def list_field(self):
+        return self.list_field_impl()
+
+    cdef inline set_field_impl(self):
+        if self.__fbthrift_cached_set_field is None:
+            self.__fbthrift_cached_set_field = _MyType__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_set_field
+
+    @property
+    def set_field(self):
+        return self.set_field_impl()
+
+    cdef inline map_field_impl(self):
+        if self.__fbthrift_cached_map_field is None:
+            self.__fbthrift_cached_map_field = _MyType__Map__i32_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_map_field
+
+    @property
+    def map_field(self):
+        return self.map_field_impl()
+
+    cdef inline struct_field_impl(self):
+        if self.__fbthrift_cached_struct_field is None:
+            self.__fbthrift_cached_struct_field = SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_struct_field
+
+    @property
+    def struct_field(self):
+        return self.struct_field_impl()
+
+
+    def __hash__(CustomFields self):
+        return super().__hash__()
+
+    def __repr__(CustomFields self):
+        return super().__repr__()
+
+    def __str__(CustomFields self):
+        return super().__str__()
+
+
+    def __copy__(CustomFields self):
+        cdef shared_ptr[_module_cbindings.cCustomFields] cpp_obj = make_shared[_module_cbindings.cCustomFields](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return CustomFields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __eq__(CustomFields self, other):
+        if not isinstance(other, CustomFields):
+            return False
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get()) == deref((<CustomFields>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+
+    def __ne__(CustomFields self, other):
+        if not isinstance(other, CustomFields):
+            return True
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE) != deref((<CustomFields>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__CustomFields()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        _module_cbindings.StructMetadata[_module_cbindings.cCustomFields].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CustomFields"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cCustomFields](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 9
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(CustomFields self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[_module_cbindings.cCustomFields](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(CustomFields self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCustomFields]()
+        with nogil:
+            needed = serializer.cdeserialize[_module_cbindings.cCustomFields](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.CustomFields, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.CustomFields, self)
+
+@__cython.auto_pickle(False)
+cdef class CustomTypedefFields(thrift.py3.types.Struct):
+    def __init__(CustomTypedefFields self, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCustomTypedefFields]()
+        self._fields_setter = _fbthrift_types_fields.__CustomTypedefFields_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        super().__init__(**kwargs)
+
+    def __call__(CustomTypedefFields self, **kwargs):
+        if not kwargs:
+            return self
+        cdef CustomTypedefFields __fbthrift_inst = CustomTypedefFields.__new__(CustomTypedefFields)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCustomTypedefFields](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__CustomTypedefFields_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("CustomTypedefFields", {
+          "bool_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().has_value(),
+          "integer_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).integer_field_ref().has_value(),
+          "double_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).double_field_ref().has_value(),
+          "string_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().has_value(),
+          "binary_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().has_value(),
+          "list_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().has_value(),
+          "set_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().has_value(),
+          "map_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().has_value(),
+          "struct_field": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_field_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomTypedefFields] cpp_obj):
+        __fbthrift_inst = <CustomTypedefFields>CustomTypedefFields.__new__(CustomTypedefFields)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline bool_field_impl(self):
+        return <pbool> deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).bool_field_ref().value()
+
+    @property
+    def bool_field(self):
+        return self.bool_field_impl()
+
+    cdef inline integer_field_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).integer_field_ref().value()
+
+    @property
+    def integer_field(self):
+        return self.integer_field_impl()
+
+    cdef inline double_field_impl(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).double_field_ref().value()
+
+    @property
+    def double_field(self):
+        return self.double_field_impl()
+
+    cdef inline string_field_impl(self):
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).string_field_ref().value()).decode('UTF-8')
+
+    @property
+    def string_field(self):
+        return self.string_field_impl()
+
+    cdef inline binary_field_impl(self):
+        return (<const char*>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().value().data())[:deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().value().size()]
+
+    @property
+    def binary_field(self):
+        return self.binary_field_impl()
+
+    cdef inline list_field_impl(self):
+        if self.__fbthrift_cached_list_field is None:
+            self.__fbthrift_cached_list_field = _MyType__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().ref())
+        return self.__fbthrift_cached_list_field
+
+    @property
+    def list_field(self):
+        return self.list_field_impl()
+
+    cdef inline set_field_impl(self):
+        if self.__fbthrift_cached_set_field is None:
+            self.__fbthrift_cached_set_field = _MyType__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_set_field
+
+    @property
+    def set_field(self):
+        return self.set_field_impl()
+
+    cdef inline map_field_impl(self):
+        if self.__fbthrift_cached_map_field is None:
+            self.__fbthrift_cached_map_field = _MyType__Map__i32_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_map_field
+
+    @property
+    def map_field(self):
+        return self.map_field_impl()
+
+    cdef inline struct_field_impl(self):
+        if self.__fbthrift_cached_struct_field is None:
+            self.__fbthrift_cached_struct_field = SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).struct_field_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        return self.__fbthrift_cached_struct_field
+
+    @property
+    def struct_field(self):
+        return self.struct_field_impl()
+
+
+    def __hash__(CustomTypedefFields self):
+        return super().__hash__()
+
+    def __repr__(CustomTypedefFields self):
+        return super().__repr__()
+
+    def __str__(CustomTypedefFields self):
+        return super().__str__()
+
+
+    def __copy__(CustomTypedefFields self):
+        cdef shared_ptr[_module_cbindings.cCustomTypedefFields] cpp_obj = make_shared[_module_cbindings.cCustomTypedefFields](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return CustomTypedefFields._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __eq__(CustomTypedefFields self, other):
+        if not isinstance(other, CustomTypedefFields):
+            return False
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get()) == deref((<CustomTypedefFields>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+
+    def __ne__(CustomTypedefFields self, other):
+        if not isinstance(other, CustomTypedefFields):
+            return True
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE) != deref((<CustomTypedefFields>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__CustomTypedefFields()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        _module_cbindings.StructMetadata[_module_cbindings.cCustomTypedefFields].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.CustomTypedefFields"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[_module_cbindings.cCustomTypedefFields](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 9
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(CustomTypedefFields self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[_module_cbindings.cCustomTypedefFields](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(CustomTypedefFields self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCustomTypedefFields]()
+        with nogil:
+            needed = serializer.cdeserialize[_module_cbindings.cCustomTypedefFields](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.CustomTypedefFields, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.CustomTypedefFields, self)
 
 
 cdef vector[cint16_t] List__i16__make_instance(object items) except *:
@@ -2196,6 +2577,204 @@ cdef shared_ptr[_module_cbindings._std_unordered_map[cint32_t,cint32_t]] _std_un
     return cmove(c_inst)
 
 
+
+cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *:
+    cdef _module_cbindings._MyType c_inst
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+            c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object _MyType__List__i32__from_cpp(const _module_cbindings._MyType& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return _MyType__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class _MyType__Set__i32(thrift.py3.types.Set):
+    def __init__(self, items=None):
+        if isinstance(items, _MyType__Set__i32):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<_MyType__Set__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = _MyType__Set__i32__make_instance(items)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings._MyType] c_items):
+        __fbthrift_inst = <_MyType__Set__i32>_MyType__Set__i32.__new__(_MyType__Set__i32)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(_MyType__Set__i32 self):
+        cdef shared_ptr[_module_cbindings._MyType] cpp_obj = make_shared[_module_cbindings._MyType](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return _MyType__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    def __contains__(self, item):
+        if not self or item is None:
+            return False
+        if not isinstance(item, int):
+            return False
+        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
+
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __set_iter[_module_cbindings._MyType] itr = __set_iter[_module_cbindings._MyType](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+            yield citem
+
+    def __hash__(self):
+        return super().__hash__()
+
+    def __richcmp__(self, other, int op):
+        if isinstance(other, _MyType__Set__i32):
+            # C level comparisons
+            return __setcmp(
+                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+                (<_MyType__Set__i32> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+                op,
+            )
+        return self._fbthrift_py_richcmp(other, op)
+
+    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
+        if not isinstance(other, _MyType__Set__i32):
+            other = _MyType__Set__i32(other)
+        cdef shared_ptr[_module_cbindings._MyType] result
+        return _MyType__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[_module_cbindings._MyType](
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<_MyType__Set__i32>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            op,
+        ))
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___MyType__Set__i32()
+
+
+Set.register(_MyType__Set__i32)
+
+cdef shared_ptr[_module_cbindings._MyType] _MyType__Set__i32__make_instance(object items) except *:
+    cdef shared_ptr[_module_cbindings._MyType] c_inst = make_shared[_module_cbindings._MyType]()
+    if items is not None:
+        for item in items:
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+            deref(c_inst).insert(item)
+    return cmove(c_inst)
+
+
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class _MyType__Map__i32_i32(thrift.py3.types.Map):
+    def __init__(self, items=None):
+        if isinstance(items, _MyType__Map__i32_i32):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<_MyType__Map__i32_i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = _MyType__Map__i32_i32__make_instance(items)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings._MyType] c_items):
+        __fbthrift_inst = <_MyType__Map__i32_i32>_MyType__Map__i32_i32.__new__(_MyType__Map__i32_i32)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(_MyType__Map__i32_i32 self):
+        cdef shared_ptr[_module_cbindings._MyType] cpp_obj = make_shared[_module_cbindings._MyType](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return _MyType__Map__i32_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    cdef _check_key_type(self, key):
+        if not self or key is None:
+            return
+        if isinstance(key, int):
+            return key
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._check_key_type(key)
+        if key is None:
+            raise err
+        cdef cint32_t ckey = key
+        if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
+            raise err
+        cdef cint32_t citem = 0
+        __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
+        return citem
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __map_iter[_module_cbindings._MyType] itr = __map_iter[_module_cbindings._MyType](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+            yield citem
+
+    def __contains__(self, key):
+        key = self._check_key_type(key)
+        if key is None:
+            return False
+        cdef cint32_t ckey = key
+        return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
+
+    def values(self):
+        if not self:
+            return
+        cdef __map_iter[_module_cbindings._MyType] itr = __map_iter[_module_cbindings._MyType](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+            yield citem
+
+    def items(self):
+        if not self:
+            return
+        cdef __map_iter[_module_cbindings._MyType] itr = __map_iter[_module_cbindings._MyType](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t ckey = 0
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
+            yield (ckey, citem)
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection___MyType__Map__i32_i32()
+
+Mapping.register(_MyType__Map__i32_i32)
+
+cdef shared_ptr[_module_cbindings._MyType] _MyType__Map__i32_i32__make_instance(object items) except *:
+    cdef shared_ptr[_module_cbindings._MyType] c_inst = make_shared[_module_cbindings._MyType]()
+    if items is not None:
+        for key, item in items.items():
+            if not isinstance(key, int):
+                raise TypeError(f"{key!r} is not of type int")
+            key = <cint32_t> key
+            if not isinstance(item, int):
+                raise TypeError(f"{item!r} is not of type int")
+            item = <cint32_t> item
+
+            deref(c_inst)[key] = item
+    return cmove(c_inst)
+
+
 @__cython.auto_pickle(False)
 @__cython.final
 cdef class Map__i32_double(thrift.py3.types.Map):
@@ -2429,3 +3008,12 @@ ANOTHER_CONST_MAP = Map__AnEnumRenamed_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cons
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
 foo_bar = bytes
+CustomBool = bool
+CustomInteger = int
+CustomDouble = float
+CustomString = str
+CustomBinary = bytes
+CustomList = _MyType__List__i32
+CustomSet = _MyType__Set__i32
+CustomMap = _MyType__Map__i32_i32
+CustomStruct = SimpleStruct

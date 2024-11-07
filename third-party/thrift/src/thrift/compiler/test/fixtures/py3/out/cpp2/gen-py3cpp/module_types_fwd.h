@@ -21,6 +21,8 @@ class HiddenException;
 class ComplexStruct;
 class BinaryUnion;
 class BinaryUnionStruct;
+class CustomFields;
+class CustomTypedefFields;
 } // namespace py3::simple
 // END forward_declare
 

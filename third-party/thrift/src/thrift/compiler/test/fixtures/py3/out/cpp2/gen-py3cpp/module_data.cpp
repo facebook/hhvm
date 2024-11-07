@@ -276,5 +276,119 @@ THRIFT_DATA_MEMBER const std::array<int, 1> TStructDataStorage<::py3::simple::Bi
   0,
 }};
 
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::CustomFields>::name = "CustomFields";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_names = { {
+  "bool_field"sv,
+  "integer_field"sv,
+  "double_field"sv,
+  "string_field"sv,
+  "binary_field"sv,
+  "list_field"sv,
+  "set_field"sv,
+  "map_field"sv,
+  "struct_field"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_ids = { {
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::CustomFields>::fields_types = { {
+  TType::T_BOOL,
+  TType::T_I64,
+  TType::T_DOUBLE,
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_MAP,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomFields>::storage_names = { {
+  "__fbthrift_field_bool_field"sv,
+  "__fbthrift_field_integer_field"sv,
+  "__fbthrift_field_double_field"sv,
+  "__fbthrift_field_string_field"sv,
+  "__fbthrift_field_binary_field"sv,
+  "__fbthrift_field_list_field"sv,
+  "__fbthrift_field_set_field"sv,
+  "__fbthrift_field_map_field"sv,
+  "__fbthrift_field_struct_field"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::CustomFields>::isset_indexes = { {
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+}};
+
+THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::py3::simple::CustomTypedefFields>::name = "CustomTypedefFields";
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_names = { {
+  "bool_field"sv,
+  "integer_field"sv,
+  "double_field"sv,
+  "string_field"sv,
+  "binary_field"sv,
+  "list_field"sv,
+  "set_field"sv,
+  "map_field"sv,
+  "struct_field"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int16_t, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_ids = { {
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+}};
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::fields_types = { {
+  TType::T_BOOL,
+  TType::T_I64,
+  TType::T_DOUBLE,
+  TType::T_STRING,
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_MAP,
+  TType::T_STRUCT,
+}};
+THRIFT_DATA_MEMBER const std::array<std::string_view, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::storage_names = { {
+  "__fbthrift_field_bool_field"sv,
+  "__fbthrift_field_integer_field"sv,
+  "__fbthrift_field_double_field"sv,
+  "__fbthrift_field_string_field"sv,
+  "__fbthrift_field_binary_field"sv,
+  "__fbthrift_field_list_field"sv,
+  "__fbthrift_field_set_field"sv,
+  "__fbthrift_field_map_field"sv,
+  "__fbthrift_field_struct_field"sv,
+}};
+THRIFT_DATA_MEMBER const std::array<int, 9> TStructDataStorage<::py3::simple::CustomTypedefFields>::isset_indexes = { {
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+}};
+
 } // namespace thrift
 } // namespace apache

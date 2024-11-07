@@ -90,6 +90,16 @@ class StructMetadata<::py3::simple::BinaryUnionStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::py3::simple::CustomFields> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::py3::simple::CustomTypedefFields> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class ExceptionMetadata<::py3::simple::SimpleException> {
  public:
   static void gen(ThriftMetadata& metadata);

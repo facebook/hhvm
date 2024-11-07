@@ -76,6 +76,130 @@ cdef extern from * nogil:
 
 cdef extern from *:
     ctypedef bstring foo_Bar "foo::Bar"
+cdef extern from *:
+    ctypedef cbool _MyType "::MyType"
+cdef extern from *:
+    ctypedef cint64_t _MyType "::MyType"
+cdef extern from *:
+    ctypedef double _MyType "::MyType"
+cdef extern from *:
+    ctypedef string _MyType "::MyType"
+cdef extern from *:
+    ctypedef bstring _MyType "::MyType"
+cdef extern from * nogil:
+    cdef cppclass _MyType "::MyType":
+        ctypedef cint32_t value_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _MyType() except +
+        _MyType(_MyType&) except +
+
+        cint32_t& operator[](size_type)
+        void push_back(cint32_t&) except +
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
+cdef extern from * nogil:
+    cdef cppclass _MyType "::MyType":
+        ctypedef cint32_t value_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _MyType() except +
+        _MyType(_MyType&) except +
+
+        cpair[iterator, bint] insert(const cint32_t&) except +
+        size_type size()
+        size_type count(const cint32_t&)
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
+cdef extern from * nogil:
+    cdef cppclass _MyType "::MyType":
+        ctypedef cint32_t key_type
+        ctypedef cint32_t mapped_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cpair[cint32_t, cint32_t]& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cpair[cint32_t, cint32_t]& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _MyType() except +
+        _MyType(_MyType&) except +
+
+        cint32_t& operator[](cint32_t&)
+        iterator find(const cint32_t&)
+        const_iterator const_find "find"(const cint32_t&)
+        size_type count(const cint32_t&)
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -178,6 +302,38 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_cust
         cBinaryUnionStruct() except +
         cBinaryUnionStruct(const cBinaryUnionStruct&) except +
         __field_ref[cBinaryUnion] u_ref "u_ref" ()
+
+
+    cdef cppclass cCustomFields "::py3::simple::CustomFields":
+        cCustomFields() except +
+        cCustomFields(const cCustomFields&) except +
+        bint operator==(cCustomFields&)
+        bint operator!=(cCustomFields&)
+        __field_ref[_MyType] bool_field_ref "bool_field_ref" ()
+        __field_ref[_MyType] integer_field_ref "integer_field_ref" ()
+        __field_ref[_MyType] double_field_ref "double_field_ref" ()
+        __field_ref[_MyType] string_field_ref "string_field_ref" ()
+        __field_ref[_MyType] binary_field_ref "binary_field_ref" ()
+        __field_ref[_MyType] list_field_ref "list_field_ref" ()
+        __field_ref[_MyType] set_field_ref "set_field_ref" ()
+        __field_ref[_MyType] map_field_ref "map_field_ref" ()
+        __field_ref[cSimpleStruct] struct_field_ref "struct_field_ref" ()
+
+
+    cdef cppclass cCustomTypedefFields "::py3::simple::CustomTypedefFields":
+        cCustomTypedefFields() except +
+        cCustomTypedefFields(const cCustomTypedefFields&) except +
+        bint operator==(cCustomTypedefFields&)
+        bint operator!=(cCustomTypedefFields&)
+        __field_ref[_MyType] bool_field_ref "bool_field_ref" ()
+        __field_ref[_MyType] integer_field_ref "integer_field_ref" ()
+        __field_ref[_MyType] double_field_ref "double_field_ref" ()
+        __field_ref[_MyType] string_field_ref "string_field_ref" ()
+        __field_ref[_MyType] binary_field_ref "binary_field_ref" ()
+        __field_ref[_MyType] list_field_ref "list_field_ref" ()
+        __field_ref[_MyType] set_field_ref "set_field_ref" ()
+        __field_ref[_MyType] map_field_ref "map_field_ref" ()
+        __field_ref[cSimpleStruct] struct_field_ref "struct_field_ref" ()
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_constants.h" namespace "::py3::simple":
     cdef cbool cA_BOOL "::py3::simple::module_constants::A_BOOL"

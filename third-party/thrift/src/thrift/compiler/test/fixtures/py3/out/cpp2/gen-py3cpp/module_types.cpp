@@ -1180,6 +1180,370 @@ static_assert(
 
 } // namespace py3::simple
 
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::py3::simple::CustomFields>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::py3::simple::CustomFields>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace py3::simple {
+
+std::string_view CustomFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CustomFields>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view CustomFields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<CustomFields>::name;
+}
+
+CustomFields::CustomFields(const CustomFields&) = default;
+CustomFields& CustomFields::operator=(const CustomFields&) = default;
+CustomFields::CustomFields() :
+    __fbthrift_field_bool_field(),
+    __fbthrift_field_integer_field(),
+    __fbthrift_field_double_field() {
+}
+
+
+CustomFields::~CustomFields() {}
+
+CustomFields::CustomFields([[maybe_unused]] CustomFields&& other) noexcept :
+    __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
+    __fbthrift_field_integer_field(std::move(other.__fbthrift_field_integer_field)),
+    __fbthrift_field_double_field(std::move(other.__fbthrift_field_double_field)),
+    __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
+    __fbthrift_field_binary_field(std::move(other.__fbthrift_field_binary_field)),
+    __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
+    __fbthrift_field_set_field(std::move(other.__fbthrift_field_set_field)),
+    __fbthrift_field_map_field(std::move(other.__fbthrift_field_map_field)),
+    __fbthrift_field_struct_field(std::move(other.__fbthrift_field_struct_field)),
+    __isset(other.__isset) {
+}
+
+CustomFields& CustomFields::operator=([[maybe_unused]] CustomFields&& other) noexcept {
+    this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
+    this->__fbthrift_field_integer_field = std::move(other.__fbthrift_field_integer_field);
+    this->__fbthrift_field_double_field = std::move(other.__fbthrift_field_double_field);
+    this->__fbthrift_field_string_field = std::move(other.__fbthrift_field_string_field);
+    this->__fbthrift_field_binary_field = std::move(other.__fbthrift_field_binary_field);
+    this->__fbthrift_field_list_field = std::move(other.__fbthrift_field_list_field);
+    this->__fbthrift_field_set_field = std::move(other.__fbthrift_field_set_field);
+    this->__fbthrift_field_map_field = std::move(other.__fbthrift_field_map_field);
+    this->__fbthrift_field_struct_field = std::move(other.__fbthrift_field_struct_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+CustomFields::CustomFields(apache::thrift::FragileConstructor, ::MyType bool_field__arg, ::MyType integer_field__arg, ::MyType double_field__arg, ::MyType string_field__arg, ::MyType binary_field__arg, ::MyType list_field__arg, ::MyType set_field__arg, ::MyType map_field__arg, ::MyType struct_field__arg) :
+    __fbthrift_field_bool_field(std::move(bool_field__arg)),
+    __fbthrift_field_integer_field(std::move(integer_field__arg)),
+    __fbthrift_field_double_field(std::move(double_field__arg)),
+    __fbthrift_field_string_field(std::move(string_field__arg)),
+    __fbthrift_field_binary_field(std::move(binary_field__arg)),
+    __fbthrift_field_list_field(std::move(list_field__arg)),
+    __fbthrift_field_set_field(std::move(set_field__arg)),
+    __fbthrift_field_map_field(std::move(map_field__arg)),
+    __fbthrift_field_struct_field(std::move(struct_field__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
+}
+
+
+void CustomFields::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_bool_field = ::MyType();
+  this->__fbthrift_field_integer_field = ::MyType();
+  this->__fbthrift_field_double_field = ::MyType();
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::MyType>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::MyType>::fromStringLiteral("");
+  this->__fbthrift_field_list_field.clear();
+  this->__fbthrift_field_set_field.clear();
+  this->__fbthrift_field_map_field.clear();
+  ::apache::thrift::clear(this->__fbthrift_field_struct_field);
+  __isset = {};
+}
+
+void CustomFields::__fbthrift_clear_terse_fields() {
+}
+
+bool CustomFields::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool CustomFields::operator==([[maybe_unused]] const CustomFields& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+const ::MyType& CustomFields::get_list_field() const& {
+  return __fbthrift_field_list_field;
+}
+
+::MyType CustomFields::get_list_field() && {
+  return std::move(__fbthrift_field_list_field);
+}
+
+const ::MyType& CustomFields::get_set_field() const& {
+  return __fbthrift_field_set_field;
+}
+
+::MyType CustomFields::get_set_field() && {
+  return std::move(__fbthrift_field_set_field);
+}
+
+const ::MyType& CustomFields::get_map_field() const& {
+  return __fbthrift_field_map_field;
+}
+
+::MyType CustomFields::get_map_field() && {
+  return std::move(__fbthrift_field_map_field);
+}
+
+const ::MyType& CustomFields::get_struct_field() const& {
+  return __fbthrift_field_struct_field;
+}
+
+::MyType CustomFields::get_struct_field() && {
+  return std::move(__fbthrift_field_struct_field);
+}
+
+
+void swap([[maybe_unused]] CustomFields& a, [[maybe_unused]] CustomFields& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
+  swap(a.__fbthrift_field_integer_field, b.__fbthrift_field_integer_field);
+  swap(a.__fbthrift_field_double_field, b.__fbthrift_field_double_field);
+  swap(a.__fbthrift_field_string_field, b.__fbthrift_field_string_field);
+  swap(a.__fbthrift_field_binary_field, b.__fbthrift_field_binary_field);
+  swap(a.__fbthrift_field_list_field, b.__fbthrift_field_list_field);
+  swap(a.__fbthrift_field_set_field, b.__fbthrift_field_set_field);
+  swap(a.__fbthrift_field_map_field, b.__fbthrift_field_map_field);
+  swap(a.__fbthrift_field_struct_field, b.__fbthrift_field_struct_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void CustomFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CustomFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CustomFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CustomFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CustomFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CustomFields::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CustomFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CustomFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        CustomFields,
+        ::apache::thrift::type_class::structure,
+        ::MyType>,
+    "inconsistent use of json option");
+
+} // namespace py3::simple
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::py3::simple::CustomTypedefFields>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::py3::simple::CustomTypedefFields>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace py3::simple {
+
+std::string_view CustomTypedefFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<CustomTypedefFields>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view CustomTypedefFields::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<CustomTypedefFields>::name;
+}
+
+CustomTypedefFields::CustomTypedefFields(const CustomTypedefFields&) = default;
+CustomTypedefFields& CustomTypedefFields::operator=(const CustomTypedefFields&) = default;
+CustomTypedefFields::CustomTypedefFields() :
+    __fbthrift_field_bool_field(),
+    __fbthrift_field_integer_field(),
+    __fbthrift_field_double_field() {
+}
+
+
+CustomTypedefFields::~CustomTypedefFields() {}
+
+CustomTypedefFields::CustomTypedefFields([[maybe_unused]] CustomTypedefFields&& other) noexcept :
+    __fbthrift_field_bool_field(std::move(other.__fbthrift_field_bool_field)),
+    __fbthrift_field_integer_field(std::move(other.__fbthrift_field_integer_field)),
+    __fbthrift_field_double_field(std::move(other.__fbthrift_field_double_field)),
+    __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
+    __fbthrift_field_binary_field(std::move(other.__fbthrift_field_binary_field)),
+    __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
+    __fbthrift_field_set_field(std::move(other.__fbthrift_field_set_field)),
+    __fbthrift_field_map_field(std::move(other.__fbthrift_field_map_field)),
+    __fbthrift_field_struct_field(std::move(other.__fbthrift_field_struct_field)),
+    __isset(other.__isset) {
+}
+
+CustomTypedefFields& CustomTypedefFields::operator=([[maybe_unused]] CustomTypedefFields&& other) noexcept {
+    this->__fbthrift_field_bool_field = std::move(other.__fbthrift_field_bool_field);
+    this->__fbthrift_field_integer_field = std::move(other.__fbthrift_field_integer_field);
+    this->__fbthrift_field_double_field = std::move(other.__fbthrift_field_double_field);
+    this->__fbthrift_field_string_field = std::move(other.__fbthrift_field_string_field);
+    this->__fbthrift_field_binary_field = std::move(other.__fbthrift_field_binary_field);
+    this->__fbthrift_field_list_field = std::move(other.__fbthrift_field_list_field);
+    this->__fbthrift_field_set_field = std::move(other.__fbthrift_field_set_field);
+    this->__fbthrift_field_map_field = std::move(other.__fbthrift_field_map_field);
+    this->__fbthrift_field_struct_field = std::move(other.__fbthrift_field_struct_field);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+CustomTypedefFields::CustomTypedefFields(apache::thrift::FragileConstructor, ::py3::simple::CustomBool bool_field__arg, ::py3::simple::CustomInteger integer_field__arg, ::py3::simple::CustomDouble double_field__arg, ::py3::simple::CustomString string_field__arg, ::py3::simple::CustomBinary binary_field__arg, ::py3::simple::CustomList list_field__arg, ::py3::simple::CustomSet set_field__arg, ::py3::simple::CustomMap map_field__arg, ::py3::simple::CustomStruct struct_field__arg) :
+    __fbthrift_field_bool_field(std::move(bool_field__arg)),
+    __fbthrift_field_integer_field(std::move(integer_field__arg)),
+    __fbthrift_field_double_field(std::move(double_field__arg)),
+    __fbthrift_field_string_field(std::move(string_field__arg)),
+    __fbthrift_field_binary_field(std::move(binary_field__arg)),
+    __fbthrift_field_list_field(std::move(list_field__arg)),
+    __fbthrift_field_set_field(std::move(set_field__arg)),
+    __fbthrift_field_map_field(std::move(map_field__arg)),
+    __fbthrift_field_struct_field(std::move(struct_field__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
+}
+
+
+void CustomTypedefFields::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_bool_field = ::py3::simple::CustomBool();
+  this->__fbthrift_field_integer_field = ::py3::simple::CustomInteger();
+  this->__fbthrift_field_double_field = ::py3::simple::CustomDouble();
+  this->__fbthrift_field_string_field = apache::thrift::StringTraits<::MyType>::fromStringLiteral("");
+  this->__fbthrift_field_binary_field = apache::thrift::StringTraits<::MyType>::fromStringLiteral("");
+  this->__fbthrift_field_list_field.clear();
+  this->__fbthrift_field_set_field.clear();
+  this->__fbthrift_field_map_field.clear();
+  ::apache::thrift::clear(this->__fbthrift_field_struct_field);
+  __isset = {};
+}
+
+void CustomTypedefFields::__fbthrift_clear_terse_fields() {
+}
+
+bool CustomTypedefFields::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool CustomTypedefFields::operator==([[maybe_unused]] const CustomTypedefFields& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+const ::py3::simple::CustomList& CustomTypedefFields::get_list_field() const& {
+  return __fbthrift_field_list_field;
+}
+
+::py3::simple::CustomList CustomTypedefFields::get_list_field() && {
+  return std::move(__fbthrift_field_list_field);
+}
+
+const ::py3::simple::CustomSet& CustomTypedefFields::get_set_field() const& {
+  return __fbthrift_field_set_field;
+}
+
+::py3::simple::CustomSet CustomTypedefFields::get_set_field() && {
+  return std::move(__fbthrift_field_set_field);
+}
+
+const ::py3::simple::CustomMap& CustomTypedefFields::get_map_field() const& {
+  return __fbthrift_field_map_field;
+}
+
+::py3::simple::CustomMap CustomTypedefFields::get_map_field() && {
+  return std::move(__fbthrift_field_map_field);
+}
+
+const ::py3::simple::CustomStruct& CustomTypedefFields::get_struct_field() const& {
+  return __fbthrift_field_struct_field;
+}
+
+::py3::simple::CustomStruct CustomTypedefFields::get_struct_field() && {
+  return std::move(__fbthrift_field_struct_field);
+}
+
+
+void swap([[maybe_unused]] CustomTypedefFields& a, [[maybe_unused]] CustomTypedefFields& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_bool_field, b.__fbthrift_field_bool_field);
+  swap(a.__fbthrift_field_integer_field, b.__fbthrift_field_integer_field);
+  swap(a.__fbthrift_field_double_field, b.__fbthrift_field_double_field);
+  swap(a.__fbthrift_field_string_field, b.__fbthrift_field_string_field);
+  swap(a.__fbthrift_field_binary_field, b.__fbthrift_field_binary_field);
+  swap(a.__fbthrift_field_list_field, b.__fbthrift_field_list_field);
+  swap(a.__fbthrift_field_set_field, b.__fbthrift_field_set_field);
+  swap(a.__fbthrift_field_map_field, b.__fbthrift_field_map_field);
+  swap(a.__fbthrift_field_struct_field, b.__fbthrift_field_struct_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void CustomTypedefFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t CustomTypedefFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t CustomTypedefFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t CustomTypedefFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void CustomTypedefFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t CustomTypedefFields::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t CustomTypedefFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t CustomTypedefFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        CustomTypedefFields,
+        ::apache::thrift::type_class::structure,
+        ::py3::simple::CustomStruct>,
+    "inconsistent use of json option");
+
+} // namespace py3::simple
+
 namespace py3::simple { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
   ::apache::thrift::adapt_detail::validateFieldAdapter<Adapter, 1, ::py3::simple::SimpleStruct, ::py3::simple::HiddenTypeFieldsStruct>();

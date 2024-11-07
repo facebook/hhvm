@@ -26,6 +26,10 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types.h":
         cBinaryUnion()
     cdef cppclass cBinaryUnionStruct "::py3::simple::BinaryUnionStruct":
         cBinaryUnionStruct()
+    cdef cppclass cCustomFields "::py3::simple::CustomFields":
+        cCustomFields()
+    cdef cppclass cCustomTypedefFields "::py3::simple::CustomTypedefFields":
+        cCustomTypedefFields()
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types.h":
     cdef cppclass cAnEnum "::py3::simple::AnEnum":
@@ -60,4 +64,10 @@ cdef object BinaryUnion_from_cpp(const cBinaryUnion& c_struct)
 
 cdef cBinaryUnionStruct BinaryUnionStruct_convert_to_cpp(object inst) except*
 cdef object BinaryUnionStruct_from_cpp(const cBinaryUnionStruct& c_struct)
+
+cdef cCustomFields CustomFields_convert_to_cpp(object inst) except*
+cdef object CustomFields_from_cpp(const cCustomFields& c_struct)
+
+cdef cCustomTypedefFields CustomTypedefFields_convert_to_cpp(object inst) except*
+cdef object CustomTypedefFields_from_cpp(const cCustomTypedefFields& c_struct)
 

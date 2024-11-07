@@ -298,6 +298,68 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::py3::simple::CustomFields>
+    : public BaseExtractor<::py3::simple::CustomFields> {
+  static const bool kUsingMarshal = false;
+  ExtractorResult<::py3::simple::CustomFields> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomFields>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomFields>> {
+  ExtractorResult<::py3::simple::CustomFields> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::py3::simple::CustomFields>
+    : public BaseConstructor<::py3::simple::CustomFields> {
+  static const bool kUsingMarshal = false;
+  PyObject* operator()(const ::py3::simple::CustomFields& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomFields>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomFields>> {
+  PyObject* operator()(const ::py3::simple::CustomFields& val);
+};
+
+template <>
+struct Extractor<::py3::simple::CustomTypedefFields>
+    : public BaseExtractor<::py3::simple::CustomTypedefFields> {
+  static const bool kUsingMarshal = false;
+  ExtractorResult<::py3::simple::CustomTypedefFields> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomTypedefFields>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomTypedefFields>> {
+  ExtractorResult<::py3::simple::CustomTypedefFields> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::py3::simple::CustomTypedefFields>
+    : public BaseConstructor<::py3::simple::CustomTypedefFields> {
+  static const bool kUsingMarshal = false;
+  PyObject* operator()(const ::py3::simple::CustomTypedefFields& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomTypedefFields>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::CustomTypedefFields>> {
+  PyObject* operator()(const ::py3::simple::CustomTypedefFields& val);
+};
+
+template <>
 struct Extractor<::py3::simple::AnEnum>
     : public BaseExtractor<::py3::simple::AnEnum> {
   ExtractorResult<::py3::simple::AnEnum> operator()(PyObject* obj);

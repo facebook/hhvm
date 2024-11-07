@@ -147,6 +147,50 @@ cdef class BinaryUnionStruct(thrift.py3.types.Struct):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cBinaryUnionStruct])
 
 
+
+cdef class CustomFields(thrift.py3.types.Struct):
+    cdef shared_ptr[_module_cbindings.cCustomFields] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__CustomFields_FieldsSetter _fields_setter
+    cdef inline object bool_field_impl(self)
+    cdef inline object integer_field_impl(self)
+    cdef inline object double_field_impl(self)
+    cdef inline object string_field_impl(self)
+    cdef inline object binary_field_impl(self)
+    cdef inline object list_field_impl(self)
+    cdef inline object set_field_impl(self)
+    cdef inline object map_field_impl(self)
+    cdef inline object struct_field_impl(self)
+    cdef object __fbthrift_cached_list_field
+    cdef _MyType__Set__i32 __fbthrift_cached_set_field
+    cdef _MyType__Map__i32_i32 __fbthrift_cached_map_field
+    cdef SimpleStruct __fbthrift_cached_struct_field
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomFields])
+
+
+
+cdef class CustomTypedefFields(thrift.py3.types.Struct):
+    cdef shared_ptr[_module_cbindings.cCustomTypedefFields] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__CustomTypedefFields_FieldsSetter _fields_setter
+    cdef inline object bool_field_impl(self)
+    cdef inline object integer_field_impl(self)
+    cdef inline object double_field_impl(self)
+    cdef inline object string_field_impl(self)
+    cdef inline object binary_field_impl(self)
+    cdef inline object list_field_impl(self)
+    cdef inline object set_field_impl(self)
+    cdef inline object map_field_impl(self)
+    cdef inline object struct_field_impl(self)
+    cdef object __fbthrift_cached_list_field
+    cdef _MyType__Set__i32 __fbthrift_cached_set_field
+    cdef _MyType__Map__i32_i32 __fbthrift_cached_map_field
+    cdef SimpleStruct __fbthrift_cached_struct_field
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cCustomTypedefFields])
+
+
 cdef vector[cint16_t] List__i16__make_instance(object items) except *
 cdef object List__i16__from_cpp(const vector[cint16_t]&) except *
 
@@ -259,6 +303,24 @@ cdef class _std_unordered_map__Map__i32_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[_module_cbindings._std_unordered_map[cint32_t,cint32_t]] _std_unordered_map__Map__i32_i32__make_instance(object items) except *
+
+cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *
+cdef object _MyType__List__i32__from_cpp(const _module_cbindings._MyType&) except *
+
+cdef class _MyType__Set__i32(thrift.py3.types.Set):
+    cdef shared_ptr[_module_cbindings._MyType] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings._MyType])
+
+cdef shared_ptr[_module_cbindings._MyType] _MyType__Set__i32__make_instance(object items) except *
+
+cdef class _MyType__Map__i32_i32(thrift.py3.types.Map):
+    cdef shared_ptr[_module_cbindings._MyType] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings._MyType])
+    cdef _check_key_type(self, key)
+
+cdef shared_ptr[_module_cbindings._MyType] _MyType__Map__i32_i32__make_instance(object items) except *
 
 cdef class Map__i32_double(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,double]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

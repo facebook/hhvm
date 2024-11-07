@@ -55,3 +55,15 @@ cdef shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct] BinaryUnionStruct_conver
 
 cdef object BinaryUnionStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cBinaryUnionStruct](deref(c_struct))
+cdef shared_ptr[_fbthrift_cbindings.cCustomFields] CustomFields_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cCustomFields](python_to_cpp[_fbthrift_cbindings.cCustomFields](inst))
+
+
+cdef object CustomFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomFields]& c_struct):
+    return cpp_to_python[_fbthrift_cbindings.cCustomFields](deref(c_struct))
+cdef shared_ptr[_fbthrift_cbindings.cCustomTypedefFields] CustomTypedefFields_convert_to_cpp(object inst) except*:
+    return make_shared[_fbthrift_cbindings.cCustomTypedefFields](python_to_cpp[_fbthrift_cbindings.cCustomTypedefFields](inst))
+
+
+cdef object CustomTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomTypedefFields]& c_struct):
+    return cpp_to_python[_fbthrift_cbindings.cCustomTypedefFields](deref(c_struct))

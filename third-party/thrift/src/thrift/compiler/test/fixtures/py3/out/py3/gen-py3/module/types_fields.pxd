@@ -124,3 +124,41 @@ cdef class __BinaryUnionStruct_FieldsSetter(__StructFieldsSetter):
     cdef __BinaryUnionStruct_FieldsSetter _fbthrift_create(_module_cbindings.cBinaryUnionStruct* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
+
+ctypedef void (*__CustomFields_FieldsSetterFunc)(__CustomFields_FieldsSetter, object) except *
+
+cdef class __CustomFields_FieldsSetter(__StructFieldsSetter):
+    cdef _module_cbindings.cCustomFields* _struct_cpp_obj
+    cdef cumap[__cstring_view, __CustomFields_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __CustomFields_FieldsSetter _fbthrift_create(_module_cbindings.cCustomFields* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+    cdef void _set_field_3(self, _fbthrift_value) except *
+    cdef void _set_field_4(self, _fbthrift_value) except *
+    cdef void _set_field_5(self, _fbthrift_value) except *
+    cdef void _set_field_6(self, _fbthrift_value) except *
+    cdef void _set_field_7(self, _fbthrift_value) except *
+    cdef void _set_field_8(self, _fbthrift_value) except *
+
+
+ctypedef void (*__CustomTypedefFields_FieldsSetterFunc)(__CustomTypedefFields_FieldsSetter, object) except *
+
+cdef class __CustomTypedefFields_FieldsSetter(__StructFieldsSetter):
+    cdef _module_cbindings.cCustomTypedefFields* _struct_cpp_obj
+    cdef cumap[__cstring_view, __CustomTypedefFields_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __CustomTypedefFields_FieldsSetter _fbthrift_create(_module_cbindings.cCustomTypedefFields* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+    cdef void _set_field_3(self, _fbthrift_value) except *
+    cdef void _set_field_4(self, _fbthrift_value) except *
+    cdef void _set_field_5(self, _fbthrift_value) except *
+    cdef void _set_field_6(self, _fbthrift_value) except *
+    cdef void _set_field_7(self, _fbthrift_value) except *
+    cdef void _set_field_8(self, _fbthrift_value) except *
+

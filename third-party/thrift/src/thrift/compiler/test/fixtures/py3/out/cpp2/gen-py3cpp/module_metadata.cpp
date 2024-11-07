@@ -272,6 +272,52 @@ StructMetadata<::py3::simple::BinaryUnionStruct>::gen(ThriftMetadata& metadata) 
   }
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::CustomFields>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.CustomFields", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_CustomFields = res.first->second;
+  module_CustomFields.name() = "module.CustomFields";
+  module_CustomFields.is_union() = false;
+  static const auto* const
+  module_CustomFields_fields = new std::array<EncodedThriftField, 9>{ {
+    { 1, "bool_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 2, "integer_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 3, "double_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 4, "string_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 5, "binary_field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 6, "list_field", false, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 7, "set_field", false, std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 8, "map_field", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},    { 9, "struct_field", false, std::make_unique<Typedef>("module.SimpleStruct", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(), }},  }};
+  for (const auto& f : *module_CustomFields_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_CustomFields.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.CustomTypedefFields", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_CustomTypedefFields = res.first->second;
+  module_CustomTypedefFields.name() = "module.CustomTypedefFields";
+  module_CustomTypedefFields.is_union() = false;
+  static const auto* const
+  module_CustomTypedefFields_fields = new std::array<EncodedThriftField, 9>{ {
+    { 1, "bool_field", false, std::make_unique<Typedef>("module.CustomBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "integer_field", false, std::make_unique<Typedef>("module.CustomInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "double_field", false, std::make_unique<Typedef>("module.CustomDouble", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "string_field", false, std::make_unique<Typedef>("module.CustomString", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "binary_field", false, std::make_unique<Typedef>("module.CustomBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 6, "list_field", false, std::make_unique<Typedef>("module.CustomList", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 7, "set_field", false, std::make_unique<Typedef>("module.CustomSet", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 8, "map_field", false, std::make_unique<Typedef>("module.CustomMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 9, "struct_field", false, std::make_unique<Typedef>("module.CustomStruct", std::make_unique<Typedef>("module.SimpleStruct", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{  }), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Type", { {"name", cvString("::MyType") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_CustomTypedefFields_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_CustomTypedefFields.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
 
 void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.exceptions()->emplace("module.SimpleException", ::apache::thrift::metadata::ThriftException{});

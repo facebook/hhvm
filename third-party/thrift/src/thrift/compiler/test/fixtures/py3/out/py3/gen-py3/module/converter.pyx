@@ -51,3 +51,15 @@ cdef shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct] BinaryUnionStruct_conver
 
 cdef object BinaryUnionStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct]& c_struct):
     return _fbthrift_ctypes.BinaryUnionStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCustomFields] CustomFields_convert_to_cpp(object inst) except*:
+    return (<_fbthrift_ctypes.CustomFields?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+
+
+cdef object CustomFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomFields]& c_struct):
+    return _fbthrift_ctypes.CustomFields._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+cdef shared_ptr[_fbthrift_cbindings.cCustomTypedefFields] CustomTypedefFields_convert_to_cpp(object inst) except*:
+    return (<_fbthrift_ctypes.CustomTypedefFields?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+
+
+cdef object CustomTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomTypedefFields]& c_struct):
+    return _fbthrift_ctypes.CustomTypedefFields._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)

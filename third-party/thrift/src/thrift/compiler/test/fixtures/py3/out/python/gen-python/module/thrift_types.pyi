@@ -306,6 +306,96 @@ class BinaryUnionStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with
     def _to_py_deprecated(self) -> "module.ttypes.BinaryUnionStruct": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_CustomFields:
+    pass
+
+
+class CustomFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomFields):
+    bool_field: _typing.Final[bool] = ...
+    integer_field: _typing.Final[int] = ...
+    double_field: _typing.Final[float] = ...
+    string_field: _typing.Final[str] = ...
+    binary_field: _typing.Final[bytes] = ...
+    list_field: _typing.Final[_typing.Sequence[int]] = ...
+    set_field: _typing.Final[_typing.AbstractSet[int]] = ...
+    map_field: _typing.Final[_typing.Mapping[int, int]] = ...
+    struct_field: _typing.Final[SimpleStruct] = ...
+    def __init__(
+        self, *,
+        bool_field: _typing.Optional[bool]=...,
+        integer_field: _typing.Optional[int]=...,
+        double_field: _typing.Optional[float]=...,
+        string_field: _typing.Optional[str]=...,
+        binary_field: _typing.Optional[bytes]=...,
+        list_field: _typing.Optional[_typing.Sequence[int]]=...,
+        set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
+        map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
+        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        bool_field: _typing.Optional[bool]=...,
+        integer_field: _typing.Optional[int]=...,
+        double_field: _typing.Optional[float]=...,
+        string_field: _typing.Optional[str]=...,
+        binary_field: _typing.Optional[bytes]=...,
+        list_field: _typing.Optional[_typing.Sequence[int]]=...,
+        set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
+        map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
+        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], SimpleStruct]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "module.types.CustomFields": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.CustomFields": ...  # type: ignore
+
+
+class _fbthrift_compatible_with_CustomTypedefFields:
+    pass
+
+
+class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomTypedefFields):
+    bool_field: _typing.Final[bool] = ...
+    integer_field: _typing.Final[int] = ...
+    double_field: _typing.Final[float] = ...
+    string_field: _typing.Final[str] = ...
+    binary_field: _typing.Final[bytes] = ...
+    list_field: _typing.Final[_typing.Sequence[int]] = ...
+    set_field: _typing.Final[_typing.AbstractSet[int]] = ...
+    map_field: _typing.Final[_typing.Mapping[int, int]] = ...
+    struct_field: _typing.Final[SimpleStruct] = ...
+    def __init__(
+        self, *,
+        bool_field: _typing.Optional[bool]=...,
+        integer_field: _typing.Optional[int]=...,
+        double_field: _typing.Optional[float]=...,
+        string_field: _typing.Optional[str]=...,
+        binary_field: _typing.Optional[bytes]=...,
+        list_field: _typing.Optional[_typing.Sequence[int]]=...,
+        set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
+        map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
+        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        bool_field: _typing.Optional[bool]=...,
+        integer_field: _typing.Optional[int]=...,
+        double_field: _typing.Optional[float]=...,
+        string_field: _typing.Optional[str]=...,
+        binary_field: _typing.Optional[bytes]=...,
+        list_field: _typing.Optional[_typing.Sequence[int]]=...,
+        set_field: _typing.Optional[_typing.AbstractSet[int]]=...,
+        map_field: _typing.Optional[_typing.Mapping[int, int]]=...,
+        struct_field: _typing.Optional[_fbthrift_compatible_with_SimpleStruct]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], SimpleStruct]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "module.types.CustomTypedefFields": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.CustomTypedefFields": ...  # type: ignore
+
+
 A_BOOL: bool = ...
 
 A_BYTE: int = ...
@@ -344,6 +434,15 @@ AdaptedTypeDef = SimpleStruct
 HiddenTypeDef = SimpleStruct
 ImplicitlyHiddenTypeDef = AdaptedUnion
 foo_bar = bytes
+CustomBool = bool
+CustomInteger = int
+CustomDouble = float
+CustomString = str
+CustomBinary = bytes
+CustomList = _typing.List[int]
+CustomSet = _typing.Set[int]
+CustomMap = _typing.Dict[int, int]
+CustomStruct = SimpleStruct
 
 
 class _fbthrift_SimpleService_get_five_args(_fbthrift_python_types.Struct):

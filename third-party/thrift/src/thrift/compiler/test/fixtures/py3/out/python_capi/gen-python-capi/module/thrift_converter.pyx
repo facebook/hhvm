@@ -66,3 +66,15 @@ cdef cBinaryUnionStruct BinaryUnionStruct_convert_to_cpp(object inst) except *:
 cdef object BinaryUnionStruct_from_cpp(const cBinaryUnionStruct& c_struct):
     return cpp_to_python[cBinaryUnionStruct](c_struct)
 
+cdef cCustomFields CustomFields_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cCustomFields](inst))
+
+cdef object CustomFields_from_cpp(const cCustomFields& c_struct):
+    return cpp_to_python[cCustomFields](c_struct)
+
+cdef cCustomTypedefFields CustomTypedefFields_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cCustomTypedefFields](inst))
+
+cdef object CustomTypedefFields_from_cpp(const cCustomTypedefFields& c_struct):
+    return cpp_to_python[cCustomTypedefFields](c_struct)
+

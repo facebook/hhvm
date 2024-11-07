@@ -1,4 +1,4 @@
-# @generated SignedSource<<b886bc306435900c000f58aa3c6387f5>>
+# @generated SignedSource<<6739c8027c4f0f51ab7bf5dcb36c5d96>>
 #
 # This file is generated file from `fizz/facebook/boilerplate.sh`.
 # All manual changes will be lost.
@@ -79,6 +79,7 @@ set(
         protocol/clock/SystemClock.cpp
         protocol/ech/Decrypter.cpp
         protocol/ech/Encryption.cpp
+        protocol/ech/GreaseECH.cpp
         record/BufAndPaddingPolicy.cpp
         record/EncryptedRecordLayer.cpp
         record/PlaintextRecordLayer.cpp
@@ -225,6 +226,8 @@ set(
         protocol/ech/ECHExtensions-inl.h
         protocol/ech/ECHExtensions.h
         protocol/ech/Encryption.h
+        protocol/ech/GreaseECH.h
+        protocol/ech/GreaseECHSetting.h
         protocol/ech/Types-inl.h
         protocol/ech/Types.h
         record/BufAndPaddingPolicy.h

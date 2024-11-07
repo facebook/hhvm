@@ -45,6 +45,7 @@ impl Default for ParserOptions {
             package_v2: false,
             package_info: PackageInfo::default(),
             package_v2_support_multifile_tests: false,
+            enable_class_pointer_hint: true,
         }
     }
 }

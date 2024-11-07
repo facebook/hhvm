@@ -275,6 +275,7 @@ type t = {
   tco_enable_abstract_method_optional_parameters: bool;
       (** Enable use of optional on parameters in abstract methods *)
   recursive_case_types: bool;  (** Enable recursive case types *)
+  class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
 }
 [@@deriving eq, show]
 
@@ -381,6 +382,7 @@ val set :
   ?hh_distc_exponential_backoff_num_retries:int ->
   ?tco_enable_abstract_method_optional_parameters:bool ->
   ?recursive_case_types:bool ->
+  ?class_sub_classname:bool ->
   t ->
   t
 

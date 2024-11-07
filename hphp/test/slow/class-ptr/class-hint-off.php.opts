@@ -1,0 +1,3 @@
+-vHack.Lang.AllowUnstableFeatures=true
+-vHack.Lang.EnableClassPointerHint=false
+-vEval.ClassnameNoticesSampleRate=1

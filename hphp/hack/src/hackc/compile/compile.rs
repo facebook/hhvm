@@ -121,6 +121,7 @@ impl NativeEnv {
             php5_compat_mode: true,
             hhvm_compat_mode: true,
             keep_user_attributes: true,
+            enable_class_pointer_hint: lang_flags.enable_class_pointer_hint,
             ..Default::default()
         }
     }

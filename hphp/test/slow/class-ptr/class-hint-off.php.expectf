@@ -1,0 +1,72 @@
+string(1) "C"
+=> parameter
+=> return
+=> prop
+lazyclass(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 22
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 8
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 30
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 31
+class(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 22
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 8
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 30
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 31
+Laundering string(1) "C"
+=> parameter
+=> return
+=> prop
+Laundering lazyclass(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 22
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 8
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 30
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 31
+Laundering class(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 22
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 8
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 30
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-off.php on line 31

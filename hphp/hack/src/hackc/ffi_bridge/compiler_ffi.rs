@@ -69,6 +69,7 @@ mod ffi {
         php5_compat_mode: bool,
         hhvm_compat_mode: bool,
         include_assignment_values: bool,
+        enable_class_pointer_hint: bool,
     }
 
     pub struct DeclsAndBlob {
@@ -645,6 +646,7 @@ pub fn parse_decls(
         php5_compat_mode: config.php5_compat_mode,
         hhvm_compat_mode: config.hhvm_compat_mode,
         include_assignment_values: config.include_assignment_values,
+        enable_class_pointer_hint: config.enable_class_pointer_hint,
         keep_user_attributes: true,
         ..Default::default()
     };

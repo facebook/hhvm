@@ -21,6 +21,7 @@ type t = {
   package_info: PackageInfo.t;
   package_v2: bool;
   package_v2_support_multifile_tests: bool;
+  enable_class_pointer_hint: bool;
 }
 [@@deriving show]
 

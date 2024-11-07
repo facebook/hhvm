@@ -1,0 +1,86 @@
+[("\\param",
+  (Shallow_decl_defs.Fun
+     { Typing_defs.fe_deprecated = None; fe_module = None; fe_package = None;
+       fe_internal = false;
+       fe_type =
+       (Rwitness_from_decl ([5:10-15]),
+        (Tfun
+           { ft_tparams = []; ft_where_constraints = [];
+             ft_params =
+             [{ fp_pos = [5:25-27]; fp_name = (Some "$c");
+                fp_type =
+                (Rhint ([5:16-24]),
+                 (Tclass_args
+                    (Rhint ([5:22-23]), (Tapply (([5:22-23], "\\C"), [])))));
+                fp_flags =
+                { Typing_defs_flags.FunParam.accept_disposable = false;
+                  inout = false; is_optional = false; readonly = false;
+                  ignore_readonly_error = false; splat = false };
+                fp_def_value = None }
+               ];
+             ft_implicit_params = { capability = (CapDefaults [5:10-15]) };
+             ft_ret = (Rhint ([5:30-34]), (Tprim Tvoid));
+             ft_flags =
+             { Typing_defs_flags.Fun.return_disposable = false;
+               async = false; generator = false; fun_kind = FSync;
+               is_function_pointer = false; returns_readonly = false;
+               readonly_this = false; support_dynamic_type = false;
+               is_memoized = false; variadic = false };
+             ft_cross_package = None }));
+       fe_pos = [5:10-15]; fe_php_std_lib = false;
+       fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+       fe_no_auto_likes = false }));
+  ("\\ret",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_package = None; fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([6:10-13]),
+         (Tfun
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+              ft_implicit_params = { capability = (CapDefaults [6:10-13]) };
+              ft_ret =
+              (Rhint ([6:17-25]),
+               (Tclass_args
+                  (Rhint ([6:23-24]), (Tapply (([6:23-24], "\\C"), [])))));
+              ft_flags =
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_cross_package = None }));
+        fe_pos = [6:10-13]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false }));
+  ("\\C",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+        sc_module = None; sc_name = ([7:7-8], "\\C"); sc_tparams = [];
+        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = [];
+        sc_sprops =
+        [{ Shallow_decl_defs.sp_name = ([8:27-29], "$c"); sp_xhp_attr = None;
+           sp_type =
+           (Rhint ([8:17-26]),
+            (Toption
+               (Rhint ([8:18-26]),
+                (Tclass_args
+                   (Rhint ([8:24-25]), (Tapply (([8:24-25], "\\C"), [])))))));
+           sp_visibility = Public;
+           sp_flags =
+           { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+             lateinit = false; lsb = false; needs_init = false;
+             php_std_lib = false; readonly = false;
+             safe_global_variable = false; no_auto_likes = false }
+           }
+          ];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }))
+  ]

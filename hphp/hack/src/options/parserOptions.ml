@@ -44,6 +44,7 @@ type t = {
   package_v2: bool;
   package_info: PackageInfo.t;
   package_v2_support_multifile_tests: bool;
+  enable_class_pointer_hint: bool;
 }
 [@@deriving show, eq]
 
@@ -84,6 +85,7 @@ let default =
     package_v2 = false;
     package_info = PackageInfo.empty;
     package_v2_support_multifile_tests = false;
+    enable_class_pointer_hint = true;
   }
 
 (* Changes here need to be synchronized with rust_parser_errors_ffi.rs *)
@@ -109,6 +111,7 @@ type ffi_t =
   * bool
   * Experimental_features.feature_status SMap.t
   * bool
+  * bool
 
 let to_rust_ffi_t po =
   ( po.hhvm_compat_mode,
@@ -131,4 +134,5 @@ let to_rust_ffi_t po =
     po.disallow_static_constants_in_default_func_args,
     po.use_legacy_experimental_feature_config,
     po.experimental_features,
-    po.consider_unspecified_experimental_features_released )
+    po.consider_unspecified_experimental_features_released,
+    po.enable_class_pointer_hint )

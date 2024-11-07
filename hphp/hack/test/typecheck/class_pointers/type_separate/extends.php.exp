@@ -1,0 +1,6 @@
+ERROR: File "extends.php", line 15, characters 10-11:
+Invalid return type (Typing[4110])
+  File "extends.php", line 14, characters 32-32:
+  Expected `B`
+  File "extends.php", line 14, characters 18-18:
+  But got `A`

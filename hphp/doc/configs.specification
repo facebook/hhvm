@@ -1316,6 +1316,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.EnableClassPointerHint = false, vmladenov, repooptionsflag(Parser)|hackc(parser)
+
+  Killswitch for the class<T> type. When false, lowerer and direct decl parser
+  erase it to classname<T>.
+
 - bool Hack.Lang.StressShallowDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.StressFoldedDeclDeps = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)
 - bool Hack.Lang.OptimizeReifiedParamChecks = false, UNKNOWN, repooptionsflag(Parser)|hackc(hhbc)

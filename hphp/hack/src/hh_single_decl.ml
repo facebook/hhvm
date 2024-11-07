@@ -15,7 +15,8 @@ let popt
     ~disable_xhp_element_mangling
     ~keep_user_attributes
     ~interpret_soft_types_as_like_types
-    ~everything_sdt =
+    ~everything_sdt
+    ~enable_class_pointer_hint =
   ParserOptions.
     {
       default with
@@ -25,6 +26,7 @@ let popt
       enable_xhp_class_modifier;
       interpret_soft_types_as_like_types;
       everything_sdt;
+      enable_class_pointer_hint;
     }
 
 let init root tcopt ~rust_provider_backend : Provider_context.t =
@@ -435,6 +437,7 @@ let () =
   let interpret_soft_types_as_like_types = ref false in
   let everything_sdt = ref false in
   let rust_provider_backend = ref false in
+  let enable_class_pointer_hint = ref true in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -478,6 +481,10 @@ let () =
       ( "--rust-provider-backend",
         Arg.Set rust_provider_backend,
         " Use the Rust implementation of Provider_backend (including decl-folding)"
+      );
+      ( "--enable-class-pointer-hint",
+        Arg.Bool (fun x -> enable_class_pointer_hint := x),
+        " Killswitch to interpret class<T> hint as class<T> type when true, classname<T> when false"
       );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
@@ -566,6 +573,7 @@ let () =
     !interpret_soft_types_as_like_types
   in
   let everything_sdt = !everything_sdt in
+  let enable_class_pointer_hint = !enable_class_pointer_hint in
   let popt =
     popt
       ~auto_namespace_map
@@ -574,6 +582,7 @@ let () =
       ~keep_user_attributes
       ~interpret_soft_types_as_like_types
       ~everything_sdt
+      ~enable_class_pointer_hint
   in
   let tco_experimental_features =
     TypecheckerOptions.experimental_from_flags

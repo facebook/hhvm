@@ -373,6 +373,9 @@ let load_config config options =
         package_v2_support_multifile_tests =
           bool_opt "package_v2_support_multifile_tests" config
           >?? po_opt.package_v2;
+        enable_class_pointer_hint =
+          bool_opt "enable_class_pointer_hint" config
+          >?? po_opt.enable_class_pointer_hint;
       }
   in
   GlobalOptions.set
@@ -498,6 +501,7 @@ let load_config config options =
              | true -> GlobalOptions.All_except []
              | false -> GlobalOptions.NNone))
     ?recursive_case_types:(bool_opt "recursive_case_types" config)
+    ?class_sub_classname:(bool_opt "class_sub_classname" config)
     options
 
 let load

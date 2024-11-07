@@ -5752,16 +5752,26 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _lt: Self::Output,
         targ: Self::Output,
         _trailing_comma: Self::Output,
-        _gt: Self::Output,
+        gt: Self::Output,
     ) -> Self::Output {
-        self.make_apply(
-            (
-                self.get_pos(class),
-                naming_special_names::classes::CLASS_NAME,
-            ),
-            targ,
-            self.get_pos(targ),
-        )
+        if self.opts.enable_class_pointer_hint {
+            let pos = self.merge_positions(class, gt);
+            let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
+            let cls = match self.node_to_ty(targ) {
+                Some(ty) => ty,
+                None => return Node::Ignored(SK::ClassArgsTypeSpecifier),
+            };
+            Node::Ty(self.alloc(Ty(reason, Ty_::TclassArgs(cls))))
+        } else {
+            self.make_apply(
+                (
+                    self.get_pos(class),
+                    naming_special_names::classes::CLASS_NAME,
+                ),
+                targ,
+                self.get_pos(targ),
+            )
+        }
     }
 
     fn make_scope_resolution_expression(

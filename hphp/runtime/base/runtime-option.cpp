@@ -310,6 +310,7 @@ void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
   config.enable_xhp_class_modifier = EnableXHPClassModifier;
   config.php5_compat_mode = true;
   config.hhvm_compat_mode = true;
+  config.enable_class_pointer_hint = EnableClassPointerHint;
 }
 
 void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
@@ -325,6 +326,7 @@ void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
   flags.disable_xhp_element_mangling = DisableXHPElementMangling;
   flags.disallow_func_ptrs_in_constants = DisallowFuncPtrsInConstants;
   flags.enable_xhp_class_modifier = EnableXHPClassModifier;
+  flags.enable_class_pointer_hint = EnableClassPointerHint;
 }
 
 void RepoOptionsFlags::calcCachedQuery() {

@@ -3163,6 +3163,42 @@ end = struct
         { rhs with super_supportdyn = false; ty_super = ty_inner_super }
       in
       simplify ~subtype_env ~this_ty ~lhs ~rhs env
+    (* -- Rewrite: class<T> <: C = XHPChild or Stringish
+          ---> classname<T> <: C *)
+    | ( (r_sub, Tclass_args ty_sub),
+        (_r_super, Tclass ((_, class_nm_super), exact_super, _)) )
+      when TypecheckerOptions.class_sub_classname env.genv.tcopt
+           && is_nonexact exact_super
+           && (String.equal class_nm_super SN.Classes.cXHPChild
+              || String.equal class_nm_super SN.Classes.cStringish) ->
+      (* TODO(T199610905) replace reason with upcoming rewrite reasons *)
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub = MakeType.classname r_sub [ty_sub] }
+        ~rhs:{ super_like; super_supportdyn; ty_super }
+        env
+    (* -- Rewrite: class<T> <: N ---> classname<T> <: N
+          instead of e.g. considering class<T> as an element in a case type *)
+    | ((r_sub, Tclass_args ty_sub), (_r_super, Tnewtype _))
+      when TypecheckerOptions.class_sub_classname env.genv.tcopt ->
+      (* TODO(T199610905) replace reason with upcoming rewrite reasons *)
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub = MakeType.classname r_sub [ty_sub] }
+        ~rhs:{ super_like; super_supportdyn; ty_super }
+        env
+    (* -- Rewrite: class<T> <: prim ---> classname<T> <: prim *)
+    | ((r_sub, Tclass_args ty_sub), (_r_super, Tprim _))
+      when TypecheckerOptions.class_sub_classname env.genv.tcopt ->
+      (* TODO(T199610905) replace reason with upcoming rewrite reasons *)
+      simplify
+        ~subtype_env
+        ~this_ty
+        ~lhs:{ sub_supportdyn; ty_sub = MakeType.classname r_sub [ty_sub] }
+        ~rhs:{ super_like; super_supportdyn; ty_super }
+        env
     (* -- C-Var-R ----------------------------------------------------------- *)
     | ((_, Tunion _), (_, Tvar _)) ->
       default_subtype
@@ -4904,7 +4940,15 @@ end = struct
           ~lhs:{ sub_supportdyn; ty_sub }
           ~rhs:{ super_like; super_supportdyn = false; ty_super }
           env
-      | _ -> begin
+      | ( _,
+          ( Tany _ | Tdynamic | Tunion _ | Tintersection _ | Tdependent _
+          | Taccess _ | Tgeneric _ | Tnonnull | Tfun _ | Ttuple _ | Tshape _
+          | Tvec_or_dict _ | Tclass _ | Tnewtype _ | Tneg _
+          | Tprim
+              Aast.(
+                ( Tnull | Tvoid | Tint | Tbool | Tfloat | Tstring | Tresource
+                | Tnoreturn ))
+          | Tunapplied_alias _ | Tvar _ | Tlabel _ | Tclass_args _ ) ) -> begin
         match
           Subtype_env.check_infinite_recursion
             subtype_env

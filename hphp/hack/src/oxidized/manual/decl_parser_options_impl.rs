@@ -31,6 +31,7 @@ impl DeclParserOptions {
             package_info: opts.package_info.clone(),
             package_v2: opts.package_v2,
             package_v2_support_multifile_tests: opts.package_v2_support_multifile_tests,
+            enable_class_pointer_hint: opts.enable_class_pointer_hint,
         }
     }
 }

@@ -21,6 +21,7 @@ type t = {
   package_info: PackageInfo.t;
   package_v2: bool;
   package_v2_support_multifile_tests: bool;
+  enable_class_pointer_hint: bool;
 }
 [@@deriving show]
 
@@ -41,4 +42,5 @@ let from_parser_options (popt : ParserOptions.t) =
     package_info = popt.package_info;
     package_v2 = popt.package_v2;
     package_v2_support_multifile_tests = popt.package_v2_support_multifile_tests;
+    enable_class_pointer_hint = popt.enable_class_pointer_hint;
   }

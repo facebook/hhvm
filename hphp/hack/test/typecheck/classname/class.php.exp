@@ -1,15 +1,15 @@
 File "class.php", line 8, characters 3-13:
-  classname<C>
+  class<C>
 File "class.php", line 12, characters 3-13:
-  classname<C>
+  class<C>
 File "class.php", line 16, characters 3-13:
-  classname<C>
+  class<C>
 File "class.php", line 20, characters 3-13:
-  classname<A>
+  class<A>
 File "class.php", line 24, characters 3-13:
-  classname<A>
+  class<A>
 File "class.php", line 28, characters 3-13:
-  classname<A>
+  class<A>
 File "class.php", line 32, characters 3-13:
   classname<C>
 File "class.php", line 36, characters 3-13:
@@ -30,9 +30,27 @@ Invalid return type (Typing[4110])
   Expected `C`
   File "class.php", line 23, characters 18-18:
   But got `A`
+ERROR: File "class.php", line 33, characters 10-11:
+Invalid return type (Typing[4110])
+  File "class.php", line 31, characters 30-37:
+  Expected `class<C>`
+  File "classname.hhi", line 12, characters 27-32:
+  But got `string`
+ERROR: File "class.php", line 37, characters 10-11:
+Invalid return type (Typing[4110])
+  File "class.php", line 35, characters 30-37:
+  Expected `class<A>`
+  File "classname.hhi", line 12, characters 27-32:
+  But got `string`
 ERROR: File "class.php", line 41, characters 10-11:
 Invalid return type (Typing[4110])
-  File "class.php", line 39, characters 36-36:
-  Expected `C`
-  File "class.php", line 39, characters 22-22:
-  But got `A`
+  File "class.php", line 39, characters 30-37:
+  Expected `class<C>`
+  File "classname.hhi", line 12, characters 27-32:
+  But got `string`
+ERROR: File "class.php", line 45, characters 10-11:
+Invalid return type (Typing[4110])
+  File "class.php", line 43, characters 30-37:
+  Expected `class<A>`
+  File "classname.hhi", line 12, characters 27-32:
+  But got `string`

@@ -15,7 +15,8 @@ let popt
     ~disable_xhp_element_mangling
     ~keep_user_attributes
     ~interpret_soft_types_as_like_types
-    ~everything_sdt =
+    ~everything_sdt
+    ~enable_class_pointer_hint =
   ParserOptions.
     {
       default with
@@ -25,6 +26,7 @@ let popt
       enable_xhp_class_modifier;
       interpret_soft_types_as_like_types;
       everything_sdt;
+      enable_class_pointer_hint;
     }
 
 let init ~enable_strict_const_semantics tcopt : Provider_context.t =
@@ -177,6 +179,7 @@ let () =
   let print_ocaml = ref false in
   let print_rupro = ref false in
   let test_ocamlrep_marshal = ref false in
+  let enable_class_pointer_hint = ref true in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -213,6 +216,10 @@ let () =
       ( "--test-marshaling",
         Arg.Set test_ocamlrep_marshal,
         " Test ocamlrep_marshal (rust) marshaling/unmarshaling" );
+      ( "--enable-class-pointer-hint",
+        Arg.Bool (fun x -> enable_class_pointer_hint := x),
+        " Killswitch to interpret class<T> hint as class<T> type when true, classname<T> when false"
+      );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -284,6 +291,7 @@ let () =
     let print_ocaml = !print_ocaml in
     let print_rupro = !print_rupro in
     let test_ocamlrep_marshal = !test_ocamlrep_marshal in
+    let enable_class_pointer_hint = !enable_class_pointer_hint in
     let popt =
       popt
         ~auto_namespace_map
@@ -292,6 +300,7 @@ let () =
         ~keep_user_attributes
         ~interpret_soft_types_as_like_types
         ~everything_sdt
+        ~enable_class_pointer_hint
     in
     let tco_experimental_features =
       TypecheckerOptions.experimental_from_flags

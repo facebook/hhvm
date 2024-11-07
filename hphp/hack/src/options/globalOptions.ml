@@ -190,6 +190,7 @@ type t = {
   hh_distc_exponential_backoff_num_retries: int;
   tco_enable_abstract_method_optional_parameters: bool;
   recursive_case_types: bool;
+  class_sub_classname: bool;
 }
 [@@deriving eq, show]
 
@@ -297,6 +298,7 @@ let default =
     hh_distc_exponential_backoff_num_retries = 10;
     tco_enable_abstract_method_optional_parameters = false;
     recursive_case_types = false;
+    class_sub_classname = true;
   }
 
 let set
@@ -402,6 +404,7 @@ let set
     ?hh_distc_exponential_backoff_num_retries
     ?tco_enable_abstract_method_optional_parameters
     ?recursive_case_types
+    ?class_sub_classname
     options =
   let setting setting option =
     match setting with
@@ -682,6 +685,8 @@ let set
         options.tco_enable_abstract_method_optional_parameters;
     recursive_case_types =
       setting recursive_case_types options.recursive_case_types;
+    class_sub_classname =
+      setting class_sub_classname options.class_sub_classname;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

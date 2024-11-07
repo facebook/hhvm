@@ -1076,7 +1076,18 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             };
             Ok(Happly(name, type_args))
         }
-        ClassArgsTypeSpecifier(c) => Ok(HclassArgs(p_hint(&c.type_, env)?)),
+        ClassArgsTypeSpecifier(c) => {
+            let cls = p_hint(&c.type_, env)?;
+            if env.parser_options.enable_class_pointer_hint {
+                Ok(HclassArgs(cls))
+            } else {
+                let p = p_pos(&c.keyword, env);
+                Ok(Happly(
+                    Id(p, special_classes::CLASS_NAME.to_string()),
+                    vec![cls],
+                ))
+            }
+        }
         NullableTypeSpecifier(c) => Ok(Hoption(p_hint(&c.type_, env)?)),
         LikeTypeSpecifier(c) => Ok(Hlike(p_hint(&c.type_, env)?)),
         SoftTypeSpecifier(c) => Ok(Hsoft(p_hint(&c.type_, env)?)),

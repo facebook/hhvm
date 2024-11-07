@@ -318,6 +318,10 @@ impl HhConfig {
                 "package_v2_support_multifile_tests",
                 default.package_v2_support_multifile_tests,
             )?,
+            enable_class_pointer_hint: hhconfig.get_bool_or(
+                "enable_class_pointer_hint",
+                default.enable_class_pointer_hint,
+            )?,
         };
         let default = GlobalOptions::default();
         let opts = GlobalOptions {
@@ -551,6 +555,8 @@ impl HhConfig {
             )?,
             recursive_case_types: hhconfig
                 .get_bool_or("recursive_case_types", default.recursive_case_types)?,
+            class_sub_classname: hhconfig
+                .get_bool_or("class_sub_classname", default.class_sub_classname)?,
         };
         let mut c = Self {
             local_config,

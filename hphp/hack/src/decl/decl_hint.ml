@@ -118,9 +118,7 @@ and hint_ p env = function
   | Habstr (x, argl) ->
     let argl = List.map argl ~f:(hint env) in
     Tgeneric (x, argl)
-  | Hclass_args h ->
-    let arg = hint env h in
-    Tapply ((Decl_env.make_decl_pos env p, SN.Classes.cClassname), [arg])
+  | Hclass_args h -> Tclass_args (hint env h)
   | Hoption h ->
     let h = hint env h in
     Toption h

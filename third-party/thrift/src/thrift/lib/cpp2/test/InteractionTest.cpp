@@ -103,8 +103,6 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
 };
 
 TEST(InteractionTest, PrioritizedInteractionRequest) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
-
   struct BlockingCalculatorHandler : public SemiCalculatorHandler {
     folly::Baton<> blockInteraction, blockNormal, startedInteraction;
 
@@ -171,7 +169,6 @@ TEST(InteractionTest, PrioritizedInteractionRequest) {
 }
 
 TEST(InteractionTest, TerminateUsed) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
@@ -183,7 +180,6 @@ TEST(InteractionTest, TerminateUsed) {
 }
 
 TEST(InteractionTest, TerminateActive) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
@@ -195,7 +191,6 @@ TEST(InteractionTest, TerminateActive) {
 }
 
 TEST(InteractionTest, TerminateUnused) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
@@ -207,7 +202,6 @@ TEST(InteractionTest, TerminateUnused) {
 }
 
 TEST(InteractionTest, TerminateWithoutSetup) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
@@ -218,7 +212,6 @@ TEST(InteractionTest, TerminateWithoutSetup) {
 }
 
 TEST(InteractionTest, TerminateUsedPRC) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -228,7 +221,6 @@ TEST(InteractionTest, TerminateUsedPRC) {
 }
 
 TEST(InteractionTest, TerminateUnusedPRC) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -238,7 +230,6 @@ TEST(InteractionTest, TerminateUnusedPRC) {
 }
 
 TEST(InteractionTest, TerminateWithoutSetupPRC) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -247,7 +238,6 @@ TEST(InteractionTest, TerminateWithoutSetupPRC) {
 }
 
 TEST(InteractionTest, TerminateStressPRC) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -259,7 +249,6 @@ TEST(InteractionTest, TerminateStressPRC) {
 }
 
 TEST(InteractionTest, IsDetachable) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   folly::EventBase eb;
   CalculatorAsyncClient client(
@@ -285,7 +274,6 @@ TEST(InteractionTest, IsDetachable) {
 }
 
 TEST(InteractionTest, QueueTimeout) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct SlowCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
     struct SemiAdditionHandler
         : apache::thrift::ServiceHandler<Calculator>::AdditionIf {
@@ -318,7 +306,6 @@ TEST(InteractionTest, QueueTimeout) {
 }
 
 TEST(InteractionTest, OnTermination) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct TerminationHandler : apache::thrift::ServiceHandler<Calculator> {
     folly::coro::Baton create;
     folly::coro::Baton terminate;
@@ -524,7 +511,6 @@ struct CalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
 };
 
 TEST(InteractionCodegenTest, Basic) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<CalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -554,7 +540,6 @@ TEST(InteractionCodegenTest, Basic) {
 }
 
 TEST(InteractionCodegenTest, RpcOptions) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<CalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -585,7 +570,6 @@ TEST(InteractionCodegenTest, RpcOptions) {
 }
 
 TEST(InteractionCodegenTest, BasicSemiFuture) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -611,7 +595,6 @@ TEST(InteractionCodegenTest, BasicSemiFuture) {
 }
 
 TEST(InteractionCodegenTest, BasicSync) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   ScopedServerInterfaceThread runner{std::make_shared<SemiCalculatorHandler>()};
   auto client = runner.newClient<CalculatorAsyncClient>(
       nullptr, RocketClientChannel::newChannel);
@@ -638,7 +621,6 @@ TEST(InteractionCodegenTest, BasicSync) {
 }
 
 TEST(InteractionCodegenTest, Error) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct BrokenCalculatorHandler : CalculatorHandler {
     std::unique_ptr<AdditionIf> createAddition() override {
       throw std::runtime_error("Plus key is broken");
@@ -669,7 +651,6 @@ TEST(InteractionCodegenTest, Error) {
 }
 
 TEST(InteractionCodegenTest, MethodException) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct ExceptionCalculatorHandler
       : apache::thrift::ServiceHandler<Calculator> {
     struct AdditionHandler
@@ -706,7 +687,6 @@ TEST(InteractionCodegenTest, MethodException) {
 }
 
 TEST(InteractionCodegenTest, SlowConstructor) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct SlowCalculatorHandler : CalculatorHandler {
     std::unique_ptr<AdditionIf> createAddition() override {
       b.wait();
@@ -733,7 +713,6 @@ TEST(InteractionCodegenTest, SlowConstructor) {
 }
 
 TEST(InteractionCodegenTest, FastTermination) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
 #if FOLLY_HAS_COROUTINES
   struct SlowCalculatorHandler : CalculatorHandler {
     struct SlowAdditionHandler : AdditionHandler {
@@ -778,7 +757,6 @@ TEST(InteractionCodegenTest, FastTermination) {
 }
 
 TEST(InteractionCodegenTest, ClientCrashDuringInteraction) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
 #if FOLLY_HAS_COROUTINES
   struct SlowCalculatorHandler : CalculatorHandler {
     struct SlowAdditionHandler : AdditionHandler {
@@ -818,7 +796,6 @@ TEST(InteractionCodegenTest, ClientCrashDuringInteraction) {
 }
 
 TEST(InteractionCodegenTest, ClientCrashDuringInteractionConstructor) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
 #if FOLLY_HAS_COROUTINES
   struct SlowCalculatorHandler : CalculatorHandler {
     struct SlowAdditionHandler : AdditionHandler {
@@ -865,7 +842,6 @@ TEST(InteractionCodegenTest, ClientCrashDuringInteractionConstructor) {
 }
 
 TEST(InteractionCodegenTest, ReuseIdDuringConstructor) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct SlowCalculatorHandler : CalculatorHandler {
     std::unique_ptr<AdditionIf> createAddition() override {
       if (first) {
@@ -909,7 +885,6 @@ TEST(InteractionCodegenTest, ReuseIdDuringConstructor) {
 }
 
 TEST(InteractionCodegenTest, ConstructorExceptionPropagated) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct SlowCalculatorHandler : CalculatorHandler {
     std::unique_ptr<AdditionIf> createAddition() override {
       b.wait();
@@ -940,7 +915,6 @@ TEST(InteractionCodegenTest, ConstructorExceptionPropagated) {
 }
 
 TEST(InteractionCodegenTest, SerialInteraction) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
 #if FOLLY_HAS_COROUTINES
   struct SerialCalculatorHandler : CalculatorHandler {
     struct SerialAdditionHandler
@@ -1024,7 +998,6 @@ TEST(InteractionCodegenTest, SerialInteraction) {
 }
 
 TEST(InteractionCodegenTest, StreamExtendsInteractionLifetime) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
 #if FOLLY_HAS_COROUTINES
   struct StreamingHandler : apache::thrift::ServiceHandler<Streamer> {
     StreamingHandler()
@@ -1170,7 +1143,6 @@ TEST(InteractionCodegenTest, StreamExtendsInteractionLifetime) {
 }
 
 TEST(InteractionCodegenTest, ShutdownDuringStreamTeardown) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
 #if FOLLY_HAS_COROUTINES
   struct StreamingHandler : apache::thrift::ServiceHandler<Streamer> {
     struct StreamTile : apache::thrift::ServiceHandler<Streamer>::StreamingIf {
@@ -1201,7 +1173,6 @@ TEST(InteractionCodegenTest, ShutdownDuringStreamTeardown) {
 }
 
 TEST(InteractionCodegenTest, BasicEB) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct ExceptionCalculatorHandler
       : apache::thrift::ServiceHandler<Calculator> {
     struct AdditionHandler
@@ -1238,7 +1209,6 @@ TEST(InteractionCodegenTest, BasicEB) {
 }
 
 TEST(InteractionCodegenTest, ErrorEB) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct ExceptionCalculatorHandler
       : apache::thrift::ServiceHandler<Calculator> {
     std::unique_ptr<AdditionFastIf> createAdditionFast() override {
@@ -1263,7 +1233,6 @@ TEST(InteractionCodegenTest, ErrorEB) {
 }
 
 CO_TEST(InteractionCodegenTest, Factory) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   auto client = makeTestClient<CalculatorAsyncClient>(
       std::make_shared<SemiCalculatorHandler>());
 
@@ -1290,7 +1259,6 @@ CO_TEST(InteractionCodegenTest, Factory) {
 }
 
 CO_TEST(InteractionCodegenTest, FactoryError) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   auto client = makeTestClient<CalculatorAsyncClient>(
       std::make_shared<SemiCalculatorHandler>());
 
@@ -1302,7 +1270,6 @@ CO_TEST(InteractionCodegenTest, FactoryError) {
 }
 
 CO_TEST(InteractionCodegenTest, FactoryEager) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   auto client = makeTestClient<CalculatorAsyncClient>(
       std::make_shared<SemiCalculatorHandler>());
 
@@ -1319,7 +1286,6 @@ CO_TEST(InteractionCodegenTest, FactoryEager) {
 }
 
 TEST(InteractionCodegenTest, FactoryEb) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   auto client = makeTestClient<CalculatorAsyncClient>(
       std::make_shared<SemiCalculatorHandler>());
 
@@ -1361,7 +1327,6 @@ TEST(InteractionCodegenTest, FactoryEb) {
 }
 
 TEST(InteractionCodegenTest, FactoryHandlerCallback) {
-  THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
   struct HandlerResult : apache::thrift::ServiceHandler<Calculator> {
     void async_tm_newAddition(
         apache::thrift::HandlerCallbackPtr<TileAndResponse<AdditionIf, void>>
@@ -1662,9 +1627,6 @@ class InternalPriorityTest : public testing::Test {
     if (!FLAGS_thrift_experimental_use_resource_pools) {
       GTEST_SKIP() << "This test is only relevant when resource pools is used";
     }
-    THRIFT_FLAG_SET_MOCK(enable_resource_pools_for_interaction, true);
-    THRIFT_FLAG_SET_MOCK(
-        enable_resource_pools_for_interaction_generated_processor_only, true);
     auto pile = std::make_unique<TestRequestPile>();
     auto cc = std::make_unique<ParallelConcurrencyController>(
         *pile.get(), *folly::getGlobalCPUExecutor().get());

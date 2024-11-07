@@ -481,11 +481,16 @@ void HttpServer::ProfileFlush() {
     Logger::Info("Flushing profile");
     __gcov_flush();
   }
+  // If running with ROAR, this calls into the profiling runtime included with
+  // ROAR. ROAR expects to be in full control of the runtime, so this has to be
+  // disabled.
+#ifndef __roar__
   if (__llvm_profile_write_file) {
     Logger::Info("Flushing profile");
     __llvm_profile_write_file();
     __llvm_profile_set_filename("/dev/null");
   }
+#endif
 }
 
 void HttpServer::stop(const char* stopReason) {

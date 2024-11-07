@@ -518,6 +518,10 @@ void retranslateAll(bool skipSerialize) {
     }
     __gcov_reset();
   }
+  // If running with ROAR, this calls into the profiling runtime included with
+  // ROAR. ROAR expects to be in full control of the runtime, so this has to be
+  // disabled.
+#ifndef __roar__
   if (__llvm_profile_reset_counters) {
     if (serverMode) {
       Logger::Info("Calling __llvm_profile_reset_counters (retranslateAll "
@@ -525,7 +529,7 @@ void retranslateAll(bool skipSerialize) {
     }
     __llvm_profile_reset_counters();
   }
-
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////

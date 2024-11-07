@@ -172,6 +172,8 @@ func NewClient(opts ...ClientOption) (types.Protocol, error) {
 		switch options.transport {
 		case TransportIDRocket:
 			options.tlsConfig.NextProtos = []string{"rs"}
+		case TransportIDUpgradeToRocket:
+			options.tlsConfig.NextProtos = []string{"rs" /* preferred */, "thrift" /* fallback */}
 		default:
 			options.tlsConfig.NextProtos = []string{"thrift"}
 		}

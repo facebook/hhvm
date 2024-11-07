@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"crypto/tls"
 	"net"
 	"time"
 
@@ -44,7 +45,29 @@ func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, timeout t
 	if err != nil {
 		return nil, err
 	}
+
+	var protocol Protocol
+	// Explicitly force TLS handshake protocol to run (if this is a TLS connection).
+	//
+	// Usually, TLS handshake is done implicitly/seamlessly by 'crypto/tls' package,
+	// whenever Read/Write functions are invoked on a connection for the first time.
+	// However, in our case, we require the handshake to be complete ahead of any
+	// Read/Write calls - so that we can access ALPN value and choose the transport.
+	tlsConn, isTLS := conn.(*tls.Conn)
+	if isTLS {
+		err := tlsConn.Handshake()
+		if err != nil {
+			return nil, err
+		}
+		tlsConnState := tlsConn.ConnectionState()
+		// Use Rocket protocol right away if ALPN value is set to "rs".
+		if tlsConnState.NegotiatedProtocol == "rs" {
+			protocol = rocket
+		}
+	}
+
 	return &upgradeToRocketClient{
+		Protocol:       protocol,
 		rocketProtocol: rocket,
 		headerProtocol: header,
 	}, nil

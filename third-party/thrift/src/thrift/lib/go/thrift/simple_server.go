@@ -31,7 +31,6 @@ type Server interface {
 // NewSimpleServer creates a new server that only supports Header Transport.
 func NewSimpleServer(processor Processor, listener net.Listener, transportType TransportID, options ...ServerOption) Server {
 	serverOptions := newServerOptions(options...)
-	processor = WrapInterceptor(serverOptions.interceptor, processor)
 	switch transportType {
 	case TransportIDHeader:
 		return newHeaderServer(processor, listener, serverOptions)

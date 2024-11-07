@@ -45,7 +45,6 @@ type serverOptions struct {
 	pipeliningEnabled bool
 	numWorkers        int
 	log               func(format string, args ...interface{})
-	interceptor       Interceptor
 	connContext       ConnContextFunc
 	serverStats       *stats.ServerStats
 	processorStats    map[string]*stats.TimingSeries
@@ -57,7 +56,6 @@ func defaultServerOptions() *serverOptions {
 		pipeliningEnabled: true,
 		numWorkers:        runtime.NumCPU(),
 		log:               logger.Printf,
-		interceptor:       nil,
 		connContext:       WithConnInfo,
 		processorStats:    make(map[string]*stats.TimingSeries),
 		serverStats:       stats.NewServerStats(stats.NewTimingConfig(defaultStatsPeriod), defaultStatsPeriod),
@@ -87,13 +85,6 @@ func WithoutPipelining() ServerOption {
 func WithNumWorkers(num int) ServerOption {
 	return func(server *serverOptions) {
 		server.numWorkers = num
-	}
-}
-
-// Deprecated: use WrapInterceptor
-func WithInterceptor(interceptor Interceptor) func(*serverOptions) {
-	return func(server *serverOptions) {
-		server.interceptor = interceptor
 	}
 }
 

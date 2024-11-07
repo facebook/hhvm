@@ -45,11 +45,10 @@ const (
 var taskExpiredException = NewApplicationException(UNKNOWN_APPLICATION_EXCEPTION, "Task Expired")
 
 type server struct {
-	processor   Processor
-	pstats      map[string]*thriftstats.TimingSeries
-	interceptor Interceptor
-	ln          net.Listener
-	wg          sync.WaitGroup
+	processor Processor
+	pstats    map[string]*thriftstats.TimingSeries
+	ln        net.Listener
+	wg        sync.WaitGroup
 
 	// configuration
 	reportError func(format string, args ...interface{})
@@ -85,7 +84,6 @@ func NewServer(processor Processor, listener net.Listener, transportType Transpo
 	server := &server{
 		ln:                listener,
 		processor:         processor,
-		interceptor:       opts.interceptor,
 		pstats:            opts.processorStats,
 		reportError:       opts.log,
 		pipeliningEnabled: opts.pipeliningEnabled,

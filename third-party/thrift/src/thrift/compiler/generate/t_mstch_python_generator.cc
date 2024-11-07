@@ -87,6 +87,14 @@ std::string_view extract_module_path(std::string_view fully_qualified_name) {
   return fully_qualified_name.substr(0, last_dot);
 }
 
+std::string mangle_program_path(
+    const t_program* program, const std::string& root_module_prefix) {
+  std::string prefix = root_module_prefix.empty() ? std::string("_fbthrift")
+                                                  : root_module_prefix;
+  boost::algorithm::replace_all(prefix, ".", "__");
+  return get_py3_namespace_with_name_and_prefix(program, prefix, "__");
+}
+
 class python_mstch_const_value;
 
 mstch::node adapter_node(
@@ -130,6 +138,7 @@ class python_mstch_program : public mstch_program {
         this,
         {
             {"program:module_path", &python_mstch_program::module_path},
+            {"program:module_mangle", &python_mstch_program::module_mangle},
             {"program:py_deprecated_module_path",
              &python_mstch_program::py_deprecated_module_path},
             {"program:py_asyncio_module_path",
@@ -188,6 +197,7 @@ class python_mstch_program : public mstch_program {
     for (const auto& it : namespaces) {
       a.push_back(mstch::map{
           {"included_module_path", it->ns},
+          {"included_module_mangle", it->ns_mangle},
           {"has_services?", it->has_services},
           {"has_types?", it->has_types}});
     }
@@ -197,6 +207,10 @@ class python_mstch_program : public mstch_program {
   mstch::node module_path() {
     return get_py3_namespace_with_name_and_prefix(
         program_, get_option("root_module_prefix"));
+  }
+
+  mstch::node module_mangle() {
+    return mangle_program_path(program_, get_option("root_module_prefix"));
   }
 
   mstch::node py_deprecated_module_path() {
@@ -254,6 +268,7 @@ class python_mstch_program : public mstch_program {
  protected:
   struct Namespace {
     std::string ns;
+    std::string ns_mangle;
     bool has_services;
     bool has_types;
   };
@@ -268,6 +283,8 @@ class python_mstch_program : public mstch_program {
             included_program->consts().empty());
       include_namespaces_[included_program->path()] = Namespace{
           get_py3_namespace_with_name_and_prefix(
+              included_program, get_option("root_module_prefix")),
+          mangle_program_path(
               included_program, get_option("root_module_prefix")),
           !included_program->services().empty(),
           has_types,
@@ -285,6 +302,8 @@ class python_mstch_program : public mstch_program {
       auto ns = Namespace();
       ns.ns = get_py3_namespace_with_name_and_prefix(
           prog, get_option("root_module_prefix"));
+      ns.ns_mangle =
+          mangle_program_path(prog, get_option("root_module_prefix"));
       ns.has_services = false;
       ns.has_types = true;
       include_namespaces_[path] = std::move(ns);
@@ -635,7 +654,8 @@ class python_mstch_type : public mstch_type {
     register_volatile_methods(
         this,
         {
-            {"type:module_path", &python_mstch_type::module_path},
+            {"type:module_name", &python_mstch_type::module_name},
+            {"type:module_mangle", &python_mstch_type::module_mangle},
             {"type:patch_module_path", &python_mstch_type::patch_module_path},
             {"type:need_module_path?", &python_mstch_type::need_module_path},
             {"type:need_patch_module_path?",
@@ -643,7 +663,7 @@ class python_mstch_type : public mstch_type {
         });
   }
 
-  mstch::node module_path() {
+  mstch::node module_name() {
     std::string_view types_import_path = [this]() {
       if (!get_option("generate_abstract_types").empty()) {
         return ".thrift_abstract_types";
@@ -662,6 +682,27 @@ class python_mstch_type : public mstch_type {
                get_type_program(), get_option("root_module_prefix"))
         .append(types_import_path);
   }
+
+  mstch::node module_mangle() {
+    std::string_view types_import_path = [this]() {
+      if (!get_option("generate_abstract_types").empty()) {
+        return "__thrift_abstract_types";
+      }
+      if (!get_option("generate_mutable_types").empty()) {
+        return "__thrift_mutable_types";
+      }
+      if (!get_option("generate_immutable_types").empty()) {
+        return "__thrift_types";
+      }
+      throw std::runtime_error(
+          "Expected one option out of generate_abstract_types, generate_immutable_types, or generate_mutable_types to be set, and none are set.");
+    }();
+
+    return mangle_program_path(
+               get_type_program(), get_option("root_module_prefix"))
+        .append(types_import_path);
+  }
+
   mstch::node patch_module_path() {
     return get_py3_namespace_with_name_and_prefix(
                get_type_program(), get_option("root_module_prefix"))

@@ -28,7 +28,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-import include.thrift_types
+import include.thrift_types as _fbthrift__include__thrift_types
 
 class _fbthrift_compatible_with_Result:
     pass

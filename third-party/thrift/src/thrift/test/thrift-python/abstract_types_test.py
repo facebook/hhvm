@@ -351,7 +351,7 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             ),
             (
                 TestStructWithUnionFieldAbstract.union_field_from_included,
-                "thrift.test.thrift_python.included.thrift_abstract_types.TestUnion",
+                "_fbthrift__thrift__test__thrift_python__included__thrift_abstract_types.TestUnion",
             ),
             (
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_bool,

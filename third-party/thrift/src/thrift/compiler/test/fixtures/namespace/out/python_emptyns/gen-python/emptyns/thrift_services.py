@@ -16,7 +16,7 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import emptyns.thrift_types
+import emptyns.thrift_types as _fbthrift__emptyns__thrift_types
 import emptyns.thrift_metadata
 
 class TestServiceInterface(
@@ -55,8 +55,8 @@ class TestServiceInterface(
         raise NotImplementedError("async def init is not implemented")
 
     async def _fbthrift__handler_init(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(emptyns.thrift_types._fbthrift_TestService_init_args, args, protocol)
+        args_struct = deserialize(_fbthrift__emptyns__thrift_types._fbthrift_TestService_init_args, args, protocol)
         value = await self.init(args_struct.int1,)
-        return_struct = emptyns.thrift_types._fbthrift_TestService_init_result(success=value)
+        return_struct = _fbthrift__emptyns__thrift_types._fbthrift_TestService_init_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

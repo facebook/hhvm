@@ -13,9 +13,9 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-import b.thrift_types
+import b.thrift_types as _fbthrift__b__thrift_types
 
-import c.thrift_types
+import c.thrift_types as _fbthrift__c__thrift_types
 
 
 class _fbthrift_TestService_test_args(_fbthrift_python_types.Struct):
@@ -31,15 +31,15 @@ class _fbthrift_TestService_test_args(_fbthrift_python_types.Struct):
 
 class _fbthrift_TestService_test_result(_fbthrift_python_types.Struct):
     success: _typing.Final[None]
-    ex: _typing.Final[c.thrift_types.E]
+    ex: _typing.Final[_fbthrift__c__thrift_types.E]
 
     def __init__(
-        self, *, success: _typing.Optional[None] = ..., ex: _typing.Optional[c.thrift_types.E]=...
+        self, *, success: _typing.Optional[None] = ..., ex: _typing.Optional[_fbthrift__c__thrift_types.E]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             None,
-            c.thrift_types.E,
+            _fbthrift__c__thrift_types.E,
         ]]]: ...

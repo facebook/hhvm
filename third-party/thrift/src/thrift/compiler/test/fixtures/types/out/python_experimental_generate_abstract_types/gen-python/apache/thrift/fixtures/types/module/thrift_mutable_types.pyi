@@ -29,7 +29,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-import apache.thrift.fixtures.types.included.thrift_types
+import apache.thrift.fixtures.types.included.thrift_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_types
 
 class _fbthrift_compatible_with_has_bitwise_ops:
     pass

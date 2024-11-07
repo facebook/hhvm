@@ -20,7 +20,7 @@ from thrift.python.client.omni_client import InteractionMethodPosition as _fbthr
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import empty.thrift_types
+import empty.thrift_types as _fbthrift__empty__thrift_types
 import empty.thrift_metadata
 
 class NullService(_fbthrift_python_Client["NullService.Async", "NullService.Sync"]):

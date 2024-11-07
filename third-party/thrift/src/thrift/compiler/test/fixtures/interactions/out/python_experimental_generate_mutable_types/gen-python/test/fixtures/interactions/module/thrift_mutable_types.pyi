@@ -28,7 +28,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-import test.fixtures.another_interactions.shared.thrift_types
+import test.fixtures.another_interactions.shared.thrift_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_types
 
 
 class _fbthrift_compatible_with_CustomException:
@@ -841,16 +841,16 @@ class _fbthrift_InteractWithShared_do_some_similar_things_args(_fbthrift_python_
 
 
 class _fbthrift_InteractWithShared_do_some_similar_things_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult]
+    success: _typing.Final[_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult]
 
     def __init__(
-        self, *, success: _typing.Optional[test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult] = ...
+        self, *, success: _typing.Optional[_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult,
+            _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult,
         ]]]: ...
 
 
@@ -967,16 +967,16 @@ class _fbthrift_SharedInteraction_do_something_args(_fbthrift_python_types.Struc
 
 
 class _fbthrift_SharedInteraction_do_something_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult]
+    success: _typing.Final[_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult]
 
     def __init__(
-        self, *, success: _typing.Optional[test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult] = ...
+        self, *, success: _typing.Optional[_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult,
+            _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult,
         ]]]: ...
 
 

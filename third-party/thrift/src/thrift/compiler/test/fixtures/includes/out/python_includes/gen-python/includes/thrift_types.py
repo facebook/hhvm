@@ -13,6 +13,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import transitive.thrift_types
+import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
 
 class Included(metaclass=_fbthrift_python_types.StructMeta):
@@ -33,7 +34,7 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyTransitiveField",  # name
             "MyTransitiveField",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(transitive.thrift_types.Foo),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__transitive__thrift_types.Foo),  # typeinfo
             lambda: transitive.thrift_types.Foo(a=2),  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -94,4 +95,4 @@ ExampleIncluded = Included(MyIntField=2, MyTransitiveField=transitive.thrift_typ
 IncludedConstant = 42
 
 IncludedInt64 = int
-TransitiveFoo = transitive.thrift_types.Foo
+TransitiveFoo = _fbthrift__transitive__thrift_types.Foo

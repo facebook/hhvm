@@ -16,7 +16,7 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import test.fixtures.basic.module.thrift_types
+import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
 import test.fixtures.basic.module.thrift_metadata
 
 class FooServiceInterface(
@@ -54,9 +54,9 @@ class FooServiceInterface(
         raise NotImplementedError("async def simple_rpc is not implemented")
 
     async def _fbthrift__handler_simple_rpc(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_FooService_simple_rpc_args, args, protocol)
         value = await self.simple_rpc()
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_result()
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_FooService_simple_rpc_result()
         return serialize_iobuf(return_struct, protocol)
 
 class FB303ServiceInterface(
@@ -91,13 +91,13 @@ class FB303ServiceInterface(
     async def simple_rpc(
             self,
             int_parameter: int
-        ) -> test.fixtures.basic.module.thrift_types.ReservedKeyword:
+        ) -> _fbthrift__test__fixtures__basic__module__thrift_types.ReservedKeyword:
         raise NotImplementedError("async def simple_rpc is not implemented")
 
     async def _fbthrift__handler_simple_rpc(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_FB303Service_simple_rpc_args, args, protocol)
         value = await self.simple_rpc(args_struct.int_parameter,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_FB303Service_simple_rpc_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 class MyServiceInterface(
@@ -144,9 +144,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def ping is not implemented")
 
     async def _fbthrift__handler_ping(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_ping_args, args, protocol)
         value = await self.ping()
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_result()
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_ping_result()
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -156,9 +156,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def getRandomData is not implemented")
 
     async def _fbthrift__handler_getRandomData(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_getRandomData_args, args, protocol)
         value = await self.getRandomData()
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_getRandomData_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -169,9 +169,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def sink is not implemented")
 
     async def _fbthrift__handler_sink(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_sink_args, args, protocol)
         value = await self.sink(args_struct.sink,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_result()
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_sink_result()
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -183,9 +183,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def putDataById is not implemented")
 
     async def _fbthrift__handler_putDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_putDataById_args, args, protocol)
         value = await self.putDataById(args_struct.id,args_struct.data,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_result()
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_putDataById_result()
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -196,9 +196,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def hasDataById is not implemented")
 
     async def _fbthrift__handler_hasDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_hasDataById_args, args, protocol)
         value = await self.hasDataById(args_struct.id,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_hasDataById_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -209,9 +209,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def getDataById is not implemented")
 
     async def _fbthrift__handler_getDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_getDataById_args, args, protocol)
         value = await self.getDataById(args_struct.id,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_getDataById_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -222,9 +222,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def deleteDataById is not implemented")
 
     async def _fbthrift__handler_deleteDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_deleteDataById_args, args, protocol)
         value = await self.deleteDataById(args_struct.id,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_result()
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_deleteDataById_result()
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -236,7 +236,7 @@ class MyServiceInterface(
         raise NotImplementedError("async def lobDataById is not implemented")
 
     async def _fbthrift__handler_lobDataById(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> None:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_lobDataById_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_lobDataById_args, args, protocol)
         value = await self.lobDataById(args_struct.id,args_struct.data,)
 
 
@@ -246,9 +246,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def invalid_return_for_hack is not implemented")
 
     async def _fbthrift__handler_invalid_return_for_hack(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_invalid_return_for_hack_args, args, protocol)
         value = await self.invalid_return_for_hack()
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_invalid_return_for_hack_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -258,9 +258,9 @@ class MyServiceInterface(
         raise NotImplementedError("async def rpc_skipped_codegen is not implemented")
 
     async def _fbthrift__handler_rpc_skipped_codegen(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_rpc_skipped_codegen_args, args, protocol)
         value = await self.rpc_skipped_codegen()
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_result()
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_MyService_rpc_skipped_codegen_result()
         return serialize_iobuf(return_struct, protocol)
 
 class DbMixedStackArgumentsInterface(
@@ -300,9 +300,9 @@ class DbMixedStackArgumentsInterface(
         raise NotImplementedError("async def getDataByKey0 is not implemented")
 
     async def _fbthrift__handler_getDataByKey0(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_args, args, protocol)
         value = await self.getDataByKey0(args_struct.key,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -313,8 +313,8 @@ class DbMixedStackArgumentsInterface(
         raise NotImplementedError("async def getDataByKey1 is not implemented")
 
     async def _fbthrift__handler_getDataByKey1(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_args, args, protocol)
+        args_struct = deserialize(_fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_args, args, protocol)
         value = await self.getDataByKey1(args_struct.key,)
-        return_struct = test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result(success=value)
+        return_struct = _fbthrift__test__fixtures__basic__module__thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

@@ -16,7 +16,7 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import meta.example.thrift.service.thrift_mutable_types
+import meta.example.thrift.service.thrift_mutable_types as _fbthrift__meta__example__thrift__service__thrift_mutable_types
 import meta.example.thrift.service.thrift_metadata
 
 class EchoServiceInterface(
@@ -50,17 +50,17 @@ class EchoServiceInterface(
 
     async def echo(
             self,
-            request: meta.example.thrift.service.thrift_mutable_types.EchoRequest
-        ) -> meta.example.thrift.service.thrift_mutable_types.EchoResponse:
+            request: _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoRequest
+        ) -> _fbthrift__meta__example__thrift__service__thrift_mutable_types.EchoResponse:
         raise NotImplementedError("async def echo is not implemented")
 
     async def _fbthrift__handler_echo(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(meta.example.thrift.service.thrift_mutable_types._fbthrift_EchoService_echo_args, args, protocol)
+        args_struct = deserialize(_fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_EchoService_echo_args, args, protocol)
         try:
             value = await self.echo(args_struct.request,)
-            return_struct = meta.example.thrift.service.thrift_mutable_types._fbthrift_EchoService_echo_result(success=value)
-        except meta.example.thrift.service.thrift_mutable_types.WhisperException as e:
-            return_struct = meta.example.thrift.service.thrift_mutable_types._fbthrift_EchoService_echo_result(ex=e)
+            return_struct = _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_EchoService_echo_result(success=value)
+        except _fbthrift__meta__example__thrift__service__thrift_mutable_types.WhisperException as e:
+            return_struct = _fbthrift__meta__example__thrift__service__thrift_mutable_types._fbthrift_EchoService_echo_result(ex=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('meta.example.thrift.WhisperException', str(e), buf)
             raise exp

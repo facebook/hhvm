@@ -20,10 +20,10 @@ from thrift.python.client.omni_client import InteractionMethodPosition as _fbthr
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import s.thrift_types
+import s.thrift_types as _fbthrift__s__thrift_types
 import s.thrift_metadata
-import b.thrift_types
-import c.thrift_types
+import b.thrift_types as _fbthrift__b__thrift_types
+import c.thrift_types as _fbthrift__c__thrift_types
 
 class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync"]):
     @staticmethod
@@ -64,8 +64,8 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
             _fbthrift_resp = await self._send_request(
                 "TestService",
                 "test",
-                s.thrift_types._fbthrift_TestService_test_args(),
-                s.thrift_types._fbthrift_TestService_test_result,
+                _fbthrift__s__thrift_types._fbthrift_TestService_test_args(),
+                _fbthrift__s__thrift_types._fbthrift_TestService_test_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="TestService",
                 rpc_options=rpc_options,
@@ -94,8 +94,8 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
             _fbthrift_resp = self._send_request(
                 "TestService",
                 "test",
-                s.thrift_types._fbthrift_TestService_test_args(),
-                s.thrift_types._fbthrift_TestService_test_result,
+                _fbthrift__s__thrift_types._fbthrift_TestService_test_args(),
+                _fbthrift__s__thrift_types._fbthrift_TestService_test_result,
                 uri_or_name="TestService",
                 rpc_options=rpc_options,
             )

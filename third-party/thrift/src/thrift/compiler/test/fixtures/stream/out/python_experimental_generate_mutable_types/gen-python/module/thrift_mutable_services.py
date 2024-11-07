@@ -16,7 +16,7 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import module.thrift_mutable_types
+import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
 import module.thrift_metadata
 
 class PubSubStreamingServiceInterface(
@@ -65,15 +65,15 @@ class PubSubStreamingServiceInterface(
 
     async def _fbthrift__stream_wrapper_returnstream(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
-            yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_returnstream_result_stream(success=item), protocol)
+            yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_returnstream_result_stream(success=item), protocol)
 
     async def _fbthrift__handler_returnstream(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_args, args, protocol)
         value = self.returnstream(args_struct.i32_from,args_struct.i32_to,)
         stream = value
         if not isinstance(stream, _typing.AsyncIterator):
             stream = await stream
-        return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_result()
+        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstream_result()
         return_stream = self._fbthrift__stream_wrapper_returnstream(stream, protocol)
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
@@ -87,20 +87,20 @@ class PubSubStreamingServiceInterface(
     async def _fbthrift__stream_wrapper_streamthrows(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         try:
             async for item in stream_generator:
-                yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_streamthrows_result_stream(success=item), protocol)
-        except module.thrift_mutable_types.FooStreamEx as e:
-            return_struct = module.thrift_types._fbthrift_PubSubStreamingService_streamthrows_result_stream(e=e)
+                yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_streamthrows_result_stream(success=item), protocol)
+        except _fbthrift__module__thrift_mutable_types.FooStreamEx as e:
+            return_struct = _fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_streamthrows_result_stream(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooStreamEx', str(e), buf)
             raise exp
 
     async def _fbthrift__handler_streamthrows(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_args, args, protocol)
         value = self.streamthrows(args_struct.foo,)
         stream = value
         if not isinstance(stream, _typing.AsyncIterator):
             stream = await stream
-        return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_result()
+        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_streamthrows_result()
         return_stream = self._fbthrift__stream_wrapper_streamthrows(stream, protocol)
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
@@ -113,19 +113,19 @@ class PubSubStreamingServiceInterface(
 
     async def _fbthrift__stream_wrapper_servicethrows(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
-            yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_servicethrows_result_stream(success=item), protocol)
+            yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_servicethrows_result_stream(success=item), protocol)
 
     async def _fbthrift__handler_servicethrows(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_args, args, protocol)
         try:
             value = self.servicethrows(args_struct.foo,)
             stream = value
             if not isinstance(stream, _typing.AsyncIterator):
                 stream = await stream
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result()
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result()
             return_stream = self._fbthrift__stream_wrapper_servicethrows(stream, protocol)
-        except module.thrift_mutable_types.FooEx as e:
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result(e=e)
+        except _fbthrift__module__thrift_mutable_types.FooEx as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows_result(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
@@ -140,24 +140,24 @@ class PubSubStreamingServiceInterface(
 
     async def _fbthrift__stream_wrapper_servicethrows2(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
-            yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_servicethrows2_result_stream(success=item), protocol)
+            yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_servicethrows2_result_stream(success=item), protocol)
 
     async def _fbthrift__handler_servicethrows2(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_args, args, protocol)
         try:
             value = self.servicethrows2(args_struct.foo,)
             stream = value
             if not isinstance(stream, _typing.AsyncIterator):
                 stream = await stream
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result()
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result()
             return_stream = self._fbthrift__stream_wrapper_servicethrows2(stream, protocol)
-        except module.thrift_mutable_types.FooEx as e:
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(e1=e)
+        except _fbthrift__module__thrift_mutable_types.FooEx as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(e1=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
-        except module.thrift_mutable_types.FooEx2 as e:
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(e2=e)
+        except _fbthrift__module__thrift_mutable_types.FooEx2 as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_servicethrows2_result(e2=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx2', str(e), buf)
             raise exp
@@ -173,24 +173,24 @@ class PubSubStreamingServiceInterface(
     async def _fbthrift__stream_wrapper_boththrows(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         try:
             async for item in stream_generator:
-                yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_boththrows_result_stream(success=item), protocol)
-        except module.thrift_mutable_types.FooStreamEx as e:
-            return_struct = module.thrift_types._fbthrift_PubSubStreamingService_boththrows_result_stream(e=e)
+                yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_boththrows_result_stream(success=item), protocol)
+        except _fbthrift__module__thrift_mutable_types.FooStreamEx as e:
+            return_struct = _fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_boththrows_result_stream(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooStreamEx', str(e), buf)
             raise exp
 
     async def _fbthrift__handler_boththrows(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_args, args, protocol)
         try:
             value = self.boththrows(args_struct.foo,)
             stream = value
             if not isinstance(stream, _typing.AsyncIterator):
                 stream = await stream
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result()
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result()
             return_stream = self._fbthrift__stream_wrapper_boththrows(stream, protocol)
-        except module.thrift_mutable_types.FooEx as e:
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result(e=e)
+        except _fbthrift__module__thrift_mutable_types.FooEx as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_boththrows_result(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
@@ -206,20 +206,20 @@ class PubSubStreamingServiceInterface(
     async def _fbthrift__stream_wrapper_responseandstreamstreamthrows(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         try:
             async for item in stream_generator:
-                yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream(success=item), protocol)
-        except module.thrift_mutable_types.FooStreamEx as e:
-            return_struct = module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream(e=e)
+                yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream(success=item), protocol)
+        except _fbthrift__module__thrift_mutable_types.FooStreamEx as e:
+            return_struct = _fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooStreamEx', str(e), buf)
             raise exp
 
     async def _fbthrift__handler_responseandstreamstreamthrows(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args, args, protocol)
         value = self.responseandstreamstreamthrows(args_struct.foo,)
         value, stream = await value
         if not isinstance(stream, _typing.AsyncIterator):
             stream = await stream
-        return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(success=value)
+        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(success=value)
         return_stream = self._fbthrift__stream_wrapper_responseandstreamstreamthrows(stream, protocol)
         return (serialize_iobuf(return_struct, protocol), return_stream)
 
@@ -232,19 +232,19 @@ class PubSubStreamingServiceInterface(
 
     async def _fbthrift__stream_wrapper_responseandstreamservicethrows(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
-            yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream(success=item), protocol)
+            yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream(success=item), protocol)
 
     async def _fbthrift__handler_responseandstreamservicethrows(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_args, args, protocol)
         try:
             value = self.responseandstreamservicethrows(args_struct.foo,)
             value, stream = await value
             if not isinstance(stream, _typing.AsyncIterator):
                 stream = await stream
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(success=value)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(success=value)
             return_stream = self._fbthrift__stream_wrapper_responseandstreamservicethrows(stream, protocol)
-        except module.thrift_mutable_types.FooEx as e:
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(e=e)
+        except _fbthrift__module__thrift_mutable_types.FooEx as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
@@ -260,24 +260,24 @@ class PubSubStreamingServiceInterface(
     async def _fbthrift__stream_wrapper_responseandstreamboththrows(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         try:
             async for item in stream_generator:
-                yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream(success=item), protocol)
-        except module.thrift_mutable_types.FooStreamEx as e:
-            return_struct = module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream(e=e)
+                yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream(success=item), protocol)
+        except _fbthrift__module__thrift_mutable_types.FooStreamEx as e:
+            return_struct = _fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooStreamEx', str(e), buf)
             raise exp
 
     async def _fbthrift__handler_responseandstreamboththrows(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_args, args, protocol)
         try:
             value = self.responseandstreamboththrows(args_struct.foo,)
             value, stream = await value
             if not isinstance(stream, _typing.AsyncIterator):
                 stream = await stream
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result(success=value)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result(success=value)
             return_stream = self._fbthrift__stream_wrapper_responseandstreamboththrows(stream, protocol)
-        except module.thrift_mutable_types.FooEx as e:
-            return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result(e=e)
+        except _fbthrift__module__thrift_mutable_types.FooEx as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result(e=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('FooEx', str(e), buf)
             raise exp
@@ -293,15 +293,15 @@ class PubSubStreamingServiceInterface(
 
     async def _fbthrift__stream_wrapper_returnstreamFast(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
-            yield serialize_iobuf(module.thrift_types._fbthrift_PubSubStreamingService_returnstreamFast_result_stream(success=item), protocol)
+            yield serialize_iobuf(_fbthrift__module__thrift_types._fbthrift_PubSubStreamingService_returnstreamFast_result_stream(success=item), protocol)
 
     async def _fbthrift__handler_returnstreamFast(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_args, args, protocol)
         value = self.returnstreamFast(args_struct.i32_from,args_struct.i32_to,)
         stream = value
         if not isinstance(stream, _typing.AsyncIterator):
             stream = await stream
-        return_struct = module.thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_result()
+        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_PubSubStreamingService_returnstreamFast_result()
         return_stream = self._fbthrift__stream_wrapper_returnstreamFast(stream, protocol)
         return (serialize_iobuf(return_struct, protocol), return_stream)
 

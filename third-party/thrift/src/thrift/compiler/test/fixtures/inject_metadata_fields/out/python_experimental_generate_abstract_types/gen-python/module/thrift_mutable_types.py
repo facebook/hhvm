@@ -20,6 +20,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 import foo.thrift_mutable_types
+import foo.thrift_mutable_types as _fbthrift__foo__thrift_mutable_types
 
 
 @_fbthrift_abstract_types.Fields.register

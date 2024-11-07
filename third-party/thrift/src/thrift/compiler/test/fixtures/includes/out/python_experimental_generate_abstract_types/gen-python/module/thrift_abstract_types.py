@@ -15,21 +15,21 @@ import abc as _abc
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
-import includes.thrift_abstract_types
+import includes.thrift_abstract_types as _fbthrift__includes__thrift_abstract_types
 
 
 class MyStruct(_abc.ABC):
     @property
     @_abc.abstractmethod
-    def MyIncludedField(self) -> includes.thrift_abstract_types.Included: ...
+    def MyIncludedField(self) -> _fbthrift__includes__thrift_abstract_types.Included: ...
     @property
     @_abc.abstractmethod
-    def MyOtherIncludedField(self) -> includes.thrift_abstract_types.Included: ...
+    def MyOtherIncludedField(self) -> _fbthrift__includes__thrift_abstract_types.Included: ...
     @property
     @_abc.abstractmethod
     def MyIncludedInt(self) -> int: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[includes.thrift_abstract_types.Included, includes.thrift_abstract_types.Included, int]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift__includes__thrift_abstract_types.Included, _fbthrift__includes__thrift_abstract_types.Included, int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod

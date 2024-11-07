@@ -33,7 +33,7 @@ import enum as _enum
 import folly.iobuf as _fbthrift_iobuf
 {{#program:include_namespaces}}
 {{#has_types?}}
-import {{included_module_path}}.thrift_abstract_types
+import {{included_module_path}}.thrift_abstract_types as {{included_module_mangle}}__thrift_abstract_types
 {{/has_types?}}
 {{/program:include_namespaces}}
 {{#program:adapter_type_hint_modules}}

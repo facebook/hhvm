@@ -13,6 +13,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import python_module_root.my.namespacing.test.hsmodule.thrift_types
+import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_module_root__my__namespacing__test__hsmodule__thrift_types
 
 # This unfortunately has to be down here to prevent circular imports
 import python_module_root.my.namespacing.extend.test.extend.thrift_metadata
@@ -33,7 +34,7 @@ class _fbthrift_ExtendTestService_check_args(metaclass=_fbthrift_python_types.St
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "struct1",  # name
             "struct1",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(python_module_root.my.namespacing.test.hsmodule.thrift_types.HsFoo),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(python_module_root__my__namespacing__test__hsmodule__thrift_types.HsFoo),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

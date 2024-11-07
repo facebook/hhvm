@@ -14,12 +14,16 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import apache.thrift.type.id.thrift_types
+import apache.thrift.type.id.thrift_types as _fbthrift__apache__thrift__type__id__thrift_types
 
 import apache.thrift.type.schema.thrift_types
+import apache.thrift.type.schema.thrift_types as _fbthrift__apache__thrift__type__schema__thrift_types
 
 import test.fixtures.python_capi.serialized_dep.thrift_types
+import test.fixtures.python_capi.serialized_dep.thrift_types as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types
 
 import test.fixtures.python_capi.thrift_dep.thrift_types
+import test.fixtures.python_capi.thrift_dep.thrift_types as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types
 
 
 @_fbthrift_abstract_types.MyStruct.register
@@ -596,7 +600,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "some_error",  # name
             "some_error",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.SomeError),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.SomeError),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1196,7 +1200,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "xenum",  # name
             "xenum",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.EnumTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.DepEnum),  # typeinfo
+            lambda: _fbthrift_python_types.EnumTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1207,7 +1211,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "xstruct",  # name
             "xstruct",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.DepStruct),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1218,7 +1222,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "friends",  # name
             "friends",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_types.DepStruct)),  # typeinfo
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types.DepStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1229,7 +1233,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "serial_struct",  # name
             "serial_struct",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_types.SerializedStruct),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1240,7 +1244,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "serial_union",  # name
             "serial_union",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_types.SerializedUnion),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1251,7 +1255,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "serial_error",  # name
             "serial_error",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_types.SerializedError),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types.SerializedError),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

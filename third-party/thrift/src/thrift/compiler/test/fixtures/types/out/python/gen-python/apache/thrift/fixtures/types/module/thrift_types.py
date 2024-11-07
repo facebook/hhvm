@@ -13,6 +13,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import apache.thrift.fixtures.types.included.thrift_types
+import apache.thrift.fixtures.types.included.thrift_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_types
 
 
 class empty_struct(metaclass=_fbthrift_python_types.StructMeta):

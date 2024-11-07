@@ -20,6 +20,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 import includes.thrift_mutable_types
+import includes.thrift_mutable_types as _fbthrift__includes__thrift_mutable_types
 
 
 @_fbthrift_abstract_types.MyStruct.register
@@ -30,7 +31,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyIncludedField",  # name
             "MyIncludedField",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(includes.thrift_mutable_types.Included),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__includes__thrift_mutable_types.Included),  # typeinfo
             lambda: includes.thrift_mutable_types.Included(MyIntField=2, MyTransitiveField=transitive.thrift_mutable_types.Foo(a=2)),  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -41,7 +42,7 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "MyOtherIncludedField",  # name
             "MyOtherIncludedField",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(includes.thrift_mutable_types.Included),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__includes__thrift_mutable_types.Included),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

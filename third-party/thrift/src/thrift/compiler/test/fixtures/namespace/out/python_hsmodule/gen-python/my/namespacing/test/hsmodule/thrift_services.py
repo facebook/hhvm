@@ -16,7 +16,7 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import python_module_root.my.namespacing.test.hsmodule.thrift_types
+import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_module_root__my__namespacing__test__hsmodule__thrift_types
 import python_module_root.my.namespacing.test.hsmodule.thrift_metadata
 
 class HsTestServiceInterface(
@@ -55,8 +55,8 @@ class HsTestServiceInterface(
         raise NotImplementedError("async def init is not implemented")
 
     async def _fbthrift__handler_init(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_args, args, protocol)
+        args_struct = deserialize(python_module_root__my__namespacing__test__hsmodule__thrift_types._fbthrift_HsTestService_init_args, args, protocol)
         value = await self.init(args_struct.int1,)
-        return_struct = python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_result(success=value)
+        return_struct = python_module_root__my__namespacing__test__hsmodule__thrift_types._fbthrift_HsTestService_init_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

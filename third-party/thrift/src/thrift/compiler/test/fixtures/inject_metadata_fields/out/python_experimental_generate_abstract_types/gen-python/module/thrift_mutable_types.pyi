@@ -29,7 +29,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-import foo.thrift_types
+import foo.thrift_types as _fbthrift__foo__thrift_types
 
 
 class _fbthrift_compatible_with_Fields:

@@ -16,10 +16,10 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import a.thrift_types
+import a.thrift_types as _fbthrift__a__thrift_types
 import a.thrift_metadata
-import b.thrift_types
-import c.thrift_types
+import b.thrift_types as _fbthrift__b__thrift_types
+import c.thrift_types as _fbthrift__c__thrift_types
 import three
 import two
 import one
@@ -59,25 +59,25 @@ class MyServiceInterface(
 
     async def adapted_return(
             self
-        ) -> typeshed_one.AdapterOneType[b.thrift_types.B]:
+        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_types.B]:
         raise NotImplementedError("async def adapted_return is not implemented")
 
     async def _fbthrift__handler_adapted_return(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(a.thrift_types._fbthrift_MyService_adapted_return_args, args, protocol)
+        args_struct = deserialize(_fbthrift__a__thrift_types._fbthrift_MyService_adapted_return_args, args, protocol)
         value = await self.adapted_return()
-        return_struct = a.thrift_types._fbthrift_MyService_adapted_return_result(success=value)
+        return_struct = _fbthrift__a__thrift_types._fbthrift_MyService_adapted_return_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def adapted_param(
             self,
-            param: typeshed_two.AdapterTwoType[c.thrift_types.C2]
+            param: typeshed_two.AdapterTwoType[_fbthrift__c__thrift_types.C2]
         ) -> None:
         raise NotImplementedError("async def adapted_param is not implemented")
 
     async def _fbthrift__handler_adapted_param(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(a.thrift_types._fbthrift_MyService_adapted_param_args, args, protocol)
+        args_struct = deserialize(_fbthrift__a__thrift_types._fbthrift_MyService_adapted_param_args, args, protocol)
         value = await self.adapted_param(args_struct.param,)
-        return_struct = a.thrift_types._fbthrift_MyService_adapted_param_result()
+        return_struct = _fbthrift__a__thrift_types._fbthrift_MyService_adapted_param_result()
         return serialize_iobuf(return_struct, protocol)
 

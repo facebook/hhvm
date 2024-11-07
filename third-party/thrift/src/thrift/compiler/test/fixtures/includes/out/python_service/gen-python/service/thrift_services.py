@@ -16,11 +16,11 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import service.thrift_types
+import service.thrift_types as _fbthrift__service__thrift_types
 import service.thrift_metadata
-import includes.thrift_types
-import module.thrift_types
-import transitive.thrift_types
+import includes.thrift_types as _fbthrift__includes__thrift_types
+import module.thrift_types as _fbthrift__module__thrift_types
+import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
 class MyServiceInterface(
     ServiceInterface,
@@ -54,28 +54,28 @@ class MyServiceInterface(
 
     async def query(
             self,
-            s: module.thrift_types.MyStruct,
-            i: includes.thrift_types.Included
+            s: _fbthrift__module__thrift_types.MyStruct,
+            i: _fbthrift__includes__thrift_types.Included
         ) -> None:
         raise NotImplementedError("async def query is not implemented")
 
     async def _fbthrift__handler_query(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(service.thrift_types._fbthrift_MyService_query_args, args, protocol)
+        args_struct = deserialize(_fbthrift__service__thrift_types._fbthrift_MyService_query_args, args, protocol)
         value = await self.query(args_struct.s,args_struct.i,)
-        return_struct = service.thrift_types._fbthrift_MyService_query_result()
+        return_struct = _fbthrift__service__thrift_types._fbthrift_MyService_query_result()
         return serialize_iobuf(return_struct, protocol)
 
 
     async def has_arg_docs(
             self,
-            s: module.thrift_types.MyStruct,
-            i: includes.thrift_types.Included
+            s: _fbthrift__module__thrift_types.MyStruct,
+            i: _fbthrift__includes__thrift_types.Included
         ) -> None:
         raise NotImplementedError("async def has_arg_docs is not implemented")
 
     async def _fbthrift__handler_has_arg_docs(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(service.thrift_types._fbthrift_MyService_has_arg_docs_args, args, protocol)
+        args_struct = deserialize(_fbthrift__service__thrift_types._fbthrift_MyService_has_arg_docs_args, args, protocol)
         value = await self.has_arg_docs(args_struct.s,args_struct.i,)
-        return_struct = service.thrift_types._fbthrift_MyService_has_arg_docs_result()
+        return_struct = _fbthrift__service__thrift_types._fbthrift_MyService_has_arg_docs_result()
         return serialize_iobuf(return_struct, protocol)
 

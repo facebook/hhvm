@@ -16,9 +16,9 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import apache.thrift.fixtures.types.module.thrift_types
+import apache.thrift.fixtures.types.module.thrift_types as _fbthrift__apache__thrift__fixtures__types__module__thrift_types
 import apache.thrift.fixtures.types.module.thrift_metadata
-import apache.thrift.fixtures.types.included.thrift_types
+import apache.thrift.fixtures.types.included.thrift_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_types
 
 class SomeServiceInterface(
     ServiceInterface,
@@ -57,9 +57,9 @@ class SomeServiceInterface(
         raise NotImplementedError("async def bounce_map is not implemented")
 
     async def _fbthrift__handler_bounce_map(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_bounce_map_args, args, protocol)
+        args_struct = deserialize(_fbthrift__apache__thrift__fixtures__types__module__thrift_types._fbthrift_SomeService_bounce_map_args, args, protocol)
         value = await self.bounce_map(args_struct.m,)
-        return_struct = apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_bounce_map_result(success=value)
+        return_struct = _fbthrift__apache__thrift__fixtures__types__module__thrift_types._fbthrift_SomeService_bounce_map_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -70,8 +70,8 @@ class SomeServiceInterface(
         raise NotImplementedError("async def binary_keyed_map is not implemented")
 
     async def _fbthrift__handler_binary_keyed_map(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_binary_keyed_map_args, args, protocol)
+        args_struct = deserialize(_fbthrift__apache__thrift__fixtures__types__module__thrift_types._fbthrift_SomeService_binary_keyed_map_args, args, protocol)
         value = await self.binary_keyed_map(args_struct.r,)
-        return_struct = apache.thrift.fixtures.types.module.thrift_types._fbthrift_SomeService_binary_keyed_map_result(success=value)
+        return_struct = _fbthrift__apache__thrift__fixtures__types__module__thrift_types._fbthrift_SomeService_binary_keyed_map_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

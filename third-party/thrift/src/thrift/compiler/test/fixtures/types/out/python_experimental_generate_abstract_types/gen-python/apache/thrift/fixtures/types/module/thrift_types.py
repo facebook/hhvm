@@ -14,6 +14,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import apache.thrift.fixtures.types.included.thrift_types
+import apache.thrift.fixtures.types.included.thrift_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_types
 
 
 @_fbthrift_abstract_types.empty_struct.register

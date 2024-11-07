@@ -13,6 +13,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import include.thrift_types
+import include.thrift_types as _fbthrift__include__thrift_types
 
 
 class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):

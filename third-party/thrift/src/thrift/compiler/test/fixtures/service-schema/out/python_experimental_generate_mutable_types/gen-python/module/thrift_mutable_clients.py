@@ -22,9 +22,9 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import module.thrift_mutable_types
+import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
 import module.thrift_metadata
-import include.thrift_mutable_types
+import include.thrift_mutable_types as _fbthrift__include__thrift_mutable_types
 
 class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "PrimitivesService.Sync"]):
     @staticmethod
@@ -67,10 +67,10 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
             _fbthrift_resp = await self._send_request(
                 "PrimitivesService",
                 "init",
-                module.thrift_mutable_types._fbthrift_PrimitivesService_init_args(
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_init_args(
                     param0=param0,
                     param1=param1,),
-                module.thrift_mutable_types._fbthrift_PrimitivesService_init_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PrimitivesService",
                 rpc_options=rpc_options,
@@ -88,12 +88,12 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> module.thrift_mutable_types.Result:
+        ) -> _fbthrift__module__thrift_mutable_types.Result:
             _fbthrift_resp = await self._send_request(
                 "PrimitivesService",
                 "method_that_throws",
-                module.thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_args(),
-                module.thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PrimitivesService",
                 rpc_options=rpc_options,
@@ -118,9 +118,9 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
             _fbthrift_resp = await self._send_request(
                 "PrimitivesService",
                 "return_void_method",
-                module.thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_args(
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_args(
                     id=id,),
-                module.thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="PrimitivesService",
                 rpc_options=rpc_options,
@@ -150,10 +150,10 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
             _fbthrift_resp = self._send_request(
                 "PrimitivesService",
                 "init",
-                module.thrift_mutable_types._fbthrift_PrimitivesService_init_args(
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_init_args(
                     param0=param0,
                     param1=param1,),
-                module.thrift_mutable_types._fbthrift_PrimitivesService_init_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_init_result,
                 uri_or_name="PrimitivesService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -170,12 +170,12 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> module.thrift_mutable_types.Result:
+        ) -> _fbthrift__module__thrift_mutable_types.Result:
             _fbthrift_resp = self._send_request(
                 "PrimitivesService",
                 "method_that_throws",
-                module.thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_args(),
-                module.thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_method_that_throws_result,
                 uri_or_name="PrimitivesService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -199,9 +199,9 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
             _fbthrift_resp = self._send_request(
                 "PrimitivesService",
                 "return_void_method",
-                module.thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_args(
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_args(
                     id=id,),
-                module.thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_PrimitivesService_return_void_method_result,
                 uri_or_name="PrimitivesService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,

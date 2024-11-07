@@ -20,7 +20,7 @@ from thrift.python.client.omni_client import InteractionMethodPosition as _fbthr
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import meta.example.thrift.service.thrift_types
+import meta.example.thrift.service.thrift_types as _fbthrift__meta__example__thrift__service__thrift_types
 import meta.example.thrift.service.thrift_metadata
 
 class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync"]):
@@ -56,16 +56,16 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
         async def echo(
             self,
-            request: meta.example.thrift.service.thrift_types.EchoRequest,
+            request: _fbthrift__meta__example__thrift__service__thrift_types.EchoRequest,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> meta.example.thrift.service.thrift_types.EchoResponse:
+        ) -> _fbthrift__meta__example__thrift__service__thrift_types.EchoResponse:
             _fbthrift_resp = await self._send_request(
                 "EchoService",
                 "echo",
-                meta.example.thrift.service.thrift_types._fbthrift_EchoService_echo_args(
+                _fbthrift__meta__example__thrift__service__thrift_types._fbthrift_EchoService_echo_args(
                     request=request,),
-                meta.example.thrift.service.thrift_types._fbthrift_EchoService_echo_result,
+                _fbthrift__meta__example__thrift__service__thrift_types._fbthrift_EchoService_echo_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="EchoService",
                 rpc_options=rpc_options,
@@ -95,16 +95,16 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
     
         def echo(
             self,
-            request: meta.example.thrift.service.thrift_types.EchoRequest,
+            request: _fbthrift__meta__example__thrift__service__thrift_types.EchoRequest,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> meta.example.thrift.service.thrift_types.EchoResponse:
+        ) -> _fbthrift__meta__example__thrift__service__thrift_types.EchoResponse:
             _fbthrift_resp = self._send_request(
                 "EchoService",
                 "echo",
-                meta.example.thrift.service.thrift_types._fbthrift_EchoService_echo_args(
+                _fbthrift__meta__example__thrift__service__thrift_types._fbthrift_EchoService_echo_args(
                     request=request,),
-                meta.example.thrift.service.thrift_types._fbthrift_EchoService_echo_result,
+                _fbthrift__meta__example__thrift__service__thrift_types._fbthrift_EchoService_echo_result,
                 uri_or_name="EchoService",
                 rpc_options=rpc_options,
             )

@@ -15,7 +15,7 @@ import abc as _abc
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
-import foo.thrift_abstract_types
+import foo.thrift_abstract_types as _fbthrift__foo__thrift_abstract_types
 
 
 class Fields(_abc.ABC):

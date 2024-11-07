@@ -13,6 +13,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import c.thrift_types
+import c.thrift_types as _fbthrift__c__thrift_types
 
 # This unfortunately has to be down here to prevent circular imports
 import b.thrift_metadata
@@ -24,5 +25,5 @@ _fbthrift_all_enums = [
 _fbthrift_all_structs = [
 ]
 
-B = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(c.thrift_types.C))
-E = c.thrift_types.E
+B = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.StructTypeInfo(_fbthrift__c__thrift_types.C))
+E = _fbthrift__c__thrift_types.E

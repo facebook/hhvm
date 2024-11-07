@@ -13,6 +13,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import foo.thrift_types
+import foo.thrift_types as _fbthrift__foo__thrift_types
 
 
 class Fields(metaclass=_fbthrift_python_types.StructMeta):

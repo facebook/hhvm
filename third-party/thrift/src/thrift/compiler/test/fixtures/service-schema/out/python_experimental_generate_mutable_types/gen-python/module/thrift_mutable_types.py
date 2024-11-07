@@ -19,6 +19,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 import include.thrift_mutable_types
+import include.thrift_mutable_types as _fbthrift__include__thrift_mutable_types
 
 
 class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):

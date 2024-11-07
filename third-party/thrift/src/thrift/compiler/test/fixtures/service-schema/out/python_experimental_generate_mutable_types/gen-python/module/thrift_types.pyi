@@ -13,7 +13,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-import include.thrift_types
+import include.thrift_types as _fbthrift__include__thrift_types
 
 class _fbthrift_compatible_with_Result:
     pass

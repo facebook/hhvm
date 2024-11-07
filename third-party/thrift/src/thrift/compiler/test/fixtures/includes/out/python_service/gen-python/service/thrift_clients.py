@@ -20,11 +20,11 @@ from thrift.python.client.omni_client import InteractionMethodPosition as _fbthr
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import service.thrift_types
+import service.thrift_types as _fbthrift__service__thrift_types
 import service.thrift_metadata
-import includes.thrift_types
-import module.thrift_types
-import transitive.thrift_types
+import includes.thrift_types as _fbthrift__includes__thrift_types
+import module.thrift_types as _fbthrift__module__thrift_types
+import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
 class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     @staticmethod
@@ -59,18 +59,18 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def query(
             self,
-            s: module.thrift_types.MyStruct,
-            i: includes.thrift_types.Included,
+            s: _fbthrift__module__thrift_types.MyStruct,
+            i: _fbthrift__includes__thrift_types.Included,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "query",
-                service.thrift_types._fbthrift_MyService_query_args(
+                _fbthrift__service__thrift_types._fbthrift_MyService_query_args(
                     s=s,
                     i=i,),
-                service.thrift_types._fbthrift_MyService_query_result,
+                _fbthrift__service__thrift_types._fbthrift_MyService_query_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
@@ -78,18 +78,18 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def has_arg_docs(
             self,
-            s: module.thrift_types.MyStruct,
-            i: includes.thrift_types.Included,
+            s: _fbthrift__module__thrift_types.MyStruct,
+            i: _fbthrift__includes__thrift_types.Included,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "has_arg_docs",
-                service.thrift_types._fbthrift_MyService_has_arg_docs_args(
+                _fbthrift__service__thrift_types._fbthrift_MyService_has_arg_docs_args(
                     s=s,
                     i=i,),
-                service.thrift_types._fbthrift_MyService_has_arg_docs_result,
+                _fbthrift__service__thrift_types._fbthrift_MyService_has_arg_docs_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
@@ -110,36 +110,36 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def query(
             self,
-            s: module.thrift_types.MyStruct,
-            i: includes.thrift_types.Included,
+            s: _fbthrift__module__thrift_types.MyStruct,
+            i: _fbthrift__includes__thrift_types.Included,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "query",
-                service.thrift_types._fbthrift_MyService_query_args(
+                _fbthrift__service__thrift_types._fbthrift_MyService_query_args(
                     s=s,
                     i=i,),
-                service.thrift_types._fbthrift_MyService_query_result,
+                _fbthrift__service__thrift_types._fbthrift_MyService_query_result,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
     
         def has_arg_docs(
             self,
-            s: module.thrift_types.MyStruct,
-            i: includes.thrift_types.Included,
+            s: _fbthrift__module__thrift_types.MyStruct,
+            i: _fbthrift__includes__thrift_types.Included,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "has_arg_docs",
-                service.thrift_types._fbthrift_MyService_has_arg_docs_args(
+                _fbthrift__service__thrift_types._fbthrift_MyService_has_arg_docs_args(
                     s=s,
                     i=i,),
-                service.thrift_types._fbthrift_MyService_has_arg_docs_result,
+                _fbthrift__service__thrift_types._fbthrift_MyService_has_arg_docs_result,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
             )

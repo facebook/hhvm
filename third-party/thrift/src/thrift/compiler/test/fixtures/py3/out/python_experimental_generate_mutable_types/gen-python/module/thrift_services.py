@@ -18,7 +18,7 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from fbcode.thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from fbcode.thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import module.thrift_types
+import module.thrift_types as _fbthrift__module__thrift_types
 import module.thrift_metadata
 
 class SimpleServiceInterface(
@@ -97,9 +97,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def get_five is not implemented")
 
     async def _fbthrift__handler_get_five(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_five_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_five_args, args, protocol)
         value = await self.get_five()
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_five_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_five_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -110,9 +110,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def add_five is not implemented")
 
     async def _fbthrift__handler_add_five(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_add_five_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_add_five_args, args, protocol)
         value = await self.add_five(args_struct.num,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_add_five_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_add_five_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -122,9 +122,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def do_nothing is not implemented")
 
     async def _fbthrift__handler_do_nothing(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_do_nothing_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_do_nothing_args, args, protocol)
         value = await self.do_nothing()
-        return_struct = module.thrift_types._fbthrift_SimpleService_do_nothing_result()
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_do_nothing_result()
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -136,22 +136,22 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def concat is not implemented")
 
     async def _fbthrift__handler_concat(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_concat_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_concat_args, args, protocol)
         value = await self.concat(args_struct.first,args_struct.second,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_concat_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def get_value(
             self,
-            simple_struct: module.thrift_types.SimpleStruct
+            simple_struct: _fbthrift__module__thrift_types.SimpleStruct
         ) -> int:
         raise NotImplementedError("async def get_value is not implemented")
 
     async def _fbthrift__handler_get_value(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_value_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_value_args, args, protocol)
         value = await self.get_value(args_struct.simple_struct,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_value_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_value_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -162,9 +162,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def negate is not implemented")
 
     async def _fbthrift__handler_negate(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_negate_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_negate_args, args, protocol)
         value = await self.negate(args_struct.input,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_negate_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_negate_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -175,9 +175,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def tiny is not implemented")
 
     async def _fbthrift__handler_tiny(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_tiny_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_tiny_args, args, protocol)
         value = await self.tiny(args_struct.input,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_tiny_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_tiny_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -188,9 +188,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def small is not implemented")
 
     async def _fbthrift__handler_small(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_small_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_small_args, args, protocol)
         value = await self.small(args_struct.input,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_small_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_small_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -201,9 +201,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def big is not implemented")
 
     async def _fbthrift__handler_big(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_big_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_big_args, args, protocol)
         value = await self.big(args_struct.input,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_big_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_big_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -214,9 +214,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def two is not implemented")
 
     async def _fbthrift__handler_two(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_two_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_two_args, args, protocol)
         value = await self.two(args_struct.input,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_two_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_two_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -226,12 +226,12 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def expected_exception is not implemented")
 
     async def _fbthrift__handler_expected_exception(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_expected_exception_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_expected_exception_args, args, protocol)
         try:
             value = await self.expected_exception()
-            return_struct = module.thrift_types._fbthrift_SimpleService_expected_exception_result()
-        except module.thrift_types.SimpleException as e:
-            return_struct = module.thrift_types._fbthrift_SimpleService_expected_exception_result(se=e)
+            return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_expected_exception_result()
+        except _fbthrift__module__thrift_types.SimpleException as e:
+            return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_expected_exception_result(se=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('SimpleException', str(e), buf)
             raise exp
@@ -244,9 +244,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def unexpected_exception is not implemented")
 
     async def _fbthrift__handler_unexpected_exception(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_unexpected_exception_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_unexpected_exception_args, args, protocol)
         value = await self.unexpected_exception()
-        return_struct = module.thrift_types._fbthrift_SimpleService_unexpected_exception_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_unexpected_exception_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -257,9 +257,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def sum_i16_list is not implemented")
 
     async def _fbthrift__handler_sum_i16_list(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_i16_list_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i16_list_args, args, protocol)
         value = await self.sum_i16_list(args_struct.numbers,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_sum_i16_list_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i16_list_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -270,9 +270,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def sum_i32_list is not implemented")
 
     async def _fbthrift__handler_sum_i32_list(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_i32_list_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i32_list_args, args, protocol)
         value = await self.sum_i32_list(args_struct.numbers,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_sum_i32_list_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i32_list_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -283,9 +283,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def sum_i64_list is not implemented")
 
     async def _fbthrift__handler_sum_i64_list(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_i64_list_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i64_list_args, args, protocol)
         value = await self.sum_i64_list(args_struct.numbers,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_sum_i64_list_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_i64_list_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -296,22 +296,22 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def concat_many is not implemented")
 
     async def _fbthrift__handler_concat_many(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_concat_many_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_concat_many_args, args, protocol)
         value = await self.concat_many(args_struct.words,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_concat_many_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_concat_many_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def count_structs(
             self,
-            items: _typing.Sequence[module.thrift_types.SimpleStruct]
+            items: _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]
         ) -> int:
         raise NotImplementedError("async def count_structs is not implemented")
 
     async def _fbthrift__handler_count_structs(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_count_structs_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_count_structs_args, args, protocol)
         value = await self.count_structs(args_struct.items,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_count_structs_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_count_structs_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -322,9 +322,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def sum_set is not implemented")
 
     async def _fbthrift__handler_sum_set(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_set_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_sum_set_args, args, protocol)
         value = await self.sum_set(args_struct.numbers,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_sum_set_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_set_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -336,9 +336,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def contains_word is not implemented")
 
     async def _fbthrift__handler_contains_word(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_contains_word_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_contains_word_args, args, protocol)
         value = await self.contains_word(args_struct.words,args_struct.word,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_contains_word_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_contains_word_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -350,22 +350,22 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def get_map_value is not implemented")
 
     async def _fbthrift__handler_get_map_value(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_map_value_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_map_value_args, args, protocol)
         value = await self.get_map_value(args_struct.words,args_struct.key,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_map_value_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_map_value_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def map_length(
             self,
-            items: _typing.Mapping[str, module.thrift_types.SimpleStruct]
+            items: _typing.Mapping[str, _fbthrift__module__thrift_types.SimpleStruct]
         ) -> int:
         raise NotImplementedError("async def map_length is not implemented")
 
     async def _fbthrift__handler_map_length(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_map_length_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_map_length_args, args, protocol)
         value = await self.map_length(args_struct.items,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_map_length_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_map_length_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -376,47 +376,47 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def sum_map_values is not implemented")
 
     async def _fbthrift__handler_sum_map_values(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_sum_map_values_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_sum_map_values_args, args, protocol)
         value = await self.sum_map_values(args_struct.items,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_sum_map_values_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_sum_map_values_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def complex_sum_i32(
             self,
-            counter: module.thrift_types.ComplexStruct
+            counter: _fbthrift__module__thrift_types.ComplexStruct
         ) -> int:
         raise NotImplementedError("async def complex_sum_i32 is not implemented")
 
     async def _fbthrift__handler_complex_sum_i32(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_complex_sum_i32_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_complex_sum_i32_args, args, protocol)
         value = await self.complex_sum_i32(args_struct.counter,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_complex_sum_i32_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_complex_sum_i32_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def repeat_name(
             self,
-            counter: module.thrift_types.ComplexStruct
+            counter: _fbthrift__module__thrift_types.ComplexStruct
         ) -> str:
         raise NotImplementedError("async def repeat_name is not implemented")
 
     async def _fbthrift__handler_repeat_name(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_repeat_name_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_repeat_name_args, args, protocol)
         value = await self.repeat_name(args_struct.counter,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_repeat_name_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_repeat_name_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def get_struct(
             self
-        ) -> module.thrift_types.SimpleStruct:
+        ) -> _fbthrift__module__thrift_types.SimpleStruct:
         raise NotImplementedError("async def get_struct is not implemented")
 
     async def _fbthrift__handler_get_struct(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_struct_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_args, args, protocol)
         value = await self.get_struct()
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_struct_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -427,9 +427,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def fib is not implemented")
 
     async def _fbthrift__handler_fib(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_fib_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_fib_args, args, protocol)
         value = await self.fib(args_struct.n,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_fib_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_fib_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -440,9 +440,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def unique_words is not implemented")
 
     async def _fbthrift__handler_unique_words(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_unique_words_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_unique_words_args, args, protocol)
         value = await self.unique_words(args_struct.words,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_unique_words_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_unique_words_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -453,22 +453,22 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def words_count is not implemented")
 
     async def _fbthrift__handler_words_count(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_words_count_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_words_count_args, args, protocol)
         value = await self.words_count(args_struct.words,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_words_count_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_words_count_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def set_enum(
             self,
-            in_enum: module.thrift_types.AnEnum
-        ) -> module.thrift_types.AnEnum:
+            in_enum: _fbthrift__module__thrift_types.AnEnum
+        ) -> _fbthrift__module__thrift_types.AnEnum:
         raise NotImplementedError("async def set_enum is not implemented")
 
     async def _fbthrift__handler_set_enum(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_set_enum_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_set_enum_args, args, protocol)
         value = await self.set_enum(args_struct.in_enum,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_set_enum_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_set_enum_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -480,9 +480,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def list_of_lists is not implemented")
 
     async def _fbthrift__handler_list_of_lists(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_list_of_lists_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_lists_args, args, protocol)
         value = await self.list_of_lists(args_struct.num_lists,args_struct.num_items,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_list_of_lists_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_lists_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -493,9 +493,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def word_character_frequency is not implemented")
 
     async def _fbthrift__handler_word_character_frequency(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_word_character_frequency_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_word_character_frequency_args, args, protocol)
         value = await self.word_character_frequency(args_struct.sentence,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_word_character_frequency_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_word_character_frequency_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -506,22 +506,22 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def list_of_sets is not implemented")
 
     async def _fbthrift__handler_list_of_sets(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_list_of_sets_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_sets_args, args, protocol)
         value = await self.list_of_sets(args_struct.some_words,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_list_of_sets_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_list_of_sets_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def nested_map_argument(
             self,
-            struct_map: _typing.Mapping[str, _typing.Sequence[module.thrift_types.SimpleStruct]]
+            struct_map: _typing.Mapping[str, _typing.Sequence[_fbthrift__module__thrift_types.SimpleStruct]]
         ) -> int:
         raise NotImplementedError("async def nested_map_argument is not implemented")
 
     async def _fbthrift__handler_nested_map_argument(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_nested_map_argument_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_nested_map_argument_args, args, protocol)
         value = await self.nested_map_argument(args_struct.struct_map,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_nested_map_argument_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_nested_map_argument_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -532,9 +532,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def make_sentence is not implemented")
 
     async def _fbthrift__handler_make_sentence(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_make_sentence_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_make_sentence_args, args, protocol)
         value = await self.make_sentence(args_struct.word_chars,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_make_sentence_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_make_sentence_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -545,9 +545,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def get_union is not implemented")
 
     async def _fbthrift__handler_get_union(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_union_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_union_args, args, protocol)
         value = await self.get_union(args_struct.sets,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_union_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_union_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -558,9 +558,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def get_keys is not implemented")
 
     async def _fbthrift__handler_get_keys(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_keys_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_keys_args, args, protocol)
         value = await self.get_keys(args_struct.string_map,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_keys_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_keys_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -571,9 +571,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def lookup_double is not implemented")
 
     async def _fbthrift__handler_lookup_double(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_lookup_double_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_lookup_double_args, args, protocol)
         value = await self.lookup_double(args_struct.key,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_lookup_double_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_lookup_double_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -584,9 +584,9 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def retrieve_binary is not implemented")
 
     async def _fbthrift__handler_retrieve_binary(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_retrieve_binary_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_retrieve_binary_args, args, protocol)
         value = await self.retrieve_binary(args_struct.something,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_retrieve_binary_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_retrieve_binary_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -597,47 +597,47 @@ class SimpleServiceInterface(
         raise NotImplementedError("async def contain_binary is not implemented")
 
     async def _fbthrift__handler_contain_binary(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_contain_binary_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_contain_binary_args, args, protocol)
         value = await self.contain_binary(args_struct.binaries,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_contain_binary_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_binary_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def contain_enum(
             self,
-            the_enum: _typing.Sequence[module.thrift_types.AnEnum]
-        ) -> _typing.Sequence[module.thrift_types.AnEnum]:
+            the_enum: _typing.Sequence[_fbthrift__module__thrift_types.AnEnum]
+        ) -> _typing.Sequence[_fbthrift__module__thrift_types.AnEnum]:
         raise NotImplementedError("async def contain_enum is not implemented")
 
     async def _fbthrift__handler_contain_enum(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_contain_enum_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_contain_enum_args, args, protocol)
         value = await self.contain_enum(args_struct.the_enum,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_contain_enum_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_contain_enum_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def get_binary_union_struct(
             self,
-            u: module.thrift_types.BinaryUnion
-        ) -> module.thrift_types.BinaryUnionStruct:
+            u: _fbthrift__module__thrift_types.BinaryUnion
+        ) -> _fbthrift__module__thrift_types.BinaryUnionStruct:
         raise NotImplementedError("async def get_binary_union_struct is not implemented")
 
     async def _fbthrift__handler_get_binary_union_struct(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_binary_union_struct_args, args, protocol)
         value = await self.get_binary_union_struct(args_struct.u,)
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_binary_union_struct_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
     async def get_struct_hidden(
             self
-        ) -> module.thrift_types.SimpleStruct:
+        ) -> _fbthrift__module__thrift_types.SimpleStruct:
         raise NotImplementedError("async def get_struct_hidden is not implemented")
 
     async def _fbthrift__handler_get_struct_hidden(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_SimpleService_get_struct_hidden_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_hidden_args, args, protocol)
         value = await self.get_struct_hidden()
-        return_struct = module.thrift_types._fbthrift_SimpleService_get_struct_hidden_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_SimpleService_get_struct_hidden_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 class DerivedServiceInterface(
@@ -675,9 +675,9 @@ SimpleServiceInterface,
         raise NotImplementedError("async def get_six is not implemented")
 
     async def _fbthrift__handler_get_six(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_DerivedService_get_six_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_DerivedService_get_six_args, args, protocol)
         value = await self.get_six()
-        return_struct = module.thrift_types._fbthrift_DerivedService_get_six_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_DerivedService_get_six_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 class RederivedServiceInterface(
@@ -715,8 +715,8 @@ DerivedServiceInterface,
         raise NotImplementedError("async def get_seven is not implemented")
 
     async def _fbthrift__handler_get_seven(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_types._fbthrift_RederivedService_get_seven_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_types._fbthrift_RederivedService_get_seven_args, args, protocol)
         value = await self.get_seven()
-        return_struct = module.thrift_types._fbthrift_RederivedService_get_seven_result(success=value)
+        return_struct = _fbthrift__module__thrift_types._fbthrift_RederivedService_get_seven_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

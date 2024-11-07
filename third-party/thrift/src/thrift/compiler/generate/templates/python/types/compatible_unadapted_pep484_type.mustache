@@ -31,7 +31,7 @@ thrift-python specific container types.
 }}{{#type:string?}}str{{/type:string?}}{{!
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}{{^type:iobuf?}}bytes{{/type:iobuf?}}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
-    }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
+    }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}_fbthrift_compatible_with_{{struct:py_name}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:list?}}{{> types/sequence }}[{{!
@@ -46,6 +46,6 @@ thrift-python specific container types.
 }}]{{/type:map?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{!
-  }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
+  }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}_fbthrift_compatible_with_{{enum:name}}{{!
 }}{{/type:enum}}

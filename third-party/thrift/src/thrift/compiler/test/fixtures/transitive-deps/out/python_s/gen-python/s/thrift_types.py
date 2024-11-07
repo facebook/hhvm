@@ -13,8 +13,10 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import b.thrift_types
+import b.thrift_types as _fbthrift__b__thrift_types
 
 import c.thrift_types
+import c.thrift_types as _fbthrift__c__thrift_types
 
 # This unfortunately has to be down here to prevent circular imports
 import s.thrift_metadata
@@ -40,7 +42,7 @@ class _fbthrift_TestService_test_result(metaclass=_fbthrift_python_types.StructM
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "ex",  # name
             "ex",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.StructTypeInfo(c.thrift_types.E),  # typeinfo
+            lambda: _fbthrift_python_types.StructTypeInfo(_fbthrift__c__thrift_types.E),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

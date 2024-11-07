@@ -14,7 +14,7 @@ import module.thrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-import foo.thrift_types
+import foo.thrift_types as _fbthrift__foo__thrift_types
 
 
 class _fbthrift_compatible_with_Fields:

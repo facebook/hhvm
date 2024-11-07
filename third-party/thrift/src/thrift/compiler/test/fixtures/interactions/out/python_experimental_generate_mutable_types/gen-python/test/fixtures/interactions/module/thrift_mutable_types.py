@@ -19,6 +19,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 import test.fixtures.another_interactions.shared.thrift_mutable_types
+import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types
 
 
 class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
@@ -667,7 +668,7 @@ class _fbthrift_InteractWithShared_do_some_similar_things_result(metaclass=_fbth
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -772,7 +773,7 @@ class _fbthrift_SharedInteraction_do_something_result(metaclass=_fbthrift_python
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "success",  # name
             "success", # name
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.another_interactions.shared.thrift_mutable_types.DoSomethingResult),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

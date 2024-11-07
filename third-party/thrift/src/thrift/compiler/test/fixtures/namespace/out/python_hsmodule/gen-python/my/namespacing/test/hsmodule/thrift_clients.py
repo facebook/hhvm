@@ -20,7 +20,7 @@ from thrift.python.client.omni_client import InteractionMethodPosition as _fbthr
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import python_module_root.my.namespacing.test.hsmodule.thrift_types
+import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_module_root__my__namespacing__test__hsmodule__thrift_types
 import python_module_root.my.namespacing.test.hsmodule.thrift_metadata
 
 class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestService.Sync"]):
@@ -63,9 +63,9 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
             _fbthrift_resp = await self._send_request(
                 "HsTestService",
                 "init",
-                python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_args(
+                python_module_root__my__namespacing__test__hsmodule__thrift_types._fbthrift_HsTestService_init_args(
                     int1=int1,),
-                python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_result,
+                python_module_root__my__namespacing__test__hsmodule__thrift_types._fbthrift_HsTestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="HsTestService",
                 rpc_options=rpc_options,
@@ -100,9 +100,9 @@ class HsTestService(_fbthrift_python_Client["HsTestService.Async", "HsTestServic
             _fbthrift_resp = self._send_request(
                 "HsTestService",
                 "init",
-                python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_args(
+                python_module_root__my__namespacing__test__hsmodule__thrift_types._fbthrift_HsTestService_init_args(
                     int1=int1,),
-                python_module_root.my.namespacing.test.hsmodule.thrift_types._fbthrift_HsTestService_init_result,
+                python_module_root__my__namespacing__test__hsmodule__thrift_types._fbthrift_HsTestService_init_result,
                 uri_or_name="HsTestService",
                 rpc_options=rpc_options,
             )

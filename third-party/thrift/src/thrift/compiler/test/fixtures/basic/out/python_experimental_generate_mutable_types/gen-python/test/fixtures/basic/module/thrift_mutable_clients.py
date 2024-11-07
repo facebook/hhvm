@@ -22,7 +22,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import test.fixtures.basic.module.thrift_mutable_types
+import test.fixtures.basic.module.thrift_mutable_types as _fbthrift__test__fixtures__basic__module__thrift_mutable_types
 import test.fixtures.basic.module.thrift_metadata
 
 class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"]):
@@ -64,8 +64,8 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
             _fbthrift_resp = await self._send_request(
                 "FooService",
                 "simple_rpc",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FooService_simple_rpc_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FooService_simple_rpc_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FooService_simple_rpc_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FooService_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/FooService",
                 rpc_options=rpc_options,
@@ -93,8 +93,8 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
             _fbthrift_resp = self._send_request(
                 "FooService",
                 "simple_rpc",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FooService_simple_rpc_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FooService_simple_rpc_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FooService_simple_rpc_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FooService_simple_rpc_result,
                 uri_or_name="test.dev/fixtures/basic/FooService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -137,13 +137,13 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
             int_parameter: int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> test.fixtures.basic.module.thrift_mutable_types.ReservedKeyword:
+        ) -> _fbthrift__test__fixtures__basic__module__thrift_mutable_types.ReservedKeyword:
             _fbthrift_resp = await self._send_request(
                 "FB303Service",
                 "simple_rpc",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FB303Service_simple_rpc_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FB303Service_simple_rpc_args(
                     int_parameter=int_parameter,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FB303Service_simple_rpc_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FB303Service_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/FB303Service",
                 rpc_options=rpc_options,
@@ -175,13 +175,13 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
             int_parameter: int,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> test.fixtures.basic.module.thrift_mutable_types.ReservedKeyword:
+        ) -> _fbthrift__test__fixtures__basic__module__thrift_mutable_types.ReservedKeyword:
             _fbthrift_resp = self._send_request(
                 "FB303Service",
                 "simple_rpc",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FB303Service_simple_rpc_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FB303Service_simple_rpc_args(
                     int_parameter=int_parameter,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_FB303Service_simple_rpc_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_FB303Service_simple_rpc_result,
                 uri_or_name="test.dev/fixtures/basic/FB303Service",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -234,8 +234,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "ping",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_ping_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_ping_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_ping_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_ping_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -250,8 +250,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "getRandomData",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getRandomData_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getRandomData_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getRandomData_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getRandomData_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -274,9 +274,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "sink",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_sink_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_sink_args(
                     sink=sink,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_sink_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_sink_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -293,10 +293,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "putDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_putDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_putDataById_args(
                     id=id,
                     data=data,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_putDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_putDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -312,9 +312,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "hasDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_hasDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_hasDataById_args(
                     id=id,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_hasDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_hasDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -337,9 +337,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "getDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getDataById_args(
                     id=id,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -362,9 +362,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "deleteDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_deleteDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_deleteDataById_args(
                     id=id,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_deleteDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_deleteDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Idempotent,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -381,7 +381,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "lobDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_lobDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_lobDataById_args(
                     id=id,
                     data=data,),
                 None,
@@ -399,8 +399,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "invalid_return_for_hack",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -422,8 +422,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "rpc_skipped_codegen",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
@@ -451,8 +451,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "ping",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_ping_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_ping_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_ping_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_ping_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -466,8 +466,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "getRandomData",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getRandomData_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getRandomData_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getRandomData_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getRandomData_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -489,9 +489,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "sink",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_sink_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_sink_args(
                     sink=sink,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_sink_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_sink_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -507,10 +507,10 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "putDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_putDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_putDataById_args(
                     id=id,
                     data=data,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_putDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_putDataById_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -525,9 +525,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "hasDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_hasDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_hasDataById_args(
                     id=id,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_hasDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_hasDataById_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -549,9 +549,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "getDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getDataById_args(
                     id=id,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_getDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_getDataById_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -573,9 +573,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "deleteDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_deleteDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_deleteDataById_args(
                     id=id,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_deleteDataById_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_deleteDataById_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -591,7 +591,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "lobDataById",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_lobDataById_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_lobDataById_args(
                     id=id,
                     data=data,),
                 None,
@@ -608,8 +608,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "invalid_return_for_hack",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_invalid_return_for_hack_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -630,8 +630,8 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "rpc_skipped_codegen",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_args(),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_args(),
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_MyService_rpc_skipped_codegen_result,
                 uri_or_name="test.dev/fixtures/basic/MyService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -678,9 +678,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
             _fbthrift_resp = await self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey0",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_args(
                     key=key,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/DbMixedStackArguments",
                 rpc_options=rpc_options,
@@ -703,9 +703,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
             _fbthrift_resp = await self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey1",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_args(
                     key=key,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="test.dev/fixtures/basic/DbMixedStackArguments",
                 rpc_options=rpc_options,
@@ -741,9 +741,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
             _fbthrift_resp = self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey0",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_args(
                     key=key,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
                 uri_or_name="test.dev/fixtures/basic/DbMixedStackArguments",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -765,9 +765,9 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
             _fbthrift_resp = self._send_request(
                 "DbMixedStackArguments",
                 "getDataByKey1",
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_args(
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_args(
                     key=key,),
-                test.fixtures.basic.module.thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
+                _fbthrift__test__fixtures__basic__module__thrift_mutable_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
                 uri_or_name="test.dev/fixtures/basic/DbMixedStackArguments",
                 rpc_options=rpc_options,
                 is_mutable_types=True,

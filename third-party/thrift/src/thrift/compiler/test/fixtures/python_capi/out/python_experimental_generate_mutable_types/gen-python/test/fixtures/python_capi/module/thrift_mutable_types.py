@@ -19,12 +19,16 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 import apache.thrift.type.id.thrift_mutable_types
+import apache.thrift.type.id.thrift_mutable_types as _fbthrift__apache__thrift__type__id__thrift_mutable_types
 
 import apache.thrift.type.schema.thrift_mutable_types
+import apache.thrift.type.schema.thrift_mutable_types as _fbthrift__apache__thrift__type__schema__thrift_mutable_types
 
 import test.fixtures.python_capi.serialized_dep.thrift_mutable_types
+import test.fixtures.python_capi.serialized_dep.thrift_mutable_types as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types
 
 import test.fixtures.python_capi.thrift_dep.thrift_mutable_types
+import test.fixtures.python_capi.thrift_dep.thrift_mutable_types as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types
 
 
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -600,7 +604,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "some_error",  # name
             "some_error",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_mutable_types.SomeError),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.SomeError),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1200,7 +1204,7 @@ class ComposeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "xenum",  # name
             "xenum",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_types.EnumTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_mutable_types.DepEnum),  # typeinfo
+            lambda: _fbthrift_python_types.EnumTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepEnum),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1211,7 +1215,7 @@ class ComposeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "xstruct",  # name
             "xstruct",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_mutable_types.DepStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1222,7 +1226,7 @@ class ComposeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "friends",  # name
             "friends",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.python_capi.thrift_dep.thrift_mutable_types.DepStruct)),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct)),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1233,7 +1237,7 @@ class ComposeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "serial_struct",  # name
             "serial_struct",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedStruct),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedStruct),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1244,7 +1248,7 @@ class ComposeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "serial_union",  # name
             "serial_union",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedUnion),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedUnion),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive
@@ -1255,7 +1259,7 @@ class ComposeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "serial_error",  # name
             "serial_error",  # python name (from @python.Name annotation)
-            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedError),  # typeinfo
+            lambda: _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedError),  # typeinfo
             None,  # default value
             None,  # adapter info
             False, # field type is primitive

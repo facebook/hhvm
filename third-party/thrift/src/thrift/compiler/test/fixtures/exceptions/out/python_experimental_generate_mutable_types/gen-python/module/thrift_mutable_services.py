@@ -16,7 +16,7 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import module.thrift_mutable_types
+import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
 import module.thrift_metadata
 
 class RaiserInterface(
@@ -57,9 +57,9 @@ class RaiserInterface(
         raise NotImplementedError("async def doBland is not implemented")
 
     async def _fbthrift__handler_doBland(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_Raiser_doBland_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doBland_args, args, protocol)
         value = await self.doBland()
-        return_struct = module.thrift_mutable_types._fbthrift_Raiser_doBland_result()
+        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doBland_result()
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -69,22 +69,22 @@ class RaiserInterface(
         raise NotImplementedError("async def doRaise is not implemented")
 
     async def _fbthrift__handler_doRaise(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_Raiser_doRaise_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_args, args, protocol)
         try:
             value = await self.doRaise()
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_doRaise_result()
-        except module.thrift_mutable_types.Banal as e:
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_doRaise_result(b=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_result()
+        except _fbthrift__module__thrift_mutable_types.Banal as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_result(b=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Banal', str(e), buf)
             raise exp
-        except module.thrift_mutable_types.Fiery as e:
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_doRaise_result(f=e)
+        except _fbthrift__module__thrift_mutable_types.Fiery as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_result(f=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Fiery', str(e), buf)
             raise exp
-        except module.thrift_mutable_types.Serious as e:
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_doRaise_result(s=e)
+        except _fbthrift__module__thrift_mutable_types.Serious as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_result(s=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Serious', str(e), buf)
             raise exp
@@ -97,9 +97,9 @@ class RaiserInterface(
         raise NotImplementedError("async def get200 is not implemented")
 
     async def _fbthrift__handler_get200(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_Raiser_get200_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get200_args, args, protocol)
         value = await self.get200()
-        return_struct = module.thrift_mutable_types._fbthrift_Raiser_get200_result(success=value)
+        return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get200_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
 
@@ -109,22 +109,22 @@ class RaiserInterface(
         raise NotImplementedError("async def get500 is not implemented")
 
     async def _fbthrift__handler_get500(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(module.thrift_mutable_types._fbthrift_Raiser_get500_args, args, protocol)
+        args_struct = deserialize(_fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_args, args, protocol)
         try:
             value = await self.get500()
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_get500_result(success=value)
-        except module.thrift_mutable_types.Fiery as e:
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_get500_result(f=e)
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_result(success=value)
+        except _fbthrift__module__thrift_mutable_types.Fiery as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_result(f=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Fiery', str(e), buf)
             raise exp
-        except module.thrift_mutable_types.Banal as e:
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_get500_result(b=e)
+        except _fbthrift__module__thrift_mutable_types.Banal as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_result(b=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Banal', str(e), buf)
             raise exp
-        except module.thrift_mutable_types.Serious as e:
-            return_struct = module.thrift_mutable_types._fbthrift_Raiser_get500_result(s=e)
+        except _fbthrift__module__thrift_mutable_types.Serious as e:
+            return_struct = _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_result(s=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('Serious', str(e), buf)
             raise exp

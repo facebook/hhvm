@@ -22,7 +22,7 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import module.thrift_mutable_types
+import module.thrift_mutable_types as _fbthrift__module__thrift_mutable_types
 import module.thrift_metadata
 
 class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
@@ -64,8 +64,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "Raiser",
                 "doBland",
-                module.thrift_mutable_types._fbthrift_Raiser_doBland_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_doBland_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doBland_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doBland_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
@@ -80,8 +80,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "Raiser",
                 "doRaise",
-                module.thrift_mutable_types._fbthrift_Raiser_doRaise_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_doRaise_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
@@ -102,8 +102,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "Raiser",
                 "get200",
-                module.thrift_mutable_types._fbthrift_Raiser_get200_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_get200_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get200_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get200_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
@@ -125,8 +125,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = await self._send_request(
                 "Raiser",
                 "get500",
-                module.thrift_mutable_types._fbthrift_Raiser_get500_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_get500_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
@@ -167,8 +167,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "doBland",
-                module.thrift_mutable_types._fbthrift_Raiser_doBland_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_doBland_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doBland_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doBland_result,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -182,8 +182,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "doRaise",
-                module.thrift_mutable_types._fbthrift_Raiser_doRaise_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_doRaise_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_doRaise_result,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -203,8 +203,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "get200",
-                module.thrift_mutable_types._fbthrift_Raiser_get200_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_get200_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get200_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get200_result,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -225,8 +225,8 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
             _fbthrift_resp = self._send_request(
                 "Raiser",
                 "get500",
-                module.thrift_mutable_types._fbthrift_Raiser_get500_args(),
-                module.thrift_mutable_types._fbthrift_Raiser_get500_result,
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_args(),
+                _fbthrift__module__thrift_mutable_types._fbthrift_Raiser_get500_result,
                 uri_or_name="Raiser",
                 rpc_options=rpc_options,
                 is_mutable_types=True,

@@ -15,7 +15,7 @@ import abc as _abc
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
-import apache.thrift.fixtures.types.included.thrift_abstract_types
+import apache.thrift.fixtures.types.included.thrift_abstract_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_abstract_types
 
 class has_bitwise_ops:
     pass

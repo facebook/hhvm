@@ -16,10 +16,10 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import s.thrift_types
+import s.thrift_types as _fbthrift__s__thrift_types
 import s.thrift_metadata
-import b.thrift_types
-import c.thrift_types
+import b.thrift_types as _fbthrift__b__thrift_types
+import c.thrift_types as _fbthrift__c__thrift_types
 
 class TestServiceInterface(
     ServiceInterface,
@@ -56,12 +56,12 @@ class TestServiceInterface(
         raise NotImplementedError("async def test is not implemented")
 
     async def _fbthrift__handler_test(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(s.thrift_types._fbthrift_TestService_test_args, args, protocol)
+        args_struct = deserialize(_fbthrift__s__thrift_types._fbthrift_TestService_test_args, args, protocol)
         try:
             value = await self.test()
-            return_struct = s.thrift_types._fbthrift_TestService_test_result()
-        except c.thrift_types.E as e:
-            return_struct = s.thrift_types._fbthrift_TestService_test_result(ex=e)
+            return_struct = _fbthrift__s__thrift_types._fbthrift_TestService_test_result()
+        except _fbthrift__c__thrift_types.E as e:
+            return_struct = _fbthrift__s__thrift_types._fbthrift_TestService_test_result(ex=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('E', str(e), buf)
             raise exp

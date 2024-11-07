@@ -22,9 +22,9 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import apache.thrift.fixtures.types.module.thrift_mutable_types
+import apache.thrift.fixtures.types.module.thrift_mutable_types as _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types
 import apache.thrift.fixtures.types.module.thrift_metadata
-import apache.thrift.fixtures.types.included.thrift_mutable_types
+import apache.thrift.fixtures.types.included.thrift_mutable_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_mutable_types
 
 class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync"]):
     @staticmethod
@@ -66,9 +66,9 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "bounce_map",
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_bounce_map_args(
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_bounce_map_args(
                     m=m,),
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_bounce_map_result,
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_bounce_map_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="apache.org/thrift/fixtures/types/SomeService",
                 rpc_options=rpc_options,
@@ -91,9 +91,9 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             _fbthrift_resp = await self._send_request(
                 "SomeService",
                 "binary_keyed_map",
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_args(
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_args(
                     r=r,),
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_result,
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="apache.org/thrift/fixtures/types/SomeService",
                 rpc_options=rpc_options,
@@ -129,9 +129,9 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "bounce_map",
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_bounce_map_args(
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_bounce_map_args(
                     m=m,),
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_bounce_map_result,
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_bounce_map_result,
                 uri_or_name="apache.org/thrift/fixtures/types/SomeService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,
@@ -153,9 +153,9 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
             _fbthrift_resp = self._send_request(
                 "SomeService",
                 "binary_keyed_map",
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_args(
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_args(
                     r=r,),
-                apache.thrift.fixtures.types.module.thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_result,
+                _fbthrift__apache__thrift__fixtures__types__module__thrift_mutable_types._fbthrift_SomeService_binary_keyed_map_result,
                 uri_or_name="apache.org/thrift/fixtures/types/SomeService",
                 rpc_options=rpc_options,
                 is_mutable_types=True,

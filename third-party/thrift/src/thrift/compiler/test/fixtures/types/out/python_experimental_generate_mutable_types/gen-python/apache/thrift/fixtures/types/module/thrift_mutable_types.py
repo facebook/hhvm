@@ -19,6 +19,7 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 import apache.thrift.fixtures.types.included.thrift_mutable_types
+import apache.thrift.fixtures.types.included.thrift_mutable_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_mutable_types
 
 
 class empty_struct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):

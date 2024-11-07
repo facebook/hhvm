@@ -20,10 +20,10 @@ from thrift.python.client.omni_client import InteractionMethodPosition as _fbthr
 from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import a.thrift_types
+import a.thrift_types as _fbthrift__a__thrift_types
 import a.thrift_metadata
-import b.thrift_types
-import c.thrift_types
+import b.thrift_types as _fbthrift__b__thrift_types
+import c.thrift_types as _fbthrift__c__thrift_types
 import three
 import two
 import one
@@ -66,12 +66,12 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> typeshed_one.AdapterOneType[b.thrift_types.B]:
+        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_types.B]:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "adapted_return",
-                a.thrift_types._fbthrift_MyService_adapted_return_args(),
-                a.thrift_types._fbthrift_MyService_adapted_return_result,
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_return_args(),
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_return_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
@@ -86,16 +86,16 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def adapted_param(
             self,
-            param: typeshed_two.AdapterTwoType[c.thrift_types.C2],
+            param: typeshed_two.AdapterTwoType[_fbthrift__c__thrift_types.C2],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = await self._send_request(
                 "MyService",
                 "adapted_param",
-                a.thrift_types._fbthrift_MyService_adapted_param_args(
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_param_args(
                     param=param,),
-                a.thrift_types._fbthrift_MyService_adapted_param_result,
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_param_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
@@ -118,12 +118,12 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
-        ) -> typeshed_one.AdapterOneType[b.thrift_types.B]:
+        ) -> typeshed_one.AdapterOneType[_fbthrift__b__thrift_types.B]:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "adapted_return",
-                a.thrift_types._fbthrift_MyService_adapted_return_args(),
-                a.thrift_types._fbthrift_MyService_adapted_return_result,
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_return_args(),
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_return_result,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
             )
@@ -137,16 +137,16 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def adapted_param(
             self,
-            param: typeshed_two.AdapterTwoType[c.thrift_types.C2],
+            param: typeshed_two.AdapterTwoType[_fbthrift__c__thrift_types.C2],
             *,
             rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> None:
             _fbthrift_resp = self._send_request(
                 "MyService",
                 "adapted_param",
-                a.thrift_types._fbthrift_MyService_adapted_param_args(
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_param_args(
                     param=param,),
-                a.thrift_types._fbthrift_MyService_adapted_param_result,
+                _fbthrift__a__thrift_types._fbthrift_MyService_adapted_param_result,
                 uri_or_name="MyService",
                 rpc_options=rpc_options,
             )

@@ -14,6 +14,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 import foo.thrift_types
+import foo.thrift_types as _fbthrift__foo__thrift_types
 
 
 @_fbthrift_abstract_types.Fields.register

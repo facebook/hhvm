@@ -27,11 +27,13 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
 import thrift.python.types as _fbthrift_python_types
 import folly.iobuf as _fbthrift_iobuf
 
-import test.fixtures.basic.module.thrift_types
+import test.fixtures.basic.module.thrift_types as _fbthrift__test__fixtures__basic__module__thrift_types
 
 
 
-class MyStructPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyStruct]):
+class MyStructPatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyStruct]
+):
     pass
 
     @property
@@ -56,24 +58,24 @@ class MyStructPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MySt
             _fbthrift_python_types.typeinfo_string)
     @property
     def MyDataField(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyDataItem,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyDataItem,
             MyDataItemPatch]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: MyDataItemPatch(patch),
             self._patch,
             3,
-            _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyDataItem))
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyDataItem))
     @property
     def myEnum(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyEnum,
-            test.fixtures.basic.module.thrift_types.MyEnum]:
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: patch.as_enum_patch(),
             self._patch,
             4,
-            _fbthrift_python_types.EnumTypeInfo(test.fixtures.basic.module.thrift_types.MyEnum))
+            _fbthrift_python_types.EnumTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyEnum))
     @property
     def oneway(self) -> OptionalFieldPatch[
             bool,
@@ -125,7 +127,9 @@ class MyStructPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MySt
             9,
             _fbthrift_python_types.typeinfo_string)
 
-class ContainersPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.Containers]):
+class ContainersPatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.Containers]
+):
     pass
 
     @property
@@ -159,43 +163,47 @@ class ContainersPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.Co
             3,
             _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_i64))
 
-class MyDataItemPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyDataItem]):
+class MyDataItemPatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyDataItem]
+):
     pass
 
 
-class MyUnionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyUnion]):
+class MyUnionPatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyUnion]
+):
     pass
 
     @property
     def myEnum(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyEnum,
-            test.fixtures.basic.module.thrift_types.MyEnum]:
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: patch.as_enum_patch(),
             self._patch,
             1,
-            _fbthrift_python_types.EnumTypeInfo(test.fixtures.basic.module.thrift_types.MyEnum))
+            _fbthrift_python_types.EnumTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyEnum))
     @property
     def myStruct(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyStruct,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyStruct,
             MyStructPatch]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             2,
-            _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyStruct))
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyStruct))
     @property
     def myDataItem(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyDataItem,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyDataItem,
             MyDataItemPatch]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: MyDataItemPatch(patch),
             self._patch,
             3,
-            _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyDataItem))
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyDataItem))
     @property
     def floatSet(self) -> OptionalFieldPatch[
             _typing.AbstractSet[float],
@@ -207,7 +215,9 @@ class MyUnionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyUni
             4,
             _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_float))
 
-class MyExceptionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyException]):
+class MyExceptionPatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyException]
+):
     pass
 
     @property
@@ -232,26 +242,28 @@ class MyExceptionPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.M
             _fbthrift_python_types.typeinfo_string)
     @property
     def myStruct(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyStruct,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyStruct,
             MyStructPatch]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             3,
-            _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyStruct))
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyStruct))
     @property
     def myUnion(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyUnion,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyUnion,
             MyUnionPatch]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: MyUnionPatch(patch),
             self._patch,
             4,
-            _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyUnion))
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyUnion))
 
-class MyExceptionWithMessagePatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.MyExceptionWithMessage]):
+class MyExceptionWithMessagePatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyExceptionWithMessage]
+):
     pass
 
     @property
@@ -276,26 +288,28 @@ class MyExceptionWithMessagePatch(BaseStructPatch[test.fixtures.basic.module.thr
             _fbthrift_python_types.typeinfo_string)
     @property
     def myStruct(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyStruct,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyStruct,
             MyStructPatch]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             3,
-            _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyStruct))
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyStruct))
     @property
     def myUnion(self) -> OptionalFieldPatch[
-            test.fixtures.basic.module.thrift_types.MyUnion,
+            _fbthrift__test__fixtures__basic__module__thrift_types.MyUnion,
             MyUnionPatch]:
 
         return OptionalFieldPatch(
             lambda patch, type_info: MyUnionPatch(patch),
             self._patch,
             4,
-            _fbthrift_python_types.StructTypeInfo(test.fixtures.basic.module.thrift_types.MyUnion))
+            _fbthrift_python_types.StructTypeInfo(_fbthrift__test__fixtures__basic__module__thrift_types.MyUnion))
 
-class ReservedKeywordPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.ReservedKeyword]):
+class ReservedKeywordPatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.ReservedKeyword]
+):
     pass
 
     @property
@@ -309,7 +323,9 @@ class ReservedKeywordPatch(BaseStructPatch[test.fixtures.basic.module.thrift_typ
             1,
             _fbthrift_python_types.typeinfo_i32)
 
-class UnionToBeRenamedPatch(BaseStructPatch[test.fixtures.basic.module.thrift_types.UnionToBeRenamed]):
+class UnionToBeRenamedPatch(
+    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.UnionToBeRenamed]
+):
     pass
 
     @property

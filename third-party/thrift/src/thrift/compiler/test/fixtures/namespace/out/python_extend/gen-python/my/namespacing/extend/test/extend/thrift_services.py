@@ -16,10 +16,10 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import python_module_root.my.namespacing.extend.test.extend.thrift_types
+import python_module_root.my.namespacing.extend.test.extend.thrift_types as python_module_root__my__namespacing__extend__test__extend__thrift_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_metadata
 import python_module_root.my.namespacing.test.hsmodule.thrift_services
-import python_module_root.my.namespacing.test.hsmodule.thrift_types
+import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_module_root__my__namespacing__test__hsmodule__thrift_types
 
 class ExtendTestServiceInterface(
     python_module_root.my.namespacing.test.hsmodule.thrift_services.HsTestServiceInterface,
@@ -52,13 +52,13 @@ class ExtendTestServiceInterface(
 
     async def check(
             self,
-            struct1: python_module_root.my.namespacing.test.hsmodule.thrift_types.HsFoo
+            struct1: python_module_root__my__namespacing__test__hsmodule__thrift_types.HsFoo
         ) -> bool:
         raise NotImplementedError("async def check is not implemented")
 
     async def _fbthrift__handler_check(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_args, args, protocol)
+        args_struct = deserialize(python_module_root__my__namespacing__extend__test__extend__thrift_types._fbthrift_ExtendTestService_check_args, args, protocol)
         value = await self.check(args_struct.struct1,)
-        return_struct = python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_result(success=value)
+        return_struct = python_module_root__my__namespacing__extend__test__extend__thrift_types._fbthrift_ExtendTestService_check_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

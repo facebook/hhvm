@@ -43,6 +43,6 @@ This is for pep 484 typing for thrift patch types
 }}]{{/type:map?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{!
-  }}{{#type:need_module_path?}}{{type:module_path}}.{{/type:need_module_path?}}{{!
+  }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{enum:name}}{{!
 }}{{/type:enum}}

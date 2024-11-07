@@ -34,14 +34,14 @@ from {{program:base_library_package}}.mutable_serializer import serialize_iobuf,
 {{/program:generate_mutable_types}}
 from {{program:base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
 
-import {{program:module_path}}.{{>types/types_import_path}}
+import {{program:module_path}}.{{>types/types_import_path}} as {{program:module_mangle}}__{{> types/types_import_path}}
 import {{program:module_path}}.thrift_metadata
 {{#program:include_namespaces}}
 {{#has_services?}}
 import {{included_module_path}}.thrift_services
 {{/has_services?}}
 {{#has_types?}}
-import {{included_module_path}}.{{>types/types_import_path}}
+import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
 {{#program:adapter_modules}}
@@ -102,7 +102,7 @@ class {{service:name}}Interface(
             async for item in stream_generator:
                 yield serialize_iobuf({{> types/function_second_return_type}}(success=item), protocol)
         {{#function:stream_exceptions}}{{#field:type}}
-        except {{type:module_path}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
+        except {{type:module_mangle}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
             return_struct = {{> types/function_second_return_type}}({{field:py_name}}=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('{{type:py3_namespace}}{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}}', str(e), buf)
@@ -124,7 +124,7 @@ class {{service:name}}Interface(
         try:
             {{> services/get_handler_result }}
         {{#function:exceptions}}{{#field:type}}
-        except {{type:module_path}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
+        except {{type:module_mangle}}.{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}} as e:
             return_struct = {{> types/function_return_type}}({{field:py_name}}=e)
             buf = serialize_iobuf(return_struct, protocol)
             exp = PythonUserException('{{type:py3_namespace}}{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}}', str(e), buf)

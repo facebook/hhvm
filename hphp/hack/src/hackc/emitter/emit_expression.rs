@@ -5921,12 +5921,15 @@ fn emit_array_get_fixed(
     Ok(InstrSeq::gather(index_exprs))
 }
 
+/// List and shape destructuring are similar, except that list is indexed by ints, and shapes by
+/// ShapeFieldNames. Use VecDictIndex to unify their treatment.
 #[derive(Clone)]
 pub enum VecDictIndex<'a> {
     V(isize),
     D(&'a ast_defs::ShapeFieldName),
 }
 
+/// Pull the subexpressions out of a list or shape lvalue, and pair them with their index
 impl<'a> VecDictIndex<'a> {
     pub fn add_indices_to_lval_exp(expr: &'a ast::Expr_) -> Vec<(VecDictIndex<'a>, &'a ast::Expr)> {
         match expr {
@@ -5943,6 +5946,10 @@ impl<'a> VecDictIndex<'a> {
         }
     }
 
+    /// Build a MemberKey to access the corresponding field, e.g., for use with dim or member
+    /// For a shape field name, first try to resolve to a constant. If it isn't, then also return
+    /// the expression to load the index onto the stack and generate an EC MemberKey. The
+    /// stack_count parameter tells us how far back the index will be on the stack.
     pub fn index_to_mem_key(
         &self,
         e: &mut Emitter<'_>,

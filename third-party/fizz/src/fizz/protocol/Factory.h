@@ -97,5 +97,7 @@ class Factory {
    * Should not be overridden *unless* for testing.
    */
   virtual std::shared_ptr<Cert> makeIdentityOnlyCert(std::string ident) const;
+
+  Buf makeRandomIOBuf(size_t size) const;
 };
 } // namespace fizz

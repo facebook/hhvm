@@ -50,4 +50,13 @@ std::unique_ptr<KeyDerivation> Factory::makeKeyDeriver(
 std::shared_ptr<Cert> Factory::makeIdentityOnlyCert(std::string ident) const {
   return std::make_shared<IdentityCert>(std::move(ident));
 }
+
+Buf Factory::makeRandomIOBuf(size_t size) const {
+  auto buf = folly::IOBuf::create(size);
+  if (size > 0) {
+    makeRandomBytes(buf->writableData(), size);
+    buf->append(size);
+  }
+  return buf;
+}
 } // namespace fizz

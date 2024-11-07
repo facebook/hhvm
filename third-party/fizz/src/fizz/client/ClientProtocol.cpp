@@ -793,17 +793,6 @@ static ClientHello constructEncryptedClientHello(
   return chloOuter;
 }
 
-static std::unique_ptr<folly::IOBuf> randomIOBuf(
-    const Factory& factory,
-    size_t count) {
-  auto buf = folly::IOBuf::create(count);
-  if (count > 0) {
-    factory.makeRandomBytes(buf->writableData(), count);
-    buf->append(count);
-  }
-  return buf;
-}
-
 Actions
 EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     const State& /*state*/,
@@ -846,7 +835,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   Buf legacySessionId;
   if (context->getCompatibilityMode()) {
     constexpr size_t kRandomSize = Random().size();
-    legacySessionId = randomIOBuf(*context->getFactory(), kRandomSize);
+    legacySessionId = context->getFactory()->makeRandomIOBuf(kRandomSize);
   } else {
     legacySessionId = folly::IOBuf::create(0);
   }

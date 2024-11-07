@@ -106,14 +106,14 @@ struct parser_scan_window {
   }
   [[nodiscard]] bool empty() const { return start == head; }
 
-  [[nodiscard]] parser_scan_window with_start(cursor start_2) const {
-    assert(start_2 <= head);
-    return parser_scan_window(start_2, head, end);
+  [[nodiscard]] parser_scan_window with_start(cursor new_start) const {
+    assert(new_start <= head);
+    return parser_scan_window(new_start, head, end);
   }
-  [[nodiscard]] parser_scan_window with_head(cursor head_2) const {
-    assert(start <= head_2);
-    assert(head_2 < end);
-    return parser_scan_window(start, head_2, end);
+  [[nodiscard]] parser_scan_window with_head(cursor new_head) const {
+    assert(start <= new_head);
+    assert(new_head < end);
+    return parser_scan_window(start, new_head, end);
   }
 
   source_location start_location() const { return start->range.begin; }

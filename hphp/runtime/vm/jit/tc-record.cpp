@@ -48,6 +48,8 @@
 
 TRACE_SET_MOD(mcg);
 
+extern "C" __attribute__((weak)) int _roar_upcall_getWarmupStatus();
+
 namespace HPHP::jit::tc {
 
 void recordGdbTranslation(SrcKey sk, const CodeBlock& cb,
@@ -549,6 +551,16 @@ std::string warmupStatusString() {
       }
     }
   }
+
+  // If we are running with ROAR, we also should wait for PGO/CSPGO to be
+  // complete before reporting warmed up.
+  if (status_str.empty() && _roar_upcall_getWarmupStatus) {
+    int roar_warmup_status = _roar_upcall_getWarmupStatus();
+    if (roar_warmup_status != 0) {
+      status_str = "Waiting on ROAR warmup.\n";
+    }
+  }
+
   // Empty string means "warmed up".
   return status_str;
 }

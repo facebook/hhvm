@@ -906,6 +906,7 @@ TEST(DynamicPatchTest, AnyPatch) {
 // * If we copied the assign field, the address of the first element should be
 //   different.
 struct CheckAssign {
+  void assign(auto&&) {}
   void assign(detail::Badge, const auto& v) {
     EXPECT_EQ(v.size(), 100);
     // Check whether the address of the first element is expected.
@@ -919,6 +920,12 @@ struct CheckAssign {
   void put(auto&&...) {}
   void patchIfSet(auto&&...) {}
   void patchByKey(auto&&...) {}
+  void patchIfTypeIs(auto&&...) {}
+  void ensureAny(auto&&...) {}
+  void invert() {}
+  void prepend(auto&&...) {}
+  void append(auto&&...) {}
+
   void ensure(auto&&...) {}
   const void* expected;
 };
@@ -955,6 +962,7 @@ void testMergeMovedPatch(T t) {
           [&](const auto&) {
             folly::throw_exception<std::runtime_error>("not reachable.");
           }));
+  dp.customVisit(badge, checkAssign);
 }
 
 TEST(DynamicPatchTest, MergeMovedListPatch) {

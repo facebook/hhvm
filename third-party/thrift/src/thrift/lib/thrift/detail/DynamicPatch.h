@@ -65,6 +65,13 @@ template <typename T>
 constexpr static bool has_merge_with_badge_v =
     folly::is_detected_v<detect_merge_with_badge, T>;
 
+template <typename T>
+using detect_custom_visit_with_badge = decltype(std::declval<T>().customVisit(
+    std::declval<Badge>(), std::declval<T>));
+template <typename T>
+constexpr static bool has_custom_visit_with_badge_v =
+    folly::is_detected_v<detect_custom_visit_with_badge, T>;
+
 template <typename T, typename U>
 using if_same_type_after_remove_cvref = std::enable_if_t<
     std::is_same_v<folly::remove_cvref_t<T>, folly::remove_cvref_t<U>>>;
@@ -582,9 +589,25 @@ class DynamicPatch {
         std::forward<Visitor>(visitor), *std::forward<Self>(self).patch_);
   }
 
+  template <class Self, class Visitor>
+  static void customVisitImpl(Self&& self, detail::Badge badge, Visitor&& v) {
+    std::forward<Self>(self).visitPatch(badge, [&](auto&& patch) {
+      using PatchType = folly::remove_cvref_t<decltype(patch)>;
+      if constexpr (detail::has_custom_visit_with_badge_v<PatchType>) {
+        std::forward<PatchType>(patch).customVisit(
+            badge, std::forward<Visitor>(v));
+      } else {
+        std::forward<PatchType>(patch).customVisit(std::forward<Visitor>(v));
+      }
+    });
+  }
+
  public:
   FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
       visitPatch, visitPatchImpl);
+
+  FOLLY_FOR_EACH_THIS_OVERLOAD_IN_CLASS_BODY_DELEGATE(
+      customVisit, customVisitImpl);
 
  private:
   using Patch = std::variant<

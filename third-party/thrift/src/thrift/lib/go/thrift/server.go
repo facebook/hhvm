@@ -111,14 +111,22 @@ var tooBusyResponse ApplicationException = NewApplicationException(
 	"server is too busy",
 )
 
-func (s *server) serve(ctx context.Context) error {
+// ServeContext enters the accept loop and processes requests.
+func (s *server) ServeContext(ctx context.Context) error {
+	go func() {
+		<-ctx.Done()
+		s.listener.Close()
+		// at least wait for our workers to clock out?
+		if s.workCh != nil {
+			close(s.workCh)
+		}
+		// currently not waiting for connection goroutines or goroutine per request threads.
+		s.wg.Wait()
+		return
+	}()
 	// add self
 	s.wg.Add(1)
 	defer s.wg.Done()
-
-	if s.listener == nil {
-		return fmt.Errorf("ServeContext() called without Listen()")
-	}
 
 	if s.pipeliningEnabled && s.numWorkers != GoroutinePerRequest {
 		// setup work queue for pipelining
@@ -149,32 +157,6 @@ func (s *server) acceptLoop(ctx context.Context) error {
 		ctx = s.connContext(ctx, conn)
 		go s.processRequests(ctx, conn)
 	}
-}
-
-// ServeContext enters the accept loop and processes requests.
-func (s *server) ServeContext(ctx context.Context) error {
-	go func() {
-		<-ctx.Done()
-		s.stop()
-	}()
-	return s.serve(ctx)
-}
-
-func (s *server) stop() error {
-	if s.listener == nil {
-		return fmt.Errorf("not listening")
-	}
-	if err := s.listener.Close(); err != nil {
-		return err
-	}
-
-	// at least wait for our workers to clock out?
-	if s.workCh != nil {
-		close(s.workCh)
-	}
-	// currently not waiting for connection goroutines or goroutine per request threads.
-	s.wg.Wait()
-	return nil
 }
 
 // used to recover from any application panics, and count accordingly.

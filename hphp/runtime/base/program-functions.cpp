@@ -111,6 +111,7 @@
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hardware-counter.h"
+#include "hphp/util/hugetlb.h"
 #include "hphp/util/kernel-version.h"
 #include "hphp/util/light-process.h"
 #include "hphp/util/managed-arena.h"
@@ -863,21 +864,17 @@ hugifyMemcpy(uint64_t* dst, uint64_t* src, size_t sz) {
   }
 }
 
-static void
+static bool
 NEVER_INLINE AT_END_OF_TEXT ALIGN_HUGE_PAGE OPTIMIZE_2
 EXTERNALLY_VISIBLE
 hugifyText(char* from, char* to) {
 #if !FOLLY_SANITIZE && defined MADV_HUGEPAGE
   if (from > to || (to - from) < sizeof(uint64_t)) {
-    // This shouldn't happen if HHVM is behaving correctly (I think),
-    // but if it does then there is nothing to do and we should bail
-    // out early because the call to wordcpy() below can't handle
-    // zero size or negative sizes.
-    return;
+    return false;
   }
+  size_t sz = to - from;
 
 #ifdef __x86_64__
-  size_t sz = to - from;
   auto const hasKernelSupport = [] () -> bool {
     KernelVersion version;
     if (version.m_major < 5) return false;
@@ -892,41 +889,108 @@ hugifyText(char* from, char* to) {
     // fails to find huge pages for us.
     munlock(from, sz);
     madvise(from, sz, MADV_HUGEPAGE);
-    std::stringstream ss;
-    ss << "Mapped text section onto THP pagecache from " <<
-      std::hex << (uint64_t*)from << " to " << (uint64_t*)to;
-    Logger::Info(ss.str());
-    return;
+    Logger::FInfo("Mapped text section onto THP pagecache from {} to {}.",
+                  (uint64_t*)from, (uint64_t*)to);
+    return true;
   }
-
-  void* mem = malloc(sz);
-  memcpy(mem, from, sz);
-
-  // This maps out a portion of our executable. We need to be very careful about
-  // what we do until we replace the original code
-  mmap(from, sz,
-       PROT_READ | PROT_WRITE | PROT_EXEC,
-       MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
-       -1, 0);
-  // This is in glibc, which isn't a problem, except for the trampoline code in
-  // .plt, which we dealt with in the linker script
-  madvise(from, sz, MADV_HUGEPAGE);
-  // Don't use memcpy because its probably one of the functions thats been
-  // mapped out. Needs the attribute((optimize("2")) to prevent g++ from turning
-  // this back into memcpy(!)
-  hugifyMemcpy((uint64_t*)from, (uint64_t*)mem, sz);
-  mprotect(from, sz, PROT_READ | PROT_EXEC);
-  free(mem);
-  mlock(from, to - from);
-  Debug::DebugInfo::setPidMapOverlay(from, to);
-  std::stringstream ss;
-  ss << "Mapped text section onto huge pages from " <<
-      std::hex << (uint64_t*)from << " to " << (uint64_t*)to;
-  Logger::Info(ss.str());
-#elif defined(__aarch64__)
-  // TODO: we cannot use THP on aarch64, use hugetlb
 #endif
+
+  // We will try to get the hot text in [from, to) on 2M hugetlb pages in 3
+  // steps.
+  // Step 1: get some 2M hugetlb pages, but don't overwrite the hot text yet.
+  // Step 2: copy content of hot text to the hugetlb pages.
+  // Step 3: use `mremap()` to replace [from, to) with the hugetlb pages that
+  // already contain the original content.
+  //
+  // This approach has the advantage that the hot range always contains the
+  // right sequences of instructions (except when the kernel is doing mremap,
+  // which isn't visible in user space as we only have a single thread running
+  // here), so we don't have to worry about problems such as unavailability of
+  // memcpy.
+  HugePageInfo info = get_huge2m_info();
+  if (info.free_hugepages * size2m < sz) {
+    Logger::Warning("Insufficient hugetlb reservation for hot text.");
+    return false;
+  }
+  auto tempPages = mmap(nullptr,
+                        sz + size2m,   // extra size for alignment
+                        PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  if (tempPages == MAP_FAILED) {
+    perror("Failed to create temporary mapping");
+    return false;
+  }
+  // An extra copy of the hot text, just in case the kernel messes things up
+  // when manipulating the mappings.
+  auto backup = static_cast<char*>(malloc(sz));
+  memcpy(backup, from, sz);
+  SCOPE_EXIT {
+    munmap(tempPages, sz);
+    free(backup);
+    Debug::DebugInfo::setPidMapOverlay(from, to);
+  };
+  auto aligned = static_cast<char*>(ru<size2m>(tempPages));
+  auto const requestedPages = sz / size2m;
+  // Now map some hugetlb pages starting at `aligned`.
+  auto const actualPages = remap_interleaved_2m_pages(aligned, requestedPages);
+  if (actualPages < requestedPages) {
+    Logger::Warning("Insufficient hugetlb reservation for hot text.");
+    return false;
+  }
+  memcpy(aligned, from, sz);
+  mprotect(aligned, sz, PROT_READ | PROT_EXEC);
+  // We might have done mlock() when obtaining hugetlb pages, so unlock before
+  // moving the mapping.
+  munlock(aligned, sz);
+  // Replace the original mapping one page at a time using mremap(), which has
+  // the limitation of only handling one mapping at a time.
+  for (size_t offset = 0; offset < sz; offset += size2m) {
+    if (MAP_FAILED == mremap(aligned + offset, size2m, size2m,
+                             MREMAP_MAYMOVE | MREMAP_FIXED,
+                             from + offset)) {
+      perror("mremap() failed");
+      // I don't know why mremap() would fail here. If it does fail, the kernel
+      // should not change existing mapping. However, we don't want to rely on
+      // the kernel doing the right thing. Check and restore the pages from
+      // backup if needed.
+      bool needsRestoration = false;
+      unsigned char status[size2m / size4k];
+      if (mincore(from + offset, size2m, status) == -1) {
+        // The range now contains unmapped memory, overwrite the mapping and
+        // restore from backup.
+        needsRestoration = true;
+      } else {
+        needsRestoration = memcmp(from + offset, backup + offset, size2m);
+      }
+      if (needsRestoration) {
+        void* restored = mmap(from + offset, size2m,
+                              PROT_READ | PROT_WRITE,
+                              MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED,
+                              -1, 0);
+        if (restored != from + offset) {
+          // Either MAP_FAILED, or maybe MAP_FIXED doesn't work. At this point,
+          // there is not much we can do. The process will likely crash soon.
+          perror("mmap() failed when recovering hot text mapping");
+          return false;
+        }
+        hugifyMemcpy((uint64_t*)(from + offset), (uint64_t*)(backup + offset), size2m);
+        mprotect(from + offset, size2m, PROT_READ | PROT_EXEC);
+      }
+      if (offset > size2m) {
+        Logger::FWarning("Mapped text section onto hugetlb pages from {} to {},"
+                         "which is smaller than the intended size of {} bytes",
+                         (uint64_t*)from, (uint64_t*)(from + offset - size2m),
+                         sz);
+      } else {
+        Logger::FWarning("Unable to get any page on hugetlb pages");
+      }
+      return false;
+    }
+  }
+  Logger::FInfo("Mapped text section onto hugetlb pages from {} to {}",
+                (uint64_t*)from, (uint64_t*)to);
+  return true;
 #endif
+  return false;
 }
 
 static void pagein_self(void) {
@@ -1042,27 +1106,25 @@ static void pagein_self(void) {
       auto endPtr = (char*)end;
       auto hotStart = (char*)__hot_start;
       auto hotEnd = (char*)__hot_end;
-      constexpr size_t hugePageBytes = 2L * 1024 * 1024;
 
-      if (mlock(beginPtr, end - begin) == 0) {
-        if (try_map_huge && beginPtr <= hotStart && hotEnd <= endPtr) {
-          char* from = hotStart - ((intptr_t)hotStart & (hugePageBytes - 1));
-          char* to = hotEnd + (hugePageBytes - 1);
-          to -= (intptr_t)to & (hugePageBytes - 1);
-          const size_t maxHugeHotTextBytes =
-            Cfg::Eval::MaxHotTextHugePages * hugePageBytes;
-          if (to - from >  maxHugeHotTextBytes) {
-            to = from + maxHugeHotTextBytes;
-          }
-          // Check that hugifyText() does not start in hot text.
-          if (to <= (void*)hugifyText || from > (void*)hugifyText) {
-            mapped_huge = true;
-            hugifyText(from, to);
-          }
+      if (try_map_huge && beginPtr <= hotStart && hotEnd <= endPtr) {
+        char* from = rd<size2m>(hotStart);
+        if (from < beginPtr) from += size2m;
+        char* to = ru<size2m>(hotEnd);
+        if (to > endPtr) to -= size2m;
+        if (to <= from) continue;
+        const size_t maxHugeHotTextBytes =
+          Cfg::Eval::MaxHotTextHugePages * size2m;
+        if (to - from >  maxHugeHotTextBytes) {
+          to = from + maxHugeHotTextBytes;
         }
-        if (!Cfg::Server::LockCodeMemory) {
-          munlock(beginPtr, end - begin);
+        // Check that hugifyText() does not start in hot text.
+        if (to <= (void*)hugifyText || from > (void*)hugifyText) {
+          mapped_huge |= hugifyText(from, to);
         }
+      }
+      if (Cfg::Server::LockCodeMemory) {
+        mlock(beginPtr, end - begin);
       }
     }
   }

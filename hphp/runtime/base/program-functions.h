@@ -29,11 +29,6 @@ namespace HPHP {
 struct Transport;
 struct Unit;
 
-extern "C" {
-void __attribute__((__weak__)) __hot_start();
-void __attribute__((__weak__)) __hot_end();
-}
-
 /**
  * Main entry point of the entire program.
  */
@@ -165,4 +160,9 @@ struct HphpSessionAndThread {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+}
+
+extern "C" {
+void __attribute__((__weak__)) __hot_start();
+void __attribute__((__weak__)) __hot_end();
 }

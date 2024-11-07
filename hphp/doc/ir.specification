@@ -620,13 +620,16 @@ To string conversions:
 
   Profile that S0 has been used as the RHS of an instance check.
 
-| InstanceOf, D(Bool), S(Cls) S(Cls|Nullptr), NF
+| InstanceOf<canCheckVtable>, D(Bool), S(Cls) S(Cls|Nullptr), NF
 
   Sets D based on whether S0 is a descendant of the class, interface, or trait
   in S1. (Note that this is always false for a trait). S1 may be null at
   runtime if the class is not defined.
 
-| InstanceOfIface, D(Bool), S(Cls) CStr, NF
+  canCheckVtable signals that this opcode may be simplified to
+  InstanceOfIfaceVtable, which we allow when S0 was fetched from an object.
+
+| InstanceOfIface<canCheckVtable>, D(Bool), S(Cls) CStr, NF
 
   Fast path for interface checks. Sets D based on whether S0 implements S1, but
   S1 must be a known interface.

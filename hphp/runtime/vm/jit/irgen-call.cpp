@@ -898,7 +898,7 @@ inline SSATmp* ldCtxForClsMethod(IRGS& env,
       auto thizCls = gen(env, LdObjClass, thiz);
       auto flag = exact ?
         gen(env, ExtendsClass, ExtendsClassData{ cls, true }, thizCls) :
-        gen(env, InstanceOf, thizCls, callCtx);
+        gen(env, InstanceOf, InstanceOfData { true }, thizCls, callCtx);
       gen(env, JmpZero, taken, flag);
     },
     [&] {

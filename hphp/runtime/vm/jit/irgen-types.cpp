@@ -118,7 +118,8 @@ SSATmp* implInstanceCheck(IRGS& env, SSATmp* src, const StringData* className,
                  objClass);
     }
 
-    return gen(env, InstanceOfIface, objClass, ssaClassName);
+    auto const extra = InstanceOfData { true };
+    return gen(env, InstanceOfIface, extra, objClass, ssaClassName);
   }
 
   // If knownCls isn't a normal class, our caller may want to do something
@@ -695,7 +696,11 @@ SSATmp* implInstanceOfD(IRGS& env, SSATmp* src, const StringData* className) {
     return isInstance;
   }
 
-  return gen(env, InstanceOf, gen(env, LdObjClass, src), checkCls);
+  return gen(env,
+             InstanceOf,
+             InstanceOfData { true },
+             gen(env, LdObjClass, src),
+             checkCls);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -713,7 +718,8 @@ void emitInstanceOf(IRGS& env) {
   if (t1->isA(TObj) && t2->isA(TObj)) {
     auto const c2 = gen(env, LdObjClass, t2);
     auto const c1 = gen(env, LdObjClass, t1);
-    push(env, gen(env, InstanceOf, c2, c1));
+    auto const extra = InstanceOfData { true };
+    push(env, gen(env, InstanceOf, extra, c2, c1));
     decRef(env, t2, DecRefProfileId::InstanceOfSrc2);
     decRef(env, t1, DecRefProfileId::InstanceOfSrc1);
     return;
@@ -724,7 +730,8 @@ void emitInstanceOf(IRGS& env) {
   if (t2->isA(TObj)) {
     auto const c1 = gen(env, LookupCls, t1);
     auto const c2  = gen(env, LdObjClass, t2);
-    push(env, gen(env, InstanceOf, c2, c1));
+    auto const extra = InstanceOfData { true };
+    push(env, gen(env, InstanceOf, extra, c2, c1));
     decRef(env, t2, DecRefProfileId::InstanceOfSrc2);
     decRef(env, t1, DecRefProfileId::InstanceOfSrc1);
     return;
@@ -775,7 +782,7 @@ void emitIsLateBoundCls(IRGS& env) {
   if (obj->isA(TObj)) {
     auto const rhs = ldCtxCls(env);
     auto const lhs  = gen(env, LdObjClass, obj);
-    push(env, gen(env, InstanceOf, lhs, rhs));
+    push(env, gen(env, InstanceOf, InstanceOfData { true }, lhs, rhs));
   } else if (!obj->type().maybe(TObj)) {
     push(env, cns(env, false));
   } else {

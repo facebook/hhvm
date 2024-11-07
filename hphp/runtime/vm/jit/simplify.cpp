@@ -1802,7 +1802,8 @@ SSATmp* simplifyCGetPropQ(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* instanceOfImpl(State& env, SSATmp* ssatmp1, ClassSpec spec2) {
+SSATmp* instanceOfImpl(State& env, SSATmp* ssatmp1, ClassSpec spec2,
+                       bool canCheckVtable) {
   assertx(ssatmp1->type() <= TCls);
   if (!spec2) return nullptr;
   auto const cls2 = spec2.cls();
@@ -1824,7 +1825,8 @@ SSATmp* instanceOfImpl(State& env, SSATmp* ssatmp1, ClassSpec spec2) {
   }
 
   // If spec2 is an interface and we've assigned it a vtable slot, use that.
-  if (spec2.exact() && isInterface(cls2) && Cfg::Repo::Authoritative) {
+  if (canCheckVtable && spec2.exact() && isInterface(cls2)
+      && Cfg::Repo::Authoritative) {
     auto const slot = cls2->preClass()->ifaceVtableSlot();
     if (slot != kInvalidSlot) {
       auto const data = InstanceOfIfaceVtableData{spec2.cls(), true};
@@ -1862,6 +1864,8 @@ SSATmp* instanceOfImpl(State& env, SSATmp* ssatmp1, ClassSpec spec2) {
 SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
+  auto const extra = inst->extra<InstanceOfData>();
+  auto const canCheckVtable = extra->canCheckVtable;
 
   if (src2->isA(TNullptr)) {
     return cns(env, false);
@@ -1874,11 +1878,11 @@ SSATmp* simplifyInstanceOf(State& env, const IRInstruction* inst) {
       return gen(env, ExtendsClass, ExtendsClassData{ cls }, src1);
     }
     if (isInterface(cls) && (cls->attrs() & AttrPersistent)) {
-      return gen(env, InstanceOfIface, src1, cns(env, cls->name()));
+      return gen(env, InstanceOfIface, *extra, src1, cns(env, cls->name()));
     }
   }
 
-  return instanceOfImpl(env, src1, src2->type().clsSpec());
+  return instanceOfImpl(env, src1, src2->type().clsSpec(), canCheckVtable);
 }
 
 SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
@@ -1886,7 +1890,7 @@ SSATmp* simplifyExtendsClass(State& env, const IRInstruction* inst) {
   auto const cls2 = inst->extra<ExtendsClassData>()->cls;
   assertx(cls2 && isNormalClass(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
-  return instanceOfImpl(env, src1, spec2);
+  return instanceOfImpl(env, src1, spec2, false);
 }
 
 SSATmp* simplifyInstanceOfBitmask(State& env, const IRInstruction* inst) {
@@ -1933,6 +1937,7 @@ SSATmp* simplifyDeserializeLazyProp(State& env, const IRInstruction* inst) {
 SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
+  auto const canCheckVtable = inst->extra<InstanceOfData>()->canCheckVtable;
 
   // We only emit InstanceOfIface if we checked that we could trust the class.
   // Just grab it from the named-entity map.
@@ -1941,7 +1946,7 @@ SSATmp* simplifyInstanceOfIface(State& env, const IRInstruction* inst) {
   assertx(cls2 && isInterface(cls2));
   auto const spec2 = ClassSpec{cls2, ClassSpec::ExactTag{}};
 
-  return instanceOfImpl(env, src1, spec2);
+  return instanceOfImpl(env, src1, spec2, canCheckVtable);
 }
 
 SSATmp* simplifyInstanceOfIfaceVtable(State& env, const IRInstruction* inst) {

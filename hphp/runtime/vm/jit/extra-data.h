@@ -322,6 +322,26 @@ struct ExtendsClassData : IRExtraData {
 };
 
 /*
+ * Used to signal that InstanceOf or InstanceOfIface check may be simplified to
+ * an InstanceOfIfaceVtable, which is true when we fetched S0 from an object.
+ */
+struct InstanceOfData : IRExtraData {
+  explicit InstanceOfData(bool canCheckVtable)
+    : canCheckVtable(canCheckVtable) {}
+
+  std::string show() const {
+    return folly::sformat("canCheckVtable={}", canCheckVtable);
+  }
+  bool equals(const InstanceOfData& o) const {
+    return canCheckVtable == o.canCheckVtable;
+  }
+  size_t hash() const { return std::hash<bool>()(canCheckVtable); }
+  size_t stableHash() const { return std::hash<bool>()(canCheckVtable); }
+
+  bool canCheckVtable;
+};
+
+/*
  * InstanceOfIfaceVtable.
  */
 struct InstanceOfIfaceVtableData : IRExtraData {
@@ -3039,6 +3059,8 @@ X(InitSProps,                   ClassData);
 X(NewInstanceRaw,               ClassData);
 X(InitObjProps,                 ClassData);
 X(InitObjMemoSlots,             ClassData);
+X(InstanceOf,                   InstanceOfData);
+X(InstanceOfIface,              InstanceOfData);
 X(InstanceOfIfaceVtable,        InstanceOfIfaceVtableData);
 X(ResolveTypeStruct,            ResolveTypeStructData);
 X(ExtendsClass,                 ExtendsClassData);

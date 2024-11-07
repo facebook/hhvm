@@ -234,7 +234,10 @@ SSATmp* is_a_impl(IRGS& env, const ParamPrep& params, bool subclassOnly) {
 
         return rhs;
       },
-      [&](SSATmp* rhs) { return gen(env, InstanceOf, lhs, rhs); },
+      [&](SSATmp* rhs) {
+        auto const extra = InstanceOfData { cls_or_obj->isA(TObj) };
+        return gen(env, InstanceOf, extra, lhs, rhs);
+      },
       [&]{ return cns(env, false); }
     );
   };
@@ -588,7 +591,7 @@ SSATmp* genConcat(IRGS& env, std::vector<SSATmp*>&& tokens) {
   auto lhs = tokens[0];
   size_t frontier = 1;
   // we want unique DecRefProfileIds for each of the decRef below
-  // emitRetC will use the DecRefProfileIds upto numLocals, so let's 
+  // emitRetC will use the DecRefProfileIds upto numLocals, so let's
   // use IDs over that
   auto decrefBaseId = curFunc(env)->numLocals();
   while (frontier < tokens.size()) {

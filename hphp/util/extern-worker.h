@@ -440,6 +440,11 @@ struct Options {
     return *this;
   }
 
+  Options& setExecutionConcurrencyLimit(size_t n) {
+    m_executionConcurrencyLimit = n;
+    return *this;
+  }
+
   Options& setAcConnectionCount(size_t n) {
     m_acConnectionCount = n;
     return *this;
@@ -460,6 +465,7 @@ struct Options {
   bool m_useP2P{false};
   int m_casConnectionCount{16};
   int m_engineConnectionCount{6};
+  int m_executionConcurrencyLimit{6000};
   int m_acConnectionCount{16};
   std::string m_useCase{""};
   std::string m_featuresFile{""};

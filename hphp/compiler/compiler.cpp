@@ -767,6 +767,7 @@ Options makeExternWorkerOptions(const CompilerOptions& po) {
     .setUseP2P(Option::ExternWorkerUseP2P)
     .setCasConnectionCount(Option::ExternWorkerCasConnectionCount)
     .setEngineConnectionCount(Option::ExternWorkerEngineConnectionCount)
+    .setExecutionConcurrencyLimit(Option::ExternWorkerExecutionConcurrencyLimit)
     .setAcConnectionCount(Option::ExternWorkerAcConnectionCount)
     .setVerboseLogging(Option::ExternWorkerVerboseLogging);
   if (Option::ExternWorkerTimeoutSecs > 0) {
@@ -1039,6 +1040,7 @@ bool process(CompilerOptions &po) {
   sample.setInt("use_p2p", Option::ExternWorkerUseP2P);
   sample.setInt("cas_connection_count", Option::ExternWorkerCasConnectionCount);
   sample.setInt("engine_connection_count", Option::ExternWorkerEngineConnectionCount);
+  sample.setInt("execution_concurrency_limit", Option::ExternWorkerExecutionConcurrencyLimit);
   sample.setInt("ac_connection_count", Option::ExternWorkerAcConnectionCount);
   sample.setInt("use_exec_cache", Option::ExternWorkerUseExecCache);
   sample.setInt("timeout_secs", Option::ExternWorkerTimeoutSecs);

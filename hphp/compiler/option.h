@@ -120,6 +120,7 @@ struct Option {
   static bool ExternWorkerUseP2P;
   static int ExternWorkerCasConnectionCount;
   static int ExternWorkerEngineConnectionCount;
+  static int ExternWorkerExecutionConcurrencyLimit;
   static int ExternWorkerAcConnectionCount;
   static bool ExternWorkerVerboseLogging;
   static int ExternWorkerThrottleRetries;

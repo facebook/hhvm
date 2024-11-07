@@ -75,6 +75,7 @@ bool Option::ExternWorkerUseZippyRichClient = true;
 bool Option::ExternWorkerUseP2P = false;
 int Option::ExternWorkerCasConnectionCount = 16;
 int Option::ExternWorkerEngineConnectionCount = 6;
+int Option::ExternWorkerExecutionConcurrencyLimit = 6000;
 int Option::ExternWorkerAcConnectionCount = 16;
 bool Option::ExternWorkerVerboseLogging = false;
 std::string Option::ExternWorkerWorkingDir;
@@ -200,6 +201,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
   Config::Bind(ExternWorkerEngineConnectionCount, ini, config,
                "ExternWorker.EngineConnectionCount",
                ExternWorkerEngineConnectionCount);
+  Config::Bind(ExternWorkerExecutionConcurrencyLimit, ini, config,
+               "ExternWorker.ExecutionConcurrencyLimit",
+               ExternWorkerExecutionConcurrencyLimit);
   Config::Bind(ExternWorkerAcConnectionCount, ini, config,
                "ExternWorker.AcConnectionCount",
                ExternWorkerAcConnectionCount);

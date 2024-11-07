@@ -183,8 +183,9 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+
+        fbthriftResults := make([]*metadata.ThriftStruct, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("module.MyStruct").
     SetIsUnion(false).
     SetFields(
@@ -236,7 +237,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("module.Containers").
     SetIsUnion(false).
     SetFields(
@@ -258,10 +259,10 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_map_string_i64),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("module.MyDataItem").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("module.MyUnion").
     SetIsUnion(true).
     SetFields(
@@ -288,7 +289,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_set_float),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("module.ReservedKeyword").
     SetIsUnion(false).
     SetFields(
@@ -300,7 +301,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_i32),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("module.UnionToBeRenamed").
     SetIsUnion(true).
     SetFields(
@@ -312,7 +313,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_i32),
         },
     ))
-        return fbthriftThriftStructs
+        return fbthriftResults
     },
 )
 
@@ -320,8 +321,9 @@ var exceptionMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftException {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftException{
-            metadata.NewThriftException().
+
+        fbthriftResults := make([]*metadata.ThriftException, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftException().
     SetName("module.MyException").
     SetFields(
         []*metadata.ThriftField{
@@ -346,8 +348,8 @@ var exceptionMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_MyUnion),
         },
-    ),
-            metadata.NewThriftException().
+    ))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftException().
     SetName("module.MyExceptionWithMessage").
     SetFields(
         []*metadata.ThriftField{
@@ -372,8 +374,8 @@ var exceptionMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_module_MyUnion),
         },
-    ),
-        }
+    ))
+        return fbthriftResults
     },
 )
 
@@ -381,24 +383,25 @@ var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftEnum{
-            metadata.NewThriftEnum().
+
+        fbthriftResults := make([]*metadata.ThriftEnum, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
     SetName("module.MyEnum").
     SetElements(
         map[int32]string{
             0: "MyValue1",
             1: "MyValue2",
         },
-    ),
-            metadata.NewThriftEnum().
+    ))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
     SetName("module.HackEnum").
     SetElements(
         map[int32]string{
             0: "Value1",
             1: "Value2",
         },
-    ),
-        }
+    ))
+        return fbthriftResults
     },
 )
 
@@ -406,8 +409,9 @@ var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftService{
-            metadata.NewThriftService().
+
+        fbthriftResults := make([]*metadata.ThriftService, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.FooService").
     SetFunctions(
         []*metadata.ThriftFunction{
@@ -416,8 +420,8 @@ var serviceMetadatasOnce = sync.OnceValue(
     SetIsOneway(false).
     SetReturnType(premadeThriftType_void),
         },
-    ),
-            metadata.NewThriftService().
+    ))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.FB303Service").
     SetFunctions(
         []*metadata.ThriftFunction{
@@ -435,8 +439,8 @@ var serviceMetadatasOnce = sync.OnceValue(
         },
     ),
         },
-    ),
-            metadata.NewThriftService().
+    ))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.MyService").
     SetFunctions(
         []*metadata.ThriftFunction{
@@ -545,8 +549,8 @@ var serviceMetadatasOnce = sync.OnceValue(
     SetIsOneway(false).
     SetReturnType(premadeThriftType_void),
         },
-    ),
-            metadata.NewThriftService().
+    ))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.DbMixedStackArguments").
     SetFunctions(
         []*metadata.ThriftFunction{
@@ -577,8 +581,8 @@ var serviceMetadatasOnce = sync.OnceValue(
         },
     ),
         },
-    ),
-        }
+    ))
+        return fbthriftResults
     },
 )
 

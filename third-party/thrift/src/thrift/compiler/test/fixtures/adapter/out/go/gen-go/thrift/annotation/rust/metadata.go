@@ -152,8 +152,9 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+
+        fbthriftResults := make([]*metadata.ThriftStruct, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Name").
     SetIsUnion(false).
     SetFields(
@@ -165,28 +166,28 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Copy").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.RequestContext").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Arc").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Box").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Exhaustive").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Ord").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.NewType").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Type").
     SetIsUnion(false).
     SetFields(
@@ -198,7 +199,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Serde").
     SetIsUnion(false).
     SetFields(
@@ -210,7 +211,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Mod").
     SetIsUnion(false).
     SetFields(
@@ -222,7 +223,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Adapter").
     SetIsUnion(false).
     SetFields(
@@ -234,7 +235,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_string),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.Derive").
     SetIsUnion(false).
     SetFields(
@@ -246,7 +247,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_list_string),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("rust.ServiceExn").
     SetIsUnion(false).
     SetFields(
@@ -258,7 +259,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
-        return fbthriftThriftStructs
+        return fbthriftResults
     },
 )
 
@@ -266,8 +267,9 @@ var exceptionMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftException {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftException{
-        }
+
+        fbthriftResults := make([]*metadata.ThriftException, 0)
+        return fbthriftResults
     },
 )
 
@@ -275,8 +277,9 @@ var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftEnum{
-        }
+
+        fbthriftResults := make([]*metadata.ThriftEnum, 0)
+        return fbthriftResults
     },
 )
 
@@ -284,8 +287,9 @@ var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftService{
-        }
+
+        fbthriftResults := make([]*metadata.ThriftService, 0)
+        return fbthriftResults
     },
 )
 

@@ -59,8 +59,9 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
-        return fbthriftThriftStructs
+
+        fbthriftResults := make([]*metadata.ThriftStruct, 0)
+        return fbthriftResults
     },
 )
 
@@ -68,8 +69,9 @@ var exceptionMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftException {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftException{
-        }
+
+        fbthriftResults := make([]*metadata.ThriftException, 0)
+        return fbthriftResults
     },
 )
 
@@ -77,8 +79,9 @@ var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftEnum{
-            metadata.NewThriftEnum().
+
+        fbthriftResults := make([]*metadata.ThriftEnum, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
     SetName("module2.Enum").
     SetElements(
         map[int32]string{
@@ -86,8 +89,8 @@ var enumMetadatasOnce = sync.OnceValue(
             1: "B",
             2: "C",
         },
-    ),
-        }
+    ))
+        return fbthriftResults
     },
 )
 
@@ -95,8 +98,9 @@ var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftService{
-        }
+
+        fbthriftResults := make([]*metadata.ThriftService, 0)
+        return fbthriftResults
     },
 )
 

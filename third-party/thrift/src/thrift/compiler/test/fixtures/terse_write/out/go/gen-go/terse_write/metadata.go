@@ -181,11 +181,12 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        fbthriftThriftStructs := make([]*metadata.ThriftStruct, 0)
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+
+        fbthriftResults := make([]*metadata.ThriftStruct, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.MyStruct").
     SetIsUnion(false))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.MyUnion").
     SetIsUnion(true).
     SetFields(
@@ -262,7 +263,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_terse_write_MyStruct),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.MyStructWithCustomDefault").
     SetIsUnion(false).
     SetFields(
@@ -274,7 +275,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_i64),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.StructLevelTerseStruct").
     SetIsUnion(false).
     SetFields(
@@ -356,7 +357,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_terse_write_MyUnion),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.FieldLevelTerseStruct").
     SetIsUnion(false).
     SetFields(
@@ -513,7 +514,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_terse_write_MyUnion),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.TerseStructWithCustomDefault").
     SetIsUnion(false).
     SetFields(
@@ -590,7 +591,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_terse_write_MyStructWithCustomDefault),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.AdaptedFields").
     SetIsUnion(false).
     SetFields(
@@ -612,7 +613,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_terse_write_MyInteger),
         },
     ))
-        fbthriftThriftStructs = append(fbthriftThriftStructs, metadata.NewThriftStruct().
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("terse_write.WrappedFields").
     SetIsUnion(false).
     SetFields(
@@ -624,7 +625,7 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_i32),
         },
     ))
-        return fbthriftThriftStructs
+        return fbthriftResults
     },
 )
 
@@ -632,8 +633,9 @@ var exceptionMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftException {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftException{
-            metadata.NewThriftException().
+
+        fbthriftResults := make([]*metadata.ThriftException, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftException().
     SetName("terse_write.TerseException").
     SetFields(
         []*metadata.ThriftField{
@@ -643,8 +645,8 @@ var exceptionMetadatasOnce = sync.OnceValue(
     SetIsOptional(false).
     SetType(premadeThriftType_string),
         },
-    ),
-        }
+    ))
+        return fbthriftResults
     },
 )
 
@@ -652,16 +654,17 @@ var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftEnum{
-            metadata.NewThriftEnum().
+
+        fbthriftResults := make([]*metadata.ThriftEnum, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
     SetName("terse_write.MyEnum").
     SetElements(
         map[int32]string{
             0: "ME0",
             1: "ME1",
         },
-    ),
-        }
+    ))
+        return fbthriftResults
     },
 )
 
@@ -669,8 +672,9 @@ var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*metadata.ThriftService{
-        }
+
+        fbthriftResults := make([]*metadata.ThriftService, 0)
+        return fbthriftResults
     },
 )
 

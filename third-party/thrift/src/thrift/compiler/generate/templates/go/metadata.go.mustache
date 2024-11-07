@@ -94,13 +94,14 @@ var structMetadatasOnce = sync.OnceValue(
     func() []*{{program:metadata_qualifier}}ThriftStruct {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        fbthriftThriftStructs := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
+
+        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
         {{#program:structs}}
         {{^struct:exception?}}
-        fbthriftThriftStructs = append(fbthriftThriftStructs, {{> metadata/thrift_metadata_struct}})
+        fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_struct}})
         {{/struct:exception?}}
         {{/program:structs}}
-        return fbthriftThriftStructs
+        return fbthriftResults
     },
 )
 
@@ -108,13 +109,14 @@ var exceptionMetadatasOnce = sync.OnceValue(
     func() []*{{program:metadata_qualifier}}ThriftException {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*{{program:metadata_qualifier}}ThriftException{
-            {{#program:structs}}
-            {{#struct:exception?}}
-            {{> metadata/thrift_metadata_exception}},
-            {{/struct:exception?}}
-            {{/program:structs}}
-        }
+
+        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftException, 0)
+        {{#program:structs}}
+        {{#struct:exception?}}
+        fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_exception}})
+        {{/struct:exception?}}
+        {{/program:structs}}
+        return fbthriftResults
     },
 )
 
@@ -122,11 +124,12 @@ var enumMetadatasOnce = sync.OnceValue(
     func() []*{{program:metadata_qualifier}}ThriftEnum {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*{{program:metadata_qualifier}}ThriftEnum{
-            {{#program:enums}}
-            {{> metadata/thrift_metadata_enum}},
-            {{/program:enums}}
-        }
+
+        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftEnum, 0)
+        {{#program:enums}}
+        fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_enum}})
+        {{/program:enums}}
+        return fbthriftResults
     },
 )
 
@@ -134,11 +137,12 @@ var serviceMetadatasOnce = sync.OnceValue(
     func() []*{{program:metadata_qualifier}}ThriftService {
         // Relies on premade Thrift types initialization
         premadeThriftTypesInitOnce()
-        return []*{{program:metadata_qualifier}}ThriftService{
-            {{#program:services}}
-            {{> metadata/thrift_metadata_service}},
-            {{/program:services}}
-        }
+
+        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftService, 0)
+        {{#program:services}}
+        fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_service}})
+        {{/program:services}}
+        return fbthriftResults
     },
 )
 

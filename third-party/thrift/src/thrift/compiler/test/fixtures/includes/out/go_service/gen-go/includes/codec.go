@@ -39,13 +39,16 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_includes_Included = &thrift.TypeSpec{
         FullName: "includes.Included",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewIncluded() },
+    ScopedName: "includes.Included",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewIncluded() },
 },
 
     }
     premadeCodecTypeSpec_includes_IncludedInt64 = &thrift.TypeSpec{
         FullName: "includes.IncludedInt64",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "includes.IncludedInt64",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
 },
 
@@ -53,6 +56,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_includes_TransitiveFoo = &thrift.TypeSpec{
         FullName: "includes.TransitiveFoo",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "includes.TransitiveFoo",
 	UnderlyingTypeSpec: transitive.GetCodecTypeSpec("transitive.Foo"),
 },
 
@@ -68,6 +72,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Included = &thrift.StructSpec{
     Name:                 "Included",
+    ScopedName:           "includes.Included",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

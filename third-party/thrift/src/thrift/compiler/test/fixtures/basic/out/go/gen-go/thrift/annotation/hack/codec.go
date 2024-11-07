@@ -45,35 +45,45 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_hack_FieldWrapper = &thrift.TypeSpec{
         FullName: "hack.FieldWrapper",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFieldWrapper() },
+    ScopedName: "hack.FieldWrapper",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFieldWrapper() },
 },
 
     }
     premadeCodecTypeSpec_hack_Wrapper = &thrift.TypeSpec{
         FullName: "hack.Wrapper",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewWrapper() },
+    ScopedName: "hack.Wrapper",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewWrapper() },
 },
 
     }
     premadeCodecTypeSpec_hack_Adapter = &thrift.TypeSpec{
         FullName: "hack.Adapter",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAdapter() },
+    ScopedName: "hack.Adapter",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
     }
     premadeCodecTypeSpec_hack_SkipCodegen = &thrift.TypeSpec{
         FullName: "hack.SkipCodegen",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewSkipCodegen() },
+    ScopedName: "hack.SkipCodegen",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewSkipCodegen() },
 },
 
     }
     premadeCodecTypeSpec_hack_Name = &thrift.TypeSpec{
         FullName: "hack.Name",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewName() },
+    ScopedName: "hack.Name",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewName() },
 },
 
     }
@@ -88,35 +98,45 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_hack_UnionEnumAttributes = &thrift.TypeSpec{
         FullName: "hack.UnionEnumAttributes",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUnionEnumAttributes() },
+    ScopedName: "hack.UnionEnumAttributes",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewUnionEnumAttributes() },
 },
 
     }
     premadeCodecTypeSpec_hack_StructTrait = &thrift.TypeSpec{
         FullName: "hack.StructTrait",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStructTrait() },
+    ScopedName: "hack.StructTrait",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStructTrait() },
 },
 
     }
     premadeCodecTypeSpec_hack_Attributes = &thrift.TypeSpec{
         FullName: "hack.Attributes",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAttributes() },
+    ScopedName: "hack.Attributes",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAttributes() },
 },
 
     }
     premadeCodecTypeSpec_hack_StructAsTrait = &thrift.TypeSpec{
         FullName: "hack.StructAsTrait",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStructAsTrait() },
+    ScopedName: "hack.StructAsTrait",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStructAsTrait() },
 },
 
     }
     premadeCodecTypeSpec_hack_ModuleInternal = &thrift.TypeSpec{
         FullName: "hack.ModuleInternal",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewModuleInternal() },
+    ScopedName: "hack.ModuleInternal",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewModuleInternal() },
 },
 
     }
@@ -140,6 +160,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_FieldWrapper = &thrift.StructSpec{
     Name:                 "FieldWrapper",
+    ScopedName:           "hack.FieldWrapper",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -161,6 +182,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Wrapper = &thrift.StructSpec{
     Name:                 "Wrapper",
+    ScopedName:           "hack.Wrapper",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -202,6 +224,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Adapter = &thrift.StructSpec{
     Name:                 "Adapter",
+    ScopedName:           "hack.Adapter",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -223,6 +246,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_SkipCodegen = &thrift.StructSpec{
     Name:                 "SkipCodegen",
+    ScopedName:           "hack.SkipCodegen",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -244,6 +268,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
+    ScopedName:           "hack.Name",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -275,6 +300,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_UnionEnumAttributes = &thrift.StructSpec{
     Name:                 "UnionEnumAttributes",
+    ScopedName:           "hack.UnionEnumAttributes",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -296,6 +322,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_StructTrait = &thrift.StructSpec{
     Name:                 "StructTrait",
+    ScopedName:           "hack.StructTrait",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -317,6 +344,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Attributes = &thrift.StructSpec{
     Name:                 "Attributes",
+    ScopedName:           "hack.Attributes",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -338,6 +366,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_StructAsTrait = &thrift.StructSpec{
     Name:                 "StructAsTrait",
+    ScopedName:           "hack.StructAsTrait",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -349,6 +378,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ModuleInternal = &thrift.StructSpec{
     Name:                 "ModuleInternal",
+    ScopedName:           "hack.ModuleInternal",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

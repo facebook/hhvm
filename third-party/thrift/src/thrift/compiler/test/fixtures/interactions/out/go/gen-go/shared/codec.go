@@ -43,7 +43,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_shared_DoSomethingResult = &thrift.TypeSpec{
         FullName: "shared.DoSomethingResult",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDoSomethingResult() },
+    ScopedName: "shared.DoSomethingResult",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDoSomethingResult() },
 },
 
     }
@@ -58,6 +60,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_DoSomethingResult = &thrift.StructSpec{
     Name:                 "DoSomethingResult",
+    ScopedName:           "shared.DoSomethingResult",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

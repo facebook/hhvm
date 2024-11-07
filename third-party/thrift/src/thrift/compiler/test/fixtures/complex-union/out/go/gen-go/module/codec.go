@@ -90,6 +90,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_containerTypedef = &thrift.TypeSpec{
         FullName: "module.containerTypedef",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.containerTypedef",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i16_string,
 },
 
@@ -97,14 +98,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_ComplexUnion = &thrift.TypeSpec{
         FullName: "module.ComplexUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewComplexUnion() },
+    ScopedName: "module.ComplexUnion",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewComplexUnion() },
 },
 
     }
     premadeCodecTypeSpec_module_ListUnion = &thrift.TypeSpec{
         FullName: "module.ListUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewListUnion() },
+    ScopedName: "module.ListUnion",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewListUnion() },
 },
 
     }
@@ -118,7 +123,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_DataUnion = &thrift.TypeSpec{
         FullName: "module.DataUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDataUnion() },
+    ScopedName: "module.DataUnion",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewDataUnion() },
 },
 
     }
@@ -132,35 +139,45 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Val = &thrift.TypeSpec{
         FullName: "module.Val",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewVal() },
+    ScopedName: "module.Val",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewVal() },
 },
 
     }
     premadeCodecTypeSpec_module_ValUnion = &thrift.TypeSpec{
         FullName: "module.ValUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewValUnion() },
+    ScopedName: "module.ValUnion",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewValUnion() },
 },
 
     }
     premadeCodecTypeSpec_module_VirtualComplexUnion = &thrift.TypeSpec{
         FullName: "module.VirtualComplexUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewVirtualComplexUnion() },
+    ScopedName: "module.VirtualComplexUnion",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewVirtualComplexUnion() },
 },
 
     }
     premadeCodecTypeSpec_module_NonCopyableStruct = &thrift.TypeSpec{
         FullName: "module.NonCopyableStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewNonCopyableStruct() },
+    ScopedName: "module.NonCopyableStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewNonCopyableStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_NonCopyableUnion = &thrift.TypeSpec{
         FullName: "module.NonCopyableUnion",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewNonCopyableUnion() },
+    ScopedName: "module.NonCopyableUnion",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewNonCopyableUnion() },
 },
 
     }
@@ -182,6 +199,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_ComplexUnion = &thrift.StructSpec{
     Name:                 "ComplexUnion",
+    ScopedName:           "module.ComplexUnion",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -253,6 +271,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ListUnion = &thrift.StructSpec{
     Name:                 "ListUnion",
+    ScopedName:           "module.ListUnion",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -284,6 +303,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_DataUnion = &thrift.StructSpec{
     Name:                 "DataUnion",
+    ScopedName:           "module.DataUnion",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -315,6 +335,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Val = &thrift.StructSpec{
     Name:                 "Val",
+    ScopedName:           "module.Val",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -356,6 +377,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ValUnion = &thrift.StructSpec{
     Name:                 "ValUnion",
+    ScopedName:           "module.ValUnion",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -387,6 +409,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_VirtualComplexUnion = &thrift.StructSpec{
     Name:                 "VirtualComplexUnion",
+    ScopedName:           "module.VirtualComplexUnion",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -418,6 +441,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_NonCopyableStruct = &thrift.StructSpec{
     Name:                 "NonCopyableStruct",
+    ScopedName:           "module.NonCopyableStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -439,6 +463,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_NonCopyableUnion = &thrift.StructSpec{
     Name:                 "NonCopyableUnion",
+    ScopedName:           "module.NonCopyableUnion",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

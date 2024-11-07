@@ -40,28 +40,36 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Fields = &thrift.TypeSpec{
         FullName: "module.Fields",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFields() },
+    ScopedName: "module.Fields",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFields() },
 },
 
     }
     premadeCodecTypeSpec_module_FieldsInjectedToEmptyStruct = &thrift.TypeSpec{
         FullName: "module.FieldsInjectedToEmptyStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFieldsInjectedToEmptyStruct() },
+    ScopedName: "module.FieldsInjectedToEmptyStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFieldsInjectedToEmptyStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_FieldsInjectedToStruct = &thrift.TypeSpec{
         FullName: "module.FieldsInjectedToStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFieldsInjectedToStruct() },
+    ScopedName: "module.FieldsInjectedToStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFieldsInjectedToStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_FieldsInjectedWithIncludedStruct = &thrift.TypeSpec{
         FullName: "module.FieldsInjectedWithIncludedStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFieldsInjectedWithIncludedStruct() },
+    ScopedName: "module.FieldsInjectedWithIncludedStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFieldsInjectedWithIncludedStruct() },
 },
 
     }
@@ -79,6 +87,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Fields = &thrift.StructSpec{
     Name:                 "Fields",
+    ScopedName:           "module.Fields",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -100,6 +109,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_FieldsInjectedToEmptyStruct = &thrift.StructSpec{
     Name:                 "FieldsInjectedToEmptyStruct",
+    ScopedName:           "module.FieldsInjectedToEmptyStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -121,6 +131,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_FieldsInjectedToStruct = &thrift.StructSpec{
     Name:                 "FieldsInjectedToStruct",
+    ScopedName:           "module.FieldsInjectedToStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -152,6 +163,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_FieldsInjectedWithIncludedStruct = &thrift.StructSpec{
     Name:                 "FieldsInjectedWithIncludedStruct",
+    ScopedName:           "module.FieldsInjectedWithIncludedStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

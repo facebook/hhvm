@@ -36,14 +36,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_go_Name = &thrift.TypeSpec{
         FullName: "go.Name",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewName() },
+    ScopedName: "go.Name",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewName() },
 },
 
     }
     premadeCodecTypeSpec_go_Tag = &thrift.TypeSpec{
         FullName: "go.Tag",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTag() },
+    ScopedName: "go.Tag",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTag() },
 },
 
     }
@@ -59,6 +63,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
+    ScopedName:           "go.Name",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -80,6 +85,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Tag = &thrift.StructSpec{
     Name:                 "Tag",
+    ScopedName:           "go.Tag",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

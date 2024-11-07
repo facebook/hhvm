@@ -33,6 +33,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_service_IncludesIncluded = &thrift.TypeSpec{
         FullName: "service.IncludesIncluded",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "service.IncludesIncluded",
 	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
 },
 
@@ -40,6 +41,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_service_IncludesTransitiveFoo = &thrift.TypeSpec{
         FullName: "service.IncludesTransitiveFoo",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "service.IncludesTransitiveFoo",
 	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
 },
 
@@ -65,6 +67,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_reqMyServiceQuery = &thrift.StructSpec{
     Name:                 "reqMyServiceQuery",
+    ScopedName:           "service.reqMyServiceQuery",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -96,6 +99,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respMyServiceQuery = &thrift.StructSpec{
     Name:                 "respMyServiceQuery",
+    ScopedName:           "service.respMyServiceQuery",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -107,6 +111,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqMyServiceHasArgDocs = &thrift.StructSpec{
     Name:                 "reqMyServiceHasArgDocs",
+    ScopedName:           "service.reqMyServiceHasArgDocs",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -138,6 +143,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respMyServiceHasArgDocs = &thrift.StructSpec{
     Name:                 "respMyServiceHasArgDocs",
+    ScopedName:           "service.respMyServiceHasArgDocs",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

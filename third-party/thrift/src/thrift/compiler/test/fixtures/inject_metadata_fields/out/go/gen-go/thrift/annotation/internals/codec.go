@@ -35,7 +35,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_internal_InjectMetadataFields = &thrift.TypeSpec{
         FullName: "internal.InjectMetadataFields",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewInjectMetadataFields() },
+    ScopedName: "internal.InjectMetadataFields",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewInjectMetadataFields() },
 },
 
     }
@@ -50,6 +52,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_InjectMetadataFields = &thrift.StructSpec{
     Name:                 "InjectMetadataFields",
+    ScopedName:           "internal.InjectMetadataFields",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

@@ -26,7 +26,9 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module2_Enum = &thrift.TypeSpec{
         FullName: "module2.Enum",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module2.Enum",
+},
 
     }
 })

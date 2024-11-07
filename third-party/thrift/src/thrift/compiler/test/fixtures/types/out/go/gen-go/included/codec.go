@@ -56,6 +56,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_included_SomeMap = &thrift.TypeSpec{
         FullName: "included.SomeMap",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "included.SomeMap",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i32_string,
 },
 
@@ -71,6 +72,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_included_SomeListOfTypeMap = &thrift.TypeSpec{
         FullName: "included.SomeListOfTypeMap",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "included.SomeListOfTypeMap",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_list_included_SomeMap,
 },
 

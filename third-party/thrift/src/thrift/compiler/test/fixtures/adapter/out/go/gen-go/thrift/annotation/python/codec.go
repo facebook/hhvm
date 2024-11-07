@@ -34,7 +34,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_python_Py3Hidden = &thrift.TypeSpec{
         FullName: "python.Py3Hidden",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewPy3Hidden() },
+    ScopedName: "python.Py3Hidden",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewPy3Hidden() },
 },
 
     }
@@ -48,28 +50,36 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_python_PyDeprecatedHidden = &thrift.TypeSpec{
         FullName: "python.PyDeprecatedHidden",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewPyDeprecatedHidden() },
+    ScopedName: "python.PyDeprecatedHidden",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewPyDeprecatedHidden() },
 },
 
     }
     premadeCodecTypeSpec_python_Flags = &thrift.TypeSpec{
         FullName: "python.Flags",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFlags() },
+    ScopedName: "python.Flags",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFlags() },
 },
 
     }
     premadeCodecTypeSpec_python_Name = &thrift.TypeSpec{
         FullName: "python.Name",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewName() },
+    ScopedName: "python.Name",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewName() },
 },
 
     }
     premadeCodecTypeSpec_python_Adapter = &thrift.TypeSpec{
         FullName: "python.Adapter",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAdapter() },
+    ScopedName: "python.Adapter",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
     }
@@ -83,7 +93,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_python_UseCAPI = &thrift.TypeSpec{
         FullName: "python.UseCAPI",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUseCAPI() },
+    ScopedName: "python.UseCAPI",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewUseCAPI() },
 },
 
     }
@@ -103,6 +115,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Py3Hidden = &thrift.StructSpec{
     Name:                 "Py3Hidden",
+    ScopedName:           "python.Py3Hidden",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -114,6 +127,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_PyDeprecatedHidden = &thrift.StructSpec{
     Name:                 "PyDeprecatedHidden",
+    ScopedName:           "python.PyDeprecatedHidden",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -135,6 +149,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Flags = &thrift.StructSpec{
     Name:                 "Flags",
+    ScopedName:           "python.Flags",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -146,6 +161,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
+    ScopedName:           "python.Name",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -167,6 +183,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Adapter = &thrift.StructSpec{
     Name:                 "Adapter",
+    ScopedName:           "python.Adapter",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -198,6 +215,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_UseCAPI = &thrift.StructSpec{
     Name:                 "UseCAPI",
+    ScopedName:           "python.UseCAPI",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

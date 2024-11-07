@@ -38,7 +38,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_CustomException = &thrift.TypeSpec{
         FullName: "module.CustomException",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCustomException() },
+    ScopedName: "module.CustomException",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCustomException() },
 },
 
     }
@@ -68,6 +70,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_CustomException = &thrift.StructSpec{
     Name:                 "CustomException",
+    ScopedName:           "module.CustomException",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -89,6 +92,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqMyServiceFoo = &thrift.StructSpec{
     Name:                 "reqMyServiceFoo",
+    ScopedName:           "module.reqMyServiceFoo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -100,6 +104,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respMyServiceFoo = &thrift.StructSpec{
     Name:                 "respMyServiceFoo",
+    ScopedName:           "module.respMyServiceFoo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -111,6 +116,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqFactoriesFoo = &thrift.StructSpec{
     Name:                 "reqFactoriesFoo",
+    ScopedName:           "module.reqFactoriesFoo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -122,6 +128,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respFactoriesFoo = &thrift.StructSpec{
     Name:                 "respFactoriesFoo",
+    ScopedName:           "module.respFactoriesFoo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -133,6 +140,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqPerformFoo = &thrift.StructSpec{
     Name:                 "reqPerformFoo",
+    ScopedName:           "module.reqPerformFoo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -144,6 +152,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respPerformFoo = &thrift.StructSpec{
     Name:                 "respPerformFoo",
+    ScopedName:           "module.respPerformFoo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -155,6 +164,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqInteractWithSharedDoSomeSimilarThings = &thrift.StructSpec{
     Name:                 "reqInteractWithSharedDoSomeSimilarThings",
+    ScopedName:           "module.reqInteractWithSharedDoSomeSimilarThings",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -166,6 +176,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respInteractWithSharedDoSomeSimilarThings = &thrift.StructSpec{
     Name:                 "respInteractWithSharedDoSomeSimilarThings",
+    ScopedName:           "module.respInteractWithSharedDoSomeSimilarThings",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

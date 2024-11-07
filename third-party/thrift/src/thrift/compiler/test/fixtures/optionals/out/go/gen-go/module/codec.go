@@ -38,7 +38,9 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Animal = &thrift.TypeSpec{
         FullName: "module.Animal",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.Animal",
+},
 
     }
     premadeCodecTypeSpec_double = &thrift.TypeSpec{
@@ -51,7 +53,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Color = &thrift.TypeSpec{
         FullName: "module.Color",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewColor() },
+    ScopedName: "module.Color",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewColor() },
 },
 
     }
@@ -72,7 +76,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Vehicle = &thrift.TypeSpec{
         FullName: "module.Vehicle",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewVehicle() },
+    ScopedName: "module.Vehicle",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewVehicle() },
 },
 
     }
@@ -86,6 +92,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_PersonID = &thrift.TypeSpec{
         FullName: "module.PersonID",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.PersonID",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
 },
 
@@ -126,7 +133,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Person = &thrift.TypeSpec{
         FullName: "module.Person",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewPerson() },
+    ScopedName: "module.Person",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewPerson() },
 },
 
     }
@@ -143,6 +152,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Color = &thrift.StructSpec{
     Name:                 "Color",
+    ScopedName:           "module.Color",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -194,6 +204,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Vehicle = &thrift.StructSpec{
     Name:                 "Vehicle",
+    ScopedName:           "module.Vehicle",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -255,6 +266,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Person = &thrift.StructSpec{
     Name:                 "Person",
+    ScopedName:           "module.Person",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

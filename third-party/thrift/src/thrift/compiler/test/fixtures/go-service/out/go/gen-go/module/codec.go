@@ -48,14 +48,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_GetEntityRequest = &thrift.TypeSpec{
         FullName: "module.GetEntityRequest",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewGetEntityRequest() },
+    ScopedName: "module.GetEntityRequest",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewGetEntityRequest() },
 },
 
     }
     premadeCodecTypeSpec_module_GetEntityResponse = &thrift.TypeSpec{
         FullName: "module.GetEntityResponse",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewGetEntityResponse() },
+    ScopedName: "module.GetEntityResponse",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewGetEntityResponse() },
 },
 
     }
@@ -70,7 +74,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_NonComparableStruct = &thrift.TypeSpec{
         FullName: "module.NonComparableStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewNonComparableStruct() },
+    ScopedName: "module.NonComparableStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewNonComparableStruct() },
 },
 
     }
@@ -208,6 +214,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_GetEntityRequest = &thrift.StructSpec{
     Name:                 "GetEntityRequest",
+    ScopedName:           "module.GetEntityRequest",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -229,6 +236,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_GetEntityResponse = &thrift.StructSpec{
     Name:                 "GetEntityResponse",
+    ScopedName:           "module.GetEntityResponse",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -250,6 +258,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_NonComparableStruct = &thrift.StructSpec{
     Name:                 "NonComparableStruct",
+    ScopedName:           "module.NonComparableStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -291,6 +300,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetEntity = &thrift.StructSpec{
     Name:                 "reqGetEntityGetEntity",
+    ScopedName:           "module.reqGetEntityGetEntity",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -312,6 +322,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetEntity = &thrift.StructSpec{
     Name:                 "respGetEntityGetEntity",
+    ScopedName:           "module.respGetEntityGetEntity",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -333,6 +344,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetBool = &thrift.StructSpec{
     Name:                 "reqGetEntityGetBool",
+    ScopedName:           "module.reqGetEntityGetBool",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -344,6 +356,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetBool = &thrift.StructSpec{
     Name:                 "respGetEntityGetBool",
+    ScopedName:           "module.respGetEntityGetBool",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -365,6 +378,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetByte = &thrift.StructSpec{
     Name:                 "reqGetEntityGetByte",
+    ScopedName:           "module.reqGetEntityGetByte",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -376,6 +390,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetByte = &thrift.StructSpec{
     Name:                 "respGetEntityGetByte",
+    ScopedName:           "module.respGetEntityGetByte",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -397,6 +412,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetI16 = &thrift.StructSpec{
     Name:                 "reqGetEntityGetI16",
+    ScopedName:           "module.reqGetEntityGetI16",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -408,6 +424,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetI16 = &thrift.StructSpec{
     Name:                 "respGetEntityGetI16",
+    ScopedName:           "module.respGetEntityGetI16",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -429,6 +446,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetI32 = &thrift.StructSpec{
     Name:                 "reqGetEntityGetI32",
+    ScopedName:           "module.reqGetEntityGetI32",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -440,6 +458,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetI32 = &thrift.StructSpec{
     Name:                 "respGetEntityGetI32",
+    ScopedName:           "module.respGetEntityGetI32",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -461,6 +480,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetI64 = &thrift.StructSpec{
     Name:                 "reqGetEntityGetI64",
+    ScopedName:           "module.reqGetEntityGetI64",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -472,6 +492,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetI64 = &thrift.StructSpec{
     Name:                 "respGetEntityGetI64",
+    ScopedName:           "module.respGetEntityGetI64",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -493,6 +514,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetDouble = &thrift.StructSpec{
     Name:                 "reqGetEntityGetDouble",
+    ScopedName:           "module.reqGetEntityGetDouble",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -504,6 +526,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetDouble = &thrift.StructSpec{
     Name:                 "respGetEntityGetDouble",
+    ScopedName:           "module.respGetEntityGetDouble",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -525,6 +548,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetString = &thrift.StructSpec{
     Name:                 "reqGetEntityGetString",
+    ScopedName:           "module.reqGetEntityGetString",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -536,6 +560,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetString = &thrift.StructSpec{
     Name:                 "respGetEntityGetString",
+    ScopedName:           "module.respGetEntityGetString",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -557,6 +582,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetBinary = &thrift.StructSpec{
     Name:                 "reqGetEntityGetBinary",
+    ScopedName:           "module.reqGetEntityGetBinary",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -568,6 +594,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetBinary = &thrift.StructSpec{
     Name:                 "respGetEntityGetBinary",
+    ScopedName:           "module.respGetEntityGetBinary",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -589,6 +616,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetMap = &thrift.StructSpec{
     Name:                 "reqGetEntityGetMap",
+    ScopedName:           "module.reqGetEntityGetMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -600,6 +628,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetMap = &thrift.StructSpec{
     Name:                 "respGetEntityGetMap",
+    ScopedName:           "module.respGetEntityGetMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -621,6 +650,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetSet = &thrift.StructSpec{
     Name:                 "reqGetEntityGetSet",
+    ScopedName:           "module.reqGetEntityGetSet",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -632,6 +662,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetSet = &thrift.StructSpec{
     Name:                 "respGetEntityGetSet",
+    ScopedName:           "module.respGetEntityGetSet",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -653,6 +684,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetList = &thrift.StructSpec{
     Name:                 "reqGetEntityGetList",
+    ScopedName:           "module.reqGetEntityGetList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -664,6 +696,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetList = &thrift.StructSpec{
     Name:                 "respGetEntityGetList",
+    ScopedName:           "module.respGetEntityGetList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -685,6 +718,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetLegacyStuff = &thrift.StructSpec{
     Name:                 "reqGetEntityGetLegacyStuff",
+    ScopedName:           "module.reqGetEntityGetLegacyStuff",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -726,6 +760,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetLegacyStuff = &thrift.StructSpec{
     Name:                 "respGetEntityGetLegacyStuff",
+    ScopedName:           "module.respGetEntityGetLegacyStuff",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -747,6 +782,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetCtxCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetCtxCollision",
+    ScopedName:           "module.reqGetEntityGetCtxCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -768,6 +804,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetCtxCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetCtxCollision",
+    ScopedName:           "module.respGetEntityGetCtxCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -789,6 +826,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetCtx1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetCtx1Collision",
+    ScopedName:           "module.reqGetEntityGetCtx1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -820,6 +858,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetCtx1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetCtx1Collision",
+    ScopedName:           "module.respGetEntityGetCtx1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -841,6 +880,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetContextCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetContextCollision",
+    ScopedName:           "module.reqGetEntityGetContextCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -862,6 +902,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetContextCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetContextCollision",
+    ScopedName:           "module.respGetEntityGetContextCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -883,6 +924,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetOutCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetOutCollision",
+    ScopedName:           "module.reqGetEntityGetOutCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -904,6 +946,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetOutCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetOutCollision",
+    ScopedName:           "module.respGetEntityGetOutCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -925,6 +968,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetOut1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetOut1Collision",
+    ScopedName:           "module.reqGetEntityGetOut1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -956,6 +1000,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetOut1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetOut1Collision",
+    ScopedName:           "module.respGetEntityGetOut1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -977,6 +1022,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetInCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetInCollision",
+    ScopedName:           "module.reqGetEntityGetInCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -998,6 +1044,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetInCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetInCollision",
+    ScopedName:           "module.respGetEntityGetInCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1019,6 +1066,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetIn1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetIn1Collision",
+    ScopedName:           "module.reqGetEntityGetIn1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1050,6 +1098,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetIn1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetIn1Collision",
+    ScopedName:           "module.respGetEntityGetIn1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1071,6 +1120,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetErrCollision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetErrCollision",
+    ScopedName:           "module.reqGetEntityGetErrCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1092,6 +1142,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetErrCollision = &thrift.StructSpec{
     Name:                 "respGetEntityGetErrCollision",
+    ScopedName:           "module.respGetEntityGetErrCollision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1113,6 +1164,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqGetEntityGetErr1Collision = &thrift.StructSpec{
     Name:                 "reqGetEntityGetErr1Collision",
+    ScopedName:           "module.reqGetEntityGetErr1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1144,6 +1196,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respGetEntityGetErr1Collision = &thrift.StructSpec{
     Name:                 "respGetEntityGetErr1Collision",
+    ScopedName:           "module.respGetEntityGetErr1Collision",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

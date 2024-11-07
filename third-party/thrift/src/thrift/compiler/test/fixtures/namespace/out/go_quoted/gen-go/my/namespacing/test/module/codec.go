@@ -35,7 +35,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_quoted_Foo = &thrift.TypeSpec{
         FullName: "quoted.Foo",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFoo() },
+    ScopedName: "quoted.Foo",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFoo() },
 },
 
     }
@@ -52,6 +54,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Foo = &thrift.StructSpec{
     Name:                 "Foo",
+    ScopedName:           "quoted.Foo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -73,6 +76,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqTestServiceInit = &thrift.StructSpec{
     Name:                 "reqTestServiceInit",
+    ScopedName:           "quoted.reqTestServiceInit",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -94,6 +98,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respTestServiceInit = &thrift.StructSpec{
     Name:                 "respTestServiceInit",
+    ScopedName:           "quoted.respTestServiceInit",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

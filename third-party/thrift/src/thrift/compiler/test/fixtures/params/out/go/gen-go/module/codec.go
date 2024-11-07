@@ -157,6 +157,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_reqNestedContainersMapList = &thrift.StructSpec{
     Name:                 "reqNestedContainersMapList",
+    ScopedName:           "module.reqNestedContainersMapList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -178,6 +179,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respNestedContainersMapList = &thrift.StructSpec{
     Name:                 "respNestedContainersMapList",
+    ScopedName:           "module.respNestedContainersMapList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -189,6 +191,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqNestedContainersMapSet = &thrift.StructSpec{
     Name:                 "reqNestedContainersMapSet",
+    ScopedName:           "module.reqNestedContainersMapSet",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -210,6 +213,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respNestedContainersMapSet = &thrift.StructSpec{
     Name:                 "respNestedContainersMapSet",
+    ScopedName:           "module.respNestedContainersMapSet",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -221,6 +225,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqNestedContainersListMap = &thrift.StructSpec{
     Name:                 "reqNestedContainersListMap",
+    ScopedName:           "module.reqNestedContainersListMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -242,6 +247,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respNestedContainersListMap = &thrift.StructSpec{
     Name:                 "respNestedContainersListMap",
+    ScopedName:           "module.respNestedContainersListMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -253,6 +259,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqNestedContainersListSet = &thrift.StructSpec{
     Name:                 "reqNestedContainersListSet",
+    ScopedName:           "module.reqNestedContainersListSet",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -274,6 +281,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respNestedContainersListSet = &thrift.StructSpec{
     Name:                 "respNestedContainersListSet",
+    ScopedName:           "module.respNestedContainersListSet",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -285,6 +293,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqNestedContainersTurtles = &thrift.StructSpec{
     Name:                 "reqNestedContainersTurtles",
+    ScopedName:           "module.reqNestedContainersTurtles",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -306,6 +315,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respNestedContainersTurtles = &thrift.StructSpec{
     Name:                 "respNestedContainersTurtles",
+    ScopedName:           "module.respNestedContainersTurtles",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

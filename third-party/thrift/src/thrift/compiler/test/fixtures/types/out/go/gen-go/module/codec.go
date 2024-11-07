@@ -97,23 +97,31 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_has_bitwise_ops = &thrift.TypeSpec{
         FullName: "module.has_bitwise_ops",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.has_bitwise_ops",
+},
 
     }
     premadeCodecTypeSpec_module_is_unscoped = &thrift.TypeSpec{
         FullName: "module.is_unscoped",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.is_unscoped",
+},
 
     }
     premadeCodecTypeSpec_module_MyForwardRefEnum = &thrift.TypeSpec{
         FullName: "module.MyForwardRefEnum",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.MyForwardRefEnum",
+},
 
     }
     premadeCodecTypeSpec_module_empty_struct = &thrift.TypeSpec{
         FullName: "module.empty_struct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewEmptyStruct() },
+    ScopedName: "module.empty_struct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewEmptyStruct() },
 },
 
     }
@@ -127,7 +135,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_decorated_struct = &thrift.TypeSpec{
         FullName: "module.decorated_struct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDecoratedStruct() },
+    ScopedName: "module.decorated_struct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDecoratedStruct() },
 },
 
     }
@@ -157,6 +167,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_set_i32_7194 = &thrift.TypeSpec{
         FullName: "module.set_i32_7194",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.set_i32_7194",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_set_i32,
 },
 
@@ -174,6 +185,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_map_i32_string_1261 = &thrift.TypeSpec{
         FullName: "module.map_i32_string_1261",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.map_i32_string_1261",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i32_string,
 },
 
@@ -181,14 +193,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_ContainerStruct = &thrift.TypeSpec{
         FullName: "module.ContainerStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewContainerStruct() },
+    ScopedName: "module.ContainerStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewContainerStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_CppTypeStruct = &thrift.TypeSpec{
         FullName: "module.CppTypeStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCppTypeStruct() },
+    ScopedName: "module.CppTypeStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCppTypeStruct() },
 },
 
     }
@@ -202,14 +218,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_VirtualStruct = &thrift.TypeSpec{
         FullName: "module.VirtualStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewVirtualStruct() },
+    ScopedName: "module.VirtualStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewVirtualStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_MyStructWithForwardRefEnum = &thrift.TypeSpec{
         FullName: "module.MyStructWithForwardRefEnum",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMyStructWithForwardRefEnum() },
+    ScopedName: "module.MyStructWithForwardRefEnum",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMyStructWithForwardRefEnum() },
 },
 
     }
@@ -223,14 +243,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_TrivialNumeric = &thrift.TypeSpec{
         FullName: "module.TrivialNumeric",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTrivialNumeric() },
+    ScopedName: "module.TrivialNumeric",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTrivialNumeric() },
 },
 
     }
     premadeCodecTypeSpec_module_TrivialNestedWithDefault = &thrift.TypeSpec{
         FullName: "module.TrivialNestedWithDefault",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTrivialNestedWithDefault() },
+    ScopedName: "module.TrivialNestedWithDefault",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTrivialNestedWithDefault() },
 },
 
     }
@@ -247,14 +271,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_ComplexString = &thrift.TypeSpec{
         FullName: "module.ComplexString",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewComplexString() },
+    ScopedName: "module.ComplexString",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewComplexString() },
 },
 
     }
     premadeCodecTypeSpec_module_ComplexNestedWithDefault = &thrift.TypeSpec{
         FullName: "module.ComplexNestedWithDefault",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewComplexNestedWithDefault() },
+    ScopedName: "module.ComplexNestedWithDefault",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewComplexNestedWithDefault() },
 },
 
     }
@@ -275,35 +303,45 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_MinPadding = &thrift.TypeSpec{
         FullName: "module.MinPadding",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMinPadding() },
+    ScopedName: "module.MinPadding",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMinPadding() },
 },
 
     }
     premadeCodecTypeSpec_module_MinPaddingWithCustomType = &thrift.TypeSpec{
         FullName: "module.MinPaddingWithCustomType",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMinPaddingWithCustomType() },
+    ScopedName: "module.MinPaddingWithCustomType",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMinPaddingWithCustomType() },
 },
 
     }
     premadeCodecTypeSpec_module_MyDataItem = &thrift.TypeSpec{
         FullName: "module.MyDataItem",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMyDataItem() },
+    ScopedName: "module.MyDataItem",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMyDataItem() },
 },
 
     }
     premadeCodecTypeSpec_module_MyStruct = &thrift.TypeSpec{
         FullName: "module.MyStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMyStruct() },
+    ScopedName: "module.MyStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMyStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_Renaming = &thrift.TypeSpec{
         FullName: "module.Renaming",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewRenaming() },
+    ScopedName: "module.Renaming",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewRenaming() },
 },
 
     }
@@ -317,6 +355,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_TBinary = &thrift.TypeSpec{
         FullName: "module.TBinary",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.TBinary",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_binary,
 },
 
@@ -324,6 +363,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_TBinary_8623 = &thrift.TypeSpec{
         FullName: "module.TBinary_8623",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.TBinary_8623",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_module_TBinary,
 },
 
@@ -331,6 +371,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_SomeListOfTypeMap_2468 = &thrift.TypeSpec{
         FullName: "module.SomeListOfTypeMap_2468",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.SomeListOfTypeMap_2468",
 	UnderlyingTypeSpec: included.GetCodecTypeSpec("included.SomeListOfTypeMap"),
 },
 
@@ -338,35 +379,45 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_AnnotatedTypes = &thrift.TypeSpec{
         FullName: "module.AnnotatedTypes",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAnnotatedTypes() },
+    ScopedName: "module.AnnotatedTypes",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAnnotatedTypes() },
 },
 
     }
     premadeCodecTypeSpec_module_ForwardUsageStruct = &thrift.TypeSpec{
         FullName: "module.ForwardUsageStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewForwardUsageStruct() },
+    ScopedName: "module.ForwardUsageStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewForwardUsageStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_ForwardUsageByRef = &thrift.TypeSpec{
         FullName: "module.ForwardUsageByRef",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewForwardUsageByRef() },
+    ScopedName: "module.ForwardUsageByRef",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewForwardUsageByRef() },
 },
 
     }
     premadeCodecTypeSpec_module_ForwardUsageRoot = &thrift.TypeSpec{
         FullName: "module.ForwardUsageRoot",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewForwardUsageRoot() },
+    ScopedName: "module.ForwardUsageRoot",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewForwardUsageRoot() },
 },
 
     }
     premadeCodecTypeSpec_module_IncompleteMapDep = &thrift.TypeSpec{
         FullName: "module.IncompleteMapDep",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewIncompleteMapDep() },
+    ScopedName: "module.IncompleteMapDep",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewIncompleteMapDep() },
 },
 
     }
@@ -383,14 +434,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_IncompleteMap = &thrift.TypeSpec{
         FullName: "module.IncompleteMap",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewIncompleteMap() },
+    ScopedName: "module.IncompleteMap",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewIncompleteMap() },
 },
 
     }
     premadeCodecTypeSpec_module_CompleteMapDep = &thrift.TypeSpec{
         FullName: "module.CompleteMapDep",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCompleteMapDep() },
+    ScopedName: "module.CompleteMapDep",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCompleteMapDep() },
 },
 
     }
@@ -407,14 +462,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_CompleteMap = &thrift.TypeSpec{
         FullName: "module.CompleteMap",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCompleteMap() },
+    ScopedName: "module.CompleteMap",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCompleteMap() },
 },
 
     }
     premadeCodecTypeSpec_module_IncompleteListDep = &thrift.TypeSpec{
         FullName: "module.IncompleteListDep",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewIncompleteListDep() },
+    ScopedName: "module.IncompleteListDep",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewIncompleteListDep() },
 },
 
     }
@@ -429,14 +488,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_IncompleteList = &thrift.TypeSpec{
         FullName: "module.IncompleteList",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewIncompleteList() },
+    ScopedName: "module.IncompleteList",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewIncompleteList() },
 },
 
     }
     premadeCodecTypeSpec_module_CompleteListDep = &thrift.TypeSpec{
         FullName: "module.CompleteListDep",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCompleteListDep() },
+    ScopedName: "module.CompleteListDep",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCompleteListDep() },
 },
 
     }
@@ -451,14 +514,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_CompleteList = &thrift.TypeSpec{
         FullName: "module.CompleteList",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCompleteList() },
+    ScopedName: "module.CompleteList",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCompleteList() },
 },
 
     }
     premadeCodecTypeSpec_module_AdaptedListDep = &thrift.TypeSpec{
         FullName: "module.AdaptedListDep",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAdaptedListDep() },
+    ScopedName: "module.AdaptedListDep",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAdaptedListDep() },
 },
 
     }
@@ -473,14 +540,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_AdaptedList = &thrift.TypeSpec{
         FullName: "module.AdaptedList",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAdaptedList() },
+    ScopedName: "module.AdaptedList",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAdaptedList() },
 },
 
     }
     premadeCodecTypeSpec_module_DependentAdaptedListDep = &thrift.TypeSpec{
         FullName: "module.DependentAdaptedListDep",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDependentAdaptedListDep() },
+    ScopedName: "module.DependentAdaptedListDep",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDependentAdaptedListDep() },
 },
 
     }
@@ -495,13 +566,16 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_DependentAdaptedList = &thrift.TypeSpec{
         FullName: "module.DependentAdaptedList",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDependentAdaptedList() },
+    ScopedName: "module.DependentAdaptedList",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDependentAdaptedList() },
 },
 
     }
     premadeCodecTypeSpec_module_list_i32_9187 = &thrift.TypeSpec{
         FullName: "module.list_i32_9187",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.list_i32_9187",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_list_i32,
 },
 
@@ -509,6 +583,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_set_i32_7070 = &thrift.TypeSpec{
         FullName: "module.set_i32_7070",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.set_i32_7070",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_set_i32,
 },
 
@@ -526,6 +601,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_map_i32_i32_9565 = &thrift.TypeSpec{
         FullName: "module.map_i32_i32_9565",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.map_i32_i32_9565",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_i32_i32,
 },
 
@@ -533,6 +609,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_string_5252 = &thrift.TypeSpec{
         FullName: "module.string_5252",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.string_5252",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
@@ -540,6 +617,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_i32_9314 = &thrift.TypeSpec{
         FullName: "module.i32_9314",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.i32_9314",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
@@ -547,20 +625,25 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_AllocatorAware = &thrift.TypeSpec{
         FullName: "module.AllocatorAware",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAllocatorAware() },
+    ScopedName: "module.AllocatorAware",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAllocatorAware() },
 },
 
     }
     premadeCodecTypeSpec_module_AllocatorAware2 = &thrift.TypeSpec{
         FullName: "module.AllocatorAware2",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAllocatorAware2() },
+    ScopedName: "module.AllocatorAware2",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAllocatorAware2() },
 },
 
     }
     premadeCodecTypeSpec_module_IntTypedef = &thrift.TypeSpec{
         FullName: "module.IntTypedef",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.IntTypedef",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
@@ -568,6 +651,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_UintTypedef = &thrift.TypeSpec{
         FullName: "module.UintTypedef",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.UintTypedef",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_module_IntTypedef,
 },
 
@@ -575,14 +659,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_TypedefStruct = &thrift.TypeSpec{
         FullName: "module.TypedefStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTypedefStruct() },
+    ScopedName: "module.TypedefStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTypedefStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_StructWithDoubleUnderscores = &thrift.TypeSpec{
         FullName: "module.StructWithDoubleUnderscores",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStructWithDoubleUnderscores() },
+    ScopedName: "module.StructWithDoubleUnderscores",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStructWithDoubleUnderscores() },
 },
 
     }
@@ -653,6 +741,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_empty_struct = &thrift.StructSpec{
     Name:                 "empty_struct",
+    ScopedName:           "module.empty_struct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -664,6 +753,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_decorated_struct = &thrift.StructSpec{
     Name:                 "decorated_struct",
+    ScopedName:           "module.decorated_struct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -685,6 +775,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ContainerStruct = &thrift.StructSpec{
     Name:                 "ContainerStruct",
+    ScopedName:           "module.ContainerStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -776,6 +867,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_CppTypeStruct = &thrift.StructSpec{
     Name:                 "CppTypeStruct",
+    ScopedName:           "module.CppTypeStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -797,6 +889,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_VirtualStruct = &thrift.StructSpec{
     Name:                 "VirtualStruct",
+    ScopedName:           "module.VirtualStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -818,6 +911,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MyStructWithForwardRefEnum = &thrift.StructSpec{
     Name:                 "MyStructWithForwardRefEnum",
+    ScopedName:           "module.MyStructWithForwardRefEnum",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -849,6 +943,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_TrivialNumeric = &thrift.StructSpec{
     Name:                 "TrivialNumeric",
+    ScopedName:           "module.TrivialNumeric",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -880,6 +975,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_TrivialNestedWithDefault = &thrift.StructSpec{
     Name:                 "TrivialNestedWithDefault",
+    ScopedName:           "module.TrivialNestedWithDefault",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -911,6 +1007,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ComplexString = &thrift.StructSpec{
     Name:                 "ComplexString",
+    ScopedName:           "module.ComplexString",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -942,6 +1039,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ComplexNestedWithDefault = &thrift.StructSpec{
     Name:                 "ComplexNestedWithDefault",
+    ScopedName:           "module.ComplexNestedWithDefault",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -973,6 +1071,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MinPadding = &thrift.StructSpec{
     Name:                 "MinPadding",
+    ScopedName:           "module.MinPadding",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1034,6 +1133,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MinPaddingWithCustomType = &thrift.StructSpec{
     Name:                 "MinPaddingWithCustomType",
+    ScopedName:           "module.MinPaddingWithCustomType",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1095,6 +1195,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MyStruct = &thrift.StructSpec{
     Name:                 "MyStruct",
+    ScopedName:           "module.MyStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1146,6 +1247,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MyDataItem = &thrift.StructSpec{
     Name:                 "MyDataItem",
+    ScopedName:           "module.MyDataItem",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1157,6 +1259,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Renaming = &thrift.StructSpec{
     Name:                 "Renaming",
+    ScopedName:           "module.Renaming",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1178,6 +1281,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_AnnotatedTypes = &thrift.StructSpec{
     Name:                 "AnnotatedTypes",
+    ScopedName:           "module.AnnotatedTypes",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1209,6 +1313,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ForwardUsageRoot = &thrift.StructSpec{
     Name:                 "ForwardUsageRoot",
+    ScopedName:           "module.ForwardUsageRoot",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1240,6 +1345,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ForwardUsageStruct = &thrift.StructSpec{
     Name:                 "ForwardUsageStruct",
+    ScopedName:           "module.ForwardUsageStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1261,6 +1367,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ForwardUsageByRef = &thrift.StructSpec{
     Name:                 "ForwardUsageByRef",
+    ScopedName:           "module.ForwardUsageByRef",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1282,6 +1389,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_IncompleteMap = &thrift.StructSpec{
     Name:                 "IncompleteMap",
+    ScopedName:           "module.IncompleteMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1303,6 +1411,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_IncompleteMapDep = &thrift.StructSpec{
     Name:                 "IncompleteMapDep",
+    ScopedName:           "module.IncompleteMapDep",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1314,6 +1423,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_CompleteMap = &thrift.StructSpec{
     Name:                 "CompleteMap",
+    ScopedName:           "module.CompleteMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1335,6 +1445,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_CompleteMapDep = &thrift.StructSpec{
     Name:                 "CompleteMapDep",
+    ScopedName:           "module.CompleteMapDep",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1346,6 +1457,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_IncompleteList = &thrift.StructSpec{
     Name:                 "IncompleteList",
+    ScopedName:           "module.IncompleteList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1367,6 +1479,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_IncompleteListDep = &thrift.StructSpec{
     Name:                 "IncompleteListDep",
+    ScopedName:           "module.IncompleteListDep",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1378,6 +1491,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_CompleteList = &thrift.StructSpec{
     Name:                 "CompleteList",
+    ScopedName:           "module.CompleteList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1399,6 +1513,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_CompleteListDep = &thrift.StructSpec{
     Name:                 "CompleteListDep",
+    ScopedName:           "module.CompleteListDep",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1410,6 +1525,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_AdaptedList = &thrift.StructSpec{
     Name:                 "AdaptedList",
+    ScopedName:           "module.AdaptedList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1431,6 +1547,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_AdaptedListDep = &thrift.StructSpec{
     Name:                 "AdaptedListDep",
+    ScopedName:           "module.AdaptedListDep",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1452,6 +1569,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_DependentAdaptedList = &thrift.StructSpec{
     Name:                 "DependentAdaptedList",
+    ScopedName:           "module.DependentAdaptedList",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1473,6 +1591,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_DependentAdaptedListDep = &thrift.StructSpec{
     Name:                 "DependentAdaptedListDep",
+    ScopedName:           "module.DependentAdaptedListDep",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1494,6 +1613,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_AllocatorAware = &thrift.StructSpec{
     Name:                 "AllocatorAware",
+    ScopedName:           "module.AllocatorAware",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1575,6 +1695,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_AllocatorAware2 = &thrift.StructSpec{
     Name:                 "AllocatorAware2",
+    ScopedName:           "module.AllocatorAware2",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1606,6 +1727,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_TypedefStruct = &thrift.StructSpec{
     Name:                 "TypedefStruct",
+    ScopedName:           "module.TypedefStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1647,6 +1769,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_StructWithDoubleUnderscores = &thrift.StructSpec{
     Name:                 "StructWithDoubleUnderscores",
+    ScopedName:           "module.StructWithDoubleUnderscores",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1668,6 +1791,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqSomeServiceBounceMap = &thrift.StructSpec{
     Name:                 "reqSomeServiceBounceMap",
+    ScopedName:           "module.reqSomeServiceBounceMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1689,6 +1813,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respSomeServiceBounceMap = &thrift.StructSpec{
     Name:                 "respSomeServiceBounceMap",
+    ScopedName:           "module.respSomeServiceBounceMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1710,6 +1835,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqSomeServiceBinaryKeyedMap = &thrift.StructSpec{
     Name:                 "reqSomeServiceBinaryKeyedMap",
+    ScopedName:           "module.reqSomeServiceBinaryKeyedMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -1731,6 +1857,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respSomeServiceBinaryKeyedMap = &thrift.StructSpec{
     Name:                 "respSomeServiceBinaryKeyedMap",
+    ScopedName:           "module.respSomeServiceBinaryKeyedMap",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

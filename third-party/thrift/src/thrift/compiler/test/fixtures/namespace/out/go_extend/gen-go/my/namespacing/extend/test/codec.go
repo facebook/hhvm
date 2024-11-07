@@ -45,6 +45,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_reqExtendTestServiceCheck = &thrift.StructSpec{
     Name:                 "reqExtendTestServiceCheck",
+    ScopedName:           "extend.reqExtendTestServiceCheck",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -66,6 +67,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respExtendTestServiceCheck = &thrift.StructSpec{
     Name:                 "respExtendTestServiceCheck",
+    ScopedName:           "extend.respExtendTestServiceCheck",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

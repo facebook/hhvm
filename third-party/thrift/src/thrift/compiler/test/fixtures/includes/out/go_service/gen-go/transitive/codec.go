@@ -35,7 +35,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_transitive_Foo = &thrift.TypeSpec{
         FullName: "transitive.Foo",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFoo() },
+    ScopedName: "transitive.Foo",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFoo() },
 },
 
     }
@@ -50,6 +52,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Foo = &thrift.StructSpec{
     Name:                 "Foo",
+    ScopedName:           "transitive.Foo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

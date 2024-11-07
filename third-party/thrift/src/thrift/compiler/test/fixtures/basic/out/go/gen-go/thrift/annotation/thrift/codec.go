@@ -48,13 +48,17 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_thrift_RpcPriority = &thrift.TypeSpec{
         FullName: "thrift.RpcPriority",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "thrift.RpcPriority",
+},
 
     }
     premadeCodecTypeSpec_thrift_Experimental = &thrift.TypeSpec{
         FullName: "thrift.Experimental",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewExperimental() },
+    ScopedName: "thrift.Experimental",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewExperimental() },
 },
 
     }
@@ -86,7 +90,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_thrift_ReserveIds = &thrift.TypeSpec{
         FullName: "thrift.ReserveIds",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewReserveIds() },
+    ScopedName: "thrift.ReserveIds",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewReserveIds() },
 },
 
     }
@@ -100,63 +106,81 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility = &thrift.TypeSpec{
         FullName: "thrift.RequiresBackwardCompatibility",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewRequiresBackwardCompatibility() },
+    ScopedName: "thrift.RequiresBackwardCompatibility",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewRequiresBackwardCompatibility() },
 },
 
     }
     premadeCodecTypeSpec_thrift_TerseWrite = &thrift.TypeSpec{
         FullName: "thrift.TerseWrite",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTerseWrite() },
+    ScopedName: "thrift.TerseWrite",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTerseWrite() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Box = &thrift.TypeSpec{
         FullName: "thrift.Box",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewBox() },
+    ScopedName: "thrift.Box",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewBox() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Mixin = &thrift.TypeSpec{
         FullName: "thrift.Mixin",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMixin() },
+    ScopedName: "thrift.Mixin",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMixin() },
 },
 
     }
     premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder = &thrift.TypeSpec{
         FullName: "thrift.SerializeInFieldIdOrder",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewSerializeInFieldIdOrder() },
+    ScopedName: "thrift.SerializeInFieldIdOrder",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewSerializeInFieldIdOrder() },
 },
 
     }
     premadeCodecTypeSpec_thrift_BitmaskEnum = &thrift.TypeSpec{
         FullName: "thrift.BitmaskEnum",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewBitmaskEnum() },
+    ScopedName: "thrift.BitmaskEnum",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewBitmaskEnum() },
 },
 
     }
     premadeCodecTypeSpec_thrift_ExceptionMessage = &thrift.TypeSpec{
         FullName: "thrift.ExceptionMessage",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewExceptionMessage() },
+    ScopedName: "thrift.ExceptionMessage",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewExceptionMessage() },
 },
 
     }
     premadeCodecTypeSpec_thrift_InternBox = &thrift.TypeSpec{
         FullName: "thrift.InternBox",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewInternBox() },
+    ScopedName: "thrift.InternBox",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewInternBox() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Serial = &thrift.TypeSpec{
         FullName: "thrift.Serial",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewSerial() },
+    ScopedName: "thrift.Serial",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewSerial() },
 },
 
     }
@@ -170,14 +194,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_thrift_Uri = &thrift.TypeSpec{
         FullName: "thrift.Uri",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUri() },
+    ScopedName: "thrift.Uri",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewUri() },
 },
 
     }
     premadeCodecTypeSpec_thrift_Priority = &thrift.TypeSpec{
         FullName: "thrift.Priority",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewPriority() },
+    ScopedName: "thrift.Priority",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewPriority() },
 },
 
     }
@@ -194,21 +222,27 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations = &thrift.TypeSpec{
         FullName: "thrift.DeprecatedUnvalidatedAnnotations",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDeprecatedUnvalidatedAnnotations() },
+    ScopedName: "thrift.DeprecatedUnvalidatedAnnotations",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDeprecatedUnvalidatedAnnotations() },
 },
 
     }
     premadeCodecTypeSpec_thrift_AllowReservedIdentifier = &thrift.TypeSpec{
         FullName: "thrift.AllowReservedIdentifier",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAllowReservedIdentifier() },
+    ScopedName: "thrift.AllowReservedIdentifier",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAllowReservedIdentifier() },
 },
 
     }
     premadeCodecTypeSpec_thrift_AllowReservedFilename = &thrift.TypeSpec{
         FullName: "thrift.AllowReservedFilename",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAllowReservedFilename() },
+    ScopedName: "thrift.AllowReservedFilename",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAllowReservedFilename() },
 },
 
     }
@@ -238,6 +272,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Experimental = &thrift.StructSpec{
     Name:                 "Experimental",
+    ScopedName:           "thrift.Experimental",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -249,6 +284,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ReserveIds = &thrift.StructSpec{
     Name:                 "ReserveIds",
+    ScopedName:           "thrift.ReserveIds",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -280,6 +316,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_RequiresBackwardCompatibility = &thrift.StructSpec{
     Name:                 "RequiresBackwardCompatibility",
+    ScopedName:           "thrift.RequiresBackwardCompatibility",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -301,6 +338,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_TerseWrite = &thrift.StructSpec{
     Name:                 "TerseWrite",
+    ScopedName:           "thrift.TerseWrite",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -312,6 +350,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Box = &thrift.StructSpec{
     Name:                 "Box",
+    ScopedName:           "thrift.Box",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -323,6 +362,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Mixin = &thrift.StructSpec{
     Name:                 "Mixin",
+    ScopedName:           "thrift.Mixin",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -334,6 +374,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_SerializeInFieldIdOrder = &thrift.StructSpec{
     Name:                 "SerializeInFieldIdOrder",
+    ScopedName:           "thrift.SerializeInFieldIdOrder",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -345,6 +386,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_BitmaskEnum = &thrift.StructSpec{
     Name:                 "BitmaskEnum",
+    ScopedName:           "thrift.BitmaskEnum",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -356,6 +398,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ExceptionMessage = &thrift.StructSpec{
     Name:                 "ExceptionMessage",
+    ScopedName:           "thrift.ExceptionMessage",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -367,6 +410,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_InternBox = &thrift.StructSpec{
     Name:                 "InternBox",
+    ScopedName:           "thrift.InternBox",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -378,6 +422,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Serial = &thrift.StructSpec{
     Name:                 "Serial",
+    ScopedName:           "thrift.Serial",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -389,6 +434,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Uri = &thrift.StructSpec{
     Name:                 "Uri",
+    ScopedName:           "thrift.Uri",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -410,6 +456,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Priority = &thrift.StructSpec{
     Name:                 "Priority",
+    ScopedName:           "thrift.Priority",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -431,6 +478,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_DeprecatedUnvalidatedAnnotations = &thrift.StructSpec{
     Name:                 "DeprecatedUnvalidatedAnnotations",
+    ScopedName:           "thrift.DeprecatedUnvalidatedAnnotations",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -452,6 +500,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_AllowReservedIdentifier = &thrift.StructSpec{
     Name:                 "AllowReservedIdentifier",
+    ScopedName:           "thrift.AllowReservedIdentifier",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -463,6 +512,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_AllowReservedFilename = &thrift.StructSpec{
     Name:                 "AllowReservedFilename",
+    ScopedName:           "thrift.AllowReservedFilename",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

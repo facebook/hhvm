@@ -43,119 +43,153 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_scope_Transitive = &thrift.TypeSpec{
         FullName: "scope.Transitive",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTransitive() },
+    ScopedName: "scope.Transitive",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTransitive() },
 },
 
     }
     premadeCodecTypeSpec_scope_Program = &thrift.TypeSpec{
         FullName: "scope.Program",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewProgram() },
+    ScopedName: "scope.Program",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewProgram() },
 },
 
     }
     premadeCodecTypeSpec_scope_Struct = &thrift.TypeSpec{
         FullName: "scope.Struct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStruct() },
+    ScopedName: "scope.Struct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStruct() },
 },
 
     }
     premadeCodecTypeSpec_scope_Union = &thrift.TypeSpec{
         FullName: "scope.Union",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUnion() },
+    ScopedName: "scope.Union",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewUnion() },
 },
 
     }
     premadeCodecTypeSpec_scope_Exception = &thrift.TypeSpec{
         FullName: "scope.Exception",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewException() },
+    ScopedName: "scope.Exception",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewException() },
 },
 
     }
     premadeCodecTypeSpec_scope_Field = &thrift.TypeSpec{
         FullName: "scope.Field",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewField() },
+    ScopedName: "scope.Field",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewField() },
 },
 
     }
     premadeCodecTypeSpec_scope_Typedef = &thrift.TypeSpec{
         FullName: "scope.Typedef",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTypedef() },
+    ScopedName: "scope.Typedef",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTypedef() },
 },
 
     }
     premadeCodecTypeSpec_scope_Service = &thrift.TypeSpec{
         FullName: "scope.Service",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewService() },
+    ScopedName: "scope.Service",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewService() },
 },
 
     }
     premadeCodecTypeSpec_scope_Interaction = &thrift.TypeSpec{
         FullName: "scope.Interaction",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewInteraction() },
+    ScopedName: "scope.Interaction",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewInteraction() },
 },
 
     }
     premadeCodecTypeSpec_scope_Function = &thrift.TypeSpec{
         FullName: "scope.Function",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFunction() },
+    ScopedName: "scope.Function",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFunction() },
 },
 
     }
     premadeCodecTypeSpec_scope_EnumValue = &thrift.TypeSpec{
         FullName: "scope.EnumValue",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewEnumValue() },
+    ScopedName: "scope.EnumValue",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewEnumValue() },
 },
 
     }
     premadeCodecTypeSpec_scope_Const = &thrift.TypeSpec{
         FullName: "scope.Const",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewConst() },
+    ScopedName: "scope.Const",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewConst() },
 },
 
     }
     premadeCodecTypeSpec_scope_Enum = &thrift.TypeSpec{
         FullName: "scope.Enum",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewEnum() },
+    ScopedName: "scope.Enum",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewEnum() },
 },
 
     }
     premadeCodecTypeSpec_scope_Structured = &thrift.TypeSpec{
         FullName: "scope.Structured",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStructured() },
+    ScopedName: "scope.Structured",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStructured() },
 },
 
     }
     premadeCodecTypeSpec_scope_Interface = &thrift.TypeSpec{
         FullName: "scope.Interface",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewInterface() },
+    ScopedName: "scope.Interface",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewInterface() },
 },
 
     }
     premadeCodecTypeSpec_scope_RootDefinition = &thrift.TypeSpec{
         FullName: "scope.RootDefinition",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewRootDefinition() },
+    ScopedName: "scope.RootDefinition",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewRootDefinition() },
 },
 
     }
     premadeCodecTypeSpec_scope_Definition = &thrift.TypeSpec{
         FullName: "scope.Definition",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDefinition() },
+    ScopedName: "scope.Definition",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDefinition() },
 },
 
     }
@@ -186,6 +220,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Transitive = &thrift.StructSpec{
     Name:                 "Transitive",
+    ScopedName:           "scope.Transitive",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -197,6 +232,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Program = &thrift.StructSpec{
     Name:                 "Program",
+    ScopedName:           "scope.Program",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -208,6 +244,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Struct = &thrift.StructSpec{
     Name:                 "Struct",
+    ScopedName:           "scope.Struct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -219,6 +256,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Union = &thrift.StructSpec{
     Name:                 "Union",
+    ScopedName:           "scope.Union",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -230,6 +268,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Exception = &thrift.StructSpec{
     Name:                 "Exception",
+    ScopedName:           "scope.Exception",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -241,6 +280,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Field = &thrift.StructSpec{
     Name:                 "Field",
+    ScopedName:           "scope.Field",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -252,6 +292,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Typedef = &thrift.StructSpec{
     Name:                 "Typedef",
+    ScopedName:           "scope.Typedef",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -263,6 +304,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Service = &thrift.StructSpec{
     Name:                 "Service",
+    ScopedName:           "scope.Service",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -274,6 +316,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Interaction = &thrift.StructSpec{
     Name:                 "Interaction",
+    ScopedName:           "scope.Interaction",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -285,6 +328,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Function = &thrift.StructSpec{
     Name:                 "Function",
+    ScopedName:           "scope.Function",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -296,6 +340,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_EnumValue = &thrift.StructSpec{
     Name:                 "EnumValue",
+    ScopedName:           "scope.EnumValue",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -307,6 +352,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Const = &thrift.StructSpec{
     Name:                 "Const",
+    ScopedName:           "scope.Const",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -318,6 +364,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Enum = &thrift.StructSpec{
     Name:                 "Enum",
+    ScopedName:           "scope.Enum",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -329,6 +376,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Structured = &thrift.StructSpec{
     Name:                 "Structured",
+    ScopedName:           "scope.Structured",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -340,6 +388,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Interface = &thrift.StructSpec{
     Name:                 "Interface",
+    ScopedName:           "scope.Interface",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -351,6 +400,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_RootDefinition = &thrift.StructSpec{
     Name:                 "RootDefinition",
+    ScopedName:           "scope.RootDefinition",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -362,6 +412,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Definition = &thrift.StructSpec{
     Name:                 "Definition",
+    ScopedName:           "scope.Definition",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

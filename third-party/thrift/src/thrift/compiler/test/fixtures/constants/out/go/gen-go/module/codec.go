@@ -46,17 +46,23 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_EmptyEnum = &thrift.TypeSpec{
         FullName: "module.EmptyEnum",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.EmptyEnum",
+},
 
     }
     premadeCodecTypeSpec_module_City = &thrift.TypeSpec{
         FullName: "module.City",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.City",
+},
 
     }
     premadeCodecTypeSpec_module_Company = &thrift.TypeSpec{
         FullName: "module.Company",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.Company",
+},
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -83,21 +89,27 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Internship = &thrift.TypeSpec{
         FullName: "module.Internship",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewInternship() },
+    ScopedName: "module.Internship",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewInternship() },
 },
 
     }
     premadeCodecTypeSpec_module_Range = &thrift.TypeSpec{
         FullName: "module.Range",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewRange() },
+    ScopedName: "module.Range",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewRange() },
 },
 
     }
     premadeCodecTypeSpec_module_struct1 = &thrift.TypeSpec{
         FullName: "module.struct1",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStruct1() },
+    ScopedName: "module.struct1",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStruct1() },
 },
 
     }
@@ -112,14 +124,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_struct2 = &thrift.TypeSpec{
         FullName: "module.struct2",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStruct2() },
+    ScopedName: "module.struct2",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStruct2() },
 },
 
     }
     premadeCodecTypeSpec_module_struct3 = &thrift.TypeSpec{
         FullName: "module.struct3",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStruct3() },
+    ScopedName: "module.struct3",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStruct3() },
 },
 
     }
@@ -133,27 +149,34 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_struct4 = &thrift.TypeSpec{
         FullName: "module.struct4",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStruct4() },
+    ScopedName: "module.struct4",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStruct4() },
 },
 
     }
     premadeCodecTypeSpec_module_union1 = &thrift.TypeSpec{
         FullName: "module.union1",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUnion1() },
+    ScopedName: "module.union1",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewUnion1() },
 },
 
     }
     premadeCodecTypeSpec_module_union2 = &thrift.TypeSpec{
         FullName: "module.union2",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUnion2() },
+    ScopedName: "module.union2",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewUnion2() },
 },
 
     }
     premadeCodecTypeSpec_module_MyCompany = &thrift.TypeSpec{
         FullName: "module.MyCompany",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.MyCompany",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_module_Company,
 },
 
@@ -161,6 +184,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_MyStringIdentifier = &thrift.TypeSpec{
         FullName: "module.MyStringIdentifier",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.MyStringIdentifier",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
@@ -168,6 +192,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_MyIntIdentifier = &thrift.TypeSpec{
         FullName: "module.MyIntIdentifier",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.MyIntIdentifier",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
@@ -185,6 +210,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_MyMapIdentifier = &thrift.TypeSpec{
         FullName: "module.MyMapIdentifier",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.MyMapIdentifier",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_map_string_string,
 },
 
@@ -207,6 +233,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Internship = &thrift.StructSpec{
     Name:                 "Internship",
+    ScopedName:           "module.Internship",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -268,6 +295,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Range = &thrift.StructSpec{
     Name:                 "Range",
+    ScopedName:           "module.Range",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -299,6 +327,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_struct1 = &thrift.StructSpec{
     Name:                 "struct1",
+    ScopedName:           "module.struct1",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -330,6 +359,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_struct2 = &thrift.StructSpec{
     Name:                 "struct2",
+    ScopedName:           "module.struct2",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -381,6 +411,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_struct3 = &thrift.StructSpec{
     Name:                 "struct3",
+    ScopedName:           "module.struct3",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -422,6 +453,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_struct4 = &thrift.StructSpec{
     Name:                 "struct4",
+    ScopedName:           "module.struct4",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -463,6 +495,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_union1 = &thrift.StructSpec{
     Name:                 "union1",
+    ScopedName:           "module.union1",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -494,6 +527,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_union2 = &thrift.StructSpec{
     Name:                 "union2",
+    ScopedName:           "module.union2",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

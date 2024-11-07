@@ -28,14 +28,18 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Empty = &thrift.TypeSpec{
         FullName: "module.Empty",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewEmpty() },
+    ScopedName: "module.Empty",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewEmpty() },
 },
 
     }
     premadeCodecTypeSpec_module_Nada = &thrift.TypeSpec{
         FullName: "module.Nada",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewNada() },
+    ScopedName: "module.Nada",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewNada() },
 },
 
     }
@@ -51,6 +55,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Empty = &thrift.StructSpec{
     Name:                 "Empty",
+    ScopedName:           "module.Empty",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -62,6 +67,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Nada = &thrift.StructSpec{
     Name:                 "Nada",
+    ScopedName:           "module.Nada",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

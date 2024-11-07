@@ -35,7 +35,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_hsmodule_HsFoo = &thrift.TypeSpec{
         FullName: "hsmodule.HsFoo",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewHsFoo() },
+    ScopedName: "hsmodule.HsFoo",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewHsFoo() },
 },
 
     }
@@ -52,6 +54,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_HsFoo = &thrift.StructSpec{
     Name:                 "HsFoo",
+    ScopedName:           "hsmodule.HsFoo",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -73,6 +76,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqHsTestServiceInit = &thrift.StructSpec{
     Name:                 "reqHsTestServiceInit",
+    ScopedName:           "hsmodule.reqHsTestServiceInit",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -94,6 +98,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respHsTestServiceInit = &thrift.StructSpec{
     Name:                 "respHsTestServiceInit",
+    ScopedName:           "hsmodule.respHsTestServiceInit",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

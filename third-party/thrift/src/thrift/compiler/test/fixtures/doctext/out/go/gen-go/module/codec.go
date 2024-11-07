@@ -35,7 +35,9 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_B = &thrift.TypeSpec{
         FullName: "module.B",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "module.B",
+},
 
     }
     premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
@@ -48,7 +50,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_A = &thrift.TypeSpec{
         FullName: "module.A",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewA() },
+    ScopedName: "module.A",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewA() },
 },
 
     }
@@ -62,20 +66,25 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_U = &thrift.TypeSpec{
         FullName: "module.U",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewU() },
+    ScopedName: "module.U",
+    IsUnion:    true,
+    NewFunc:    func() thrift.Struct { return NewU() },
 },
 
     }
     premadeCodecTypeSpec_module_Bang = &thrift.TypeSpec{
         FullName: "module.Bang",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewBang() },
+    ScopedName: "module.Bang",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewBang() },
 },
 
     }
     premadeCodecTypeSpec_module_lanyard = &thrift.TypeSpec{
         FullName: "module.lanyard",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.lanyard",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
@@ -83,6 +92,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_number = &thrift.TypeSpec{
         FullName: "module.number",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module.number",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
@@ -119,6 +129,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_A = &thrift.StructSpec{
     Name:                 "A",
+    ScopedName:           "module.A",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -140,6 +151,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_U = &thrift.StructSpec{
     Name:                 "U",
+    ScopedName:           "module.U",
     IsUnion:              true,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -171,6 +183,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Bang = &thrift.StructSpec{
     Name:                 "Bang",
+    ScopedName:           "module.Bang",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -192,6 +205,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqCF = &thrift.StructSpec{
     Name:                 "reqCF",
+    ScopedName:           "module.reqCF",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -203,6 +217,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respCF = &thrift.StructSpec{
     Name:                 "respCF",
+    ScopedName:           "module.respCF",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -214,6 +229,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqCThing = &thrift.StructSpec{
     Name:                 "reqCThing",
+    ScopedName:           "module.reqCThing",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -255,6 +271,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respCThing = &thrift.StructSpec{
     Name:                 "respCThing",
+    ScopedName:           "module.respCThing",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

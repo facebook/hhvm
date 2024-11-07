@@ -43,28 +43,36 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_Fiery = &thrift.TypeSpec{
         FullName: "module.Fiery",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFiery() },
+    ScopedName: "module.Fiery",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFiery() },
 },
 
     }
     premadeCodecTypeSpec_module_Serious = &thrift.TypeSpec{
         FullName: "module.Serious",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewSerious() },
+    ScopedName: "module.Serious",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewSerious() },
 },
 
     }
     premadeCodecTypeSpec_module_ComplexFieldNames = &thrift.TypeSpec{
         FullName: "module.ComplexFieldNames",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewComplexFieldNames() },
+    ScopedName: "module.ComplexFieldNames",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewComplexFieldNames() },
 },
 
     }
     premadeCodecTypeSpec_module_CustomFieldNames = &thrift.TypeSpec{
         FullName: "module.CustomFieldNames",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCustomFieldNames() },
+    ScopedName: "module.CustomFieldNames",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCustomFieldNames() },
 },
 
     }
@@ -78,21 +86,27 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_ExceptionWithPrimitiveField = &thrift.TypeSpec{
         FullName: "module.ExceptionWithPrimitiveField",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewExceptionWithPrimitiveField() },
+    ScopedName: "module.ExceptionWithPrimitiveField",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewExceptionWithPrimitiveField() },
 },
 
     }
     premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation = &thrift.TypeSpec{
         FullName: "module.ExceptionWithStructuredAnnotation",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewExceptionWithStructuredAnnotation() },
+    ScopedName: "module.ExceptionWithStructuredAnnotation",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewExceptionWithStructuredAnnotation() },
 },
 
     }
     premadeCodecTypeSpec_module_Banal = &thrift.TypeSpec{
         FullName: "module.Banal",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewBanal() },
+    ScopedName: "module.Banal",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewBanal() },
 },
 
     }
@@ -128,6 +142,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Fiery = &thrift.StructSpec{
     Name:                 "Fiery",
+    ScopedName:           "module.Fiery",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -149,6 +164,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Serious = &thrift.StructSpec{
     Name:                 "Serious",
+    ScopedName:           "module.Serious",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -170,6 +186,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ComplexFieldNames = &thrift.StructSpec{
     Name:                 "ComplexFieldNames",
+    ScopedName:           "module.ComplexFieldNames",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -201,6 +218,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_CustomFieldNames = &thrift.StructSpec{
     Name:                 "CustomFieldNames",
+    ScopedName:           "module.CustomFieldNames",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -232,6 +250,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ExceptionWithPrimitiveField = &thrift.StructSpec{
     Name:                 "ExceptionWithPrimitiveField",
+    ScopedName:           "module.ExceptionWithPrimitiveField",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -263,6 +282,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ExceptionWithStructuredAnnotation = &thrift.StructSpec{
     Name:                 "ExceptionWithStructuredAnnotation",
+    ScopedName:           "module.ExceptionWithStructuredAnnotation",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -294,6 +314,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Banal = &thrift.StructSpec{
     Name:                 "Banal",
+    ScopedName:           "module.Banal",
     IsUnion:              false,
     IsException:          true,
     FieldSpecs:           []thrift.FieldSpec{
@@ -305,6 +326,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqRaiserDoBland = &thrift.StructSpec{
     Name:                 "reqRaiserDoBland",
+    ScopedName:           "module.reqRaiserDoBland",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -316,6 +338,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respRaiserDoBland = &thrift.StructSpec{
     Name:                 "respRaiserDoBland",
+    ScopedName:           "module.respRaiserDoBland",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -327,6 +350,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqRaiserDoRaise = &thrift.StructSpec{
     Name:                 "reqRaiserDoRaise",
+    ScopedName:           "module.reqRaiserDoRaise",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -338,6 +362,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respRaiserDoRaise = &thrift.StructSpec{
     Name:                 "respRaiserDoRaise",
+    ScopedName:           "module.respRaiserDoRaise",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -379,6 +404,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqRaiserGet200 = &thrift.StructSpec{
     Name:                 "reqRaiserGet200",
+    ScopedName:           "module.reqRaiserGet200",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -390,6 +416,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respRaiserGet200 = &thrift.StructSpec{
     Name:                 "respRaiserGet200",
+    ScopedName:           "module.respRaiserGet200",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -411,6 +438,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqRaiserGet500 = &thrift.StructSpec{
     Name:                 "reqRaiserGet500",
+    ScopedName:           "module.reqRaiserGet500",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -422,6 +450,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respRaiserGet500 = &thrift.StructSpec{
     Name:                 "respRaiserGet500",
+    ScopedName:           "module.respRaiserGet500",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

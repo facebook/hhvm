@@ -21,6 +21,7 @@
 }}
 &thrift.StructSpec{
     Name:                 "{{struct:name}}",
+    ScopedName:           "{{struct:scoped_name}}",
     IsUnion:              {{#struct:union?}}true{{/struct:union?}}{{^struct:union?}}false{{/struct:union?}},
     IsException:          {{#struct:exception?}}true{{/struct:exception?}}{{^struct:exception?}}false{{/struct:exception?}},
     FieldSpecs:           []thrift.FieldSpec{

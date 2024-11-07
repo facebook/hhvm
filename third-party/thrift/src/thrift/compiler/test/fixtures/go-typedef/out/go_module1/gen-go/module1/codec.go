@@ -59,6 +59,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Plate = &thrift.TypeSpec{
         FullName: "module1.Plate",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.Plate",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
@@ -73,6 +74,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Year = &thrift.TypeSpec{
         FullName: "module1.Year",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.Year",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
@@ -88,6 +90,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Drivers = &thrift.TypeSpec{
         FullName: "module1.Drivers",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.Drivers",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_list_string,
 },
 
@@ -95,6 +98,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Accessory = &thrift.TypeSpec{
         FullName: "module1.Accessory",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.Accessory",
 	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.Accessory"),
 },
 
@@ -110,6 +114,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_PartName = &thrift.TypeSpec{
         FullName: "module1.PartName",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.PartName",
 	UnderlyingTypeSpec: module0.GetCodecTypeSpec("module0.PartName"),
 },
 
@@ -127,7 +132,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Automobile = &thrift.TypeSpec{
         FullName: "module1.Automobile",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAutomobile() },
+    ScopedName: "module1.Automobile",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAutomobile() },
 },
 
     }
@@ -141,7 +148,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_MapKey = &thrift.TypeSpec{
         FullName: "module1.MapKey",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMapKey() },
+    ScopedName: "module1.MapKey",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMapKey() },
 },
 
     }
@@ -158,13 +167,16 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_MapContainer = &thrift.TypeSpec{
         FullName: "module1.MapContainer",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMapContainer() },
+    ScopedName: "module1.MapContainer",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMapContainer() },
 },
 
     }
     premadeCodecTypeSpec_module1_Car = &thrift.TypeSpec{
         FullName: "module1.Car",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.Car",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_module1_Automobile,
 },
 
@@ -172,7 +184,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Pair = &thrift.TypeSpec{
         FullName: "module1.Pair",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewPair() },
+    ScopedName: "module1.Pair",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewPair() },
 },
 
     }
@@ -195,13 +209,16 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Collection = &thrift.TypeSpec{
         FullName: "module1.Collection",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewCollection() },
+    ScopedName: "module1.Collection",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewCollection() },
 },
 
     }
     premadeCodecTypeSpec_module1_State = &thrift.TypeSpec{
         FullName: "module1.State",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.State",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_string,
 },
 
@@ -209,6 +226,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module1_Enum = &thrift.TypeSpec{
         FullName: "module1.Enum",
         CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    ScopedName:         "module1.Enum",
 	UnderlyingTypeSpec: module2.GetCodecTypeSpec("module2.Enum"),
 },
 
@@ -234,6 +252,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Automobile = &thrift.StructSpec{
     Name:                 "Automobile",
+    ScopedName:           "module1.Automobile",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -315,6 +334,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MapKey = &thrift.StructSpec{
     Name:                 "MapKey",
+    ScopedName:           "module1.MapKey",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -346,6 +366,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MapContainer = &thrift.StructSpec{
     Name:                 "MapContainer",
+    ScopedName:           "module1.MapContainer",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -367,6 +388,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Pair = &thrift.StructSpec{
     Name:                 "Pair",
+    ScopedName:           "module1.Pair",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -398,6 +420,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Collection = &thrift.StructSpec{
     Name:                 "Collection",
+    ScopedName:           "module1.Collection",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -429,6 +452,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqFinderByPlate = &thrift.StructSpec{
     Name:                 "reqFinderByPlate",
+    ScopedName:           "module1.reqFinderByPlate",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -450,6 +474,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respFinderByPlate = &thrift.StructSpec{
     Name:                 "respFinderByPlate",
+    ScopedName:           "module1.respFinderByPlate",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -471,6 +496,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqFinderAliasByPlate = &thrift.StructSpec{
     Name:                 "reqFinderAliasByPlate",
+    ScopedName:           "module1.reqFinderAliasByPlate",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -492,6 +518,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respFinderAliasByPlate = &thrift.StructSpec{
     Name:                 "respFinderAliasByPlate",
+    ScopedName:           "module1.respFinderAliasByPlate",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -513,6 +540,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqFinderPreviousPlate = &thrift.StructSpec{
     Name:                 "reqFinderPreviousPlate",
+    ScopedName:           "module1.reqFinderPreviousPlate",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -534,6 +562,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respFinderPreviousPlate = &thrift.StructSpec{
     Name:                 "respFinderPreviousPlate",
+    ScopedName:           "module1.respFinderPreviousPlate",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

@@ -29,7 +29,9 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_matching_names_IncludesAlso = &thrift.TypeSpec{
         FullName: "matching_names.IncludesAlso",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewIncludesAlso() },
+    ScopedName: "matching_names.IncludesAlso",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewIncludesAlso() },
 },
 
     }
@@ -44,6 +46,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_IncludesAlso = &thrift.StructSpec{
     Name:                 "IncludesAlso",
+    ScopedName:           "matching_names.IncludesAlso",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

@@ -37,21 +37,27 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_module_TrivialStruct = &thrift.TypeSpec{
         FullName: "module.TrivialStruct",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewTrivialStruct() },
+    ScopedName: "module.TrivialStruct",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewTrivialStruct() },
 },
 
     }
     premadeCodecTypeSpec_module_StructWithNoCustomDefaultValues = &thrift.TypeSpec{
         FullName: "module.StructWithNoCustomDefaultValues",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStructWithNoCustomDefaultValues() },
+    ScopedName: "module.StructWithNoCustomDefaultValues",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStructWithNoCustomDefaultValues() },
 },
 
     }
     premadeCodecTypeSpec_module_StructWithCustomDefaultValues = &thrift.TypeSpec{
         FullName: "module.StructWithCustomDefaultValues",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewStructWithCustomDefaultValues() },
+    ScopedName: "module.StructWithCustomDefaultValues",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewStructWithCustomDefaultValues() },
 },
 
     }
@@ -68,6 +74,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_TrivialStruct = &thrift.StructSpec{
     Name:                 "TrivialStruct",
+    ScopedName:           "module.TrivialStruct",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -89,6 +96,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_StructWithNoCustomDefaultValues = &thrift.StructSpec{
     Name:                 "StructWithNoCustomDefaultValues",
+    ScopedName:           "module.StructWithNoCustomDefaultValues",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -160,6 +168,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_StructWithCustomDefaultValues = &thrift.StructSpec{
     Name:                 "StructWithCustomDefaultValues",
+    ScopedName:           "module.StructWithCustomDefaultValues",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

@@ -47,6 +47,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_reqMyRootDoRoot = &thrift.StructSpec{
     Name:                 "reqMyRootDoRoot",
+    ScopedName:           "module.reqMyRootDoRoot",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -58,6 +59,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respMyRootDoRoot = &thrift.StructSpec{
     Name:                 "respMyRootDoRoot",
+    ScopedName:           "module.respMyRootDoRoot",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -69,6 +71,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqMyNodeDoMid = &thrift.StructSpec{
     Name:                 "reqMyNodeDoMid",
+    ScopedName:           "module.reqMyNodeDoMid",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -80,6 +83,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respMyNodeDoMid = &thrift.StructSpec{
     Name:                 "respMyNodeDoMid",
+    ScopedName:           "module.respMyNodeDoMid",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -91,6 +95,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_reqMyLeafDoLeaf = &thrift.StructSpec{
     Name:                 "reqMyLeafDoLeaf",
+    ScopedName:           "module.reqMyLeafDoLeaf",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -102,6 +107,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_respMyLeafDoLeaf = &thrift.StructSpec{
     Name:                 "respMyLeafDoLeaf",
+    ScopedName:           "module.respMyLeafDoLeaf",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

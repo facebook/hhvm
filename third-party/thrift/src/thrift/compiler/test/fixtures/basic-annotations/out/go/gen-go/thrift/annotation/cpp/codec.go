@@ -47,12 +47,16 @@ var (
 var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_cpp_RefType = &thrift.TypeSpec{
         FullName: "cpp.RefType",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "cpp.RefType",
+},
 
     }
     premadeCodecTypeSpec_cpp_EnumUnderlyingType = &thrift.TypeSpec{
         FullName: "cpp.EnumUnderlyingType",
-        CodecEnumSpec: &thrift.CodecEnumSpec{},
+        CodecEnumSpec: &thrift.CodecEnumSpec{
+    ScopedName: "cpp.EnumUnderlyingType",
+},
 
     }
     premadeCodecTypeSpec_string = &thrift.TypeSpec{
@@ -65,21 +69,27 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_cpp_Name = &thrift.TypeSpec{
         FullName: "cpp.Name",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewName() },
+    ScopedName: "cpp.Name",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewName() },
 },
 
     }
     premadeCodecTypeSpec_cpp_Type = &thrift.TypeSpec{
         FullName: "cpp.Type",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewType() },
+    ScopedName: "cpp.Type",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewType() },
 },
 
     }
     premadeCodecTypeSpec_cpp_Ref = &thrift.TypeSpec{
         FullName: "cpp.Ref",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewRef() },
+    ScopedName: "cpp.Ref",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewRef() },
 },
 
     }
@@ -93,105 +103,135 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     premadeCodecTypeSpec_cpp_Lazy = &thrift.TypeSpec{
         FullName: "cpp.Lazy",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewLazy() },
+    ScopedName: "cpp.Lazy",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewLazy() },
 },
 
     }
     premadeCodecTypeSpec_cpp_DisableLazyChecksum = &thrift.TypeSpec{
         FullName: "cpp.DisableLazyChecksum",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewDisableLazyChecksum() },
+    ScopedName: "cpp.DisableLazyChecksum",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDisableLazyChecksum() },
 },
 
     }
     premadeCodecTypeSpec_cpp_Adapter = &thrift.TypeSpec{
         FullName: "cpp.Adapter",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewAdapter() },
+    ScopedName: "cpp.Adapter",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
     }
     premadeCodecTypeSpec_cpp_PackIsset = &thrift.TypeSpec{
         FullName: "cpp.PackIsset",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewPackIsset() },
+    ScopedName: "cpp.PackIsset",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewPackIsset() },
 },
 
     }
     premadeCodecTypeSpec_cpp_MinimizePadding = &thrift.TypeSpec{
         FullName: "cpp.MinimizePadding",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewMinimizePadding() },
+    ScopedName: "cpp.MinimizePadding",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewMinimizePadding() },
 },
 
     }
     premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType = &thrift.TypeSpec{
         FullName: "cpp.ScopedEnumAsUnionType",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewScopedEnumAsUnionType() },
+    ScopedName: "cpp.ScopedEnumAsUnionType",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewScopedEnumAsUnionType() },
 },
 
     }
     premadeCodecTypeSpec_cpp_FieldInterceptor = &thrift.TypeSpec{
         FullName: "cpp.FieldInterceptor",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFieldInterceptor() },
+    ScopedName: "cpp.FieldInterceptor",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFieldInterceptor() },
 },
 
     }
     premadeCodecTypeSpec_cpp_UseOpEncode = &thrift.TypeSpec{
         FullName: "cpp.UseOpEncode",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUseOpEncode() },
+    ScopedName: "cpp.UseOpEncode",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewUseOpEncode() },
 },
 
     }
     premadeCodecTypeSpec_cpp_EnumType = &thrift.TypeSpec{
         FullName: "cpp.EnumType",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewEnumType() },
+    ScopedName: "cpp.EnumType",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewEnumType() },
 },
 
     }
     premadeCodecTypeSpec_cpp_Frozen2Exclude = &thrift.TypeSpec{
         FullName: "cpp.Frozen2Exclude",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFrozen2Exclude() },
+    ScopedName: "cpp.Frozen2Exclude",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFrozen2Exclude() },
 },
 
     }
     premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams = &thrift.TypeSpec{
         FullName: "cpp.Frozen2RequiresCompleteContainerParams",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewFrozen2RequiresCompleteContainerParams() },
+    ScopedName: "cpp.Frozen2RequiresCompleteContainerParams",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewFrozen2RequiresCompleteContainerParams() },
 },
 
     }
     premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe = &thrift.TypeSpec{
         FullName: "cpp.ProcessInEbThreadUnsafe",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewProcessInEbThreadUnsafe() },
+    ScopedName: "cpp.ProcessInEbThreadUnsafe",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewProcessInEbThreadUnsafe() },
 },
 
     }
     premadeCodecTypeSpec_cpp_RuntimeAnnotation = &thrift.TypeSpec{
         FullName: "cpp.RuntimeAnnotation",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewRuntimeAnnotation() },
+    ScopedName: "cpp.RuntimeAnnotation",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewRuntimeAnnotation() },
 },
 
     }
     premadeCodecTypeSpec_cpp_UseCursorSerialization = &thrift.TypeSpec{
         FullName: "cpp.UseCursorSerialization",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewUseCursorSerialization() },
+    ScopedName: "cpp.UseCursorSerialization",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewUseCursorSerialization() },
 },
 
     }
     premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods = &thrift.TypeSpec{
         FullName: "cpp.GenerateDeprecatedHeaderClientMethods",
         CodecStructSpec: &thrift.CodecStructSpec{
-    NewFunc: func() thrift.Struct { return NewGenerateDeprecatedHeaderClientMethods() },
+    ScopedName: "cpp.GenerateDeprecatedHeaderClientMethods",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewGenerateDeprecatedHeaderClientMethods() },
 },
 
     }
@@ -223,6 +263,7 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     premadeStructSpec_Name = &thrift.StructSpec{
     Name:                 "Name",
+    ScopedName:           "cpp.Name",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -244,6 +285,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Type = &thrift.StructSpec{
     Name:                 "Type",
+    ScopedName:           "cpp.Type",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -275,6 +317,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Ref = &thrift.StructSpec{
     Name:                 "Ref",
+    ScopedName:           "cpp.Ref",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -296,6 +339,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Lazy = &thrift.StructSpec{
     Name:                 "Lazy",
+    ScopedName:           "cpp.Lazy",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -317,6 +361,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_DisableLazyChecksum = &thrift.StructSpec{
     Name:                 "DisableLazyChecksum",
+    ScopedName:           "cpp.DisableLazyChecksum",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -328,6 +373,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Adapter = &thrift.StructSpec{
     Name:                 "Adapter",
+    ScopedName:           "cpp.Adapter",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -389,6 +435,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_PackIsset = &thrift.StructSpec{
     Name:                 "PackIsset",
+    ScopedName:           "cpp.PackIsset",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -410,6 +457,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_MinimizePadding = &thrift.StructSpec{
     Name:                 "MinimizePadding",
+    ScopedName:           "cpp.MinimizePadding",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -421,6 +469,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ScopedEnumAsUnionType = &thrift.StructSpec{
     Name:                 "ScopedEnumAsUnionType",
+    ScopedName:           "cpp.ScopedEnumAsUnionType",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -432,6 +481,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_FieldInterceptor = &thrift.StructSpec{
     Name:                 "FieldInterceptor",
+    ScopedName:           "cpp.FieldInterceptor",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -463,6 +513,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_UseOpEncode = &thrift.StructSpec{
     Name:                 "UseOpEncode",
+    ScopedName:           "cpp.UseOpEncode",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -474,6 +525,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_EnumType = &thrift.StructSpec{
     Name:                 "EnumType",
+    ScopedName:           "cpp.EnumType",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -495,6 +547,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Frozen2Exclude = &thrift.StructSpec{
     Name:                 "Frozen2Exclude",
+    ScopedName:           "cpp.Frozen2Exclude",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -506,6 +559,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_Frozen2RequiresCompleteContainerParams = &thrift.StructSpec{
     Name:                 "Frozen2RequiresCompleteContainerParams",
+    ScopedName:           "cpp.Frozen2RequiresCompleteContainerParams",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -517,6 +571,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_ProcessInEbThreadUnsafe = &thrift.StructSpec{
     Name:                 "ProcessInEbThreadUnsafe",
+    ScopedName:           "cpp.ProcessInEbThreadUnsafe",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -528,6 +583,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_RuntimeAnnotation = &thrift.StructSpec{
     Name:                 "RuntimeAnnotation",
+    ScopedName:           "cpp.RuntimeAnnotation",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -539,6 +595,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_UseCursorSerialization = &thrift.StructSpec{
     Name:                 "UseCursorSerialization",
+    ScopedName:           "cpp.UseCursorSerialization",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{
@@ -550,6 +607,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
     premadeStructSpec_GenerateDeprecatedHeaderClientMethods = &thrift.StructSpec{
     Name:                 "GenerateDeprecatedHeaderClientMethods",
+    ScopedName:           "cpp.GenerateDeprecatedHeaderClientMethods",
     IsUnion:              false,
     IsException:          false,
     FieldSpecs:           []thrift.FieldSpec{

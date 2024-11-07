@@ -35,6 +35,7 @@ type FieldSpec struct {
 // StructSpec is a spec for a stuct.
 type StructSpec struct {
 	Name                 string
+	ScopedName           string
 	IsUnion              bool
 	IsException          bool
 	FieldSpecs           []FieldSpec // Concrete (non-pointer) struct type is intentional
@@ -64,7 +65,9 @@ type CodecPrimitiveSpec struct {
 }
 
 // CodecEnumSpec is a spec for an enum type.
-type CodecEnumSpec struct{}
+type CodecEnumSpec struct {
+	ScopedName string
+}
 
 // CodecSetSpec is a spec for a set type.
 type CodecSetSpec struct {
@@ -88,11 +91,14 @@ type CodecMapSpec struct {
 
 // CodecStructSpec is a spec for a struct type.
 type CodecStructSpec struct {
-	NewFunc func() Struct
+	ScopedName string
+	IsUnion    bool
+	NewFunc    func() Struct
 }
 
 // CodecTypedefSpec is a spec for a typedef type.
 type CodecTypedefSpec struct {
+	ScopedName         string
 	UnderlyingTypeSpec *TypeSpec
 }
 

@@ -68,6 +68,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 TRACE_SET_MOD(hhbc);
+const StaticString s_TrivialHHVMBuiltinWrapper("TrivialHHVMBuiltinWrapper");
 
 std::atomic<bool> Func::s_treadmill;
 
@@ -877,6 +878,65 @@ Func* Func::lookupBuiltin(const StringData* name) {
   auto const f = Func::lookup(name);
   return (f && f->isPersistent() && f->isBuiltin()) ? f : nullptr;
 }
+
+// If the function is a trivial builtin, that is not interceptable, and
+// is persistent, then unwrap it.
+Func* Func::unwrap() {
+  if (!Cfg::Eval::ReplaceTrivialBuiltins) return this;
+  // Already unwrapped
+  if (Cfg::Repo::Authoritative) return this;
+  if (RO::funcIsRenamable(name())) return this;
+
+  auto const it = userAttributes().find(s_TrivialHHVMBuiltinWrapper.get());
+  if (it != userAttributes().end()) {
+    assertx(tvIsVec(it->second));
+    auto const args = it->second.m_data.parr;
+    assertx(args->size() == 1);
+    auto const wrappedFunc = args->at(int64_t{0});
+    assertx(tvIsString(wrappedFunc));
+    assertx(wrappedFunc.m_data.pstr->isStatic());
+    auto const resolved_ne = NamedFunc::getOrCreate(wrappedFunc.m_data.pstr);
+    return resolved_ne->func();
+  }
+  return this;
+}
+
+/*
+ * Find a function which always uniquely maps to the given name in the context
+ * of the given unit. A function so returned can be used directly in the TC as
+ * it will not change.
+ */
+const Func::FuncLookup Func::lookupKnownMaybe(const StringData* name, const Unit* unit) {
+  auto const func = [&]() -> const Func* {
+    auto const ne = NamedFunc::getOrCreate(name);
+    auto const f = ne->func();
+    if (!f) return nullptr;
+    return f->unwrap();
+  }();
+
+  if (!func || RO::funcIsRenamable(func->name())) return Func::none();
+  // In non-repo mode while the function must be available in this unit, it
+  // may be de-duplication on load. This may mean that while the func is
+  // available it is not immutable in the current compilation unit. The order
+  // of the de-duplication can also differ between requests.
+  if (func->isMethCaller() && !Cfg::Repo::Authoritative) return Func::none();
+  assertx(!func->cls());
+  if (func->isPersistent()) return Func::exact(func);
+  if (func->unit() == unit) return Func::exact(func);
+  return Cfg::Sandbox::Speculate ? Func::maybe(func) : Func::none();
+}
+
+inline const Func* Func::lookupKnown(const StringData* name, const Unit* unit) {
+  auto const res = Func::lookupKnownMaybe(name, unit);
+  switch (res.tag) {
+    case Func::FuncLookupResult::Exact:
+      return res.func;
+    case Func::FuncLookupResult::Maybe:
+    case Func::FuncLookupResult::None:
+      return nullptr;
+  }
+}
+
 
 Func* Func::load(const NamedFunc* ne, const StringData* name) {
   Func* func = ne->getCachedFunc();

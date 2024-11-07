@@ -3896,10 +3896,13 @@ OPTBLD_INLINE JitResumeAddr iopFCallFunc(bool retToJit, PC origpc, PC& pc,
 OPTBLD_INLINE JitResumeAddr iopFCallFuncD(bool retToJit, PC origpc, PC& pc,
                                           FCallArgs fca, Id id) {
   auto const nep = vmfp()->unit()->lookupNamedFuncPairId(id);
-  auto const func = Func::resolve(nep.second, nep.first, vmfp()->func());
-  if (UNLIKELY(func == nullptr)) {
-    raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
-  }
+  auto const func = [&]() {
+    auto const f = Func::resolve(nep.second, nep.first, vmfp()->func());
+    if (UNLIKELY(f == nullptr)) {
+      raise_call_to_undefined(vmfp()->unit()->lookupLitstrId(id));
+    }
+    return f->unwrap();
+  }();
 
   return fcallImpl<false>(retToJit, origpc, pc, fca, func, NoCtx{});
 }

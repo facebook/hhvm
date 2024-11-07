@@ -1299,7 +1299,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.CrashOnStaticAnalysisError, UNKNOWN
 
-- bool Eval.ReplaceTrivialBuiltins = false, UNKNOWN
+- bool Eval.ReplaceTrivialBuiltins = true, UNKNOWN
 
 - bool Eval.ReflectionMissConstantFromIncludedEnumsNotice = false, fzn
 

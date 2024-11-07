@@ -778,37 +778,6 @@ inline bool Func::hasReifiedGenerics() const {
   return shared()->m_allFlags.m_hasReifiedGenerics;
 }
 
-/*
- * Find a function which always uniquely maps to the given name in the context
- * of the given unit. A function so returned can be used directly in the TC as
- * it will not change.
- */
-inline const Func::FuncLookup Func::lookupKnownMaybe(const StringData* name, const Unit* unit) {
-  auto const ne = NamedFunc::getOrCreate(name);
-  auto const func = ne->func();
-  if (!func || RO::funcIsRenamable(func->name())) return Func::none();
-  // In non-repo mode while the function must be available in this unit, it
-  // may be de-duplication on load. This may mean that while the func is
-  // available it is not immutable in the current compilation unit. The order
-  // of the de-duplication can also differ between requests.
-  if (func->isMethCaller() && !Cfg::Repo::Authoritative) return Func::none();
-  assertx(!func->cls());
-  if (func->isPersistent()) return Func::exact(func);
-  if (func->unit() == unit) return Func::exact(func);
-  return Cfg::Sandbox::Speculate ? Func::maybe(func) : Func::none();
-}
-
-inline const Func* Func::lookupKnown(const StringData* name, const Unit* unit) {
-  auto const res = Func::lookupKnownMaybe(name, unit);
-  switch (res.tag) {
-    case Func::FuncLookupResult::Exact:
-      return res.func;
-    case Func::FuncLookupResult::Maybe:
-    case Func::FuncLookupResult::None:
-      return nullptr;
-  }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // Unit table entries.
 

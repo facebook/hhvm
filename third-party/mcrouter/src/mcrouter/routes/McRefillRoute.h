@@ -97,6 +97,7 @@ class McRefillRoute {
       if (isHitResult(*refillReply.result_ref())) {
         McMetagetRequest metaGet(req.key_ref()->fullKey());
         metaGet.setClientIdentifier(req.getClientIdentifier().value_or(""));
+        metaGet.flags_ref() = getFlagsIfExist(req);
         auto metaReply = refill_->route(metaGet);
         if (isHitResult(*metaReply.result_ref())) {
           folly::fibers::addTask(
@@ -143,7 +144,7 @@ class McRefillRoute {
       const McMetagetReply& metaReply) const {
     McLeaseSetRequest sreq(primaryReq.key_ref()->fullKey());
     sreq.value_ref() = *refillReply.value_ref();
-    sreq.flags_ref() = *refillReply.flags_ref();
+    sreq.flags_ref() = *primaryReq.flags_ref();
     sreq.exptime_ref() = *metaReply.exptime_ref();
     sreq.leaseToken_ref() = *primaryReply.leaseToken_ref();
     sreq.setClientIdentifier(primaryReq.getClientIdentifier().value_or(""));
@@ -159,7 +160,7 @@ class McRefillRoute {
       carbon::GetLikeT<Request> = 0) const {
     McSetRequest sreq(primaryReq.key_ref()->fullKey());
     sreq.value_ref() = *refillReply.value_ref();
-    sreq.flags_ref() = *refillReply.flags_ref();
+    sreq.flags_ref() = getFlagsIfExist(primaryReq);
     sreq.exptime_ref() = *metaReply.exptime_ref();
     sreq.setClientIdentifier(primaryReq.getClientIdentifier().value_or(""));
     return sreq;

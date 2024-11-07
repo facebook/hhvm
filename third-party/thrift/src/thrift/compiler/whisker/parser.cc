@@ -351,7 +351,7 @@ class standalone_lines_scanner {
                 mark_partial_apply(c, std::move(partial));
               },
               [&](removed&&) {
-                std::logic_error(
+                throw std::logic_error(
                     "Removal markings should only happen at the end of the line");
               });
         }

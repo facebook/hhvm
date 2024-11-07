@@ -104,7 +104,7 @@ TEST(TProgram, ComputeNameFromFilePath) {
   t_program program("");
 
   const std::string expect = "tprogramtest";
-  const std::string file_path_1 = expect;
+  const std::string& file_path_1 = expect;
   const std::string file_path_2 = expect + ".thrift";
   const std::string file_path_3 = "/this/is/a/path/" + expect + ".thrift";
 

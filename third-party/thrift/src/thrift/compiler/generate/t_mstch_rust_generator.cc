@@ -352,7 +352,7 @@ void parse_include_srcs(
   if (!include_srcs) {
     return;
   }
-  auto paths = *include_srcs;
+  const auto& paths = *include_srcs;
   std::string::size_type pos = 0;
   while (pos != std::string::npos && pos < paths.size()) {
     std::string::size_type next_pos = paths.find(':', pos);

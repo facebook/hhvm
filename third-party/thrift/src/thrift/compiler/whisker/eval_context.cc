@@ -143,7 +143,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
   }
 
   auto current = std::invoke([&]() -> const object* {
-    auto id = path.front();
+    const auto& id = path.front();
     // Crawl up through the scope stack since names can be shadowed.
     for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
       if (auto result = scope->lookup_property(id)) {

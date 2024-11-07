@@ -201,7 +201,7 @@ class package_name_generator {
         });
 
     if (iter != path_.end()) {
-      auto tld = kPotentialDomainNames.at(*iter);
+      const auto& tld = kPotentialDomainNames.at(*iter);
 
       // Check if TLD is already present in path
       auto tld_iter = std::find(path_.begin(), iter, tld);

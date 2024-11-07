@@ -197,7 +197,7 @@ TEST_F(UtilTest, for_each_transitive_field) {
 
   fields = std::vector<std::string>();
   cpp2::for_each_transitive_field(&a, [&](const t_field* f) {
-    auto name = f->get_name();
+    const auto& name = f->get_name();
     fields.push_back(name);
     return name != "e"; // Stop at e.
   });
@@ -321,7 +321,7 @@ TEST_F(UtilTest, is_custom_type) {
   }
 
   {
-    auto cppAdapter = i32;
+    const auto& cppAdapter = i32;
     auto typeDef = t_typedef(&p, "Type", cppAdapter);
     auto typeDef2 = t_typedef(&p, "TypeDef", typeDef);
     EXPECT_FALSE(cpp2::is_custom_type(cppAdapter));

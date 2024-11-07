@@ -77,7 +77,7 @@ rust_crate_map load_crate_map(const std::string& path) {
   auto crate_map_path =
       std::filesystem::absolute(std::filesystem::u8path(path));
 #else
-  auto crate_map_path = path;
+  const auto& crate_map_path = path;
 #endif
   auto in = std::ifstream(crate_map_path);
   if (!in.is_open()) {

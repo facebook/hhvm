@@ -1483,6 +1483,7 @@ namespace {
 const StaticString
   s_uses("uses"),
   s_includes("includes"),
+  s_include_paths("include_paths"),
   s_soft_includes("soft_includes"),
   s_packages("packages"),
   s_soft_packages("soft_packages"),
@@ -1493,20 +1494,33 @@ Array HHVM_FUNCTION(get_all_packages) {
   auto const& packageInfo = g_context->getPackageInfo();
   DictInit result(packageInfo.packages().size());
   for (auto const& [name, p] : packageInfo.packages()) {
-    DictInit package(3);
+    if (Cfg::Eval::PackageV2) {
+      DictInit package(2);
 
-    VecInit uses(p.m_uses.size());
-    for (auto& s : p.m_uses) uses.append(String{makeStaticString(s)});
-    package.set(s_uses.get(), uses.toVariant());
+      VecInit includes(p.m_includes.size());
+      for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
+      package.set(s_includes.get(), includes.toVariant());
 
-    VecInit includes(p.m_includes.size());
-    for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
-    package.set(s_includes.get(), includes.toVariant());
+      VecInit include_paths(p.m_include_paths.size());
+      for (auto& s : p.m_include_paths) include_paths.append(String{makeStaticString(s)});
+      package.set(s_include_paths.get(), include_paths.toVariant());
+      result.set(makeStaticString(name), package.toVariant());
+    } else {
+      DictInit package(3);
 
-    VecInit soft_includes(p.m_soft_includes.size());
-    for (auto& s : p.m_soft_includes) soft_includes.append(String{makeStaticString(s)});
-    package.set(s_soft_includes.get(), soft_includes.toVariant());
-    result.set(makeStaticString(name), package.toVariant());
+      VecInit uses(p.m_uses.size());
+      for (auto& s : p.m_uses) uses.append(String{makeStaticString(s)});
+      package.set(s_uses.get(), uses.toVariant());
+
+      VecInit includes(p.m_includes.size());
+      for (auto& s : p.m_includes) includes.append(String{makeStaticString(s)});
+      package.set(s_includes.get(), includes.toVariant());
+
+      VecInit soft_includes(p.m_soft_includes.size());
+      for (auto& s : p.m_soft_includes) soft_includes.append(String{makeStaticString(s)});
+      package.set(s_soft_includes.get(), soft_includes.toVariant());
+      result.set(makeStaticString(name), package.toVariant());
+    }
   }
 
   return result.toArray();

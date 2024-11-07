@@ -91,7 +91,8 @@ PackageInfo PackageInfo::fromFile(const std::filesystem::path& path) {
                      Package {
                        convert(p.package.uses),
                        convert(p.package.includes),
-                       convert(p.package.soft_includes)
+                       convert(p.package.soft_includes),
+                       convert(p.package.include_paths)
                      });
   }
 

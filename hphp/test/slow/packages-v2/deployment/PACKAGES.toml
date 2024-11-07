@@ -1,0 +1,19 @@
+[packages]
+
+[packages.prod]
+#include_paths=["//prod/", "//basic-1.php", "//basic-2.php", "//basic-3.php"]
+include_paths=["//prod/", "//"]
+
+[packages.intern]
+include_paths=["//prod/intern/"]
+includes=["prod"]
+
+[deployments]
+
+[deployments.my-prod]
+packages = ["prod"]
+domains = ['www\.my-prod\.com']
+
+[deployments.my-intern]
+packages = ["intern", "prod"]
+domains = ['www\.my-intern\.com']

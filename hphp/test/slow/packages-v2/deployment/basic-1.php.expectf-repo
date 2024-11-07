@@ -1,0 +1,3 @@
+I am foo in prod/
+
+Fatal error: Call to undefined function bar() in %s/deployment/basic-1.php on line 6

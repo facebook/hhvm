@@ -40,13 +40,17 @@ enum class DeployKind {
 struct PackageInfo {
   struct Package {
     hphp_vector_string_set m_uses;
+    //PackageV1
     hphp_vector_string_set m_includes;
     hphp_vector_string_set m_soft_includes;
+    // PackageV2
+    hphp_vector_string_set m_include_paths;
 
     template <typename SerDe> void serde(SerDe& sd) {
       sd(m_uses, stdltstr{})
         (m_includes, stdltstr{})
         (m_soft_includes, stdltstr{})
+        (m_include_paths, stdltstr{})
         ;
     }
   };

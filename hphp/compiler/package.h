@@ -220,6 +220,9 @@ struct Package {
     // File path copied from UnitEmitter::m_filepath
     const StringData* m_filepath{nullptr};
 
+    // Package override copied from UnitEmitter file attributes
+    const StringData* m_packageOverride{nullptr};
+
     // Name of the module that this unit belongs to
     const StringData* m_module_use{nullptr};
 
@@ -229,6 +232,7 @@ struct Package {
         (m_abort)
         (m_definitions)
         (m_filepath)
+        (m_packageOverride)
         (m_module_use)
         ;
     }

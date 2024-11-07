@@ -227,6 +227,9 @@ createSymlinkWrapper(const std::string& fileName,
 
 ///////////////////////////////////////////////////////////////////////////////
 
+const StaticString
+  s_PackageOverride("__PackageOverride");
+
 Package::FileMetaVec s_fileMetas;
 Package::ParseMetaVec s_parseMetas;
 Package::IndexMetaVec s_indexMetas;
@@ -249,6 +252,14 @@ UnitEmitterSerdeWrapper output(
 
   meta.m_symbol_refs = std::move(ue->m_symbol_refs);
   meta.m_filepath = ue->m_filepath;
+  auto const hasPackageOverride =
+    ue->m_fileAttributes.find(s_PackageOverride.get());
+  if (hasPackageOverride != ue->m_fileAttributes.end()) {
+    assertx(tvIsVec(hasPackageOverride->second)
+            && val(hasPackageOverride->second).parr->size() == 1);
+    meta.m_packageOverride =
+      tvAssertStringLike(val(hasPackageOverride->second).parr->at(int64_t(0)));
+  }
   meta.m_module_use = ue->m_moduleName;
 
   for (auto const pce : ue->preclasses()) {

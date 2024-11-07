@@ -1109,14 +1109,25 @@ bool process(CompilerOptions &po) {
     );
   }
 
+  /** For PackageV1, many files will be in the same module, so we precompute
+    * the set of the modules in the current deployment
+    */
   hphp_fast_set<const StringData*> moduleInDeployment;
+
+  /** For PackageV2, we store all the paths listed in include_paths clauses
+    * together with a boolean recording if files under that path are included
+    * in the active deployment or not.  The list of paths is stored in
+    * anti-lexicographic order so a simple linear search returns the most
+    * precise path that includes a given file.
+    */
+  std::vector<std::pair<std::string , bool>> pathsInDeployment;
+
   if (!Cfg::Eval::ActiveDeployment.empty()) {
-    // Many files will be in the same module, so it is better to precompute
-    // a mapping of whether a given module is in the current deployment
     auto const& packageInfo =
       RepoOptions::forFile(po.repoOptionsDir).packageInfo();
-    auto const it = packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
-    if (it == end(packageInfo.deployments())) {
+    auto const activeDeployment =
+      packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
+    if (activeDeployment == end(packageInfo.deployments())) {
       Logger::FError("The active deployment is set to {}; "
                      "however, it is not defined in the {}/{} file",
                      Cfg::Eval::ActiveDeployment,
@@ -1125,22 +1136,39 @@ bool process(CompilerOptions &po) {
       return false;
     }
 
-    moduleInDeployment.reserve(index->modules.size());
-    for (auto const& [module, _] : index->modules) {
-      assertx(!moduleInDeployment.contains(module));
-      if (packageInfo.moduleInDeployment(module,
-                                         it->second,
-                                         DeployKind::HardOrSoft)) {
-        moduleInDeployment.insert(module);
+    if (Cfg::Eval::PackageV2) {
+      // PackageV2: precompute a sorted mapping (include_paths -> in_active_deployment)
+      for (auto const& it : packageInfo.packages()) {
+        bool isPackageDeployed =
+          (activeDeployment->second).m_packages.contains(it.first);
+        for (auto ip : it.second.m_include_paths) {
+          pathsInDeployment.push_back(std::pair(ip, isPackageDeployed));
+        }
       }
-    }
-    // Check for the default module separately since there is no module
-    // declaration for the default module.
-    static auto const defaultModule = makeStaticString(Module::DEFAULT);
-    if (packageInfo.moduleInDeployment(defaultModule,
-                                       it->second,
-                                       DeployKind::HardOrSoft)) {
-      moduleInDeployment.insert(defaultModule);
+      std::sort(pathsInDeployment.begin(), pathsInDeployment.end(), std::greater());
+      // files that do not have a __PackageOverride and do not match an
+      // include_path belong to the default package, which is always included
+      // in the active deployment
+      pathsInDeployment.push_back(std::pair(Cfg::Server::SourceRoot + po.repoOptionsDir, true));
+    } else {
+      // PackageV1: precompute the set of modules in the current deployment
+      moduleInDeployment.reserve(index->modules.size());
+      for (auto const& [module, _] : index->modules) {
+        assertx(!moduleInDeployment.contains(module));
+        if (packageInfo.moduleInDeployment(module,
+                                           activeDeployment->second,
+                                           DeployKind::HardOrSoft)) {
+          moduleInDeployment.insert(module);
+        }
+      }
+      // Check for the default module separately since there is no module
+      // declaration for the default module.
+      static auto const defaultModule = makeStaticString(Module::DEFAULT);
+      if (packageInfo.moduleInDeployment(defaultModule,
+                                         activeDeployment->second,
+                                         DeployKind::HardOrSoft)) {
+        moduleInDeployment.insert(defaultModule);
+      }
     }
   }
 
@@ -1325,6 +1353,24 @@ bool process(CompilerOptions &po) {
 
     auto const shouldIncludeInBuild = [&] (const Package::ParseMeta& p) {
       if (Cfg::Eval::ActiveDeployment.empty()) return true;
+      if (Cfg::Eval::PackageV2) {
+        auto const file = Cfg::Server::SourceRoot + p.m_filepath->data();
+        if (p.m_packageOverride) {
+          auto const& packageInfo =
+            RepoOptions::forFile(po.repoOptionsDir).packageInfo();
+          auto const activeDeployment =
+            packageInfo.deployments().find(Cfg::Eval::ActiveDeployment);
+          return ((activeDeployment->second).m_packages.contains(p.m_packageOverride->data()));
+        }
+        // match file with the include_path declarations and return
+        // if most precise one that matches belongs to the active deployment
+        for (auto const& it : pathsInDeployment) {
+          if (file.size() >= it.first.size() && std::equal(it.first.begin(), it.first.end(), file.begin())) {
+            return it.second;
+          }
+        }
+        return false;
+      }
       // If the unit defines any modules, then it is always included
       if (!p.m_definitions.m_modules.empty()) return true;
       if (Option::ForceEnableSymbolRefs && isOnDemand) return true;

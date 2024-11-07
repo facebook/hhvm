@@ -174,6 +174,7 @@ namespace Trace {
       TM(minstr)        \
       TM(mm)            \
       TM(objprof)       \
+      TM(packages)      \
       TM(perf_mem_event) \
       TM(pgo)           \
       TM(preg)          \

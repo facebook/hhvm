@@ -4421,6 +4421,7 @@ end = struct
         Class_id.class_id_for_new
           ~exact:nonexact
           ~is_attribute:false
+          ~is_catch:false
           p
           env
           cid
@@ -8148,8 +8149,12 @@ end = struct
     let env = LEnv.replace_cont env C.Next catchctx in
     let cid = CI sid in
     let ety_p = fst sid in
-    let (env, _, _, _) = Class_id.instantiable_cid ety_p env cid [] in
-    let (env, _tal, _te, ety) = Class_id.class_expr env [] ((), ety_p, cid) in
+    let (env, _, _, _) =
+      Class_id.instantiable_cid ~is_catch:true ety_p env cid []
+    in
+    let (env, _tal, _te, ety) =
+      Class_id.class_expr ~is_catch:true env [] ((), ety_p, cid)
+    in
     let (env, ty_err_opt) = coerce_to_throwable ety_p env ety in
     Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
     let (p, x) = exn_lvar in
@@ -9300,6 +9305,7 @@ and Class_id : sig
     ?inside_nameof:bool ->
     ?is_const:bool ->
     ?is_attribute:bool ->
+    ?is_catch:bool ->
     ?is_function_pointer:bool ->
     env ->
     Nast.targ list ->
@@ -9308,10 +9314,14 @@ and Class_id : sig
 
   (** Computes class information for the class id in an instance.
       When `is_attribute` is true, this is used for the attribute
-      instantiation as in `<<MyAtrr()>> class C` (note that attributes are classes) *)
+      instantiation as in `<<MyAtrr()>> class C` (note that attributes are classes).
+      When `is_catch` is true, this is used for the exception pattern
+      inside a catch arm, as in `catch (MyException $e)`.
+    *)
   val class_id_for_new :
     exact:exact ->
     is_attribute:bool ->
+    is_catch:bool ->
     pos ->
     env ->
     (unit, unit) class_id_ ->
@@ -9358,6 +9368,7 @@ and Class_id : sig
   val instantiable_cid :
     ?exact:exact ->
     ?is_attribute:bool ->
+    ?is_catch:bool ->
     pos ->
     env ->
     Nast.class_id_ ->
@@ -9372,6 +9383,7 @@ end = struct
       ?(inside_nameof = false)
       ?(is_const = false)
       ?(is_attribute = false)
+      ?(is_catch = false)
       ?(is_function_pointer = false)
       (env : env)
       (tal : Nast.targ list)
@@ -9489,6 +9501,7 @@ end = struct
               Env.package_v2 env
               && (inside_nameof
                  || is_attribute
+                 || is_catch
                  || is_function_pointer
                  || Env.package_v2_bypass_package_check_for_class_const env
                     && is_const)
@@ -9679,6 +9692,7 @@ end = struct
   let class_id_for_new
       ~exact
       ~is_attribute
+      ~is_catch
       p
       env
       (cid : Nast.class_id_)
@@ -9689,6 +9703,7 @@ end = struct
         ~check_explicit_targs:true
         ~exact
         ~is_attribute
+        ~is_catch
         env
         explicit_targs
         ((), p, cid)
@@ -9764,10 +9779,15 @@ end = struct
     | _ -> (env, default_ty)
 
   and instantiable_cid
-      ?(exact = nonexact) ?(is_attribute = false) p env cid explicit_targs :
-      newable_class_info =
+      ?(exact = nonexact)
+      ?(is_attribute = false)
+      ?(is_catch = false)
+      p
+      env
+      cid
+      explicit_targs : newable_class_info =
     let (env, tal, te, classes) =
-      class_id_for_new ~exact ~is_attribute p env cid explicit_targs
+      class_id_for_new ~exact ~is_attribute ~is_catch p env cid explicit_targs
     in
     List.iter classes ~f:(function
         | `Dynamic -> ()

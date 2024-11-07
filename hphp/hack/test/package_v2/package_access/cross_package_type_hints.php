@@ -5,6 +5,7 @@
 type TFoo = int;
 newtype NTFoo = string;
 class Foo {}
+final class FooException extends Exception {}
 
 //// bar.php
 <?hh
@@ -14,6 +15,10 @@ class Foo {}
 function test1(TFoo  $_) : void {}
 function test2(NTFoo $_) : void {}
 function test3(Foo   $_) : void {}
+function test4() : void {
+  try {} catch (FooException $e) {}
+}
+
 class Bar {
   const TFoo ClsConst = 42;
 }

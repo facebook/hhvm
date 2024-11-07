@@ -360,6 +360,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::py3::simple::AdaptedTypedefFields>
+    : public BaseExtractor<::py3::simple::AdaptedTypedefFields> {
+  static const bool kUsingMarshal = false;
+  ExtractorResult<::py3::simple::AdaptedTypedefFields> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::AdaptedTypedefFields>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::AdaptedTypedefFields>> {
+  ExtractorResult<::py3::simple::AdaptedTypedefFields> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::py3::simple::AdaptedTypedefFields>
+    : public BaseConstructor<::py3::simple::AdaptedTypedefFields> {
+  static const bool kUsingMarshal = false;
+  PyObject* operator()(const ::py3::simple::AdaptedTypedefFields& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::AdaptedTypedefFields>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::AdaptedTypedefFields>> {
+  PyObject* operator()(const ::py3::simple::AdaptedTypedefFields& val);
+};
+
+template <>
 struct Extractor<::py3::simple::AnEnum>
     : public BaseExtractor<::py3::simple::AnEnum> {
   ExtractorResult<::py3::simple::AnEnum> operator()(PyObject* obj);

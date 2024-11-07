@@ -165,3 +165,29 @@ class CustomTypedefFields_Builder(thrift.py3.builder.StructBuilder):
         yield "map_field", self.map_field
         yield "struct_field", self.struct_field
 
+_fbthrift_struct_type__AdaptedTypedefFields = _module_types.AdaptedTypedefFields
+class AdaptedTypedefFields_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__AdaptedTypedefFields
+
+    def __init__(self):
+        self.bool_field: _typing.Optional[bool] = None
+        self.integer_field: _typing.Optional[int] = None
+        self.double_field: _typing.Optional[float] = None
+        self.string_field: _typing.Optional[str] = None
+        self.binary_field: _typing.Optional[bytes] = None
+        self.list_field: _typing.Optional[list] = None
+        self.set_field: _typing.Optional[set] = None
+        self.map_field: _typing.Optional[dict] = None
+        self.struct_field: _typing.Any = None
+
+    def __iter__(self):
+        yield "bool_field", self.bool_field
+        yield "integer_field", self.integer_field
+        yield "double_field", self.double_field
+        yield "string_field", self.string_field
+        yield "binary_field", self.binary_field
+        yield "list_field", self.list_field
+        yield "set_field", self.set_field
+        yield "map_field", self.map_field
+        yield "struct_field", self.struct_field
+

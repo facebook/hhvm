@@ -80,6 +80,14 @@ cdef api object construct__module__CustomTypedefFields(__unique_ptr[__cIOBuf])
 
 cdef api object init__module__CustomTypedefFields(object data)
 
+cdef api int can_extract__module__AdaptedTypedefFields(object) except -1
+
+cdef api __cIOBuf* extract__module__AdaptedTypedefFields(object) except NULL
+
+cdef api object construct__module__AdaptedTypedefFields(__unique_ptr[__cIOBuf])
+
+cdef api object init__module__AdaptedTypedefFields(object data)
+
 cdef api int can_extract__module__AnEnum(object) except -1
 
 cdef api object construct__module__AnEnum(int64_t)

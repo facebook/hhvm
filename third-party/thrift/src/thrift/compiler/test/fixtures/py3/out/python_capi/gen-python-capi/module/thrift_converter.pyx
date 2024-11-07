@@ -78,3 +78,9 @@ cdef cCustomTypedefFields CustomTypedefFields_convert_to_cpp(object inst) except
 cdef object CustomTypedefFields_from_cpp(const cCustomTypedefFields& c_struct):
     return cpp_to_python[cCustomTypedefFields](c_struct)
 
+cdef cAdaptedTypedefFields AdaptedTypedefFields_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cAdaptedTypedefFields](inst))
+
+cdef object AdaptedTypedefFields_from_cpp(const cAdaptedTypedefFields& c_struct):
+    return cpp_to_python[cAdaptedTypedefFields](c_struct)
+

@@ -162,3 +162,22 @@ cdef class __CustomTypedefFields_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_7(self, _fbthrift_value) except *
     cdef void _set_field_8(self, _fbthrift_value) except *
 
+
+ctypedef void (*__AdaptedTypedefFields_FieldsSetterFunc)(__AdaptedTypedefFields_FieldsSetter, object) except *
+
+cdef class __AdaptedTypedefFields_FieldsSetter(__StructFieldsSetter):
+    cdef _module_cbindings.cAdaptedTypedefFields* _struct_cpp_obj
+    cdef cumap[__cstring_view, __AdaptedTypedefFields_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __AdaptedTypedefFields_FieldsSetter _fbthrift_create(_module_cbindings.cAdaptedTypedefFields* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+    cdef void _set_field_3(self, _fbthrift_value) except *
+    cdef void _set_field_4(self, _fbthrift_value) except *
+    cdef void _set_field_5(self, _fbthrift_value) except *
+    cdef void _set_field_6(self, _fbthrift_value) except *
+    cdef void _set_field_7(self, _fbthrift_value) except *
+    cdef void _set_field_8(self, _fbthrift_value) except *
+

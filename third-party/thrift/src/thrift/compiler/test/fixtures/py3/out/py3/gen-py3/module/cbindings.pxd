@@ -335,6 +335,22 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types_cust
         __field_ref[_MyType] map_field_ref "map_field_ref" ()
         __field_ref[cSimpleStruct] struct_field_ref "struct_field_ref" ()
 
+
+    cdef cppclass cAdaptedTypedefFields "::py3::simple::AdaptedTypedefFields":
+        cAdaptedTypedefFields() except +
+        cAdaptedTypedefFields(const cAdaptedTypedefFields&) except +
+        bint operator==(cAdaptedTypedefFields&)
+        bint operator!=(cAdaptedTypedefFields&)
+        __field_ref[cbool] bool_field_ref "bool_field_ref" ()
+        __field_ref[cint64_t] integer_field_ref "integer_field_ref" ()
+        __field_ref[double] double_field_ref "double_field_ref" ()
+        __field_ref[string] string_field_ref "string_field_ref" ()
+        __field_ref[string] binary_field_ref "binary_field_ref" ()
+        __field_ref[vector[cint32_t]] list_field_ref "list_field_ref" ()
+        __field_ref[cset[cint32_t]] set_field_ref "set_field_ref" ()
+        __field_ref[cmap[cint32_t,cint32_t]] map_field_ref "map_field_ref" ()
+        __field_ref[cSimpleStruct] struct_field_ref "struct_field_ref" ()
+
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_constants.h" namespace "::py3::simple":
     cdef cbool cA_BOOL "::py3::simple::module_constants::A_BOOL"
     cdef cint8_t cA_BYTE "::py3::simple::module_constants::A_BYTE"

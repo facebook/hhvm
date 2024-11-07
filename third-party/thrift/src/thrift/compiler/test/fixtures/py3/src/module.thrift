@@ -240,6 +240,25 @@ typedef map<i32, i32> CustomMap
 @cpp.Type{name = "::MyType"}
 typedef SimpleStruct CustomStruct
 
+@cpp.Adapter{name = "::MyAdapter"}
+typedef bool AdaptedBool
+@cpp.Adapter{name = "::MyAdapter"}
+typedef i64 AdaptedInteger
+@cpp.Adapter{name = "::MyAdapter"}
+typedef double AdaptedDouble
+@cpp.Adapter{name = "::MyAdapter"}
+typedef string AdaptedString
+@cpp.Adapter{name = "::MyAdapter"}
+typedef binary AdaptedBinary
+@cpp.Adapter{name = "::MyAdapter"}
+typedef list<i32> AdaptedList
+@cpp.Adapter{name = "::MyAdapter"}
+typedef set<i32> AdaptedSet
+@cpp.Adapter{name = "::MyAdapter"}
+typedef map<i32, i32> AdaptedMap
+@cpp.Adapter{name = "::MyAdapter"}
+typedef SimpleStruct AdaptedStruct
+
 struct CustomFields {
   @cpp.Type{name = "::MyType"}
   1: bool bool_field;
@@ -271,4 +290,16 @@ struct CustomTypedefFields {
   7: CustomSet set_field;
   8: CustomMap map_field;
   9: CustomStruct struct_field;
+}
+
+struct AdaptedTypedefFields {
+  1: AdaptedBool bool_field;
+  2: AdaptedInteger integer_field;
+  3: AdaptedDouble double_field;
+  4: AdaptedString string_field;
+  5: AdaptedBinary binary_field;
+  6: AdaptedList list_field;
+  7: AdaptedSet set_field;
+  8: AdaptedMap map_field;
+  9: AdaptedStruct struct_field;
 }

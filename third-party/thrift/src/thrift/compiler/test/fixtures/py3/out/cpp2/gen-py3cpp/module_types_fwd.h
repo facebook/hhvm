@@ -23,6 +23,7 @@ class BinaryUnion;
 class BinaryUnionStruct;
 class CustomFields;
 class CustomTypedefFields;
+class AdaptedTypedefFields;
 } // namespace py3::simple
 // END forward_declare
 

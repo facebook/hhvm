@@ -37,3 +37,6 @@ cdef object CustomFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomFi
 cdef shared_ptr[_fbthrift_cbindings.cCustomTypedefFields] CustomTypedefFields_convert_to_cpp(object inst) except*
 cdef object CustomTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomTypedefFields]& c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields] AdaptedTypedefFields_convert_to_cpp(object inst) except*
+cdef object AdaptedTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields]& c_struct)
+

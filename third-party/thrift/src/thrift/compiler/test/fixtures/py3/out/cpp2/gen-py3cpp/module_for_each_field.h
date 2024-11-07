@@ -134,6 +134,22 @@ struct ForEachField<::py3::simple::CustomTypedefFields> {
     f(8, static_cast<T&&>(t).struct_field_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::py3::simple::AdaptedTypedefFields> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).bool_field_ref()...);
+    f(1, static_cast<T&&>(t).integer_field_ref()...);
+    f(2, static_cast<T&&>(t).double_field_ref()...);
+    f(3, static_cast<T&&>(t).string_field_ref()...);
+    f(4, static_cast<T&&>(t).binary_field_ref()...);
+    f(5, static_cast<T&&>(t).list_field_ref()...);
+    f(6, static_cast<T&&>(t).set_field_ref()...);
+    f(7, static_cast<T&&>(t).map_field_ref()...);
+    f(8, static_cast<T&&>(t).struct_field_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

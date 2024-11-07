@@ -905,6 +905,141 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomTypedefFields, self)
 
+
+class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "bool_field",  # name
+            "bool_field",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            1, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "integer_field",  # name
+            "integer_field",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            5, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "double_field",  # name
+            "double_field",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_double,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            7, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "string_field",  # name
+            "string_field",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "binary_field",  # name
+            "binary_field",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_binary,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            True, # field type is primitive
+            9, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_field",  # name
+            "list_field",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_field",  # name
+            "set_field",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_field",  # name
+            "map_field",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "struct_field",  # name
+            "struct_field",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(SimpleStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.AdaptedTypedefFields"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_AdaptedTypedefFields()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.AdaptedTypedefFields, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedTypedefFields, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedTypedefFields, self)
+
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
@@ -1046,6 +1181,10 @@ def _fbthrift_metadata__struct_CustomTypedefFields():
     return module.thrift_metadata.gen_metadata_struct_CustomTypedefFields()
 
 
+def _fbthrift_metadata__struct_AdaptedTypedefFields():
+    return module.thrift_metadata.gen_metadata_struct_AdaptedTypedefFields()
+
+
 _fbthrift_all_structs = [
     SimpleException,
     OptionalRefStruct,
@@ -1058,6 +1197,7 @@ _fbthrift_all_structs = [
     BinaryUnionStruct,
     CustomFields,
     CustomTypedefFields,
+    AdaptedTypedefFields,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
@@ -1109,6 +1249,15 @@ CustomList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typei
 CustomSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
 CustomStruct = SimpleStruct
+AdaptedBool = bool
+AdaptedInteger = int
+AdaptedDouble = float
+AdaptedString = str
+AdaptedBinary = bytes
+AdaptedList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
+AdaptedSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
+AdaptedMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
+AdaptedStruct = SimpleStruct
 
 
 

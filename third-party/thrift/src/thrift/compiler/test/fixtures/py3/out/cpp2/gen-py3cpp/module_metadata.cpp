@@ -318,6 +318,29 @@ StructMetadata<::py3::simple::CustomTypedefFields>::gen(ThriftMetadata& metadata
   }
   return res.first->second;
 }
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::py3::simple::AdaptedTypedefFields>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.AdaptedTypedefFields", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_AdaptedTypedefFields = res.first->second;
+  module_AdaptedTypedefFields.name() = "module.AdaptedTypedefFields";
+  module_AdaptedTypedefFields.is_union() = false;
+  static const auto* const
+  module_AdaptedTypedefFields_fields = new std::array<EncodedThriftField, 9>{ {
+    { 1, "bool_field", false, std::make_unique<Typedef>("module.AdaptedBool", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 2, "integer_field", false, std::make_unique<Typedef>("module.AdaptedInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 3, "double_field", false, std::make_unique<Typedef>("module.AdaptedDouble", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_DOUBLE_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 4, "string_field", false, std::make_unique<Typedef>("module.AdaptedString", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_STRING_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 5, "binary_field", false, std::make_unique<Typedef>("module.AdaptedBinary", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 6, "list_field", false, std::make_unique<Typedef>("module.AdaptedList", std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 7, "set_field", false, std::make_unique<Typedef>("module.AdaptedSet", std::make_unique<Set>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 8, "map_field", false, std::make_unique<Typedef>("module.AdaptedMap", std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE)), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},    { 9, "struct_field", false, std::make_unique<Typedef>("module.AdaptedStruct", std::make_unique<Struct<::py3::simple::SimpleStruct>>("module.SimpleStruct"), std::vector<ThriftConstStruct>{ *cvStruct("cpp.Adapter", { {"name", cvString("::MyAdapter") } }).cv_struct_ref(),  }), std::vector<ThriftConstStruct>{ }},  }};
+  for (const auto& f : *module_AdaptedTypedefFields_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_AdaptedTypedefFields.fields()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
 
 void ExceptionMetadata<::py3::simple::SimpleException>::gen(ThriftMetadata& metadata) {
   auto res = metadata.exceptions()->emplace("module.SimpleException", ::apache::thrift::metadata::ThriftException{});

@@ -603,6 +603,131 @@ def get_reflection__CustomTypedefFields() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__AdaptedTypedefFields() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="AdaptedTypedefFields",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="bool_field",
+            py_name="bool_field",
+            type=bool,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="integer_field",
+            py_name="integer_field",
+            type=int,
+            kind=__NumberType.I64,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="double_field",
+            py_name="double_field",
+            type=float,
+            kind=__NumberType.DOUBLE,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=4,
+            name="string_field",
+            py_name="string_field",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=5,
+            name="binary_field",
+            py_name="binary_field",
+            type=bytes,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=6,
+            name="list_field",
+            py_name="list_field",
+            type=_module_types.List__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=7,
+            name="set_field",
+            py_name="set_field",
+            type=_module_types.Set__i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=8,
+            name="map_field",
+            py_name="map_field",
+            type=_module_types.Map__i32_i32,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=9,
+            name="struct_field",
+            py_name="struct_field",
+            type=_module_types.SimpleStruct,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 def get_reflection__List__i16() -> __ListSpec :
     return __ListSpec._fbthrift_create(
         value=int,
@@ -762,6 +887,14 @@ def get_reflection___MyType__Set__i32() -> __SetSpec:
      )
 
 def get_reflection___MyType__Map__i32_i32() -> __MapSpec:
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=int,
+        value_kind=__NumberType.I32,
+    )
+
+def get_reflection__Map__i32_i32() -> __MapSpec:
     return __MapSpec._fbthrift_create(
         key=int,
         key_kind=__NumberType.I32,

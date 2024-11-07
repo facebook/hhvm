@@ -1064,6 +1064,87 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
   return getThriftData(*obj);
 }
 
+ExtractorResult<::py3::simple::AdaptedTypedefFields>
+Extractor<::py3::simple::AdaptedTypedefFields>::operator()(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::py3::simple::AdaptedTypedefFields>(
+      "Module module import error");
+  }
+  std::unique_ptr<folly::IOBuf> val(
+      extract__module__AdaptedTypedefFields(obj));
+  if (!val) {
+    CHECK(PyErr_Occurred());
+    return extractorError<::py3::simple::AdaptedTypedefFields>(
+        "Thrift serialize error: AdaptedTypedefFields");
+  }
+  return detail::deserialize_iobuf<::py3::simple::AdaptedTypedefFields>(std::move(val));
+}
+
+
+ExtractorResult<::py3::simple::AdaptedTypedefFields>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::py3::simple::AdaptedTypedefFields>>::operator()(PyObject* fbthrift_data) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return extractorError<::py3::simple::AdaptedTypedefFields>(
+      "Module module import error");
+  }
+  auto obj = StrongRef(init__module__AdaptedTypedefFields(fbthrift_data));
+  if (!obj) {
+      return extractorError<::py3::simple::AdaptedTypedefFields>(
+          "Init from fbthrift error: AdaptedTypedefFields");
+  }
+  return Extractor<::py3::simple::AdaptedTypedefFields>{}(*obj);
+}
+
+int Extractor<::py3::simple::AdaptedTypedefFields>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module module import error");
+  }
+  int result =
+      can_extract__module__AdaptedTypedefFields(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: AdaptedTypedefFields");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::py3::simple::AdaptedTypedefFields>::operator()(
+    const ::py3::simple::AdaptedTypedefFields& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  ::std::unique_ptr<::folly::IOBuf> serialized;
+  try {
+    serialized = detail::serialize_to_iobuf(val);
+  } catch (const apache::thrift::TProtocolException& e) {
+    detail::handle_protocol_error(e);
+    return nullptr;
+  }
+  DCHECK(serialized);
+  auto ptr = construct__module__AdaptedTypedefFields(std::move(serialized));
+  if (!ptr) {
+    CHECK(PyErr_Occurred());
+  }
+  return ptr;
+}
+
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::py3::simple::AdaptedTypedefFields>>::operator()(
+    const ::py3::simple::AdaptedTypedefFields& val) {
+  auto obj = StrongRef(Constructor<::py3::simple::AdaptedTypedefFields>{}(val));
+  if (!obj) {
+    return nullptr;
+  }
+  return getThriftData(*obj);
+}
+
 ExtractorResult<::py3::simple::AnEnum>
 Extractor<::py3::simple::AnEnum>::operator()(PyObject* obj) {
   long val = PyLong_AsLong(obj);

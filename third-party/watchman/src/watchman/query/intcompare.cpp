@@ -132,6 +132,14 @@ class SizeExpr : public QueryExpr {
   ReturnOnlyFiles listOnlyFiles() const override {
     return ReturnOnlyFiles::Unrelated;
   }
+
+  SimpleSuffixType evaluateSimpleSuffix() const override {
+    return SimpleSuffixType::Excluded;
+  }
+
+  std::vector<std::string> getSuffixQueryGlobPatterns() const override {
+    return std::vector<std::string>{};
+  }
 };
 W_TERM_PARSER(size, SizeExpr::parse);
 

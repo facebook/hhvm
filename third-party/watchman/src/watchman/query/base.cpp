@@ -64,6 +64,14 @@ class NotExpr : public QueryExpr {
     }
     return ReturnOnlyFiles::Unrelated;
   }
+
+  SimpleSuffixType evaluateSimpleSuffix() const override {
+    return SimpleSuffixType::Excluded;
+  }
+
+  std::vector<std::string> getSuffixQueryGlobPatterns() const override {
+    return std::vector<std::string>{};
+  }
 };
 
 W_TERM_PARSER(not, NotExpr::parse);
@@ -87,6 +95,14 @@ class TrueExpr : public QueryExpr {
   ReturnOnlyFiles listOnlyFiles() const override {
     return ReturnOnlyFiles::Unrelated;
   }
+
+  SimpleSuffixType evaluateSimpleSuffix() const override {
+    return SimpleSuffixType::Excluded;
+  }
+
+  std::vector<std::string> getSuffixQueryGlobPatterns() const override {
+    return std::vector<std::string>{};
+  }
 };
 
 W_TERM_PARSER(true, TrueExpr::parse);
@@ -109,6 +125,14 @@ class FalseExpr : public QueryExpr {
 
   ReturnOnlyFiles listOnlyFiles() const override {
     return ReturnOnlyFiles::Unrelated;
+  }
+
+  SimpleSuffixType evaluateSimpleSuffix() const override {
+    return SimpleSuffixType::Excluded;
+  }
+
+  std::vector<std::string> getSuffixQueryGlobPatterns() const override {
+    return std::vector<std::string>{};
   }
 };
 
@@ -311,6 +335,35 @@ class ListExpr : public QueryExpr {
       }
     }
     return result;
+  }
+
+  SimpleSuffixType evaluateSimpleSuffix() const override {
+    if (allof) {
+      std::vector<SimpleSuffixType> types;
+      for (auto& subExpr : exprs) {
+        types.push_back(subExpr->evaluateSimpleSuffix());
+      }
+      if (types.size() == 2) {
+        if ((types[0] == SimpleSuffixType::Type &&
+             types[1] == SimpleSuffixType::Suffix) ||
+            (types[1] == SimpleSuffixType::Type &&
+             types[0] == SimpleSuffixType::Suffix)) {
+          return SimpleSuffixType::IsSimpleSuffix;
+        }
+      }
+    }
+    return SimpleSuffixType::Excluded;
+  }
+
+  std::vector<std::string> getSuffixQueryGlobPatterns() const override {
+    if (allof) {
+      for (auto& subExpr : exprs) {
+        if (subExpr->evaluateSimpleSuffix() == SimpleSuffixType::Suffix) {
+          return subExpr->getSuffixQueryGlobPatterns();
+        }
+      }
+    }
+    return std::vector<std::string>{};
   }
 };
 

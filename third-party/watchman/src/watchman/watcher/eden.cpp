@@ -613,13 +613,18 @@ static std::string escapeGlobSpecialChars(w_string_piece str) {
  * We need to respect the ignore_dirs configuration setting and
  * also remove anything that doesn't match the relative_root constraint
  * in the query. */
-void filterOutPaths(std::vector<NameAndDType>& files, QueryContext* ctx) {
+void filterOutPaths(
+    std::vector<NameAndDType>& files,
+    QueryContext* ctx,
+    const std::string& relative_root = "") {
   files.erase(
       std::remove_if(
           files.begin(),
           files.end(),
-          [ctx](const NameAndDType& item) {
-            auto full = w_string::pathCat({ctx->root->root_path, item.name});
+          [ctx, relative_root](const NameAndDType& item) {
+            w_string full;
+            full = w_string::pathCat(
+                {ctx->root->root_path, relative_root, item.name});
 
             if (!ctx->fileMatchesRelativeRoot(full)) {
               // Not in the desired area, so filter it out
@@ -655,7 +660,8 @@ std::vector<NameAndDType> globNameAndDType(
     const std::vector<std::string>& globPatterns,
     bool includeDotfiles,
     bool splitGlobPattern = false,
-    bool listOnlyFiles = false) {
+    bool listOnlyFiles = false,
+    const std::string& relative_root = "") {
   // TODO(xavierd): Once the config: "eden_split_glob_pattern" is rolled out
   // everywhere, remove this code.
   if (splitGlobPattern && globPatterns.size() > 1) {
@@ -672,6 +678,7 @@ std::vector<NameAndDType> globNameAndDType(
       params.wantDtype() = true;
       params.listOnlyFiles() = listOnlyFiles;
       params.sync() = getSyncBehavior();
+      params.searchRoot() = relative_root;
 
       globFutures.emplace_back(
           client->semifuture_globFiles(params).via(executor));
@@ -691,6 +698,7 @@ std::vector<NameAndDType> globNameAndDType(
     params.wantDtype() = true;
     params.listOnlyFiles() = listOnlyFiles;
     params.sync() = getSyncBehavior();
+    params.searchRoot() = relative_root;
 
     Glob glob;
     try {
@@ -867,7 +875,8 @@ class EdenView final : public QueryableView {
       const std::vector<std::string>& globStrings,
       QueryContext* ctx,
       bool includeDotfiles,
-      bool includeDir = true) const {
+      bool includeDir = true,
+      const std::string& relative_root = "") const {
     auto client = getEdenClient(thriftChannel_);
 
     bool listOnlyFiles = false;
@@ -882,12 +891,13 @@ class EdenView final : public QueryableView {
         globStrings,
         includeDotfiles,
         splitGlobPattern_,
-        listOnlyFiles);
+        listOnlyFiles,
+        relative_root);
     ctx->edenGlobFilesDurationUs.store(
         timer.elapsed().count(), std::memory_order_relaxed);
 
     // Filter out any ignored files
-    filterOutPaths(fileInfo, ctx);
+    filterOutPaths(fileInfo, ctx, relative_root);
 
     for (auto& item : fileInfo) {
       auto file = make_unique<EdenFileResult>(
@@ -997,8 +1007,23 @@ class EdenView final : public QueryableView {
 
   void allFilesGenerator(const Query*, QueryContext* ctx) const override {
     ctx->generationStarted();
-    auto globPatterns = getGlobPatternsForAllFiles(ctx);
-    executeGlobBasedQuery(globPatterns, ctx, /*includeDotfiles=*/true);
+    std::string relative_root = "";
+    std::vector<std::string> globPatterns;
+    bool includeDir = true;
+    if (isSimpleSuffixQuery(ctx)) {
+      globPatterns = getSuffixQueryGlobPatterns(ctx);
+      relative_root = getSuffixQueryRelativeRoot(ctx);
+      includeDir = false;
+    } else {
+      globPatterns = getGlobPatternsForAllFiles(ctx);
+    }
+
+    executeGlobBasedQuery(
+        globPatterns,
+        ctx,
+        /*includeDotfiles=*/true,
+        includeDir,
+        relative_root);
   }
 
   ClockPosition getMostRecentRootNumberAndTickValue() const override {
@@ -1191,6 +1216,26 @@ class EdenView final : public QueryableView {
     return globPatterns;
   }
 
+  bool isSimpleSuffixQuery(QueryContext* ctx) const {
+    // Checks if this query expression is a simple suffix query.
+    // A simple suffix query is an allof expression that only contains
+    //   1. Type = f
+    //   2. Suffix
+    if (ctx->query->expr) {
+      return ctx->query->expr->evaluateSimpleSuffix() ==
+          SimpleSuffixType::IsSimpleSuffix;
+    }
+    return false;
+  }
+
+  std::vector<std::string> getSuffixQueryGlobPatterns(QueryContext* ctx) const {
+    return ctx->query->expr->getSuffixQueryGlobPatterns();
+  }
+
+  std::string getSuffixQueryRelativeRoot(QueryContext* ctx) const {
+    return computeRelativePathPiece(ctx).string();
+  }
+
   /**
    * Returns all the files in the watched directory for a fresh instance.
    *
@@ -1203,8 +1248,14 @@ class EdenView final : public QueryableView {
       // Avoid a full tree walk if we don't need it!
       return std::vector<NameAndDType>();
     }
-
-    auto globPatterns = getGlobPatternsForAllFiles(ctx);
+    std::string relative_root = "";
+    std::vector<std::string> globPatterns;
+    if (isSimpleSuffixQuery(ctx)) {
+      globPatterns = getSuffixQueryGlobPatterns(ctx);
+      relative_root = getSuffixQueryRelativeRoot(ctx);
+    } else {
+      globPatterns = getGlobPatternsForAllFiles(ctx);
+    }
 
     auto client = getEdenClient(thriftChannel_);
     return globNameAndDType(
@@ -1212,7 +1263,9 @@ class EdenView final : public QueryableView {
         mountPoint_,
         std::move(globPatterns),
         /*includeDotfiles=*/true,
-        splitGlobPattern_);
+        splitGlobPattern_,
+        /*listOnlyFiles=*/false,
+        relative_root);
   }
 
   struct GetAllChangesSinceResult {

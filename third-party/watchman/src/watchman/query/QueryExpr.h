@@ -43,6 +43,11 @@ enum AggregateOp {
   AllOf,
 };
 
+/**
+ * Describes which part of a simple suffix expression
+ */
+enum SimpleSuffixType { Excluded, Suffix, IsSimpleSuffix, Type };
+
 class QueryExpr {
  public:
   virtual ~QueryExpr() = default;
@@ -78,6 +83,8 @@ class QueryExpr {
   virtual std::optional<std::vector<std::string>> computeGlobUpperBound(
       CaseSensitivity) const = 0;
 
+  virtual std::vector<std::string> getSuffixQueryGlobPatterns() const = 0;
+
   enum ReturnOnlyFiles { No, Yes, Unrelated };
 
   /**
@@ -86,6 +93,16 @@ class QueryExpr {
    * method to handle this query.
    */
   virtual ReturnOnlyFiles listOnlyFiles() const = 0;
+
+  /**
+   * Returns whether this expression is a simple suffix expression, or a part
+   * of a simple suffix expression. A simple suffix expression is an allof
+   * expression that contains a single suffix expresssion containing one or more
+   * suffixes, and a type expresssion that wants files only. The intention for
+   * this is to allow watchman to more accurately determine what arguments to
+   * pass to eden's globFiles API.
+   */
+  virtual SimpleSuffixType evaluateSimpleSuffix() const = 0;
 };
 
 } // namespace watchman

@@ -320,7 +320,6 @@ module.exports = {
           id: 'fb/server/index',
         },
         items: [
-          'fb/server/howto',
           'fb/server/server-lifecycle',
           'fb/server/server-modules',
           'fb/server/service-interceptors',

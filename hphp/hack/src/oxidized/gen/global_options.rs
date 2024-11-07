@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d3c5b6cf9d7173f5a1265547c614bb79>>
+// @generated SignedSource<<af8a272a5b4d661025098a4afdbe72ad>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -254,4 +254,5 @@ pub struct GlobalOptions {
     pub tco_enable_abstract_method_optional_parameters: bool,
     pub recursive_case_types: bool,
     pub class_sub_classname: bool,
+    pub class_class_type: bool,
 }

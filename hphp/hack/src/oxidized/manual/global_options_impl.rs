@@ -142,6 +142,7 @@ impl Default for GlobalOptions {
             tco_enable_abstract_method_optional_parameters: false,
             recursive_case_types: false,
             class_sub_classname: true,
+            class_class_type: false,
         }
     }
 }

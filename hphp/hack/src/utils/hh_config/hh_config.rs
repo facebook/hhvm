@@ -557,6 +557,7 @@ impl HhConfig {
                 .get_bool_or("recursive_case_types", default.recursive_case_types)?,
             class_sub_classname: hhconfig
                 .get_bool_or("class_sub_classname", default.class_sub_classname)?,
+            class_class_type: hhconfig.get_bool_or("class_class_type", default.class_class_type)?,
         };
         let mut c = Self {
             local_config,

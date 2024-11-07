@@ -191,6 +191,7 @@ type t = {
   tco_enable_abstract_method_optional_parameters: bool;
   recursive_case_types: bool;
   class_sub_classname: bool;
+  class_class_type: bool;
 }
 [@@deriving eq, show]
 
@@ -299,6 +300,7 @@ let default =
     tco_enable_abstract_method_optional_parameters = false;
     recursive_case_types = false;
     class_sub_classname = true;
+    class_class_type = false;
   }
 
 let set
@@ -405,6 +407,7 @@ let set
     ?tco_enable_abstract_method_optional_parameters
     ?recursive_case_types
     ?class_sub_classname
+    ?class_class_type
     options =
   let setting setting option =
     match setting with
@@ -687,6 +690,7 @@ let set
       setting recursive_case_types options.recursive_case_types;
     class_sub_classname =
       setting class_sub_classname options.class_sub_classname;
+    class_class_type = setting class_class_type options.class_class_type;
   }
 
 let so_naming_sqlite_path t = t.so_naming_sqlite_path

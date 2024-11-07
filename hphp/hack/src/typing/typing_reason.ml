@@ -1312,7 +1312,7 @@ let witness_decl_to_string prefix witness =
   | Class_class (pos_or_decl, s) ->
     ( pos_or_decl,
       prefix
-      ^ "; implicitly defined constant `::class` is a string that contains the fully qualified name of "
+      ^ "; implicitly defined constant `::class` is a reference to class "
       ^ (strip_ns s |> Markdown_lite.md_codify) )
   | Var_param_from_decl pos_or_decl ->
     (pos_or_decl, prefix ^ " (variadic argument)")

@@ -502,6 +502,7 @@ let load_config config options =
              | false -> GlobalOptions.NNone))
     ?recursive_case_types:(bool_opt "recursive_case_types" config)
     ?class_sub_classname:(bool_opt "class_sub_classname" config)
+    ?class_class_type:(bool_opt "class_class_type" config)
     options
 
 let load

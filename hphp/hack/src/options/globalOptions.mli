@@ -276,6 +276,7 @@ type t = {
       (** Enable use of optional on parameters in abstract methods *)
   recursive_case_types: bool;  (** Enable recursive case types *)
   class_sub_classname: bool;  (** Whether class<T> <: classname<T> *)
+  class_class_type: bool;  (** When true, C::class : class<C> *)
 }
 [@@deriving eq, show]
 
@@ -383,6 +384,7 @@ val set :
   ?tco_enable_abstract_method_optional_parameters:bool ->
   ?recursive_case_types:bool ->
   ?class_sub_classname:bool ->
+  ?class_class_type:bool ->
   t ->
   t
 

@@ -23,6 +23,6 @@ Invalid argument (Typing[4110])
   File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 6, characters 39-40:
     via this generic `Tv`
   File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 19, characters 7-7:
-  But got `C`; implicitly defined constant `::class` is a string that contains the fully qualified name of `C`
+  But got `C`; implicitly defined constant `::class` is a reference to class `C`
   File "class_tparam_substitution_conflicts_with_method_tparam2.php", line 22, characters 34-34:
     where the class `C` was referenced here

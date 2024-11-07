@@ -332,3 +332,5 @@ let class_sub_classname t = t.GlobalOptions.class_sub_classname
 
 let enable_class_pointer_hint t =
   t.GlobalOptions.po.ParserOptions.enable_class_pointer_hint
+
+let class_class_type t = t.GlobalOptions.class_class_type

@@ -7,6 +7,6 @@ Invalid argument (Typing[4323])
   File "reflection.hhi", line 62, characters 48-68:
   Expected `HH\ClassLikeAttribute`
   File "reflection.php", line 8, characters 7-11:
-  But got `FAttr`; implicitly defined constant `::class` is a string that contains the fully qualified name of `FAttr`
+  But got `FAttr`; implicitly defined constant `::class` is a reference to class `FAttr`
   File "reflection.php", line 18, characters 26-30:
     where the class `FAttr` was referenced here

@@ -17,21 +17,29 @@
 package thrift
 
 import (
+	"context"
 	"fmt"
 	"net"
 )
 
-// NewSimpleServer creates a new server that only supports Header Transport.
-func NewSimpleServer(processor Processor, listener net.Listener, transportType TransportID, options ...ServerOption) Server {
+// Server is a thrift server
+type Server interface {
+	// ServeContext starts the server, and stops it when the context is cancelled
+	ServeContext(ctx context.Context) error
+}
+
+// NewServer creates a new thrift server. It includes:
+// * load shedding support
+// * load balancing compatible with high QPS services
+// * pipelining of incoming requests on same connection
+// * out of order responses (for clients that support it!)
+// * and statstics that you can export to your favorite monitoring system
+func NewServer(processor Processor, listener net.Listener, transportType TransportID, options ...ServerOption) Server {
 	serverOptions := newServerOptions(options...)
 	switch transportType {
 	case TransportIDHeader:
-		return newHeaderSimpleServer(processor, listener, serverOptions)
-	case TransportIDRocket:
-		return newRocketSimpleServer(processor, listener, serverOptions)
-	case TransportIDUpgradeToRocket:
-		return newUpgradeToRocketSimpleServer(processor, listener, serverOptions)
+		return newHeaderServer(processor, listener, serverOptions)
 	default:
-		panic(fmt.Sprintf("SimpleServer does not support: %v", transportType))
+		panic(fmt.Sprintf("Server does not support: %v", transportType))
 	}
 }

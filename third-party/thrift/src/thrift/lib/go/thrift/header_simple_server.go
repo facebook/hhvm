@@ -31,16 +31,16 @@ import (
 // on the connection.  multiple simultaneous requests over a single
 // connection are not supported, as the per-connection gofunc reads
 // the request, processes it, and writes the response serially
-type headerServer struct {
+type headerSimpleServer struct {
 	processor   Processor
 	listener    net.Listener
 	log         func(format string, args ...interface{})
 	connContext func(context.Context, net.Conn) context.Context
 }
 
-// newHeaderServer creates a new server that only supports Header Transport.
-func newHeaderServer(processor Processor, listener net.Listener, options *serverOptions) Server {
-	return &headerServer{
+// newHeaderSimpleServer creates a new server that only supports Header Transport.
+func newHeaderSimpleServer(processor Processor, listener net.Listener, options *serverOptions) Server {
+	return &headerSimpleServer{
 		processor:   processor,
 		listener:    listener,
 		log:         options.log,
@@ -50,7 +50,7 @@ func newHeaderServer(processor Processor, listener net.Listener, options *server
 
 // ServeContext starts listening on the transport and accepting new connections
 // and blocks until cancel is called via context or an error occurs.
-func (s *headerServer) ServeContext(ctx context.Context) error {
+func (s *headerSimpleServer) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 		s.listener.Close()
@@ -63,7 +63,7 @@ func (s *headerServer) ServeContext(ctx context.Context) error {
 }
 
 // acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.
-func (s *headerServer) acceptLoop(ctx context.Context) error {
+func (s *headerSimpleServer) acceptLoop(ctx context.Context) error {
 	for {
 		conn, err := s.listener.Accept()
 		if err != nil {
@@ -91,7 +91,7 @@ func (s *headerServer) acceptLoop(ctx context.Context) error {
 	}
 }
 
-func (s *headerServer) processRequests(ctx context.Context, conn net.Conn) error {
+func (s *headerSimpleServer) processRequests(ctx context.Context, conn net.Conn) error {
 	protocol, err := NewHeaderProtocol(conn)
 	if err != nil {
 		return err

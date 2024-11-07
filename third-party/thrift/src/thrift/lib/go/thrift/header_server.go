@@ -65,18 +65,13 @@ type server struct {
 	pstats map[string]*thriftstats.TimingSeries
 }
 
-// NewServer creates a new thrift server. It includes:
+// newHeaderServer creates a new thrift server. It includes:
 // * load shedding support
 // * load balancing compatible with high QPS services
 // * pipelining of incoming requests on same connection
 // * out of order responses (for clients that support it!)
 // * and statstics that you can export to your favorite monitoring system
-func NewServer(processor Processor, listener net.Listener, transportType TransportID, options ...ServerOption) Server {
-	if transportType != TransportIDHeader {
-		panic(fmt.Sprintf("Server does not support: %v", transportType))
-	}
-	opts := newServerOptions(options...)
-	// allocate a server with defaults
+func newHeaderServer(processor Processor, listener net.Listener, opts *serverOptions) Server {
 	return &server{
 		processor:   processor,
 		listener:    listener,

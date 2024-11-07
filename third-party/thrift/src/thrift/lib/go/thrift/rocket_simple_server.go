@@ -27,7 +27,7 @@ import (
 	"github.com/rsocket/rsocket-go/rx/mono"
 )
 
-type rocketServer struct {
+type rocketSimpleServer struct {
 	proc          Processor
 	listener      net.Listener
 	transportID   TransportID
@@ -36,8 +36,8 @@ type rocketServer struct {
 	connContext   ConnContextFunc
 }
 
-func newRocketServer(proc Processor, listener net.Listener, options *serverOptions) Server {
-	return &rocketServer{
+func newRocketSimpleServer(proc Processor, listener net.Listener, options *serverOptions) Server {
+	return &rocketSimpleServer{
 		proc:          proc,
 		listener:      listener,
 		transportID:   TransportIDRocket,
@@ -47,8 +47,8 @@ func newRocketServer(proc Processor, listener net.Listener, options *serverOptio
 	}
 }
 
-func newUpgradeToRocketServer(proc Processor, listener net.Listener, options *serverOptions) Server {
-	return &rocketServer{
+func newUpgradeToRocketSimpleServer(proc Processor, listener net.Listener, options *serverOptions) Server {
+	return &rocketSimpleServer{
 		proc:          proc,
 		listener:      listener,
 		transportID:   TransportIDUpgradeToRocket,
@@ -58,7 +58,7 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, options *se
 	}
 }
 
-func (s *rocketServer) ServeContext(ctx context.Context) error {
+func (s *rocketSimpleServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
 		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log), nil
 	}
@@ -66,7 +66,7 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 	return r.Serve(ctx)
 }
 
-func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
+func (s *rocketSimpleServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {
 	if err := checkRequestSetupMetadata8(setup); err != nil {
 		return nil, err
 	}

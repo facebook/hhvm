@@ -40,9 +40,8 @@ cdef shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}] {{struct:name}}_conve
 {{/program:auto_migrate?}}
 {{^program:auto_migrate?}}
     return (<_fbthrift_ctypes.{{struct:name}}?>inst).{{> types/cpp_obj}}
+
 {{/program:auto_migrate?}}
-
-
 {{! direct replacement for ._fbthrift_create }}
 cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> types/c_struct }}]& c_struct):
 {{#program:auto_migrate?}}
@@ -51,4 +50,5 @@ cdef object {{struct:name}}_from_cpp(const shared_ptr[_fbthrift_cbindings.{{> ty
 {{^program:auto_migrate?}}
     return _fbthrift_ctypes.{{struct:name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
 {{/program:auto_migrate?}}
+
 {{/program:filtered_structs}}

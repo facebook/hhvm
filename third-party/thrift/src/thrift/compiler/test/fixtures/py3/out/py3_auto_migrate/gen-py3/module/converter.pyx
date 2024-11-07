@@ -15,61 +15,51 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-python-capi/module/thrif
 
 cdef shared_ptr[_fbthrift_cbindings.cSimpleException] SimpleException_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cSimpleException](python_to_cpp[_fbthrift_cbindings.cSimpleException](inst))
-
-
 cdef object SimpleException_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleException]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cSimpleException](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cOptionalRefStruct] OptionalRefStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cOptionalRefStruct](python_to_cpp[_fbthrift_cbindings.cOptionalRefStruct](inst))
-
-
 cdef object OptionalRefStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cOptionalRefStruct]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cOptionalRefStruct](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cSimpleStruct] SimpleStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cSimpleStruct](python_to_cpp[_fbthrift_cbindings.cSimpleStruct](inst))
-
-
 cdef object SimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleStruct]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cSimpleStruct](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct] HiddenTypeFieldsStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cHiddenTypeFieldsStruct](python_to_cpp[_fbthrift_cbindings.cHiddenTypeFieldsStruct](inst))
-
-
 cdef object HiddenTypeFieldsStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cHiddenTypeFieldsStruct]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cHiddenTypeFieldsStruct](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cComplexStruct] ComplexStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cComplexStruct](python_to_cpp[_fbthrift_cbindings.cComplexStruct](inst))
-
-
 cdef object ComplexStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexStruct]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cComplexStruct](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cBinaryUnion] BinaryUnion_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cBinaryUnion](python_to_cpp[_fbthrift_cbindings.cBinaryUnion](inst))
-
-
 cdef object BinaryUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnion]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cBinaryUnion](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct] BinaryUnionStruct_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cBinaryUnionStruct](python_to_cpp[_fbthrift_cbindings.cBinaryUnionStruct](inst))
-
-
 cdef object BinaryUnionStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cBinaryUnionStruct]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cBinaryUnionStruct](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cCustomFields] CustomFields_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cCustomFields](python_to_cpp[_fbthrift_cbindings.cCustomFields](inst))
-
-
 cdef object CustomFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomFields]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cCustomFields](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cCustomTypedefFields] CustomTypedefFields_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cCustomTypedefFields](python_to_cpp[_fbthrift_cbindings.cCustomTypedefFields](inst))
-
-
 cdef object CustomTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomTypedefFields]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cCustomTypedefFields](deref(c_struct))
+
 cdef shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields] AdaptedTypedefFields_convert_to_cpp(object inst) except*:
     return make_shared[_fbthrift_cbindings.cAdaptedTypedefFields](python_to_cpp[_fbthrift_cbindings.cAdaptedTypedefFields](inst))
-
-
 cdef object AdaptedTypedefFields_from_cpp(const shared_ptr[_fbthrift_cbindings.cAdaptedTypedefFields]& c_struct):
     return cpp_to_python[_fbthrift_cbindings.cAdaptedTypedefFields](deref(c_struct))
+

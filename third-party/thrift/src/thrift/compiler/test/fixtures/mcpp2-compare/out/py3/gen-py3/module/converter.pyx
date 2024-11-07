@@ -12,90 +12,90 @@ cimport module.types as _fbthrift_ctypes
 cdef shared_ptr[_fbthrift_cbindings.cEmpty] Empty_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.Empty?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object Empty_from_cpp(const shared_ptr[_fbthrift_cbindings.cEmpty]& c_struct):
     return _fbthrift_ctypes.Empty._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cASimpleStruct] ASimpleStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ASimpleStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object ASimpleStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cASimpleStruct]& c_struct):
     return _fbthrift_ctypes.ASimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cASimpleStructNoexcept] ASimpleStructNoexcept_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ASimpleStructNoexcept?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object ASimpleStructNoexcept_from_cpp(const shared_ptr[_fbthrift_cbindings.cASimpleStructNoexcept]& c_struct):
     return _fbthrift_ctypes.ASimpleStructNoexcept._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cMyStruct] MyStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.MyStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object MyStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyStruct]& c_struct):
     return _fbthrift_ctypes.MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cSimpleUnion] SimpleUnion_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.SimpleUnion?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object SimpleUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cSimpleUnion]& c_struct):
     return _fbthrift_ctypes.SimpleUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cComplexUnion] ComplexUnion_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ComplexUnion?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object ComplexUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexUnion]& c_struct):
     return _fbthrift_ctypes.ComplexUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cAnException] AnException_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.AnException?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object AnException_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnException]& c_struct):
     return _fbthrift_ctypes.AnException._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cAnotherException] AnotherException_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.AnotherException?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object AnotherException_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnotherException]& c_struct):
     return _fbthrift_ctypes.AnotherException._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.ccontainerStruct] containerStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.containerStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object containerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.ccontainerStruct]& c_struct):
     return _fbthrift_ctypes.containerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cMyIncludedStruct] MyIncludedStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.MyIncludedStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object MyIncludedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cMyIncludedStruct]& c_struct):
     return _fbthrift_ctypes.MyIncludedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cAnnotatedStruct] AnnotatedStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.AnnotatedStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object AnnotatedStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cAnnotatedStruct]& c_struct):
     return _fbthrift_ctypes.AnnotatedStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cComplexContainerStruct] ComplexContainerStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.ComplexContainerStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object ComplexContainerStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cComplexContainerStruct]& c_struct):
     return _fbthrift_ctypes.ComplexContainerStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cFloatStruct] FloatStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.FloatStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object FloatStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloatStruct]& c_struct):
     return _fbthrift_ctypes.FloatStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cFloatUnion] FloatUnion_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.FloatUnion?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object FloatUnion_from_cpp(const shared_ptr[_fbthrift_cbindings.cFloatUnion]& c_struct):
     return _fbthrift_ctypes.FloatUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+
 cdef shared_ptr[_fbthrift_cbindings.cAllRequiredNoExceptMoveCtrStruct] AllRequiredNoExceptMoveCtrStruct_convert_to_cpp(object inst) except*:
     return (<_fbthrift_ctypes.AllRequiredNoExceptMoveCtrStruct?>inst)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
 
-
 cdef object AllRequiredNoExceptMoveCtrStruct_from_cpp(const shared_ptr[_fbthrift_cbindings.cAllRequiredNoExceptMoveCtrStruct]& c_struct):
     return _fbthrift_ctypes.AllRequiredNoExceptMoveCtrStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(c_struct)
+

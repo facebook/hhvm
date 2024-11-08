@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/jjeffcaii/reactor-go/scheduler"
@@ -109,7 +110,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log)
+	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log, s.stats)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResonse),
@@ -122,10 +123,17 @@ type rocketServerSocket struct {
 	proc              Processor
 	pipeliningEnabled bool
 	log               func(format string, args ...interface{})
+	stats             *stats.ServerStats
 }
 
-func newRocketServerSocket(ctx context.Context, proc Processor, pipeliningEnabled bool, log func(format string, args ...interface{})) *rocketServerSocket {
-	return &rocketServerSocket{ctx: ctx, proc: proc, pipeliningEnabled: pipeliningEnabled, log: log}
+func newRocketServerSocket(ctx context.Context, proc Processor, pipeliningEnabled bool, log func(format string, args ...interface{}), stats *stats.ServerStats) *rocketServerSocket {
+	return &rocketServerSocket{
+		ctx:               ctx,
+		proc:              proc,
+		pipeliningEnabled: pipeliningEnabled,
+		log:               log,
+		stats:             stats,
+	}
 }
 
 func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
@@ -142,18 +150,21 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	if err != nil {
 		return mono.Error(err)
 	}
+	s.stats.SchedulingWorkCount.Incr()
+	workItem := func(ctx context.Context) (payload.Payload, error) {
+		s.stats.SchedulingWorkCount.Decr()
+		s.stats.WorkingCount.Incr()
+		defer s.stats.WorkingCount.Decr()
+		if err := process(ctx, s.proc, protocol); err != nil {
+			return nil, err
+		}
+		protocol.SetRequestHeader(LoadHeaderKey, fmt.Sprintf("%d", loadFn(s.stats)))
+		return encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
+	}
 	if s.pipeliningEnabled {
-		return mono.FromFunc(func(context.Context) (payload.Payload, error) {
-			if err := process(s.ctx, s.proc, protocol); err != nil {
-				return nil, err
-			}
-			return encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
-		})
+		return mono.FromFunc(workItem)
 	}
-	if err := process(s.ctx, s.proc, protocol); err != nil {
-		return mono.Error(err)
-	}
-	response, err := encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
+	response, err := workItem(s.ctx)
 	if err != nil {
 		return mono.Error(err)
 	}

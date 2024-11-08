@@ -75,11 +75,11 @@ func (s *rocketSimpleServer) acceptor(ctx context.Context, setup payload.SetupPa
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	conn := newRocketServerSocket(ctx, s.proc, s.log)
+	socket := newRocketServerSocket(ctx, s.proc, s.log)
 	return rsocket.NewAbstractSocket(
-		rsocket.MetadataPush(conn.metadataPush),
-		rsocket.RequestResponse(conn.requestResonse),
-		rsocket.FireAndForget(conn.fireAndForget),
+		rsocket.MetadataPush(socket.metadataPush),
+		rsocket.RequestResponse(socket.requestResonse),
+		rsocket.FireAndForget(socket.fireAndForget),
 	), nil
 }
 

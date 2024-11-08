@@ -37,6 +37,7 @@ type rocketSimpleServer struct {
 }
 
 func newRocketSimpleServer(proc Processor, listener net.Listener, options *serverOptions) Server {
+	setRsocketLogger(options.log)
 	return &rocketSimpleServer{
 		proc:          proc,
 		listener:      listener,
@@ -48,6 +49,7 @@ func newRocketSimpleServer(proc Processor, listener net.Listener, options *serve
 }
 
 func newUpgradeToRocketSimpleServer(proc Processor, listener net.Listener, options *serverOptions) Server {
+	setRsocketLogger(options.log)
 	return &rocketSimpleServer{
 		proc:          proc,
 		listener:      listener,

@@ -24,6 +24,7 @@ import (
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
+	"github.com/rsocket/rsocket-go/rx/mono"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 )
@@ -108,10 +109,71 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(ctx, s.proc, s.log)
+	socket := newRocketServerSocket(ctx, s.proc, s.pipeliningEnabled, s.log)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResonse),
 		rsocket.FireAndForget(socket.fireAndForget),
 	), nil
+}
+
+type rocketServerSocket struct {
+	ctx               context.Context
+	proc              Processor
+	pipeliningEnabled bool
+	log               func(format string, args ...interface{})
+}
+
+func newRocketServerSocket(ctx context.Context, proc Processor, pipeliningEnabled bool, log func(format string, args ...interface{})) *rocketServerSocket {
+	return &rocketServerSocket{ctx: ctx, proc: proc, pipeliningEnabled: pipeliningEnabled, log: log}
+}
+
+func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
+	_ = decodeClientMetadataPush(msg)
+	// This is usually something like transportMetadata = map[deciding_accessors:IP=...], but we do not handle it.
+}
+
+func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
+	request, err := decodeRequestPayload(msg)
+	if err != nil {
+		return mono.Error(err)
+	}
+	protocol, err := newProtocolBufferFromRequest(request)
+	if err != nil {
+		return mono.Error(err)
+	}
+	if s.pipeliningEnabled {
+		return mono.FromFunc(func(context.Context) (payload.Payload, error) {
+			if err := process(s.ctx, s.proc, protocol); err != nil {
+				return nil, err
+			}
+			return encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
+		})
+	}
+	if err := process(s.ctx, s.proc, protocol); err != nil {
+		return mono.Error(err)
+	}
+	response, err := encodeResponsePayload(protocol.name, protocol.messageType, protocol.getRequestHeaders(), request.Zstd(), protocol.Bytes())
+	if err != nil {
+		return mono.Error(err)
+	}
+	return mono.Just(response)
+}
+
+func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
+	request, err := decodeRequestPayload(msg)
+	if err != nil {
+		s.log("rocketServer fireAndForget decode request payload error: %v", err)
+		return
+	}
+	protocol, err := newProtocolBufferFromRequest(request)
+	if err != nil {
+		s.log("rocketServer fireAndForget error creating protocol: %v", err)
+		return
+	}
+	// TODO: support pipelining
+	if err := process(s.ctx, s.proc, protocol); err != nil {
+		s.log("rocketServer fireAndForget process error: %v", err)
+		return
+	}
 }

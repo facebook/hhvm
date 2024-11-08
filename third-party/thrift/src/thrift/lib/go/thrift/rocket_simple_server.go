@@ -75,7 +75,7 @@ func (s *rocketSimpleServer) acceptor(ctx context.Context, setup payload.SetupPa
 		return nil, err
 	}
 	sendingSocket.MetadataPush(serverMetadataPush)
-	socket := newRocketServerSocket(ctx, s.proc, s.log)
+	socket := newRocketSimpleServerSocket(ctx, s.proc, s.log)
 	return rsocket.NewAbstractSocket(
 		rsocket.MetadataPush(socket.metadataPush),
 		rsocket.RequestResponse(socket.requestResonse),
@@ -83,22 +83,22 @@ func (s *rocketSimpleServer) acceptor(ctx context.Context, setup payload.SetupPa
 	), nil
 }
 
-type rocketServerSocket struct {
+type rocketSimpleServerSocket struct {
 	ctx  context.Context
 	proc Processor
 	log  func(format string, args ...interface{})
 }
 
-func newRocketServerSocket(ctx context.Context, proc Processor, log func(format string, args ...interface{})) *rocketServerSocket {
-	return &rocketServerSocket{ctx: ctx, proc: proc, log: log}
+func newRocketSimpleServerSocket(ctx context.Context, proc Processor, log func(format string, args ...interface{})) *rocketSimpleServerSocket {
+	return &rocketSimpleServerSocket{ctx: ctx, proc: proc, log: log}
 }
 
-func (s *rocketServerSocket) metadataPush(msg payload.Payload) {
+func (s *rocketSimpleServerSocket) metadataPush(msg payload.Payload) {
 	_ = decodeClientMetadataPush(msg)
 	// This is usually something like transportMetadata = map[deciding_accessors:IP=...], but we do not handle it.
 }
 
-func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
+func (s *rocketSimpleServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	request, err := decodeRequestPayload(msg)
 	if err != nil {
 		return mono.Error(err)
@@ -117,7 +117,7 @@ func (s *rocketServerSocket) requestResonse(msg payload.Payload) mono.Mono {
 	return mono.Just(response)
 }
 
-func (s *rocketServerSocket) fireAndForget(msg payload.Payload) {
+func (s *rocketSimpleServerSocket) fireAndForget(msg payload.Payload) {
 	request, err := decodeRequestPayload(msg)
 	if err != nil {
 		s.log("rocketServer fireAndForget decode request payload error: %v", err)

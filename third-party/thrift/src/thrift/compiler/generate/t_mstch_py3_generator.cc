@@ -380,7 +380,7 @@ class py3_mstch_program : public mstch_program {
       if (is_hidden(*typedef_def) || is_hidden(*typedef_def->get_true_type())) {
         continue;
       }
-      visit_type(typedef_def->get_type());
+      visit_type(typedef_def);
       typedefs_.push_back(typedef_def);
     }
   }
@@ -1097,7 +1097,7 @@ class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 std::string py3_mstch_program::visit_type_impl(
     const t_type* orig_type, bool fromTypeDef) {
   auto trueType = orig_type->get_true_type();
-  auto baseType = context_.type_factory->make_mstch_object(trueType, context_);
+  auto baseType = context_.type_factory->make_mstch_object(orig_type, context_);
   py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(baseType.get());
   const std::string& flatName = type->get_flat_name();
   // Import all types either beneath a typedef, even if the current type is

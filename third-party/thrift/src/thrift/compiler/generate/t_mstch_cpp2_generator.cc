@@ -525,7 +525,9 @@ class cpp_mstch_program : public mstch_program {
               schematizer::name_schema(sm_, *include)));
       const auto& recursive_includes = context_.cache().get(
           *include, [&] { return gen_transitive_include_map(include); });
-      size_t i = 0;
+      // Transitive includes begin at 1 because every programs' list of includes
+      // has itself as the first entry.
+      size_t i = 1;
       for (const auto& [recursive_include, _] : recursive_includes) {
         if (includes->count(recursive_include) == 0) {
           includes->emplace(

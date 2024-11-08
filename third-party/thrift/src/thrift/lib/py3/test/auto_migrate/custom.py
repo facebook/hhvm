@@ -34,6 +34,7 @@ class CustomTests(unittest.TestCase):
         for v in c.list_template:
             res.append(v)
         self.assertEqual(res, [1, 2, 3])
+        self.assertNotIsInstance(c.list_template, list)
         self.roundTrip(c)
 
     def test_set_template(self) -> None:
@@ -42,6 +43,7 @@ class CustomTests(unittest.TestCase):
         for v in c.set_template:
             res.add(v)
         self.assertEqual(res, {1, 2, 3})
+        self.assertNotIsInstance(c.set_template, set)
         self.roundTrip(c)
 
     def test_map_template(self) -> None:
@@ -50,6 +52,7 @@ class CustomTests(unittest.TestCase):
         for k, v in c.map_template.items():
             res[k] = v
         self.assertEqual(res, {1: 2, 3: 6, 5: 10})
+        self.assertNotIsInstance(c.map_template, dict)
         self.roundTrip(c)
 
     def test_list_type(self) -> None:
@@ -58,6 +61,7 @@ class CustomTests(unittest.TestCase):
         for v in c.list_type:
             res.append(v)
         self.assertEqual(res, [1, 2, 3])
+        self.assertNotIsInstance(c.list_type, list)
         self.roundTrip(c)
 
     def test_set_type(self) -> None:
@@ -66,6 +70,7 @@ class CustomTests(unittest.TestCase):
         for v in c.set_type:
             res.add(v)
         self.assertEqual(res, {1, 2, 3})
+        self.assertNotIsInstance(c.set_type, set)
         self.roundTrip(c)
 
     def test_map_type(self) -> None:
@@ -74,11 +79,13 @@ class CustomTests(unittest.TestCase):
         for k, v in c.map_type.items():
             res[k] = v
         self.assertEqual(res, {1: 2, 3: 6, 5: 10})
+        self.assertNotIsInstance(c.map_type, dict)
         self.roundTrip(c)
 
     def test_string_type(self) -> None:
         c = customized(string_type="hello")
         self.assertEqual(c.string_type, "hello")
+        # For custom primitive and string types, we don't create new instance of type.
         self.roundTrip(c)
 
     def test_cpp_name(self) -> None:
@@ -89,4 +96,5 @@ class CustomTests(unittest.TestCase):
     def test_list_of_uint32(self) -> None:
         c = customized(list_of_uint32=[1, 2, 3])
         self.assertEqual(c.list_of_uint32, [1, 2, 3])
+        self.assertNotIsInstance(c.list_of_uint32, list)
         self.roundTrip(c)

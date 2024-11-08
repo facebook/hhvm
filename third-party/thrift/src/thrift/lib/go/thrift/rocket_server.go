@@ -20,6 +20,7 @@ import (
 	"context"
 	"net"
 
+	"github.com/jjeffcaii/reactor-go/scheduler"
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
@@ -80,8 +81,22 @@ func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
 		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log), nil
 	}
-	r := rsocket.Receive().Acceptor(s.acceptor).Transport(transporter)
+	r := rsocket.Receive().
+		Scheduler(s.requestScheduler(), s.responeScheduler()).
+		Acceptor(s.acceptor).
+		Transport(transporter)
 	return r.Serve(ctx)
+}
+
+func (s *rocketServer) requestScheduler() scheduler.Scheduler {
+	if s.numWorkers == GoroutinePerRequest {
+		return scheduler.Elastic()
+	}
+	return scheduler.NewElastic(s.numWorkers)
+}
+
+func (s *rocketServer) responeScheduler() scheduler.Scheduler {
+	return scheduler.Elastic()
 }
 
 func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload, sendingSocket rsocket.CloseableRSocket) (rsocket.RSocket, error) {

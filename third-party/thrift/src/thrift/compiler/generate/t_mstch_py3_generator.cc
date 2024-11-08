@@ -114,16 +114,20 @@ bool is_hidden(const t_named& node) {
   return node.has_annotation("py3.hidden") ||
       node.find_structured_annotation_or_null(kPythonPy3HiddenUri);
 }
+bool is_hidden(const t_typedef& node) {
+  return node.generated() || node.has_annotation("py3.hidden") ||
+      node.find_structured_annotation_or_null(kPythonPy3HiddenUri) ||
+      is_hidden(*node.get_true_type());
+}
+bool is_hidden(const t_type& node) {
+  return node.generated() || node.has_annotation("py3.hidden") ||
+      node.find_structured_annotation_or_null(kPythonPy3HiddenUri) ||
+      cpp_name_resolver::is_directly_adapted(node);
+}
 
 bool is_func_supported(bool no_stream, const t_function* func) {
   return !is_hidden(*func) && !(no_stream && func->stream()) && !func->sink() &&
       !func->is_interaction_constructor();
-}
-
-bool is_hidden(const t_type& node) {
-  return node.generated() || cpp_name_resolver::is_directly_adapted(node) ||
-      node.has_annotation("py3.hidden") ||
-      node.find_structured_annotation_or_null(kPythonPy3HiddenUri);
 }
 
 class py3_mstch_program : public mstch_program {

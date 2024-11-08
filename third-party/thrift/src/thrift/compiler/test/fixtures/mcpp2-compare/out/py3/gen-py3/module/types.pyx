@@ -7107,6 +7107,7 @@ ListOfIntsFromEnums = List__i32__from_cpp(_module_cbindings.cListOfIntsFromEnums
 constEnumA = MyEnumA(<int> (_module_cbindings.cconstEnumA()))
 constEnumB = MyEnumA(<int> (_module_cbindings.cconstEnumB()))
 AStruct = _includes_types.AStruct
+CustomProtocolType = _fbthrift_iobuf.IOBuf
 simpleTypeDef = int
 containerTypeDef = Map__i16_string
 complexContainerTypeDef = List__Map__i16_string

@@ -1622,7 +1622,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Minimum probability of an arc to include it in HotCFG. [0,1]
 
 - uint32_t Jit.PGORelaxPercent = 100, UNKNOWN
-- double Jit.PGOCalledFuncCheckThreshold = 25, UNKNOWN
+- uint32_t Jit.PGOCalledFuncCheckNumSpeculations = 8, UNKNOWN
+- double Jit.PGOCalledFuncCheckThreshold = 10, UNKNOWN
 - double Jit.PGOCalledFuncExitThreshold = 99.9, UNKNOWN
 - bool Jit.PGODumpCallGraph = false, UNKNOWN
 - bool Jit.PGOOptCodeCallGraph = true, UNKNOWN

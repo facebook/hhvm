@@ -65,7 +65,7 @@ struct CallTargetProfile {
 
   void init();
 
-  static const size_t kMaxEntries = 6;
+  static const size_t kMaxEntries = 8;
 
   Entry    m_entries[kMaxEntries];
   uint32_t m_untracked{0};

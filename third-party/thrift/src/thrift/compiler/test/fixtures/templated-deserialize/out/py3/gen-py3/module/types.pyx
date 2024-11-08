@@ -705,6 +705,14 @@ cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cint32_t]] iter = __set_iter[cset[cint32_t]](c_set)
+    cdef cint32_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 
 cdef vector[cint32_t] List__i32__make_instance(object items) except *:
@@ -1271,6 +1279,14 @@ cdef shared_ptr[cset[cbool]] Set__bool__make_instance(object items) except *:
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__bool__from_cpp(const cset[cbool]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cbool]] iter = __set_iter[cset[cbool]](c_set)
+    cdef cbool citem = False
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1359,6 +1375,14 @@ cdef shared_ptr[cset[cset[cbool]]] Set__Set__bool__make_instance(object items) e
             deref(c_inst).insert(deref((<Set__bool>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
+cdef object Set__Set__bool__from_cpp(const cset[cset[cbool]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cset[cbool]]] iter = __set_iter[cset[cset[cbool]]](c_set)
+    cdef shared_ptr[cset[cbool]] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(Set__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return Set__Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1447,6 +1471,14 @@ cdef shared_ptr[cset[cset[cset[cbool]]]] Set__Set__Set__bool__make_instance(obje
             deref(c_inst).insert(deref((<Set__Set__bool>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
+cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cset[cset[cbool]]]] iter = __set_iter[cset[cset[cset[cbool]]]](c_set)
+    cdef shared_ptr[cset[cset[cbool]]] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(Set__Set__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return Set__Set__Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1535,6 +1567,14 @@ cdef shared_ptr[cset[vector[cint32_t]]] Set__List__i32__make_instance(object ite
             deref(c_inst).insert(List__i32__make_instance(item))
     return cmove(c_inst)
 
+cdef object Set__List__i32__from_cpp(const cset[vector[cint32_t]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[vector[cint32_t]]] iter = __set_iter[cset[vector[cint32_t]]](c_set)
+    cdef vector[cint32_t] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(List__i32__from_cpp(citem))
+    return Set__List__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1618,6 +1658,14 @@ cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *:
             deref(c_inst).insert(item.encode('UTF-8'))
     return cmove(c_inst)
 
+cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[string]] iter = __set_iter[cset[string]](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 
 cdef vector[cset[string]] List__Set__string__make_instance(object items) except *:

@@ -1300,6 +1300,14 @@ cdef shared_ptr[cset[float]] Set__float__make_instance(object items) except *:
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__float__from_cpp(const cset[float]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[float]] iter = __set_iter[cset[float]](c_set)
+    cdef float citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__float(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 
 cdef vector[cint32_t] List__i32__make_instance(object items) except *:
@@ -1401,6 +1409,14 @@ cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *:
             deref(c_inst).insert(item.encode('UTF-8'))
     return cmove(c_inst)
 
+cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[string]] iter = __set_iter[cset[string]](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final

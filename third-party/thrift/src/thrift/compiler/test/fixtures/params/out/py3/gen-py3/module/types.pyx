@@ -270,6 +270,14 @@ cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cint32_t]] iter = __set_iter[cset[cint32_t]](c_set)
+    cdef cint32_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final

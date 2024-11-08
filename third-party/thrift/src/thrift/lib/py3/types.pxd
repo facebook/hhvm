@@ -82,7 +82,9 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     cdef cppclass set_iter[T]:
         set_iter()
         set_iter(const shared_ptr[T]& cpp_obj)
+        set_iter(const T& cpp_obj)
         void genNext(const shared_ptr[T]& cpp_obj, ...)
+        void genNextItem(...)
     cdef cppclass map_iter[T]:
         map_iter()
         map_iter(const shared_ptr[T]& cpp_obj)

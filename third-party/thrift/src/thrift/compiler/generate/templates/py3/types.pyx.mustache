@@ -815,6 +815,19 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ve
     {{/type:list_elem_type}}
     return {{type:flat_name}}(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 {{/type:list?}}
+{{#type:set?}}
+cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[{{> types/cython_cpp_type}}] iter = __set_iter[{{> types/cython_cpp_type}}](c_set)
+    {{#type:set_elem_type}}
+    cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+        }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append({{> types/set_cpp_to_python }})
+    {{/type:set_elem_type}}
+    return {{type:flat_name}}(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+{{/type:set?}}
 
 {{/program:containerTypes}}
 

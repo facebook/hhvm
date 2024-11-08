@@ -184,7 +184,8 @@ template <typename T>
 struct set_iter {
   set_iter() = default;
   set_iter(const std::shared_ptr<T>& cpp_obj) : it{cpp_obj->begin()} {}
-  typename T::iterator it;
+  explicit set_iter(const T& cpp_obj) : it{cpp_obj.begin()} {}
+  typename T::const_iterator it;
   template <typename V>
   void genNext(const std::shared_ptr<T>& cpp_obj, std::shared_ptr<V>& out) {
     out = std::shared_ptr<V>(cpp_obj, const_cast<V*>(&*it));
@@ -193,6 +194,16 @@ struct set_iter {
   template <typename V>
   void genNext(const std::shared_ptr<T>&, V& out) {
     out = *it;
+    ++it;
+  }
+  template <typename V>
+  void genNextItem(V& out) {
+    out = *it;
+    ++it;
+  }
+  template <typename V>
+  void genNextItem(std::shared_ptr<V>& out) {
+    out = std::make_shared<V>(*it);
     ++it;
   }
 };

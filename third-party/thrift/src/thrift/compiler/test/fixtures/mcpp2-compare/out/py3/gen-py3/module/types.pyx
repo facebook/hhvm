@@ -3979,6 +3979,14 @@ cdef shared_ptr[cset[_module_cbindings.cMyStruct]] Set__MyStruct__make_instance(
             deref(c_inst).insert(deref((<MyStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
+cdef object Set__MyStruct__from_cpp(const cset[_module_cbindings.cMyStruct]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[_module_cbindings.cMyStruct]] iter = __set_iter[cset[_module_cbindings.cMyStruct]](c_set)
+    cdef shared_ptr[_module_cbindings.cMyStruct] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return Set__MyStruct(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 
 cdef vector[_module_cbindings.cComplexUnion] List__ComplexUnion__make_instance(object items) except *:
@@ -4103,6 +4111,14 @@ cdef shared_ptr[cset[vector[string]]] Set__List__string__make_instance(object it
             deref(c_inst).insert(List__string__make_instance(item))
     return cmove(c_inst)
 
+cdef object Set__List__string__from_cpp(const cset[vector[string]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[vector[string]]] iter = __set_iter[cset[vector[string]]](c_set)
+    cdef vector[string] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(List__string__from_cpp(citem))
+    return Set__List__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -4191,6 +4207,14 @@ cdef shared_ptr[cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindin
             deref(c_inst).insert(List__List__Map__Empty_MyStruct__make_instance(item))
     return cmove(c_inst)
 
+cdef object Set__List__List__Map__Empty_MyStruct__from_cpp(const cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]] iter = __set_iter[cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]](c_set)
+    cdef vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(List__List__Map__Empty_MyStruct__from_cpp(citem))
+    return Set__List__List__Map__Empty_MyStruct(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -4470,6 +4494,14 @@ cdef shared_ptr[cset[vector[cint32_t]]] Set__List__i32__make_instance(object ite
             deref(c_inst).insert(List__i32__make_instance(item))
     return cmove(c_inst)
 
+cdef object Set__List__i32__from_cpp(const cset[vector[cint32_t]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[vector[cint32_t]]] iter = __set_iter[cset[vector[cint32_t]]](c_set)
+    cdef vector[cint32_t] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(List__i32__from_cpp(citem))
+    return Set__List__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -4553,6 +4585,14 @@ cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *:
             deref(c_inst).insert(item.encode('UTF-8'))
     return cmove(c_inst)
 
+cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[string]] iter = __set_iter[cset[string]](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 
 cdef vector[cset[string]] List__Set__string__make_instance(object items) except *:
@@ -4975,6 +5015,14 @@ cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *:
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cint64_t]] iter = __set_iter[cset[cint64_t]](c_set)
+    cdef cint64_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__i64(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5170,6 +5218,14 @@ cdef shared_ptr[cset[_module_cbindings.cSimpleUnion]] Set__SimpleUnion__make_ins
             deref(c_inst).insert(deref((<SimpleUnion>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
+cdef object Set__SimpleUnion__from_cpp(const cset[_module_cbindings.cSimpleUnion]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[_module_cbindings.cSimpleUnion]] iter = __set_iter[cset[_module_cbindings.cSimpleUnion]](c_set)
+    cdef shared_ptr[_module_cbindings.cSimpleUnion] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(SimpleUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return Set__SimpleUnion(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 
 cdef vector[cset[_module_cbindings.cSimpleUnion]] List__Set__SimpleUnion__make_instance(object items) except *:
@@ -5367,6 +5423,14 @@ cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cint32_t]] iter = __set_iter[cset[cint32_t]](c_set)
+    cdef cint32_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5761,6 +5825,14 @@ cdef shared_ptr[cset[cbool]] Set__bool__make_instance(object items) except *:
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__bool__from_cpp(const cset[cbool]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cbool]] iter = __set_iter[cset[cbool]](c_set)
+    cdef cbool citem = False
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5849,6 +5921,14 @@ cdef shared_ptr[cset[cset[cbool]]] Set__Set__bool__make_instance(object items) e
             deref(c_inst).insert(deref((<Set__bool>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
+cdef object Set__Set__bool__from_cpp(const cset[cset[cbool]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cset[cbool]]] iter = __set_iter[cset[cset[cbool]]](c_set)
+    cdef shared_ptr[cset[cbool]] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(Set__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return Set__Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -5937,6 +6017,14 @@ cdef shared_ptr[cset[cset[cset[cbool]]]] Set__Set__Set__bool__make_instance(obje
             deref(c_inst).insert(deref((<Set__Set__bool>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
+cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[cset[cset[cbool]]]] iter = __set_iter[cset[cset[cset[cbool]]]](c_set)
+    cdef shared_ptr[cset[cset[cbool]]] citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(Set__Set__bool._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
+    return Set__Set__Set__bool(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -6135,6 +6223,14 @@ cdef shared_ptr[_module_cbindings.folly_sorted_vector_set_std_string] folly_sort
             deref(c_inst).insert(item.encode('UTF-8'))
     return cmove(c_inst)
 
+cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set_std_string& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[_module_cbindings.folly_sorted_vector_set_std_string] iter = __set_iter[_module_cbindings.folly_sorted_vector_set_std_string](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return folly_sorted_vector_set_std_string__Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -6448,6 +6544,14 @@ cdef shared_ptr[_module_cbindings.folly_sorted_vector_set[string]] folly_sorted_
             deref(c_inst).insert(item.encode('UTF-8'))
     return cmove(c_inst)
 
+cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set[string]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[_module_cbindings.folly_sorted_vector_set[string]] iter = __set_iter[_module_cbindings.folly_sorted_vector_set[string]](c_set)
+    cdef string citem
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(__init_unicode_from_cpp(citem))
+    return folly_sorted_vector_set__Set__string(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -6644,6 +6748,14 @@ cdef shared_ptr[cset[_module_cbindings.Baz]] Set__Baz__i32__make_instance(object
             deref(c_inst).insert(item)
     return cmove(c_inst)
 
+cdef object Set__Baz__i32__from_cpp(const cset[_module_cbindings.Baz]& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[cset[_module_cbindings.Baz]] iter = __set_iter[cset[_module_cbindings.Baz]](c_set)
+    cdef _module_cbindings.Baz citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return Set__Baz__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final

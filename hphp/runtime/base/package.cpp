@@ -18,6 +18,7 @@
 
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/string-data.h"
+#include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/vm/func.h"
 
 #include "hphp/util/configs/eval.h"
@@ -174,25 +175,38 @@ std::string PackageInfo::mangleForCacheKey() const {
 static RDS_LOCAL_NO_CHECK(const PackageInfo::Deployment*, s_requestActiveDeployment);
 
 const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
-  if (Cfg::Repo::Authoritative || !RuntimeOption::ServerExecutionMode()) {
-    auto const it = deployments().find(Cfg::Eval::ActiveDeployment);
+  auto const findDeploymentByName = [&](const std::string& name) -> const PackageInfo::Deployment* {
+    auto const it = deployments().find(name);
     if (it == end(deployments())) return nullptr;
     return &it->second;
+  };
+  auto const findDeploymentByDomains = [&]() -> const PackageInfo::Deployment* {
+    if (!g_context || !g_context->getTransport()) return nullptr;
+    auto const host = g_context->getTransport()->getHeader("Host");
+    for (auto const& [_, deployment]: deployments()) {
+      for (auto const& domain: deployment.m_domains) {
+        if (re2::RE2::FullMatch(host, *domain)) {
+          // If we find a domain that matches the host, return the deployment as active.
+          return &deployment;
+        }
+      }
+    }
+    return nullptr;
+  };
+
+  if (Cfg::Repo::Authoritative || !RuntimeOption::ServerExecutionMode()) {
+    return findDeploymentByName(Cfg::Eval::ActiveDeployment);
   }
-  if (!g_context || !g_context->getTransport()) return nullptr;
   // If unset, set the cached active deployment to null by default.
   if (s_requestActiveDeployment.isNull()) {
     auto const activeDeployment = [&]() -> const PackageInfo::Deployment* {
-      auto const host = g_context->getTransport()->getHeader("Host");
-      for (auto const& [_, deployment]: deployments()) {
-        for (auto const& domain: deployment.m_domains) {
-          if (re2::RE2::FullMatch(host, *domain)) {
-            // If we find a domain that matches the host, return the deployment as active.
-            return &deployment;
-          }
-        }
+      if (Cfg::Eval::PackageV2) {
+        // If we're in the CLI server, get the active deployment from cli.hdf
+        // Otherwise, read the active deployment from config.hdf
+        return is_cli_server_mode() ? findDeploymentByName(cli_get_active_deployment()) 
+                                    : findDeploymentByName(Cfg::Eval::ActiveDeployment);
       }
-      return nullptr;
+      return findDeploymentByDomains();
     }();
     s_requestActiveDeployment.emplace(activeDeployment);
   }

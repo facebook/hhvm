@@ -2076,6 +2076,13 @@ CLIContext CLIContext::initFromClient(int client) {
     );
   }
 
+  auto const active_deployment = get_setting_string(
+    shared.ini,
+    "hhvm.active_deployment",
+    Cfg::Eval::ActiveDeployment
+  );
+  shared.activeDeployment = active_deployment;
+
   guard.dismiss();
   return CLIContext{std::move(data), std::move(shared)};
 }
@@ -2265,6 +2272,11 @@ bool cli_supports_clone() {
     (tl_context->getShared()->flags & CLIContext::ProxyXbox);
 }
 
+
+std::string cli_get_active_deployment() {
+  assertx(is_cli_server_mode());
+  return tl_context->getShared()->activeDeployment;
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 void run_command_on_cli_server(const char* sock_path,

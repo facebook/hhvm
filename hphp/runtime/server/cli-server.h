@@ -106,6 +106,7 @@ struct CLIContext {
     Flags flags{Flags::None};
     std::filesystem::path repo;
     std::string uuid;
+    std::string activeDeployment;
   };
 
   ~CLIContext();
@@ -239,5 +240,10 @@ void cli_invoke(
  * Clone the current CLI context
  */
 CLIContext cli_clone_context();
+
+/*
+ * Returns the active deployment used by the CLI server.
+ */
+std::string cli_get_active_deployment();
 
 }

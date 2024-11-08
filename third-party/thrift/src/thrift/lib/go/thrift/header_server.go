@@ -91,10 +91,6 @@ func (s *server) ServeContext(ctx context.Context) error {
 	go func() {
 		<-ctx.Done()
 		s.listener.Close()
-		// at least wait for our workers to clock out?
-		if s.workCh != nil {
-			close(s.workCh)
-		}
 		// currently not waiting for connection goroutines or goroutine per request threads.
 		s.wg.Wait()
 		return
@@ -110,7 +106,7 @@ func (s *server) ServeContext(ctx context.Context) error {
 		// launch workers
 		s.wg.Add(s.numWorkers)
 		for i := 0; i < s.numWorkers; i++ {
-			go s.worker()
+			go s.worker(ctx)
 		}
 	}
 
@@ -160,10 +156,15 @@ func (s *server) executeWork(w work) {
 // one should prefer to have many more workers than cores. if its all cpu bound,
 // worker per core should suffice. It's all about optimizing for keeping the
 // writer per connection goroutines as busy as possible.
-func (s *server) worker() {
+func (s *server) worker(ctx context.Context) {
 	defer s.wg.Done()
-	for w := range s.workCh {
-		s.executeWork(w)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case w := <-s.workCh:
+			s.executeWork(w)
+		}
 	}
 }
 

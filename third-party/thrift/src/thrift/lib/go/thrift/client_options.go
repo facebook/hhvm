@@ -118,7 +118,7 @@ func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) Clie
 	}
 }
 
-// DialTLS dials and returns a TLS connection to the given address, including ALPN for thrift.
+// Deprecated: use WithTLS() instead.
 func DialTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) (net.Conn, error) {
 	clonedTLSConfig := tlsConfig.Clone()
 	AddALPNForTransport(clonedTLSConfig)

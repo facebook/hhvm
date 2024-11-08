@@ -20,9 +20,13 @@ from __future__ import annotations
 
 import unittest
 
+from transitive_deps.a.thrift_mutable_types import A as A_mutable
 from transitive_deps.a.thrift_types import A
 
 
 class TransitiveDepsTest(unittest.TestCase):
     def test_a(self) -> None:
         A()
+
+    def test_a_mutable(self) -> None:
+        A_mutable()

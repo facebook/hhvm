@@ -708,8 +708,14 @@ class ContainerCursorIterator {
   // Dereference
   // These return non-const to allow moving the deserialzed value out.
   // Modifying them does not affect the underlying buffer.
-  reference operator*() { return reader_->currentValue(); }
-  pointer operator->() { return &reader_->currentValue(); }
+  reference operator*() {
+    FOLLY_SAFE_DCHECK(reader_);
+    return reader_->currentValue();
+  }
+  pointer operator->() {
+    FOLLY_SAFE_DCHECK(reader_);
+    return &reader_->currentValue();
+  }
 
   // Equality is only defined against itself and the end iterator
   bool operator==(ContainerCursorIterator other) const {
@@ -1193,7 +1199,11 @@ void ContainerCursorReader<Tag, ProtocolReader, Contiguous>::finalize() {
   checkState(State::Active);
   state_ = State::Done;
 
-  if (remaining_ > 1) {
+  if (remaining_ > 0) {
+    if (!lastRead_) {
+      lastRead_.emplace();
+      readItem();
+    }
     // Skip remaining unread elements
     skip_n(*protocol_, remaining_ - 1, detail::ContainerTraits<Tag>::wireTypes);
   }

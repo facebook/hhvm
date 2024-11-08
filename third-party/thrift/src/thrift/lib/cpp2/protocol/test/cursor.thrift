@@ -126,3 +126,12 @@ typedef Empty EmptyWrapper
 service Example {
   EmptyWrapper identity(1: EmptyWrapper empty);
 }
+
+struct ReadRemaining {
+  1: list<string> aaa;
+  2: list<i32> bbb;
+  3: bool ccc;
+}
+
+@cpp.UseCursorSerialization
+typedef ReadRemaining ReadRemainingWrapper

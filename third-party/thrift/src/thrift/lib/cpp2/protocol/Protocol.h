@@ -50,6 +50,9 @@ FOLLY_GFLAGS_DECLARE_int32(thrift_protocol_max_depth);
  */
 
 namespace apache::thrift {
+
+class BinaryProtocolReader;
+
 namespace detail {
 
 class ProtocolBase {
@@ -228,8 +231,14 @@ void skip(Protocol_& prot, WireType arg_type, int depth = 0) {
     case TType::T_UTF8:
     case TType::T_UTF16:
     case TType::T_STRING: {
-      apache::thrift::detail::SkipNoopString str;
-      prot.readBinary(str);
+      if constexpr (std::is_same_v<Protocol_, BinaryProtocolReader>) {
+        int32_t size;
+        prot.readI32(size);
+        prot.skipBytes(size);
+      } else {
+        apache::thrift::detail::SkipNoopString str;
+        prot.readBinary(str);
+      }
       return;
     }
     case TType::T_STRUCT: {

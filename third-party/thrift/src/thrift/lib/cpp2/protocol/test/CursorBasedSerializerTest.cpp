@@ -640,3 +640,49 @@ TEST(CursorSerializer, CursorWriteInContainer) {
       *obj.set_nested_field(),
       Contains(Contains(IsThriftUnionWith<ident::string_field>(Eq("foo")))));
 }
+
+void doCursorReadRemainEndTest(int count) {
+  std::unique_ptr<folly::IOBuf> buf;
+  {
+    ReadRemainingWrapper wrapper;
+    auto writer = wrapper.beginWrite();
+
+    auto listWriter = writer.beginWrite<ident::aaa>();
+    for (int i = 0; i < count; ++i) {
+      auto s = "a string " + std::to_string(i);
+      listWriter.write(s);
+    }
+    writer.endWrite(std::move(listWriter));
+
+    auto bwriter = writer.beginWrite<ident::bbb>();
+    for (int i = 0; i < count; ++i) {
+      bwriter.write(i);
+    }
+    writer.endWrite(std::move(bwriter));
+
+    writer.write<ident::ccc>(true);
+
+    wrapper.endWrite(std::move(writer));
+
+    buf = std::move(wrapper).serializedData();
+  }
+
+  {
+    ReadRemainingWrapper wrapper = ReadRemainingWrapper(std::move(buf));
+    auto reader = wrapper.beginRead();
+    auto listReader = reader.beginRead<ident::aaa>();
+    listReader.remaining();
+    reader.endRead(std::move(listReader));
+    auto breader = reader.beginRead<ident::bbb>();
+    reader.endRead(std::move(breader));
+    wrapper.endRead(std::move(reader));
+  }
+}
+
+TEST(CursorBasedSerializer, CursorReadRemainingEndOne) {
+  doCursorReadRemainEndTest(1);
+}
+
+TEST(CursorBasedSerializer, CursorReadRemainingEndMany) {
+  doCursorReadRemainEndTest(10);
+}

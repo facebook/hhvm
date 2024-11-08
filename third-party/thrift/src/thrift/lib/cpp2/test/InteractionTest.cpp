@@ -26,8 +26,8 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
-#include <thrift/lib/cpp2/server/InternalPriorityRequestPile.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
+#include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Calculator.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Streamer.h>
@@ -1529,10 +1529,10 @@ TEST(InteractionResourcePools, CustomAsyncProcessorFactory) {
 
 class InternalPriorityTest : public testing::Test {
  public:
-  class TestRequestPile : public InternalPriorityRequestPile {
+  class TestRequestPile : public RoundRobinRequestPile {
    public:
     TestRequestPile()
-        : InternalPriorityRequestPile(InternalPriorityRequestPile::Options()) {}
+        : RoundRobinRequestPile(RoundRobinRequestPile::Options()) {}
 
     ~TestRequestPile() override {
       EXPECT_TRUE(expectedInternalPriorities_.empty());
@@ -1545,7 +1545,7 @@ class InternalPriorityTest : public testing::Test {
           detail::ServerRequestHelper::internalPriority(request);
       EXPECT_EQ(expectedInternalPriority, internalPriority);
       expectedInternalPriorities_.pop();
-      return InternalPriorityRequestPile::enqueue(std::move(request));
+      return RoundRobinRequestPile::enqueue(std::move(request));
     }
 
    private:

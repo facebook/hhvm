@@ -43,5 +43,6 @@ func (log rsocketLogger) Errorf(format string, args ...interface{}) {
 }
 
 func setRsocketLogger(log func(format string, args ...interface{})) {
+	logger.SetLevel(logger.LevelError)
 	logger.SetLogger(rsocketLogger(log))
 }

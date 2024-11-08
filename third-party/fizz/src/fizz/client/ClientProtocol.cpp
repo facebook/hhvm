@@ -17,6 +17,7 @@
 #include <fizz/protocol/Protocol.h>
 #include <fizz/protocol/StateMachine.h>
 #include <fizz/protocol/ech/Encryption.h>
+#include <fizz/protocol/ech/GreaseECH.h>
 #include <fizz/record/Extensions.h>
 
 using folly::Optional;
@@ -873,12 +874,20 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     requestedExtensions.push_back(extension.extension_type);
   }
 
-  if (echParams.has_value() &&
-      echParams.value().supportedECHConfig.config.version ==
-          ech::ECHVersion::Draft15) {
-    ech::InnerECHClientHello chloIsInnerExt;
-    chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
-    requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
+  if (echParams.has_value()) {
+    if (echParams.value().supportedECHConfig.config.version ==
+        ech::ECHVersion::Draft15) {
+      ech::InnerECHClientHello chloIsInnerExt;
+      chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
+      requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
+    }
+  } else if (
+      context->getGreaseECHSetting().hasValue() &&
+      context->getGreaseECHSetting()->payloadStrategy ==
+          ech::PayloadGenerationStrategy::UniformRandom) {
+    auto greaseECH = ech::generateGreaseECH(
+        *context->getGreaseECHSetting(), *context->getFactory(), 0);
+    chlo.extensions.push_back(encodeExtension(std::move(greaseECH)));
   }
 
   Buf encodedClientHello;
@@ -959,6 +968,17 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     encodedECH = std::move(encodedClientHello);
 
     // Update the client hello with the ECH client hello outer
+    encodedClientHello = encodeHandshake(chlo);
+  } else if (
+      context->getGreaseECHSetting().hasValue() &&
+      context->getGreaseECHSetting()->payloadStrategy ==
+          ech::PayloadGenerationStrategy::Computed) {
+    auto greaseECH = ech::generateGreaseECH(
+        *context->getGreaseECHSetting(),
+        *context->getFactory(),
+        encodedClientHello->computeChainDataLength());
+    chlo.extensions.push_back(encodeExtension(std::move(greaseECH)));
+    // Update the client hello with the grease ECH extension
     encodedClientHello = encodeHandshake(chlo);
   }
 

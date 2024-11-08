@@ -15,6 +15,7 @@
 #include <fizz/protocol/Certificate.h>
 #include <fizz/protocol/Factory.h>
 #include <fizz/protocol/clock/SystemClock.h>
+#include <fizz/protocol/ech/GreaseECHSetting.h>
 #include <fizz/record/Types.h>
 
 namespace fizz {
@@ -321,6 +322,17 @@ class FizzClientContext {
     return sniExtFirst_;
   }
 
+  /**
+   * Sets the grease ECH setting. If not set, no grease ECH extension is send.
+   */
+  void setGreaseECHSetting(ech::GreaseECHSetting setting) {
+    greaseECHSetting_ = std::move(setting);
+  }
+
+  const auto& getGreaseECHSetting() const {
+    return greaseECHSetting_;
+  }
+
  private:
   std::shared_ptr<Factory> factory_;
 
@@ -368,6 +380,7 @@ class FizzClientContext {
   std::chrono::seconds maxPskHandshakeLife_{std::chrono::hours(168)};
 
   bool sniExtFirst_{false};
+  folly::Optional<ech::GreaseECHSetting> greaseECHSetting_;
 };
 } // namespace client
 } // namespace fizz

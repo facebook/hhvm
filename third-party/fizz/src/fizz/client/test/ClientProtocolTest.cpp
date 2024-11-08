@@ -1041,6 +1041,8 @@ TEST_F(ClientProtocolTest, TestConnectCompat) {
 }
 
 TEST_F(ClientProtocolTest, TestConnectECH) {
+  // grease ech will be ignored
+  context_->setGreaseECHSetting(ech::GreaseECHSetting{});
   auto echConfig = ech::test::getECHConfig();
   Connect connect;
   connect.context = context_;
@@ -1298,6 +1300,88 @@ TEST_F(ClientProtocolTest, TestConnectECHWithPSK) {
   for (size_t i = 0; i < binderRange.size(); i++) {
     EXPECT_EQ(binderRange.data()[i], 0x44);
   }
+}
+
+TEST_F(ClientProtocolTest, TestConnectWithRandomGreaseECH) {
+  auto setting = ech::GreaseECHSetting{};
+  setting.minPayloadSize = 100;
+  setting.maxPayloadSize = 1000;
+  context_->setGreaseECHSetting(setting);
+  Connect connect;
+  connect.context = context_;
+  connect.verifier = verifier_;
+  std::string sni = "www.hostname.com";
+  connect.sni = sni;
+  auto extensions = std::make_shared<MockClientExtensions>();
+  connect.extensions = extensions;
+
+  fizz::Param param = std::move(connect);
+  auto actions = detail::processEvent(state_, param);
+  expectActions<MutateState, WriteToSocket>(actions);
+  processStateMutations(actions);
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingServerHello);
+  EXPECT_FALSE(state_.echState().hasValue());
+
+  auto& encodedHello = *state_.encodedClientHello();
+  // Get rid of handshake header (type + version)
+  encodedHello->trimStart(4);
+  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
+  auto echExtension =
+      getExtension<ech::OuterECHClientHello>(decodedHello.extensions);
+  ASSERT_TRUE(echExtension.hasValue());
+  EXPECT_GT(echExtension->enc->computeChainDataLength(), 0);
+  EXPECT_GE(
+      echExtension->payload->computeChainDataLength(), setting.minPayloadSize);
+  EXPECT_LE(
+      echExtension->payload->computeChainDataLength(), setting.maxPayloadSize);
+}
+
+TEST_F(ClientProtocolTest, TestConnectWithComputedGreaseECH) {
+  ech::GreaseECHSetting setting{
+      /* minConfigId = */ 0,
+      /* maxConfigId = */ 0,
+      ech::PayloadGenerationStrategy::Computed,
+      /* minPayloadSize = */ 100,
+      /* maxPayloadSize = */ 100,
+      /* keySizes = */ {32},
+      /* kdfs = */ {hpke::KDFId::Sha256},
+      /* aeads = */ {hpke::AeadId::TLS_AES_128_GCM_SHA256}};
+  context_->setGreaseECHSetting(setting);
+  Connect connect;
+  connect.context = context_;
+  connect.verifier = verifier_;
+  std::string sni = "www.hostname.com";
+  connect.sni = sni;
+  auto extensions = std::make_shared<MockClientExtensions>();
+  connect.extensions = extensions;
+
+  fizz::Param param = std::move(connect);
+  auto actions = detail::processEvent(state_, param);
+  expectActions<MutateState, WriteToSocket>(actions);
+  processStateMutations(actions);
+  EXPECT_EQ(state_.state(), StateEnum::ExpectingServerHello);
+  EXPECT_FALSE(state_.echState().hasValue());
+
+  auto& encodedHello = *state_.encodedClientHello();
+  auto encodedChloSize = encodedHello->computeChainDataLength();
+  // Get rid of handshake header (type + version)
+  encodedHello->trimStart(4);
+  auto decodedHello = decode<ClientHello>(std::move(encodedHello));
+  auto echExtension =
+      getExtension<ech::OuterECHClientHello>(decodedHello.extensions);
+  ASSERT_TRUE(echExtension.hasValue());
+  EXPECT_EQ(hpke::KDFId::Sha256, echExtension->cipher_suite.kdf_id);
+  EXPECT_EQ(
+      hpke::AeadId::TLS_AES_128_GCM_SHA256, echExtension->cipher_suite.aead_id);
+  EXPECT_EQ(32, echExtension->enc->computeChainDataLength());
+
+  auto encodedEch = encodeExtension(*echExtension);
+  auto echOverhead = encodedEch.extension_data->computeChainDataLength() + 4;
+  size_t expectedPayloadSize = encodedChloSize +
+      hpke::getCipherOverhead(echExtension->cipher_suite.aead_id) + 100 -
+      echOverhead;
+  EXPECT_EQ(
+      expectedPayloadSize, echExtension->payload->computeChainDataLength());
 }
 
 TEST_F(ClientProtocolTest, TestConnectCompatEarly) {

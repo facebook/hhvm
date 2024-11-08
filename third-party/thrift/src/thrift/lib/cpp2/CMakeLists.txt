@@ -260,7 +260,6 @@ add_library(
   server/Cpp2Worker.cpp
   server/CPUConcurrencyController.cpp
   server/IOUringUtil.cpp
-  server/InternalPriorityRequestPile.cpp
   server/LegacyHeaderRoutingHandler.cpp
   server/LoggingEvent.cpp
   server/LoggingEventHelper.cpp

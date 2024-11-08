@@ -54,7 +54,6 @@
 #include <thrift/lib/cpp2/server/Cpp2Connection.h>
 #include <thrift/lib/cpp2/server/Cpp2Worker.h>
 #include <thrift/lib/cpp2/server/ExecutorToThreadManagerAdaptor.h>
-#include <thrift/lib/cpp2/server/InternalPriorityRequestPile.h>
 #include <thrift/lib/cpp2/server/LegacyHeaderRoutingHandler.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/server/ServerFlags.h>

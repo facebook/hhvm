@@ -504,6 +504,7 @@ let typedef tenv (t : (_, _) typedef) =
     t
   in
   let ( should_check_internal_signature,
+        ignore_package_errors,
         typedef_tparams,
         hints,
         where_constraints ) =
@@ -514,15 +515,16 @@ let typedef tenv (t : (_, _) typedef) =
        if its type params satisfy the constraints of any tapply it
        references. *)
     | SimpleTypeDef { tvh_vis = Transparent; tvh_hint } ->
-      (true, t_tparams, [tvh_hint], [])
-    | SimpleTypeDef { tvh_vis = _; tvh_hint } -> (false, [], [tvh_hint], [])
+      (true, false, t_tparams, [tvh_hint], [])
+    | SimpleTypeDef { tvh_vis = _; tvh_hint } ->
+      (false, true, [], [tvh_hint], [])
     | CaseType (variant, variants) ->
       let variants = variant :: variants in
       let hints = List.map variants ~f:(fun v -> v.tctv_hint) in
       let where_constraints =
         List.map variants ~f:(fun v -> v.tctv_where_constraints)
       in
-      (false, [], hints, List.concat where_constraints)
+      (false, false, [], hints, List.concat where_constraints)
   in
   (* We don't allow constraints on typdef parameters, but we still
      need to record their kinds in the generic var environment *)
@@ -547,19 +549,19 @@ let typedef tenv (t : (_, _) typedef) =
     (* We always check the constraints for internal types, so treat in_signature:true *)
     (Typing_type_integrity.Simple.check_well_kinded_hint
        ~in_signature:true
-       ~ignore_package_errors:false)
+       ~ignore_package_errors)
     tenv_with_typedef_tparams
     t_as_constraint;
   maybe
     (Typing_type_integrity.Simple.check_well_kinded_hint
        ~in_signature:true
-       ~ignore_package_errors:false)
+       ~ignore_package_errors)
     tenv_with_typedef_tparams
     t_super_constraint;
   List.iter hints ~f:(fun hint ->
       Typing_type_integrity.Simple.check_well_kinded_hint
         ~in_signature:should_check_internal_signature
-        ~ignore_package_errors:false
+        ~ignore_package_errors
         tenv_with_typedef_tparams
         hint);
   let env = { typedef_tparams; tenv } in

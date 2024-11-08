@@ -607,7 +607,6 @@ std::string RuntimeOption::DeploymentId;
 int64_t RuntimeOption::ConfigId = 0;
 std::string RuntimeOption::PidFile = "www.pid";
 
-bool RuntimeOption::EnableXHP = true;
 bool RuntimeOption::CheckSymLink = true;
 bool RuntimeOption::TrustAutoloaderPath = false;
 bool RuntimeOption::EnableArgsInBacktraces = true;
@@ -1487,7 +1486,6 @@ void RuntimeOption::Load(
 
   {
     // Eval
-    Config::Bind(EnableXHP, ini, config, "Eval.EnableXHP", EnableXHP);
     Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",
                  true);
     static std::string jitSerdesMode;

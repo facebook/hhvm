@@ -372,6 +372,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 # Eval
 
+- bool Eval.EnableXHP = true, UNKNOWN, unitcacheflag|compileroption(EnableXHP)
+
 - int32_t Eval.CheckPropTypeHints = 3, UNKNOWN, globaldata|compileroption(CheckPropTypeHints)
 
   CheckPropTypeHints:

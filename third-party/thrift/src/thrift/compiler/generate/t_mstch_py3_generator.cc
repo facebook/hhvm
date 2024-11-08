@@ -586,21 +586,21 @@ class py3_mstch_type : public mstch_type {
  public:
   using cached_properties = apache::thrift::compiler::python::cached_properties;
 
-  struct data {
+  struct context {
     const t_program* program;
     std::unordered_map<const t_type*, cached_properties>* cache;
   };
 
-  cached_properties& get_cached_props(const t_type* type, const data& d);
+  cached_properties& get_cached_props(const t_type* type, const context& c);
 
   py3_mstch_type(
       const t_type* type,
       mstch_context& ctx,
       mstch_element_position pos,
-      data d)
+      context c)
       : mstch_type(type->get_true_type(), ctx, pos),
-        prog_(d.program),
-        cached_props_(get_cached_props(type, d)) {
+        prog_(c.program),
+        cached_props_(get_cached_props(type, c)) {
     register_cached_methods(
         this,
         {
@@ -1322,11 +1322,11 @@ class t_mstch_py3_generator : public t_mstch_generator {
 };
 
 py3_mstch_type::cached_properties& py3_mstch_type::get_cached_props(
-    const t_type* type, const data& d) {
+    const t_type* type, const py3_mstch_type::context& c) {
   auto true_type = type->get_true_type();
-  auto it = d.cache->find(true_type);
-  if (it == d.cache->end()) {
-    it = d.cache
+  auto it = c.cache->find(true_type);
+  if (it == c.cache->end()) {
+    it = c.cache
              ->emplace(
                  true_type,
                  py3_mstch_type::cached_properties{
@@ -1344,7 +1344,7 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_interaction>(program_);
   mstch_context_.add<py3_mstch_function>();
   mstch_context_.add<py3_mstch_type>(
-      py3_mstch_type::data{program_, &type_props_cache_});
+      py3_mstch_type::context{program_, &type_props_cache_});
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();
   mstch_context_.add<py3_mstch_enum>();

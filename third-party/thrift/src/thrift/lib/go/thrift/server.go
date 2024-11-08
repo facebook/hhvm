@@ -42,6 +42,10 @@ func NewServer(processor Processor, listener net.Listener, transportType Transpo
 	switch transportType {
 	case TransportIDHeader:
 		return newHeaderServer(processor, listener, serverOptions)
+	case TransportIDRocket:
+		return newRocketSimpleServer(processor, listener, serverOptions)
+	case TransportIDUpgradeToRocket:
+		return newUpgradeToRocketSimpleServer(processor, listener, serverOptions)
 	default:
 		panic(fmt.Sprintf("Server does not support: %v", transportType))
 	}

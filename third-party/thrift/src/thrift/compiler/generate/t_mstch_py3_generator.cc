@@ -396,14 +396,11 @@ class py3_mstch_program : public mstch_program {
     }
   }
 
-  enum TypeDef { NoTypedef, HasTypedef };
+  std::string visit_type_impl(const t_type* orig_type, bool fromTypeDef);
 
   std::string visit_type(const t_type* orig_type) {
-    return visit_type_with_typedef(orig_type, TypeDef::NoTypedef);
+    return visit_type_impl(orig_type, orig_type->is_typedef());
   }
-
-  std::string visit_type_with_typedef(
-      const t_type* orig_type, TypeDef isTypedef);
 
   mstch::node filtered_objects() {
     std::string id = program_->name() + get_program_namespace(program_);
@@ -1097,29 +1094,27 @@ class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
   }
 };
 
-std::string py3_mstch_program::visit_type_with_typedef(
-    const t_type* orig_type, TypeDef isTypedef) {
+std::string py3_mstch_program::visit_type_impl(
+    const t_type* orig_type, bool fromTypeDef) {
   auto trueType = orig_type->get_true_type();
   auto baseType = context_.type_factory->make_mstch_object(trueType, context_);
   py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(baseType.get());
   const std::string& flatName = type->get_flat_name();
   // Import all types either beneath a typedef, even if the current type is
   // not directly a typedef
-  isTypedef = isTypedef == TypeDef::HasTypedef || orig_type->is_typedef()
-      ? TypeDef::HasTypedef
-      : TypeDef::NoTypedef;
+  fromTypeDef = fromTypeDef || orig_type->is_typedef();
   if (flatName.empty()) {
     std::string extra;
     if (trueType->is_list()) {
       extra = "List__" +
-          visit_type_with_typedef(get_list_elem_type(*trueType), isTypedef);
+          visit_type_impl(get_list_elem_type(*trueType), fromTypeDef);
     } else if (trueType->is_set()) {
-      extra = "Set__" +
-          visit_type_with_typedef(get_set_elem_type(*trueType), isTypedef);
+      extra =
+          "Set__" + visit_type_impl(get_set_elem_type(*trueType), fromTypeDef);
     } else if (trueType->is_map()) {
       extra = "Map__" +
-          visit_type_with_typedef(get_map_key_type(*trueType), isTypedef) +
-          "_" + visit_type_with_typedef(get_map_val_type(*trueType), isTypedef);
+          visit_type_impl(get_map_key_type(*trueType), fromTypeDef) + "_" +
+          visit_type_impl(get_map_val_type(*trueType), fromTypeDef);
     } else if (trueType->is_binary()) {
       extra = "binary";
     } else {
@@ -1131,7 +1126,7 @@ std::string py3_mstch_program::visit_type_with_typedef(
   // If this type or a parent of this type is a typedef,
   // then add the namespace of the *resolved* type:
   // (parent matters if you have eg. typedef list<list<type>>)
-  if (isTypedef == TypeDef::HasTypedef) {
+  if (fromTypeDef) {
     add_typedef_namespace(trueType);
   }
   bool inserted = seenTypeNames_.insert(flatName).second;

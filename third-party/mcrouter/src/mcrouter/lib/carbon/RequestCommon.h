@@ -10,6 +10,7 @@
 #include <optional>
 #include <utility>
 
+#include <folly/IPAddress.h>
 #include <folly/io/IOBuf.h>
 
 #include "mcrouter/lib/carbon/MessageCommon.h"
@@ -93,6 +94,14 @@ class RequestCommon : public MessageCommon {
     clientIdentifier_ = clientIdentifier.str();
   }
 
+  const std::optional<folly::IPAddress>& getSourceIpAddr() const noexcept {
+    return sourceIpAddr_;
+  }
+
+  void setSourceIpAddr(const folly::IPAddress& sourceIpAddr) noexcept {
+    sourceIpAddr_ = sourceIpAddr;
+  }
+
  protected:
   void markBufferAsDirty() {
     serializedBuffer_ = nullptr;
@@ -104,6 +113,8 @@ class RequestCommon : public MessageCommon {
   std::optional<std::string> cryptoAuthToken_;
   // Hash string of primary (non-host) tls client identities
   std::optional<std::string> clientIdentifier_;
+  // Source ip address.
+  std::optional<folly::IPAddress> sourceIpAddr_;
 };
 
 } // namespace carbon

@@ -123,14 +123,6 @@ class ProxyRequestContext {
         "of ProxyRequestContext");
   }
 
-  const std::string& userIpAddress() const noexcept {
-    return userIpAddr_;
-  }
-
-  void setUserIpAddress(folly::StringPiece newAddr) noexcept {
-    userIpAddr_ = newAddr.str();
-  }
-
   bool isProcessing() const {
     return processing_;
   }
@@ -218,8 +210,6 @@ class ProxyRequestContext {
   };
 
   uint64_t senderIdForTest_{0};
-
-  std::string userIpAddr_;
 
   ProxyRequestPriority priority_{ProxyRequestPriority::kCritical};
 

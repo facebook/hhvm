@@ -94,13 +94,9 @@ bool srHostInfoPtrFuncCarbonRouterClient(
 
 template <class RouterInfo>
 template <class Request, class F>
-bool CarbonRouterClient<RouterInfo>::send(
-    const Request& req,
-    F&& callback,
-    folly::StringPiece ipAddr) {
-  auto makePreq = [this, ipAddr, &req, &callback](bool inBatch) mutable {
-    return makeProxyRequestContext(
-        req, std::forward<F>(callback), ipAddr, inBatch);
+bool CarbonRouterClient<RouterInfo>::send(const Request& req, F&& callback) {
+  auto makePreq = [this, &req, &callback](bool inBatch) mutable {
+    return makeProxyRequestContext(req, std::forward<F>(callback), inBatch);
   };
 
   auto cancelRemaining = [&req, &callback]() {
@@ -259,15 +255,14 @@ template <class InputIt, class F>
 bool CarbonRouterClient<RouterInfo>::send(
     InputIt begin,
     InputIt end,
-    F&& callback,
-    folly::StringPiece ipAddr) {
+    F&& callback) {
   using IterReference = typename std::iterator_traits<InputIt>::reference;
   using Request = typename std::decay<decltype(detail::unwrapRequest(
       std::declval<IterReference>()))>::type;
 
-  auto makeNextPreq = [this, ipAddr, &callback, &begin](bool inBatch) {
+  auto makeNextPreq = [this, &callback, &begin](bool inBatch) {
     auto proxyRequestContext = makeProxyRequestContext(
-        detail::unwrapRequest(*begin), callback, ipAddr, inBatch);
+        detail::unwrapRequest(*begin), callback, inBatch);
     ++begin;
     return proxyRequestContext;
   };
@@ -371,7 +366,6 @@ std::unique_ptr<ProxyRequestContextWithInfo<RouterInfo>>
 CarbonRouterClient<RouterInfo>::makeProxyRequestContext(
     const Request& req,
     CallbackFunc&& callback,
-    folly::StringPiece ipAddr,
     bool inBatch) {
   Proxy<RouterInfo>* proxy = proxies_[proxyIdx_];
   if (mode_ == ThreadMode::AffinitizedRemoteThread) {
@@ -398,9 +392,6 @@ CarbonRouterClient<RouterInfo>::makeProxyRequestContext(
       });
 
   proxyRequestContext->setRequester(self_);
-  if (!ipAddr.empty()) {
-    proxyRequestContext->setUserIpAddress(ipAddr);
-  }
   return proxyRequestContext;
 }
 

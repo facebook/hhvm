@@ -55,11 +55,10 @@ class OriginalClientHashRoute {
       return false;
     }
 
-    auto& ctx = mcrouter::fiber_local<RouterInfo>::getSharedCtx();
-    auto& ip = ctx->userIpAddress();
-    if (!ip.empty()) {
+    if (auto ip = req.getSourceIpAddr()) {
       return t(
-          *children_[(folly::Hash()(ip) + offset_) % children_.size()], req);
+          *children_[(folly::Hash()(ip->str()) + offset_) % children_.size()],
+          req);
     }
     return false;
   }
@@ -69,11 +68,9 @@ class OriginalClientHashRoute {
     ReplyT<Request> reply;
     assert(children_.size() > 1);
 
-    auto& ctx = mcrouter::fiber_local<RouterInfo>::getSharedCtx();
-    auto& ip = ctx->userIpAddress();
-    if (!ip.empty()) {
-      return children_[(folly::Hash()(ip) + offset_) % children_.size()]->route(
-          req);
+    if (auto ip = req.getSourceIpAddr()) {
+      return children_[(folly::Hash()(ip->str()) + offset_) % children_.size()]
+          ->route(req);
     } else {
       return createReply<Request>(
           ErrorReply, carbon::Result::LOCAL_ERROR, "Missing IP");

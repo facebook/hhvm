@@ -347,6 +347,47 @@ TEST(routeHandleTest, hashNoSalt) {
   });
 }
 
+TEST(routeHandleTest, bucketHashSelector) {
+  vector<std::shared_ptr<TestHandle>> test_handles{
+      make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "a")),
+      make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "b")),
+      make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "c")),
+  };
+  auto outOfRangeRh = createNullRoute<typename TestRouterInfo::RouteHandleIf>();
+
+  TestFiberManager<TestRouterInfo> fm;
+
+  TestRouteHandle<SelectionRoute<
+      TestRouterInfo,
+      BucketHashSelector<HashFunc, TestRouterInfo>>>
+      rh(get_route_handles(test_handles),
+         BucketHashSelector<HashFunc, TestRouterInfo>(
+             /* salt= */ "1",
+             HashFunc(test_handles.size()),
+             /*clientFanout=*/true),
+         std::move(outOfRangeRh));
+  McGetRequest getReq("0");
+  fm.run([&]() {
+    fiber_local<TestRouterInfo>::setBucketId(1);
+    auto reply = rh.route(getReq);
+    EXPECT_EQ("c", carbon::valueRangeSlow(reply).str());
+  });
+
+  fm.run([&]() {
+    fiber_local<TestRouterInfo>::setBucketId(1);
+    getReq.setSourceIpAddr(folly::IPAddress("0.0.0.0"));
+    auto reply = rh.route(getReq);
+    EXPECT_EQ("b", carbon::valueRangeSlow(reply).str());
+  });
+
+  fm.run([&]() {
+    fiber_local<TestRouterInfo>::setBucketId(1);
+    getReq.setSourceIpAddr(folly::IPAddress("1.0.0.0"));
+    auto reply = rh.route(getReq);
+    EXPECT_EQ("c", carbon::valueRangeSlow(reply).str());
+  });
+}
+
 TEST(routeHandleTest, hashSalt) {
   vector<std::shared_ptr<TestHandle>> test_handles{
       make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "a")),

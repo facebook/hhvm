@@ -43,12 +43,13 @@ TEST(originalClientHashRouteTest, basic) {
     EXPECT_EQ(carbon::Result::LOCAL_ERROR, *reply.result_ref());
   });
 
-  context->setUserIpAddress("12345");
+  McGetRequest getReq("0");
+  getReq.setSourceIpAddr(folly::IPAddress("::3"));
   testfm.run([&]() {
     fiber_local<MemcacheRouterInfo>::setSharedCtx(context);
     auto rh = createOriginalClientHashRoute<MemcacheRouterInfo>(
         get_route_handles(test_handles), 0 /* offset */);
-    auto reply = rh->route(McGetRequest("0"));
+    auto reply = rh->route(getReq);
     EXPECT_EQ("a", carbon::valueRangeSlow(reply).str());
   });
 
@@ -57,7 +58,7 @@ TEST(originalClientHashRouteTest, basic) {
     fiber_local<MemcacheRouterInfo>::setSharedCtx(context);
     auto rh = createOriginalClientHashRoute<MemcacheRouterInfo>(
         get_route_handles(test_handles), 1 /* offset */);
-    auto reply = rh->route(McGetRequest("0"));
+    auto reply = rh->route(getReq);
     EXPECT_EQ("b", carbon::valueRangeSlow(reply).str());
   });
 
@@ -66,17 +67,17 @@ TEST(originalClientHashRouteTest, basic) {
     fiber_local<MemcacheRouterInfo>::setSharedCtx(context);
     auto rh = createOriginalClientHashRoute<MemcacheRouterInfo>(
         get_route_handles(test_handles), 2 /* offset */);
-    auto reply = rh->route(McGetRequest("0"));
+    auto reply = rh->route(getReq);
     EXPECT_EQ("c", carbon::valueRangeSlow(reply).str());
   });
 
   // Set IP that maps to b and set offset to 2 to test wrap around
-  context->setUserIpAddress("0");
+  getReq.setSourceIpAddr(folly::IPAddress("::2"));
   testfm.run([&]() {
     fiber_local<MemcacheRouterInfo>::setSharedCtx(context);
     auto rh = createOriginalClientHashRoute<MemcacheRouterInfo>(
         get_route_handles(test_handles), 2 /* offset */);
-    auto reply = rh->route(McGetRequest("0"));
+    auto reply = rh->route(getReq);
     EXPECT_EQ("a", carbon::valueRangeSlow(reply).str());
   });
 }

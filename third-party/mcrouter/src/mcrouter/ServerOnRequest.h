@@ -200,12 +200,11 @@ class ServerOnRequest {
       }
     };
 
-    folly::Optional<std::string> peerIp;
-    if (retainSourceIp_ && (peerIp = ctxRef.getPeerSocketAddressStr())) {
-      client_.send(reqRef, std::move(cb), *peerIp);
-    } else {
-      client_.send(reqRef, std::move(cb));
+    std::optional<folly::IPAddress> peerIp;
+    if (retainSourceIp_ && (peerIp = ctxRef.getPeerSocketIPAddress())) {
+      reqRef.setSourceIpAddr(*peerIp);
     }
+    client_.send(reqRef, std::move(cb));
   }
 
  private:

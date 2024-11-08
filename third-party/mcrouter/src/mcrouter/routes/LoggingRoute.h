@@ -67,12 +67,11 @@ class LoggingRoute {
 
     // Pull the IP (if available) out of the saved request
     auto& ctx = mcrouter::fiber_local<RouterInfo>::getSharedCtx();
-    auto& ip = ctx->userIpAddress();
-    folly::StringPiece userIp;
-    if (!ip.empty()) {
-      userIp = ip;
+    std::string userIpStr;
+    if (auto sourceIpAddr = req.getSourceIpAddr()) {
+      userIpStr = sourceIpAddr->str();
     } else {
-      userIp = "N/A";
+      userIpStr = "N/A";
     }
 
     auto& callback = ctx->proxy().router().postprocessCallback();
@@ -83,7 +82,7 @@ class LoggingRoute {
             carbon::convertToFollyDynamic(req),
             carbon::convertToFollyDynamic(reply),
             Request::name,
-            userIp);
+            userIpStr);
       }
     }
     return reply;

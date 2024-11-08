@@ -100,10 +100,7 @@ class CarbonRouterClient : public CarbonRouterClientBase {
    *       callback is called.
    */
   template <class Request, class F>
-  bool send(
-      const Request& req,
-      F&& callback,
-      folly::StringPiece ipAddr = folly::StringPiece());
+  bool send(const Request& req, F&& callback);
 
   /**
    * Multi requests version of send.
@@ -122,11 +119,7 @@ class CarbonRouterClient : public CarbonRouterClientBase {
    *       each request.
    */
   template <class InputIt, class F>
-  bool send(
-      InputIt begin,
-      InputIt end,
-      F&& callback,
-      folly::StringPiece ipAddr = folly::StringPiece());
+  bool send(InputIt begin, InputIt end, F&& callback);
 
   CacheClientCounters getStatCounters() noexcept {
     return stats_.getCounters();
@@ -222,7 +215,6 @@ class CarbonRouterClient : public CarbonRouterClientBase {
    * @param req         The request to be routed.
    * @param callback    The callback function to be called once the reply
    *                    is received.
-   * @param ipAddr      The ip address of the caller (can be empty).
    * @param inBatch     Whether or not the given request is part of a batch
    *                    of requests.
    *
@@ -233,7 +225,6 @@ class CarbonRouterClient : public CarbonRouterClientBase {
   makeProxyRequestContext(
       const Request& req,
       CallbackFunc&& callback,
-      folly::StringPiece ipAddr,
       bool inBatch);
 
   bool shouldDelayNotification(size_t batchSize) const;

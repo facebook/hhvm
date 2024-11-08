@@ -64,7 +64,7 @@ class McServerRequestContext {
   ServerLoad getServerLoad() const noexcept;
 
   folly::Optional<struct sockaddr_storage> getPeerSocketAddress();
-  folly::Optional<std::string> getPeerSocketAddressStr();
+  std::optional<folly::IPAddress> getPeerSocketIPAddress();
 
   folly::EventBase& getSessionEventBase() const noexcept;
   const apache::thrift::Cpp2RequestContext* getThriftRequestContext()

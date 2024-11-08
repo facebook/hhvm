@@ -14,6 +14,7 @@
 
 #include "mcrouter/McrouterFiberContext.h"
 #include "mcrouter/lib/HashUtil.h"
+#include "mcrouter/lib/fbi/cpp/util.h"
 
 namespace facebook {
 namespace memcache {
@@ -88,7 +89,7 @@ class BucketHashSelector : public HashSelectorBase<HashFunc> {
         clientFanout_(clientFanout) {}
 
   template <class Request>
-  size_t select(const Request& /*req*/, size_t size) const {
+  size_t select(const Request& req, size_t size) const {
     auto bucketId = mcrouter::fiber_local<RouterInfo>::getBucketId();
     checkRuntime(
         bucketId.has_value(),
@@ -96,9 +97,8 @@ class BucketHashSelector : public HashSelectorBase<HashFunc> {
     // Hash functions can be stack-intensive, so jump back to the main context
     auto key = folly::to<std::string>(*bucketId);
     if (this->clientFanout_) {
-      auto& ctx = mcrouter::fiber_local<RouterInfo>::getSharedCtx();
-      if (ctx) {
-        key += ctx->userIpAddress();
+      if (auto sourceIpAddr = req.getSourceIpAddr()) {
+        key += sourceIpAddr->str();
       }
     }
     return folly::fibers::runInMainContext(

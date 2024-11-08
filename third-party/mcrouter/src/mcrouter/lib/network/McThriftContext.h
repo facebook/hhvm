@@ -32,13 +32,13 @@ class McThriftContext {
     ctx.underlying_->exception(std::move(ex));
   }
 
-  folly::Optional<std::string> getPeerSocketAddressStr() {
-    folly::Optional<std::string> peerAddressStr;
+  std::optional<folly::IPAddress> getPeerSocketIPAddress() {
+    std::optional<folly::IPAddress> peerIPAddr;
     auto connectionCxt = underlying_->getConnectionContext();
     if (connectionCxt) {
-      peerAddressStr = connectionCxt->getPeerAddress()->getAddressStr();
+      peerIPAddr = connectionCxt->getPeerAddress()->getIPAddress();
     }
-    return peerAddressStr;
+    return peerIPAddr;
   }
 
   folly::Optional<struct sockaddr_storage> getPeerSocketAddress() {

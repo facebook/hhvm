@@ -1,6 +1,0 @@
-Runtime {
-    Eval {
-        ActiveDeployment = prod
-        PackagesV2 = true
-    }
-}

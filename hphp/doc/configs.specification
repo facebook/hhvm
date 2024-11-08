@@ -17,7 +17,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 # Server
 
-  A lot of configs uses Server.Mode so put this first
+  A lot of configs uses Server.Mode but not Repo so put this second
 
 - bool Server.Mode = false, UNKNOWN, nobind
 - int Server.ThreadJobMaxQueuingMilliSeconds = -1, UNKNOWN
@@ -803,6 +803,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.NewTHPHotText = false, UNKNOWN
 
+- bool Eval.FileBackedColdArena, UNKNOWN
+
 - std::string Eval.ColdArenaFileDir = "/tmp", UNKNOWN
 
 - uint32_t Eval.MaxHotTextHugePages, UNKNOWN
@@ -840,6 +842,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.Verify, UNKNOWN
 
 - bool Eval.VerifyOnly = false, UNKNOWN
+
+- bool Eval.FatalOnVerifyError, UNKNOWN
 
 - bool Eval.AbortBuildOnVerifyError = true, UNKNOWN, globaldata|unitcacheflag|compileroption(AbortBuildOnVerifyError)
 
@@ -888,6 +892,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Eval.EnableCallBuiltin = true, UNKNOWN, unitcacheflag
 
 - bool Eval.EnableNuma, UNKNOWN
+
+- bool Eval.EnableReusableTC, UNKNOWN
 
 - bool Eval.LogServerRestartStats = false, UNKNOWN
 
@@ -1248,6 +1254,8 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Eval.StartOptionLogCache = "/tmp/hhvm-options-%{user}-%{hash}", UNKNOWN
 
 - uint64_t Eval.StartOptionLogWindow = 86400, UNKNOWN
+
+- uint64_t Eval.CoeffectViolationWarningMax = UINT64_MAX, UNKNOWN
 
 - hphp_fast_string_set Eval.StartOptionLogOptions = {}, UNKNOWN
 

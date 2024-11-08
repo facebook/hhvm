@@ -386,7 +386,7 @@ TEST(COUNTERS, fixmup_map_size) {
 }
 
 TEST(COUNTERS, allocs_frees) {
-  // EvalEnableReusableTC is false, so the best we can do is ensure that
+  // Eval.EnableReusableTC is false, so the best we can do is ensure that
   // the counters are being created successfully and that the code runs
   // without crashing.
 

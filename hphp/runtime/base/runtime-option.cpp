@@ -727,15 +727,6 @@ static inline uint64_t pgoThresholdDefault() {
   return debug ? 2 : 2000;
 }
 
-static inline bool reuseTCDefault() {
-  return hhvm_reuse_tc && !Cfg::Repo::Authoritative;
-}
-
-static inline bool useFileBackedArenaDefault() {
-  return Cfg::Repo::Authoritative &&
-    RuntimeOption::ServerExecutionMode();
-}
-
 static inline bool hugePagesSoundNice() {
   return RuntimeOption::ServerExecutionMode();
 }
@@ -1604,7 +1595,7 @@ void RuntimeOption::Load(
     }
 
     if (Cfg::Jit::SerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
-    if (!EvalEnableReusableTC) Cfg::Eval::ReusableTCPadding = 0;
+    if (!Cfg::Eval::EnableReusableTC) Cfg::Eval::ReusableTCPadding = 0;
     if (numa_num_nodes <= 1) {
       Cfg::Eval::EnableNuma = false;
     }

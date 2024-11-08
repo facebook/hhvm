@@ -415,7 +415,7 @@ int recordedFuncs()   { return s_funcTCData.size(); }
 namespace {
 ServiceData::CounterCallback s_counters(
   [](std::map<std::string, int64_t>& counters) {
-    if (!RuntimeOption::EvalEnableReusableTC) return;
+    if (!Cfg::Eval::EnableReusableTC) return;
 
     counters["jit.tc.smashed_calls"] = s_smashedCalls.size();
     counters["jit.tc.recorded_funcs"] = s_funcTCData.size();
@@ -476,7 +476,7 @@ void reclaimTranslations(GrowableVector<TransLoc>&& trans) {
 
 
 void recycleInit() {
-  if (!RuntimeOption::EvalEnableReusableTC) return;
+  if (!Cfg::Eval::EnableReusableTC) return;
 
   s_running.store(true, std::memory_order_release);
   s_reaper = std::thread([] {

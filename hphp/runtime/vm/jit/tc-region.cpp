@@ -511,7 +511,7 @@ SrcRec* createSrcRec(SrcKey sk, SBInvOffset spOff) {
   SKTRACE(1, sk, "inserting SrcRec\n");
 
   auto const sr = srcDB().insert(sk);
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     recordFuncSrcRec(sk.func(), sr);
   }
 

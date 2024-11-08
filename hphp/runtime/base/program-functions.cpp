@@ -2028,7 +2028,7 @@ static int execute_program_impl(int argc, char** argv) {
     setup_arena0({Cfg::Eval::Num1GPagesForA0,
                   Cfg::Eval::Num2MPagesForA0});
   }
-  if (RuntimeOption::EvalFileBackedColdArena) {
+  if (Cfg::Eval::FileBackedColdArena) {
     set_cold_file_dir(Cfg::Eval::ColdArenaFileDir.c_str());
     enable_high_cold_file();
   }

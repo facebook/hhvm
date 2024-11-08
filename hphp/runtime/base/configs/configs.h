@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "hphp/util/hash-set.h"
+
 #include <map>
 #include <set>
 #include <string>
@@ -52,6 +54,7 @@ using StringStringMap = std::map<std::string, std::string>;
 using StringVector = std::vector<std::string>;
 using StringSet = std::set<std::string>;
 using StringBoostFlatSet = boost::container::flat_set<std::string>;
+using StringHphpFastSet = hphp_fast_set<std::string>;
 
 }
 

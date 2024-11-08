@@ -194,7 +194,7 @@ void PrologueTranslator::publishCodeImpl() {
   assertOwnsMetadataLock();
   assertOwnsCodeLock();
 
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     auto const& loc = transMeta->range.loc();
     recordFuncPrologue(func, loc);
   }

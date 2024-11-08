@@ -94,7 +94,7 @@ void bindCall(TCA toSmash, TCA start, Func* callee, int nArgs) {
   //
   // Additionally for profiled calls we need to remove them from the main
   // caller map.
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     if (debug || rec) {
       recordFuncCaller(callee, toSmash, rec);
     }

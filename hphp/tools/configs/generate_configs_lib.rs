@@ -480,6 +480,7 @@ fn parse_num<'a, E: ParseError<&'a str>>(input: &'a str) -> IResult<&'a str, &'a
             alt((
                 tag("INT_MAX"),
                 tag("INT64_MAX"),
+                tag("UINT64_MAX"),
                 recognize(tuple((
                     alt((
                         recognize(tuple((digit1, opt(preceded(tag("."), digit1))))),

@@ -261,13 +261,13 @@ ALWAYS_INLINE bool isMature() {
 }
 
 /*
- * Initialize the TC recycling mechanism. Does nothing if EvalEnableReusableTC
+ * Initialize the TC recycling mechanism. Does nothing if Eval.EnableReusableTC
  * is false.
  */
 void recycleInit();
 
 /*
- * Teardown TC recycling mechanism. Does nothing if EvalEnableReusableTC is
+ * Teardown TC recycling mechanism. Does nothing if Eval.EnableReusableTC is
  * false.
  */
 void recycleStop();

@@ -1118,7 +1118,7 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
       appendStat("opt-funcs", profData->optimizedFuncs());
     }
 
-    if (RuntimeOption::EvalEnableReusableTC) {
+    if (Cfg::Eval::EnableReusableTC) {
       auto const memInfos = jit::tc::getTCMemoryUsage();
       for (auto const& info : memInfos) {
         appendStat(folly::format("tc-{}-allocs", info.name).str(), info.allocs);

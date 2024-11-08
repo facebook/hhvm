@@ -391,7 +391,7 @@ void raiseCoeffectsCallViolation(const Func* callee,
 
   assertx(!provided.canCall(required));
   if (provided.canCallWithWarning(required)) {
-    if (*rl_num_coeffect_violations >= RO::EvalCoeffectViolationWarningMax) {
+    if (*rl_num_coeffect_violations >= Cfg::Eval::CoeffectViolationWarningMax) {
       return;
     }
     (*rl_num_coeffect_violations)++;

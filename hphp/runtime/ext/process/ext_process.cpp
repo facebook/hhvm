@@ -108,7 +108,7 @@ bool cantPrefork() {
     // manage singletons, threadpools, connection pools, etc.
     if (!ff->canFork()) return true;
   }
-  if (num_1g_pages() > 0 || RuntimeOption::EvalFileBackedColdArena) {
+  if (num_1g_pages() > 0 || Cfg::Eval::FileBackedColdArena) {
     // We put data on shared pages, which won't work with fork().
     return true;
   }

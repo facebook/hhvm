@@ -144,7 +144,7 @@ void emitVunit(Vunit& vunit, const IRUnit* unit,
   CodeBlock& cold = code.isLocal() ? code.cold() : coldLocal;
   CodeBlock* frozen = &code.frozen();
 
-  assertx(IMPLIES(RuntimeOption::EvalEnableReusableTC, code.isLocal()));
+  assertx(IMPLIES(Cfg::Eval::EnableReusableTC, code.isLocal()));
   auto const do_relocate =
     Cfg::Jit::RelocationSize &&
     cold_in.canEmit(Cfg::Jit::RelocationSize * 3) &&

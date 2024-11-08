@@ -502,7 +502,7 @@ void retranslateAll(bool skipSerialize) {
     ProfData::Session pds;
     // The ReusableTC mode assumes that ProfData is never freed, so don't
     // discard ProfData in this mode.
-    if (!RuntimeOption::EvalEnableReusableTC) {
+    if (!Cfg::Eval::EnableReusableTC) {
       discardProfData();
       PropertyProfile::clear();
     }

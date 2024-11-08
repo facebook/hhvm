@@ -162,7 +162,7 @@ void* Func::allocFuncMem(int numParams) {
 
 void Func::destroy(Func* func) {
   NamedFunc::removeFunc(func);
-  if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
+  if (jit::mcgen::initialized() && Cfg::Eval::EnableReusableTC) {
     // Free TC-space associated with func
     jit::tc::reclaimFunction(func);
   }
@@ -195,7 +195,7 @@ void Func::freeClone() {
   assertx(isPreFunc());
   assertx(m_cloned.flag.test_and_set());
 
-  if (jit::mcgen::initialized() && RuntimeOption::EvalEnableReusableTC) {
+  if (jit::mcgen::initialized() && Cfg::Eval::EnableReusableTC) {
     // Free TC-space associated with func
     jit::tc::reclaimFunction(this);
   }

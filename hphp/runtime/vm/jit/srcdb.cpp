@@ -154,7 +154,7 @@ void SrcRec::chainFrom(IncomingBranch br, TCA stub) {
         m_incomingBranches.size());
   br.patch(destAddr);
 
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     tc::recordJump(br.toSmash(), this);
   }
 }
@@ -263,7 +263,7 @@ void SrcRec::replaceOldTranslations(TCA transStub) {
   // Now that we've smashed all the IBs for these translations they should be
   // unreachable-- to prevent a race we treadmill here and then reclaim their
   // associated TC space
-  if (RuntimeOption::EvalEnableReusableTC) {
+  if (Cfg::Eval::EnableReusableTC) {
     tc::reclaimTranslations(std::move(translations));
     return;
   }

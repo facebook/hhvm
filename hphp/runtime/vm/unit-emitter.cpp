@@ -664,7 +664,7 @@ std::unique_ptr<Unit> UnitEmitter::create() const {
           std::fflush(stdout);
           _Exit(1);
         }
-      } else if (RuntimeOption::EvalFatalOnVerifyError) {
+      } else if (Cfg::Eval::FatalOnVerifyError) {
         return createFatalUnit(
           const_cast<StringData*>(m_filepath),
           m_sha1,

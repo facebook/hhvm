@@ -96,7 +96,7 @@ struct CodeReuseBlock {
   // reusable TC is enabled).
   CodeCache::View getMaybeReusedView(CodeCache::View& src,
                                      const TransRange& range) {
-    if (!RuntimeOption::EvalEnableReusableTC) return src;
+    if (!Cfg::Eval::EnableReusableTC) return src;
     auto main = &src.main();
     auto cold = &src.cold();
     auto frozen = &src.frozen();
@@ -399,7 +399,7 @@ void checkFreeProfData() {
   // via a different mechanism, after all the optimized translations are
   // generated.
   if (profData() &&
-      !RuntimeOption::EvalEnableReusableTC &&
+      !Cfg::Eval::EnableReusableTC &&
       (code().main().used() >= CodeCache::AMaxUsage ||
        getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&
@@ -586,7 +586,7 @@ Translator::translate(Optional<CodeCache::View> view) {
 
   auto codeLock = lockCode(false);
   if (!view.has_value()) {
-    if (RuntimeOption::EvalEnableReusableTC) {
+    if (Cfg::Eval::EnableReusableTC) {
       auto const initialSize = 256;
       m_localBuffer = std::make_unique<uint8_t[]>(initialSize);
       m_localTCBuffer =
@@ -664,7 +664,7 @@ Optional<TranslationResult> Translator::relocate(bool alignMain) {
   // Code emitted directly is relocated during emission (or emitted
   // directly in place).
   if (!transMeta->view.isLocal()) {
-    assertx(!RuntimeOption::EvalEnableReusableTC);
+    assertx(!Cfg::Eval::EnableReusableTC);
     return std::nullopt;
   }
 

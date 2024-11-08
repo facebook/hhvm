@@ -19,6 +19,7 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/low-ptr.h"
 #include "hphp/util/numa.h"
@@ -49,6 +50,18 @@ bool EvalLoader::DumpTCAnnotationsForAllTransDefault() {
 uint32_t EvalLoader::MaxHotTextHugePagesDefault() {
   if (!Cfg::Server::Mode) return 0;
   return arch() == Arch::ARM ? 12 : 8;
+}
+
+bool EvalLoader::FileBackedColdArenaDefault() {
+  return Cfg::Repo::Authoritative && Cfg::Server::Mode;
+}
+
+bool EvalLoader::FatalOnVerifyErrorDefault() {
+  return !Cfg::Repo::Authoritative;
+}
+
+bool EvalLoader::EnableReusableTCDefault() {
+  return hhvm_reuse_tc && !Cfg::Repo::Authoritative;
 }
 
 uint32_t EvalLoader::MaxLowMemHugePagesDefault() {

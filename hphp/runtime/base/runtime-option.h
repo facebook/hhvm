@@ -407,15 +407,11 @@ struct RuntimeOption {
 #define EVALFLAGS()                                                     \
   /* F(type, name, defaultVal) */                                       \
   F(string, ReorderProps,              reorderPropsDefault())           \
-  F(bool, FileBackedColdArena,         useFileBackedArenaDefault())     \
-  F(bool, FatalOnVerifyError,          !Cfg::Repo::Authoritative)       \
-  F(bool, EnableReusableTC,   reuseTCDefault())                         \
   /*                                                                    \
    * Map from coeffect name to enforcement level                        \
    * e.g. {'pure' => 2, 'rx' => 1}                                      \
    */                                                                   \
   F(StringToIntMap, CoeffectEnforcementLevels, coeffectEnforcementLevelsDefaults()) \
-  F(uint64_t, CoeffectViolationWarningMax, std::numeric_limits<uint64_t>::max()) \
   /* */
 
 private:

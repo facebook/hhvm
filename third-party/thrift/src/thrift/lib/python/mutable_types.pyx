@@ -170,8 +170,6 @@ class _MutableStructField:
         else:
             (<MutableGeneratedError>obj)._fbthrift_set_field_value(self._field_index, value)
 
-
-
 cdef is_cacheable_non_primitive(ThriftIdlType idl_type):
     return idl_type in (ThriftIdlType.String, ThriftIdlType.Struct)
 

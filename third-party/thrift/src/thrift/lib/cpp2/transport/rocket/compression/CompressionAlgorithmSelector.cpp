@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/Utility.h>
 #include <folly/compression/Compression.h>
 
 #include <thrift/lib/cpp/TApplicationException.h>
@@ -39,7 +40,7 @@ CompressionAlgorithm fromZlibConfig(
       fmt::format(
           "Unknown {} enum value: {}",
           TEnumTraits<ZlibCompressionLevelPreset>::typeName(),
-          zlibConfig.levelPreset().value()));
+          folly::to_underlying(zlibConfig.levelPreset().value())));
 }
 
 CompressionAlgorithm fromZstdConfig(
@@ -59,7 +60,7 @@ CompressionAlgorithm fromZstdConfig(
       fmt::format(
           "Unknown {} enum value: {}",
           TEnumTraits<ZstdCompressionLevelPreset>::typeName(),
-          zstdConfig.levelPreset().value()));
+          folly::to_underlying(zstdConfig.levelPreset().value())));
 }
 
 CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
@@ -78,7 +79,7 @@ CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
       fmt::format(
           "Unknown {} enum value: {}",
           TEnumTraits<Lz4CompressionLevelPreset>::typeName(),
-          lz4Config.levelPreset().value()));
+          folly::to_underlying(lz4Config.levelPreset().value())));
 }
 
 CompressionAlgorithm CompressionAlgorithmSelector::fromCodecConfig(
@@ -99,7 +100,8 @@ CompressionAlgorithm CompressionAlgorithmSelector::fromCodecConfig(
   throw TApplicationException(
       TApplicationException::PROTOCOL_ERROR,
       fmt::format(
-          "Unknown CodecConfig::Type value: {}", codecConfig.getType()));
+          "Unknown CodecConfig::Type enum value: {}",
+          folly::to_underlying(codecConfig.getType())));
 }
 
 std::pair<folly::io::CodecType, int>
@@ -170,6 +172,6 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
       fmt::format(
           "Unknown {} enum value: {}",
           TEnumTraits<CompressionAlgorithm>::typeName(),
-          compressionAlgorithm));
+          folly::to_underlying(compressionAlgorithm)));
 }
 } // namespace apache::thrift::rocket

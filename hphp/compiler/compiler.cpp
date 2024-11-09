@@ -1134,7 +1134,7 @@ bool process(CompilerOptions &po) {
                      "however, it is not defined in the {}/{} file",
                      Cfg::Eval::ActiveDeployment,
                      po.repoOptionsDir,
-                     kPackagesToml);
+                     Cfg::Eval::PackagesTomlFileName);
       return false;
     }
 

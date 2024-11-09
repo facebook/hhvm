@@ -1,1 +1,2 @@
 -vEval.PackageV2=true
+-vEval.PackagesTomlFileName="PACKAGES_v2.toml"

@@ -59,8 +59,6 @@ struct FilesMatch;
 struct Hdf;
 struct IniSettingMap;
 
-constexpr const char* kPackagesToml = "PACKAGES.toml";
-
 using StringToIntMap = std::unordered_map<std::string, int>;
 
 enum class JitSerdesMode {

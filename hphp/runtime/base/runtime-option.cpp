@@ -274,7 +274,7 @@ RepoOptionStats::RepoOptionStats(const std::string& configPath,
   // Same directory
   auto const repo =
     configPath.empty() ? "" : std::filesystem::path(configPath).parent_path();
-  auto const packagePath = repo / kPackagesToml;
+  auto const packagePath = repo / Cfg::Eval::PackagesTomlFileName;
   if (std::filesystem::exists(packagePath) || Cfg::Eval::RecordReplay) {
     struct stat package;
     if (wrapped_stat(packagePath.string().data(), &package) == 0) {
@@ -566,7 +566,7 @@ RepoOptions::RepoOptions(const char* str, const char* file) : m_path(file), m_in
       m_repo = std::filesystem::canonical(m_path.parent_path());
     }
   }
-  m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / kPackagesToml);
+  m_flags.m_packageInfo = PackageInfo::fromFile(m_repo / Cfg::Eval::PackagesTomlFileName);
   calcCacheKey();
   calcAutoloadDB();
   m_flags.calcCachedQuery();

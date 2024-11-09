@@ -1,1 +1,2 @@
 -vRuntime.Eval.PackageV2=true
+-vRuntime.Eval.PackagesTomlFileName="PACKAGES_v2.toml"

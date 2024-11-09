@@ -280,7 +280,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 
   /// Inserts entries. Override entries if exists.
   template <typename C = T>
-  void put(C&& entries) {
+  void putMulti(C&& entries) {
     auto& field = assignOr(*data_.put());
     for (auto&& entry : entries) {
       auto key = std::forward<decltype(entry)>(entry).first;
@@ -291,10 +291,16 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       data_.patch()->erase(key);
     }
   }
+
+  template <typename C = T>
+  [[deprecated("Use putMulti(...) instead.")]] void put(C&& c) {
+    return putMulti(std::forward<C>(c));
+  }
+
   /// Inserts entries. Override entries if exists.
   template <typename K, typename V>
   void insert_or_assign(K&& key, V&& value) {
-    put(single(
+    putMulti(single(
         std::pair<K&&, V&&>(std::forward<K>(key), std::forward<V>(value))));
   }
 

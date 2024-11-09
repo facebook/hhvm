@@ -888,6 +888,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
     auto greaseECH = ech::generateGreaseECH(
         *context->getGreaseECHSetting(), *context->getFactory(), 0);
     chlo.extensions.push_back(encodeExtension(std::move(greaseECH)));
+    requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
   }
 
   Buf encodedClientHello;
@@ -978,6 +979,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
         *context->getFactory(),
         encodedClientHello->computeChainDataLength());
     chlo.extensions.push_back(encodeExtension(std::move(greaseECH)));
+    requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
     // Update the client hello with the grease ECH extension
     encodedClientHello = encodeHandshake(chlo);
   }

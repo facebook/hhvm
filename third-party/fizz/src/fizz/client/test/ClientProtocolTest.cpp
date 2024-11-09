@@ -1334,6 +1334,12 @@ TEST_F(ClientProtocolTest, TestConnectWithRandomGreaseECH) {
       echExtension->payload->computeChainDataLength(), setting.minPayloadSize);
   EXPECT_LE(
       echExtension->payload->computeChainDataLength(), setting.maxPayloadSize);
+  EXPECT_TRUE(
+      std::find(
+          state_.requestedExtensions()->begin(),
+          state_.requestedExtensions()->end(),
+          ExtensionType::encrypted_client_hello) !=
+      state_.requestedExtensions()->end());
 }
 
 TEST_F(ClientProtocolTest, TestConnectWithComputedGreaseECH) {
@@ -1382,6 +1388,12 @@ TEST_F(ClientProtocolTest, TestConnectWithComputedGreaseECH) {
       echOverhead;
   EXPECT_EQ(
       expectedPayloadSize, echExtension->payload->computeChainDataLength());
+  EXPECT_TRUE(
+      std::find(
+          state_.requestedExtensions()->begin(),
+          state_.requestedExtensions()->end(),
+          ExtensionType::encrypted_client_hello) !=
+      state_.requestedExtensions()->end());
 }
 
 TEST_F(ClientProtocolTest, TestConnectCompatEarly) {

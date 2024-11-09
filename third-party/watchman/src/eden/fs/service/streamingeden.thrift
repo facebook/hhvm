@@ -62,28 +62,7 @@ const i64 FS_EVENT_READ = 1;
 const i64 FS_EVENT_WRITE = 2;
 const i64 FS_EVENT_OTHER = 4;
 
-struct CommitTransition {
-  1: eden.ThriftRootId from;
-  2: eden.ThriftRootId to;
-}
-
-struct DirectoryRenamed {
-  1: eden.PathString from;
-  2: eden.PathString to;
-}
-
-struct Renamed {
-  1: eden.Dtype fileType;
-  2: eden.PathString from;
-  3: eden.PathString to;
-}
-
 struct Added {
-  1: eden.Dtype fileType;
-  3: eden.PathString path;
-}
-
-struct Deleted {
   1: eden.Dtype fileType;
   3: eden.PathString path;
 }
@@ -93,11 +72,41 @@ struct Modified {
   3: eden.PathString path;
 }
 
+struct Renamed {
+  1: eden.Dtype fileType;
+  2: eden.PathString from;
+  3: eden.PathString to;
+}
+
+struct Replaced {
+  1: eden.Dtype fileType;
+  2: eden.PathString from;
+  3: eden.PathString to;
+}
+
+struct Removed {
+  1: eden.Dtype fileType;
+  3: eden.PathString path;
+}
+
 union SmallChangeNotification {
-  1: Renamed renamed;
-  2: Added added;
-  3: Deleted deleted;
-  4: Modified modified;
+  // @lint-ignore-every FBTHRIFTCOMPAT FBTHRIFTCOMPAT1 FBTHRIFTCOMPAT2
+  1: Added added;
+  // @lint-ignore-every FBTHRIFTCOMPAT FBTHRIFTCOMPAT1 FBTHRIFTCOMPAT2
+  2: Modified modified;
+  // @lint-ignore-every FBTHRIFTCOMPAT FBTHRIFTCOMPAT1 FBTHRIFTCOMPAT2
+  3: Renamed renamed;
+  4: Replaced replaced;
+  5: Removed removed;
+}
+
+struct DirectoryRenamed {
+  1: eden.PathString from;
+  2: eden.PathString to;
+}
+struct CommitTransition {
+  1: eden.ThriftRootId from;
+  2: eden.ThriftRootId to;
 }
 
 union LargeChangeNotification {

@@ -57,5 +57,6 @@ def serialize_with_header_iobuf(
 def deserialize_from_header(
     # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     structKlass: Type[sT],
+    # pyre-fixme[24]: Generic type `memoryview` expects 1 type parameter.
     buf: Union[bytes, bytearray, IOBuf, memoryview],
 ) -> sT: ...

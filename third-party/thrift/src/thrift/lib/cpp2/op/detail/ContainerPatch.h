@@ -77,9 +77,13 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
 
   /// Appends a list.
   template <typename C = T>
-  void append(C&& rhs) {
+  void appendMulti(C&& rhs) {
     auto& lhs = assignOr(*data_.append());
     lhs.insert(lhs.end(), rhs.begin(), rhs.end());
+  }
+  template <typename C = T>
+  [[deprecated("Use appendMulti(...) instead.")]] void append(C&& c) {
+    return appendMulti(std::forward<C>(c));
   }
   /// Emplaces and appends a new element.
   template <typename... Args>
@@ -177,19 +181,23 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
 
   /// Adds keys.
   template <typename C = T>
-  void add(C&& keys) {
+  void addMulti(C&& keys) {
     erase_all(*data_.remove(), keys);
     assignOr(*data_.add()).insert(keys.begin(), keys.end());
+  }
+  template <typename C = T>
+  [[deprecated("Use addMulti(...) instead.")]] void add(C&& c) {
+    return addMulti(std::forward<C>(c));
   }
   /// Adds a key.
   template <typename U = typename T::value_type>
   void insert(U&& val) {
-    add(single(std::forward<U>(val)));
+    addMulti(single(std::forward<U>(val)));
   }
 
   /// Removes keys.
   template <typename C = T>
-  void remove(C&& keys) {
+  void removeMulti(C&& keys) {
     if (data_.assign().has_value()) {
       erase_all(*data_.assign(), keys);
       return;
@@ -197,10 +205,14 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
     erase_all(*data_.add(), keys);
     data_.remove()->insert(keys.begin(), keys.end());
   }
+  template <typename C = T>
+  [[deprecated("Use removeMulti(...) instead.")]] void remove(C&& c) {
+    return removeMulti(std::forward<C>(c));
+  }
   /// Remove a key.
   template <typename U = typename T::value_type>
   void erase(U&& val) {
-    remove(single(std::forward<U>(val)));
+    removeMulti(single(std::forward<U>(val)));
   }
 
   /// @copybrief AssignPatch::customVisit
@@ -320,7 +332,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 
   /// Removes keys.
   template <typename C = std::unordered_set<typename T::key_type>>
-  void remove(C&& keys) {
+  void removeMulti(C&& keys) {
     auto& field = assignOr(*data_.add());
     auto& patchPrior = *data_.patchPrior();
     auto& patch = *data_.patch();
@@ -332,11 +344,15 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       patch.erase(key);
     }
   }
+  template <typename C = std::unordered_set<typename T::key_type>>
+  [[deprecated("Use removeMulti(...) instead.")]] void remove(C&& c) {
+    return removeMulti(std::forward<C>(c));
+  }
 
   /// Removes a key.
   template <typename K = typename T::key_type>
   void erase(K&& key) {
-    remove(single(std::forward<K>(key)));
+    removeMulti(single(std::forward<K>(key)));
   }
 
   /// Returns the patch that for the entry.

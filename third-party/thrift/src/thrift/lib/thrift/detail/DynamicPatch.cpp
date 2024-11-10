@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <folly/Overload.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
@@ -1375,65 +1376,52 @@ void DynamicUnknownPatch::apply(detail::Badge, Value& v) const {
 
   return customVisit(badge, Visitor{v});
 }
-
-void DynamicPatch::apply(detail::Badge, Value& v) const {
-  if (holds_alternative<DynamicUnknownPatch>(badge)) {
-    return std::get<DynamicUnknownPatch>(*patch_).apply(badge, v);
-  }
-  switch (v.getType()) {
-    case Value::Type::boolValue:
-      return std::get<op::BoolPatch>(*patch_).apply(v.as_bool());
-    case Value::Type::byteValue:
-      return std::get<op::BytePatch>(*patch_).apply(v.as_byte());
-    case Value::Type::i16Value:
-      return std::get<op::I16Patch>(*patch_).apply(v.as_i16());
-    case Value::Type::i32Value:
-      return std::get<op::I32Patch>(*patch_).apply(v.as_i32());
-    case Value::Type::i64Value:
-      return std::get<op::I64Patch>(*patch_).apply(v.as_i64());
-    case Value::Type::floatValue:
-      return std::get<op::FloatPatch>(*patch_).apply(v.as_float());
-    case Value::Type::doubleValue:
-      return std::get<op::DoublePatch>(*patch_).apply(v.as_double());
-    case Value::Type::stringValue: {
-      if (holds_alternative<op::BinaryPatch>(badge)) {
-        return detail::createPatchFromObject<op::StringPatch>(badge, toObject())
-            .apply(v.as_string());
-      }
-      return std::get<op::StringPatch>(*patch_).apply(v.as_string());
-    }
-    case Value::Type::binaryValue: {
-      if (holds_alternative<op::StringPatch>(badge)) {
-        return detail::createPatchFromObject<op::BinaryPatch>(badge, toObject())
-            .apply(v.as_binary());
-      }
-      return std::get<op::BinaryPatch>(*patch_).apply(v.as_binary());
-    }
-    case Value::Type::listValue:
-      return std::get<DynamicListPatch>(*patch_).apply(badge, v.as_list());
-    case Value::Type::setValue:
-      return std::get<DynamicSetPatch>(*patch_).apply(badge, v.as_set());
-    case Value::Type::mapValue:
-      return std::get<DynamicMapPatch>(*patch_).apply(badge, v.as_map());
-    case Value::Type::objectValue:
-      if (holds_alternative<op::AnyPatch>(badge)) {
+void DynamicPatch::apply(detail::Badge, Value& value) const {
+  auto applier = folly::overload(
+      [&](const op::BoolPatch& patch) { patch.apply(value.as_bool()); },
+      [&](const op::BytePatch& patch) { patch.apply(value.as_byte()); },
+      [&](const op::I16Patch& patch) { patch.apply(value.as_i16()); },
+      [&](const op::I32Patch& patch) { patch.apply(value.as_i32()); },
+      [&](const op::I64Patch& patch) { patch.apply(value.as_i64()); },
+      [&](const op::FloatPatch& patch) { patch.apply(value.as_float()); },
+      [&](const op::DoublePatch& patch) { patch.apply(value.as_double()); },
+      [&](const op::BinaryPatch& patch) {
+        if (value.is_binary()) {
+          patch.apply(value.as_binary());
+        } else {
+          patch.apply(value.as_string());
+        }
+      },
+      [&](const op::StringPatch& patch) {
+        if (value.is_binary()) {
+          auto s = std::move(value.as_binary()).to<std::string>();
+          patch.apply(s);
+          value.as_binary() = *folly::IOBuf::fromString(std::move(s));
+        } else {
+          patch.apply(value.as_string());
+        }
+      },
+      [&](const DynamicListPatch& patch) {
+        patch.apply(badge, value.as_list());
+      },
+      [&](const DynamicSetPatch& patch) { patch.apply(badge, value.as_set()); },
+      [&](const DynamicMapPatch& patch) { patch.apply(badge, value.as_map()); },
+      [&](const DynamicStructPatch& patch) {
+        patch.apply(badge, value.as_object());
+      },
+      [&](const DynamicUnionPatch& patch) {
+        patch.apply(badge, value.as_object());
+      },
+      [&](const DynamicUnknownPatch& patch) { patch.apply(badge, value); },
+      [&](const op::AnyPatch& patch) {
         using Tag = type::struct_t<type::AnyStruct>;
-        auto any = fromValueStruct<Tag>(v);
-        std::get<op::AnyPatch>(*patch_).apply(any);
-        v = asValueStruct<Tag>(any);
-        return;
-      }
-      if (holds_alternative<DynamicStructPatch>(badge)) {
-        return std::get<DynamicStructPatch>(*patch_).apply(
-            badge, v.as_object());
-      }
-      return std::get<DynamicUnionPatch>(*patch_).apply(badge, v.as_object());
-    case Value::Type::__EMPTY__:
-      folly::throw_exception<std::runtime_error>("value is empty.");
-    default:
-      notImpl();
-  }
+        auto any = fromValueStruct<Tag>(std::move(value));
+        patch.apply(any);
+        value = asValueStruct<Tag>(std::move(any));
+      });
+  visitPatch(badge, applier);
 }
+
 Object DynamicPatch::toObject() && {
   return std::visit([&](auto&& v) { return std::move(v).toObject(); }, *patch_);
 }

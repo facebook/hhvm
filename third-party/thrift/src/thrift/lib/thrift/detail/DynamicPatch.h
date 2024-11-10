@@ -584,7 +584,7 @@ class DynamicPatch {
 
  private:
   template <class Self, class Visitor>
-  void visitPatchImpl(Self&& self, detail::Badge, Visitor&& visitor) {
+  static void visitPatchImpl(Self&& self, detail::Badge, Visitor&& visitor) {
     std::visit(
         std::forward<Visitor>(visitor), *std::forward<Self>(self).patch_);
   }

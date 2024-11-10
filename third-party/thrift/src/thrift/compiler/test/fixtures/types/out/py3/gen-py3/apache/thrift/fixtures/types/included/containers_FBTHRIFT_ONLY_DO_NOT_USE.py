@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -69,5 +69,5 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 
 
 Sequence.register(List__std_unordered_map__Map__i32_string)
-__all__.append('List__std_unordered_map__Map__i32_string')
 
+__all__.append('List__std_unordered_map__Map__i32_string')

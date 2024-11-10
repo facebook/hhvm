@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -27,6 +27,45 @@ def get_types_reflection():
 
 __all__ = []
 
+class Set__i64(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__i64):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__i64._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__i64)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__i64()
+
+
+Set.register(Set__i64)
+__all__.append('Set__i64')
 class List__Vehicle(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -65,5 +104,5 @@ class List__Vehicle(thrift.py3.types.List):
 
 
 Sequence.register(List__Vehicle)
-__all__.append('List__Vehicle')
 
+__all__.append('List__Vehicle')

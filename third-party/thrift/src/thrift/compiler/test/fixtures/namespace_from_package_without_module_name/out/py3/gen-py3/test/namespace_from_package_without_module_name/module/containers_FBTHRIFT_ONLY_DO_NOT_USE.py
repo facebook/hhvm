@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 
 """
     This is a helper module to define py3 container types.

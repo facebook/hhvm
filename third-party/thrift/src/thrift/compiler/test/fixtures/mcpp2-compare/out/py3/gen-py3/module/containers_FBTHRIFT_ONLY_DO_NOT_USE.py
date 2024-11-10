@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -70,8 +70,8 @@ class List__Map__Empty_MyStruct(thrift.py3.types.List):
 
 
 Sequence.register(List__Map__Empty_MyStruct)
-__all__.append('List__Map__Empty_MyStruct')
 
+__all__.append('List__Map__Empty_MyStruct')
 class List__List__Map__Empty_MyStruct(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -114,8 +114,8 @@ class List__List__Map__Empty_MyStruct(thrift.py3.types.List):
 
 
 Sequence.register(List__List__Map__Empty_MyStruct)
-__all__.append('List__List__Map__Empty_MyStruct')
 
+__all__.append('List__List__Map__Empty_MyStruct')
 class List__List__List__Map__Empty_MyStruct(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -158,8 +158,8 @@ class List__List__List__Map__Empty_MyStruct(thrift.py3.types.List):
 
 
 Sequence.register(List__List__List__Map__Empty_MyStruct)
-__all__.append('List__List__List__Map__Empty_MyStruct')
 
+__all__.append('List__List__List__Map__Empty_MyStruct')
 class List__MyEnumA(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -199,8 +199,47 @@ class List__MyEnumA(thrift.py3.types.List):
 
 
 Sequence.register(List__MyEnumA)
-__all__.append('List__MyEnumA')
 
+__all__.append('List__MyEnumA')
+class Set__MyStruct(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__MyStruct):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__MyStruct._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__MyStruct)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, _module_types.MyStruct)
+        ):
+            raise TypeError(f"{item!r} is not of type _module_types.MyStruct")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.MyStruct):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__MyStruct()
+
+
+Set.register(Set__MyStruct)
+__all__.append('Set__MyStruct')
 class List__ComplexUnion(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -239,8 +278,8 @@ class List__ComplexUnion(thrift.py3.types.List):
 
 
 Sequence.register(List__ComplexUnion)
-__all__.append('List__ComplexUnion')
 
+__all__.append('List__ComplexUnion')
 class List__string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -281,8 +320,94 @@ class List__string(thrift.py3.types.List):
 
 
 Sequence.register(List__string)
-__all__.append('List__string')
 
+__all__.append('List__string')
+class Set__List__string(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__List__string):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__List__string._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__List__string)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.Sequence[str]")
+        if not isinstance(item, _module_types.List__string):
+            item = _module_types.List__string(item)
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.List__string):
+            return item
+        try:
+            return _module_types.List__string(item)
+        except:
+            return None
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__List__string()
+
+
+Set.register(Set__List__string)
+__all__.append('Set__List__string')
+class Set__List__List__Map__Empty_MyStruct(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__List__List__Map__Empty_MyStruct):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__List__List__Map__Empty_MyStruct._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__List__List__Map__Empty_MyStruct)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.Sequence[_typing.Sequence[_typing.Mapping[_module_types.Empty, _module_types.MyStruct]]]")
+        if not isinstance(item, _module_types.List__List__Map__Empty_MyStruct):
+            item = _module_types.List__List__Map__Empty_MyStruct(item)
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.List__List__Map__Empty_MyStruct):
+            return item
+        try:
+            return _module_types.List__List__Map__Empty_MyStruct(item)
+        except:
+            return None
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__List__List__Map__Empty_MyStruct()
+
+
+Set.register(Set__List__List__Map__Empty_MyStruct)
+__all__.append('Set__List__List__Map__Empty_MyStruct')
 class List__bool(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -321,8 +446,8 @@ class List__bool(thrift.py3.types.List):
 
 
 Sequence.register(List__bool)
-__all__.append('List__bool')
 
+__all__.append('List__bool')
 class List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -361,8 +486,8 @@ class List__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__i32)
-__all__.append('List__i32')
 
+__all__.append('List__i32')
 class List__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -405,8 +530,8 @@ class List__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__List__i32)
-__all__.append('List__List__i32')
 
+__all__.append('List__List__i32')
 class List__List__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -449,8 +574,8 @@ class List__List__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__List__List__i32)
-__all__.append('List__List__List__i32')
 
+__all__.append('List__List__List__i32')
 class List__List__List__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -493,8 +618,92 @@ class List__List__List__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__List__List__List__i32)
-__all__.append('List__List__List__List__i32')
 
+__all__.append('List__List__List__List__i32')
+class Set__List__i32(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__List__i32):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__List__i32._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__List__i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.Sequence[int]")
+        if not isinstance(item, _module_types.List__i32):
+            item = _module_types.List__i32(item)
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.List__i32):
+            return item
+        try:
+            return _module_types.List__i32(item)
+        except:
+            return None
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__List__i32()
+
+
+Set.register(Set__List__i32)
+__all__.append('Set__List__i32')
+class Set__string(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__string):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
+            check_method = Set__string._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__string)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, str)
+        ):
+            raise TypeError(f"{item!r} is not of type str")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, str):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__string()
+
+
+Set.register(Set__string)
+__all__.append('Set__string')
 class List__Set__string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -537,8 +746,8 @@ class List__Set__string(thrift.py3.types.List):
 
 
 Sequence.register(List__Set__string)
-__all__.append('List__Set__string')
 
+__all__.append('List__Set__string')
 class List__binary(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -579,8 +788,47 @@ class List__binary(thrift.py3.types.List):
 
 
 Sequence.register(List__binary)
-__all__.append('List__binary')
 
+__all__.append('List__binary')
+class Set__i64(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__i64):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__i64._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__i64)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__i64()
+
+
+Set.register(Set__i64)
+__all__.append('Set__i64')
 class List__SimpleUnion(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -619,8 +867,47 @@ class List__SimpleUnion(thrift.py3.types.List):
 
 
 Sequence.register(List__SimpleUnion)
-__all__.append('List__SimpleUnion')
 
+__all__.append('List__SimpleUnion')
+class Set__SimpleUnion(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__SimpleUnion):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__SimpleUnion._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__SimpleUnion)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, _module_types.SimpleUnion)
+        ):
+            raise TypeError(f"{item!r} is not of type _module_types.SimpleUnion")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.SimpleUnion):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__SimpleUnion()
+
+
+Set.register(Set__SimpleUnion)
+__all__.append('Set__SimpleUnion')
 class List__Set__SimpleUnion(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -663,8 +950,47 @@ class List__Set__SimpleUnion(thrift.py3.types.List):
 
 
 Sequence.register(List__Set__SimpleUnion)
-__all__.append('List__Set__SimpleUnion')
 
+__all__.append('List__Set__SimpleUnion')
+class Set__i32(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__i32):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__i32._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__i32()
+
+
+Set.register(Set__i32)
+__all__.append('Set__i32')
 class List__Set__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -707,8 +1033,133 @@ class List__Set__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__Set__i32)
-__all__.append('List__Set__i32')
 
+__all__.append('List__Set__i32')
+class Set__bool(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__bool):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__bool._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__bool)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, bool)
+        ):
+            raise TypeError(f"{item!r} is not of type bool")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, bool):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__bool()
+
+
+Set.register(Set__bool)
+__all__.append('Set__bool')
+class Set__Set__bool(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__Set__bool):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__Set__bool._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__Set__bool)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.AbstractSet[bool]")
+        if not isinstance(item, _module_types.Set__bool):
+            item = _module_types.Set__bool(item)
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.Set__bool):
+            return item
+        try:
+            return _module_types.Set__bool(item)
+        except:
+            return None
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__Set__bool()
+
+
+Set.register(Set__Set__bool)
+__all__.append('Set__Set__bool')
+class Set__Set__Set__bool(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__Set__Set__bool):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__Set__Set__bool._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__Set__Set__bool)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if item is None:
+            raise TypeError("None is not of the type _typing.AbstractSet[_typing.AbstractSet[bool]]")
+        if not isinstance(item, _module_types.Set__Set__bool):
+            item = _module_types.Set__Set__bool(item)
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.Set__Set__bool):
+            return item
+        try:
+            return _module_types.Set__Set__bool(item)
+        except:
+            return None
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__Set__Set__bool()
+
+
+Set.register(Set__Set__Set__bool)
+__all__.append('Set__Set__Set__bool')
 class folly_small_vector_int64_t_8__List__i64(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -747,8 +1198,49 @@ class folly_small_vector_int64_t_8__List__i64(thrift.py3.types.List):
 
 
 Sequence.register(folly_small_vector_int64_t_8__List__i64)
-__all__.append('folly_small_vector_int64_t_8__List__i64')
 
+__all__.append('folly_small_vector_int64_t_8__List__i64')
+class folly_sorted_vector_set_std_string__Set__string(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, folly_sorted_vector_set_std_string__Set__string):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
+            check_method = folly_sorted_vector_set_std_string__Set__string._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, folly_sorted_vector_set_std_string__Set__string)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, str)
+        ):
+            raise TypeError(f"{item!r} is not of type str")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, str):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__folly_sorted_vector_set_std_string__Set__string()
+
+
+Set.register(folly_sorted_vector_set_std_string__Set__string)
+__all__.append('folly_sorted_vector_set_std_string__Set__string')
 class std_list__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -787,8 +1279,8 @@ class std_list__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(std_list__List__i32)
-__all__.append('std_list__List__i32')
 
+__all__.append('std_list__List__i32')
 class std_deque__List__string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -829,8 +1321,49 @@ class std_deque__List__string(thrift.py3.types.List):
 
 
 Sequence.register(std_deque__List__string)
-__all__.append('std_deque__List__string')
 
+__all__.append('std_deque__List__string')
+class folly_sorted_vector_set__Set__string(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, folly_sorted_vector_set__Set__string):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
+            check_method = folly_sorted_vector_set__Set__string._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, folly_sorted_vector_set__Set__string)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, str)
+        ):
+            raise TypeError(f"{item!r} is not of type str")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, str):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__folly_sorted_vector_set__Set__string()
+
+
+Set.register(folly_sorted_vector_set__Set__string)
+__all__.append('folly_sorted_vector_set__Set__string')
 class List__Bar__double(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -869,8 +1402,47 @@ class List__Bar__double(thrift.py3.types.List):
 
 
 Sequence.register(List__Bar__double)
-__all__.append('List__Bar__double')
 
+__all__.append('List__Bar__double')
+class Set__Baz__i32(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__Baz__i32):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__Baz__i32._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__Baz__i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__Baz__i32()
+
+
+Set.register(Set__Baz__i32)
+__all__.append('Set__Baz__i32')
 class List__Map__string_i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -913,8 +1485,8 @@ class List__Map__string_i32(thrift.py3.types.List):
 
 
 Sequence.register(List__Map__string_i32)
-__all__.append('List__Map__string_i32')
 
+__all__.append('List__Map__string_i32')
 class List__Map__i16_string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -957,8 +1529,8 @@ class List__Map__i16_string(thrift.py3.types.List):
 
 
 Sequence.register(List__Map__i16_string)
-__all__.append('List__Map__i16_string')
 
+__all__.append('List__Map__i16_string')
 class List__MyStruct(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -997,5 +1569,5 @@ class List__MyStruct(thrift.py3.types.List):
 
 
 Sequence.register(List__MyStruct)
-__all__.append('List__MyStruct')
 
+__all__.append('List__MyStruct')

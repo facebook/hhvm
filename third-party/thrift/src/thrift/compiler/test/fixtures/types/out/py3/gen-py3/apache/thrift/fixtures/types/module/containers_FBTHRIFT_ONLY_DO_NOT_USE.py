@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -66,8 +66,8 @@ class List__i64(thrift.py3.types.List):
 
 
 Sequence.register(List__i64)
-__all__.append('List__i64')
 
+__all__.append('List__i64')
 class List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -106,8 +106,8 @@ class List__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__i32)
-__all__.append('List__i32')
 
+__all__.append('List__i32')
 class std_list__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -146,8 +146,8 @@ class std_list__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(std_list__List__i32)
-__all__.append('std_list__List__i32')
 
+__all__.append('std_list__List__i32')
 class std_deque__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -186,8 +186,8 @@ class std_deque__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(std_deque__List__i32)
-__all__.append('std_deque__List__i32')
 
+__all__.append('std_deque__List__i32')
 class folly_fbvector__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -226,8 +226,8 @@ class folly_fbvector__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(folly_fbvector__List__i32)
-__all__.append('folly_fbvector__List__i32')
 
+__all__.append('folly_fbvector__List__i32')
 class folly_small_vector__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -266,8 +266,47 @@ class folly_small_vector__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(folly_small_vector__List__i32)
-__all__.append('folly_small_vector__List__i32')
 
+__all__.append('folly_small_vector__List__i32')
+class folly_sorted_vector_set__Set__i32(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, folly_sorted_vector_set__Set__i32):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = folly_sorted_vector_set__Set__i32._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, folly_sorted_vector_set__Set__i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__folly_sorted_vector_set__Set__i32()
+
+
+Set.register(folly_sorted_vector_set__Set__i32)
+__all__.append('folly_sorted_vector_set__Set__i32')
 class std_list_int32_t__List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -306,8 +345,8 @@ class std_list_int32_t__List__i32(thrift.py3.types.List):
 
 
 Sequence.register(std_list_int32_t__List__i32)
-__all__.append('std_list_int32_t__List__i32')
 
+__all__.append('std_list_int32_t__List__i32')
 class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -350,8 +389,8 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 
 
 Sequence.register(List__std_unordered_map__Map__i32_string)
-__all__.append('List__std_unordered_map__Map__i32_string')
 
+__all__.append('List__std_unordered_map__Map__i32_string')
 class _std_list__List__IncompleteListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -390,8 +429,8 @@ class _std_list__List__IncompleteListDep(thrift.py3.types.List):
 
 
 Sequence.register(_std_list__List__IncompleteListDep)
-__all__.append('_std_list__List__IncompleteListDep')
 
+__all__.append('_std_list__List__IncompleteListDep')
 class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -430,8 +469,8 @@ class folly_small_vector__List__CompleteListDep(thrift.py3.types.List):
 
 
 Sequence.register(folly_small_vector__List__CompleteListDep)
-__all__.append('folly_small_vector__List__CompleteListDep')
 
+__all__.append('folly_small_vector__List__CompleteListDep')
 class List__AdaptedListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -470,8 +509,8 @@ class List__AdaptedListDep(thrift.py3.types.List):
 
 
 Sequence.register(List__AdaptedListDep)
-__all__.append('List__AdaptedListDep')
 
+__all__.append('List__AdaptedListDep')
 class List__DependentAdaptedListDep(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -510,5 +549,44 @@ class List__DependentAdaptedListDep(thrift.py3.types.List):
 
 
 Sequence.register(List__DependentAdaptedListDep)
-__all__.append('List__DependentAdaptedListDep')
 
+__all__.append('List__DependentAdaptedListDep')
+class Set__i32(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__i32):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__i32._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__i32()
+
+
+Set.register(Set__i32)
+__all__.append('Set__i32')

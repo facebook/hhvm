@@ -167,6 +167,27 @@ class SetTests(unittest.TestCase):
         self.assertEqual(SetI32(Untruthy(5)), set(range(5)))
         self.assertEqual(SetTypes(second=Untruthy(5)).second, set(range(5)))
 
+    def test_create_set_str_field(self) -> None:
+        s = SetTypes(first={"foo"})
+        self.assertIn("foo", s.first)
+        self.assertEqual(len(s.first), 1)
+
+        self.assertTrue(s.first)
+        self.assertEqual(s.first, {"foo"})
+        self.assertEqual(s.first, SetTypes(first={"foo"}).first)
+
+        s = SetTypes(first={"foo", "bar"})
+        self.assertIn("foo", s.first)
+        self.assertIn("bar", s.first)
+        self.assertEqual(len(s.first), 2)
+        self.assertTrue(s.first)
+        self.assertEqual(s.first, {"foo", "bar"})
+        self.assertEqual(s.first, SetTypes(first={"foo", "bar"}).first)
+
+        self.assertEqual(SetTypes().first, set())
+        self.assertEqual(SetTypes().first or "foo", "foo")
+        self.assertEqual(SetTypes().first or set(), SetTypes().first)
+
     def test_hashability(self) -> None:
         hash(SetI32Lists())
         z = SetSetI32Lists({SetI32Lists({(1, 2, 3)})})
@@ -179,3 +200,14 @@ class SetTests(unittest.TestCase):
         self.assertIsInstance(SetI32Lists(), Container)
         self.assertIsInstance(SetSetI32Lists(), Container)
         self.assertIsInstance(SetI32(), Container)
+
+    # in thrift-python, we return the frozenset directly,
+    # which is is probably not intended.
+    @brokenInAutoMigrate()
+    def test_set_op_return_type(self) -> None:
+        x = SetI32({1, 3, 4, 5})
+        y = SetI32({1, 2, 4, 6})
+        self.assertIs(type(x & y), SetI32)
+        self.assertIs(type(x | y), SetI32)
+        self.assertIs(type(x ^ y), SetI32)
+        self.assertIs(type(x - y), SetI32)

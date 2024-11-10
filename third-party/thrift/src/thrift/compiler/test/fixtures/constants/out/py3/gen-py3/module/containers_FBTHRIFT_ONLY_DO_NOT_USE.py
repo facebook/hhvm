@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -65,8 +65,8 @@ class List__i32(thrift.py3.types.List):
 
 
 Sequence.register(List__i32)
-__all__.append('List__i32')
 
+__all__.append('List__i32')
 class List__Map__string_i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -109,8 +109,8 @@ class List__Map__string_i32(thrift.py3.types.List):
 
 
 Sequence.register(List__Map__string_i32)
-__all__.append('List__Map__string_i32')
 
+__all__.append('List__Map__string_i32')
 class List__Range(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -149,8 +149,8 @@ class List__Range(thrift.py3.types.List):
 
 
 Sequence.register(List__Range)
-__all__.append('List__Range')
 
+__all__.append('List__Range')
 class List__Internship(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -189,8 +189,8 @@ class List__Internship(thrift.py3.types.List):
 
 
 Sequence.register(List__Internship)
-__all__.append('List__Internship')
 
+__all__.append('List__Internship')
 class List__string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -231,5 +231,85 @@ class List__string(thrift.py3.types.List):
 
 
 Sequence.register(List__string)
-__all__.append('List__string')
 
+__all__.append('List__string')
+class Set__i32(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__i32):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            check_method = Set__i32._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__i32)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, int):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__i32()
+
+
+Set.register(Set__i32)
+__all__.append('Set__i32')
+class Set__string(thrift.py3.types.SetNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Set__string):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
+            check_method = Set__string._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, Set__string)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, str)
+        ):
+            raise TypeError(f"{item!r} is not of type str")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, str):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__string()
+
+
+Set.register(Set__string)
+__all__.append('Set__string')

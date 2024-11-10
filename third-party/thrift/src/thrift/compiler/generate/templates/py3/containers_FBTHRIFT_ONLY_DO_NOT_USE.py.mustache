@@ -36,7 +36,7 @@ want to include.
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence
+from collections.abc import Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -132,7 +132,78 @@ class {{type:flat_name}}(thrift.py3.types.List):
 
 
 Sequence.register({{type:flat_name}})
-__all__.append('{{type:flat_name}}')
 
-{{/type:list?}}
+{{/type:list?}}{{#type:set?}}
+class {{type:flat_name}}(thrift.py3.types.SetNew):
+    {{! make the type appear to originate from .types module }}
+    __module__ = _fbthrift__module_name__
+    {{! __slots__ prevents accidental treatment as py-deprecated }}
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_set_private_ctor:
+            {{!
+                For internal use only, when items set has been created internally
+                and each item has been converted from cpp so we can trust the type.
+                Do not use with user-exposed `set` to avoid accidental mutability.
+            }}
+            _py_obj = items
+        elif isinstance(items, {{type:flat_name}}):
+            _py_obj = frozenset(items)
+        elif items is None:
+            _py_obj = frozenset()
+        else:
+            {{#type:containerOfString?}}
+            if isinstance(items, str):
+                raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+            {{/type:containerOfString?}}
+            check_method = {{type:flat_name}}._check_item_type_or_raise
+            _py_obj = frozenset(check_method(item) for item in items)
+
+        super().__init__(_py_obj, {{type:flat_name}})
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+    {{#type:set_elem_type}}
+    {{#type:container?}}
+        if item is None:
+            raise TypeError("None is not of the type {{> types/pep484_type}}")
+        if not isinstance(item, {{> types/python_type}}):
+            item = {{> types/python_type}}(item)
+    {{/type:container?}}
+    {{^type:container?}}
+        if not (
+            isinstance(item, {{> types/python_is_instance_type}}){{#type:enum?}} or
+            isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
+        ):
+            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+    {{/type:container?}}
+    {{/type:set_elem_type}}
+        return item
+
+    {{! __contains__ doesn't raise TypeError}}
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        {{#type:set_elem_type}}
+        if isinstance(item, {{> types/python_type}}):
+            return item
+        {{#type:container?}}
+        try:
+            return {{> types/python_type}}(item)
+        except:
+            return None
+        {{/type:container?}}
+        {{/type:set_elem_type}}
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__{{type:flat_name}}()
+
+
+Set.register({{type:flat_name}})
+{{/type:set?}}{{^type:map?}}
+__all__.append('{{type:flat_name}}')
+{{/type:map?}}
 {{/program:containerTypes}}

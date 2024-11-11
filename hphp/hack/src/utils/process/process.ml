@@ -80,41 +80,62 @@ let make_result
   | Unix.WSTOPPED _ ->
     Error (Abnormal_exit { status; stdout; stderr })
 
-(** [maybe_consume ?timeout_sec fd_ref acc] readd from the FD
+(** [consume ~timeout_sec fd acc] polls [fd] for reading with a timeout
+  and if that succeeds, reads from it into [acc]. If
+  EOF is reached, the FD is closed *)
+let consume ~timeout_sec fd acc :
+    ([ `EOF | `Read | `Timeout ], Poll.Flags.t list) result =
+  let open Result.Monad_infix in
+  Poll.wait_fd_read_non_intr
+    fd
+    ~timeout_ms:(Some (Int.of_float (timeout_sec *. 1000.)))
+  >>= function
+  | `Timeout -> Ok `Timeout
+  | `Ok ->
+    let bytes_read = Unix.read fd buffer 0 chunk_size in
+    if bytes_read = 0 then (
+      (* EOF reached. *)
+      Unix.close fd;
+      Ok `EOF
+    ) else
+      let chunk = String.sub (Bytes.to_string buffer) ~pos:0 ~len:bytes_read in
+      Stack.push chunk acc;
+      Ok `Read
+
+(** [consume_till_timeout_or_eof ~timeout_sec fd acc] keeps consuming
+  from FD until either the timeout occurs or we reach end of file.
+  In the latter case, the FD is closed *)
+let rec consume_till_timeout_or_eof ~timeout_sec fd acc :
+    ([ `EOF | `Timeout ], Poll.Flags.t list) result =
+  if Float.(timeout_sec < 0.0) then
+    Ok `Timeout
+  else
+    let start_t = Unix.time () in
+    let open Result.Monad_infix in
+    consume ~timeout_sec fd acc >>= function
+    | `Timeout -> Ok `Timeout
+    | `EOF -> Ok `EOF
+    | `Read ->
+      let consumed_t = Unix.time () -. start_t in
+      let timeout_sec = timeout_sec -. consumed_t in
+      consume_till_timeout_or_eof ~timeout_sec fd acc
+
+(** [maybe_consume ?timeout_sec fd_ref acc] reads from the FD
   if there is something to be read and accumulates the result in [acc].
-  The [fd_ref] reference is set to None and the FD is closed when EOF is read from it. *)
-let rec maybe_consume
+  The [fd_ref] reference is set to None and the FD is closed when EOF is reached. *)
+let maybe_consume
     ?(timeout_sec : float = 0.0)
     (fd_ref : Unix.file_descr option ref)
     (acc : string Stack_utils.Stack.t) : (unit, Poll.Flags.t list) result =
-  if Float.(timeout_sec < 0.0) then
-    Ok ()
-  else
-    let start_t = Unix.time () in
-    match !fd_ref with
-    | None -> Ok ()
-    | Some fd ->
-      let open Result.Monad_infix in
-      Poll.wait_fd_read_non_intr
-        fd
-        ~timeout_ms:(Some (Int.of_float (timeout_sec *. 1000.)))
-      >>= ( function
-      | `Timeout -> Ok ()
-      | `Ok ->
-        let bytes_read = Unix.read fd buffer 0 chunk_size in
-        if bytes_read = 0 then (
-          (* EOF reached. *)
-          Unix.close fd;
-          fd_ref := None;
-          Ok ()
-        ) else
-          let chunk =
-            String.sub (Bytes.to_string buffer) ~pos:0 ~len:bytes_read
-          in
-          Stack.push chunk acc;
-          let consumed_t = Unix.time () -. start_t in
-          let timeout_sec = timeout_sec -. consumed_t in
-          maybe_consume ~timeout_sec fd_ref acc )
+  match !fd_ref with
+  | None -> Ok ()
+  | Some fd ->
+    let open Result.Monad_infix in
+    consume_till_timeout_or_eof ~timeout_sec fd acc >>| ( function
+    | `Timeout -> ()
+    | `EOF ->
+      fd_ref := None;
+      () )
 
 (** Read data from stdout and stderr until EOF is reached. Waits for
     process to terminate returns the stderr and stdout
@@ -167,25 +188,24 @@ let kill_and_cleanup_fds (pid : int) (fds : Unix.file_descr option ref list) :
   in
   List.iter fds ~f:maybe_close
 
-(**
- * Consumes from stdout and stderr pipes and waitpids on the process.
- * Returns immediately if process has already been waited on (so this
- * function is idempotent).
- *
- * The implementation is a little complicated because:
- *   (1) The pipe can get filled up and the child process will pause
- *       until it's emptied out.
- *   (2) If the child process itself forks a grandchild, the
- *       granchild will unknowingly inherit the pipe's file descriptors;
- *       in this case, the pipe will not provide an EOF as you'd expect.
- *
- * Due to (1), we can't just blockingly waitpid followed by reading the
- * data from the pipe.
- *
- * Due to (2), we can't just read data from the pipes until an EOF is
- * reached and then do a waitpid.
- *
- * We must do some weird alternating between them.
+(** Consumes from stdout and stderr pipes and waitpids on the process.
+  Returns immediately if process has already been waited on (so this
+  function is idempotent).
+
+  The implementation is a little complicated because:
+    (1) The pipe can get filled up and the child process will pause
+        until it's emptied out.
+    (2) If the child process itself forks a grandchild, the
+        granchild will unknowingly inherit the pipe's file descriptors;
+        in this case, the pipe will not provide an EOF as you'd expect.
+
+  Due to (1), we can't just blockingly waitpid followed by reading the
+  data from the pipe.
+
+  Due to (2), we can't just read data from the pipes until an EOF is
+  reached and then do a waitpid.
+
+  We must do some weird alternating between them.
  *)
 let rec read_and_wait_pid ~(retries : int) (process : Process_types.t) :
     Process_types.process_result =

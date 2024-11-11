@@ -1,6 +1,25 @@
 open Asserter
 open Hh_prelude
 
+let print_error err =
+  match err with
+  | Process_types.Timed_out _ ->
+    Printf.eprintf "Process timed out\n";
+    ()
+  | Process_types.Overflow_stdin ->
+    Printf.eprintf "Unexpected error process input too large\n";
+    ()
+  | Process_types.Abnormal_exit { stdout; stderr; _ } ->
+    Printf.eprintf "Process exited abnormally\n";
+    Printf.eprintf "See stdout: %s\n" stdout;
+    Printf.eprintf "See stderr: %s\n" stderr;
+    ()
+  | Process_types.Poll_exn flags ->
+    Printf.eprintf
+      "`poll` syscall returned error flags %s"
+      (Poll.Flags.to_string flags);
+    ()
+
 let test_echo () =
   let process =
     Process.exec (Exec_command.For_use_in_testing_only "echo") ["hello world"]
@@ -9,7 +28,9 @@ let test_echo () =
   | Ok { Process_types.stdout; _ } ->
     let () = String_asserter.assert_equals "hello world\n" stdout "" in
     true
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_echo_in_a_loop () =
   let rec loop acc = function
@@ -38,7 +59,9 @@ let test_process_read_idempotent () =
   | Ok { Process_types.stdout; _ } ->
     String_asserter.assert_equals "hello world\n" stdout "";
     true
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_env_variable () =
   let process =
@@ -58,7 +81,9 @@ let test_env_variable () =
     | n :: _ ->
       let () = String_asserter.assert_equals "NAME=world" n "" in
       true)
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_process_timeout () =
   let process =
@@ -66,7 +91,10 @@ let test_process_timeout () =
   in
   match Process.read_and_wait_pid ~timeout:1 process with
   | Error (Process_types.Timed_out _) -> true
-  | _ -> false
+  | Ok _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_process_finishes_within_timeout () =
   let process =
@@ -74,7 +102,9 @@ let test_process_finishes_within_timeout () =
   in
   match Process.read_and_wait_pid ~timeout:2 process with
   | Ok _ -> true
-  | _ -> false
+  | Error err ->
+    print_error err;
+    false
 
 let test_future () =
   let future =

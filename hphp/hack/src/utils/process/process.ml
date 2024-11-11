@@ -90,16 +90,16 @@ let consume ~timeout_sec fd acc :
     fd
     ~timeout_ms:(Some (Int.of_float (timeout_sec *. 1000.)))
   >>= function
-  | `Timeout -> Ok `Timeout
-  | `Ok ->
-    let bytes_read = Unix.read fd buffer 0 chunk_size in
-    if bytes_read = 0 then (
-      (* EOF reached. *)
+  | Poll.Timeout -> Ok `Timeout
+  | Poll.Event { ready; hup } ->
+    (if ready then
+      let bytes_read = Unix.read fd buffer 0 chunk_size in
+      let chunk = String.sub (Bytes.to_string buffer) ~pos:0 ~len:bytes_read in
+      Stack.push chunk acc);
+    if hup then (
       Unix.close fd;
       Ok `EOF
     ) else
-      let chunk = String.sub (Bytes.to_string buffer) ~pos:0 ~len:bytes_read in
-      Stack.push chunk acc;
       Ok `Read
 
 (** [consume_till_timeout_or_eof ~timeout_sec fd acc] keeps consuming

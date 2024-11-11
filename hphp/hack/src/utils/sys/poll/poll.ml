@@ -18,22 +18,6 @@ module Flags = struct
     | Pollout
     | Pollpri
 
-  let error_flags (flags : Poll.Flags.t) : t list =
-    let res = [] in
-    let res =
-      if Poll.Flags.mem flags Poll.Flags.pollerr then
-        Pollerr :: res
-      else
-        res
-    in
-    let res =
-      if Poll.Flags.mem flags Poll.Flags.pollnval then
-        Pollnval :: res
-      else
-        res
-    in
-    res
-
   let flags (flags : Poll.Flags.t) : t list =
     let res = [] in
     let res =
@@ -74,6 +58,9 @@ module Flags = struct
     in
     res
 
+  let contains_error_flags flags =
+    Poll.Flags.mem flags Poll.Flags.(pollerr + pollnval + pollpri)
+
   let error_to_string = function
     | Pollerr -> "POLLERR"
     | Pollnval -> "POLLNVAL"
@@ -93,22 +80,39 @@ let make_poll_timeout_ms (t : int option) : Poll.poll_timeout =
   | Some t -> Poll.Milliseconds t
   | None -> Poll.Infinite
 
+type outcome =
+  | Timeout
+  | Event of {
+      ready: bool;
+          (** The FD is ready to read or write. This may be false
+              if e.g. the peer has hung up already and there is nothing to read/write *)
+      hup: bool;
+          (** If the FD is a pipe or socket, `hup` indicates whether
+              the peer has hung up, i.e. closed its end of the channel. *)
+    }
+
 let wait_fd
     (flags : Poll.Flags.t) (fd : Unix.file_descr) ~(timeout_ms : int option) :
-    ([ `Ok | `Timeout ], Flags.t list) result =
+    (outcome, Flags.t list) result =
   let timeout = make_poll_timeout_ms timeout_ms in
   let poll = Poll.create () in
   Poll.set_index poll 0 fd flags;
-  let _nready = Poll.poll poll 1 timeout in
-  let rflags = Poll.get_revents poll 0 in
-  match Flags.error_flags rflags with
-  | [] ->
-    Ok
-      (if Poll.Flags.mem rflags flags then
-        `Ok
-      else
-        `Timeout)
-  | _ -> Error (Flags.flags rflags)
+  let nready = Poll.poll poll 1 timeout in
+  if nready = 0 then
+    Ok Timeout
+  else (
+    assert (nready = 1);
+    let rflags = Poll.get_revents poll 0 in
+    if Flags.contains_error_flags rflags then
+      Error (Flags.flags rflags)
+    else
+      Ok
+        (Event
+           {
+             hup = Poll.Flags.mem rflags Poll.Flags.pollhup;
+             ready = Poll.Flags.mem rflags flags;
+           })
+  )
 
 let rec wait_fd_non_intr flags fd ~timeout_ms =
   let start_time = Unix.gettimeofday () in

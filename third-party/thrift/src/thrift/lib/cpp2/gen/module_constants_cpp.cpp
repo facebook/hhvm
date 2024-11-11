@@ -14,29 +14,18 @@
  * limitations under the License.
  */
 
-#pragma once
-
-#include <array>
-#include <cstdint>
-#include <string_view>
-
-#include <folly/CPortability.h>
-#include <folly/Indestructible.h>
-#include <folly/Range.h>
-#include <folly/lang/Exception.h>
-
-FOLLY_GNU_DISABLE_WARNING("-Woverlength-strings")
-FOLLY_GNU_DISABLE_WARNING("-Wtrigraphs")
-
-// Schema constant depends on weak symbols to work around legacy include
-// resolution behavior.
-#define FBTHRIFT_CAN_POPULATE_SCHEMA_LIST FOLLY_HAVE_WEAK_SYMBOLS
+#include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 namespace apache::thrift::detail::mc {
 
-::std::string_view readSchema(::std::string_view (*access)());
+::std::string_view readSchema(::std::string_view (*access)()) {
+  return access == nullptr ? ::std::string_view() : access();
+}
 
 ::std::string_view readSchemaInclude(
-    ::folly::Range<const ::std::string_view*> (*access)(), ::std::size_t index);
+    ::folly::Range<const ::std::string_view*> (*access)(),
+    ::std::size_t index) {
+  return access == nullptr ? ::std::string_view() : access()[index];
+}
 
 } // namespace apache::thrift::detail::mc

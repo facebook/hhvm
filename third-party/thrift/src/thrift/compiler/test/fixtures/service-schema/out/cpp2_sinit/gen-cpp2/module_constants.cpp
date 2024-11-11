@@ -15,11 +15,8 @@
 
 // include.thrift
 namespace cpp2 {namespace include_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_8569dfae849b43aa() { return ""; }
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_8569dfae849b43aa_includes() {
-  static const ::std::array<::std::string_view, 1> empty;
-  return ::folly::range(empty);
- }
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_8569dfae849b43aa();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_8569dfae849b43aa_includes();
 }} // namespace cpp2
 
 #endif
@@ -37,7 +34,7 @@ namespace module_constants {
 #if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
   static const ::std::array<::std::string_view, 2> includes = {
     _fbthrift_schema_b747839c13cb3aa5(),
-    ::cpp2::include_constants::_fbthrift_schema_8569dfae849b43aa(),
+    ::apache::thrift::detail::mc::readSchema(::cpp2::include_constants::_fbthrift_schema_8569dfae849b43aa),
   };
   return ::folly::range(includes);
 #else

@@ -32,11 +32,8 @@
 // {{program:autogen_path}}
 {{ > common/namespace_cpp2_begin}}
 namespace {{program:name}}_constants {
-FOLLY_ATTR_WEAK ::std::string_view {{program:schema_name}}() { return ""; }
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
-  static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> empty;
-  return ::folly::range(empty);
- }
+FOLLY_ATTR_WEAK ::std::string_view {{program:schema_name}}();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes();
 }{{ > common/namespace_cpp2_end}}
 
 {{/program:thrift_includes}}

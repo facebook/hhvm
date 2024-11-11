@@ -519,7 +519,7 @@ class cpp_mstch_program : public mstch_program {
       includes->emplace(
           include,
           fmt::format(
-              "{}::{}_constants::{}()",
+              "::apache::thrift::detail::mc::readSchema({}::{}_constants::{})",
               t_mstch_cpp2_generator::get_cpp2_namespace(include),
               include->name(),
               schematizer::name_schema(sm_, *include)));
@@ -533,7 +533,7 @@ class cpp_mstch_program : public mstch_program {
           includes->emplace(
               recursive_include,
               fmt::format(
-                  "{}::{}_constants::{}_includes()[{}]",
+                  "::apache::thrift::detail::mc::readSchemaInclude({}::{}_constants::{}_includes, {})",
                   t_mstch_cpp2_generator::get_cpp2_namespace(include),
                   include->name(),
                   schematizer::name_schema(sm_, *include),

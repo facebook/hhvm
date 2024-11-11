@@ -4,8 +4,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use hhbc_string_utils::mangle_xhp_id;
 use hhbc_string_utils::strip_global_ns;
-use hhbc_string_utils::unmangle;
 use oxidized_by_ref::ast_defs::Id;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::file_info::Mode;
@@ -295,8 +295,7 @@ pub fn get_classes(parsed_file: &ParsedFile<'_>) -> Vec<ExtDeclClass> {
 }
 
 pub fn get_class(parsed_file: &ParsedFile<'_>, name: &str) -> Option<ExtDeclClass> {
-    let name = unmangle(name.into());
-    let class_opt = find_class(parsed_file, &name);
+    let class_opt = find_class(parsed_file, name);
     Some(get_class_impl(class_opt?))
 }
 
@@ -709,7 +708,7 @@ fn extract_type_name_opt(t: Option<&Ty<'_>>) -> String {
 
 fn extract_type_name(t: &Ty<'_>) -> String {
     #[allow(suspicious_double_ref_op)]
-    let converted_ty: ty::decl::Ty<BReason> = t.into();
+    let converted_ty: ty::decl::Ty<BReason> = (&t).clone().into();
     converted_ty.to_string()
 }
 
@@ -718,7 +717,15 @@ fn extract_type_name_vec(arr: &[&Ty<'_>]) -> Vec<String> {
 }
 
 fn fmt_type(original_name: &str) -> String {
-    strip_global_ns(original_name).into()
+    let unqualified = strip_global_ns(original_name);
+    match unqualified.rsplit('\\').next() {
+        Some(id) if original_name.starts_with('\\') && id.starts_with(':') => {
+            // only mangle already qualified xhp ids - avoid mangling string literals
+            // containing an xhp name, for example an attribute param ':foo:bar'
+            mangle_xhp_id(id.to_string())
+        }
+        _ => String::from(unqualified),
+    }
 }
 
 // ========== Simple ==========

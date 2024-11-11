@@ -86,7 +86,7 @@ let make_result
 let consume ~timeout_sec fd acc :
     ([ `EOF | `Read | `Timeout ], Poll.Flags.t list) result =
   let open Result.Monad_infix in
-  Poll.wait_fd_read_non_intr
+  Poll.wait_fd_read_non_interrupted
     fd
     ~timeout_ms:(Some (Int.of_float (timeout_sec *. 1000.)))
   >>= function

@@ -7,7 +7,7 @@
  *)
 
 open Hh_prelude
-module Poll = Iomux.Poll
+module IPoll = Iomux.Poll
 
 module Flags = struct
   type t =
@@ -18,40 +18,40 @@ module Flags = struct
     | Pollout
     | Pollpri
 
-  let flags (flags : Poll.Flags.t) : t list =
+  let flags (flags : IPoll.Flags.t) : t list =
     let res = [] in
     let res =
-      if Poll.Flags.mem flags Poll.Flags.pollerr then
+      if IPoll.Flags.mem flags IPoll.Flags.pollerr then
         Pollerr :: res
       else
         res
     in
     let res =
-      if Poll.Flags.mem flags Poll.Flags.pollnval then
+      if IPoll.Flags.mem flags IPoll.Flags.pollnval then
         Pollnval :: res
       else
         res
     in
     let res =
-      if Poll.Flags.mem flags Poll.Flags.pollhup then
+      if IPoll.Flags.mem flags IPoll.Flags.pollhup then
         Pollhup :: res
       else
         res
     in
     let res =
-      if Poll.Flags.mem flags Poll.Flags.pollin then
+      if IPoll.Flags.mem flags IPoll.Flags.pollin then
         Pollin :: res
       else
         res
     in
     let res =
-      if Poll.Flags.mem flags Poll.Flags.pollout then
+      if IPoll.Flags.mem flags IPoll.Flags.pollout then
         Pollout :: res
       else
         res
     in
     let res =
-      if Poll.Flags.mem flags Poll.Flags.pollpri then
+      if IPoll.Flags.mem flags IPoll.Flags.pollpri then
         Pollpri :: res
       else
         res
@@ -59,7 +59,7 @@ module Flags = struct
     res
 
   let contains_error_flags flags =
-    Poll.Flags.mem flags Poll.Flags.(pollerr + pollnval + pollpri)
+    IPoll.Flags.mem flags IPoll.Flags.(pollerr + pollnval + pollpri)
 
   let error_to_string = function
     | Pollerr -> "POLLERR"
@@ -75,10 +75,10 @@ end
 
 exception Poll_exception of Flags.t list
 
-let make_poll_timeout_ms (t : int option) : Poll.poll_timeout =
+let make_poll_timeout_ms (t : int option) : IPoll.poll_timeout =
   match t with
-  | Some t -> Poll.Milliseconds t
-  | None -> Poll.Infinite
+  | Some t -> IPoll.Milliseconds t
+  | None -> IPoll.Infinite
 
 type outcome =
   | Timeout
@@ -92,29 +92,27 @@ type outcome =
     }
 
 let wait_fd
-    (flags : Poll.Flags.t) (fd : Unix.file_descr) ~(timeout_ms : int option) :
+    (flags : IPoll.Flags.t) (fd : Unix.file_descr) ~(timeout_ms : int option) :
     (outcome, Flags.t list) result =
   let timeout = make_poll_timeout_ms timeout_ms in
-  let poll = Poll.create ~maxfds:1 () in
-  Poll.set_index poll 0 fd flags;
-  let nready = Poll.poll poll 1 timeout in
+  let poll = IPoll.create ~maxfds:1 () in
+  IPoll.set_index poll 0 fd flags;
+  let nready = IPoll.poll poll 1 timeout in
   if nready = 0 then
     Ok Timeout
-  else (
-    assert (nready = 1);
-    let rflags = Poll.get_revents poll 0 in
+  else
+    let rflags = IPoll.get_revents poll 0 in
     if Flags.contains_error_flags rflags then
       Error (Flags.flags rflags)
     else
       Ok
         (Event
            {
-             hup = Poll.Flags.mem rflags Poll.Flags.pollhup;
-             ready = Poll.Flags.mem rflags flags;
+             hup = IPoll.Flags.mem rflags IPoll.Flags.pollhup;
+             ready = IPoll.Flags.mem rflags flags;
            })
-  )
 
-let rec f_non_intr f x y ~timeout_ms =
+let rec f_non_interrupted f x y ~timeout_ms =
   let start_time = Unix.gettimeofday () in
   try f x y ~timeout_ms with
   | Unix.Unix_error (Unix.EINTR, _, _) ->
@@ -125,31 +123,31 @@ let rec f_non_intr f x y ~timeout_ms =
           in
           timeout_ms - elapsed_ms)
     in
-    f_non_intr f x y ~timeout_ms
+    f_non_interrupted f x y ~timeout_ms
 
-let wait_fd_non_intr = f_non_intr wait_fd
+let wait_fd_non_intr = f_non_interrupted wait_fd
 
-let wait_fd_read = wait_fd Poll.Flags.pollin
+let wait_fd_read = wait_fd IPoll.Flags.pollin
 
-let wait_fd_read_non_intr = wait_fd_non_intr Poll.Flags.pollin
+let wait_fd_read_non_interrupted = wait_fd_non_intr IPoll.Flags.pollin
 
-let wait_fd_write = wait_fd Poll.Flags.pollout
+let wait_fd_write = wait_fd IPoll.Flags.pollout
 
-let wait_fd_write_non_intr = wait_fd_non_intr Poll.Flags.pollout
+let wait_fd_write_non_interrupted = wait_fd_non_intr IPoll.Flags.pollout
 
 let ready_fds flags fds ~timeout_ms =
   let timeout = make_poll_timeout_ms timeout_ms in
   let nfds = List.length fds in
-  let poll = Poll.create ~maxfds:nfds () in
-  List.iteri fds ~f:(fun idx fd -> Poll.set_index poll idx fd flags);
-  let nready = Poll.poll poll nfds timeout in
+  let poll = IPoll.create ~maxfds:nfds () in
+  List.iteri fds ~f:(fun idx fd -> IPoll.set_index poll idx fd flags);
+  let nready = IPoll.poll poll nfds timeout in
   let ready_fds = ref [] in
-  Poll.iter_ready poll nready (fun _idx fd _revents ->
+  IPoll.iter_ready poll nready (fun _idx fd _revents ->
       ready_fds := fd :: !ready_fds);
   !ready_fds
 
-let ready_fds_non_intr = f_non_intr ready_fds
+let ready_fds_non_intr = f_non_interrupted ready_fds
 
-let ready_fds_read_non_intr = ready_fds_non_intr Poll.Flags.pollin
+let ready_fds_read_non_interrupted = ready_fds_non_intr IPoll.Flags.pollin
 
-let ready_fds_write_non_intr = ready_fds_non_intr Poll.Flags.pollout
+let ready_fds_write_non_interrupted = ready_fds_non_intr IPoll.Flags.pollout

@@ -42,7 +42,7 @@ val wait_fd_read :
   Ignores EINTR, i.e. retries with an adjusted timeout upon EINTR.
   We implement timers using sigalarm which means this call can be
   interrupted. *)
-val wait_fd_read_non_intr :
+val wait_fd_read_non_interrupted :
   Unix.file_descr -> timeout_ms:int option -> (outcome, Flags.t list) result
 
 (** Wait for a file descriptor to be ready for writing.
@@ -56,11 +56,11 @@ val wait_fd_write :
   Ignores EINTR, i.e. retries with an adjusted timeout upon EINTR.
   We implement timers using sigalarm which means this call can be
   interrupted. *)
-val wait_fd_write_non_intr :
+val wait_fd_write_non_interrupted :
   Unix.file_descr -> timeout_ms:int option -> (outcome, Flags.t list) result
 
-val ready_fds_read_non_intr :
+val ready_fds_read_non_interrupted :
   Unix.file_descr list -> timeout_ms:int option -> Unix.file_descr list
 
-val ready_fds_write_non_intr :
+val ready_fds_write_non_interrupted :
   Unix.file_descr list -> timeout_ms:int option -> Unix.file_descr list

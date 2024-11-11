@@ -268,7 +268,7 @@ class folly_small_vector__List__i32(thrift.py3.types.List):
 Sequence.register(folly_small_vector__List__i32)
 
 __all__.append('folly_small_vector__List__i32')
-class folly_sorted_vector_set__Set__i32(thrift.py3.types.SetNew):
+class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -551,7 +551,7 @@ class List__DependentAdaptedListDep(thrift.py3.types.List):
 Sequence.register(List__DependentAdaptedListDep)
 
 __all__.append('List__DependentAdaptedListDep')
-class Set__i32(thrift.py3.types.SetNew):
+class Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

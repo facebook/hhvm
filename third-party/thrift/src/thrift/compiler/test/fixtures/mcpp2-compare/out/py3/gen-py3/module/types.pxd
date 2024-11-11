@@ -189,15 +189,15 @@ cdef class AnException(thrift.py3.exceptions.GeneratedError):
     cdef inline object MyCustomField_impl(self)
     cdef inline object MyOptCustomField_impl(self)
     cdef object __fbthrift_cached_exception_list
-    cdef Set__i64 __fbthrift_cached_exception_set
+    cdef object __fbthrift_cached_exception_set
     cdef Map__string_i32 __fbthrift_cached_exception_map
     cdef Map__string_i32 __fbthrift_cached_req_exception_map
     cdef object __fbthrift_cached_enum_field
     cdef object __fbthrift_cached_enum_container
     cdef MyStruct __fbthrift_cached_a_struct
-    cdef Set__MyStruct __fbthrift_cached_a_set_struct
+    cdef object __fbthrift_cached_a_set_struct
     cdef object __fbthrift_cached_a_union_list
-    cdef Set__SimpleUnion __fbthrift_cached_union_typedef
+    cdef object __fbthrift_cached_union_typedef
     cdef object __fbthrift_cached_a_union_typedef_list
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_MyCustomField
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_MyOptCustomField
@@ -271,15 +271,15 @@ cdef class containerStruct(thrift.py3.types.Struct):
     cdef Map__string_bool __fbthrift_cached_fieldB
     cdef Map__string_bool __fbthrift_cached_req_fieldB
     cdef Map__string_bool __fbthrift_cached_opt_fieldB
-    cdef Set__i32 __fbthrift_cached_fieldC
-    cdef Set__i32 __fbthrift_cached_req_fieldC
-    cdef Set__i32 __fbthrift_cached_opt_fieldC
+    cdef object __fbthrift_cached_fieldC
+    cdef object __fbthrift_cached_req_fieldC
+    cdef object __fbthrift_cached_opt_fieldC
     cdef object __fbthrift_cached_fieldF
     cdef Map__string_Map__string_Map__string_i32 __fbthrift_cached_fieldG
     cdef object __fbthrift_cached_fieldH
     cdef Map__string_List__i32 __fbthrift_cached_fieldJ
     cdef object __fbthrift_cached_fieldK
-    cdef Set__Set__Set__bool __fbthrift_cached_fieldL
+    cdef object __fbthrift_cached_fieldL
     cdef Map__Set__List__i32_Map__List__Set__string_string __fbthrift_cached_fieldM
     cdef object __fbthrift_cached_fieldO
     cdef object __fbthrift_cached_fieldP
@@ -293,12 +293,12 @@ cdef class containerStruct(thrift.py3.types.Struct):
     cdef MyStruct __fbthrift_cached_fieldV
     cdef MyStruct __fbthrift_cached_req_fieldV
     cdef MyStruct __fbthrift_cached_opt_fieldV
-    cdef Set__MyStruct __fbthrift_cached_fieldW
+    cdef object __fbthrift_cached_fieldW
     cdef ComplexUnion __fbthrift_cached_fieldX
     cdef ComplexUnion __fbthrift_cached_req_fieldX
     cdef ComplexUnion __fbthrift_cached_opt_fieldX
     cdef object __fbthrift_cached_fieldY
-    cdef Set__SimpleUnion __fbthrift_cached_fieldZ
+    cdef object __fbthrift_cached_fieldZ
     cdef object __fbthrift_cached_fieldAA
     cdef Map__Bar__double_Baz__i32 __fbthrift_cached_fieldAB
     cdef object __fbthrift_cached_fieldAC
@@ -378,7 +378,7 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_req_container_with_ref
     cdef containerStruct __fbthrift_cached_opt_cpp_unique_ref
     cdef containerStruct __fbthrift_cached_opt_cpp2_unique_ref
-    cdef Set__i32 __fbthrift_cached_opt_container_with_ref
+    cdef object __fbthrift_cached_opt_container_with_ref
     cdef containerStruct __fbthrift_cached_ref_type_unique
     cdef containerStruct __fbthrift_cached_ref_type_shared
     cdef Map__i32_List__string __fbthrift_cached_ref_type_const
@@ -387,23 +387,23 @@ cdef class AnnotatedStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_req_ref_type_unique
     cdef containerStruct __fbthrift_cached_opt_ref_type_const
     cdef containerStruct __fbthrift_cached_opt_ref_type_unique
-    cdef Set__i32 __fbthrift_cached_opt_ref_type_shared
+    cdef object __fbthrift_cached_opt_ref_type_shared
     cdef object __fbthrift_cached_list_type
-    cdef folly_sorted_vector_set_std_string__Set__string __fbthrift_cached_set_type
+    cdef object __fbthrift_cached_set_type
     cdef FakeMap__Map__i64_double __fbthrift_cached_map_type
     cdef std_unordered_map_std_string_containerStruct__Map__string_containerStruct __fbthrift_cached_map_struct_type
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_type
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_ptr
     cdef object __fbthrift_cached_list_i32_template
     cdef object __fbthrift_cached_list_string_template
-    cdef folly_sorted_vector_set__Set__string __fbthrift_cached_set_template
+    cdef object __fbthrift_cached_set_template
     cdef folly_sorted_vector_map__Map__i64_string __fbthrift_cached_map_template
     cdef object __fbthrift_cached_typedef_list_template
     cdef object __fbthrift_cached_typedef_deque_template
-    cdef folly_sorted_vector_set__Set__string __fbthrift_cached_typedef_set_template
+    cdef object __fbthrift_cached_typedef_set_template
     cdef folly_sorted_vector_map__Map__i64_string __fbthrift_cached_typedef_map_template
     cdef object __fbthrift_cached_indirection_b
-    cdef Set__Baz__i32 __fbthrift_cached_indirection_c
+    cdef object __fbthrift_cached_indirection_c
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_type_val
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_iobuf_ptr_val
     cdef containerStruct __fbthrift_cached_struct_struct
@@ -492,12 +492,8 @@ cdef object List__List__List__Map__Empty_MyStruct__from_cpp(const vector[vector[
 cdef vector[_module_cbindings.cMyEnumA] List__MyEnumA__make_instance(object items) except *
 cdef object List__MyEnumA__from_cpp(const vector[_module_cbindings.cMyEnumA]&) except *
 
-cdef class Set__MyStruct(thrift.py3.types.Set):
-    cdef shared_ptr[cset[_module_cbindings.cMyStruct]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[_module_cbindings.cMyStruct]])
-
-cdef shared_ptr[cset[_module_cbindings.cMyStruct]] Set__MyStruct__make_instance(object items) except *
+cdef cset[_module_cbindings.cMyStruct] Set__MyStruct__make_instance(object items) except *
+cdef object Set__MyStruct__from_cpp(const cset[_module_cbindings.cMyStruct]&) except *
 
 cdef vector[_module_cbindings.cComplexUnion] List__ComplexUnion__make_instance(object items) except *
 cdef object List__ComplexUnion__from_cpp(const vector[_module_cbindings.cComplexUnion]&) except *
@@ -505,19 +501,11 @@ cdef object List__ComplexUnion__from_cpp(const vector[_module_cbindings.cComplex
 cdef vector[string] List__string__make_instance(object items) except *
 cdef object List__string__from_cpp(const vector[string]&) except *
 
-cdef class Set__List__string(thrift.py3.types.Set):
-    cdef shared_ptr[cset[vector[string]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[vector[string]]])
+cdef cset[vector[string]] Set__List__string__make_instance(object items) except *
+cdef object Set__List__string__from_cpp(const cset[vector[string]]&) except *
 
-cdef shared_ptr[cset[vector[string]]] Set__List__string__make_instance(object items) except *
-
-cdef class Set__List__List__Map__Empty_MyStruct(thrift.py3.types.Set):
-    cdef shared_ptr[cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]])
-
-cdef shared_ptr[cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]] Set__List__List__Map__Empty_MyStruct__make_instance(object items) except *
+cdef cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]] Set__List__List__Map__Empty_MyStruct__make_instance(object items) except *
+cdef object Set__List__List__Map__Empty_MyStruct__from_cpp(const cset[vector[vector[cmap[_module_cbindings.cEmpty,_module_cbindings.cMyStruct]]]]&) except *
 
 cdef class Map__i32_List__string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,vector[string]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -542,19 +530,11 @@ cdef object List__List__List__i32__from_cpp(const vector[vector[vector[cint32_t]
 cdef vector[vector[vector[vector[cint32_t]]]] List__List__List__List__i32__make_instance(object items) except *
 cdef object List__List__List__List__i32__from_cpp(const vector[vector[vector[vector[cint32_t]]]]&) except *
 
-cdef class Set__List__i32(thrift.py3.types.Set):
-    cdef shared_ptr[cset[vector[cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[vector[cint32_t]]])
+cdef cset[vector[cint32_t]] Set__List__i32__make_instance(object items) except *
+cdef object Set__List__i32__from_cpp(const cset[vector[cint32_t]]&) except *
 
-cdef shared_ptr[cset[vector[cint32_t]]] Set__List__i32__make_instance(object items) except *
-
-cdef class Set__string(thrift.py3.types.Set):
-    cdef shared_ptr[cset[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[string]])
-
-cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *
+cdef cset[string] Set__string__make_instance(object items) except *
+cdef object Set__string__from_cpp(const cset[string]&) except *
 
 cdef vector[cset[string]] List__Set__string__make_instance(object items) except *
 cdef object List__Set__string__from_cpp(const vector[cset[string]]&) except *
@@ -586,12 +566,8 @@ cdef class Map__MyEnumA_string(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[_module_cbindings.cMyEnumA,string]] Map__MyEnumA_string__make_instance(object items) except *
 
-cdef class Set__i64(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint64_t]])
-
-cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *
+cdef cset[cint64_t] Set__i64__make_instance(object items) except *
+cdef object Set__i64__from_cpp(const cset[cint64_t]&) except *
 
 cdef class Map__string_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -604,12 +580,8 @@ cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object ite
 cdef vector[_module_cbindings.cSimpleUnion] List__SimpleUnion__make_instance(object items) except *
 cdef object List__SimpleUnion__from_cpp(const vector[_module_cbindings.cSimpleUnion]&) except *
 
-cdef class Set__SimpleUnion(thrift.py3.types.Set):
-    cdef shared_ptr[cset[_module_cbindings.cSimpleUnion]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[_module_cbindings.cSimpleUnion]])
-
-cdef shared_ptr[cset[_module_cbindings.cSimpleUnion]] Set__SimpleUnion__make_instance(object items) except *
+cdef cset[_module_cbindings.cSimpleUnion] Set__SimpleUnion__make_instance(object items) except *
+cdef object Set__SimpleUnion__from_cpp(const cset[_module_cbindings.cSimpleUnion]&) except *
 
 cdef vector[cset[_module_cbindings.cSimpleUnion]] List__Set__SimpleUnion__make_instance(object items) except *
 cdef object List__Set__SimpleUnion__from_cpp(const vector[cset[_module_cbindings.cSimpleUnion]]&) except *
@@ -622,12 +594,8 @@ cdef class Map__string_bool(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[string,cbool]] Map__string_bool__make_instance(object items) except *
 
-cdef class Set__i32(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]])
-
-cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *
+cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
 
 cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -656,26 +624,14 @@ cdef class Map__string_List__i32(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[string,vector[cint32_t]]] Map__string_List__i32__make_instance(object items) except *
 
-cdef class Set__bool(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cbool]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cbool]])
+cdef cset[cbool] Set__bool__make_instance(object items) except *
+cdef object Set__bool__from_cpp(const cset[cbool]&) except *
 
-cdef shared_ptr[cset[cbool]] Set__bool__make_instance(object items) except *
+cdef cset[cset[cbool]] Set__Set__bool__make_instance(object items) except *
+cdef object Set__Set__bool__from_cpp(const cset[cset[cbool]]&) except *
 
-cdef class Set__Set__bool(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cset[cbool]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cset[cbool]]])
-
-cdef shared_ptr[cset[cset[cbool]]] Set__Set__bool__make_instance(object items) except *
-
-cdef class Set__Set__Set__bool(thrift.py3.types.Set):
-    cdef shared_ptr[cset[cset[cset[cbool]]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cset[cset[cbool]]]])
-
-cdef shared_ptr[cset[cset[cset[cbool]]]] Set__Set__Set__bool__make_instance(object items) except *
+cdef cset[cset[cset[cbool]]] Set__Set__Set__bool__make_instance(object items) except *
+cdef object Set__Set__Set__bool__from_cpp(const cset[cset[cset[cbool]]]&) except *
 
 cdef class Map__Bar__double_Baz__i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[_module_cbindings.Bar,_module_cbindings.Baz]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -688,12 +644,8 @@ cdef shared_ptr[cmap[_module_cbindings.Bar,_module_cbindings.Baz]] Map__Bar__dou
 cdef _module_cbindings.folly_small_vector_int64_t_8 folly_small_vector_int64_t_8__List__i64__make_instance(object items) except *
 cdef object folly_small_vector_int64_t_8__List__i64__from_cpp(const _module_cbindings.folly_small_vector_int64_t_8&) except *
 
-cdef class folly_sorted_vector_set_std_string__Set__string(thrift.py3.types.Set):
-    cdef shared_ptr[_module_cbindings.folly_sorted_vector_set_std_string] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.folly_sorted_vector_set_std_string])
-
-cdef shared_ptr[_module_cbindings.folly_sorted_vector_set_std_string] folly_sorted_vector_set_std_string__Set__string__make_instance(object items) except *
+cdef _module_cbindings.folly_sorted_vector_set_std_string folly_sorted_vector_set_std_string__Set__string__make_instance(object items) except *
+cdef object folly_sorted_vector_set_std_string__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set_std_string&) except *
 
 cdef class FakeMap__Map__i64_double(thrift.py3.types.Map):
     cdef shared_ptr[_module_cbindings.FakeMap] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -717,12 +669,8 @@ cdef object std_list__List__i32__from_cpp(const _module_cbindings.std_list[cint3
 cdef _module_cbindings.std_deque[string] std_deque__List__string__make_instance(object items) except *
 cdef object std_deque__List__string__from_cpp(const _module_cbindings.std_deque[string]&) except *
 
-cdef class folly_sorted_vector_set__Set__string(thrift.py3.types.Set):
-    cdef shared_ptr[_module_cbindings.folly_sorted_vector_set[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.folly_sorted_vector_set[string]])
-
-cdef shared_ptr[_module_cbindings.folly_sorted_vector_set[string]] folly_sorted_vector_set__Set__string__make_instance(object items) except *
+cdef _module_cbindings.folly_sorted_vector_set[string] folly_sorted_vector_set__Set__string__make_instance(object items) except *
+cdef object folly_sorted_vector_set__Set__string__from_cpp(const _module_cbindings.folly_sorted_vector_set[string]&) except *
 
 cdef class folly_sorted_vector_map__Map__i64_string(thrift.py3.types.Map):
     cdef shared_ptr[_module_cbindings.folly_sorted_vector_map[cint64_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -735,12 +683,8 @@ cdef shared_ptr[_module_cbindings.folly_sorted_vector_map[cint64_t,string]] foll
 cdef vector[_module_cbindings.Bar] List__Bar__double__make_instance(object items) except *
 cdef object List__Bar__double__from_cpp(const vector[_module_cbindings.Bar]&) except *
 
-cdef class Set__Baz__i32(thrift.py3.types.Set):
-    cdef shared_ptr[cset[_module_cbindings.Baz]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[_module_cbindings.Baz]])
-
-cdef shared_ptr[cset[_module_cbindings.Baz]] Set__Baz__i32__make_instance(object items) except *
+cdef cset[_module_cbindings.Baz] Set__Baz__i32__make_instance(object items) except *
+cdef object Set__Baz__i32__from_cpp(const cset[_module_cbindings.Baz]&) except *
 
 cdef class Map__string_folly_IOBuf__binary(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,_fbthrift_iobuf.cIOBuf]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

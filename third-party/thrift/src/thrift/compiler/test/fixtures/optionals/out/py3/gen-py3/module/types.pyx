@@ -61,6 +61,7 @@ from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 )
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    Set__i64,
     List__Vehicle,
 )
 
@@ -454,7 +455,7 @@ cdef class Person(thrift.py3.types.Struct):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).friends_ref().has_value():
             return None
         if self.__fbthrift_cached_friends is None:
-            self.__fbthrift_cached_friends = Set__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).friends_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_friends = Set__i64__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).friends_ref().ref_unchecked())
         return self.__fbthrift_cached_friends
 
     @property
@@ -581,85 +582,15 @@ cdef class Person(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Person, self)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Set__i64(thrift.py3.types.Set):
-    def __init__(self, items=None):
-        if isinstance(items, Set__i64):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__i64> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__i64__make_instance(items)
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint64_t]] c_items):
-        __fbthrift_inst = <Set__i64>Set__i64.__new__(Set__i64)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Set__i64 self):
-        cdef shared_ptr[cset[cint64_t]] cpp_obj = make_shared[cset[cint64_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Set__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    def __contains__(self, item):
-        if not self or item is None:
-            return False
-        if not isinstance(item, int):
-            return False
-        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
-
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __set_iter[cset[cint64_t]] itr = __set_iter[cset[cint64_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cint64_t citem = 0
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield citem
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __richcmp__(self, other, int op):
-        if isinstance(other, Set__i64):
-            # C level comparisons
-            return __setcmp(
-                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                (<Set__i64> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                op,
-            )
-        return self._fbthrift_py_richcmp(other, op)
-
-    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
-        if not isinstance(other, Set__i64):
-            other = Set__i64(other)
-        cdef shared_ptr[cset[cint64_t]] result
-        return Set__i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[cint64_t]](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<Set__i64>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Set__i64()
-
-
-Set.register(Set__i64)
-
-cdef shared_ptr[cset[cint64_t]] Set__i64__make_instance(object items) except *:
-    cdef shared_ptr[cset[cint64_t]] c_inst = make_shared[cset[cint64_t]]()
+cdef cset[cint64_t] Set__i64__make_instance(object items) except *:
+    cdef cset[cint64_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint64_t> item
-            deref(c_inst).insert(item)
+            c_inst.insert(item)
     return cmove(c_inst)
 
 cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:

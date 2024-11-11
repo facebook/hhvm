@@ -439,7 +439,7 @@ cdef class __CustomFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cCustomFields](deref(self._struct_cpp_obj), 6)
             return
-        deref(self._struct_cpp_obj).set_field_ref().assign(deref(_module_types._MyType__Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).set_field_ref().assign(_module_types._MyType__Set__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field map_field
@@ -546,7 +546,7 @@ cdef class __CustomTypedefFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cCustomTypedefFields](deref(self._struct_cpp_obj), 6)
             return
-        deref(self._struct_cpp_obj).set_field_ref().assign(deref(_module_types._MyType__Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).set_field_ref().assign(_module_types._MyType__Set__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field map_field
@@ -653,7 +653,7 @@ cdef class __AdaptedTypedefFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAdaptedTypedefFields](deref(self._struct_cpp_obj), 6)
             return
-        deref(self._struct_cpp_obj).set_field_ref().assign(deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).set_field_ref().assign(_module_types.Set__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field map_field

@@ -65,7 +65,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object no_hack_codegen_field_impl(self)
     cdef MyDataItem __fbthrift_cached_MyDataField
     cdef object __fbthrift_cached_myEnum
-    cdef Set__float __fbthrift_cached_floatSet
+    cdef object __fbthrift_cached_floatSet
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyStruct])
@@ -79,7 +79,7 @@ cdef class Containers(thrift.py3.types.Struct):
     cdef inline object StringSet_impl(self)
     cdef inline object StringToI64Map_impl(self)
     cdef object __fbthrift_cached_I32List
-    cdef Set__string __fbthrift_cached_StringSet
+    cdef object __fbthrift_cached_StringSet
     cdef Map__string_i64 __fbthrift_cached_StringToI64Map
 
     @staticmethod
@@ -172,22 +172,14 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed])
 
 
-cdef class Set__float(thrift.py3.types.Set):
-    cdef shared_ptr[cset[float]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[float]])
-
-cdef shared_ptr[cset[float]] Set__float__make_instance(object items) except *
+cdef cset[float] Set__float__make_instance(object items) except *
+cdef object Set__float__from_cpp(const cset[float]&) except *
 
 cdef vector[cint32_t] List__i32__make_instance(object items) except *
 cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
 
-cdef class Set__string(thrift.py3.types.Set):
-    cdef shared_ptr[cset[string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[string]])
-
-cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *
+cdef cset[string] Set__string__make_instance(object items) except *
+cdef object Set__string__from_cpp(const cset[string]&) except *
 
 cdef class Map__string_i64(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

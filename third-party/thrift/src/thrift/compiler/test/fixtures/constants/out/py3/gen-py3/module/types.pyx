@@ -70,6 +70,8 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Range,
     List__Internship,
     List__string,
+    Set__i32,
+    Set__string,
 )
 
 
@@ -1568,85 +1570,15 @@ cdef object List__string__from_cpp(const vector[string]& c_vec) except *:
         py_list.append(__init_unicode_from_cpp(c_vec[idx]))
     return List__string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Set__i32(thrift.py3.types.Set):
-    def __init__(self, items=None):
-        if isinstance(items, Set__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__i32__make_instance(items)
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]] c_items):
-        __fbthrift_inst = <Set__i32>Set__i32.__new__(Set__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Set__i32 self):
-        cdef shared_ptr[cset[cint32_t]] cpp_obj = make_shared[cset[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    def __contains__(self, item):
-        if not self or item is None:
-            return False
-        if not isinstance(item, int):
-            return False
-        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
-
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __set_iter[cset[cint32_t]] itr = __set_iter[cset[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cint32_t citem = 0
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield citem
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __richcmp__(self, other, int op):
-        if isinstance(other, Set__i32):
-            # C level comparisons
-            return __setcmp(
-                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                (<Set__i32> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                op,
-            )
-        return self._fbthrift_py_richcmp(other, op)
-
-    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
-        if not isinstance(other, Set__i32):
-            other = Set__i32(other)
-        cdef shared_ptr[cset[cint32_t]] result
-        return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[cint32_t]](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<Set__i32>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Set__i32()
-
-
-Set.register(Set__i32)
-
-cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
-    cdef shared_ptr[cset[cint32_t]] c_inst = make_shared[cset[cint32_t]]()
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
+    cdef cset[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).insert(item)
+            c_inst.insert(item)
     return cmove(c_inst)
 
 cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
@@ -1658,86 +1590,16 @@ cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
         py_items.append(citem)
     return Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Set__string(thrift.py3.types.Set):
-    def __init__(self, items=None):
-        if isinstance(items, Set__string):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__string__make_instance(items)
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[string]] c_items):
-        __fbthrift_inst = <Set__string>Set__string.__new__(Set__string)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Set__string self):
-        cdef shared_ptr[cset[string]] cpp_obj = make_shared[cset[string]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    def __contains__(self, item):
-        if not self or item is None:
-            return False
-        if not isinstance(item, str):
-            return False
-        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item.encode('UTF-8')))
-
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __set_iter[cset[string]] itr = __set_iter[cset[string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield bytes(citem).decode('UTF-8')
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __richcmp__(self, other, int op):
-        if isinstance(other, Set__string):
-            # C level comparisons
-            return __setcmp(
-                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                (<Set__string> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                op,
-            )
-        return self._fbthrift_py_richcmp(other, op)
-
-    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
-        if not isinstance(other, Set__string):
-            other = Set__string(other)
-        cdef shared_ptr[cset[string]] result
-        return Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[string]](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<Set__string>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Set__string()
-
-
-Set.register(Set__string)
-
-cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *:
-    cdef shared_ptr[cset[string]] c_inst = make_shared[cset[string]]()
+cdef cset[string] Set__string__make_instance(object items) except *:
+    cdef cset[string] c_inst
     if items is not None:
         if isinstance(items, str):
             raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
         for item in items:
             if not isinstance(item, str):
                 raise TypeError(f"{item!r} is not of type str")
-            deref(c_inst).insert(item.encode('UTF-8'))
+            c_inst.insert(item.encode('UTF-8'))
     return cmove(c_inst)
 
 cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
@@ -2096,8 +1958,8 @@ zero_dot_zero = 0
 empty_string = _module_cbindings.cempty_string().decode('UTF-8')
 empty_int_list = List__i32__from_cpp(_module_cbindings.cempty_int_list())
 empty_string_list = List__string__from_cpp(_module_cbindings.cempty_string_list())
-empty_int_set = Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cempty_int_set()))
-empty_string_set = Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cempty_string_set()))
+empty_int_set = Set__i32__from_cpp(_module_cbindings.cempty_int_set())
+empty_string_set = Set__string__from_cpp(_module_cbindings.cempty_string_set())
 empty_int_int_map = Map__i32_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cempty_int_int_map()))
 empty_int_string_map = Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cempty_int_string_map()))
 empty_string_int_map = Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cempty_string_int_map()))

@@ -231,7 +231,7 @@ cdef class __Person_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cPerson](deref(self._struct_cpp_obj), 5)
             return
-        deref(self._struct_cpp_obj).friends_ref().assign(deref(_module_types.Set__i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).friends_ref().assign(_module_types.Set__i64__make_instance(_fbthrift_value))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field bestFriend

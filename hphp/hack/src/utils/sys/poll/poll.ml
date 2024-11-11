@@ -95,7 +95,7 @@ let wait_fd
     (flags : Poll.Flags.t) (fd : Unix.file_descr) ~(timeout_ms : int option) :
     (outcome, Flags.t list) result =
   let timeout = make_poll_timeout_ms timeout_ms in
-  let poll = Poll.create () in
+  let poll = Poll.create ~maxfds:1 () in
   Poll.set_index poll 0 fd flags;
   let nready = Poll.poll poll 1 timeout in
   if nready = 0 then

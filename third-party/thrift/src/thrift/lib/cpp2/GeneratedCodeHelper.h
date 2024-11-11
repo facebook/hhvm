@@ -1251,8 +1251,7 @@ void populateMethodMetadataMap(
   for (const auto& [methodName, processFuncs] :
        CurrentProcessor::getOwnProcessMap()) {
     const auto& requestInfo = requestInfoMap.at(methodName);
-    std::optional<std::string_view> interactionName =
-        requestInfo.interactionName;
+    std::optional<std::string> interactionName = requestInfo.interactionName;
     if (!interactionName) {
       // If this is a normal RPC that creates an interaction
       interactionName = requestInfo.createdInteraction;

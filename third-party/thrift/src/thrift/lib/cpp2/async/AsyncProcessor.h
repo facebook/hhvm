@@ -92,10 +92,10 @@ struct ServiceRequestInfo {
   // requirement to pass this as a single string. T112104402
   const char* functionName_deprecated; // Qualified function name (includes
                                        // service name)
-  std::optional<std::string_view>
+  std::optional<std::string>
       interactionName; // Interaction name if part of an interaction
   concurrency::PRIORITY priority; // Method priority set in the IDL
-  std::optional<std::string_view>
+  std::optional<std::string>
       createdInteraction; // The name of the interaction created by the RPC
 };
 
@@ -187,7 +187,7 @@ class AsyncProcessorFactory {
         InteractionType interaction,
         RpcKind kind,
         concurrency::PRIORITY prio,
-        const std::optional<std::string_view> interactName,
+        const std::optional<std::string>& interactName,
         bool createsInteract)
         : executorType(executor),
           interactionType(interaction),
@@ -228,7 +228,7 @@ class AsyncProcessorFactory {
     const InteractionType interactionType{InteractionType::UNKNOWN};
     const std::optional<RpcKind> rpcKind{};
     const std::optional<concurrency::PRIORITY> priority{};
-    const std::optional<std::string_view> interactionName;
+    const std::optional<std::string> interactionName{};
     const bool createsInteraction{false};
 
    private:
@@ -1126,7 +1126,7 @@ class ServerInterface : public virtual AsyncProcessorFactory,
         InteractionType interaction,
         RpcKind rpcKind,
         concurrency::PRIORITY priority,
-        const std::optional<std::string_view> interactionName,
+        const std::optional<std::string>& interactionName,
         const bool createsInteraction)
         : MethodMetadata(
               executor,

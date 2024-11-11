@@ -345,7 +345,7 @@ std::unique_ptr<Tile> GeneratedAsyncProcessorBase::createInteractionImpl(
 }
 
 namespace {
-constexpr std::string_view kNONE = "NONE";
+const std::string kNONE = "NONE";
 /**
  * Call this version to only invoke handlers that explicitly okays
  * callbacks from non-per-request contexts.
@@ -581,7 +581,7 @@ bool GeneratedAsyncProcessorBase::setUpRequestProcessing(ServerRequest& req) {
     if (auto interactionCreate = ctx->getInteractionCreate()) {
       if (!interactionName ||
           *interactionCreate->interactionName_ref() !=
-              interactionName.value()) {
+              std::string_view(interactionName.value())) {
         interactionMetadataValid = false;
       } else if (!createInteraction(req)) {
         // Duplicate id is a contract violation so close the connection.

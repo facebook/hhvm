@@ -83,7 +83,7 @@ func newUpgradeToRocketServer(proc Processor, listener net.Listener, opts *serve
 
 func (s *rocketServer) ServeContext(ctx context.Context) error {
 	transporter := func(context.Context) (transport.ServerTransport, error) {
-		return newRocketSimpleServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log), nil
+		return newRocketServerTransport(s.listener, s.connContext, s.proc, s.transportID, s.log), nil
 	}
 	r := rsocket.Receive().
 		Scheduler(s.requestScheduler(), s.responeScheduler()).

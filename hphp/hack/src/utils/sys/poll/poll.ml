@@ -114,9 +114,9 @@ let wait_fd
            })
   )
 
-let rec wait_fd_non_intr flags fd ~timeout_ms =
+let rec f_non_intr f x y ~timeout_ms =
   let start_time = Unix.gettimeofday () in
-  try wait_fd flags fd ~timeout_ms with
+  try f x y ~timeout_ms with
   | Unix.Unix_error (Unix.EINTR, _, _) ->
     let timeout_ms =
       Option.map timeout_ms ~f:(fun timeout_ms ->
@@ -125,7 +125,9 @@ let rec wait_fd_non_intr flags fd ~timeout_ms =
           in
           timeout_ms - elapsed_ms)
     in
-    wait_fd_non_intr flags fd ~timeout_ms
+    f_non_intr f x y ~timeout_ms
+
+let wait_fd_non_intr = f_non_intr wait_fd
 
 let wait_fd_read = wait_fd Poll.Flags.pollin
 
@@ -134,3 +136,20 @@ let wait_fd_read_non_intr = wait_fd_non_intr Poll.Flags.pollin
 let wait_fd_write = wait_fd Poll.Flags.pollout
 
 let wait_fd_write_non_intr = wait_fd_non_intr Poll.Flags.pollout
+
+let ready_fds flags fds ~timeout_ms =
+  let timeout = make_poll_timeout_ms timeout_ms in
+  let nfds = List.length fds in
+  let poll = Poll.create ~maxfds:nfds () in
+  List.iteri fds ~f:(fun idx fd -> Poll.set_index poll idx fd flags);
+  let nready = Poll.poll poll nfds timeout in
+  let ready_fds = ref [] in
+  Poll.iter_ready poll nready (fun _idx fd _revents ->
+      ready_fds := fd :: !ready_fds);
+  !ready_fds
+
+let ready_fds_non_intr = f_non_intr ready_fds
+
+let ready_fds_read_non_intr = ready_fds_non_intr Poll.Flags.pollin
+
+let ready_fds_write_non_intr = ready_fds_non_intr Poll.Flags.pollout

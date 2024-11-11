@@ -825,8 +825,8 @@ let rec event_loop
     ~(hhdg_path : string) : _ distc_outcome =
   let handler_fds = List.map handlers ~f:fst in
   (* hh_distc sends a byte each time new events are ready. *)
-  let (ready_fds, _, _) =
-    Sys_utils.select_non_intr (handler_fds @ [fd_distc]) [] [] (-1.)
+  let ready_fds =
+    Poll.ready_fds_read_non_intr (fd_distc :: handler_fds) ~timeout_ms:None
   in
   if List.mem ~equal:Poly.( = ) ready_fds fd_distc then
     match Sys_utils.read_non_intr fd_distc 1 with

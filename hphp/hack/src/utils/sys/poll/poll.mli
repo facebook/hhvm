@@ -58,3 +58,9 @@ val wait_fd_write :
   interrupted. *)
 val wait_fd_write_non_intr :
   Unix.file_descr -> timeout_ms:int option -> (outcome, Flags.t list) result
+
+val ready_fds_read_non_intr :
+  Unix.file_descr list -> timeout_ms:int option -> Unix.file_descr list
+
+val ready_fds_write_non_intr :
+  Unix.file_descr list -> timeout_ms:int option -> Unix.file_descr list

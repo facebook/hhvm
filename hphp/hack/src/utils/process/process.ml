@@ -94,7 +94,7 @@ let rec maybe_consume
         match
           Poll.wait_fd_read_non_intr
             fd
-            ~timeout_ms:(Some (Int.of_float max_time * 1000))
+            ~timeout_ms:(Some (Int.of_float (max_time *. 1000.)))
         with
         | Ok `Timeout -> ()
         | Ok `Ok ->

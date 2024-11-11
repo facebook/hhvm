@@ -113,25 +113,13 @@ func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) Clie
 	return func(opts *clientOptions) {
 		opts.tlsConfig = clonedTLSConfig
 		opts.dialerFn = func() (net.Conn, error) {
-			return dialWithTLS(addr, dialTimeout, opts.tlsConfig)
+			conn, err := net.DialTimeout("tcp", addr, dialTimeout)
+			if err != nil {
+				return nil, err
+			}
+			return tls.Client(conn, opts.tlsConfig), nil
 		}
 	}
-}
-
-// Deprecated: use WithTLS() instead.
-func DialTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) (net.Conn, error) {
-	clonedTLSConfig := tlsConfig.Clone()
-	AddALPNForTransport(clonedTLSConfig)
-	return dialWithTLS(addr, dialTimeout, clonedTLSConfig)
-}
-
-// This is an internal helper to dial with TLS.
-func dialWithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) (net.Conn, error) {
-	conn, err := net.DialTimeout("tcp", addr, dialTimeout)
-	if err != nil {
-		return nil, err
-	}
-	return tls.Client(conn, tlsConfig), nil
 }
 
 func newDefaultPersistentHeaders() map[string]string {

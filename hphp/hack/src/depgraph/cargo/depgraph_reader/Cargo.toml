@@ -12,7 +12,7 @@ path = "../../depgraph_reader/reader.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bytemuck = { version = "1.17", features = ["derive", "min_const_generics"] }
+bytemuck = { version = "1.19", features = ["derive", "min_const_generics", "nightly_portable_simd", "nightly_stdsimd"] }
 dep = { version = "0.0.0", path = "../dep" }
 memmap2 = "0.5.10"
 rayon = "1.9.0"

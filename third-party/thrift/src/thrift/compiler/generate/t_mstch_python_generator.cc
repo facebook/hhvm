@@ -37,6 +37,7 @@
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
 #include <thrift/compiler/sema/ast_validator.h>
+#include <thrift/compiler/sema/explicit_include_validator.h>
 
 namespace apache::thrift::compiler {
 
@@ -1059,6 +1060,11 @@ class t_mstch_python_generator : public t_mstch_generator {
         enum_member_union_field_names_validator::validate_enum);
     validator.add_struct_visitor(
         enum_member_union_field_names_validator::validate_structured);
+    add_explicit_include_validators(
+        validator,
+        diagnostic_level::error,
+        /* skip_annotations*/ true,
+        /* skip_service_includes*/ true);
   }
 
   enum class IsTypesFile { Yes, No };

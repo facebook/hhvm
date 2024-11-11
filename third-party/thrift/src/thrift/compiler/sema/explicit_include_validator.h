@@ -49,6 +49,8 @@ void validate_explicit_include(
 
 void add_explicit_include_validators(
     ast_validator& validator,
-    diagnostic_level level = diagnostic_level::warning);
+    diagnostic_level level = diagnostic_level::warning,
+    bool skip_annotations = false,
+    bool skip_service_extends = false);
 
 } // namespace apache::thrift::compiler

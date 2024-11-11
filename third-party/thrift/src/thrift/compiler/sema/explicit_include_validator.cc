@@ -108,7 +108,10 @@ void validate_explicit_include(
 }
 
 void add_explicit_include_validators(
-    ast_validator& validator, diagnostic_level level) {
+    ast_validator& validator,
+    diagnostic_level level,
+    bool skip_annotations,
+    bool skip_service_extends) {
   /*
    * This function adds visitors that collectively apply the validation logic to
    * each type reference in the IDL file.
@@ -163,12 +166,14 @@ void add_explicit_include_validators(
   });
 
   // Services: base service
-  validator.add_service_visitor(
-      [level](sema_context& ctx, const t_service& svc) {
-        if (const t_service* extends = svc.extends()) {
-          visit_type(ctx, svc, *extends, level);
-        }
-      });
+  if (!skip_service_extends) {
+    validator.add_service_visitor(
+        [level](sema_context& ctx, const t_service& svc) {
+          if (const t_service* extends = svc.extends()) {
+            visit_type(ctx, svc, *extends, level);
+          }
+        });
+  }
 
   // Constants: value type
   validator.add_const_visitor([level](sema_context& ctx, const t_const& c) {
@@ -176,6 +181,9 @@ void add_explicit_include_validators(
   });
 
   // All definitions: annotations
+  if (skip_annotations) {
+    return;
+  }
   validator.add_named_visitor([level](sema_context& ctx, const t_named& n) {
     // Temporary workaround for patch generator
     if (n.generated() ||

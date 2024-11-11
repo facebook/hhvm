@@ -10,11 +10,15 @@ open Hh_prelude
 module Poll = Iomux.Poll
 
 module Flags = struct
-  type error =
+  type t =
     | Pollerr
     | Pollnval
+    | Pollhup
+    | Pollin
+    | Pollout
+    | Pollpri
 
-  let error_flags (flags : Poll.Flags.t) : error list =
+  let error_flags (flags : Poll.Flags.t) : t list =
     let res = [] in
     let res =
       if Poll.Flags.mem flags Poll.Flags.pollerr then
@@ -30,15 +34,59 @@ module Flags = struct
     in
     res
 
+  let flags (flags : Poll.Flags.t) : t list =
+    let res = [] in
+    let res =
+      if Poll.Flags.mem flags Poll.Flags.pollerr then
+        Pollerr :: res
+      else
+        res
+    in
+    let res =
+      if Poll.Flags.mem flags Poll.Flags.pollnval then
+        Pollnval :: res
+      else
+        res
+    in
+    let res =
+      if Poll.Flags.mem flags Poll.Flags.pollhup then
+        Pollhup :: res
+      else
+        res
+    in
+    let res =
+      if Poll.Flags.mem flags Poll.Flags.pollin then
+        Pollin :: res
+      else
+        res
+    in
+    let res =
+      if Poll.Flags.mem flags Poll.Flags.pollout then
+        Pollout :: res
+      else
+        res
+    in
+    let res =
+      if Poll.Flags.mem flags Poll.Flags.pollpri then
+        Pollpri :: res
+      else
+        res
+    in
+    res
+
   let error_to_string = function
     | Pollerr -> "POLLERR"
     | Pollnval -> "POLLNVAL"
+    | Pollhup -> "POLLHUP"
+    | Pollin -> "POLLIN"
+    | Pollout -> "POLLOUT"
+    | Pollpri -> "POLLPRI"
 
   let to_string flags =
     List.map flags ~f:error_to_string |> String.concat ~sep:", "
 end
 
-exception Poll_exception of Flags.error list
+exception Poll_exception of Flags.t list
 
 let make_poll_timeout_ms (t : int option) : Poll.poll_timeout =
   match t with
@@ -47,7 +95,7 @@ let make_poll_timeout_ms (t : int option) : Poll.poll_timeout =
 
 let wait_fd
     (flags : Poll.Flags.t) (fd : Unix.file_descr) ~(timeout_ms : int option) :
-    ([ `Ok | `Timeout ], Flags.error list) result =
+    ([ `Ok | `Timeout ], Flags.t list) result =
   let timeout = make_poll_timeout_ms timeout_ms in
   let poll = Poll.create () in
   Poll.set_index poll 0 fd flags;
@@ -60,7 +108,7 @@ let wait_fd
         `Ok
       else
         `Timeout)
-  | errors -> Error errors
+  | _ -> Error (Flags.flags rflags)
 
 let rec wait_fd_non_intr flags fd ~timeout_ms =
   let start_time = Unix.gettimeofday () in

@@ -7,21 +7,25 @@
  *)
 
 module Flags : sig
-  type error =
+  type t =
     | Pollerr
     | Pollnval
+    | Pollhup
+    | Pollin
+    | Pollout
+    | Pollpri
 
-  val to_string : error list -> string
+  val to_string : t list -> string
 end
 
-exception Poll_exception of Flags.error list
+exception Poll_exception of Flags.t list
 
 (** Wait for a file descriptor to be ready for reading.
       Returns true if ready, false if it timed out. *)
 val wait_fd_read :
   Unix.file_descr ->
   timeout_ms:int option ->
-  ([ `Ok | `Timeout ], Flags.error list) result
+  ([ `Ok | `Timeout ], Flags.t list) result
 
 (** Wait for a file descriptor to be ready for reading.
       Returns true if ready, false if it timed out.
@@ -32,14 +36,14 @@ val wait_fd_read :
 val wait_fd_read_non_intr :
   Unix.file_descr ->
   timeout_ms:int option ->
-  ([ `Ok | `Timeout ], Flags.error list) result
+  ([ `Ok | `Timeout ], Flags.t list) result
 
 (** Wait for a file descriptor to be ready for writing.
       Returns true if ready, false if it timed out. *)
 val wait_fd_write :
   Unix.file_descr ->
   timeout_ms:int option ->
-  ([ `Ok | `Timeout ], Flags.error list) result
+  ([ `Ok | `Timeout ], Flags.t list) result
 
 (** Wait for a file descriptor to be ready for writing.
       Returns true if ready, false if it timed out.
@@ -50,4 +54,4 @@ val wait_fd_write :
 val wait_fd_write_non_intr :
   Unix.file_descr ->
   timeout_ms:int option ->
-  ([ `Ok | `Timeout ], Flags.error list) result
+  ([ `Ok | `Timeout ], Flags.t list) result

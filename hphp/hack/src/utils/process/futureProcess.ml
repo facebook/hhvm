@@ -20,7 +20,7 @@ type error_mode =
     }
   | Process_aborted
   | Transformer_raised of Exception.t
-  | Poll_exn of Poll.Flags.error list
+  | Poll_exn of Poll.Flags.t list
 
 type process_error = Process_types.invocation_info * error_mode
 

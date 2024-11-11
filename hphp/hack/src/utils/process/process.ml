@@ -85,7 +85,7 @@ let make_result
 let rec maybe_consume
     ?(max_time : float = 0.0)
     (fd_ref : Unix.file_descr option ref)
-    (acc : string Stack_utils.Stack.t) : (unit, Poll.Flags.error list) result =
+    (acc : string Stack_utils.Stack.t) : (unit, Poll.Flags.t list) result =
   if Float.(max_time < 0.0) then
     Ok ()
   else

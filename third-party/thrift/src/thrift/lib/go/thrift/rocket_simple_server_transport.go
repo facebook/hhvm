@@ -29,7 +29,7 @@ import (
 	"github.com/rsocket/rsocket-go/core/transport"
 )
 
-type rocketServerTransport struct {
+type rocketSimpleServerTransport struct {
 	listener    net.Listener
 	processor   Processor
 	acceptor    transport.ServerTransportAcceptor
@@ -38,8 +38,8 @@ type rocketServerTransport struct {
 	connContext ConnContextFunc
 }
 
-func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...interface{})) transport.ServerTransport {
-	return &rocketServerTransport{
+func newRocketSimpleServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...interface{})) transport.ServerTransport {
+	return &rocketSimpleServerTransport{
 		listener:    listener,
 		processor:   processor,
 		log:         log,
@@ -49,13 +49,13 @@ func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc
 }
 
 // Accept register incoming connection handler.
-func (r *rocketServerTransport) Accept(acceptor transport.ServerTransportAcceptor) {
+func (r *rocketSimpleServerTransport) Accept(acceptor transport.ServerTransportAcceptor) {
 	r.acceptor = acceptor
 }
 
 // Listen listens on the network address addr and handles requests on incoming connections.
 // You can specify notifier chan, it'll be sent true/false when server listening success/failed.
-func (r *rocketServerTransport) Listen(ctx context.Context, notifier chan<- bool) error {
+func (r *rocketSimpleServerTransport) Listen(ctx context.Context, notifier chan<- bool) error {
 	notifier <- true
 	go func() {
 		<-ctx.Done()
@@ -69,7 +69,7 @@ func (r *rocketServerTransport) Listen(ctx context.Context, notifier chan<- bool
 }
 
 // acceptLoop takes a context that will be decorated with ConnInfo and passed down to new clients.
-func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
+func (r *rocketSimpleServerTransport) acceptLoop(ctx context.Context) error {
 	for {
 		conn, err := r.listener.Accept()
 		if err != nil {
@@ -111,11 +111,11 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 	}
 }
 
-func (r *rocketServerTransport) Close() (err error) {
+func (r *rocketSimpleServerTransport) Close() (err error) {
 	return r.listener.Close()
 }
 
-func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Conn) {
+func (r *rocketSimpleServerTransport) processRequests(ctx context.Context, conn net.Conn) {
 	connTransport := r.transportID
 
 	// Use Rocket protocol right away if the server is running
@@ -162,11 +162,11 @@ func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Co
 	}
 }
 
-func (r *rocketServerTransport) processRocketRequests(ctx context.Context, conn net.Conn) {
+func (r *rocketSimpleServerTransport) processRocketRequests(ctx context.Context, conn net.Conn) {
 	r.acceptor(ctx, transport.NewTransport(transport.NewTCPConn(conn)), func(*transport.Transport) {})
 }
 
-func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protocol types.Protocol, processor Processor) error {
+func (r *rocketSimpleServerTransport) processHeaderRequest(ctx context.Context, protocol types.Protocol, processor Processor) error {
 	exc := process(ctx, processor, protocol)
 	if isEOF(exc) {
 		return exc
@@ -178,7 +178,7 @@ func (r *rocketServerTransport) processHeaderRequest(ctx context.Context, protoc
 	return nil
 }
 
-func (r *rocketServerTransport) processHeaderRequests(ctx context.Context, protocol types.Protocol, processor Processor) error {
+func (r *rocketSimpleServerTransport) processHeaderRequests(ctx context.Context, protocol types.Protocol, processor Processor) error {
 	defer func() {
 		if err := recover(); err != nil {
 			r.log("panic in processor: %v: %s", err, debug.Stack())

@@ -241,6 +241,10 @@ class CarbonRouterInstance
     cpuStatsWorker_.reset();
   }
 
+  Proxy<RouterInfo>& getProxyFromHash(size_t hash) {
+    return *proxies_[hash % proxies_.size()];
+  }
+
   CarbonRouterInstance(const CarbonRouterInstance&) = delete;
   CarbonRouterInstance& operator=(const CarbonRouterInstance&) = delete;
   CarbonRouterInstance(CarbonRouterInstance&&) noexcept = delete;

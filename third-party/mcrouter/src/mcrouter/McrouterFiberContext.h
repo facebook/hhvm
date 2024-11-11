@@ -82,6 +82,7 @@ class fiber_local {
     std::bitset<NUM_FLAGS> featureFlags;
     int32_t selectedIndex{-1};
     uint32_t failoverCount{0};
+    bool jumpThreads{false};
     std::optional<uint64_t> bucketId;
     std::optional<std::string> distributionTargetRegion;
     RequestClass requestClass;
@@ -214,6 +215,22 @@ class fiber_local {
    */
   static uint32_t getFailoverCount() {
     return folly::fibers::local<McrouterFiberContext>().failoverCount;
+  }
+
+  /**
+   * Set when failing over may require the request to be moved to a different
+   * event base.
+   */
+  static void enableJumpThreads() {
+    folly::fibers::local<McrouterFiberContext>().jumpThreads = true;
+  }
+
+  /**
+   * Check whether the request should be moved to a different eventbase as a
+   * result of failing over.
+   */
+  static bool shouldJumpThreads() {
+    return folly::fibers::local<McrouterFiberContext>().jumpThreads;
   }
 
   /**

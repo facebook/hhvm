@@ -392,6 +392,8 @@ CarbonRouterClient<RouterInfo>::makeProxyRequestContext(
       });
 
   proxyRequestContext->setRequester(self_);
+  proxyRequestContext->setThreadAffinity(
+      mode_ == ThreadMode::AffinitizedRemoteThread);
   return proxyRequestContext;
 }
 

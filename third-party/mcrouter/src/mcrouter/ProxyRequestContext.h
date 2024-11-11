@@ -173,12 +173,21 @@ class ProxyRequestContext {
     reqContextScopeGuard_.reset();
   }
 
+  void setThreadAffinity(bool enabled) {
+    threadAffinity_ = enabled;
+  }
+
+  bool isThreadAffinityEnabled() const {
+    return threadAffinity_;
+  }
+
  protected:
   // Keep on first cacheline. Used by ProxyRequestContextTyped
   const void* ptr_{nullptr};
   carbon::Result finalResult_{carbon::Result::UNKNOWN};
   int32_t poolStatIndex_{-1};
   bool replied_{false};
+  bool threadAffinity_{false};
 
   ProxyRequestContext(
       ProxyBase& pr,

@@ -231,6 +231,16 @@ class FailoverRoute {
       }
     }
 
+    // Check whether we may be on the wrong thread for the failover host.
+    //
+    // Thread affinity is based on the destination host discovered by
+    // traverse(). TKO states are taken into account by traverse(), so TKO
+    // errors should not affect thread affinity.
+    //
+    if (*reply.result_ref() != carbon::Result::TKO) {
+      fiber_local<RouterInfo>::enableJumpThreads();
+    }
+
     return false;
   }
 

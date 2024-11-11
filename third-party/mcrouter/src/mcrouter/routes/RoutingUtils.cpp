@@ -27,15 +27,22 @@ uint32_t getAdditionalFanout(
 
   checkLogic(jAdditionalFanout->isInt(), "additional_fanout is not an integer");
   uint32_t additionalFanout = jAdditionalFanout->getInt();
-
-  checkLogic(
-      static_cast<uint64_t>(additionalFanout + 1) *
-              static_cast<uint64_t>(opts.num_proxies) <=
-          kMaxTotalFanout,
-      "(additional_fanout={} + 1) * num_proxies={} must be <= {}",
-      additionalFanout,
-      opts.num_proxies,
-      kMaxTotalFanout);
+  if (!opts.thread_affinity) {
+    checkLogic(
+        static_cast<uint64_t>(additionalFanout + 1) *
+                static_cast<uint64_t>(opts.num_proxies) <=
+            kMaxTotalFanout,
+        "(additional_fanout={} + 1) * num_proxies={} must be <= {}",
+        additionalFanout,
+        opts.num_proxies,
+        kMaxTotalFanout);
+  } else {
+    checkLogic(
+        static_cast<uint64_t>(additionalFanout + 1) <= kMaxTotalFanout,
+        "(additional_fanout={} + 1) must be <= {}",
+        additionalFanout,
+        kMaxTotalFanout);
+  }
 
   return additionalFanout;
 }

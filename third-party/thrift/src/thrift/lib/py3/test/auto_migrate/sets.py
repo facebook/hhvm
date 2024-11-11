@@ -211,29 +211,3 @@ class SetTests(unittest.TestCase):
         self.assertIs(type(x | y), SetI32)
         self.assertIs(type(x ^ y), SetI32)
         self.assertIs(type(x - y), SetI32)
-
-    @brokenInAutoMigrate()
-    def test_set_op_type_error_thrift_set(self) -> None:
-        x = SetI32({1, 3, 4, 5})
-        y = SetI32Lists({(1, 2), (4, 6)})
-        with self.assertRaises(TypeError):
-            x & y
-        with self.assertRaises(TypeError):
-            x | y
-        with self.assertRaises(TypeError):
-            x ^ y
-        with self.assertRaises(TypeError):
-            x - y
-
-    @brokenInAutoMigrate()
-    def test_set_op_type_error_raw_set(self) -> None:
-        x = SetI32({1, 3, 4, 5})
-        y = {"lol", "woops"}
-        with self.assertRaises(TypeError):
-            x & y
-        with self.assertRaises(TypeError):
-            x | y
-        with self.assertRaises(TypeError):
-            x ^ y
-        with self.assertRaises(TypeError):
-            x - y

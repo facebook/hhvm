@@ -157,10 +157,10 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
     cdef inline object set_ref_shared_impl(self)
     cdef inline object list_ref_shared_const_impl(self)
     cdef object __fbthrift_cached_list_ref
-    cdef object __fbthrift_cached_set_ref
+    cdef Set__i32 __fbthrift_cached_set_ref
     cdef Map__i32_i32 __fbthrift_cached_map_ref
     cdef object __fbthrift_cached_list_ref_unique
-    cdef object __fbthrift_cached_set_ref_shared
+    cdef Set__i32 __fbthrift_cached_set_ref_shared
     cdef object __fbthrift_cached_list_ref_shared_const
 
     @staticmethod
@@ -348,8 +348,12 @@ cdef object List__RecursiveStruct__from_cpp(const vector[_module_cbindings.cRecu
 cdef vector[cint32_t] List__i32__make_instance(object items) except *
 cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
 
-cdef cset[cint32_t] Set__i32__make_instance(object items) except *
-cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
+cdef class Set__i32(thrift.py3.types.Set):
+    cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]])
+
+cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *
 
 cdef class Map__i32_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE

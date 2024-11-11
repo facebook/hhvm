@@ -134,7 +134,7 @@ class {{type:flat_name}}(thrift.py3.types.List):
 Sequence.register({{type:flat_name}})
 
 {{/type:list?}}{{#type:set?}}
-class {{type:flat_name}}(thrift.py3.types.Set):
+class {{type:flat_name}}(thrift.py3.types.SetNew):
     {{! make the type appear to originate from .types module }}
     __module__ = _fbthrift__module_name__
     {{! __slots__ prevents accidental treatment as py-deprecated }}

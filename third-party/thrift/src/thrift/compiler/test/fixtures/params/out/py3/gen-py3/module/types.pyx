@@ -59,7 +59,6 @@ import importlib
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i32,
-    Set__i32,
     List__Map__i32_i32,
     List__Set__i32,
     List__Map__i32_Map__i32_Set__i32,
@@ -190,15 +189,85 @@ cdef shared_ptr[cmap[cint32_t,vector[cint32_t]]] Map__i32_List__i32__make_instan
     return cmove(c_inst)
 
 
+@__cython.auto_pickle(False)
+@__cython.final
+cdef class Set__i32(thrift.py3.types.Set):
+    def __init__(self, items=None):
+        if isinstance(items, Set__i32):
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+        else:
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__i32__make_instance(items)
 
-cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
-    cdef cset[cint32_t] c_inst
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]] c_items):
+        __fbthrift_inst = <Set__i32>Set__i32.__new__(Set__i32)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
+        return __fbthrift_inst
+
+    def __copy__(Set__i32 self):
+        cdef shared_ptr[cset[cint32_t]] cpp_obj = make_shared[cset[cint32_t]](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __len__(self):
+        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
+
+    def __contains__(self, item):
+        if not self or item is None:
+            return False
+        if not isinstance(item, int):
+            return False
+        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
+
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __set_iter[cset[cint32_t]] itr = __set_iter[cset[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        cdef cint32_t citem = 0
+        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
+            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
+            yield citem
+
+    def __hash__(self):
+        return super().__hash__()
+
+    def __richcmp__(self, other, int op):
+        if isinstance(other, Set__i32):
+            # C level comparisons
+            return __setcmp(
+                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+                (<Set__i32> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+                op,
+            )
+        return self._fbthrift_py_richcmp(other, op)
+
+    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
+        if not isinstance(other, Set__i32):
+            other = Set__i32(other)
+        cdef shared_ptr[cset[cint32_t]] result
+        return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[cint32_t]](
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<Set__i32>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            op,
+        ))
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Set__i32()
+
+
+Set.register(Set__i32)
+
+cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
+    cdef shared_ptr[cset[cint32_t]] c_inst = make_shared[cset[cint32_t]]()
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            c_inst.insert(item)
+            deref(c_inst).insert(item)
     return cmove(c_inst)
 
 cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:
@@ -248,9 +317,9 @@ cdef class Map__i32_Set__i32(thrift.py3.types.Map):
         cdef cint32_t ckey = key
         if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
             raise err
-        cdef cset[cint32_t] citem
+        cdef shared_ptr[cset[cint32_t]] citem
         __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-        return Set__i32__from_cpp(citem)
+        return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def __iter__(self):
         if not self:
@@ -272,20 +341,20 @@ cdef class Map__i32_Set__i32(thrift.py3.types.Map):
         if not self:
             return
         cdef __map_iter[cmap[cint32_t,cset[cint32_t]]] itr = __map_iter[cmap[cint32_t,cset[cint32_t]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cset[cint32_t] citem
+        cdef shared_ptr[cset[cint32_t]] citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield Set__i32__from_cpp(citem)
+            yield Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem)
 
     def items(self):
         if not self:
             return
         cdef __map_iter[cmap[cint32_t,cset[cint32_t]]] itr = __map_iter[cmap[cint32_t,cset[cint32_t]]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
         cdef cint32_t ckey = 0
-        cdef cset[cint32_t] citem
+        cdef shared_ptr[cset[cint32_t]] citem
         for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
             itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-            yield (ckey, Set__i32__from_cpp(citem))
+            yield (ckey, Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(citem))
 
     @staticmethod
     def __get_reflection__():
@@ -305,7 +374,7 @@ cdef shared_ptr[cmap[cint32_t,cset[cint32_t]]] Map__i32_Set__i32__make_instance(
             if not isinstance(item, Set__i32):
                 item = Set__i32(item)
 
-            deref(c_inst)[key] = Set__i32__make_instance(item)
+            deref(c_inst)[key] = deref((<Set__i32>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
 
@@ -435,14 +504,14 @@ cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *
                 raise TypeError("None is not of the type _typing.AbstractSet[int]")
             if not isinstance(item, Set__i32):
                 item = Set__i32(item)
-            c_inst.push_back(Set__i32__make_instance(item))
+            c_inst.push_back(deref((<Set__i32>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
 cdef object List__Set__i32__from_cpp(const vector[cset[cint32_t]]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     for idx in range(c_vec.size()):
-        py_list.append(Set__i32__from_cpp(c_vec[idx]))
+        py_list.append(Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[cint32_t]](c_vec[idx])))
     return List__Set__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 @__cython.auto_pickle(False)

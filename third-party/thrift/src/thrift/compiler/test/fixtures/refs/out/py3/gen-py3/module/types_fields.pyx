@@ -292,7 +292,7 @@ cdef class __StructWithContainers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cStructWithContainers](deref(self._struct_cpp_obj), 1)
             return
-        assign_unique_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).set_ref_ref(), make_unique[cset[cint32_t]](_module_types.Set__i32__make_instance(_fbthrift_value)))
+        assign_unique_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).set_ref_ref(), make_unique[cset[cint32_t]](deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field map_ref
@@ -313,7 +313,7 @@ cdef class __StructWithContainers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cStructWithContainers](deref(self._struct_cpp_obj), 4)
             return
-        assign_shared_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).set_ref_shared_ref(), make_shared[cset[cint32_t]](_module_types.Set__i32__make_instance(_fbthrift_value)))
+        assign_shared_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).set_ref_shared_ref(), _module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field list_ref_shared_const

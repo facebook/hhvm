@@ -201,7 +201,7 @@ cdef void MyService_invalid_return_for_hack_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_test_fixtures_basic_module_types.Set__float__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_test_fixtures_basic_module_types.Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[float]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 

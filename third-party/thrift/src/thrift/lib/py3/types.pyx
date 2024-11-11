@@ -395,18 +395,93 @@ cdef class List(Container):
         return index
 
 
+@cython.auto_pickle(False)
+cdef class Set(Container):
+    """
+    Base class for all thrift sets
+    """
+
+    def __reduce__(self):
+        return (type(self), (set(self), ))
+
+    def __repr__(self):
+        if not self:
+            return 'iset()'
+        return f'i{{{", ".join(map(repr, self))}}}'
+
+    def isdisjoint(self, other):
+        return len(self & other) == 0
+
+    def union(self, other):
+        return self | other
+
+    def intersection(self, other):
+        return self & other
+
+    def difference(self, other):
+        return self - other
+
+    def symmetric_difference(self, other):
+        return self ^ other
+
+    def issubset(self, other):
+        return self <= other
+
+    def issuperset(self, other):
+        return self >= other
+
+    cdef _fbthrift_py_richcmp(self, other, int op):
+        if op == Py_LT:
+            return pySet.__lt__(self, other)
+        elif op == Py_LE:
+            return pySet.__le__(self, other)
+        elif op == Py_EQ:
+            return pySet.__eq__(self, other)
+        elif op == Py_NE:
+            return pySet.__ne__(self, other)
+        elif op == Py_GT:
+            return pySet.__gt__(self, other)
+        elif op == Py_GE:
+            return pySet.__ge__(self, other)
+
+    cdef _fbthrift_do_set_op(self, other, cSetOp op):
+        raise NotImplementedError()
+
+    def __and__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.AND)
+
+    def __sub__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.SUB)
+
+    def __or__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.OR)
+
+    def __xor__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.XOR)
+
+    def __rand__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.AND)
+
+    def __ror__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.OR)
+
+    def __rxor__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.XOR)
+
+    def __rsub__(Set self, other):
+        return self._fbthrift_do_set_op(other, cSetOp.REVSUB)
+
 cdef class _SetPrivateCtorToken:
     pass
-
 
 _fbthrift_set_private_ctor = _SetPrivateCtorToken()
 
 @cython.auto_pickle(False)
-cdef class Set(Container):
+cdef class SetNew(Container):
     """
     Base class for pure python thrift sets
     """
-    def __init__(self, frozenset py_obj not None, child_cls not None):
+    def __init__(self, list py_obj not None, child_cls not None):
         self._py_obj = py_obj
         self._child_cls = child_cls
 
@@ -459,8 +534,8 @@ cdef class Set(Container):
         yield from self._py_obj
 
     def __richcmp__(self, other, int op):
-        if isinstance(other, Set):
-            return self._fbthrift_py_richcmp((<Set>other)._py_obj, op)
+        if isinstance(other, SetNew):
+            return self._fbthrift_py_richcmp((<SetNew>other)._py_obj, op)
         return self._fbthrift_py_richcmp(other, op)
 
     cdef _fbthrift_py_richcmp(self, other, int op):
@@ -477,61 +552,60 @@ cdef class Set(Container):
         elif op == Py_GE:
             return pySet.__ge__(self._py_obj, other)
 
-    def __and__(Set self, other):
+    def __and__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             self._py_obj & _fbthrift_set_to_py_set(self, other)
         )
 
-    def __or__(Set self, other):
+    def __or__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             self._py_obj | _fbthrift_set_to_py_set(self, other)
         )
 
-    def __xor__(Set self, other):
+    def __xor__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             self._py_obj ^ _fbthrift_set_to_py_set(self, other)
         )
 
-    def __sub__(Set self, other):
+    def __sub__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             self._py_obj - _fbthrift_set_to_py_set(self, other)
         )
 
-    def __rand__(Set self, other):
+    def __rand__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             self._py_obj & _fbthrift_set_to_py_set(self, other)
         )
 
-    def __ror__(Set self, other):
+    def __ror__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             self._py_obj | _fbthrift_set_to_py_set(self, other)
         )
 
-    def __rxor__(Set self, other):
+    def __rxor__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             self._py_obj ^ _fbthrift_set_to_py_set(self, other)
         )
 
-    def __rsub__(Set self, other):
+    def __rsub__(SetNew self, other):
         return _py_set_to_fbthrift_set_unchecked(
             self,
             _fbthrift_set_to_py_set(self, other) - self._py_obj
         )
 
-cdef inline _fbthrift_set_to_py_set(Set self, other):
-    if isinstance(other, self._child_cls):
-        return (<Set>other)._py_obj
-    # try converting to self type
-    return (<Set>self._child_cls(other))._py_obj
+cdef inline _fbthrift_set_to_py_set(SetNew self, other):
+    if isinstance(other, SetNew):
+        return (<SetNew>other)._py_obj
+    return (<SetNew>self._child_cls(other))._py_obj
 
-cdef inline _py_set_to_fbthrift_set_unchecked(Set self, py_set):
+cdef inline _py_set_to_fbthrift_set_unchecked(SetNew self, py_set):
     return self._child_cls(py_set, _fbthrift_set_private_ctor)
 
 @cython.auto_pickle(False)

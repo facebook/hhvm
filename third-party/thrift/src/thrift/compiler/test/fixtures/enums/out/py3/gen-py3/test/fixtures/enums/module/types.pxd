@@ -61,7 +61,7 @@ cdef class SomeStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_reasonable
     cdef object __fbthrift_cached_fine
     cdef object __fbthrift_cached_questionable
-    cdef object __fbthrift_cached_tags
+    cdef Set__i32 __fbthrift_cached_tags
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enums_module_cbindings.cSomeStruct])
@@ -84,7 +84,11 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enums_module_cbindings.cMyStruct])
 
 
-cdef cset[cint32_t] Set__i32__make_instance(object items) except *
-cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
+cdef class Set__i32(thrift.py3.types.Set):
+    cdef shared_ptr[cset[cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]])
+
+cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *
 
 

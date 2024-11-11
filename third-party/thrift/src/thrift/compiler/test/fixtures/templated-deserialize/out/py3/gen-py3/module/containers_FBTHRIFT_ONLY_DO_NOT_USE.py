@@ -27,7 +27,7 @@ def get_types_reflection():
 
 __all__ = []
 
-class Set__i32(thrift.py3.types.Set):
+class Set__i32(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -282,7 +282,7 @@ class List__List__List__List__i32(thrift.py3.types.List):
 Sequence.register(List__List__List__List__i32)
 
 __all__.append('List__List__List__List__i32')
-class Set__bool(thrift.py3.types.Set):
+class Set__bool(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -321,7 +321,7 @@ class Set__bool(thrift.py3.types.Set):
 
 Set.register(Set__bool)
 __all__.append('Set__bool')
-class Set__Set__bool(thrift.py3.types.Set):
+class Set__Set__bool(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -364,7 +364,7 @@ class Set__Set__bool(thrift.py3.types.Set):
 
 Set.register(Set__Set__bool)
 __all__.append('Set__Set__bool')
-class Set__Set__Set__bool(thrift.py3.types.Set):
+class Set__Set__Set__bool(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -407,7 +407,7 @@ class Set__Set__Set__bool(thrift.py3.types.Set):
 
 Set.register(Set__Set__Set__bool)
 __all__.append('Set__Set__Set__bool')
-class Set__List__i32(thrift.py3.types.Set):
+class Set__List__i32(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -450,7 +450,7 @@ class Set__List__i32(thrift.py3.types.Set):
 
 Set.register(Set__List__i32)
 __all__.append('Set__List__i32')
-class Set__string(thrift.py3.types.Set):
+class Set__string(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

@@ -201,7 +201,7 @@ class List__MyEnumA(thrift.py3.types.List):
 Sequence.register(List__MyEnumA)
 
 __all__.append('List__MyEnumA')
-class Set__MyStruct(thrift.py3.types.Set):
+class Set__MyStruct(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -322,7 +322,7 @@ class List__string(thrift.py3.types.List):
 Sequence.register(List__string)
 
 __all__.append('List__string')
-class Set__List__string(thrift.py3.types.Set):
+class Set__List__string(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -365,7 +365,7 @@ class Set__List__string(thrift.py3.types.Set):
 
 Set.register(Set__List__string)
 __all__.append('Set__List__string')
-class Set__List__List__Map__Empty_MyStruct(thrift.py3.types.Set):
+class Set__List__List__Map__Empty_MyStruct(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -620,7 +620,7 @@ class List__List__List__List__i32(thrift.py3.types.List):
 Sequence.register(List__List__List__List__i32)
 
 __all__.append('List__List__List__List__i32')
-class Set__List__i32(thrift.py3.types.Set):
+class Set__List__i32(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -663,7 +663,7 @@ class Set__List__i32(thrift.py3.types.Set):
 
 Set.register(Set__List__i32)
 __all__.append('Set__List__i32')
-class Set__string(thrift.py3.types.Set):
+class Set__string(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -790,7 +790,7 @@ class List__binary(thrift.py3.types.List):
 Sequence.register(List__binary)
 
 __all__.append('List__binary')
-class Set__i64(thrift.py3.types.Set):
+class Set__i64(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -869,7 +869,7 @@ class List__SimpleUnion(thrift.py3.types.List):
 Sequence.register(List__SimpleUnion)
 
 __all__.append('List__SimpleUnion')
-class Set__SimpleUnion(thrift.py3.types.Set):
+class Set__SimpleUnion(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -952,7 +952,7 @@ class List__Set__SimpleUnion(thrift.py3.types.List):
 Sequence.register(List__Set__SimpleUnion)
 
 __all__.append('List__Set__SimpleUnion')
-class Set__i32(thrift.py3.types.Set):
+class Set__i32(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1035,7 +1035,7 @@ class List__Set__i32(thrift.py3.types.List):
 Sequence.register(List__Set__i32)
 
 __all__.append('List__Set__i32')
-class Set__bool(thrift.py3.types.Set):
+class Set__bool(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1074,7 +1074,7 @@ class Set__bool(thrift.py3.types.Set):
 
 Set.register(Set__bool)
 __all__.append('Set__bool')
-class Set__Set__bool(thrift.py3.types.Set):
+class Set__Set__bool(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1117,7 +1117,7 @@ class Set__Set__bool(thrift.py3.types.Set):
 
 Set.register(Set__Set__bool)
 __all__.append('Set__Set__bool')
-class Set__Set__Set__bool(thrift.py3.types.Set):
+class Set__Set__Set__bool(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1200,7 +1200,7 @@ class folly_small_vector_int64_t_8__List__i64(thrift.py3.types.List):
 Sequence.register(folly_small_vector_int64_t_8__List__i64)
 
 __all__.append('folly_small_vector_int64_t_8__List__i64')
-class folly_sorted_vector_set_std_string__Set__string(thrift.py3.types.Set):
+class folly_sorted_vector_set_std_string__Set__string(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1323,7 +1323,7 @@ class std_deque__List__string(thrift.py3.types.List):
 Sequence.register(std_deque__List__string)
 
 __all__.append('std_deque__List__string')
-class folly_sorted_vector_set__Set__string(thrift.py3.types.Set):
+class folly_sorted_vector_set__Set__string(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1404,7 +1404,7 @@ class List__Bar__double(thrift.py3.types.List):
 Sequence.register(List__Bar__double)
 
 __all__.append('List__Bar__double')
-class Set__Baz__i32(thrift.py3.types.Set):
+class Set__Baz__i32(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

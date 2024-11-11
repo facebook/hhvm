@@ -44,13 +44,10 @@ to a python type.
 }}{{#type:list?}}{{!
   }}{{> types/container_from_cpp }}(_value){{!
 }}{{/type:list?}}{{!
-}}{{#type:set?}}{{!
-  }}{{> types/container_from_cpp }}(_value){{!
-}}{{/type:set?}}{{!
-}}{{#type:map?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
+}}{{#type:container?}}{{^type:list?}}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}_value)){{!
-}}{{/type:map?}}{{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{> types/python_type}}(<int> _value){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

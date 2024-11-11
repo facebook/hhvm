@@ -42,12 +42,9 @@ to be converted from unicode to binary representation.
 }}{{#type:list?}}{{!
   }}{{> types/container_from_cpp}}(deref({{field:py_name}})){{!
 }}{{/type:list?}}{{!
-}}{{#type:set?}}{{!
-  }}{{> types/container_from_cpp}}(deref({{field:py_name}})){{!
-}}{{/type:set?}}{{!
-}}{{#type:map?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{!
   }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
   }}__to_shared_ptr(cmove({{field:py_name}}))){{!
-}}{{/type:map?}}{{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:enum?}}{{> types/python_type}}(<int> {{field:py_name}}){{/type:enum?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

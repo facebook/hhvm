@@ -33,13 +33,10 @@ ckey.
 }}{{#type:float?}}ckey{{/type:float?}}{{!
 }}{{#type:string?}}ckey.data().decode('UTF-8'){{/type:string?}}{{!
 }}{{#type:binary?}}ckey{{/type:binary?}}{{!
-}}{{#type:struct?}}{{!
+}}{{^type:base?}}{{^type:enum?}}{{^type:list?}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(ckey){{!
-}}{{/type:struct?}}{{#type:map?}}{{!
-    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(ckey){{!
-}}{{/type:map?}}{{!
+}}{{/type:list?}}{{/type:enum?}}{{/type:base?}}{{!
 }}{{#type:list?}}{{> types/container_from_cpp }}(ckey){{/type:list?}}{{!
-}}{{#type:set?}}{{> types/container_from_cpp }}(ckey){{/type:set?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/python_type }}, <int> ckey){{!
 }}{{/type:enum}}

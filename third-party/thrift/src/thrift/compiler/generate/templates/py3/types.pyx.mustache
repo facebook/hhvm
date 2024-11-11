@@ -116,9 +116,9 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 
 {{#program:hasPyContainerTypes}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
-{{#program:containerTypes}}{{^type:map?}}
+{{#program:containerTypes}}{{#type:list?}}
     {{type:flat_name}},
-{{/type:map?}}{{/program:containerTypes}}
+{{/type:list?}}{{/program:containerTypes}}
 )
 {{/program:hasPyContainerTypes}}
 
@@ -526,10 +526,13 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
 
 {{/program:filtered_structs}}
-{{#program:containerTypes}}{{#type:map?}}
+{{#program:containerTypes}}{{^type:list?}}
 @__cython.auto_pickle(False)
 @__cython.final
-cdef class {{type:flat_name}}(thrift.py3.types.Map):
+cdef class {{type:flat_name}}(thrift.py3.types.{{!
+        }}{{#type:set?}}Set{{/type:set?}}{{!
+        }}{{#type:map?}}Map{{/type:map?}}{{!
+        }}):
     def __init__(self, items=None):
         if isinstance(items, {{type:flat_name}}):
             self.{{> types/cpp_obj}} = (<{{type:flat_name}}> items).{{> types/cpp_obj}}
@@ -551,6 +554,67 @@ cdef class {{type:flat_name}}(thrift.py3.types.Map):
     def __len__(self):
         return deref(self.{{> types/cpp_obj}}).size()
 
+{{#type:set?}}
+    def __contains__(self, item):
+        if not self or item is None:
+            return False
+        {{#type:set_elem_type}}
+        {{#type:container?}}
+        try:
+            if not isinstance(item, {{> types/python_type}}):
+                item = {{> types/python_type}}(item)
+        except Exception:
+            return False
+        {{/type:container?}}
+        if not isinstance(item, {{> types/python_type}}):
+            return False
+        return pbool(deref(self.{{> types/cpp_obj}}).count({{> types/cython_python_to_cpp_item}}))
+        {{/type:set_elem_type}}
+
+
+    def __iter__(self):
+        if not self:
+            return
+        cdef __set_iter[{{> types/cython_cpp_type}}] itr = __set_iter[{{> types/cython_cpp_type}}](self.{{> types/cpp_obj}})
+        {{#type:set_elem_type}}
+        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
+            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+        for i in range(deref(self.{{> types/cpp_obj}}).size()):
+            itr.genNext(self.{{> types/cpp_obj}}, citem)
+            yield {{> types/container_cython_cpp_to_python_item}}
+        {{/type:set_elem_type}}
+
+    def __hash__(self):
+        return super().__hash__()
+
+    def __richcmp__(self, other, int op):
+        if isinstance(other, {{type:flat_name}}):
+            # C level comparisons
+            return __setcmp(
+                self.{{> types/cpp_obj}},
+                (<{{type:flat_name}}> other).{{> types/cpp_obj}},
+                op,
+            )
+        return self._fbthrift_py_richcmp(other, op)
+
+    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
+        if not isinstance(other, {{type:flat_name}}):
+            other = {{type:flat_name}}(other)
+        cdef shared_ptr[{{> types/cython_cpp_type}}] result
+        return {{type:flat_name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[{{> types/cython_cpp_type}}](
+            self.{{> types/cpp_obj}},
+            (<{{type:flat_name}}>other).{{> types/cpp_obj}},
+            op,
+        ))
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__{{type:flat_name}}()
+
+
+Set.register({{type:flat_name}})
+{{/type:set?}}
+{{#type:map?}}
     cdef _check_key_type(self, key):
         if not self or key is None:
             return
@@ -642,10 +706,10 @@ cdef class {{type:flat_name}}(thrift.py3.types.Map):
         return get_types_reflection().get_reflection__{{type:flat_name}}()
 
 Mapping.register({{type:flat_name}})
-{{/type:map?}}
+{{/type:map?}}{{/type:list?}}
 
 {{! container to cpp converter }}
-{{^type:map?}}
+{{#type:list?}}
 cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
     cdef {{> types/cython_cpp_type}} c_inst
     if items is not None:
@@ -654,7 +718,6 @@ cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items)
             raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
         {{/type:containerOfString?}}
         for item in items:
-{{/type:map?}}{{#type:list?}}
             {{#type:list_elem_type}}
             {{#type:container?}}
             if item is None:
@@ -672,7 +735,16 @@ cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items)
             {{/type:container?}}
             c_inst.push_back({{> types/cython_python_to_cpp_item}})
             {{/type:list_elem_type}}
+{{/type:list?}}{{^type:list?}}
+cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(object items) except *:
+    cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
+    if items is not None:
 {{/type:list?}}{{#type:set?}}
+        {{#type:containerOfString?}}
+        if isinstance(items, str):
+            raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+        {{/type:containerOfString?}}
+        for item in items:
             {{#type:set_elem_type}}
             {{#type:container?}}
             if item is None:
@@ -688,13 +760,10 @@ cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items)
             item = <{{> types/cython_python_type}}> item
             {{/type:integer?}}
             {{/type:container?}}
-            c_inst.insert({{> types/cython_python_to_cpp_item}})
+            deref(c_inst).insert({{> types/cython_python_to_cpp_item}})
             {{/type:set_elem_type}}
 {{/type:set?}}
 {{#type:map?}}
-cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(object items) except *:
-    cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
-    if items is not None:
         for key, item in items.items():
             {{#type:key_type}}
             {{#type:container?}}

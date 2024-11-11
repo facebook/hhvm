@@ -43,16 +43,11 @@ citem.
 }}{{#type:float?}}c_vec[idx]{{/type:float?}}{{!
 }}{{#type:string?}}__init_unicode_from_cpp(c_vec[idx]){{/type:string?}}{{!
 }}{{#type:binary?}}bytes(<string>c_vec[idx]){{/type:binary?}}{{!
-}}{{#type:struct?}}{{!
+}}{{^type:base?}}{{^type:enum?}}{{^type:list?}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
     }}make_shared[{{> types/cython_cpp_type }}](c_vec[idx])){{!
-}}{{/type:struct?}}{{!
-}}{{#type:map?}}{{!
-    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-    }}make_shared[{{> types/cython_cpp_type }}](c_vec[idx])){{!
-}}{{/type:map?}}{{!
+}}{{/type:list?}}{{/type:enum?}}{{/type:base?}}{{!
 }}{{#type:list?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:list?}}{{!
-}}{{#type:set?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:set?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/python_type}}, <int> c_vec[idx]){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

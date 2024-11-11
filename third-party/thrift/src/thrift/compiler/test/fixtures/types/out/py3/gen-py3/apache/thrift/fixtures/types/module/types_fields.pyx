@@ -138,7 +138,7 @@ cdef class __ContainerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct](deref(self._struct_cpp_obj), 5)
             return
-        deref(self._struct_cpp_obj).fieldF_ref().assign(_apache_thrift_fixtures_types_module_types.folly_sorted_vector_set__Set__i32__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).fieldF_ref().assign(deref(_apache_thrift_fixtures_types_module_types.folly_sorted_vector_set__Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field fieldG
@@ -1020,7 +1020,7 @@ cdef class __AllocatorAware_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).aa_set_ref().assign(_apache_thrift_fixtures_types_module_types.Set__i32__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).aa_set_ref().assign(deref(_apache_thrift_fixtures_types_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field aa_map

@@ -194,7 +194,7 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node hasPyContainerTypes() {
     for (const auto* ttype : containers_) {
-      if (ttype->is_list() || ttype->is_set()) {
+      if (ttype->is_list()) {
         return true;
       }
     }
@@ -692,7 +692,7 @@ class py3_mstch_type : public mstch_type {
   // as used, non-simple types live in shared_ptr in container conversions
   mstch::node isSimple() {
     return (type_->is_primitive_type() || type_->is_enum() ||
-            type_->is_list() || type_->is_set()) &&
+            type_->is_list()) &&
         !has_custom_type_behavior();
   }
 

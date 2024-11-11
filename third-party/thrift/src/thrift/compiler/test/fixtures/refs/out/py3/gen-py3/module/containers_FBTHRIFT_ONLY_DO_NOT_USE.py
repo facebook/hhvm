@@ -107,7 +107,7 @@ class List__i32(thrift.py3.types.List):
 Sequence.register(List__i32)
 
 __all__.append('List__i32')
-class Set__i32(thrift.py3.types.Set):
+class Set__i32(thrift.py3.types.SetNew):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

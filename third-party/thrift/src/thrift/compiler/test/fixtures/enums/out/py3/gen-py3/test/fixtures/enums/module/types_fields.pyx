@@ -81,7 +81,7 @@ cdef class __SomeStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_enums_module_cbindings.cSomeStruct](deref(self._struct_cpp_obj), 3)
             return
-        deref(self._struct_cpp_obj).tags_ref().assign(_test_fixtures_enums_module_types.Set__i32__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).tags_ref().assign(deref(_test_fixtures_enums_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
 
 @__cython.auto_pickle(False)

@@ -123,7 +123,7 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).floatSet_ref().assign(_test_fixtures_basic_module_types.Set__float__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).floatSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__float(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field no_hack_codegen_field
@@ -166,7 +166,7 @@ cdef class __Containers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_cbindings.cContainers](deref(self._struct_cpp_obj), 1)
             return
-        deref(self._struct_cpp_obj).StringSet_ref().assign(_test_fixtures_basic_module_types.Set__string__make_instance(_fbthrift_value))
+        deref(self._struct_cpp_obj).StringSet_ref().assign(deref(_test_fixtures_basic_module_types.Set__string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
 
     cdef void _set_field_2(self, _fbthrift_value) except *:
         # for field StringToI64Map

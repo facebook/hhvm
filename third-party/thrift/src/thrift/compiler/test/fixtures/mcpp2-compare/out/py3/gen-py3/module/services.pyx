@@ -1678,7 +1678,7 @@ async def ReturnService_set_StructReturn_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[_module_cbindings.cMyStruct]](_module_types.Set__MyStruct__make_instance(result)))
+        promise.cPromise.setValue(make_unique[cset[_module_cbindings.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ReturnService_unionReturn_coro(
     object self,
@@ -1919,7 +1919,7 @@ cdef api void call_cy_ParamService_void_ret_map_setlist_param(
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
     arg_param1 = _module_types.Map__string_i64._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
-    arg_param2 = _module_types.Set__List__string__from_cpp(deref(param2))
+    arg_param2 = _module_types.Set__List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param2)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2090,7 +2090,7 @@ cdef api void call_cy_ParamService_i64_ret_string_typedef_param(
 ) noexcept:
     cdef Promise_cint64_t __promise = Promise_cint64_t._fbthrift_create(cmove(cPromise))
     arg_param1 = (deref(param1)).data().decode('UTF-8')
-    arg_param2 = _module_types.Set__List__List__Map__Empty_MyStruct__from_cpp(deref(param2))
+    arg_param2 = _module_types.Set__List__List__Map__Empty_MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param2)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2139,7 +2139,7 @@ cdef api void call_cy_ParamService_double_ret_setstruct_param(
     unique_ptr[cset[_module_cbindings.cMyStruct]] param1
 ) noexcept:
     cdef Promise_double __promise = Promise_double._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Set__MyStruct__from_cpp(deref(param1))
+    arg_param1 = _module_types.Set__MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2361,7 +2361,7 @@ cdef api void call_cy_ParamService_setstruct_ret_set_param(
     unique_ptr[cset[string]] param1
 ) noexcept:
     cdef Promise_cset___module_cbindings_cMyStruct __promise = Promise_cset___module_cbindings_cMyStruct._fbthrift_create(cmove(cPromise))
-    arg_param1 = _module_types.Set__string__from_cpp(deref(param1))
+    arg_param1 = _module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(param1)))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -3269,7 +3269,7 @@ async def ParamService_setstruct_ret_set_param_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[_module_cbindings.cMyStruct]](_module_types.Set__MyStruct__make_instance(result)))
+        promise.cPromise.setValue(make_unique[cset[_module_cbindings.cMyStruct]](deref((<_module_types.Set__MyStruct?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
 
 async def ParamService_union_ret_i32_i32_param_coro(
     object self,

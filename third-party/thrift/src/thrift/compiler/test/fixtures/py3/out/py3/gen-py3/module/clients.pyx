@@ -415,7 +415,7 @@ cdef void SimpleService_unique_words_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__string__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -519,7 +519,7 @@ cdef void SimpleService_get_union_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__i32__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[cint32_t]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -532,7 +532,7 @@ cdef void SimpleService_get_keys_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__string__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -571,7 +571,7 @@ cdef void SimpleService_contain_binary_callback(
         pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
     else:
         try:
-            pyfuture.set_result(_module_types.Set__binary__from_cpp(cmove(result.value())))
+            pyfuture.set_result(_module_types.Set__binary._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[string]](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -1055,7 +1055,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cint32_t](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).sum_set(rpc_options._cpp_obj, 
-                _module_types.Set__i32__make_instance(numbers),
+                deref((<_module_types.Set__i32>numbers)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
             ),
             SimpleService_sum_set_callback,
             <PyObject *> __userdata
@@ -1080,7 +1080,7 @@ cdef class SimpleService(thrift.py3.client.Client):
         bridgeFutureWith[cbool](
             self._executor,
             down_cast_ptr[cSimpleServiceClientWrapper, cClientWrapper](self._client.get()).contains_word(rpc_options._cpp_obj, 
-                _module_types.Set__string__make_instance(words),
+                deref((<_module_types.Set__string>words)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
                 word.encode('UTF-8'),
             ),
             SimpleService_contains_word_callback,

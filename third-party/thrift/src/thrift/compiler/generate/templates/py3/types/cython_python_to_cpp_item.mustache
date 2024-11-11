@@ -47,10 +47,9 @@ key, include the parallel CythonPythonToCppKey file instead.
 }}{{#type:struct}}{{!
   }}deref((<{{> types/cython_python_type}}>item).{{> types/cpp_obj}}){{!
 }}{{/type:struct}}{{!
-}}{{#type:map?}}{{!
+}}{{#type:container?}}{{^type:list?}}{{!
   }}deref((<{{> types/cython_python_type}}>item).{{> types/cpp_obj}}){{!
-}}{{/type:map?}}{{!
+}}{{/type:list?}}{{/type:container?}}{{!
 }}{{#type:list?}}{{> types/container_to_cpp }}(item){{/type:list?}}{{!
-}}{{#type:set?}}{{> types/container_to_cpp }}(item){{/type:set?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>item{{/type:enum?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

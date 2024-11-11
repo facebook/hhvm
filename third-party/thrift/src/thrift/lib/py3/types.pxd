@@ -121,10 +121,14 @@ cdef class List(Container):
     cdef object _child_cls
     cdef int _normalize_index(self, int index) except *
 
-cdef class Set(Container):
+cdef class SetNew(Container):
     cdef frozenset _py_obj
     cdef object _child_cls
     cdef _fbthrift_py_richcmp(self, other, int op)
+
+cdef class Set(Container):
+    cdef _fbthrift_py_richcmp(self, other, int op)
+    cdef _fbthrift_do_set_op(self, other, cSetOp op)
 
 
 cdef class Map(Container):

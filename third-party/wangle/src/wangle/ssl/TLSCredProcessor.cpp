@@ -85,7 +85,7 @@ void TLSCredProcessor::setTicketPathToWatch(
   ticketFile_ = ticketFile;
   password_ = password;
   if (!ticketFile_.empty()) {
-    auto ticketsChangedCob = [=]() {
+    auto ticketsChangedCob = [this]() {
       ticketFileUpdated(ticketFile_, password_);
     };
     poller_->addFileToTrack(ticketFile_, ticketsChangedCob);

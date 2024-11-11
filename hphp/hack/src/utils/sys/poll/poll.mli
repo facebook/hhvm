@@ -10,6 +10,8 @@ module Flags : sig
   type error =
     | Pollerr
     | Pollnval
+
+  val to_string : error list -> string
 end
 
 exception Poll_exception of Flags.error list

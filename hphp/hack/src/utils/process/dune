@@ -4,7 +4,11 @@
  (modules process_types)
  (preprocess
   (pps ppx_deriving.std))
- (libraries core_kernel utils_core sys_utils))
+ (libraries
+  core_kernel
+  poll
+  utils_core
+  sys_utils))
 
 (library
  (name process)

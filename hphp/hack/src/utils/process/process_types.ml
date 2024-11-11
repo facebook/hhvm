@@ -85,6 +85,7 @@ and failure =
     }
   (* we initially tried to send a bigger stdin than the current implementation allows for *)
   | Overflow_stdin
+  | Poll_exn of Poll.Flags.error list
 
 let dummy =
   {

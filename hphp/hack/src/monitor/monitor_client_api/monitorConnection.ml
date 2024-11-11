@@ -151,6 +151,11 @@ let read_and_log_process_information ~timeout =
         |> Telemetry.string_ ~key:"stderr" ~value:stderr
         |> Telemetry.string_ ~key:"stdout" ~value:stdout
       | Process_types.Overflow_stdin -> Telemetry.create ()
+      | Process_types.Poll_exn flags ->
+        Telemetry.create ()
+        |> Telemetry.string_
+             ~key:"exn"
+             ~value:(Printf.sprintf "Poll_exn(%s)" @@ Poll.Flags.to_string flags)
     in
     let desc = "pgrep_failed_for_monitor_connect" in
     Hh_logger.log

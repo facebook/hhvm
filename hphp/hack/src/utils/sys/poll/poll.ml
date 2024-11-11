@@ -29,6 +29,13 @@ module Flags = struct
         res
     in
     res
+
+  let error_to_string = function
+    | Pollerr -> "POLLERR"
+    | Pollnval -> "POLLNVAL"
+
+  let to_string flags =
+    List.map flags ~f:error_to_string |> String.concat ~sep:", "
 end
 
 exception Poll_exception of Flags.error list

@@ -335,16 +335,24 @@ let test_chdir () =
   | Ok { Process_types.stdout; _ } ->
     let () = String_asserter.assert_equals "/tmp\n" stdout "" in
     true
-  | Error (Process_types.Timed_out _) ->
-    Printf.eprintf "Process timed out\n";
-    false
-  | Error Process_types.Overflow_stdin ->
-    Printf.eprintf "Unexpected error process input too large\n";
-    false
-  | Error (Process_types.Abnormal_exit { stdout; stderr; _ }) ->
-    Printf.eprintf "Process exited abnormally\n";
-    Printf.eprintf "See stdout: %s\n" stdout;
-    Printf.eprintf "See stderr: %s\n" stderr;
+  | Error err ->
+    (match err with
+    | Process_types.Timed_out _ ->
+      Printf.eprintf "Process timed out\n";
+      ()
+    | Process_types.Overflow_stdin ->
+      Printf.eprintf "Unexpected error process input too large\n";
+      ()
+    | Process_types.Abnormal_exit { stdout; stderr; _ } ->
+      Printf.eprintf "Process exited abnormally\n";
+      Printf.eprintf "See stdout: %s\n" stdout;
+      Printf.eprintf "See stderr: %s\n" stderr;
+      ()
+    | Process_types.Poll_exn flags ->
+      Printf.eprintf
+        "`poll` syscall returned error flags %s"
+        (Poll.Flags.to_string flags);
+      ());
     false
 
 let open_an_fd () = Unix.openfile "/dev/null" [Unix.O_RDONLY] 0o440

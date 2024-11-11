@@ -343,7 +343,7 @@ def run_test_program(
                 # errors cause hh_single_type_check to produce them
                 output = str(e.output)
         if filter_glog_failures:
-            glog_message_re = r"COULD NOT CREATE A LOGGINGFILE .+\!|Could not create logging file: No such file or directory\n"
+            glog_message_re = r"COULD NOT CREATE A LOGGINGFILE .+\!|Could not create logging file: No such file or directory\n|(E|I|W)\d{4} .*\n"
             output = re.sub(glog_message_re, r"", output)
         return check_result(
             test_case,

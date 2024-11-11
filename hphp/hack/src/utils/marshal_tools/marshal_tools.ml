@@ -107,15 +107,19 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
   let ( >>= ) a f = f a
 
   let rec write fd ~buffer ~offset ~size =
-    match Sys_utils.select_non_intr [] [fd] [] (-1.) with
-    | (_, [], _) -> 0
-    | _ ->
-      (* Sys_utils.select_non_intr handles EINTR, but the Unix.write call can also be interrupted. If the write
-       * is interrupted before any bytes are written, the call fails with EINTR. Otherwise, the call
-       * succeeds and returns the number of bytes written.
-       *)
-      (try Unix.write fd buffer offset size with
-      | Unix.Unix_error (Unix.EINTR, _, _) -> write fd ~buffer ~offset ~size)
+    match Poll.wait_fd_write_non_intr ~timeout_ms:None fd with
+    | Error flags -> raise (Poll.Poll_exception flags)
+    | Ok Poll.Timeout -> 0
+    | Ok (Poll.Event { ready; hup = _ }) ->
+      if ready then
+        (* Poll.wait_fd_write_non_intr handles EINTR, but the Unix.write call can also be interrupted. If the write
+         * is interrupted before any bytes are written, the call fails with EINTR. Otherwise, the call
+         * succeeds and returns the number of bytes written.
+         *)
+        try Unix.write fd buffer offset size with
+        | Unix.Unix_error (Unix.EINTR, _, _) -> write fd ~buffer ~offset ~size
+      else
+        0
 
   (* Marshal_tools reads from file descriptors. These file descriptors might be for some
    * non-blocking socket. Normally if you try to read from an fd, it will block until some data is
@@ -127,15 +131,19 @@ module RegularWriterReader : REGULAR_WRITER_READER = struct
    * preamble and one or more for the data). Any read after the first might block.
    *)
   let rec read fd ~buffer ~offset ~size =
-    match Sys_utils.select_non_intr [fd] [] [] (-1.) with
-    | ([], _, _) -> 0
-    | _ ->
-      (* Sys_utils.select_non_intr handles EINTR, but the Unix.read call can also be interrupted. If the read
-       * is interrupted before any bytes are read, the call fails with EINTR. Otherwise, the call
-       * succeeds and returns the number of bytes read.
-       *)
-      (try Unix.read fd buffer offset size with
-      | Unix.Unix_error (Unix.EINTR, _, _) -> read fd ~buffer ~offset ~size)
+    match Poll.wait_fd_read_non_intr ~timeout_ms:None fd with
+    | Error flags -> raise (Poll.Poll_exception flags)
+    | Ok Poll.Timeout -> 0
+    | Ok (Poll.Event { ready; hup = _ }) ->
+      if ready then
+        (* Poll.wait_fd_write_non_intr handles EINTR, but the Unix.read call can also be interrupted. If the read
+         * is interrupted before any bytes are read, the call fails with EINTR. Otherwise, the call
+         * succeeds and returns the number of bytes read.
+         *)
+        try Unix.read fd buffer offset size with
+        | Unix.Unix_error (Unix.EINTR, _, _) -> read fd ~buffer ~offset ~size
+      else
+        0
 
   let log str = Printf.eprintf "%s\n%!" str
 end

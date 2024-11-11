@@ -68,3 +68,14 @@
   test_injector_config
   unit_test
   utils_core))
+
+(executable
+ (name marshal_tools_test)
+ (modules
+  marshal_tools_test)
+ (libraries
+  libancillary
+  marshal_tools
+  unix)
+ (preprocess
+  (pps ppx_deriving.std)))

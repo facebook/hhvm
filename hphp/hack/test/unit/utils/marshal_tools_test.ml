@@ -24,16 +24,22 @@ let int_to_fd (x : int) : Unix.file_descr = Obj.magic x
 
 let fd_to_int (x : Unix.file_descr) : int = Obj.magic x
 
-let payload_message_1 = "Hello parent"
+type my_message = Message of string [@@deriving eq, show]
 
-let payload_message_2 = "Hello child 1"
+let payload_message_1 = Message "Hello parent"
+
+let payload_message_2 =
+  Message
+    (Array.make 10000 "Hello child 1\n" |> Array.to_list |> String.concat "")
 
 (** Tail call; exits *)
 let send_fd_and_wait child_1_pid socket_fd fd_to_be_sent =
   (* Before sending FD to child 1, read a message from it. *)
-  let msg : string = Marshal_tools.from_fd_with_preamble fd_to_be_sent in
-  if msg <> payload_message_1 then (
-    Printf.eprintf "Parent: error reading message. Got %s\n" msg;
+  let msg : my_message = Marshal_tools.from_fd_with_preamble fd_to_be_sent in
+  if not (equal_my_message msg payload_message_1) then (
+    Printf.eprintf
+      "Parent: error reading message. Got %s\n"
+      (show_my_message msg);
     exit 1
   );
   let result = Libancillary.ancil_send_fd socket_fd fd_to_be_sent in
@@ -64,12 +70,12 @@ let child_1_process socket_fd =
       Printf.eprintf "Child 1: Failed to receive fd: %s. Exiting.\n" err;
       exit 1
   in
-  let msg : string = Marshal_tools.from_fd_with_preamble upward_fd_2 in
+  let msg : my_message = Marshal_tools.from_fd_with_preamble upward_fd_2 in
   (* Reading should resume where parent left off, so should be message_2. *)
-  if msg = payload_message_2 then
+  if equal_my_message msg payload_message_2 then
     exit 0
   else (
-    Printf.eprintf "Child 1: Got message: %s\n" msg;
+    Printf.eprintf "Child 1: Got message: %s\n" (show_my_message msg);
     exit 1
   )
 

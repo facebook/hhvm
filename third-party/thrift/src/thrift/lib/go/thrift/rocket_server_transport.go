@@ -25,6 +25,7 @@ import (
 	"net"
 	"runtime/debug"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/stats"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 	"github.com/rsocket/rsocket-go/core/transport"
 )
@@ -34,17 +35,19 @@ type rocketServerTransport struct {
 	processor   Processor
 	acceptor    transport.ServerTransportAcceptor
 	transportID TransportID
-	log         func(format string, args ...interface{})
 	connContext ConnContextFunc
+	log         func(format string, args ...interface{})
+	stats       *stats.ServerStats
 }
 
-func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...interface{})) transport.ServerTransport {
+func newRocketServerTransport(listener net.Listener, connContext ConnContextFunc, processor Processor, transportID TransportID, log func(format string, args ...interface{}), stats *stats.ServerStats) transport.ServerTransport {
 	return &rocketServerTransport{
 		listener:    listener,
 		processor:   processor,
-		log:         log,
 		transportID: transportID,
 		connContext: connContext,
+		log:         log,
+		stats:       stats,
 	}
 }
 
@@ -116,8 +119,17 @@ func (r *rocketServerTransport) Close() (err error) {
 }
 
 func (r *rocketServerTransport) processRequests(ctx context.Context, conn net.Conn) {
-	connTransport := r.transportID
+	// keep track of the number of connections established and closed
+	// over time
+	r.stats.ConnsEstablished.RecordEvent()
+	// update current connection count
+	r.stats.ConnCount.Incr()
+	defer func() {
+		r.stats.ConnsClosed.RecordEvent()
+		r.stats.ConnCount.Decr()
+	}()
 
+	connTransport := r.transportID
 	// Use Rocket protocol right away if the server is running
 	// in "UpgradeToRocket" mode and ALPN value is set to "rs".
 	if r.transportID == TransportIDUpgradeToRocket {

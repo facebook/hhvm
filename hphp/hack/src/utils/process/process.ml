@@ -22,9 +22,9 @@ module Entry = struct
 end
 
 (** In the blocking read_and_wait_pid call, we alternate between
- * non-blocking consuming of output and a nonblocking waitpid.
- * To avoid pegging the CPU at 100%, sleep for a short time between
- * those. *)
+  non-blocking consuming of output and a nonblocking waitpid.
+  To avoid pegging the CPU at 100%, sleep for a short time between
+  those. *)
 let sleep_seconds_per_retry = 0.04
 
 let chunk_size = 65536
@@ -80,13 +80,14 @@ let make_result
   | Unix.WSTOPPED _ ->
     Error (Abnormal_exit { status; stdout; stderr })
 
-(** Read from the FD if there is something to be read. FD is a reference
- * so when EOF is read from it, it is set to None. *)
+(** [maybe_consume ?timeout_sec fd_ref acc] readd from the FD
+  if there is something to be read and accumulates the result in [acc].
+  The [fd_ref] reference is set to None and the FD is closed when EOF is read from it. *)
 let rec maybe_consume
-    ?(max_time : float = 0.0)
+    ?(timeout_sec : float = 0.0)
     (fd_ref : Unix.file_descr option ref)
     (acc : string Stack_utils.Stack.t) : (unit, Poll.Flags.t list) result =
-  if Float.(max_time < 0.0) then
+  if Float.(timeout_sec < 0.0) then
     Ok ()
   else
     let start_t = Unix.time () in
@@ -96,7 +97,7 @@ let rec maybe_consume
       let open Result.Monad_infix in
       Poll.wait_fd_read_non_intr
         fd
-        ~timeout_ms:(Some (Int.of_float (max_time *. 1000.)))
+        ~timeout_ms:(Some (Int.of_float (timeout_sec *. 1000.)))
       >>= ( function
       | `Timeout -> Ok ()
       | `Ok ->
@@ -112,8 +113,8 @@ let rec maybe_consume
           in
           Stack.push chunk acc;
           let consumed_t = Unix.time () -. start_t in
-          let max_time = max_time -. consumed_t in
-          maybe_consume ~max_time fd_ref acc )
+          let timeout_sec = timeout_sec -. consumed_t in
+          maybe_consume ~timeout_sec fd_ref acc )
 
 (** Read data from stdout and stderr until EOF is reached. Waits for
     process to terminate returns the stderr and stdout
@@ -125,7 +126,7 @@ let rec maybe_consume
     Error *)
 let read_and_wait_pid_nonblocking (process : Process_types.t) =
   let open Process_types in
-  let { stdin_fd = _stdin_fd; stdout_fd; stderr_fd; lifecycle; acc; acc_err; _ }
+  let { stdin_fd = _; stdout_fd; stderr_fd; lifecycle; acc; acc_err; info = _ }
       =
     process
   in
@@ -190,7 +191,7 @@ let rec read_and_wait_pid ~(retries : int) (process : Process_types.t) :
     Process_types.process_result =
   let open Process_types in
   let open Result.Monad_infix in
-  let { stdin_fd = _stdin_fd; stdout_fd; stderr_fd; lifecycle; acc; acc_err; _ }
+  let { stdin_fd = _; stdout_fd; stderr_fd; lifecycle; acc; acc_err; info = _ }
       =
     process
   in
@@ -209,15 +210,18 @@ let rec read_and_wait_pid ~(retries : int) (process : Process_types.t) :
       let () = lifecycle := Lifecycle_exited status in
       make_result status (Stack.merge_bytes acc) (Stack.merge_bytes acc_err)
     else
-      let maybe_consume ?max_time x y =
-        maybe_consume ?max_time x y
+      let maybe_consume ?timeout_sec x y =
+        maybe_consume ?timeout_sec x y
         |> Result.map_error ~f:(fun err -> Poll_exn err)
       in
       (* Consume output to clear the buffers which might
        * be blocking the process from continuing. *)
-      maybe_consume ~max_time:(sleep_seconds_per_retry /. 2.0) stdout_fd acc
+      maybe_consume ~timeout_sec:(sleep_seconds_per_retry /. 2.0) stdout_fd acc
       >>= fun () ->
-      maybe_consume ~max_time:(sleep_seconds_per_retry /. 2.0) stderr_fd acc_err
+      maybe_consume
+        ~timeout_sec:(sleep_seconds_per_retry /. 2.0)
+        stderr_fd
+        acc_err
       >>= fun () ->
       (* EOF hasn't been reached for all FDs. Here's where we switch from
        * reading the pipes to attempting a non-blocking waitpid. *)

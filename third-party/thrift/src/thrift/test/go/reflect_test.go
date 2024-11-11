@@ -34,7 +34,7 @@ func TestReflectCodec(t *testing.T) {
 	// "field53": {["hello1", "hello2", "hello3"]: "value1"},
 	// ....
 
-	writeTarget := reflecttest.ReflectCodecTestStructConst1
+	writeTarget := reflecttest.VariousFieldsStructConst1
 	writeTarget.Field51 = map[reflecttest.ComparableStruct]string{
 		{Field1: 123}: "value1",
 	}
@@ -48,7 +48,7 @@ func TestReflectCodec(t *testing.T) {
 		t.Fatalf("failed to serialize struct: %v", err)
 	}
 
-	readTarget := &reflecttest.ReflectCodecTestStruct{}
+	readTarget := &reflecttest.VariousFieldsStruct{}
 	deserializer := thrift.NewCompactDeserializer()
 	err = deserializer.Read(readTarget, originalBuf)
 	if err != nil {

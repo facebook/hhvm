@@ -31,7 +31,8 @@ struct NonComparableStruct {
   1: list<string> field1;
 }
 
-struct ReflectCodecTestStruct {
+// A struct to test various fields (types/optionality/etc)
+struct VariousFieldsStruct {
   // Primitive fields
   1: byte field1;
   2: bool field2;
@@ -79,7 +80,7 @@ struct ReflectCodecTestStruct {
   61: optional ComparableStruct field61;
 }
 
-const ReflectCodecTestStruct reflectCodecTestStructConst1 = {
+const VariousFieldsStruct variousFieldsStructConst1 = {
   "field1": 12,
   "field2": true,
   "field3": 1500,

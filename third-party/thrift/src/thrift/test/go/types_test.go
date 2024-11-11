@@ -188,7 +188,7 @@ func TestFieldSerializationOrderDeterminism(t *testing.T) {
 }
 
 func TestSimpleJSONSerialization(t *testing.T) {
-	writeTarget := reflecttest.ReflectCodecTestStructConst1
+	writeTarget := reflecttest.VariousFieldsStructConst1
 
 	serializer := thrift.NewSimpleJSONSerializer()
 	data, err := serializer.Write(writeTarget)
@@ -196,7 +196,7 @@ func TestSimpleJSONSerialization(t *testing.T) {
 		t.Fatalf("failed to serialize struct: %v", err)
 	}
 
-	readTarget := &reflecttest.ReflectCodecTestStruct{}
+	readTarget := &reflecttest.VariousFieldsStruct{}
 	deserializer := thrift.NewSimpleJSONDeserializer()
 	err = deserializer.Read(readTarget, data)
 	if err != nil {

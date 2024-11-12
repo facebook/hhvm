@@ -14,11 +14,7 @@
  *
  * See crypt_blowfish.c for more information.
  */
-
-#ifndef incl_CRYPT_BLOWFISH_H
-#define incl_CRYPT_BLOWFISH_H
+#pragma once
 
 char *php_crypt_blowfish_rn(const char *key, const char *setting,
                             char *output, int size);
-
-#endif // incl_CRYPT_BLOWFISH_H

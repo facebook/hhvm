@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_INSTRUCTIONS_A64_H_
-#define VIXL_A64_INSTRUCTIONS_A64_H_
+#pragma once
 
 #include "hphp/util/portability.h"
 #include "hphp/vixl/globals.h"
@@ -375,5 +373,3 @@ class Instruction {
   void SetBranchImmTarget(Instruction* target);
 };
 }  // namespace vixl
-
-#endif  // VIXL_A64_INSTRUCTIONS_A64_H_

@@ -23,9 +23,7 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-#ifndef VIXL_A64_MACRO_ASSEMBLER_A64_H_
-#define VIXL_A64_MACRO_ASSEMBLER_A64_H_
+#pragma once
 
 #include "hphp/vixl/globals.h"
 #include "hphp/vixl/a64/assembler-a64.h"
@@ -1224,5 +1222,3 @@ class InstructionAccurateScope {
 
 
 }  // namespace vixl
-
-#endif  // VIXL_A64_MACRO_ASSEMBLER_A64_H_

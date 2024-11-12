@@ -304,11 +304,6 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     }
   }
 
-  template <typename C = T>
-  [[deprecated("Use putMulti(...) instead.")]] void put(C&& c) {
-    return putMulti(std::forward<C>(c));
-  }
-
   /// Inserts entries. Override entries if exists.
   template <typename K, typename V>
   void insert_or_assign(K&& key, V&& value) {

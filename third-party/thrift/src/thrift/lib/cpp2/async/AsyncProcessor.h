@@ -1010,7 +1010,7 @@ class ServiceHandlerBase {
  * the same object for both.
  */
 class ServerInterface : public virtual AsyncProcessorFactory,
-                        public ServiceHandlerBase {
+                        public virtual ServiceHandlerBase {
  public:
   ServerInterface() = default;
   ServerInterface(const ServerInterface&) = delete;

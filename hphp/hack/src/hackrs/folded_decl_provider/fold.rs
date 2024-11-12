@@ -141,11 +141,15 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let pos = self.child.name.pos();
         let name = self.child.name.id();
         let reason = R::class_class(pos.clone(), name);
-        let classname_ty = Ty::apply(
-            reason.clone(),
-            Positioned::new(pos.clone(), *sn::classes::cClassname),
-            [Ty::this(reason)].into(),
-        );
+        let classname_ty = if self.opts.class_class_type {
+            Ty::class_args(reason.clone(), Ty::this(reason))
+        } else {
+            Ty::apply(
+                reason.clone(),
+                Positioned::new(pos.clone(), *sn::classes::cClassname),
+                [Ty::this(reason)].into(),
+            )
+        };
         let class_const = ClassConst {
             is_synthesized: true,
             kind: ClassConstKind::CCConcrete,

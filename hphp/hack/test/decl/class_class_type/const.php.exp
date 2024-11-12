@@ -1,0 +1,35 @@
+[("\\C",
+  (Shallow_decl_defs.Class
+     { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+       sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+       sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
+       sc_module = None; sc_name = ([5:7-8], "\\C"); sc_tparams = [];
+       sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
+       sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
+       sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None; sc_static_methods = []; sc_methods = [];
+       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+       sc_package = None }));
+  ("\\f",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_package = None; fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([7:10-11]),
+         (Tfun
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+              ft_implicit_params = { capability = (CapDefaults [7:10-11]) };
+              ft_ret = (Rhint ([7:15-19]), (Tprim Tvoid));
+              ft_flags =
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_cross_package = None }));
+        fe_pos = [7:10-11]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false }))
+  ]

@@ -180,10 +180,14 @@ let () =
   let print_rupro = ref false in
   let test_ocamlrep_marshal = ref false in
   let enable_class_pointer_hint = ref true in
+  let config_overrides = ref [] in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
     [
+      ( "--config",
+        Arg.String (fun s -> config_overrides := s :: !config_overrides),
+        "<option=value> Set one hhconfig option; can be used multiple times" );
       ( "--auto-namespace-map",
         Arg.String
           (fun m ->
@@ -314,6 +318,20 @@ let () =
           tco_experimental_features;
           tco_enable_strict_const_semantics = enable_strict_const_semantics;
         }
+    in
+    let tcopt =
+      let config =
+        List.fold
+          (List.rev !config_overrides)
+          ~init:(Config_file_common.empty ())
+          ~f:(fun config setting ->
+            let c = Config_file_common.parse_contents setting in
+            Config_file_common.apply_overrides
+              ~config
+              ~overrides:c
+              ~log_reason:None)
+      in
+      ServerConfig.load_config config tcopt
     in
     (* Temporarily set the root to the location of the test file so that
        Multifile will strip the dirname prefix. *)

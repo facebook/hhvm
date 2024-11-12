@@ -10,6 +10,7 @@ type t = {
   implicit_inherit_sdt: bool;
   everything_sdt: bool;
   enable_strict_const_semantics: int;
+  class_class_type: bool;
 }
 [@@deriving show]
 
@@ -19,4 +20,5 @@ let from_global_options (gopt : GlobalOptions.t) =
     implicit_inherit_sdt = gopt.tco_implicit_inherit_sdt;
     everything_sdt = gopt.po.ParserOptions.everything_sdt;
     enable_strict_const_semantics = gopt.tco_enable_strict_const_semantics;
+    class_class_type = gopt.class_class_type;
   }

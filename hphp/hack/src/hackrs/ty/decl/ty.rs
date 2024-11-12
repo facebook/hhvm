@@ -252,6 +252,10 @@ impl<R: Reason> Ty<R> {
         Self::new(reason, Ty_::Tapply(Box::new((type_name, tparams))))
     }
 
+    pub fn class_args(reason: R, cls: Ty<R>) -> Self {
+        Self::new(reason, Ty_::TclassArgs(cls))
+    }
+
     pub fn generic(reason: R, name: TypeName, tparams: Box<[Ty<R>]>) -> Self {
         Self::new(reason, Ty_::Tgeneric(Box::new((name, tparams))))
     }

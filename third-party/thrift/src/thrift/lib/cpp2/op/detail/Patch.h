@@ -110,7 +110,7 @@ class MinSafePatchVersionVisitor {
   template <typename T>
   void add(const T&) {}
   template <typename T>
-  void put(const T&) {}
+  void putMulti(const T&) {}
   template <typename T>
   void remove(const T&) {}
   template <typename Key, typename ValuePatch>

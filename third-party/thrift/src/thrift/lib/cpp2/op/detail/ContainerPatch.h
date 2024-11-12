@@ -407,7 +407,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       v.clear();
       v.patchIfSet(P{});
       v.add(T{});
-      v.put(T{});
+      v.putMulti(T{});
       v.remove(std::unordered_set<typename T::key_type>{});
     }
 
@@ -418,7 +418,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     v.patchIfSet(*data_.patchPrior());
     v.add(*data_.add());
     v.remove(*data_.remove());
-    v.put(*data_.put());
+    v.putMulti(*data_.put());
     v.patchIfSet(*data_.patch());
   }
 
@@ -439,7 +439,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
         erase_all(v, keys);
       }
       void add(const T& t) { v.insert(t.begin(), t.end()); }
-      void put(const T& t) {
+      void putMulti(const T& t) {
         for (const auto& entry : t) {
           v.insert_or_assign(entry.first, entry.second);
         }

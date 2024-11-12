@@ -403,7 +403,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       v.patchIfSet(P{});
       v.add(T{});
       v.putMulti(T{});
-      v.remove(std::unordered_set<typename T::key_type>{});
+      v.removeMulti(std::unordered_set<typename T::key_type>{});
     }
 
     if (Base::template customVisitAssignAndClear(v)) {
@@ -412,7 +412,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 
     v.patchIfSet(*data_.patchPrior());
     v.add(*data_.add());
-    v.remove(*data_.remove());
+    v.removeMulti(*data_.remove());
     v.putMulti(*data_.put());
     v.patchIfSet(*data_.patch());
   }
@@ -430,7 +430,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
           }
         }
       }
-      void remove(const std::unordered_set<typename T::key_type>& keys) {
+      void removeMulti(const std::unordered_set<typename T::key_type>& keys) {
         erase_all(v, keys);
       }
       void add(const T& t) { v.insert(t.begin(), t.end()); }

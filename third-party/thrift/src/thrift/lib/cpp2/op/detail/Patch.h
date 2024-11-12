@@ -113,6 +113,8 @@ class MinSafePatchVersionVisitor {
   void putMulti(const T&) {}
   template <typename T>
   void remove(const T&) {}
+  template <typename T>
+  void removeMulti(const T&) {}
   template <typename Key, typename ValuePatch>
   void patchIfSet(const folly::F14NodeMap<Key, ValuePatch>& patches) {
     for (const auto& [k, vp] : patches) {

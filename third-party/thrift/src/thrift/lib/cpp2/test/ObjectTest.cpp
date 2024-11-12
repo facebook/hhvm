@@ -105,7 +105,7 @@ TEST(ObjectTest, TypeEnforced) {
   // Pointers implicitly converts to bools.
   Value value = asValueStruct<type::bool_t>("");
   ASSERT_EQ(value.getType(), Value::Type::boolValue);
-  EXPECT_TRUE(value.get_boolValue());
+  EXPECT_TRUE(value.boolValue_ref().value());
 }
 
 TEST(ObjectTest, Empty) {
@@ -119,83 +119,84 @@ TEST(ObjectTest, Empty) {
 TEST(ObjectTest, Bool) {
   Value value = asValueStruct<type::bool_t>(20);
   ASSERT_EQ(value.getType(), Value::Type::boolValue);
-  EXPECT_TRUE(value.get_boolValue());
+  EXPECT_TRUE(value.boolValue_ref().value());
 
   value = asValueStruct<type::bool_t>(0);
   ASSERT_EQ(value.getType(), Value::Type::boolValue);
-  EXPECT_FALSE(value.get_boolValue());
+  EXPECT_FALSE(value.boolValue_ref().value());
 }
 
 TEST(ObjectTest, Byte) {
   Value value = asValueStruct<type::byte_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::byteValue);
-  EXPECT_EQ(value.get_byteValue(), 7);
+  EXPECT_EQ(value.byteValue_ref().value(), 7);
 }
 
 TEST(ObjectTest, I16) {
   Value value = asValueStruct<type::i16_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::i16Value);
-  EXPECT_EQ(value.get_i16Value(), 7);
+  EXPECT_EQ(value.i16Value_ref().value(), 7);
 }
 
 TEST(ObjectTest, I32) {
   Value value = asValueStruct<type::i32_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.get_i32Value(), 7);
+  EXPECT_EQ(value.i32Value_ref().value(), 7);
 }
 
 TEST(ObjectTest, I64) {
   Value value = asValueStruct<type::i64_t>(7u);
   ASSERT_EQ(value.getType(), Value::Type::i64Value);
-  EXPECT_EQ(value.get_i64Value(), 7);
+  EXPECT_EQ(value.i64Value_ref().value(), 7);
 }
 
 TEST(ObjectTest, Enum) {
   enum class MyEnum { kValue = 7 };
   Value value = asValueStruct<type::enum_c>(MyEnum::kValue);
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.get_i32Value(), 7);
+  EXPECT_EQ(value.i32Value_ref().value(), 7);
 
   value = asValueStruct<type::enum_c>(static_cast<MyEnum>(2));
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.get_i32Value(), 2);
+  EXPECT_EQ(value.i32Value_ref().value(), 2);
 
   value = asValueStruct<type::enum_c>(21u);
   ASSERT_EQ(value.getType(), Value::Type::i32Value);
-  EXPECT_EQ(value.get_i32Value(), 21);
+  EXPECT_EQ(value.i32Value_ref().value(), 21);
 }
 
 TEST(ObjectTest, Float) {
   Value value = asValueStruct<type::float_t>(1.5);
   ASSERT_EQ(value.getType(), Value::Type::floatValue);
-  EXPECT_EQ(value.get_floatValue(), 1.5f);
+  EXPECT_EQ(value.floatValue_ref().value(), 1.5f);
 }
 
 TEST(ObjectTest, Double) {
   Value value = asValueStruct<type::double_t>(1.5f);
   ASSERT_EQ(value.getType(), Value::Type::doubleValue);
-  EXPECT_EQ(value.get_doubleValue(), 1.5);
+  EXPECT_EQ(value.doubleValue_ref().value(), 1.5);
 }
 
 TEST(ObjectTest, String) {
   Value value = asValueStruct<type::string_t>("hi");
   ASSERT_EQ(value.getType(), Value::Type::stringValue);
-  EXPECT_EQ(value.get_stringValue(), "hi");
+  EXPECT_EQ(value.stringValue_ref().value(), "hi");
 }
 
 TEST(ObjectTest, Binary) {
   Value value = asValueStruct<type::binary_t>("hi");
   ASSERT_EQ(value.getType(), Value::Type::binaryValue);
-  EXPECT_EQ(toString(value.get_binaryValue()), "hi");
+  EXPECT_EQ(toString(value.binaryValue_ref().value()), "hi");
 }
 
 TEST(ObjectTest, List) {
   std::vector<int> data = {1, 4, 2};
   Value value = asValueStruct<type::list<type::i16_t>>(data);
   ASSERT_EQ(value.getType(), Value::Type::listValue);
-  ASSERT_EQ(value.get_listValue().size(), data.size());
+  ASSERT_EQ(value.listValue_ref().value().size(), data.size());
   for (size_t i = 0; i < data.size(); ++i) {
-    EXPECT_EQ(value.get_listValue()[i], asValueStruct<type::i16_t>(data[i]));
+    EXPECT_EQ(
+        value.listValue_ref().value()[i], asValueStruct<type::i16_t>(data[i]));
   }
 
   // Works with other containers
@@ -203,9 +204,10 @@ TEST(ObjectTest, List) {
   value = asValueStruct<type::list<type::i16_t>>(s);
   std::sort(data.begin(), data.end());
   ASSERT_EQ(value.getType(), Value::Type::listValue);
-  ASSERT_EQ(value.get_listValue().size(), data.size());
+  ASSERT_EQ(value.listValue_ref().value().size(), data.size());
   for (size_t i = 0; i < data.size(); ++i) {
-    EXPECT_EQ(value.get_listValue()[i], asValueStruct<type::i16_t>(data[i]));
+    EXPECT_EQ(
+        value.listValue_ref().value()[i], asValueStruct<type::i16_t>(data[i]));
   }
 
   // Works with cpp_type type tag
@@ -263,7 +265,7 @@ TEST(ObjectTest, Struct) {
   auto protocol = ::apache::thrift::conformance::Protocol("hi").asStruct();
   Value value = asValueStruct<type::union_c>(protocol);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.get_objectValue();
+  const Object& object = value.objectValue_ref().value();
   EXPECT_EQ(object.members_ref()->size(), 2);
   EXPECT_EQ(
       object.members_ref()->at(1),
@@ -278,7 +280,7 @@ TEST(ObjectTest, StructWithList) {
   s.field_1_ref() = listValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.get_objectValue();
+  const Object& object = value.objectValue_ref().value();
   EXPECT_EQ(object.members_ref()->size(), 1);
   EXPECT_EQ(
       object.members_ref()->at(1),
@@ -291,7 +293,7 @@ TEST(ObjectTest, StructWithMap) {
   s.field_1_ref() = mapValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.get_objectValue();
+  const Object& object = value.objectValue_ref().value();
   EXPECT_EQ(object.members_ref()->size(), 1);
   auto val = asValueStruct<type::map<type::binary_t, type::i32_t>>(mapValues);
   EXPECT_EQ(object.members_ref()->at(1), val);
@@ -303,7 +305,7 @@ TEST(ObjectTest, StructWithSet) {
   s.field_1_ref() = setValues;
   Value value = asValueStruct<type::struct_c>(s);
   ASSERT_EQ(value.getType(), Value::Type::objectValue);
-  const Object& object = value.get_objectValue();
+  const Object& object = value.objectValue_ref().value();
   EXPECT_EQ(object.members_ref()->size(), 1);
   EXPECT_EQ(
       object.members_ref()->at(1),

@@ -108,8 +108,8 @@ func (r *rocketServerTransport) acceptLoop(ctx context.Context) error {
 				}
 			}
 
-			ctx = r.connContext(ctx, conn)
-			r.processRequests(ctx, conn)
+			ctxConn := r.connContext(ctx, conn)
+			r.processRequests(ctxConn, conn)
 		}(ctx, conn)
 	}
 }

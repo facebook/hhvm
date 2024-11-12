@@ -79,8 +79,8 @@ func (s *headerSimpleServer) acceptLoop(ctx context.Context) error {
 		}
 
 		go func(ctx context.Context, conn net.Conn) {
-			ctx = s.connContext(ctx, conn)
-			if err := s.processRequests(ctx, conn); err != nil {
+			ctxConn := s.connContext(ctx, conn)
+			if err := s.processRequests(ctxConn, conn); err != nil {
 				s.log("error processing request from %s: %s\n", conn.RemoteAddr(), err)
 				cerror := conn.Close()
 				if cerror != nil {

@@ -168,22 +168,31 @@ func NewClient(opts ...ClientOption) (types.Protocol, error) {
 	}
 
 	var conn net.Conn
-	var err error
+	var connErr error
 	if options.dialerFn != nil {
-		conn, err = options.dialerFn()
-		if err != nil {
-			return nil, err
+		conn, connErr = options.dialerFn()
+		if connErr != nil {
+			return nil, connErr
 		}
 	}
 
+	var protocol types.Protocol
+	var protocolErr error
 	switch options.transport {
 	case TransportIDHeader:
-		return newHeaderProtocol(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		protocol, protocolErr = newHeaderProtocol(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	case TransportIDRocket:
-		return newRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		protocol, protocolErr = newRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	case TransportIDUpgradeToRocket:
-		return newUpgradeToRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
+		protocol, protocolErr = newUpgradeToRocketClient(conn, options.protocol, options.ioTimeout, options.persistentHeaders)
 	default:
 		panic("framed and unframed transport are not supported")
 	}
+
+	if protocolErr != nil {
+		// Protocol creation failed, close the connection (IMPORTANT!).
+		conn.Close()
+	}
+
+	return protocol, protocolErr
 }

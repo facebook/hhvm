@@ -310,7 +310,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnException](deref(self._struct_cpp_obj), 5)
             return
-        deref(self._struct_cpp_obj).exception_set_ref().assign(deref(_module_types.Set__i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).exception_set_ref().assign(_module_types.Set__i64__make_instance(_fbthrift_value))
 
     cdef void _set_field_6(self, _fbthrift_value) except *:
         # for field exception_map
@@ -356,7 +356,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnException](deref(self._struct_cpp_obj), 11)
             return
-        deref(self._struct_cpp_obj).a_set_struct_ref().assign(deref(_module_types.Set__MyStruct(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).a_set_struct_ref().assign(_module_types.Set__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_12(self, _fbthrift_value) except *:
         # for field a_union_list
@@ -370,7 +370,7 @@ cdef class __AnException_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnException](deref(self._struct_cpp_obj), 13)
             return
-        deref(self._struct_cpp_obj).union_typedef_ref().assign(deref(_module_types.Set__SimpleUnion(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).union_typedef_ref().assign(_module_types.Set__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_14(self, _fbthrift_value) except *:
         # for field a_union_typedef_list
@@ -562,21 +562,21 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 6)
             return
-        deref(self._struct_cpp_obj).fieldC_ref().assign(deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldC_ref().assign(_module_types.Set__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_7(self, _fbthrift_value) except *:
         # for field req_fieldC
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).req_fieldC_ref().assign(deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).req_fieldC_ref().assign(_module_types.Set__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field opt_fieldC
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 8)
             return
-        deref(self._struct_cpp_obj).opt_fieldC_ref().assign(deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).opt_fieldC_ref().assign(_module_types.Set__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_9(self, _fbthrift_value) except *:
         # for field fieldD
@@ -663,7 +663,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 19)
             return
-        deref(self._struct_cpp_obj).fieldL_ref().assign(deref(_module_types.Set__Set__Set__bool(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldL_ref().assign(_module_types.Set__Set__Set__bool__make_instance(_fbthrift_value))
 
     cdef void _set_field_20(self, _fbthrift_value) except *:
         # for field fieldM
@@ -787,7 +787,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 34)
             return
-        deref(self._struct_cpp_obj).fieldW_ref().assign(deref(_module_types.Set__MyStruct(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldW_ref().assign(_module_types.Set__MyStruct__make_instance(_fbthrift_value))
 
     cdef void _set_field_35(self, _fbthrift_value) except *:
         # for field fieldX
@@ -828,7 +828,7 @@ cdef class __containerStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.ccontainerStruct](deref(self._struct_cpp_obj), 39)
             return
-        deref(self._struct_cpp_obj).fieldZ_ref().assign(deref(_module_types.Set__SimpleUnion(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).fieldZ_ref().assign(_module_types.Set__SimpleUnion__make_instance(_fbthrift_value))
 
     cdef void _set_field_40(self, _fbthrift_value) except *:
         # for field fieldAA
@@ -1075,7 +1075,7 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 9)
             return
-        assign_unique_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).opt_container_with_ref_ref(), make_unique[cset[cint32_t]](deref(_module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).opt_container_with_ref_ref(), make_unique[cset[cint32_t]](_module_types.Set__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_10(self, _fbthrift_value) except *:
         # for field ref_type_unique
@@ -1150,7 +1150,7 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 18)
             return
-        assign_shared_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).opt_ref_type_shared_ref(), _module_types.Set__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        assign_shared_ptr[cset[cint32_t]](deref(self._struct_cpp_obj).opt_ref_type_shared_ref(), make_shared[cset[cint32_t]](_module_types.Set__i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_19(self, _fbthrift_value) except *:
         # for field base_type
@@ -1174,7 +1174,7 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 21)
             return
-        deref(self._struct_cpp_obj).set_type_ref().assign(deref(_module_types.folly_sorted_vector_set_std_string__Set__string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).set_type_ref().assign(_module_types.folly_sorted_vector_set_std_string__Set__string__make_instance(_fbthrift_value))
 
     cdef void _set_field_22(self, _fbthrift_value) except *:
         # for field map_type
@@ -1227,7 +1227,7 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 28)
             return
-        deref(self._struct_cpp_obj).set_template_ref().assign(deref(_module_types.folly_sorted_vector_set__Set__string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).set_template_ref().assign(_module_types.folly_sorted_vector_set__Set__string__make_instance(_fbthrift_value))
 
     cdef void _set_field_29(self, _fbthrift_value) except *:
         # for field map_template
@@ -1255,7 +1255,7 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 32)
             return
-        deref(self._struct_cpp_obj).typedef_set_template_ref().assign(deref(_module_types.folly_sorted_vector_set__Set__string(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).typedef_set_template_ref().assign(_module_types.folly_sorted_vector_set__Set__string__make_instance(_fbthrift_value))
 
     cdef void _set_field_33(self, _fbthrift_value) except *:
         # for field typedef_map_template
@@ -1286,7 +1286,7 @@ cdef class __AnnotatedStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAnnotatedStruct](deref(self._struct_cpp_obj), 36)
             return
-        deref(self._struct_cpp_obj).indirection_c_ref().assign(deref(_module_types.Set__Baz__i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).indirection_c_ref().assign(_module_types.Set__Baz__i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_37(self, _fbthrift_value) except *:
         # for field iobuf_type_val

@@ -1068,7 +1068,7 @@ async def MyService_invalid_return_for_hack_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[float]](deref((<_test_fixtures_basic_module_types.Set__float?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cset[float]](_test_fixtures_basic_module_types.Set__float__make_instance(result)))
 
 async def MyService_rpc_skipped_codegen_coro(
     object self,

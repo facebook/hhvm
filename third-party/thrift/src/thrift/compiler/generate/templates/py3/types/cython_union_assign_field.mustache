@@ -24,10 +24,13 @@ on a union.
 }}{{#type:list?}}{{!
   }}deref(c_inst).{{field:py_name}}_ref().assign({{!
     }}{{> types/container_to_cpp }}({{field:py_name}})){{!
-}}{{/type:list?}}{{^type:list?}}{{!
+}}{{/type:list?}}{{#type:set?}}{{!
+  }}deref(c_inst).{{field:py_name}}_ref().assign({{!
+    }}{{> types/container_to_cpp }}({{field:py_name}})){{!
+}}{{/type:set?}}{{^type:list?}}{{^type:set?}}{{!
   }}deref(c_inst).{{field:py_name}}_ref().assign_ptr({{!
     }}cmove(deref((<{{> types/cython_python_type }}?> {{field:py_name}}).{{> types/cpp_obj}}))){{!
-}}{{/type:list?}}{{!
+}}{{/type:set?}}{{/type:list?}}{{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
 }}{{#type:bool?}}{{!
@@ -74,11 +77,15 @@ on a union.
   }}deref(c_inst).{{field:py_name}}_ref().assign({{!
     }}{{> types/container_to_cpp }}({{field:py_name}})){{!
 }}{{/type:list?}}{{!
-}}{{#type:container?}}{{^type:list?}}{{!
+}}{{#type:set?}}{{!
+  }}deref(c_inst).{{field:py_name}}_ref().assign({{!
+    }}{{> types/container_to_cpp }}({{field:py_name}})){{!
+}}{{/type:set?}}{{!
+}}{{#type:map?}}{{!
   }}deref(c_inst).{{field:py_name}}_ref().assign({{!
     }}<{{> types/cython_cpp_type}}>{{!
     }}deref({{> types/cython_python_type }}({{field:py_name}}).{{> types/cpp_obj}})){{!
-}}{{/type:list?}}{{/type:container?}}{{!
+}}{{/type:map?}}{{!
 }}{{/field:reference?}}{{!
 }}{{/field:has_ref_api?}}{{!
 }}{{#field:has_ref_api?}}{{!
@@ -147,10 +154,14 @@ on a union.
   }}deref(c_inst).set_{{field:py_name}}({{!
     }}{{> types/container_to_cpp }}({{field:py_name}})){{!
 }}{{/type:list?}}{{!
-}}{{#type:container?}}{{^type:list?}}{{!
+}}{{#type:set?}}{{!
+  }}deref(c_inst).set_{{field:py_name}}({{!
+    }}{{> types/container_to_cpp }}({{field:py_name}})){{!
+}}{{/type:set?}}{{!
+}}{{#type:map?}}{{!
   }}deref(c_inst).set_{{field:py_name}}({{!
     }}<{{> types/cython_cpp_type}}>{{!
     }}deref({{> types/cython_python_type }}({{field:py_name}}).{{> types/cpp_obj}})){{!
-}}{{/type:list?}}{{/type:container?}}{{!
+}}{{/type:map?}}{{!
 }}{{/field:reference?}}{{!
 }}{{/field:has_ref_api?}}

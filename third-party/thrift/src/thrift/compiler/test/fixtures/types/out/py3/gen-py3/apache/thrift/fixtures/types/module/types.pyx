@@ -71,12 +71,14 @@ from apache.thrift.fixtures.types.module.containers_FBTHRIFT_ONLY_DO_NOT_USE imp
     std_deque__List__i32,
     folly_fbvector__List__i32,
     folly_small_vector__List__i32,
+    folly_sorted_vector_set__Set__i32,
     std_list_int32_t__List__i32,
     List__std_unordered_map__Map__i32_string,
     _std_list__List__IncompleteListDep,
     folly_small_vector__List__CompleteListDep,
     List__AdaptedListDep,
     List__DependentAdaptedListDep,
+    Set__i32,
 )
 
 
@@ -388,7 +390,7 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
 
     cdef inline fieldF_impl(self):
         if self.__fbthrift_cached_fieldF is None:
-            self.__fbthrift_cached_fieldF = folly_sorted_vector_set__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldF_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_fieldF = folly_sorted_vector_set__Set__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).fieldF_ref().ref())
         return self.__fbthrift_cached_fieldF
 
     @property
@@ -3660,7 +3662,7 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
 
     cdef inline aa_set_impl(self):
         if self.__fbthrift_cached_aa_set is None:
-            self.__fbthrift_cached_aa_set = Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).aa_set_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_aa_set = Set__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).aa_set_ref().ref())
         return self.__fbthrift_cached_aa_set
 
     @property
@@ -4466,85 +4468,15 @@ cdef object folly_small_vector__List__i32__from_cpp(const _apache_thrift_fixture
         py_list.append(c_vec[idx])
     return folly_small_vector__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class folly_sorted_vector_set__Set__i32(thrift.py3.types.Set):
-    def __init__(self, items=None):
-        if isinstance(items, folly_sorted_vector_set__Set__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<folly_sorted_vector_set__Set__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = folly_sorted_vector_set__Set__i32__make_instance(items)
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] c_items):
-        __fbthrift_inst = <folly_sorted_vector_set__Set__i32>folly_sorted_vector_set__Set__i32.__new__(folly_sorted_vector_set__Set__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(folly_sorted_vector_set__Set__i32 self):
-        cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] cpp_obj = make_shared[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return folly_sorted_vector_set__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    def __contains__(self, item):
-        if not self or item is None:
-            return False
-        if not isinstance(item, int):
-            return False
-        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
-
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __set_iter[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] itr = __set_iter[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cint32_t citem = 0
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield citem
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __richcmp__(self, other, int op):
-        if isinstance(other, folly_sorted_vector_set__Set__i32):
-            # C level comparisons
-            return __setcmp(
-                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                (<folly_sorted_vector_set__Set__i32> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                op,
-            )
-        return self._fbthrift_py_richcmp(other, op)
-
-    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
-        if not isinstance(other, folly_sorted_vector_set__Set__i32):
-            other = folly_sorted_vector_set__Set__i32(other)
-        cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] result
-        return folly_sorted_vector_set__Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<folly_sorted_vector_set__Set__i32>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__folly_sorted_vector_set__Set__i32()
-
-
-Set.register(folly_sorted_vector_set__Set__i32)
-
-cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] folly_sorted_vector_set__Set__i32__make_instance(object items) except *:
-    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]] c_inst = make_shared[_apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]]()
+cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] folly_sorted_vector_set__Set__i32__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).insert(item)
+            c_inst.insert(item)
     return cmove(c_inst)
 
 cdef object folly_sorted_vector_set__Set__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]& c_set) except *:
@@ -5049,85 +4981,15 @@ cdef object List__DependentAdaptedListDep__from_cpp(const vector[_apache_thrift_
         py_list.append(DependentAdaptedListDep._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedListDep](c_vec[idx])))
     return List__DependentAdaptedListDep(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Set__i32(thrift.py3.types.Set):
-    def __init__(self, items=None):
-        if isinstance(items, Set__i32):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__i32> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__i32__make_instance(items)
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[cint32_t]] c_items):
-        __fbthrift_inst = <Set__i32>Set__i32.__new__(Set__i32)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Set__i32 self):
-        cdef shared_ptr[cset[cint32_t]] cpp_obj = make_shared[cset[cint32_t]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    def __contains__(self, item):
-        if not self or item is None:
-            return False
-        if not isinstance(item, int):
-            return False
-        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
-
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __set_iter[cset[cint32_t]] itr = __set_iter[cset[cint32_t]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cint32_t citem = 0
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield citem
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __richcmp__(self, other, int op):
-        if isinstance(other, Set__i32):
-            # C level comparisons
-            return __setcmp(
-                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                (<Set__i32> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                op,
-            )
-        return self._fbthrift_py_richcmp(other, op)
-
-    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
-        if not isinstance(other, Set__i32):
-            other = Set__i32(other)
-        cdef shared_ptr[cset[cint32_t]] result
-        return Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[cint32_t]](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<Set__i32>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Set__i32()
-
-
-Set.register(Set__i32)
-
-cdef shared_ptr[cset[cint32_t]] Set__i32__make_instance(object items) except *:
-    cdef shared_ptr[cset[cint32_t]] c_inst = make_shared[cset[cint32_t]]()
+cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
+    cdef cset[cint32_t] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, int):
                 raise TypeError(f"{item!r} is not of type int")
             item = <cint32_t> item
-            deref(c_inst).insert(item)
+            c_inst.insert(item)
     return cmove(c_inst)
 
 cdef object Set__i32__from_cpp(const cset[cint32_t]& c_set) except *:

@@ -27,7 +27,7 @@ def get_types_reflection():
 
 __all__ = []
 
-class Set__i32(thrift.py3.types.SetNew):
+class Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

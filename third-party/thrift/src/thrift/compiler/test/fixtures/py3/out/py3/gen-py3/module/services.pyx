@@ -1017,7 +1017,7 @@ cdef api void call_cy_SimpleService_sum_set(
     unique_ptr[cset[cint32_t]] numbers
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_numbers = _module_types.Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(numbers)))
+    arg_numbers = _module_types.Set__i32__from_cpp(deref(numbers))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1036,7 +1036,7 @@ cdef api void call_cy_SimpleService_contains_word(
     unique_ptr[string] word
 ) noexcept:
     cdef Promise_cbool __promise = Promise_cbool._fbthrift_create(cmove(cPromise))
-    arg_words = _module_types.Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(words)))
+    arg_words = _module_types.Set__string__from_cpp(deref(words))
     arg_word = (deref(word)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -2278,7 +2278,7 @@ async def SimpleService_unique_words_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cset[string]](_module_types.Set__string__make_instance(result)))
 
 async def SimpleService_words_count_coro(
     object self,
@@ -2525,7 +2525,7 @@ async def SimpleService_get_union_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[cint32_t]](deref((<_module_types.Set__i32?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cset[cint32_t]](_module_types.Set__i32__make_instance(result)))
 
 async def SimpleService_get_keys_coro(
     object self,
@@ -2556,7 +2556,7 @@ async def SimpleService_get_keys_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cset[string]](_module_types.Set__string__make_instance(result)))
 
 async def SimpleService_lookup_double_coro(
     object self,
@@ -2647,7 +2647,7 @@ async def SimpleService_contain_binary_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cset[string]](deref((<_module_types.Set__binary?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cset[string]](_module_types.Set__binary__make_instance(result)))
 
 async def SimpleService_contain_enum_coro(
     object self,

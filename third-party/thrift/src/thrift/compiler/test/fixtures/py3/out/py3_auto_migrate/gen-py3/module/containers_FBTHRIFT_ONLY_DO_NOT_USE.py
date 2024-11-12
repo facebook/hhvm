@@ -229,7 +229,7 @@ class List__SimpleStruct(thrift.py3.types.List):
 Sequence.register(List__SimpleStruct)
 
 __all__.append('List__SimpleStruct')
-class Set__i32(thrift.py3.types.SetNew):
+class Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -268,7 +268,7 @@ class Set__i32(thrift.py3.types.SetNew):
 
 Set.register(Set__i32)
 __all__.append('Set__i32')
-class Set__string(thrift.py3.types.SetNew):
+class Set__string(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -571,7 +571,7 @@ class List__binary(thrift.py3.types.List):
 Sequence.register(List__binary)
 
 __all__.append('List__binary')
-class Set__binary(thrift.py3.types.SetNew):
+class Set__binary(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -693,7 +693,7 @@ class _MyType__List__i32(thrift.py3.types.List):
 Sequence.register(_MyType__List__i32)
 
 __all__.append('_MyType__List__i32')
-class _MyType__Set__i32(thrift.py3.types.SetNew):
+class _MyType__Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

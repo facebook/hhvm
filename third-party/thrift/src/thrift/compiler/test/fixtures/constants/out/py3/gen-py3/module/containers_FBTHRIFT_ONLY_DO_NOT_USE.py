@@ -233,7 +233,7 @@ class List__string(thrift.py3.types.List):
 Sequence.register(List__string)
 
 __all__.append('List__string')
-class Set__i32(thrift.py3.types.SetNew):
+class Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -272,7 +272,7 @@ class Set__i32(thrift.py3.types.SetNew):
 
 Set.register(Set__i32)
 __all__.append('Set__i32')
-class Set__string(thrift.py3.types.SetNew):
+class Set__string(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

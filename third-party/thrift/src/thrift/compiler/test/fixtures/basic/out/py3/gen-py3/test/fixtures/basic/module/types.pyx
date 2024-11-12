@@ -64,7 +64,9 @@ from test.fixtures.basic.module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 )
 
 from test.fixtures.basic.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    Set__float,
     List__i32,
+    Set__string,
 )
 
 
@@ -168,7 +170,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     cdef inline floatSet_impl(self):
         if self.__fbthrift_cached_floatSet is None:
-            self.__fbthrift_cached_floatSet = Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).floatSet_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_floatSet = Set__float__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).floatSet_ref().ref())
         return self.__fbthrift_cached_floatSet
 
     @property
@@ -304,7 +306,7 @@ cdef class Containers(thrift.py3.types.Struct):
 
     cdef inline StringSet_impl(self):
         if self.__fbthrift_cached_StringSet is None:
-            self.__fbthrift_cached_StringSet = Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).StringSet_ref().ref(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_StringSet = Set__string__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).StringSet_ref().ref())
         return self.__fbthrift_cached_StringSet
 
     @property
@@ -563,7 +565,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         if floatSet is not None:
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
-            deref(c_inst).set_floatSet(<cset[float]>deref(Set__float(floatSet)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            deref(c_inst).set_floatSet(Set__float__make_instance(floatSet))
             any_set = True
         # in C++ you don't have to call move(), but this doesn't translate
         # into a C++ return statement, so you do here
@@ -616,7 +618,7 @@ cdef class MyUnion(thrift.py3.types.Union):
         elif type == 3:
             self.value = MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myDataItem()))
         elif type == 4:
-            self.value = Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[cset[float]](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatSet()))
+            self.value = Set__float__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatSet())
 
     def __copy__(MyUnion self):
         cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyUnion](
@@ -1220,84 +1222,14 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.UnionToBeRenamed, self)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Set__float(thrift.py3.types.Set):
-    def __init__(self, items=None):
-        if isinstance(items, Set__float):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__float> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__float__make_instance(items)
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[float]] c_items):
-        __fbthrift_inst = <Set__float>Set__float.__new__(Set__float)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Set__float self):
-        cdef shared_ptr[cset[float]] cpp_obj = make_shared[cset[float]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    def __contains__(self, item):
-        if not self or item is None:
-            return False
-        if not isinstance(item, float):
-            return False
-        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item))
-
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __set_iter[cset[float]] itr = __set_iter[cset[float]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef float citem = 0
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield citem
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __richcmp__(self, other, int op):
-        if isinstance(other, Set__float):
-            # C level comparisons
-            return __setcmp(
-                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                (<Set__float> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                op,
-            )
-        return self._fbthrift_py_richcmp(other, op)
-
-    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
-        if not isinstance(other, Set__float):
-            other = Set__float(other)
-        cdef shared_ptr[cset[float]] result
-        return Set__float._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[float]](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<Set__float>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Set__float()
-
-
-Set.register(Set__float)
-
-cdef shared_ptr[cset[float]] Set__float__make_instance(object items) except *:
-    cdef shared_ptr[cset[float]] c_inst = make_shared[cset[float]]()
+cdef cset[float] Set__float__make_instance(object items) except *:
+    cdef cset[float] c_inst
     if items is not None:
         for item in items:
             if not isinstance(item, (float, int)):
                 raise TypeError(f"{item!r} is not of type float")
-            deref(c_inst).insert(item)
+            c_inst.insert(item)
     return cmove(c_inst)
 
 cdef object Set__float__from_cpp(const cset[float]& c_set) except *:
@@ -1327,86 +1259,16 @@ cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:
         py_list.append(c_vec[idx])
     return List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Set__string(thrift.py3.types.Set):
-    def __init__(self, items=None):
-        if isinstance(items, Set__string):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Set__string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Set__string__make_instance(items)
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cset[string]] c_items):
-        __fbthrift_inst = <Set__string>Set__string.__new__(Set__string)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Set__string self):
-        cdef shared_ptr[cset[string]] cpp_obj = make_shared[cset[string]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    def __contains__(self, item):
-        if not self or item is None:
-            return False
-        if not isinstance(item, str):
-            return False
-        return pbool(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).count(item.encode('UTF-8')))
-
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __set_iter[cset[string]] itr = __set_iter[cset[string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNext(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield bytes(citem).decode('UTF-8')
-
-    def __hash__(self):
-        return super().__hash__()
-
-    def __richcmp__(self, other, int op):
-        if isinstance(other, Set__string):
-            # C level comparisons
-            return __setcmp(
-                self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                (<Set__string> other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-                op,
-            )
-        return self._fbthrift_py_richcmp(other, op)
-
-    cdef _fbthrift_do_set_op(self, other, __cSetOp op):
-        if not isinstance(other, Set__string):
-            other = Set__string(other)
-        cdef shared_ptr[cset[string]] result
-        return Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(__set_op[cset[string]](
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            (<Set__string>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
-            op,
-        ))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Set__string()
-
-
-Set.register(Set__string)
-
-cdef shared_ptr[cset[string]] Set__string__make_instance(object items) except *:
-    cdef shared_ptr[cset[string]] c_inst = make_shared[cset[string]]()
+cdef cset[string] Set__string__make_instance(object items) except *:
+    cdef cset[string] c_inst
     if items is not None:
         if isinstance(items, str):
             raise TypeError("If you really want to pass a string into a _typing.AbstractSet[str] field, explicitly convert it first.")
         for item in items:
             if not isinstance(item, str):
                 raise TypeError(f"{item!r} is not of type str")
-            deref(c_inst).insert(item.encode('UTF-8'))
+            c_inst.insert(item.encode('UTF-8'))
     return cmove(c_inst)
 
 cdef object Set__string__from_cpp(const cset[string]& c_set) except *:
@@ -1621,7 +1483,7 @@ MASK = 16388846
 E = 2.718281828459
 DATE = _test_fixtures_basic_module_cbindings.cDATE().decode('UTF-8')
 AList = List__i32__from_cpp(_test_fixtures_basic_module_cbindings.cAList())
-ASet = Set__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_test_fixtures_basic_module_cbindings.cASet()))
+ASet = Set__string__from_cpp(_test_fixtures_basic_module_cbindings.cASet())
 AMap = Map__string_List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_test_fixtures_basic_module_cbindings.cAMap()))
 MyEnumAlias = MyEnum
 MyDataItemAlias = MyDataItem

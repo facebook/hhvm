@@ -242,16 +242,16 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
       // Test whether the required methods exist in Visitor
       v.assign(T{});
       v.clear();
-      v.remove(T{});
-      v.add(T{});
+      v.removeMulti(T{});
+      v.addMulti(T{});
     }
 
     if (Base::template customVisitAssignAndClear(v)) {
       return;
     }
 
-    v.remove(*data_.remove());
-    v.add(*data_.add());
+    v.removeMulti(*data_.remove());
+    v.addMulti(*data_.add());
   }
 
   void apply(T& val) const {
@@ -259,8 +259,8 @@ class SetPatch : public BaseContainerPatch<Patch, SetPatch<Patch>> {
       T& v;
       void assign(const T& t) { v = t; }
       void clear() { v.clear(); }
-      void remove(const T& t) { erase_all(v, t); }
-      void add(const T& t) { v.insert(t.begin(), t.end()); }
+      void removeMulti(const T& t) { erase_all(v, t); }
+      void addMulti(const T& t) { v.insert(t.begin(), t.end()); }
     };
 
     return customVisit(Visitor{val});

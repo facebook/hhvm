@@ -26,10 +26,7 @@ from thrift.python.types cimport(
     BadEnum as __BadEnum,
 )
 from thrift.py3.types cimport (
-    cSetOp as __cSetOp,
     richcmp as __richcmp,
-    set_op as __set_op,
-    setcmp as __setcmp,
     init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,

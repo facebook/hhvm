@@ -57,12 +57,6 @@ cdef extern from "<memory>" namespace "std" nogil:
     cdef shared_ptr[const T] const_pointer_cast "std::const_pointer_cast"[T](shared_ptr[T])
 
 cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
-    cdef enum cSetOp "::thrift::py3::SetOp":
-        AND
-        OR
-        SUB
-        XOR
-        REVSUB
     shared_ptr[T] constant_shared_ptr[T](T)
     shared_ptr[T] reference_shared_ptr[T](const T& ref, ...)
     void assign_unique_ptr[T](unique_ptr[T]& x, unique_ptr[T] y)
@@ -70,8 +64,6 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     void assign_shared_const_ptr[T](shared_ptr[const T]& x, shared_ptr[const T] y)
     const T& default_inst[T]()
     bint richcmp[T](const shared_ptr[T]& a, const shared_ptr[T]& b, int op)
-    bint setcmp[T](const shared_ptr[T]& a, const shared_ptr[T]& b, int op)
-    shared_ptr[T] set_op[T](const shared_ptr[T]& a, const shared_ptr[T]& b, cSetOp op)
     bint map_contains[T](const shared_ptr[T]& cpp_obj, ...)
     void map_getitem[T](const shared_ptr[T]& cpp_obj, ...)
     void reset_field[T](T& obj, uint16_t index) except +
@@ -81,9 +73,7 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
 
     cdef cppclass set_iter[T]:
         set_iter()
-        set_iter(const shared_ptr[T]& cpp_obj)
         set_iter(const T& cpp_obj)
-        void genNext(const shared_ptr[T]& cpp_obj, ...)
         void genNextItem(...)
     cdef cppclass map_iter[T]:
         map_iter()

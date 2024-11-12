@@ -29,23 +29,6 @@
 #include <thrift/compiler/ast/uri.h>
 #include <thrift/compiler/generate/cpp/reference_type.h>
 
-template <>
-struct std::hash<std::pair<
-    const apache::thrift::compiler::t_field*,
-    apache::thrift::compiler::gen::cpp::reference_type>> {
-  std::size_t operator()(const std::pair<
-                         const apache::thrift::compiler::t_field*,
-                         apache::thrift::compiler::gen::cpp::reference_type>& p)
-      const noexcept {
-    uintptr_t val = reinterpret_cast<uintptr_t>(p.first);
-    uintptr_t ref = static_cast<uintptr_t>(p.second);
-    // Adjacent t_field are far enough apart that adding ref type won't
-    // introduce collisions.
-    assert(sizeof(apache::thrift::compiler::t_field) > ref);
-    return std::hash<uintptr_t>()(val + ref);
-  }
-};
-
 namespace apache::thrift::compiler {
 namespace detail {
 template <typename C, typename K = typename C::key_type, typename G>
@@ -209,8 +192,7 @@ class cpp_name_resolver {
   std::unordered_map<const t_type*, std::string> underlying_type_cache_;
   std::unordered_map<const t_type*, std::string>
       underlying_namespaced_name_cache_;
-  std::unordered_map<std::pair<const t_field*, cpp_reference_type>, std::string>
-      storage_type_cache_;
+  std::unordered_map<const t_field*, std::string> storage_type_cache_;
   std::unordered_map<const t_type*, std::string> type_tag_cache_;
   std::unordered_map<const t_field*, std::string> field_type_tag_cache_;
   std::unordered_map<const t_field*, std::string> field_reference_type_cache_;

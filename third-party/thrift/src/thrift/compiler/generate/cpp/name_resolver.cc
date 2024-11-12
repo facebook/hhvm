@@ -246,7 +246,7 @@ const std::string& cpp_name_resolver::get_storage_type(
     // The storage type is just the type name.
     return native_type;
   }
-  return detail::get_or_gen(storage_type_cache_, {&field, ref_type}, [&]() {
+  return detail::get_or_gen(storage_type_cache_, &field, [&]() {
     return gen_storage_type(native_type, ref_type, field);
   });
 }

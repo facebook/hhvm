@@ -450,75 +450,65 @@ TEST_F(CppNameResolverTest, storage_type) {
   t_struct strct(&program_, "Foo");
   strct.add_structured_annotation(
       gen::adapter_builder(program_, "cpp").make("HashAdapter"));
-  {
-    t_field strct_field(strct, "hash", 1);
-    EXPECT_EQ(get_storage_type(strct_field), "::path::to::Foo");
-  }
 
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("cpp.ref", "");
-    EXPECT_EQ(
-        get_storage_type(strct_field), "::std::unique_ptr<::path::to::Foo>");
-  }
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("cpp2.ref", ""); // Works with cpp2.
-    EXPECT_EQ(
-        get_storage_type(strct_field), "::std::unique_ptr<::path::to::Foo>");
-  }
+  t_field strct_field(strct, "hash", 1);
+  EXPECT_EQ(get_storage_type(strct_field), "::path::to::Foo");
 
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("cpp.ref_type", "unique");
-    EXPECT_EQ(
-        get_storage_type(strct_field), "::std::unique_ptr<::path::to::Foo>");
-  }
+  t_field unique_strct_field(strct, "hash", 1);
+  unique_strct_field.set_annotation("cpp.ref", "");
+  EXPECT_EQ(
+      get_storage_type(unique_strct_field),
+      "::std::unique_ptr<::path::to::Foo>");
 
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("cpp2.ref_type", "shared"); // Works with cpp2.
-    EXPECT_EQ(
-        get_storage_type(strct_field), "::std::shared_ptr<::path::to::Foo>");
-  }
+  t_field cpp2_unique_strct_field(strct, "hash", 1);
+  cpp2_unique_strct_field.set_annotation("cpp2.ref", ""); // Works with cpp2.
+  EXPECT_EQ(
+      get_storage_type(cpp2_unique_strct_field),
+      "::std::unique_ptr<::path::to::Foo>");
 
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("cpp.ref_type", "shared_mutable");
-    EXPECT_EQ(
-        get_storage_type(strct_field), "::std::shared_ptr<::path::to::Foo>");
-  }
+  t_field explicit_unique_strct_field(strct, "hash", 1);
+  explicit_unique_strct_field.set_annotation("cpp.ref_type", "unique");
+  EXPECT_EQ(
+      get_storage_type(explicit_unique_strct_field),
+      "::std::unique_ptr<::path::to::Foo>");
 
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("cpp.ref_type", "shared_const");
-    EXPECT_EQ(
-        get_storage_type(strct_field),
-        "::std::shared_ptr<const ::path::to::Foo>");
-  }
+  t_field shared_mutable_strct_field(strct, "hash", 1);
+  shared_mutable_strct_field.set_annotation(
+      "cpp2.ref_type", "shared"); // Works with cpp2.
+  EXPECT_EQ(
+      get_storage_type(shared_mutable_strct_field),
+      "::std::shared_ptr<::path::to::Foo>");
 
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("thrift.box", "");
-    EXPECT_EQ(
-        get_storage_type(strct_field),
-        "::apache::thrift::detail::boxed_value_ptr<::path::to::Foo>");
-  }
+  t_field explicit_shared_mutable_strct_field(strct, "hash", 1);
+  explicit_shared_mutable_strct_field.set_annotation(
+      "cpp.ref_type", "shared_mutable");
+  EXPECT_EQ(
+      get_storage_type(explicit_shared_mutable_strct_field),
+      "::std::shared_ptr<::path::to::Foo>");
 
-  {
-    t_field strct_field(strct, "hash", 1);
-    strct_field.add_structured_annotation(
-        gen::thrift_annotation_builder::box(program_).make());
-    EXPECT_EQ(
-        get_storage_type(strct_field),
-        "::apache::thrift::detail::boxed_value_ptr<::path::to::Foo>");
-  }
+  t_field shared_strct_field(strct, "hash", 1);
+  shared_strct_field.set_annotation("cpp.ref_type", "shared_const");
+  EXPECT_EQ(
+      get_storage_type(shared_strct_field),
+      "::std::shared_ptr<const ::path::to::Foo>");
 
-  { // Unrecognized throws an exception.
-    t_field strct_field(strct, "hash", 1);
-    strct_field.set_annotation("cpp.ref_type", "blah");
-    EXPECT_THROW(get_storage_type(strct_field), std::runtime_error);
-  }
+  t_field box_strct_field(strct, "hash", 1);
+  box_strct_field.set_annotation("thrift.box", "");
+  EXPECT_EQ(
+      get_storage_type(box_strct_field),
+      "::apache::thrift::detail::boxed_value_ptr<::path::to::Foo>");
+
+  t_field structured_box_strct_field(strct, "hash", 1);
+  structured_box_strct_field.add_structured_annotation(
+      gen::thrift_annotation_builder::box(program_).make());
+  EXPECT_EQ(
+      get_storage_type(structured_box_strct_field),
+      "::apache::thrift::detail::boxed_value_ptr<::path::to::Foo>");
+
+  // Unrecognized throws an exception.
+  t_field unrecognized_strct_field(strct, "hash", 1);
+  unrecognized_strct_field.set_annotation("cpp.ref_type", "blah");
+  EXPECT_THROW(get_storage_type(unrecognized_strct_field), std::runtime_error);
 }
 
 TEST_F(CppNameResolverTest, typedef_cpptemplate) {
@@ -595,101 +585,86 @@ TEST_F(CppNameResolverTest, adapted_field_type) {
 TEST_F(CppNameResolverTest, adapted_field_storage_type) {
   auto i64 = t_primitive_type::t_i64();
   auto adapter = gen::adapter_builder(program_, "cpp");
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>");
-  }
 
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("cpp.ref", "");
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::std::unique_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("cpp2.ref", ""); // Works with cpp2.
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::std::unique_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
+  auto field = t_field(i64, "n", 42);
+  field.add_structured_annotation(adapter.make("MyAdapter"));
+  EXPECT_EQ(
+      get_storage_type(field),
+      "::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>");
 
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("cpp.ref_type", "unique");
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::std::unique_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
+  auto unique_field = t_field(i64, "n", 42);
+  unique_field.add_structured_annotation(adapter.make("MyAdapter"));
+  unique_field.set_annotation("cpp.ref", "");
+  EXPECT_EQ(
+      get_storage_type(unique_field),
+      "::std::unique_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
 
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("cpp.ref_type", "shared");
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
+  auto cpp2_unique_field = t_field(i64, "n", 42);
+  cpp2_unique_field.add_structured_annotation(adapter.make("MyAdapter"));
+  cpp2_unique_field.set_annotation("cpp2.ref", ""); // Works with cpp2.
+  EXPECT_EQ(
+      get_storage_type(cpp2_unique_field),
+      "::std::unique_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
 
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("cpp.ref_type", "shared_mutable");
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
+  auto explicit_unique_field = t_field(i64, "n", 42);
+  explicit_unique_field.add_structured_annotation(adapter.make("MyAdapter"));
+  explicit_unique_field.set_annotation("cpp.ref_type", "unique");
+  EXPECT_EQ(
+      get_storage_type(explicit_unique_field),
+      "::std::unique_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
 
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("cpp.ref_type", "shared_const");
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
+  auto shared_mutable_field = t_field(i64, "n", 42);
+  shared_mutable_field.add_structured_annotation(adapter.make("MyAdapter"));
+  shared_mutable_field.set_annotation("cpp.ref_type", "shared");
+  EXPECT_EQ(
+      get_storage_type(shared_mutable_field),
+      "::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
 
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("thrift.box", "");
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
+  auto explicit_shared_mutable_field = t_field(i64, "n", 42);
+  explicit_shared_mutable_field.add_structured_annotation(
+      adapter.make("MyAdapter"));
+  explicit_shared_mutable_field.set_annotation(
+      "cpp.ref_type", "shared_mutable");
+  EXPECT_EQ(
+      get_storage_type(explicit_shared_mutable_field),
+      "::std::shared_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
 
-  {
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.add_structured_annotation(
-        gen::thrift_annotation_builder::box(program_).make());
-    EXPECT_EQ(
-        get_storage_type(field),
-        "::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
-        "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
-  }
+  auto shared_field = t_field(i64, "n", 42);
+  shared_field.add_structured_annotation(adapter.make("MyAdapter"));
+  shared_field.set_annotation("cpp.ref_type", "shared_const");
+  EXPECT_EQ(
+      get_storage_type(shared_field),
+      "::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
 
-  { // Unrecognized throws an exception.
-    auto field = t_field(i64, "n", 42);
-    field.add_structured_annotation(adapter.make("MyAdapter"));
-    field.set_annotation("cpp.ref_type", "blah");
-    EXPECT_THROW(get_storage_type(field), std::runtime_error);
-  }
+  auto box_field = t_field(i64, "n", 42);
+  box_field.add_structured_annotation(adapter.make("MyAdapter"));
+  box_field.set_annotation("thrift.box", "");
+  EXPECT_EQ(
+      get_storage_type(box_field),
+      "::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
+
+  auto structured_box_field = t_field(i64, "n", 42);
+  structured_box_field.add_structured_annotation(adapter.make("MyAdapter"));
+  structured_box_field.add_structured_annotation(
+      gen::thrift_annotation_builder::box(program_).make());
+  EXPECT_EQ(
+      get_storage_type(structured_box_field),
+      "::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<"
+      "MyAdapter, 42, ::std::int64_t, ThriftStruct>>");
+
+  // Unrecognized throws an exception.
+  auto unrecognized_field = t_field(i64, "n", 42);
+  unrecognized_field.add_structured_annotation(adapter.make("MyAdapter"));
+  unrecognized_field.set_annotation("cpp.ref_type", "blah");
+  EXPECT_THROW(get_storage_type(unrecognized_field), std::runtime_error);
 }
 
 TEST_F(CppNameResolverTest, transitively_adapted_field_type) {

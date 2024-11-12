@@ -125,8 +125,8 @@ func (s *server) acceptLoop(ctx context.Context) error {
 			return nil
 		}
 		// add connection info to ctx.
-		ctx = s.connContext(ctx, conn)
-		go s.processRequests(ctx, conn)
+		connCtx := s.connContext(ctx, conn)
+		go s.processRequests(connCtx, conn)
 	}
 }
 

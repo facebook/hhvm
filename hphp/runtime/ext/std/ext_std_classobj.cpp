@@ -256,10 +256,7 @@ static bool is_a_impl(const Variant& class_or_object, const String& class_name,
     return false;
   }
 
-  if ((class_or_object.isString() ||
-       class_or_object.isClass() ||
-       class_or_object.isLazyClass()) &&
-       !allow_str_cls) {
+  if (!(class_or_object.isObject() || allow_str_cls)) {
     return false;
   }
 

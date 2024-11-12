@@ -83,6 +83,27 @@ struct adapter_builder : base_thrift_annotation_builder {
   }
 };
 
+struct cpp_ref_builder : base_thrift_annotation_builder {
+  explicit cpp_ref_builder(t_program& p)
+      : base_thrift_annotation_builder(p, "cpp", "Ref") {}
+
+  std::unique_ptr<t_const> unique() {
+    auto map = t_const_value::make_map();
+    map->add_map(make_string("type"), make_integer(0));
+    return make_inst(std::move(map));
+  }
+  std::unique_ptr<t_const> shared() {
+    auto map = t_const_value::make_map();
+    map->add_map(make_string("type"), make_integer(1));
+    return make_inst(std::move(map));
+  }
+  std::unique_ptr<t_const> shared_mutable() {
+    auto map = t_const_value::make_map();
+    map->add_map(make_string("type"), make_integer(2));
+    return make_inst(std::move(map));
+  }
+};
+
 struct inject_metadata_fields_builder : base_thrift_annotation_builder {
   explicit inject_metadata_fields_builder(t_program& p)
       : base_thrift_annotation_builder(p, "InjectMetadataFields") {}

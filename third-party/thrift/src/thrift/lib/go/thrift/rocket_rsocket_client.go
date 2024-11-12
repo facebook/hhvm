@@ -139,5 +139,5 @@ func (r *rsocketClient) Close() error {
 	if r.client != nil {
 		return r.client.Close()
 	}
-	return nil
+	return r.conn.Close()
 }

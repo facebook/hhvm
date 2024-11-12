@@ -26,7 +26,11 @@ import (
 )
 
 type upgradeToRocketClient struct {
+	// Current protocol - either 'nil', 'headerProtocol' or 'rocketProtocol',
+	// depending on the current state of "upgrade". It will be 'nil' initially
+	// to indicate that "upgrade" has not yet been attempted or started.
 	types.Protocol
+
 	rocketProtocol types.Protocol
 	headerProtocol types.Protocol
 }
@@ -114,10 +118,9 @@ func (p *upgradeToRocketClient) GetResponseHeaders() map[string]string {
 
 func (p *upgradeToRocketClient) Close() error {
 	if p.Protocol == nil {
-		if err := p.headerProtocol.Close(); err != nil {
-			return err
-		}
-		return p.rocketProtocol.Close()
+		// Upgrade was never atttempted or never succeeded,
+		// so we only need to close the 'headerProtocol'.
+		return p.headerProtocol.Close()
 	}
 	return p.Protocol.Close()
 }

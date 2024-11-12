@@ -1,0 +1,70 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}
+            // From {{service:program_name}}.{{service:name}}:
+{{^service:interaction?}}
+{{#service:rustFunctions}}
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              {{#function:stream?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              {{/function:stream?}}
+              {{^function:stream?}}{{#function:sink?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              {{/function:sink?}}{{/function:stream?}}
+              {{^function:stream?}}{{^function:sink?}}
+                {{#function:return_type}}{{#type:void?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+                  {{/type:void?}}{{^type:void?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+                  {{/type:void?}}{{/function:return_type}}
+              {{/function:sink?}}{{/function:stream?}}
+              name: "{{function:name}}",
+              starts_interaction: {{#function:starts_interaction?}}true{{/function:starts_interaction?}}{{^function:starts_interaction?}}false{{/function:starts_interaction?}},
+              interaction_name: {{#function:starts_interaction?}}Some("{{service:name}}"){{/function:starts_interaction?}}{{^function:starts_interaction?}}None{{/function:starts_interaction?}},
+            },
+{{/service:rustFunctions}}
+{{#service:interactions}}{{#service:rustFunctions}}
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              {{#function:stream?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              {{/function:stream?}}
+              {{^function:stream?}}{{#function:sink?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              {{/function:sink?}}{{/function:stream?}}
+              {{^function:stream?}}{{^function:sink?}}
+                {{#function:return_type}}{{#type:void?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+                  {{/type:void?}}{{^type:void?}}
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+                  {{/type:void?}}{{/function:return_type}}
+              {{/function:sink?}}{{/function:stream?}}
+              name: "{{service:name}}.{{function:name}}",
+              starts_interaction: false,
+              interaction_name: Some("{{service:name}}"),
+            },
+{{/service:rustFunctions}}{{/service:interactions}}
+{{/service:interaction?}}
+{{#service:interaction?}}
+            // Interaction's method names are never queried directly.
+            // They are always queried from the "main" processor.
+{{/service:interaction?}}
+{{#service:extends}}
+
+{{>lib/method_metadata}}
+{{/service:extends}}

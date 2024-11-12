@@ -619,12 +619,30 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.C:
-            "f",
-            "numbers",
-            "thing",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "f",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "numbers",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "thing",
+              starts_interaction: false,
+              interaction_name: None,
+            },
         ]
     }
 

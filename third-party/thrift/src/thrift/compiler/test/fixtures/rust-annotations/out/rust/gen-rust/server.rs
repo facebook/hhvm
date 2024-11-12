@@ -351,10 +351,16 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.S1:
-            "r",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "r",
+              starts_interaction: false,
+              interaction_name: None,
+            },
         ]
     }
 
@@ -694,10 +700,16 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.S2:
-            "r",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "r",
+              starts_interaction: false,
+              interaction_name: None,
+            },
         ]
     }
 
@@ -1149,11 +1161,23 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.AllMethods:
-            "foo",
-            "bar",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "foo",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "bar",
+              starts_interaction: false,
+              interaction_name: None,
+            },
         ]
     }
 
@@ -1605,11 +1629,23 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.OneMethod:
-            "foo",
-            "bar",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "foo",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "bar",
+              starts_interaction: false,
+              interaction_name: None,
+            },
         ]
     }
 
@@ -2061,11 +2097,23 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.OneMethodOptOut:
-            "foo",
-            "bar",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "foo",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "bar",
+              starts_interaction: false,
+              interaction_name: None,
+            },
         ]
     }
 

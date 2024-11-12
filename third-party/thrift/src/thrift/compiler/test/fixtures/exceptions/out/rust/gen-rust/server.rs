@@ -656,13 +656,37 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.Raiser:
-            "doBland",
-            "doRaise",
-            "get200",
-            "get500",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "doBland",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "doRaise",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "get200",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "get500",
+              starts_interaction: false,
+              interaction_name: None,
+            },
         ]
     }
 

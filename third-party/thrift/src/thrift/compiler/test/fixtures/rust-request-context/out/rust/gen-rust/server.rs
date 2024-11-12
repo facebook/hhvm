@@ -340,7 +340,7 @@ pub mod my_service {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
             // Interaction's method names are never queried directly.
@@ -1983,20 +1983,93 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.MyService:
-            "ping",
-            "getRandomData",
-            "hasDataById",
-            "getDataById",
-            "putDataById",
-            "lobDataById",
-            "streamById",
-            "streamByIdWithException",
-            "streamByIdWithResponse",
-            "startPingInteraction",
-            "MyInteraction.ping",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "ping",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "getRandomData",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "hasDataById",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "getDataById",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "putDataById",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "lobDataById",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "streamById",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "streamByIdWithException",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "streamByIdWithResponse",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createMyInteraction",
+              starts_interaction: true,
+              interaction_name: Some("MyService"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "startPingInteraction",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteraction.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
         ]
     }
 

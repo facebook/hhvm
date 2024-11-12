@@ -427,9 +427,9 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
-{{>lib/method_names}}
+{{>lib/method_metadata}}
         ]
     }
 

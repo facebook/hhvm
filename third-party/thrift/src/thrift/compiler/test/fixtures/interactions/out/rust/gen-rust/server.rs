@@ -869,7 +869,7 @@ pub mod my_service {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
             // Interaction's method names are never queried directly.
@@ -1287,7 +1287,7 @@ pub mod my_service {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteractionFast:
             // Interaction's method names are never queried directly.
@@ -1540,7 +1540,7 @@ pub mod my_service {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.SerialInteraction:
             // Interaction's method names are never queried directly.
@@ -2338,22 +2338,121 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.MyService:
-            "foo",
-            "interact",
-            "interactFast",
-            "serialize",
-            "MyInteraction.frobnicate",
-            "MyInteraction.ping",
-            "MyInteraction.truthify",
-            "MyInteraction.encode",
-            "MyInteractionFast.frobnicate",
-            "MyInteractionFast.ping",
-            "MyInteractionFast.truthify",
-            "MyInteractionFast.encode",
-            "SerialInteraction.frobnicate",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createMyInteraction",
+              starts_interaction: true,
+              interaction_name: Some("MyService"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createMyInteractionFast",
+              starts_interaction: true,
+              interaction_name: Some("MyService"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createSerialInteraction",
+              starts_interaction: true,
+              interaction_name: Some("MyService"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "foo",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "interact",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "interactFast",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "serialize",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "MyInteraction.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteraction.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "MyInteraction.truthify",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              name: "MyInteraction.encode",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "MyInteractionFast.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteractionFast.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "MyInteractionFast.truthify",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              name: "MyInteractionFast.encode",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "SerialInteraction.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("SerialInteraction"),
+            },
         ]
     }
 
@@ -2802,7 +2901,7 @@ pub mod factories {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
             // Interaction's method names are never queried directly.
@@ -3220,7 +3319,7 @@ pub mod factories {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteractionFast:
             // Interaction's method names are never queried directly.
@@ -3473,7 +3572,7 @@ pub mod factories {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.SerialInteraction:
             // Interaction's method names are never queried directly.
@@ -4190,22 +4289,100 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.Factories:
-            "foo",
-            "interact",
-            "interactFast",
-            "serialize",
-            "MyInteraction.frobnicate",
-            "MyInteraction.ping",
-            "MyInteraction.truthify",
-            "MyInteraction.encode",
-            "MyInteractionFast.frobnicate",
-            "MyInteractionFast.ping",
-            "MyInteractionFast.truthify",
-            "MyInteractionFast.encode",
-            "SerialInteraction.frobnicate",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "foo",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "interact",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "interactFast",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "serialize",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "MyInteraction.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteraction.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "MyInteraction.truthify",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              name: "MyInteraction.encode",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "MyInteractionFast.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteractionFast.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "MyInteractionFast.truthify",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              name: "MyInteractionFast.encode",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "SerialInteraction.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("SerialInteraction"),
+            },
         ]
     }
 
@@ -4654,7 +4831,7 @@ pub mod perform {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
             // Interaction's method names are never queried directly.
@@ -5072,7 +5249,7 @@ pub mod perform {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteractionFast:
             // Interaction's method names are never queried directly.
@@ -5325,7 +5502,7 @@ pub mod perform {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.SerialInteraction:
             // Interaction's method names are never queried directly.
@@ -5720,19 +5897,100 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.Perform:
-            "foo",
-            "MyInteraction.frobnicate",
-            "MyInteraction.ping",
-            "MyInteraction.truthify",
-            "MyInteraction.encode",
-            "MyInteractionFast.frobnicate",
-            "MyInteractionFast.ping",
-            "MyInteractionFast.truthify",
-            "MyInteractionFast.encode",
-            "SerialInteraction.frobnicate",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createMyInteraction",
+              starts_interaction: true,
+              interaction_name: Some("Perform"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createMyInteractionFast",
+              starts_interaction: true,
+              interaction_name: Some("Perform"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createSerialInteraction",
+              starts_interaction: true,
+              interaction_name: Some("Perform"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "foo",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "MyInteraction.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteraction.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "MyInteraction.truthify",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              name: "MyInteraction.encode",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "MyInteractionFast.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteractionFast.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "MyInteractionFast.truthify",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              name: "MyInteractionFast.encode",
+              starts_interaction: false,
+              interaction_name: Some("MyInteractionFast"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "SerialInteraction.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("SerialInteraction"),
+            },
         ]
     }
 
@@ -6181,7 +6439,7 @@ pub mod interact_with_shared {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
             // Interaction's method names are never queried directly.
@@ -6564,7 +6822,7 @@ pub mod interact_with_shared {
             self.handle_create_interaction(idx)
         }
     
-        fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+        fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From shared.SharedInteraction:
             // Interaction's method names are never queried directly.
@@ -6932,17 +7190,79 @@ where
         self.handle_create_interaction(idx)
     }
 
-    fn get_method_names(&self) -> &'static [&'static ::std::primitive::str] {
+    fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
             // From module.InteractWithShared:
-            "do_some_similar_things",
-            "MyInteraction.frobnicate",
-            "MyInteraction.ping",
-            "MyInteraction.truthify",
-            "MyInteraction.encode",
-            "SharedInteraction.init",
-            "SharedInteraction.do_something",
-            "SharedInteraction.tear_down",
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "do_some_similar_things",
+              starts_interaction: false,
+              interaction_name: None,
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createMyInteraction",
+              starts_interaction: true,
+              interaction_name: Some("InteractWithShared"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::None,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "createshared.SharedInteraction",
+              starts_interaction: true,
+              interaction_name: Some("InteractWithShared"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "MyInteraction.frobnicate",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "MyInteraction.ping",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE,
+              name: "MyInteraction.truthify",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINK,
+              name: "MyInteraction.encode",
+              starts_interaction: false,
+              interaction_name: Some("MyInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "SharedInteraction.init",
+              starts_interaction: false,
+              interaction_name: Some("SharedInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+              name: "SharedInteraction.do_something",
+              starts_interaction: false,
+              interaction_name: Some("SharedInteraction"),
+            },
+            ::fbthrift::processor::MethodMetadata{
+              interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              name: "SharedInteraction.tear_down",
+              starts_interaction: false,
+              interaction_name: Some("SharedInteraction"),
+            },
         ]
     }
 

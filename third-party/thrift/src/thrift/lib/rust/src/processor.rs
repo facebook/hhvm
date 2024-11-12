@@ -79,6 +79,37 @@ where
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[repr(u8)]
+pub enum InteractionType {
+    Unknown = 0,
+    None,
+    InteractionV1,
+}
+
+// Source of truth: https://www.internalfb.com/code/fbsource/[747e817d8fc6ee1505b03e47629e34f40749b0ac]/fbcode/thrift/lib/thrift/RpcMetadata.thrift?lines=67-76
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[allow(non_camel_case_types)]
+#[repr(u8)]
+pub enum RpcKind {
+    SINGLE_REQUEST_SINGLE_RESPONSE = 0,
+    SINGLE_REQUEST_NO_RESPONSE = 1,
+    // Unused:
+    // STREAMING_REQUEST_SINGLE_RESPONSE = 2,
+    // STREAMING_REQUEST_NO_RESPONSE = 3,
+    SINGLE_REQUEST_STREAMING_RESPONSE = 4,
+    // STREAMING_REQUEST_STREAMING_RESPONSE = 5,
+    SINK = 6,
+}
+
+pub struct MethodMetadata {
+    pub interaction_type: InteractionType,
+    pub rpc_kind: RpcKind,
+    pub name: &'static str,
+    pub starts_interaction: bool,
+    pub interaction_name: Option<&'static str>,
+}
+
 #[async_trait]
 pub trait ThriftService<F>: Send + Sync + 'static
 where
@@ -112,12 +143,12 @@ where
         bail!("Thrift server does not support interactions");
     }
 
-    /// Returns function names this thrift service is able to handle, similar
-    /// to the keys of C++'s createMethodMetadata().
+    /// Returns function metadata for this thrift service, similar
+    /// to C++'s createMethodMetadata().
     ///
     /// Return value includes inherited functions from parent thrift services,
     /// and interactions' functions.
-    fn get_method_names(&self) -> &'static [&'static str];
+    fn get_method_metadata(&self) -> &'static [MethodMetadata];
 
     /// Applies to interactions only
     ///
@@ -167,8 +198,8 @@ where
         (**self).create_interaction(name)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
-        (**self).get_method_names()
+    fn get_method_metadata(&self) -> &'static [MethodMetadata] {
+        (**self).get_method_metadata()
     }
 
     async fn on_termination(&self) {
@@ -214,8 +245,8 @@ where
         (**self).create_interaction(name)
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
-        (**self).get_method_names()
+    fn get_method_metadata(&self) -> &'static [MethodMetadata] {
+        (**self).get_method_metadata()
     }
 
     async fn on_termination(&self) {
@@ -414,7 +445,7 @@ where
         bail!("Unimplemented interaction {}", name);
     }
 
-    fn get_method_names(&self) -> &'static [&'static str] {
+    fn get_method_metadata(&self) -> &'static [MethodMetadata] {
         &[]
     }
 

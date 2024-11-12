@@ -208,21 +208,13 @@ void RegionDesc::deleteBlock(BlockId bid) {
 RegionDesc::BlockVec::iterator
 RegionDesc::deleteBlock(RegionDesc::BlockVec::iterator it) {
   const auto bid = (*it)->id();
-  for (auto pid : preds(bid)) removeArc(pid, bid);
-  for (auto sid : succs(bid)) removeArc(bid, sid);
+  for (auto pid : preds(bid)) data(pid).succs.erase(bid);
+  for (auto sid : succs(bid)) data(sid).preds.erase(bid);
 
-  if (auto nextR = nextRetrans(bid)) {
-    auto prevR = prevRetrans(bid);
-    clearPrevRetrans(nextR.value());
-    if (prevR) {
-      clearNextRetrans(prevR.value());
-      setNextRetrans(prevR.value(), nextR.value());
-    } else {
-      clearPrevRetrans(nextR.value());
-    }
-  } else if (auto prevR = prevRetrans(bid)) {
-    clearNextRetrans(prevR.value());
-  }
+  auto const prevRetr = data(bid).prevRetransId;
+  auto const nextRetr = data(bid).nextRetransId;
+  if (prevRetr != kInvalidTransID) data(prevRetr).nextRetransId = nextRetr;
+  if (nextRetr != kInvalidTransID) data(nextRetr).prevRetransId = prevRetr;
 
   m_data.erase(bid);
   return m_blocks.erase(it);

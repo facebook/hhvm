@@ -124,7 +124,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       v.assign(T{});
       v.clear();
       v.prepend(T{});
-      v.append(T{});
+      v.appendMulti(T{});
     }
 
     if (Base::template customVisitAssignAndClear(v)) {
@@ -133,7 +133,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
 
     DCHECK(data_.prepend()->empty()) << "Prepend in ListPatch is disallowed.";
     v.prepend(*data_.prepend());
-    v.append(*data_.append());
+    v.appendMulti(*data_.append());
   }
 
   void apply(T& val) const {
@@ -142,7 +142,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
       void assign(const T& t) { v = t; }
       void clear() { v.clear(); }
       void prepend(const T& t) { v.insert(v.begin(), t.begin(), t.end()); }
-      void append(const T& t) { v.insert(v.end(), t.begin(), t.end()); }
+      void appendMulti(const T& t) { v.insert(v.end(), t.begin(), t.end()); }
     };
 
     return customVisit(Visitor{val});

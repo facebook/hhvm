@@ -80,9 +80,7 @@ def get_binary_handler_type(
     BinaryUnion: Type[BinaryUnionImmutable] | Type[BinaryUnionMutable],
 ) -> Type[ServiceInterface]:
     class BinaryHandler(BinaryServiceInterface):
-        # pyre-fixme[2]: Parameter must be annotated.
         def __init__(self, unit_test) -> None:
-            # pyre-fixme[4]: Attribute must be annotated.
             self.unit_test = unit_test
 
         async def sendRecvBinaries(self, val: Binaries) -> Binaries:

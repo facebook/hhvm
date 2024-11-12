@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <iterator>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -1020,6 +1019,41 @@ bool validate_structured(sema_context& ctx, const t_struct& s) {
 
 } // namespace enum_member_union_field_names_validator
 
+namespace module_name_collision_validator {
+
+void validate_module_name_collision(
+    const t_named& node,
+    const std::string& name,
+    sema_context& ctx,
+    diagnostic_level level) {
+  // the structured annotation @python.Name overrides unstructured py3.name
+  std::reference_wrapper<const std::string> pyname =
+      node.get_annotation("py3.name", &name);
+  if (const t_const* annot =
+          node.find_structured_annotation_or_null(kPythonNameUri)) {
+    if (auto annotation_name =
+            annot->get_value_from_structured_annotation_or_null("name")) {
+      pyname = annotation_name->get_string();
+    }
+  }
+  if (pyname.get() == node.program()->name()) {
+    ctx.report(
+        node,
+        "python-empty-namespace-symbol-collides-with-module",
+        level,
+        "'{}' is declared in module of the same name. "
+        "To fix, add a non-empty py3 namespace or change the name to "
+        " no longer collide with the module name. ",
+        pyname.get());
+  }
+}
+
+void warn_named(sema_context& ctx, const t_named& d) {
+  validate_module_name_collision(d, d.name(), ctx, diagnostic_level::warning);
+}
+
+} // namespace module_name_collision_validator
+
 std::filesystem::path program_to_path(const t_program& prog) {
   auto package = get_py3_namespace(&prog);
   return fmt::format("{}", fmt::join(package, "/"));
@@ -1065,6 +1099,16 @@ class t_mstch_python_generator : public t_mstch_generator {
         diagnostic_level::error,
         /* skip_annotations*/ true,
         /* skip_service_includes*/ true);
+    if (get_py3_namespace(program_).empty()) {
+      validator.add_structured_definition_visitor(
+          module_name_collision_validator::warn_named);
+      validator.add_enum_visitor(module_name_collision_validator::warn_named);
+      validator.add_const_visitor(module_name_collision_validator::warn_named);
+      validator.add_typedef_visitor(
+          module_name_collision_validator::warn_named);
+      validator.add_interface_visitor(
+          module_name_collision_validator::warn_named);
+    }
   }
 
   enum class IsTypesFile { Yes, No };

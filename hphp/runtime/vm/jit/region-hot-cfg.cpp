@@ -527,10 +527,13 @@ RegionDescPtr selectHotCFG(HotTransContext& ctx, bool* truncated) {
     optimizeProfiledGuards(*region, *ctx.profData);
   }
 
-  ITRACE(1, "selectHotCFG: final version after optimizeProfiledGuards:\n{}\n",
-         show(*region));
+  ITRACE(3, "selectHotCFG: before findDominators:\n{}\n", show(*region));
+  region->findDominators();
 
   scaleProfCounts(ctx, region);
+
+  ITRACE(1, "selectHotCFG: final version:\n{}\n",
+         show(*region));
 
   return region;
 }

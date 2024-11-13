@@ -106,6 +106,14 @@ struct RegionDesc {
   void sortBlocks();
 
   /*
+   * Compute a dominating block for each block and save this information into
+   * this RegionDesc.
+   *
+   * Requires blocks to be sorted in a reverse post order (see sortBlocks()).
+   */
+  void findDominators();
+
+  /*
    * Returns the last BC offset in the region that corresponds to the
    * function where the region starts.  This will normally be the offset
    * of the last instruction in the last block, except if the function
@@ -136,6 +144,7 @@ struct RegionDesc {
   void              addArc(BlockId src, BlockId dst);
   void              removeArc(BlockId src, BlockId dst);
   void              addMerged(BlockId fromId, BlockId intoId);
+  Optional<BlockId> idom(BlockId id) const;
   Optional<BlockId> prevRetrans(BlockId id) const;
   Optional<BlockId> nextRetrans(BlockId id) const;
   void              clearPrevRetrans(BlockId id);
@@ -172,6 +181,8 @@ private:
     BlockIdSet               merged; // other blocks that got merged into this
     BlockId                  prevRetransId{kInvalidTransID};
     BlockId                  nextRetransId{kInvalidTransID};
+    BlockId                  idom{kInvalidTransID};
+    uint32_t                 rpoId{std::numeric_limits<uint32_t>::max()};
     double                   profCountScale{1.0};
     bool                     hasIncoming{false};
     explicit BlockData(BlockPtr b = nullptr) : block(b) {}

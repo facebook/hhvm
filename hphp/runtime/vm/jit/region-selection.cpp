@@ -270,6 +270,12 @@ const RegionDesc::BlockIdSet& RegionDesc::merged(BlockId id) const {
   return data(id).merged;
 }
 
+Optional<RegionDesc::BlockId> RegionDesc::idom(BlockId id) const {
+  auto const idom = data(id).idom;
+  if (idom == kInvalidTransID) return std::nullopt;
+  return idom;
+}
+
 Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
   auto const prev = data(id).prevRetransId;
   if (prev == kInvalidTransID) return std::nullopt;
@@ -435,16 +441,69 @@ void RegionDesc::sortBlocks() {
   // Update `m_blocks' vector, making sure that entryId remains the first one.
   m_blocks.clear();
   m_blocks.push_back(block(entryId));
+  data(entryId).rpoId = 0;
   auto size = reverse.size();
   for (size_t i = 0; i < size; i++) {
     auto const id = reverse[size - i - 1];
-    if (id != entryId) m_blocks.push_back(block(id));
+    if (id == entryId) continue;
+    data(id).rpoId = m_blocks.size();
+    m_blocks.push_back(block(id));
   }
   always_assert_flog(
     entryId == entry()->id(),
     "sortBlocks() changed region entry: entryId ({}) != entry()->id() ({})",
     entryId, entry()->id()
   );
+}
+
+void RegionDesc::findDominators() {
+  assertx(!m_blocks.empty());
+
+  auto constexpr kUnknown = -2;
+  auto constexpr kEntry = -1;
+
+  // Entry block has a special "outside of the region" kEntry dominator.
+  // All other blocks are unknown.
+  auto idoms = std::vector<int32_t>(m_blocks.size(), kUnknown);
+  idoms[0] = kEntry;
+
+  for (auto changed = true; changed; ) {
+    changed = false;
+
+    for (auto i = 1; i < idoms.size(); ++i) {
+      auto const bid = m_blocks[i]->id();
+      assertx(entry() != m_blocks[i]);
+
+      auto idom = kUnknown;
+      auto const update = [&](BlockId pred) {
+        auto rpoId = data(pred).rpoId;
+        if (idoms[rpoId] == kUnknown) return;
+        if (idom == kUnknown) {
+          idom = rpoId;
+          return;
+        }
+        while (rpoId != idom) {
+          while (rpoId < idom) idom = idoms[idom];
+          while (rpoId > idom) rpoId = idoms[rpoId];
+        }
+      };
+
+      if (auto const prevRetr = prevRetrans(bid)) update(*prevRetr);
+      for (auto pred : preds(bid)) update(pred);
+      assertx(idom != kUnknown);
+
+      if (idoms[i] != idom) {
+        idoms[i] = idom;
+        changed = true;
+      }
+    }
+  }
+
+  for (auto i = 0; i < idoms.size(); ++i) {
+    data(m_blocks[i]->id()).idom = idoms[i] == kEntry
+      ? kInvalidTransID
+      : m_blocks[idoms[i]]->id();
+  }
 }
 
 namespace {

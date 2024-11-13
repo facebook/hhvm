@@ -18,6 +18,7 @@ package main
 
 import (
 	"context"
+	"net"
 	"time"
 
 	"apache/thrift/test/load"
@@ -45,7 +46,7 @@ func Serve(addr string) error {
 }
 
 func newServer(processor thrift.Processor, addr string) (thrift.Server, error) {
-	listener, err := thrift.NewListener(addr)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
 	}

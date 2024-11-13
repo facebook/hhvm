@@ -228,7 +228,14 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
   // Old-style constructor + tm : schedule constructor and return
   if (!isFactoryFunction) {
     apache::thrift::detail::ServerRequestHelper::executor(req)->add(
-        [=, &eb, &conn] {
+        [this,
+         &eb,
+         &conn,
+         nullthrows,
+         interactionCreate,
+         promisePtr,
+         executor,
+         id] {
           std::exception_ptr ex;
           try {
             auto tilePtr = nullthrows(createInteractionImpl(
@@ -305,7 +312,16 @@ bool GeneratedAsyncProcessorBase::createInteraction(
 
   // Old-style constructor + tm : schedule constructor and return
   if (!isFactoryFunction) {
-    tm->add([=, &eb, &ctx, name = std::move(name), &conn] {
+    tm->add([this,
+             &eb,
+             &ctx,
+             name = std::move(name),
+             &conn,
+             si,
+             tm,
+             nullthrows,
+             promisePtr,
+             id] {
       si->setEventBase(&eb);
       si->setThreadManager(tm);
       si->setRequestContext(&ctx);

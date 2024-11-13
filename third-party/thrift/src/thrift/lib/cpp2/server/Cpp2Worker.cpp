@@ -56,7 +56,12 @@ void Cpp2Worker::initRequestsRegistry() {
   auto memPerWorker = server_->getMaxDebugPayloadMemoryPerWorker();
   auto maxFinished = server_->getMaxFinishedDebugPayloadsPerWorker();
   std::weak_ptr<Cpp2Worker> self_weak = shared_from_this();
-  evb->runInEventBaseThread([=, self_weak = std::move(self_weak)]() {
+  evb->runInEventBaseThread([this,
+                             evb,
+                             memPerReq,
+                             memPerWorker,
+                             maxFinished,
+                             self_weak = std::move(self_weak)]() {
     if (auto self = self_weak.lock()) {
       self->requestsRegistry_ = &registry.get().try_emplace(
           *evb, memPerReq, memPerWorker, maxFinished);

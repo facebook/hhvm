@@ -47,7 +47,7 @@ async function later(): Awaitable<void> {
  * work.
  *
  * This is similar to calling the PHP builtin
- * [`usleep`](http://php.net/manual/en/function.usleep.php) funciton, but is
+ * [`usleep`](http://php.net/manual/en/function.usleep.php) function, but is
  * in the context of async, meaning that other `Awaitable`s in the async
  * scheduler can run while the async function that called `usleep()` waits until
  * the length of time before asking to resume again.

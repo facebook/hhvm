@@ -223,6 +223,11 @@ jit::fast_set<uint32_t> getLocalOutputs(const NormalizedInstruction& ni);
  */
 size_t localImmIdx(Op op);
 
+/*
+ * Return the local id referenced by the instruction immediate.
+ */
+uint32_t getLocalOperand(SrcKey sk);
+
 namespace InstrFlags {
 ///////////////////////////////////////////////////////////////////////////////
 

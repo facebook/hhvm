@@ -70,27 +70,12 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   not_reached();
 }
 
-uint32_t localInputId(SrcKey sk) {
-  auto const idx = localImmIdx(sk.op());
-  auto const argu = getImm(sk.pc(), idx);
-  switch (immType(sk.op(), idx)) {
-    case ArgType::LA:
-      return argu.u_LA;
-    case ArgType::NLA:
-      return argu.u_NLA.id;
-    case ArgType::ILA:
-      return argu.u_ILA;
-    default:
-      always_assert(false);
-  }
-}
-
 Optional<Type> interpOutputType(IRGS& env,
                                        Optional<Type>& checkTypeType) {
   using namespace jit::InstrFlags;
   auto const sk = curSrcKey(env);
   auto localType = [&]{
-    auto locId = localInputId(sk);
+    auto locId = getLocalOperand(sk);
     static_assert(std::is_unsigned<decltype(locId)>::value,
                   "locId should be unsigned");
     assertx(locId < curFunc(env)->numLocals());
@@ -189,7 +174,7 @@ interpOutputLocals(IRGS& env,
   auto setImmLocType = [&](uint32_t id, Type t) {
     assertx(id < kMaxHhbcImms);
     assertx(id == localImmIdx(sk.op()));
-    setLocType(localInputId(sk), t);
+    setLocType(getLocalOperand(sk), t);
   };
 
   auto const mDefine = static_cast<unsigned char>(MOpMode::Define);

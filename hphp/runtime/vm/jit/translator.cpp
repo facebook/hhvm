@@ -694,6 +694,21 @@ uint32_t getLocalOperand(const NormalizedInstruction& ni) {
   not_reached();
 }
 
+uint32_t getLocalOperand(SrcKey sk) {
+  auto const idx = localImmIdx(sk.op());
+  auto const argu = getImm(sk.pc(), idx);
+  switch (immType(sk.op(), idx)) {
+    case ArgType::LA:
+      return argu.u_LA;
+    case ArgType::NLA:
+      return argu.u_NLA.id;
+    case ArgType::ILA:
+      return argu.u_ILA;
+    default:
+      always_assert(false);
+  }
+}
+
 /*
  * Get location metadata for the inputs of `ni'.
  */

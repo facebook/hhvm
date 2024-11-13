@@ -1981,12 +1981,18 @@ module Json = struct
           []
       in
       let params fps = [("params", JSON_Array (List.map fps ~f:param))] in
+      let capability =
+        match ft.ft_implicit_params.capability with
+        | CapDefaults _ -> []
+        | CapTy capty -> [("capability", from_type env ~show_like_ty capty)]
+      in
       obj
       @@ fun_kind p
       @ readonly_this (get_ft_readonly_this ft)
       @ params ft.ft_params
       @ readonly_ret (get_ft_returns_readonly ft)
       @ result ft.ft_ret
+      @ capability
     | (p, Tvec_or_dict (ty1, ty2)) ->
       obj @@ kind p "vec_or_dict" @ args [ty1; ty2]
     (* TODO akenn *)
@@ -2322,19 +2328,26 @@ module Json = struct
           params >>= fun ft_params ->
           get_obj "result" (json, keytrace) >>= fun (result, result_keytrace) ->
           aux result ~keytrace:result_keytrace >>= fun ft_ret ->
-          ty
-            (Tfun
-               {
-                 ft_params;
-                 ft_implicit_params =
-                   { capability = CapDefaults Pos_or_decl.none };
-                 ft_ret;
-                 (* Dummy values: these aren't currently serialized. *)
-                 ft_tparams = [];
-                 ft_where_constraints = [];
-                 ft_flags = Typing_defs_flags.Fun.default;
-                 ft_cross_package = None;
-               })
+          aux_capability json ~keytrace >>= fun capability ->
+          aux_get_bool_with_default "readonly_this" false json ~keytrace
+          >>= fun readonly_this ->
+          aux_get_bool_with_default "readonly_return" false json ~keytrace
+          >>= fun readonly_return ->
+          let funty =
+            {
+              ft_params;
+              ft_implicit_params = { capability };
+              ft_ret;
+              (* Dummy values: these aren't currently serialized. *)
+              ft_tparams = [];
+              ft_where_constraints = [];
+              ft_flags = Typing_defs_flags.Fun.default;
+              ft_cross_package = None;
+            }
+          in
+          let funty = set_ft_returns_readonly funty readonly_return in
+          let funty = set_ft_readonly_this funty readonly_this in
+          ty (Tfun funty)
         | "nothing" -> ty (Tunion [])
         | _ ->
           deserialization_error
@@ -2398,6 +2411,33 @@ module Json = struct
               ("Invalid as-constraint: "
               ^ Hh_json.Access.access_failure_to_string access_failure)
             ~keytrace)
+    and aux_capability
+        (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace) :
+        (locl_ty capability, deserialization_error) result =
+      Result.Monad_infix.(
+        match Hh_json.Access.get_obj "capability" (json, keytrace) with
+        | Ok (cap_json, cap_keytrace) ->
+          aux cap_json ~keytrace:cap_keytrace >>= fun cap_ty ->
+          Ok (CapTy cap_ty)
+        | Error (Hh_json.Access.Missing_key_error _) ->
+          (* The "capability" key is omitted for CapDefaults during encoding *)
+          Ok (CapDefaults Pos_or_decl.none)
+        | Error access_failure ->
+          deserialization_error
+            ~message:
+              ("Invalid capability: "
+              ^ Hh_json.Access.access_failure_to_string access_failure)
+            ~keytrace)
+    and aux_get_bool_with_default
+        key default (json : Hh_json.json) ~(keytrace : Hh_json.Access.keytrace)
+        : (bool, deserialization_error) result =
+      match Hh_json.Access.get_bool key (json, keytrace) with
+      | Ok (value, _keytrace) -> Ok value
+      | Error (Hh_json.Access.Missing_key_error _) -> Ok default
+      | Error access_failure ->
+        deserialization_error
+          ~message:(Hh_json.Access.access_failure_to_string access_failure)
+          ~keytrace
     in
     aux json ~keytrace
 end

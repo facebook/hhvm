@@ -787,13 +787,14 @@ class CommonTests(BarebonesTests):
                 + '"line":4,'
                 + '"character":4}}'
                 + ',"type":{{'
-                + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":23,"char_end":68}},'
+                + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":23,"char_end":81}},'
                 + '"kind":"function",'
                 + '"readonly_this":true,'
                 + '"params":[{{"callConvention":"normal","readonly":true,"type":{{'
                 + '"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":51,"char_end":53}},"kind":"primitive","name":"int"}}}}],'
                 + '"readonly_return":true,'
-                + '"result":{{"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":65,"char_end":67}},"kind":"primitive","name":"int"}}}}'
+                + '"result":{{"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":78,"char_end":80}},"kind":"primitive","name":"int"}},'
+                + '"capability":{{"src_pos":{{"filename":"{root}foo_readonly.php","line":3,"char_start":56,"char_end":66}},"kind":"class","name":"\\\\HH\\\\Capabilities\\\\WriteProperty","args":[]}}}}'
                 + "}}"
             ],
             options=["--type-at-pos-batch", "{root}foo_readonly.php:4:4"],

@@ -157,9 +157,6 @@ class RpcOptions {
   RpcOptions& setDefconPriority(DefconPriority defconPriority);
   const std::optional<DefconPriority>& getDefconPriority() const;
 
-  RpcOptions& setRequestDeadlineMs(uint32_t deadlineMs);
-  const std::optional<uint32_t>& getRequestDeadlineMs() const;
-
   RpcOptions& setFdsToSend(folly::SocketFds::ToSend);
   folly::SocketFds copySocketFdsToSend() const;
 
@@ -208,9 +205,6 @@ class RpcOptions {
 
   // Classifies the current request based on its impact on the end user
   std::optional<DefconPriority> defconPriority_;
-
-  // Pre request deadline.
-  std::optional<uint32_t> requestDeadlineMs_;
 
   folly::SocketFds::ToSend fdsToSend_;
 

@@ -32,7 +32,7 @@ void TFDTransport::close() {
     return;
   }
 
-  int rv = ::close(fd_);
+  int rv = folly::fileops::close(fd_);
   int errno_copy = errno;
   fd_ = -1;
   // Have to check uncaught_exception because this is called in the destructor.
@@ -46,7 +46,7 @@ uint32_t TFDTransport::read(uint8_t* buf, uint32_t len) {
   unsigned int maxRetries = 5; // same as the TSocket default
   unsigned int retries = 0;
   while (true) {
-    ssize_t rv = ::read(fd_, buf, len);
+    ssize_t rv = folly::fileops::read(fd_, buf, len);
     if (rv < 0) {
       if (errno == EINTR && retries < maxRetries) {
         // If interrupted, try again
@@ -63,7 +63,7 @@ uint32_t TFDTransport::read(uint8_t* buf, uint32_t len) {
 
 void TFDTransport::write(const uint8_t* buf, uint32_t len) {
   while (len > 0) {
-    ssize_t rv = ::write(fd_, buf, len);
+    ssize_t rv = folly::fileops::write(fd_, buf, len);
 
     if (rv < 0) {
       int errno_copy = errno;

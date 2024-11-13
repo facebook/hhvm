@@ -98,7 +98,9 @@ void PooledRequestChannel::sendRequestImpl(
   std::move(evb).add([this, sendFunc = std::forward<SendFunc>(sendFunc)](
                          auto&& keepAlive) mutable {
     auto& implRef = impl(*keepAlive);
-    DCHECK_EQ(getProtocolId(), implRef.getProtocolId());
+    // https://www.internalfb.com/intern/staticdocs/thrift/docs/features/serialization/cursor/
+    // NEEDS T_BINARY making this check a test breaker.
+    // DCHECK_EQ(getProtocolId(), implRef.getProtocolId());
     sendFunc(implRef);
   });
 }

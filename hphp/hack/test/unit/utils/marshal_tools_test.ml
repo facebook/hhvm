@@ -42,7 +42,7 @@ let send_fd_and_wait child_1_pid socket_fd fd_to_be_sent =
       (show_my_message msg);
     exit 1
   );
-  let result = Libancillary.ancil_send_fd socket_fd fd_to_be_sent in
+  let result = Libancillary.ancil_send_fd ~to_:socket_fd fd_to_be_sent in
   if result = -1 then (
     Printf.eprintf "Parent: Failed to send fd. Exiting\n";
     let _ = Unix.wait () in

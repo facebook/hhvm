@@ -9,13 +9,13 @@
 
 exception Receiving_Fd_Exception of string
 
-(** Returns 0 for success, -1 on failure. *)
-val ancil_send_fd :
-  Unix.file_descr (** The fd of the socket to send the payload over *) ->
-  Unix.file_descr (** The file descriptor you want to send *) ->
-  int
+(** [ancil_send_fd ~to_:dest_fd fd_to_send] sends [fd_to_send] to the process
+  at the other end of [dest_fd].
 
-(** The fd received *)
-val ancil_recv_fd :
-  Unix.file_descr (** The fd of the socket to receive the payload over *) ->
-  Unix.file_descr
+  Returns 0 for success, -1 on failure.*)
+val ancil_send_fd : to_:Unix.file_descr -> Unix.file_descr -> int
+
+(** [ancil_recv_fd from_fd] receives a file descriptor over [from_fd].
+
+  Throws Receiving_Fd_Exception upon error *)
+val ancil_recv_fd : Unix.file_descr -> Unix.file_descr

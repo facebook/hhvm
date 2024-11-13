@@ -332,7 +332,7 @@ let hand_off_client_connection ~tracker server_fd client_fd =
     "Handed off tracker to server (client socket handoff #%d)"
     ~tracker
     m2s_sequence_number;
-  let status = Libancillary.ancil_send_fd server_fd client_fd in
+  let status = Libancillary.ancil_send_fd ~to_:server_fd client_fd in
   if status = 0 then begin
     log
       "Handed off client socket to server (handoff #%d)"

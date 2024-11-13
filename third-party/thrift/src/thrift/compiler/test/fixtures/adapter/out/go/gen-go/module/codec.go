@@ -39,6 +39,9 @@ var (
     premadeCodecTypeSpec_i64 *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_MyI64 *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_DoubleTypedefI64 *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_list_i32 *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_set_i32 *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_map_string_i32 *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_Foo *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_Baz *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_Foo_6868 *thrift.TypeSpec = nil
@@ -51,7 +54,6 @@ var (
     premadeCodecTypeSpec_module_Bar *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_IndependentDirectlyAdapted *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_StructWithFieldAdapter *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_set_i32 *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_TerseAdaptedFields *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_A *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_AdaptedA *thrift.TypeSpec = nil
@@ -270,6 +272,32 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 },
 
     }
+    premadeCodecTypeSpec_list_i32 = &thrift.TypeSpec{
+        FullName: "list<i32>",
+        CodecListSpec: &thrift.CodecListSpec{
+    ElementWireType: thrift.I32,
+	ElementTypeSpec: premadeCodecTypeSpec_i32,
+},
+
+    }
+    premadeCodecTypeSpec_set_i32 = &thrift.TypeSpec{
+        FullName: "set<i32>",
+        CodecSetSpec: &thrift.CodecSetSpec{
+    ElementWireType: thrift.I32,
+	ElementTypeSpec: premadeCodecTypeSpec_i32,
+},
+
+    }
+    premadeCodecTypeSpec_map_string_i32 = &thrift.TypeSpec{
+        FullName: "map<string, i32>",
+        CodecMapSpec: &thrift.CodecMapSpec{
+	KeyTypeSpec:   premadeCodecTypeSpec_string,
+	ValueTypeSpec: premadeCodecTypeSpec_i32,
+    KeyWireType:   thrift.STRING,
+	ValueWireType: thrift.I32,
+},
+
+    }
     premadeCodecTypeSpec_module_Foo = &thrift.TypeSpec{
         FullName: "module.Foo",
         CodecStructSpec: &thrift.CodecStructSpec{
@@ -369,14 +397,6 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
     ScopedName: "module.StructWithFieldAdapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructWithFieldAdapter() },
-},
-
-    }
-    premadeCodecTypeSpec_set_i32 = &thrift.TypeSpec{
-        FullName: "set<i32>",
-        CodecSetSpec: &thrift.CodecSetSpec{
-    ElementWireType: thrift.I32,
-	ElementTypeSpec: premadeCodecTypeSpec_i32,
 },
 
     }
@@ -1035,6 +1055,30 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             IsOptional:           false,
             ValueTypeSpec:        premadeCodecTypeSpec_module_DoubleTypedefI64,
             MustBeSetToSerialize: false,
+        },        {
+            ID:                   12,
+            WireType:             thrift.LIST,
+            Name:                 "adapted_list",
+            ReflectIndex:         11,
+            IsOptional:           false,
+            ValueTypeSpec:        premadeCodecTypeSpec_list_i32,
+            MustBeSetToSerialize: false,
+        },        {
+            ID:                   13,
+            WireType:             thrift.SET,
+            Name:                 "adapted_set",
+            ReflectIndex:         12,
+            IsOptional:           false,
+            ValueTypeSpec:        premadeCodecTypeSpec_set_i32,
+            MustBeSetToSerialize: false,
+        },        {
+            ID:                   14,
+            WireType:             thrift.MAP,
+            Name:                 "adapted_map",
+            ReflectIndex:         13,
+            IsOptional:           false,
+            ValueTypeSpec:        premadeCodecTypeSpec_map_string_i32,
+            MustBeSetToSerialize: false,
         },    },
     FieldSpecIDToIndex:   map[int16]int{
         1: 0,
@@ -1048,6 +1092,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         9: 8,
         10: 9,
         11: 10,
+        12: 11,
+        13: 12,
+        14: 13,
     },
     FieldSpecNameToIndex: map[string]int{
         "intField": 0,
@@ -1061,6 +1108,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "longField": 8,
         "adaptedLongField": 9,
         "doubleAdaptedField": 10,
+        "adapted_list": 11,
+        "adapted_set": 12,
+        "adapted_map": 13,
     },
 }
     premadeStructSpec_Baz = &thrift.StructSpec{

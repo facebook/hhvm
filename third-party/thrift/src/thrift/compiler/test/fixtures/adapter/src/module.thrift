@@ -104,6 +104,12 @@ struct Foo {
   @rust.Adapter{name = "::my::Adapter2"}
   10: MyI64 adaptedLongField;
   11: DoubleTypedefI64 doubleAdaptedField;
+  @python.Adapter{name = "my.ListAdapter", typeHint = "typing.Sequence[int]"}
+  12: list<i32> adapted_list;
+  @python.Adapter{name = "my.SetAdapter", typeHint = "typing.AbstractSet[int]"}
+  13: set<i32> adapted_set;
+  @python.Adapter{name = "my.MapAdapter", typeHint = "typing.Mapping[str, int]"}
+  14: map<string, i32> adapted_map;
 } (
   thrift.uri = "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo",
 )

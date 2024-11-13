@@ -611,15 +611,15 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
         case ADAPTEDLIST:
           if (__field.type == TType.LIST) {
             {
-              TList _list58 = iprot.readListBegin();
-              tmp_adaptedList = new ArrayList<Long>(Math.max(0, _list58.size));
-              for (int _i59 = 0; 
-                   (_list58.size < 0) ? iprot.peekList() : (_i59 < _list58.size); 
-                   ++_i59)
+              TList _list71 = iprot.readListBegin();
+              tmp_adaptedList = new ArrayList<Long>(Math.max(0, _list71.size));
+              for (int _i72 = 0; 
+                   (_list71.size < 0) ? iprot.peekList() : (_i72 < _list71.size); 
+                   ++_i72)
               {
-                Long _elem60;
-                _elem60 = iprot.readI64();
-                tmp_adaptedList.add(_elem60);
+                Long _elem73;
+                _elem73 = iprot.readI64();
+                tmp_adaptedList.add(_elem73);
               }
               iprot.readListEnd();
             }
@@ -630,15 +630,15 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
         case ADAPTEDSET:
           if (__field.type == TType.SET) {
             {
-              TSet _set61 = iprot.readSetBegin();
-              tmp_adaptedSet = new HashSet<Long>(Math.max(0, 2*_set61.size));
-              for (int _i62 = 0; 
-                   (_set61.size < 0) ? iprot.peekSet() : (_i62 < _set61.size); 
-                   ++_i62)
+              TSet _set74 = iprot.readSetBegin();
+              tmp_adaptedSet = new HashSet<Long>(Math.max(0, 2*_set74.size));
+              for (int _i75 = 0; 
+                   (_set74.size < 0) ? iprot.peekSet() : (_i75 < _set74.size); 
+                   ++_i75)
               {
-                Long _elem63;
-                _elem63 = iprot.readI64();
-                tmp_adaptedSet.add(_elem63);
+                Long _elem76;
+                _elem76 = iprot.readI64();
+                tmp_adaptedSet.add(_elem76);
               }
               iprot.readSetEnd();
             }
@@ -649,17 +649,17 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
         case ADAPTEDMAP:
           if (__field.type == TType.MAP) {
             {
-              TMap _map64 = iprot.readMapBegin();
-              tmp_adaptedMap = new HashMap<Long,Long>(Math.max(0, 2*_map64.size));
-              for (int _i65 = 0; 
-                   (_map64.size < 0) ? iprot.peekMap() : (_i65 < _map64.size); 
-                   ++_i65)
+              TMap _map77 = iprot.readMapBegin();
+              tmp_adaptedMap = new HashMap<Long,Long>(Math.max(0, 2*_map77.size));
+              for (int _i78 = 0; 
+                   (_map77.size < 0) ? iprot.peekMap() : (_i78 < _map77.size); 
+                   ++_i78)
               {
-                Long _key66;
-                Long _val67;
-                _key66 = iprot.readI64();
-                _val67 = iprot.readI64();
-                tmp_adaptedMap.put(_key66, _val67);
+                Long _key79;
+                Long _val80;
+                _key79 = iprot.readI64();
+                _val80 = iprot.readI64();
+                tmp_adaptedMap.put(_key79, _val80);
               }
               iprot.readMapEnd();
             }
@@ -726,15 +726,15 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
         case ADAPTEDLISTDEFAULT:
           if (__field.type == TType.LIST) {
             {
-              TList _list68 = iprot.readListBegin();
-              tmp_adaptedListDefault = new ArrayList<Long>(Math.max(0, _list68.size));
-              for (int _i69 = 0; 
-                   (_list68.size < 0) ? iprot.peekList() : (_i69 < _list68.size); 
-                   ++_i69)
+              TList _list81 = iprot.readListBegin();
+              tmp_adaptedListDefault = new ArrayList<Long>(Math.max(0, _list81.size));
+              for (int _i82 = 0; 
+                   (_list81.size < 0) ? iprot.peekList() : (_i82 < _list81.size); 
+                   ++_i82)
               {
-                Long _elem70;
-                _elem70 = iprot.readI64();
-                tmp_adaptedListDefault.add(_elem70);
+                Long _elem83;
+                _elem83 = iprot.readI64();
+                tmp_adaptedListDefault.add(_elem83);
               }
               iprot.readListEnd();
             }
@@ -745,15 +745,15 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
         case ADAPTEDSETDEFAULT:
           if (__field.type == TType.SET) {
             {
-              TSet _set71 = iprot.readSetBegin();
-              tmp_adaptedSetDefault = new HashSet<Long>(Math.max(0, 2*_set71.size));
-              for (int _i72 = 0; 
-                   (_set71.size < 0) ? iprot.peekSet() : (_i72 < _set71.size); 
-                   ++_i72)
+              TSet _set84 = iprot.readSetBegin();
+              tmp_adaptedSetDefault = new HashSet<Long>(Math.max(0, 2*_set84.size));
+              for (int _i85 = 0; 
+                   (_set84.size < 0) ? iprot.peekSet() : (_i85 < _set84.size); 
+                   ++_i85)
               {
-                Long _elem73;
-                _elem73 = iprot.readI64();
-                tmp_adaptedSetDefault.add(_elem73);
+                Long _elem86;
+                _elem86 = iprot.readI64();
+                tmp_adaptedSetDefault.add(_elem86);
               }
               iprot.readSetEnd();
             }
@@ -764,17 +764,17 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
         case ADAPTEDMAPDEFAULT:
           if (__field.type == TType.MAP) {
             {
-              TMap _map74 = iprot.readMapBegin();
-              tmp_adaptedMapDefault = new HashMap<Long,Long>(Math.max(0, 2*_map74.size));
-              for (int _i75 = 0; 
-                   (_map74.size < 0) ? iprot.peekMap() : (_i75 < _map74.size); 
-                   ++_i75)
+              TMap _map87 = iprot.readMapBegin();
+              tmp_adaptedMapDefault = new HashMap<Long,Long>(Math.max(0, 2*_map87.size));
+              for (int _i88 = 0; 
+                   (_map87.size < 0) ? iprot.peekMap() : (_i88 < _map87.size); 
+                   ++_i88)
               {
-                Long _key76;
-                Long _val77;
-                _key76 = iprot.readI64();
-                _val77 = iprot.readI64();
-                tmp_adaptedMapDefault.put(_key76, _val77);
+                Long _key89;
+                Long _val90;
+                _key89 = iprot.readI64();
+                _val90 = iprot.readI64();
+                tmp_adaptedMapDefault.put(_key89, _val90);
               }
               iprot.readMapEnd();
             }
@@ -869,8 +869,8 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
       oprot.writeFieldBegin(ADAPTED_LIST_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I64, this.adaptedList.size()));
-        for (Long _iter78 : this.adaptedList)        {
-          oprot.writeI64(_iter78);
+        for (Long _iter91 : this.adaptedList)        {
+          oprot.writeI64(_iter91);
         }
         oprot.writeListEnd();
       }
@@ -880,8 +880,8 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
       oprot.writeFieldBegin(ADAPTED_SET_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I64, this.adaptedSet.size()));
-        for (Long _iter79 : this.adaptedSet)        {
-          oprot.writeI64(_iter79);
+        for (Long _iter92 : this.adaptedSet)        {
+          oprot.writeI64(_iter92);
         }
         oprot.writeSetEnd();
       }
@@ -891,9 +891,9 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
       oprot.writeFieldBegin(ADAPTED_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I64, TType.I64, this.adaptedMap.size()));
-        for (Map.Entry<Long, Long> _iter80 : this.adaptedMap.entrySet())        {
-          oprot.writeI64(_iter80.getKey());
-          oprot.writeI64(_iter80.getValue());
+        for (Map.Entry<Long, Long> _iter93 : this.adaptedMap.entrySet())        {
+          oprot.writeI64(_iter93.getKey());
+          oprot.writeI64(_iter93.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -943,8 +943,8 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
       oprot.writeFieldBegin(ADAPTED_LIST_DEFAULT_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I64, this.adaptedListDefault.size()));
-        for (Long _iter81 : this.adaptedListDefault)        {
-          oprot.writeI64(_iter81);
+        for (Long _iter94 : this.adaptedListDefault)        {
+          oprot.writeI64(_iter94);
         }
         oprot.writeListEnd();
       }
@@ -954,8 +954,8 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
       oprot.writeFieldBegin(ADAPTED_SET_DEFAULT_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I64, this.adaptedSetDefault.size()));
-        for (Long _iter82 : this.adaptedSetDefault)        {
-          oprot.writeI64(_iter82);
+        for (Long _iter95 : this.adaptedSetDefault)        {
+          oprot.writeI64(_iter95);
         }
         oprot.writeSetEnd();
       }
@@ -965,9 +965,9 @@ public class AdaptTemplatedTestStruct implements TBase, java.io.Serializable, Cl
       oprot.writeFieldBegin(ADAPTED_MAP_DEFAULT_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I64, TType.I64, this.adaptedMapDefault.size()));
-        for (Map.Entry<Long, Long> _iter83 : this.adaptedMapDefault.entrySet())        {
-          oprot.writeI64(_iter83.getKey());
-          oprot.writeI64(_iter83.getValue());
+        for (Map.Entry<Long, Long> _iter96 : this.adaptedMapDefault.entrySet())        {
+          oprot.writeI64(_iter96.getKey());
+          oprot.writeI64(_iter96.getValue());
         }
         oprot.writeMapEnd();
       }

@@ -202,6 +202,9 @@ Foo::Foo(const Foo& srcObj) :
     __fbthrift_field_longField(srcObj.__fbthrift_field_longField),
     __fbthrift_field_adaptedLongField(srcObj.__fbthrift_field_adaptedLongField),
     __fbthrift_field_doubleAdaptedField(srcObj.__fbthrift_field_doubleAdaptedField),
+    __fbthrift_field_adapted_list(srcObj.__fbthrift_field_adapted_list),
+    __fbthrift_field_adapted_set(srcObj.__fbthrift_field_adapted_set),
+    __fbthrift_field_adapted_map(srcObj.__fbthrift_field_adapted_map),
     __isset(srcObj.__isset) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
@@ -258,6 +261,9 @@ Foo::Foo([[maybe_unused]] Foo&& other) noexcept :
     __fbthrift_field_longField(std::move(other.__fbthrift_field_longField)),
     __fbthrift_field_adaptedLongField(std::move(other.__fbthrift_field_adaptedLongField)),
     __fbthrift_field_doubleAdaptedField(std::move(other.__fbthrift_field_doubleAdaptedField)),
+    __fbthrift_field_adapted_list(std::move(other.__fbthrift_field_adapted_list)),
+    __fbthrift_field_adapted_set(std::move(other.__fbthrift_field_adapted_set)),
+    __fbthrift_field_adapted_map(std::move(other.__fbthrift_field_adapted_map)),
     __isset(other.__isset) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
@@ -284,12 +290,15 @@ Foo& Foo::operator=([[maybe_unused]] Foo&& other) noexcept {
     this->__fbthrift_field_longField = std::move(other.__fbthrift_field_longField);
     this->__fbthrift_field_adaptedLongField = std::move(other.__fbthrift_field_adaptedLongField);
     this->__fbthrift_field_doubleAdaptedField = std::move(other.__fbthrift_field_doubleAdaptedField);
+    this->__fbthrift_field_adapted_list = std::move(other.__fbthrift_field_adapted_list);
+    this->__fbthrift_field_adapted_set = std::move(other.__fbthrift_field_adapted_set);
+    this->__fbthrift_field_adapted_map = std::move(other.__fbthrift_field_adapted_map);
     __isset = other.__isset;
     return *this;
 }
 
 
-Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg) :
+Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg, ::std::vector<::std::int32_t> adapted_list__arg, ::std::set<::std::int32_t> adapted_set__arg, ::std::map<::std::string, ::std::int32_t> adapted_map__arg) :
     __fbthrift_field_intField(std::move(intField__arg)),
     __fbthrift_field_optionalIntField(std::move(optionalIntField__arg)),
     __fbthrift_field_intFieldWithDefault(std::move(intFieldWithDefault__arg)),
@@ -300,7 +309,10 @@ Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::ada
     __fbthrift_field_binaryField(std::move(binaryField__arg)),
     __fbthrift_field_longField(std::move(longField__arg)),
     __fbthrift_field_adaptedLongField(std::move(adaptedLongField__arg)),
-    __fbthrift_field_doubleAdaptedField(std::move(doubleAdaptedField__arg)) { 
+    __fbthrift_field_doubleAdaptedField(std::move(doubleAdaptedField__arg)),
+    __fbthrift_field_adapted_list(std::move(adapted_list__arg)),
+    __fbthrift_field_adapted_set(std::move(adapted_set__arg)),
+    __fbthrift_field_adapted_map(std::move(adapted_map__arg)) { 
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
   ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
@@ -323,6 +335,9 @@ Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::ada
   __isset.set(folly::index_constant<8>(), true);
   __isset.set(folly::index_constant<9>(), true);
   __isset.set(folly::index_constant<10>(), true);
+  __isset.set(folly::index_constant<11>(), true);
+  __isset.set(folly::index_constant<12>(), true);
+  __isset.set(folly::index_constant<13>(), true);
 }
 
 
@@ -339,6 +354,9 @@ void Foo::__fbthrift_clear() {
   ::apache::thrift::adapt_detail::clear<::my::Adapter1, 9>(__fbthrift_field_longField, *this);
   ::apache::thrift::adapt_detail::clear<::my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
   ::apache::thrift::adapt_detail::clear<::my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
+  this->__fbthrift_field_adapted_list.clear();
+  this->__fbthrift_field_adapted_set.clear();
+  this->__fbthrift_field_adapted_map.clear();
   __isset = {};
 }
 
@@ -357,6 +375,30 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+const ::std::vector<::std::int32_t>& Foo::get_adapted_list() const& {
+  return __fbthrift_field_adapted_list;
+}
+
+::std::vector<::std::int32_t> Foo::get_adapted_list() && {
+  return std::move(__fbthrift_field_adapted_list);
+}
+
+const ::std::set<::std::int32_t>& Foo::get_adapted_set() const& {
+  return __fbthrift_field_adapted_set;
+}
+
+::std::set<::std::int32_t> Foo::get_adapted_set() && {
+  return std::move(__fbthrift_field_adapted_set);
+}
+
+const ::std::map<::std::string, ::std::int32_t>& Foo::get_adapted_map() const& {
+  return __fbthrift_field_adapted_map;
+}
+
+::std::map<::std::string, ::std::int32_t> Foo::get_adapted_map() && {
+  return std::move(__fbthrift_field_adapted_map);
+}
+
 
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
@@ -371,6 +413,9 @@ void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   swap(a.__fbthrift_field_longField, b.__fbthrift_field_longField);
   swap(a.__fbthrift_field_adaptedLongField, b.__fbthrift_field_adaptedLongField);
   swap(a.__fbthrift_field_doubleAdaptedField, b.__fbthrift_field_doubleAdaptedField);
+  swap(a.__fbthrift_field_adapted_list, b.__fbthrift_field_adapted_list);
+  swap(a.__fbthrift_field_adapted_set, b.__fbthrift_field_adapted_set);
+  swap(a.__fbthrift_field_adapted_map, b.__fbthrift_field_adapted_map);
   swap(a.__isset, b.__isset);
 }
 

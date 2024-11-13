@@ -344,15 +344,15 @@ public class TerseAdaptedFields implements TBase, java.io.Serializable, Cloneabl
         case SET_FIELD:
           if (__field.type == TType.SET) {
             {
-              TSet _set50 = iprot.readSetBegin();
-              this.set_field = new HashSet<Integer>(Math.max(0, 2*_set50.size));
-              for (int _i51 = 0; 
-                   (_set50.size < 0) ? iprot.peekSet() : (_i51 < _set50.size); 
-                   ++_i51)
+              TSet _set63 = iprot.readSetBegin();
+              this.set_field = new HashSet<Integer>(Math.max(0, 2*_set63.size));
+              for (int _i64 = 0; 
+                   (_set63.size < 0) ? iprot.peekSet() : (_i64 < _set63.size); 
+                   ++_i64)
               {
-                int _elem52;
-                _elem52 = iprot.readI32();
-                this.set_field.add(_elem52);
+                int _elem65;
+                _elem65 = iprot.readI32();
+                this.set_field.add(_elem65);
               }
               iprot.readSetEnd();
             }
@@ -389,8 +389,8 @@ public class TerseAdaptedFields implements TBase, java.io.Serializable, Cloneabl
       oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I32, this.set_field.size()));
-        for (int _iter53 : this.set_field)        {
-          oprot.writeI32(_iter53);
+        for (int _iter66 : this.set_field)        {
+          oprot.writeI32(_iter66);
         }
         oprot.writeSetEnd();
       }

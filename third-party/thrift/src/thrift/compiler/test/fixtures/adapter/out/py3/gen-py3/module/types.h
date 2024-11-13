@@ -68,6 +68,15 @@ inline void reset_field<::facebook::thrift::test::Foo>(
     case 10:
       obj.doubleAdaptedField_ref().copy_from(default_inst<::facebook::thrift::test::Foo>().doubleAdaptedField_ref());
       return;
+    case 11:
+      obj.adapted_list_ref().copy_from(default_inst<::facebook::thrift::test::Foo>().adapted_list_ref());
+      return;
+    case 12:
+      obj.adapted_set_ref().copy_from(default_inst<::facebook::thrift::test::Foo>().adapted_set_ref());
+      return;
+    case 13:
+      obj.adapted_map_ref().copy_from(default_inst<::facebook::thrift::test::Foo>().adapted_map_ref());
+      return;
   }
 }
 

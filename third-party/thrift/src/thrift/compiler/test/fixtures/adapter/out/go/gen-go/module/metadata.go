@@ -40,6 +40,9 @@ var (
     premadeThriftType_i64 *metadata.ThriftType = nil
     premadeThriftType_module_MyI64 *metadata.ThriftType = nil
     premadeThriftType_module_DoubleTypedefI64 *metadata.ThriftType = nil
+    premadeThriftType_list_i32 *metadata.ThriftType = nil
+    premadeThriftType_set_i32 *metadata.ThriftType = nil
+    premadeThriftType_map_string_i32 *metadata.ThriftType = nil
     premadeThriftType_module_Foo *metadata.ThriftType = nil
     premadeThriftType_module_Baz *metadata.ThriftType = nil
     premadeThriftType_module_Foo_6868 *metadata.ThriftType = nil
@@ -52,7 +55,6 @@ var (
     premadeThriftType_module_Bar *metadata.ThriftType = nil
     premadeThriftType_module_IndependentDirectlyAdapted *metadata.ThriftType = nil
     premadeThriftType_module_StructWithFieldAdapter *metadata.ThriftType = nil
-    premadeThriftType_set_i32 *metadata.ThriftType = nil
     premadeThriftType_module_TerseAdaptedFields *metadata.ThriftType = nil
     premadeThriftType_module_A *metadata.ThriftType = nil
     premadeThriftType_module_AdaptedA *metadata.ThriftType = nil
@@ -201,6 +203,19 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
             SetName("module.DoubleTypedefI64").
             SetUnderlyingType(premadeThriftType_module_MyI64),
     )
+    premadeThriftType_list_i32 = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_i32),
+    )
+    premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
+        metadata.NewThriftSetType().
+            SetValueType(premadeThriftType_i32),
+    )
+    premadeThriftType_map_string_i32 = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_string).
+            SetValueType(premadeThriftType_i32),
+    )
     premadeThriftType_module_Foo = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.Foo"),
@@ -253,10 +268,6 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_module_StructWithFieldAdapter = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
             SetName("module.StructWithFieldAdapter"),
-    )
-    premadeThriftType_set_i32 = metadata.NewThriftType().SetTSet(
-        metadata.NewThriftSetType().
-            SetValueType(premadeThriftType_i32),
     )
     premadeThriftType_module_TerseAdaptedFields = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
@@ -696,6 +707,21 @@ var structMetadatasOnce = sync.OnceValue(
     SetName("doubleAdaptedField").
     SetIsOptional(false).
     SetType(premadeThriftType_module_DoubleTypedefI64),
+            metadata.NewThriftField().
+    SetId(12).
+    SetName("adapted_list").
+    SetIsOptional(false).
+    SetType(premadeThriftType_list_i32),
+            metadata.NewThriftField().
+    SetId(13).
+    SetName("adapted_set").
+    SetIsOptional(false).
+    SetType(premadeThriftType_set_i32),
+            metadata.NewThriftField().
+    SetId(14).
+    SetName("adapted_map").
+    SetIsOptional(false).
+    SetType(premadeThriftType_map_string_i32),
         },
     ))
         fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().

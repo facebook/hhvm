@@ -114,6 +114,9 @@ pub struct Foo {
     pub longField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
     pub adaptedLongField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
     pub doubleAdaptedField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::AdaptedType,
+    pub adapted_list: ::std::vec::Vec<::std::primitive::i32>,
+    pub adapted_set: ::std::collections::BTreeSet<::std::primitive::i32>,
+    pub adapted_map: ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -924,6 +927,9 @@ impl ::std::default::Default for self::Foo {
             longField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<Foo>(::std::default::Default::default(), 9),
             adaptedLongField: <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<Foo>(::std::default::Default::default(), 10),
             doubleAdaptedField: <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<Foo>(::std::default::Default::default(), 11),
+            adapted_list: ::std::default::Default::default(),
+            adapted_set: ::std::default::Default::default(),
+            adapted_map: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -944,6 +950,9 @@ impl ::std::fmt::Debug for self::Foo {
             .field("longField", &self.longField)
             .field("adaptedLongField", &self.adaptedLongField)
             .field("doubleAdaptedField", &self.doubleAdaptedField)
+            .field("adapted_list", &self.adapted_list)
+            .field("adapted_set", &self.adapted_set)
+            .field("adapted_map", &self.adapted_map)
             .finish()
     }
 }
@@ -1016,6 +1025,15 @@ where
         p.write_field_begin("doubleAdaptedField", ::fbthrift::TType::I64, 11);
         ::fbthrift::Serialize::write(&<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::to_thrift_field::<Foo>(&self.doubleAdaptedField, 11), p);
         p.write_field_end();
+        p.write_field_begin("adapted_list", ::fbthrift::TType::List, 12);
+        ::fbthrift::Serialize::write(&self.adapted_list, p);
+        p.write_field_end();
+        p.write_field_begin("adapted_set", ::fbthrift::TType::Set, 13);
+        ::fbthrift::Serialize::write(&self.adapted_set, p);
+        p.write_field_end();
+        p.write_field_begin("adapted_map", ::fbthrift::TType::Map, 14);
+        ::fbthrift::Serialize::write(&self.adapted_map, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -1029,6 +1047,9 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("adaptedLongField", ::fbthrift::TType::I64, 10),
+            ::fbthrift::Field::new("adapted_list", ::fbthrift::TType::List, 12),
+            ::fbthrift::Field::new("adapted_map", ::fbthrift::TType::Map, 14),
+            ::fbthrift::Field::new("adapted_set", ::fbthrift::TType::Set, 13),
             ::fbthrift::Field::new("binaryField", ::fbthrift::TType::String, 8),
             ::fbthrift::Field::new("doubleAdaptedField", ::fbthrift::TType::I64, 11),
             ::fbthrift::Field::new("intField", ::fbthrift::TType::I32, 1),
@@ -1051,6 +1072,9 @@ where
         let mut field_longField = ::std::option::Option::None;
         let mut field_adaptedLongField = ::std::option::Option::None;
         let mut field_doubleAdaptedField = ::std::option::Option::None;
+        let mut field_adapted_list = ::std::option::Option::None;
+        let mut field_adapted_set = ::std::option::Option::None;
+        let mut field_adapted_map = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Foo")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -1067,6 +1091,9 @@ where
                 (::fbthrift::TType::I64, 9) => field_longField = ::std::option::Option::Some(<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field::<Foo>(::fbthrift::Deserialize::read(p)?, 9)?),
                 (::fbthrift::TType::I64, 10) => field_adaptedLongField = ::std::option::Option::Some(<::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field::<Foo>(::fbthrift::Deserialize::read(p)?, 10)?),
                 (::fbthrift::TType::I64, 11) => field_doubleAdaptedField = ::std::option::Option::Some(<crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_field::<Foo>(::fbthrift::Deserialize::read(p)?, 11)?),
+                (::fbthrift::TType::List, 12) => field_adapted_list = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 13) => field_adapted_set = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 14) => field_adapted_map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1084,6 +1111,9 @@ where
             longField: field_longField.unwrap_or_else(|| <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<Foo>(::std::default::Default::default(), 9)),
             adaptedLongField: field_adaptedLongField.unwrap_or_else(|| <::fbthrift::adapter::LayeredThriftAdapter<::my::Adapter2, crate::types::adapters::MyI64> as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<Foo>(::std::default::Default::default(), 10)),
             doubleAdaptedField: field_doubleAdaptedField.unwrap_or_else(|| <crate::types::adapters::MyI64 as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<Foo>(::std::default::Default::default(), 11)),
+            adapted_list: field_adapted_list.unwrap_or_default(),
+            adapted_set: field_adapted_set.unwrap_or_default(),
+            adapted_map: field_adapted_map.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -1396,6 +1426,57 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                 }
             },
             11 => {
+            },
+            12 => {
+
+                if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(python__types::Adapter {
+                        name: "my.ListAdapter".to_owned(),
+                        typeHint: "typing.Sequence[int]".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
+            },
+            13 => {
+
+                if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(python__types::Adapter {
+                        name: "my.SetAdapter".to_owned(),
+                        typeHint: "typing.AbstractSet[int]".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
+            },
+            14 => {
+
+                if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(python__types::Adapter {
+                        name: "my.MapAdapter".to_owned(),
+                        typeHint: "typing.Mapping[str, int]".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
             },
             _ => {}
         }

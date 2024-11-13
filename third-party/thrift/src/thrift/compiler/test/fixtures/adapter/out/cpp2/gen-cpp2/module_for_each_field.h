@@ -37,6 +37,9 @@ struct ForEachField<::facebook::thrift::test::Foo> {
     f(8, static_cast<T&&>(t).longField_ref()...);
     f(9, static_cast<T&&>(t).adaptedLongField_ref()...);
     f(10, static_cast<T&&>(t).doubleAdaptedField_ref()...);
+    f(11, static_cast<T&&>(t).adapted_list_ref()...);
+    f(12, static_cast<T&&>(t).adapted_set_ref()...);
+    f(13, static_cast<T&&>(t).adapted_map_ref()...);
   }
 };
 

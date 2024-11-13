@@ -373,6 +373,37 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'var' => 'doubleAdaptedField',
       'type' => \TType::I64,
     ),
+    12 => shape(
+      'var' => 'adapted_list',
+      'type' => \TType::LST,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    13 => shape(
+      'var' => 'adapted_set',
+      'type' => \TType::SET,
+      'etype' => \TType::I32,
+      'elem' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
+    14 => shape(
+      'var' => 'adapted_map',
+      'type' => \TType::MAP,
+      'ktype' => \TType::STRING,
+      'vtype' => \TType::I32,
+      'key' => shape(
+        'type' => \TType::STRING,
+      ),
+      'val' => shape(
+        'type' => \TType::I32,
+      ),
+      'format' => 'collection',
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'intField' => 1,
@@ -386,6 +417,9 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     'longField' => 9,
     'adaptedLongField' => 10,
     'doubleAdaptedField' => 11,
+    'adapted_list' => 12,
+    'adapted_set' => 13,
+    'adapted_map' => 14,
   ];
 
   const type TConstructorShape = shape(
@@ -400,6 +434,9 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     ?'longField' => ?\facebook\thrift\test\MyI64,
     ?'adaptedLongField' => ?\facebook\thrift\test\MyI64,
     ?'doubleAdaptedField' => ?\facebook\thrift\test\DoubleTypedefI64,
+    ?'adapted_list' => ?Vector<int>,
+    ?'adapted_set' => ?Set<int>,
+    ?'adapted_map' => ?Map<string, int>,
   );
 
   const type TShape = shape(
@@ -414,8 +451,11 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     'longField' => \facebook\thrift\test\MyI64,
     'adaptedLongField' => \facebook\thrift\test\MyI64,
     'doubleAdaptedField' => \facebook\thrift\test\DoubleTypedefI64,
+    'adapted_list' => vec<int>,
+    'adapted_set' => dict<int, bool>,
+    'adapted_map' => dict<string, int>,
   );
-  const int STRUCTURAL_ID = 7737420440299883894;
+  const int STRUCTURAL_ID = 7038980662111781280;
   /**
    * Original thrift field:-
    * 1: module.i32_5137 intField
@@ -471,8 +511,23 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
    * 11: module.DoubleTypedefI64 doubleAdaptedField
    */
   public \facebook\thrift\test\DoubleTypedefI64 $doubleAdaptedField;
+  /**
+   * Original thrift field:-
+   * 12: list<i32> adapted_list
+   */
+  public Vector<int> $adapted_list;
+  /**
+   * Original thrift field:-
+   * 13: set<i32> adapted_set
+   */
+  public Set<int> $adapted_set;
+  /**
+   * Original thrift field:-
+   * 14: map<string, i32> adapted_map
+   */
+  public Map<string, int> $adapted_map;
 
-  public function __construct(?\Adapter1::THackType $intField = null, ?\Adapter1::THackType $optionalIntField = null, ?\Adapter1::THackType $intFieldWithDefault = null, ?\facebook\thrift\test\SetWithAdapter $setField = null, ?\facebook\thrift\test\SetWithAdapter $optionalSetField = null, ?\Adapter3::THackType $mapField = null, ?\Adapter3::THackType $optionalMapField = null, ?\Adapter1::THackType $binaryField = null, ?\facebook\thrift\test\MyI64 $longField = null, ?\facebook\thrift\test\MyI64 $adaptedLongField = null, ?\facebook\thrift\test\DoubleTypedefI64 $doubleAdaptedField = null)[] {
+  public function __construct(?\Adapter1::THackType $intField = null, ?\Adapter1::THackType $optionalIntField = null, ?\Adapter1::THackType $intFieldWithDefault = null, ?\facebook\thrift\test\SetWithAdapter $setField = null, ?\facebook\thrift\test\SetWithAdapter $optionalSetField = null, ?\Adapter3::THackType $mapField = null, ?\Adapter3::THackType $optionalMapField = null, ?\Adapter1::THackType $binaryField = null, ?\facebook\thrift\test\MyI64 $longField = null, ?\facebook\thrift\test\MyI64 $adaptedLongField = null, ?\facebook\thrift\test\DoubleTypedefI64 $doubleAdaptedField = null, ?Vector<int> $adapted_list = null, ?Set<int> $adapted_set = null, ?Map<string, int> $adapted_map = null)[] {
     $this->intField = $intField ?? \Adapter1::fromThrift(0);
     $this->optionalIntField = $optionalIntField;
     $this->intFieldWithDefault = $intFieldWithDefault ?? \Adapter1::fromThrift(13);
@@ -484,6 +539,9 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     $this->longField = $longField ?? 0;
     $this->adaptedLongField = $adaptedLongField ?? 0;
     $this->doubleAdaptedField = $doubleAdaptedField ?? 0;
+    $this->adapted_list = $adapted_list ?? Vector {};
+    $this->adapted_set = $adapted_set ?? Set {};
+    $this->adapted_map = $adapted_map ?? Map {};
   }
 
   public static function withDefaultValues()[]: this {
@@ -503,6 +561,9 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       Shapes::idx($shape, 'longField'),
       Shapes::idx($shape, 'adaptedLongField'),
       Shapes::idx($shape, 'doubleAdaptedField'),
+      Shapes::idx($shape, 'adapted_list'),
+      Shapes::idx($shape, 'adapted_set'),
+      Shapes::idx($shape, 'adapted_map'),
     );
   }
 
@@ -895,6 +956,68 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
               "name" => "doubleAdaptedField",
             )
           ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 12,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adapted_list",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 13,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adapted_set",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 14,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adapted_map",
+            )
+          ),
         ],
         "is_union" => false,
       )
@@ -1124,6 +1247,39 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
             ),
           ],
         ),
+        'adapted_list' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
+              shape(
+                "name" => "my.ListAdapter",
+                "typeHint" => "typing.Sequence[int]",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adapted_set' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
+              shape(
+                "name" => "my.SetAdapter",
+                "typeHint" => "typing.AbstractSet[int]",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adapted_map' => shape(
+          'field' => dict[
+            '\facebook\thrift\annotation\python\Adapter' => \facebook\thrift\annotation\python\Adapter::fromShape(
+              shape(
+                "name" => "my.MapAdapter",
+                "typeHint" => "typing.Mapping[str, int]",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -1141,6 +1297,9 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       $shape['longField'],
       $shape['adaptedLongField'],
       $shape['doubleAdaptedField'],
+      $shape['adapted_list'] |> new Vector($$),
+      new Set(Keyset\keys($shape['adapted_set'])),
+      $shape['adapted_map'] |> new Map($$),
     );
   }
 
@@ -1157,6 +1316,9 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
       'longField' => $this->longField,
       'adaptedLongField' => $this->adaptedLongField,
       'doubleAdaptedField' => $this->doubleAdaptedField,
+      'adapted_list' => vec($this->adapted_list),
+      'adapted_set' => ThriftUtil::toDArray(Dict\fill_keys($this->adapted_set->toValuesArray(), true), static::class),
+      'adapted_map' => dict($this->adapted_map),
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -1259,6 +1421,51 @@ class Foo implements \IThriftSyncStruct, \IThriftStructMetadata, \IThriftShapish
     }
     if (idx($parsed, 'doubleAdaptedField') !== null) {
       $this->doubleAdaptedField = HH\FIXME\UNSAFE_CAST<mixed, \facebook\thrift\test\DoubleTypedefI64>($parsed['doubleAdaptedField']);
+    }
+    if (idx($parsed, 'adapted_list') !== null) {
+      $_json42 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['adapted_list']);
+      $_container43 = Vector {};
+      foreach($_json42 as $_key40 => $_value41) {
+        $_elem44 = 0;
+        $_tmp45 = (int)$_value41;
+        if ($_tmp45 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem44 = (int)$_tmp45;
+        }
+        $_container43 []= $_elem44;
+      }
+      $this->adapted_list = $_container43;
+    }
+    if (idx($parsed, 'adapted_set') !== null) {
+      $_json49 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['adapted_set']);
+      $_container50 = Set {};
+      foreach($_json49 as $_key47 => $_value48) {
+        $_elem51 = 0;
+        $_tmp52 = (int)$_value48;
+        if ($_tmp52 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem51 = (int)$_tmp52;
+        }
+        $_container50->add($_elem51);
+      }
+      $this->adapted_set = $_container50;
+    }
+    if (idx($parsed, 'adapted_map') !== null) {
+      $_json56 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, int>>($parsed['adapted_map']);
+      $_container57 = Map {};
+      foreach($_json56 as $_key54 => $_value55) {
+        $_value58 = 0;
+        $_tmp59 = (int)$_value55;
+        if ($_tmp59 > 0x7fffffff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_value58 = (int)$_tmp59;
+        }
+        $_container57[$_key54] = $_value58;
+      }
+      $this->adapted_map = $_container57;
     }
   }
 

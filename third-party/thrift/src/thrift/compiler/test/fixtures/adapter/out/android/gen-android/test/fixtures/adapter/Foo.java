@@ -37,6 +37,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
   private static final TField LONG_FIELD_FIELD_DESC = new TField("longField", TType.I64, (short)9);
   private static final TField ADAPTED_LONG_FIELD_FIELD_DESC = new TField("adaptedLongField", TType.I64, (short)10);
   private static final TField DOUBLE_ADAPTED_FIELD_FIELD_DESC = new TField("doubleAdaptedField", TType.I64, (short)11);
+  private static final TField ADAPTED_LIST_FIELD_DESC = new TField("adapted_list", TType.LIST, (short)12);
+  private static final TField ADAPTED_SET_FIELD_DESC = new TField("adapted_set", TType.SET, (short)13);
+  private static final TField ADAPTED_MAP_FIELD_DESC = new TField("adapted_map", TType.MAP, (short)14);
 
   public final Integer intField;
   public final Integer optionalIntField;
@@ -49,6 +52,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
   public final Long longField;
   public final Long adaptedLongField;
   public final Long doubleAdaptedField;
+  public final List<Integer> adapted_list;
+  public final Set<Integer> adapted_set;
+  public final Map<String,Integer> adapted_map;
   public static final int INTFIELD = 1;
   public static final int OPTIONALINTFIELD = 2;
   public static final int INTFIELDWITHDEFAULT = 3;
@@ -60,6 +66,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
   public static final int LONGFIELD = 9;
   public static final int ADAPTEDLONGFIELD = 10;
   public static final int DOUBLEADAPTEDFIELD = 11;
+  public static final int ADAPTED_LIST = 12;
+  public static final int ADAPTED_SET = 13;
+  public static final int ADAPTED_MAP = 14;
 
   public Foo(
       Integer intField,
@@ -72,7 +81,10 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
       byte[] binaryField,
       Long longField,
       Long adaptedLongField,
-      Long doubleAdaptedField) {
+      Long doubleAdaptedField,
+      List<Integer> adapted_list,
+      Set<Integer> adapted_set,
+      Map<String,Integer> adapted_map) {
     this.intField = intField;
     this.optionalIntField = optionalIntField;
     this.intFieldWithDefault = intFieldWithDefault;
@@ -84,6 +96,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
     this.longField = longField;
     this.adaptedLongField = adaptedLongField;
     this.doubleAdaptedField = doubleAdaptedField;
+    this.adapted_list = adapted_list;
+    this.adapted_set = adapted_set;
+    this.adapted_map = adapted_map;
   }
 
   /**
@@ -144,6 +159,21 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
       this.doubleAdaptedField = TBaseHelper.deepCopy(other.doubleAdaptedField);
     } else {
       this.doubleAdaptedField = null;
+    }
+    if (other.isSetAdapted_list()) {
+      this.adapted_list = TBaseHelper.deepCopy(other.adapted_list);
+    } else {
+      this.adapted_list = null;
+    }
+    if (other.isSetAdapted_set()) {
+      this.adapted_set = TBaseHelper.deepCopy(other.adapted_set);
+    } else {
+      this.adapted_set = null;
+    }
+    if (other.isSetAdapted_map()) {
+      this.adapted_map = TBaseHelper.deepCopy(other.adapted_map);
+    } else {
+      this.adapted_map = null;
     }
   }
 
@@ -250,6 +280,33 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
     return this.doubleAdaptedField != null;
   }
 
+  public List<Integer> getAdapted_list() {
+    return this.adapted_list;
+  }
+
+  // Returns true if field adapted_list is set (has been assigned a value) and false otherwise
+  public boolean isSetAdapted_list() {
+    return this.adapted_list != null;
+  }
+
+  public Set<Integer> getAdapted_set() {
+    return this.adapted_set;
+  }
+
+  // Returns true if field adapted_set is set (has been assigned a value) and false otherwise
+  public boolean isSetAdapted_set() {
+    return this.adapted_set != null;
+  }
+
+  public Map<String,Integer> getAdapted_map() {
+    return this.adapted_map;
+  }
+
+  // Returns true if field adapted_map is set (has been assigned a value) and false otherwise
+  public boolean isSetAdapted_map() {
+    return this.adapted_map != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -282,12 +339,18 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetDoubleAdaptedField(), that.isSetDoubleAdaptedField(), this.doubleAdaptedField, that.doubleAdaptedField)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetAdapted_list(), that.isSetAdapted_list(), this.adapted_list, that.adapted_list)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetAdapted_set(), that.isSetAdapted_set(), this.adapted_set, that.adapted_set)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetAdapted_map(), that.isSetAdapted_map(), this.adapted_map, that.adapted_map)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {intField, optionalIntField, intFieldWithDefault, setField, optionalSetField, mapField, optionalMapField, binaryField, longField, adaptedLongField, doubleAdaptedField});
+    return Arrays.deepHashCode(new Object[] {intField, optionalIntField, intFieldWithDefault, setField, optionalSetField, mapField, optionalMapField, binaryField, longField, adaptedLongField, doubleAdaptedField, adapted_list, adapted_set, adapted_map});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -307,6 +370,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
     Long tmp_longField = null;
     Long tmp_adaptedLongField = null;
     Long tmp_doubleAdaptedField = null;
+    List<Integer> tmp_adapted_list = null;
+    Set<Integer> tmp_adapted_set = null;
+    Map<String,Integer> tmp_adapted_map = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -470,6 +536,65 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case ADAPTED_LIST:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list23 = iprot.readListBegin();
+              tmp_adapted_list = new ArrayList<Integer>(Math.max(0, _list23.size));
+              for (int _i24 = 0; 
+                   (_list23.size < 0) ? iprot.peekList() : (_i24 < _list23.size); 
+                   ++_i24)
+              {
+                Integer _elem25;
+                _elem25 = iprot.readI32();
+                tmp_adapted_list.add(_elem25);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case ADAPTED_SET:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set26 = iprot.readSetBegin();
+              tmp_adapted_set = new HashSet<Integer>(Math.max(0, 2*_set26.size));
+              for (int _i27 = 0; 
+                   (_set26.size < 0) ? iprot.peekSet() : (_i27 < _set26.size); 
+                   ++_i27)
+              {
+                Integer _elem28;
+                _elem28 = iprot.readI32();
+                tmp_adapted_set.add(_elem28);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case ADAPTED_MAP:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map29 = iprot.readMapBegin();
+              tmp_adapted_map = new HashMap<String,Integer>(Math.max(0, 2*_map29.size));
+              for (int _i30 = 0; 
+                   (_map29.size < 0) ? iprot.peekMap() : (_i30 < _map29.size); 
+                   ++_i30)
+              {
+                String _key31;
+                Integer _val32;
+                _key31 = iprot.readString();
+                _val32 = iprot.readI32();
+                tmp_adapted_map.put(_key31, _val32);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -491,6 +616,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
       ,tmp_longField
       ,tmp_adaptedLongField
       ,tmp_doubleAdaptedField
+      ,tmp_adapted_list
+      ,tmp_adapted_set
+      ,tmp_adapted_map
     );
     _that.validate();
     return _that;
@@ -521,8 +649,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.setField.size()));
-        for (String _iter23 : this.setField)        {
-          oprot.writeString(_iter23);
+        for (String _iter33 : this.setField)        {
+          oprot.writeString(_iter33);
         }
         oprot.writeSetEnd();
       }
@@ -533,8 +661,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
         oprot.writeFieldBegin(OPTIONAL_SET_FIELD_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.STRING, this.optionalSetField.size()));
-          for (String _iter24 : this.optionalSetField)          {
-            oprot.writeString(_iter24);
+          for (String _iter34 : this.optionalSetField)          {
+            oprot.writeString(_iter34);
           }
           oprot.writeSetEnd();
         }
@@ -545,12 +673,12 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, this.mapField.size()));
-        for (Map.Entry<String, List<String>> _iter25 : this.mapField.entrySet())        {
-          oprot.writeString(_iter25.getKey());
+        for (Map.Entry<String, List<String>> _iter35 : this.mapField.entrySet())        {
+          oprot.writeString(_iter35.getKey());
           {
-            oprot.writeListBegin(new TList(TType.STRING, _iter25.getValue().size()));
-            for (String _iter26 : _iter25.getValue())            {
-              oprot.writeString(_iter26);
+            oprot.writeListBegin(new TList(TType.STRING, _iter35.getValue().size()));
+            for (String _iter36 : _iter35.getValue())            {
+              oprot.writeString(_iter36);
             }
             oprot.writeListEnd();
           }
@@ -564,12 +692,12 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
         oprot.writeFieldBegin(OPTIONAL_MAP_FIELD_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, this.optionalMapField.size()));
-          for (Map.Entry<String, List<String>> _iter27 : this.optionalMapField.entrySet())          {
-            oprot.writeString(_iter27.getKey());
+          for (Map.Entry<String, List<String>> _iter37 : this.optionalMapField.entrySet())          {
+            oprot.writeString(_iter37.getKey());
             {
-              oprot.writeListBegin(new TList(TType.STRING, _iter27.getValue().size()));
-              for (String _iter28 : _iter27.getValue())              {
-                oprot.writeString(_iter28);
+              oprot.writeListBegin(new TList(TType.STRING, _iter37.getValue().size()));
+              for (String _iter38 : _iter37.getValue())              {
+                oprot.writeString(_iter38);
               }
               oprot.writeListEnd();
             }
@@ -597,6 +725,40 @@ public class Foo implements TBase, java.io.Serializable, Cloneable {
     if (this.doubleAdaptedField != null) {
       oprot.writeFieldBegin(DOUBLE_ADAPTED_FIELD_FIELD_DESC);
       oprot.writeI64(this.doubleAdaptedField);
+      oprot.writeFieldEnd();
+    }
+    if (this.adapted_list != null) {
+      oprot.writeFieldBegin(ADAPTED_LIST_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.I32, this.adapted_list.size()));
+        for (Integer _iter39 : this.adapted_list)        {
+          oprot.writeI32(_iter39);
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.adapted_set != null) {
+      oprot.writeFieldBegin(ADAPTED_SET_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.I32, this.adapted_set.size()));
+        for (Integer _iter40 : this.adapted_set)        {
+          oprot.writeI32(_iter40);
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.adapted_map != null) {
+      oprot.writeFieldBegin(ADAPTED_MAP_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, this.adapted_map.size()));
+        for (Map.Entry<String, Integer> _iter41 : this.adapted_map.entrySet())        {
+          oprot.writeString(_iter41.getKey());
+          oprot.writeI32(_iter41.getValue());
+        }
+        oprot.writeMapEnd();
+      }
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

@@ -91,7 +91,7 @@ template <> struct TStructDataStorage<::facebook::thrift::test::MyAnnotation> {
 };
 
 template <> struct TStructDataStorage<::facebook::thrift::test::Foo> {
-  static constexpr const std::size_t fields_size = 11;
+  static constexpr const std::size_t fields_size = 14;
   static const std::string_view name;
   static const std::array<std::string_view, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

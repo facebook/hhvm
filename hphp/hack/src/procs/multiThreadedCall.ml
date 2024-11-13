@@ -84,7 +84,7 @@ let multi_threaded_call
         | None -> (worker :: workers, handles)
         | Some handle -> (workers, handle :: handles))
   in
-  let is_current h = call_id = WorkerController.get_call_id h in
+  let is_current handle = call_id = WorkerController.get_call_id handle in
   (* merge accumulator, leaving environment and interrupt handlers untouched *)
   let merge x (y1, y2, y3) = (merge x y1, y2, y3) in
   (* interrupt handlers are irrelevant after job is done *)
@@ -215,7 +215,7 @@ let multi_threaded_call
         dispatch (Some workers) waiters acc
   in
   try
-    let () = nested_exception := None in
+    nested_exception := None;
     dispatch
       (Some workers)
       handles

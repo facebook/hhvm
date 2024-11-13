@@ -150,8 +150,9 @@ let finalize_init init_env typecheck_telemetry init_telemetry =
 (* The main loop *)
 (*****************************************************************************)
 
-(** Query for changed files. This is a hard to understand method...
-[let (env, changes, new_clock, may_be_stale, telemetry) = query_notifier genv env query_kind start_time].
+(** [let (env, changes, new_clock, may_be_stale, telemetry) = query_notifier genv env query_kind start_time].
+
+Query for changed files. This is a hard to understand method...
 
 CARE! [query_kind] is hard to understand...
 * [`Sync] -- a watchman sync query, i.e. guarantees to have picked up all updates
@@ -783,11 +784,11 @@ let priority_client_interrupt_handler genv client_provider :
   let (env, updates, clock, _updates_stale, _telemetry) =
     query_notifier genv env `Sync t
   in
-  let size = Relative_path.Set.cardinal updates in
-  if size > 0 then (
+  let n_updates = Relative_path.Set.cardinal updates in
+  if n_updates > 0 then (
     Hh_logger.log
       "Interrupted by Watchman sync query: %d files changed at watchclock %s"
-      size
+      n_updates
       (ServerEnv.show_clock clock);
     ( {
         env with
@@ -858,7 +859,6 @@ let setup_interrupts env client_provider =
           | _ -> handlers
         in
         let handlers =
-          let interrupt_on_client = interrupt_on_client in
           match ClientProvider.priority_fd client_provider with
           | Some fd when interrupt_on_client ->
             (fd, priority_client_interrupt_handler genv client_provider)

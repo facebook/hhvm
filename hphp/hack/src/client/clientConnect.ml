@@ -233,6 +233,8 @@ let describe_mismatch (mismatch_info : MonitorUtils.build_mismatch_info option)
       (String.concat ~sep:" " (Array.to_list Sys.argv))
       Build_id.build_revision
 
+(** [connect] essentially connects to the monitor which will hand off that
+  connection to the server, then wait for 'hello' from the server. *)
 let rec connect
     ?(allow_macos_hack = true)
     ({
@@ -335,39 +337,9 @@ let rec connect
       Sys_utils.is_apple_os ()
       && allow_macos_hack
       && Float.(Unix.gettimeofday () -. t_connected_to_monitor > threshold)
-    then (
-      (*
-        HACK: on MacOS, re-establish the connection if it took a long time
-        during the initial attempt.
-
-        The MacOS implementation of the server monitor does not appear to make a
-        graceful handoff of the client connection to the server main process.
-        If, after the handoff, the monitor closes its connection fd before the
-        server main attempts any reads, the server main's connection will go
-        stale for reads (i.e., reading will generate an EOF). This is the case
-        if the server needs to run a long typecheck phase before communication
-        with the client, e.g. for cold starts.
-
-        For shorter startup times, MonitorMain.Sent_fds_collector attempts to
-        compensate for this issue by having the monitor wait a few seconds after
-        handoff before attempting to close its connection fd.
-
-        For longer startup times, a sufficient (if not exactly clean) workaround
-        is simply to have the client re-establish a connection.
-      *)
-      (* must hide the spinner prior to printing output or exiting *)
-      progress_callback None;
-      Printf.eprintf
-        "Server connection took over %.1f seconds. Refreshing...\n"
-        threshold;
-      (try Unix.shutdown_connection ic with
-      | _ -> ());
-      Stdlib.close_in_noerr ic;
-      Stdlib.close_out_noerr oc;
-
-      (* allow_macos_hack:false is a defensive measure against infinite connection loops *)
-      connect ~allow_macos_hack:false env start_time
-    ) else (
+    then
+      macos_connect env ic oc ~threshold ~start_time ~progress_callback
+    else (
       progress_callback (Some "connected");
       Lwt.return
         {
@@ -460,6 +432,39 @@ let rec connect
         connect { env with deadline } now
       end else
         raise Exit_status.(Exit_with Build_id_mismatch))
+
+and macos_connect env ~progress_callback ~threshold ic oc ~start_time =
+  (*
+        HACK: on MacOS, re-establish the connection if it took a long time
+        during the initial attempt.
+
+        The MacOS implementation of the server monitor does not appear to make a
+        graceful handoff of the client connection to the server main process.
+        If, after the handoff, the monitor closes its connection fd before the
+        server main attempts any reads, the server main's connection will go
+        stale for reads (i.e., reading will generate an EOF). This is the case
+        if the server needs to run a long typecheck phase before communication
+        with the client, e.g. for cold starts.
+
+        For shorter startup times, MonitorMain.Sent_fds_collector attempts to
+        compensate for this issue by having the monitor wait a few seconds after
+        handoff before attempting to close its connection fd.
+
+        For longer startup times, a sufficient (if not exactly clean) workaround
+        is simply to have the client re-establish a connection.
+      *)
+  (* must hide the spinner prior to printing output or exiting *)
+  progress_callback None;
+  Printf.eprintf
+    "Server connection took over %.1f seconds. Refreshing...\n"
+    threshold;
+  (try Unix.shutdown_connection ic with
+  | _ -> ());
+  Stdlib.close_in_noerr ic;
+  Stdlib.close_out_noerr oc;
+
+  (* allow_macos_hack:false is a defensive measure against infinite connection loops *)
+  connect ~allow_macos_hack:false env start_time
 
 let connect (env : env) : conn Lwt.t =
   let start_time = Unix.time () in

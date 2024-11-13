@@ -246,6 +246,124 @@ let main_internal
     (partial_telemetry_ref : Telemetry.t option ref) :
     (Exit_status.t * Telemetry.t) Lwt.t =
   match args.ClientEnv.mode with
+  | ClientEnv.MODE_STATUS ->
+    let prechecked = Option.value args.ClientEnv.prechecked ~default:true in
+    let%lwt ((), telemetry1) =
+      if prechecked then
+        Lwt.return ((), Telemetry.create ())
+      else
+        rpc args ServerCommandTypes.NO_PRECHECKED_FILES
+    in
+    let error_filter =
+      Filter_errors.Filter.make
+        ~default_all:local_config.ServerLocalConfig.warnings_default_all
+        ~generated_files:(ServerConfig.warnings_generated_files config)
+        args.ClientEnv.warning_switches
+    in
+    (* We don't do streaming errors under [output_json]: our contract
+       with the outside world is that if a caller uses [output_json] then they
+       will never see [Exit_status.Typecheck_restarted], which streaming might show.
+
+       We don't do streaming errors under [not prechecked]. That's because the
+       [go_streaming] contract is to report on a typecheck that reflects all *file*
+       changes up until now; it has no guarantee that the typecheck will reflects our
+       preceding call to ServerCommandTypes.NO_PRECHECKED_FILES. *)
+    let use_streaming =
+      local_config.ServerLocalConfig.consume_streaming_errors
+      && (not args.ClientEnv.output_json)
+      && prechecked
+    in
+    if use_streaming then
+      let%lwt (exit_status, telemetry) =
+        ClientCheckStatus.go_streaming
+          args
+          error_filter
+          ~partial_telemetry_ref
+          ~connect_then_close:(fun () -> connect_then_close args)
+      in
+      Lwt.return (exit_status, telemetry)
+    else
+      let%lwt (status, telemetry) =
+        rpc
+          args
+          (ServerCommandTypes.STATUS
+             { max_errors = args.ClientEnv.max_errors; error_filter })
+      in
+      let exit_status =
+        ClientCheckStatus.go
+          status
+          args.ClientEnv.error_format
+          ~output_json:args.ClientEnv.output_json
+          ~max_errors:args.ClientEnv.max_errors
+          ~is_interactive:args.ClientEnv.is_interactive
+      in
+      let telemetry =
+        telemetry
+        |> Telemetry.bool_ ~key:"streaming" ~value:false
+        |> Telemetry.object_ ~key:"no_prechecked" ~value:telemetry1
+        |> Telemetry.object_opt
+             ~key:"last_recheck_stats"
+             ~value:status.ServerCommandTypes.Server_status.last_recheck_stats
+      in
+      Lwt.return (exit_status, telemetry)
+  | ClientEnv.(
+      MODE_STATUS_SINGLE { filenames; show_tast; preexisting_warnings }) ->
+    let file_input filename =
+      match filename with
+      | "-" ->
+        ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
+      | _ -> ServerCommandTypes.FileName (expand_path filename)
+    in
+    let file_inputs = List.map ~f:file_input filenames in
+    let error_filter =
+      Filter_errors.Filter.make
+        ~default_all:local_config.ServerLocalConfig.warnings_default_all
+        ~generated_files:(ServerConfig.warnings_generated_files config)
+        args.ClientEnv.warning_switches
+    in
+    let%lwt (((error_list, dropped_count), tasts), telemetry) =
+      rpc
+        args
+        (ServerCommandTypes.STATUS_SINGLE
+           {
+             file_names = file_inputs;
+             max_errors = args.ClientEnv.max_errors;
+             error_filter;
+             return_expanded_tast = show_tast;
+             preexisting_warnings;
+           })
+    in
+    (match tasts with
+    | None -> ()
+    | Some tasts ->
+      Printf.printf "TAST hashes:\n\n";
+      Relative_path.Map.map tasts ~f:Tast.program_by_names
+      |> Tast_hashes.hash_tasts_by_file
+      |> Relative_path.Map.yojson_of_t Tast_hashes.yojson_of_by_names
+      |> Yojson.Safe.pretty_to_channel Stdlib.stdout;
+      Printf.printf
+        "\n\n\nTASTs:\n\n%s\n%!"
+        (Relative_path.Map.show (Tast_with_dynamic.pp Tast.pp_program) tasts);
+      ());
+
+    let status =
+      {
+        error_list;
+        dropped_count;
+        ServerCommandTypes.Server_status.liveness =
+          ServerCommandTypes.Live_status;
+        last_recheck_stats = None;
+      }
+    in
+    let exit_status =
+      ClientCheckStatus.go
+        status
+        args.ClientEnv.error_format
+        ~is_interactive:args.ClientEnv.is_interactive
+        ~output_json:args.ClientEnv.output_json
+        ~max_errors:args.ClientEnv.max_errors
+    in
+    Lwt.return (exit_status, telemetry)
   | ClientEnv.MODE_LIST_FILES ->
     let%lwt (infol, telemetry) =
       rpc args @@ ServerCommandTypes.LIST_FILES_WITH_ERRORS
@@ -668,124 +786,6 @@ let main_internal
     in
     SaveStateResultPrinter.go result args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | ClientEnv.MODE_STATUS ->
-    let prechecked = Option.value args.ClientEnv.prechecked ~default:true in
-    let%lwt ((), telemetry1) =
-      if prechecked then
-        Lwt.return ((), Telemetry.create ())
-      else
-        rpc args ServerCommandTypes.NO_PRECHECKED_FILES
-    in
-    let error_filter =
-      Filter_errors.Filter.make
-        ~default_all:local_config.ServerLocalConfig.warnings_default_all
-        ~generated_files:(ServerConfig.warnings_generated_files config)
-        args.ClientEnv.warning_switches
-    in
-    (* We don't do streaming errors under [output_json]: our contract
-       with the outside world is that if a caller uses [output_json] then they
-       will never see [Exit_status.Typecheck_restarted], which streaming might show.
-
-       We don't do streaming errors under [not prechecked]. That's because the
-       [go_streaming] contract is to report on a typecheck that reflects all *file*
-       changes up until now; it has no guarantee that the typecheck will reflects our
-       preceding call to ServerCommandTypes.NO_PRECHECKED_FILES. *)
-    let use_streaming =
-      local_config.ServerLocalConfig.consume_streaming_errors
-      && (not args.ClientEnv.output_json)
-      && prechecked
-    in
-    if use_streaming then
-      let%lwt (exit_status, telemetry) =
-        ClientCheckStatus.go_streaming
-          args
-          error_filter
-          ~partial_telemetry_ref
-          ~connect_then_close:(fun () -> connect_then_close args)
-      in
-      Lwt.return (exit_status, telemetry)
-    else
-      let%lwt (status, telemetry) =
-        rpc
-          args
-          (ServerCommandTypes.STATUS
-             { max_errors = args.ClientEnv.max_errors; error_filter })
-      in
-      let exit_status =
-        ClientCheckStatus.go
-          status
-          args.ClientEnv.error_format
-          ~output_json:args.ClientEnv.output_json
-          ~max_errors:args.ClientEnv.max_errors
-          ~is_interactive:args.ClientEnv.is_interactive
-      in
-      let telemetry =
-        telemetry
-        |> Telemetry.bool_ ~key:"streaming" ~value:false
-        |> Telemetry.object_ ~key:"no_prechecked" ~value:telemetry1
-        |> Telemetry.object_opt
-             ~key:"last_recheck_stats"
-             ~value:status.ServerCommandTypes.Server_status.last_recheck_stats
-      in
-      Lwt.return (exit_status, telemetry)
-  | ClientEnv.(
-      MODE_STATUS_SINGLE { filenames; show_tast; preexisting_warnings }) ->
-    let file_input filename =
-      match filename with
-      | "-" ->
-        ServerCommandTypes.FileContent (Sys_utils.read_stdin_to_string ())
-      | _ -> ServerCommandTypes.FileName (expand_path filename)
-    in
-    let file_inputs = List.map ~f:file_input filenames in
-    let error_filter =
-      Filter_errors.Filter.make
-        ~default_all:local_config.ServerLocalConfig.warnings_default_all
-        ~generated_files:(ServerConfig.warnings_generated_files config)
-        args.ClientEnv.warning_switches
-    in
-    let%lwt (((error_list, dropped_count), tasts), telemetry) =
-      rpc
-        args
-        (ServerCommandTypes.STATUS_SINGLE
-           {
-             file_names = file_inputs;
-             max_errors = args.ClientEnv.max_errors;
-             error_filter;
-             return_expanded_tast = show_tast;
-             preexisting_warnings;
-           })
-    in
-    (match tasts with
-    | None -> ()
-    | Some tasts ->
-      Printf.printf "TAST hashes:\n\n";
-      Relative_path.Map.map tasts ~f:Tast.program_by_names
-      |> Tast_hashes.hash_tasts_by_file
-      |> Relative_path.Map.yojson_of_t Tast_hashes.yojson_of_by_names
-      |> Yojson.Safe.pretty_to_channel Stdlib.stdout;
-      Printf.printf
-        "\n\n\nTASTs:\n\n%s\n%!"
-        (Relative_path.Map.show (Tast_with_dynamic.pp Tast.pp_program) tasts);
-      ());
-
-    let status =
-      {
-        error_list;
-        dropped_count;
-        ServerCommandTypes.Server_status.liveness =
-          ServerCommandTypes.Live_status;
-        last_recheck_stats = None;
-      }
-    in
-    let exit_status =
-      ClientCheckStatus.go
-        status
-        args.ClientEnv.error_format
-        ~is_interactive:args.ClientEnv.is_interactive
-        ~output_json:args.ClientEnv.output_json
-        ~max_errors:args.ClientEnv.max_errors
-    in
-    Lwt.return (exit_status, telemetry)
   | ClientEnv.MODE_SEARCH query ->
     if not (String.equal query "this_is_just_to_check_liveness_of_hh_server")
     then begin
@@ -993,7 +993,7 @@ let main
     (args : ClientEnv.client_check_env)
     (config : ServerConfig.t)
     (local_config : ServerLocalConfig.t)
-    ~(init_proc_stack : string list option) : 'a =
+    ~(init_proc_stack : string list option) : _ =
   HackEventLogger.client_set_mode
     (ClientEnv.Variants_of_client_mode.to_name args.ClientEnv.mode);
 

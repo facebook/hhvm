@@ -348,16 +348,19 @@ let hand_off_client_connection ~tracker server_fd client_fd =
   end
 
 (** Sends the client connection FD to the server process then closes the FD.
+
   Backpressure: We have a timeout of 30s here to wait for the server to accept
   the handoff. That timeout will be exceeded if monitor->server pipe has filled
   up from previous requests and the server's current work item is costly. In this
   case we'll give up on the handoff, and hh_client will fail with Server_hung_up_should_retry,
   and find_hh.sh will retry with exponential backoff.
+
   During the 30s while we're blocked here, if there are lots of other clients trying
   to connect to the monitor and the monitor's incoming queue is full, they'll time
   out trying to open a connection to the monitor. Their response is to back off,
   with exponentially longer timeouts they're willing to wait for the monitor to become
   available. In this way the queue of clients is stored in the unix process list.
+
   Why did we pick 30s? It's arbitrary. If we decreased then, if there are lots of clients,
   they'll do more work while they needlessly cycle. If we increased up to infinite
   then I worry that a failure for other reasons might look like a hang.
@@ -416,11 +419,9 @@ let rec client_prehandoff
   match env.server with
   | Alive server ->
     let server_fd =
-      snd
-      @@ List.find_exn server.out_fds ~f:(fun (pipe_type, _fd) ->
-             MonitorRpc.equal_pipe_type
-               pipe_type
-               handoff_options.MonitorRpc.pipe_type)
+      MonitorRpc.PipeTypeMap.find
+        handoff_options.MonitorRpc.pipe_type
+        server.out_fds
     in
     let t_ready = Unix.gettimeofday () in
     let tracker =

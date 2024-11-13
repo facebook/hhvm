@@ -10,7 +10,13 @@ type pipe_type =
   | Default
   | Priority
   | Force_dormant_start_only
-[@@deriving eq]
+[@@deriving ord]
+
+module PipeType = struct
+  type t = pipe_type [@@deriving ord]
+end
+
+module PipeTypeMap = Stdlib.Map.Make (PipeType)
 
 let pipe_type_to_string = function
   | Default -> "default"

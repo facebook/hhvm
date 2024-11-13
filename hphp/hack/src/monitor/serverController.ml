@@ -95,12 +95,13 @@ let start_server_daemon
           };
         in_fd = Daemon.descr_of_in_channel ic;
         out_fds =
-          [
-            (MonitorRpc.Default, Daemon.descr_of_out_channel oc);
-            (MonitorRpc.Priority, parent_priority_fd);
-            ( MonitorRpc.Force_dormant_start_only,
-              parent_force_dormant_start_only_fd );
-          ];
+          MonitorRpc.PipeTypeMap.of_list
+            [
+              (MonitorRpc.Default, Daemon.descr_of_out_channel oc);
+              (MonitorRpc.Priority, parent_priority_fd);
+              ( MonitorRpc.Force_dormant_start_only,
+                parent_force_dormant_start_only_fd );
+            ];
         start_t;
         last_request_handoff = ref (Unix.time ());
       }

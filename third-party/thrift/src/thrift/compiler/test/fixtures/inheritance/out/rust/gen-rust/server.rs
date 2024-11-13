@@ -337,7 +337,7 @@ where
             // From module.MyRoot:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "do_root",
               starts_interaction: false,
               interaction_name: None,
@@ -693,7 +693,7 @@ where
             // From module.MyNode:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "do_mid",
               starts_interaction: false,
               interaction_name: None,
@@ -702,7 +702,7 @@ where
             // From module.MyRoot:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "do_root",
               starts_interaction: false,
               interaction_name: None,
@@ -1062,7 +1062,7 @@ where
             // From module.MyLeaf:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "do_leaf",
               starts_interaction: false,
               interaction_name: None,
@@ -1071,7 +1071,7 @@ where
             // From module.MyNode:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "do_mid",
               starts_interaction: false,
               interaction_name: None,
@@ -1080,7 +1080,7 @@ where
             // From module.MyRoot:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "do_root",
               starts_interaction: false,
               interaction_name: None,

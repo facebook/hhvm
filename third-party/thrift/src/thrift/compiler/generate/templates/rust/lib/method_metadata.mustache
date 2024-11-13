@@ -17,7 +17,7 @@
 }}
             // From {{service:program_name}}.{{service:name}}:
 {{^service:interaction?}}
-{{#service:rustFunctions}}
+{{#service:rustFunctions}}{{^function:starts_interaction?}}
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
               {{#function:stream?}}
@@ -27,17 +27,18 @@
               rpc_kind: ::fbthrift::processor::RpcKind::SINK,
               {{/function:sink?}}{{/function:stream?}}
               {{^function:stream?}}{{^function:sink?}}
-                {{#function:return_type}}{{#type:void?}}
+              {{#function:oneway?}}
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
-                  {{/type:void?}}{{^type:void?}}
+              {{/function:oneway?}}
+              {{^function:oneway?}}
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-                  {{/type:void?}}{{/function:return_type}}
+              {{/function:oneway?}}
               {{/function:sink?}}{{/function:stream?}}
               name: "{{function:name}}",
-              starts_interaction: {{#function:starts_interaction?}}true{{/function:starts_interaction?}}{{^function:starts_interaction?}}false{{/function:starts_interaction?}},
-              interaction_name: {{#function:starts_interaction?}}Some("{{service:name}}"){{/function:starts_interaction?}}{{^function:starts_interaction?}}None{{/function:starts_interaction?}},
+              starts_interaction: {{#function:creates_interaction?}}true{{/function:creates_interaction?}}{{^function:creates_interaction?}}false{{/function:creates_interaction?}},
+              interaction_name: {{#function:creates_interaction?}}Some("{{service:name}}"){{/function:creates_interaction?}}{{^function:creates_interaction?}}None{{/function:creates_interaction?}},
             },
-{{/service:rustFunctions}}
+{{/function:starts_interaction?}}{{/service:rustFunctions}}
 {{#service:interactions}}{{#service:rustFunctions}}
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
@@ -48,11 +49,12 @@
               rpc_kind: ::fbthrift::processor::RpcKind::SINK,
               {{/function:sink?}}{{/function:stream?}}
               {{^function:stream?}}{{^function:sink?}}
-                {{#function:return_type}}{{#type:void?}}
+              {{#function:oneway?}}
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
-                  {{/type:void?}}{{^type:void?}}
+              {{/function:oneway?}}
+              {{^function:oneway?}}
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-                  {{/type:void?}}{{/function:return_type}}
+              {{/function:oneway?}}
               {{/function:sink?}}{{/function:stream?}}
               name: "{{service:name}}.{{function:name}}",
               starts_interaction: false,

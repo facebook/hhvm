@@ -1988,7 +1988,7 @@ where
             // From module.MyService:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "ping",
               starts_interaction: false,
               interaction_name: None,
@@ -2016,7 +2016,7 @@ where
             },
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "putDataById",
               starts_interaction: false,
               interaction_name: None,
@@ -2052,20 +2052,13 @@ where
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
-              name: "createMyInteraction",
+              name: "startPingInteraction",
               starts_interaction: true,
               interaction_name: Some("MyService"),
             },
             ::fbthrift::processor::MethodMetadata{
-              interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
-              name: "startPingInteraction",
-              starts_interaction: false,
-              interaction_name: None,
-            },
-            ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "MyInteraction.ping",
               starts_interaction: false,
               interaction_name: Some("MyInteraction"),

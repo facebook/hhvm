@@ -661,14 +661,14 @@ where
             // From module.Raiser:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "doBland",
               starts_interaction: false,
               interaction_name: None,
             },
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "doRaise",
               starts_interaction: false,
               interaction_name: None,

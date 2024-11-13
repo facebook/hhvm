@@ -343,7 +343,7 @@ where
             // From module.FooService:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "simple_rpc",
               starts_interaction: false,
               interaction_name: None,
@@ -2148,7 +2148,7 @@ where
             // From module.MyService:
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "ping",
               starts_interaction: false,
               interaction_name: None,
@@ -2162,14 +2162,14 @@ where
             },
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "sink",
               starts_interaction: false,
               interaction_name: None,
             },
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "putDataById",
               starts_interaction: false,
               interaction_name: None,
@@ -2190,7 +2190,7 @@ where
             },
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "deleteDataById",
               starts_interaction: false,
               interaction_name: None,
@@ -2211,7 +2211,7 @@ where
             },
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::None,
-              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_NO_RESPONSE,
+              rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "rpc_skipped_codegen",
               starts_interaction: false,
               interaction_name: None,

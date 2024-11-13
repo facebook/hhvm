@@ -90,17 +90,22 @@ func WithDialer(d func() (net.Conn, error)) ClientOption {
 	}
 }
 
-// WithTimeout sets deadline duration for I/O operations
+// WithIoTimeout sets deadline duration for I/O operations
 // (see https://golang.org/pkg/net/#Conn). Note that
 // this timeout is not a connection timeout as it is
 // not honored during Dial operation.
-func WithTimeout(ioTimeout time.Duration) ClientOption {
+func WithIoTimeout(ioTimeout time.Duration) ClientOption {
 	return func(opts *clientOptions) {
 		opts.ioTimeout = ioTimeout
 	}
 }
 
-// WithConn sets the connection to use for the thrift client.
+// Deprecated: use WithIoTimeout() instead.
+func WithTimeout(ioTimeout time.Duration) ClientOption {
+	return WithIoTimeout(ioTimeout)
+}
+
+// Deprecated: use WithDialer() instead.
 func WithConn(conn net.Conn) ClientOption {
 	return WithDialer(func() (net.Conn, error) {
 		return conn, nil

@@ -42,7 +42,7 @@ func TestSimpleServer(t *testing.T) {
 		errChan <- err
 		close(errChan)
 	}()
-	conn, err := DialHostPort(addr.String())
+	conn, err := net.Dial("tcp", addr.String())
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}
@@ -127,12 +127,13 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 		errChan <- err
 		close(errChan)
 	}()
-	conn, err := DialHostPort(addr.String())
-	if err != nil {
-		t.Fatalf("could not create client socket: %s", err)
-	}
 	// Sets the client serialization format to a non default.
-	proto, err := NewClient(WithHeader(), WithConn(conn), WithProtocolID(types.ProtocolIDBinary))
+	proto, err := NewClient(
+		WithHeader(),
+		WithDialer(func() (net.Conn, error) {
+			return net.Dial("tcp", addr.String())
+		}),
+		WithProtocolID(types.ProtocolIDBinary))
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

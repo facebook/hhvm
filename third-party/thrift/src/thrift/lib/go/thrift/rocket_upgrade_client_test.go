@@ -31,7 +31,7 @@ func TestCloseWithoutSendingMessages(t *testing.T) {
 		t.Fatalf("could not create server socket: %s", err)
 	}
 	addr := serverSocket.Addr()
-	conn, err := DialHostPort(addr.String())
+	conn, err := net.Dial("tcp", addr.String())
 	if err != nil {
 		t.Fatalf("could not create client socket: %s", err)
 	}

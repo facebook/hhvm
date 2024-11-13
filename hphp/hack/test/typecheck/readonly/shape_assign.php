@@ -19,8 +19,10 @@ class Foo {
 }
 
 
-function test(readonly shape('a' => Foo, 'b' => Foo) $x): void {
+function test(readonly shape('a' => Foo, 'b' => Foo) $x, readonly (Foo, Foo) $y): void {
   shape('a' => $a, 'b' => $b) = $x;
   $a->prop = 4; // error $a is readonly
   $b->prop = 4; // error $b is readonly
+  tuple($c, $d) = $y;
+  $c->prop = 4; // error $c is readonly
 }

@@ -195,7 +195,7 @@ impl TypedLocal {
     fn get_lvar_hint(&mut self, expr: &Expr) -> Result<Option<Hint>, ()> {
         match expr {
             Expr(_, pos, Expr_::Lvar(box lid)) => Ok(self.get_hint_or_add_assign(lid, pos)),
-            Expr(_, _pos, Expr_::List(_) | Expr_::Shape(_)) => Err(()),
+            Expr(_, _pos, Expr_::List(_) | Expr_::Tuple(_) | Expr_::Shape(_)) => Err(()),
             _ => Ok(None),
         }
     }
@@ -280,7 +280,7 @@ impl TypedLocal {
                     }
                 }
             }
-            Expr(_, _pos, Expr_::List(exprs)) => {
+            Expr(_, _pos, Expr_::List(exprs) | Expr_::Tuple(exprs)) => {
                 for expr in exprs {
                     self.get_vars_to_enforce_lhs(expr, in_op_assign, hints, assign_tmp, used_tmps)
                 }

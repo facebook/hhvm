@@ -467,7 +467,7 @@ fn check_assignment_validity(
             context.add_local(&var_name, rhs_rty);
         }
         // list assignment
-        aast::Expr_::List(l) => {
+        aast::Expr_::List(l) | aast::Expr_::Tuple(l) => {
             let exprs = &mut **l;
             for e in exprs.iter_mut() {
                 check_assignment_validity(context, checker, &e.1.clone(), e, rhs);

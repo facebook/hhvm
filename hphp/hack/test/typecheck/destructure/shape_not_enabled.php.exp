@@ -1,8 +1,14 @@
 ERROR: File "shape_not_enabled.php", line 4, characters 3-18:
 Cannot use unstable feature: `shape_destructure` (Parsing[1002])
-ERROR: File "shape_not_enabled.php", line 5, characters 18-33:
+ERROR: File "shape_not_enabled.php", line 5, characters 3-59:
 Cannot use unstable feature: `shape_destructure` (Parsing[1002])
-ERROR: File "shape_not_enabled.php", line 5, characters 41-56:
+ERROR: File "shape_not_enabled.php", line 5, characters 13-40:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 20-35:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 5, characters 43-58:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "shape_not_enabled.php", line 7, characters 3-15:
 Cannot use unstable feature: `shape_destructure` (Parsing[1002])
 ERROR: File "shape_not_enabled.php", line 4, characters 3-23:
 Invalid assignment (Typing[4110])
@@ -10,15 +16,39 @@ Invalid assignment (Typing[4110])
   Expected `nothing`
   File "shape_not_enabled.php", line 3, characters 25-27:
   But got `int`
-ERROR: File "shape_not_enabled.php", line 5, characters 3-90:
+ERROR: File "shape_not_enabled.php", line 5, characters 3-92:
 Invalid assignment (Typing[4110])
-  File "shape_not_enabled.php", line 5, characters 31-32:
+  File "shape_not_enabled.php", line 5, characters 9-10:
+  Expected `shape('a' => int)`
+  File "shape_not_enabled.php", line 6, characters 11-11:
+  But got `int`
+ERROR: File "shape_not_enabled.php", line 5, characters 3-92:
+Invalid assignment (Typing[4110])
+  File "shape_not_enabled.php", line 5, characters 33-34:
   Expected `nothing`
   File "shape_not_enabled.php", line 3, characters 25-27:
   But got `int`
-ERROR: File "shape_not_enabled.php", line 5, characters 3-90:
+ERROR: File "shape_not_enabled.php", line 5, characters 3-92:
 Invalid assignment (Typing[4110])
-  File "shape_not_enabled.php", line 5, characters 54-55:
+  File "shape_not_enabled.php", line 5, characters 38-39:
+  Expected `nothing`
+  File "shape_not_enabled.php", line 6, characters 24-24:
+  But got `int`
+ERROR: File "shape_not_enabled.php", line 5, characters 3-92:
+Invalid assignment (Typing[4110])
+  File "shape_not_enabled.php", line 5, characters 56-57:
   Expected `nothing`
   File "shape_not_enabled.php", line 3, characters 25-27:
+  But got `int`
+ERROR: File "shape_not_enabled.php", line 7, characters 3-29:
+Invalid assignment (Typing[4110])
+  File "shape_not_enabled.php", line 7, characters 9-10:
+  Expected `shape('a' => int)`
+  File "shape_not_enabled.php", line 7, characters 25-25:
+  But got `int`
+ERROR: File "shape_not_enabled.php", line 7, characters 3-29:
+Invalid assignment (Typing[4110])
+  File "shape_not_enabled.php", line 7, characters 13-14:
+  Expected `nothing`
+  File "shape_not_enabled.php", line 7, characters 28-28:
   But got `int`

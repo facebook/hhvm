@@ -1,0 +1,1 @@
+Catchable fatal error: Typed local assignment: Expected int, got string in %s/hphp/test/slow/typed_locals/tuple_lval.php on line %d

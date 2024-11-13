@@ -1040,7 +1040,9 @@ fn check_l_iter<'a, 'd>(
                     let name = local_id::get_name(&lid.1);
                     *name == *self.arr_loc || self.is_key(name)
                 }
-                ast::Expr_::List(exprs) => exprs.iter().any(|expr| self.check_lval(expr, is_unset)),
+                ast::Expr_::List(exprs) | ast::Expr_::Tuple(exprs) => {
+                    exprs.iter().any(|expr| self.check_lval(expr, is_unset))
+                }
                 ast::Expr_::Shape(exprs) => exprs
                     .iter()
                     .any(|(_, expr)| self.check_lval(expr, is_unset)),
@@ -1438,7 +1440,7 @@ fn emit_iterator_lvalue_storage<'a, 'd>(
             &lvalue.1,
             "Can't use return value in write context",
         )),
-        ast::Expr_::List(_) | ast::Expr_::Shape(_) => {
+        ast::Expr_::List(_) | ast::Expr_::Tuple(_) | ast::Expr_::Shape(_) => {
             let idx_exps = VecDictIndex::add_indices_to_lval_exp(&lvalue.2);
             let load_values = emit_load_list_elements(
                 e,
@@ -1534,7 +1536,7 @@ fn emit_load_list_element<'a, 'd>(
             ]);
             vec![load_value]
         }
-        ast::Expr_::List(_) | ast::Expr_::Shape(_) => {
+        ast::Expr_::List(_) | ast::Expr_::Tuple(_) | ast::Expr_::Shape(_) => {
             let instr_dim = instr::dim(MOpMode::Warn, mk);
             path.push(instr_dim);
             let indexed_exprs = VecDictIndex::add_indices_to_lval_exp(&elem.2);

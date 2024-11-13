@@ -818,6 +818,10 @@ pub const fun_arg_inout_set: Error =
 pub const fun_arg_inout_const: Error = Cow::Borrowed("You cannot decorate a constant as `inout`");
 pub const fun_arg_invalid_arg: Error =
     Cow::Borrowed("You cannot decorate this argument as `inout`");
+pub const fun_arg_shape_in_list: Error =
+    Cow::Borrowed("You cannot nest a `shape` or `tuple` inside a `list`");
+pub const fun_arg_list_in_shape: Error =
+    Cow::Borrowed("You cannot nest a `list` inside a `tuple` or `shape`");
 pub const fun_arg_inout_containers: Error = Cow::Borrowed(concat!(
     "Parameters marked `inout` must be contained in locals, vecs, dicts, keysets,",
     " and arrays",

@@ -1,0 +1,40 @@
+ERROR: File "nesting.php", line 4, characters 8-23:
+You cannot nest a `shape` or `tuple` inside a `list` (Parsing[1002])
+ERROR: File "nesting.php", line 5, characters 3-28:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "nesting.php", line 5, characters 16-27:
+You cannot nest a `list` inside a `tuple` or `shape` (Parsing[1002])
+ERROR: File "nesting.php", line 6, characters 8-16:
+You cannot nest a `shape` or `tuple` inside a `list` (Parsing[1002])
+ERROR: File "nesting.php", line 7, characters 3-21:
+Cannot use unstable feature: `shape_destructure` (Parsing[1002])
+ERROR: File "nesting.php", line 7, characters 9-20:
+You cannot nest a `list` inside a `tuple` or `shape` (Parsing[1002])
+ERROR: File "nesting.php", line 5, characters 16-27:
+`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
+ERROR: File "nesting.php", line 7, characters 9-20:
+`list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
+ERROR: File "nesting.php", line 4, characters 3-56:
+Invalid assignment (Typing[4110])
+  File "nesting.php", line 4, characters 21-22:
+  Expected `nothing`
+  File "nesting.php", line 4, characters 51-51:
+  But got `int`
+ERROR: File "nesting.php", line 5, characters 3-56:
+Invalid assignment (Typing[4110])
+  File "nesting.php", line 5, characters 21-22:
+  Expected `nothing`
+  File "nesting.php", line 5, characters 51-51:
+  But got `int`
+ERROR: File "nesting.php", line 6, characters 3-42:
+Invalid assignment (Typing[4110])
+  File "nesting.php", line 6, characters 14-15:
+  Expected `nothing`
+  File "nesting.php", line 6, characters 37-37:
+  But got `int`
+ERROR: File "nesting.php", line 7, characters 3-42:
+Invalid assignment (Typing[4110])
+  File "nesting.php", line 7, characters 14-15:
+  Expected `nothing`
+  File "nesting.php", line 7, characters 37-37:
+  But got `int`

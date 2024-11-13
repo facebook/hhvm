@@ -24,12 +24,12 @@ function main(): void {
   ];
   $v = vec[0];
   foreach (
-    $s as list(
+    $s as tuple(
       $a,
       shape(
         'b' => $b,
         'v0' => $v[0],
-        'l' => list($c, $d),
+        'l' => tuple($c, $d),
         's' => shape('nest' => $nest, C::d => $e),
       ),
     )

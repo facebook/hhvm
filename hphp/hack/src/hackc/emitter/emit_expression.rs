@@ -339,7 +339,9 @@ mod inout_locals {
                     add_write(lid.1.as_str(), ctx.i, ctx.state);
                 }
             }
-            ast::Expr_::List(exprs) => exprs.iter().for_each(|expr| collect_lvars_hs(ctx, expr)),
+            ast::Expr_::List(exprs) | ast::Expr_::Tuple(exprs) => {
+                exprs.iter().for_each(|expr| collect_lvars_hs(ctx, expr))
+            }
             ast::Expr_::Shape(exprs) => exprs
                 .iter()
                 .for_each(|(_field_name, expr)| collect_lvars_hs(ctx, expr)),
@@ -5749,10 +5751,14 @@ fn emit_lval_op<'a, 'd>(
     null_coalesce_assignment: bool,
 ) -> Result<InstrSeq> {
     match (op, &expr1.2, expr2) {
-        (LValOp::Set, ast::Expr_::List(_) | ast::Expr_::Shape(_), Some(expr2)) => {
+        (
+            LValOp::Set,
+            ast::Expr_::List(_) | ast::Expr_::Tuple(_) | ast::Expr_::Shape(_),
+            Some(expr2),
+        ) => {
             let instr_rhs = emit_expr(e, env, expr2)?;
             let has_elements = match &expr1.2 {
-                ast::Expr_::List(l) => l.iter().any(|e| !e.2.is_omitted()),
+                ast::Expr_::List(l) | ast::Expr_::Tuple(l) => l.iter().any(|e| !e.2.is_omitted()),
                 ast::Expr_::Shape(l) => l.iter().any(|e| !e.1.2.is_omitted()),
                 _ => false,
             };
@@ -5933,7 +5939,7 @@ pub enum VecDictIndex<'a> {
 impl<'a> VecDictIndex<'a> {
     pub fn add_indices_to_lval_exp(expr: &'a ast::Expr_) -> Vec<(VecDictIndex<'a>, &'a ast::Expr)> {
         match expr {
-            ast::Expr_::List(exprs) => exprs
+            ast::Expr_::List(exprs) | ast::Expr_::Tuple(exprs) => exprs
                 .iter()
                 .enumerate()
                 .map(|(i, e)| (VecDictIndex::V(i as isize), e))
@@ -6005,7 +6011,7 @@ pub fn emit_lval_op_list<'a, 'd>(
 
     let is_ltr = e.options().hhbc.ltr_assign;
     match &expr.2 {
-        Expr_::List(_) | Expr_::Shape(_) => {
+        Expr_::List(_) | Expr_::Tuple(_) | Expr_::Shape(_) => {
             let indexed_exprs = VecDictIndex::add_indices_to_lval_exp(&expr.2);
             let last_non_omitted = if last_usage {
                 // last usage of the local will happen when processing last non-omitted

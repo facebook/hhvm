@@ -5092,7 +5092,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     /// `lval_root`. This is meant to span any context in which we're mutating some value. See
     /// `LvalRoot` for an accounting of the different lvalue contexts in Hack.
     /// Notably, this includes `inout` expressions, which are lvalues by way of being assignment.
-    fn check_lvalue_and_inout(&mut self, loperand: S<'a>, lval_root: LvalRoot) {
+    fn check_lvalue_and_inout(&mut self, loperand: S<'a>, lval_root: LvalRoot, c: NestingContext) {
         let append_errors =
             |self_: &mut Self, node, error| self_.errors.push(make_error_from_node(node, error));
 
@@ -5122,17 +5122,30 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             | ListExpression(_)
             | ScopeResolutionExpression(_)
             | ShapeExpression(_)
+            | TupleExpression(_)
                 if lval_root == LvalRoot::Inout =>
             {
                 err(self, errors::fun_arg_invalid_arg)
             }
+            ListExpression(_) if matches!(c, NestingContext::ShapeTuple) => {
+                err(self, errors::fun_arg_list_in_shape)
+            }
+            ShapeExpression(_) | TupleExpression(_) if matches!(c, NestingContext::List) => {
+                err(self, errors::fun_arg_shape_in_list)
+            }
             ListExpression(x) => syntax_to_list_no_separators(&x.members)
-                .for_each(|n| self.check_lvalue_and_inout(n, lval_root)),
+                .for_each(|n| self.check_lvalue_and_inout(n, lval_root, NestingContext::List)),
+            TupleExpression(x) => {
+                self.check_can_use_feature(loperand, &FeatureName::ShapeDestructure);
+                syntax_to_list_no_separators(&x.items).for_each(|n| {
+                    self.check_lvalue_and_inout(n, lval_root, NestingContext::ShapeTuple)
+                })
+            }
             ShapeExpression(x) => {
                 self.check_can_use_feature(loperand, &FeatureName::ShapeDestructure);
                 for field in syntax_to_list_no_separators(&x.fields) {
                     if let FieldInitializer(x) = field.children {
-                        self.check_lvalue_and_inout(&x.value, lval_root)
+                        self.check_lvalue_and_inout(&x.value, lval_root, NestingContext::ShapeTuple)
                     }
                 }
             }
@@ -5164,9 +5177,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                 Some(TokenKind::Inout) => err(self, errors::not_allowed_in_write("`inout`")),
                 _ => {}
             },
-            ParenthesizedExpression(x) => self.check_lvalue_and_inout(&x.expression, lval_root),
+            ParenthesizedExpression(x) => self.check_lvalue_and_inout(&x.expression, lval_root, c),
             SubscriptExpression(x) => {
-                self.check_lvalue_and_inout(&x.receiver, lval_root);
+                self.check_lvalue_and_inout(&x.receiver, lval_root, c);
                 if lval_root == LvalRoot::Inout && x.index.is_missing() {
                     err(self, errors::fun_arg_invalid_arg);
                 }
@@ -5204,7 +5217,11 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     fn assignment_errors(&mut self, node: S<'a>) {
         let check_unary_expression = |self_: &mut Self, op, loperand: S<'a>| {
             if does_unop_create_write(token_kind(op)) {
-                self_.check_lvalue_and_inout(loperand, LvalRoot::IncrementOrDecrement);
+                self_.check_lvalue_and_inout(
+                    loperand,
+                    LvalRoot::IncrementOrDecrement,
+                    NestingContext::None,
+                );
             }
         };
         match &node.children {
@@ -5213,21 +5230,25 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             DecoratedExpression(x) => {
                 let loperand = &x.expression;
                 if does_decorator_create_write(token_kind(&x.decorator)) {
-                    self.check_lvalue_and_inout(loperand, LvalRoot::Inout)
+                    self.check_lvalue_and_inout(loperand, LvalRoot::Inout, NestingContext::None)
                 }
             }
             BinaryExpression(x) => {
                 let loperand = &x.left_operand;
                 if does_binop_create_write_on_left(token_kind(&x.operator)) {
-                    self.check_lvalue_and_inout(loperand, LvalRoot::Assignment);
+                    self.check_lvalue_and_inout(
+                        loperand,
+                        LvalRoot::Assignment,
+                        NestingContext::None,
+                    );
                 }
             }
             ForeachStatement(x) => {
-                self.check_lvalue_and_inout(&x.value, LvalRoot::Foreach);
-                self.check_lvalue_and_inout(&x.key, LvalRoot::Foreach);
+                self.check_lvalue_and_inout(&x.value, LvalRoot::Foreach, NestingContext::None);
+                self.check_lvalue_and_inout(&x.key, LvalRoot::Foreach, NestingContext::None);
             }
             CatchClause(_) => {
-                self.check_lvalue_and_inout(node, LvalRoot::CatchClause);
+                self.check_lvalue_and_inout(node, LvalRoot::CatchClause, NestingContext::None);
             }
             _ => {}
         }
@@ -5564,7 +5585,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             QualifiedName(_) => self.check_qualified_name(node),
             UnsetStatement(x) => {
                 for expr in syntax_to_list_no_separators(&x.variables) {
-                    self.check_lvalue_and_inout(expr, LvalRoot::Unset);
+                    self.check_lvalue_and_inout(expr, LvalRoot::Unset, NestingContext::None);
                 }
             }
             DeclareLocalStatement(x) => {
@@ -5885,6 +5906,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
         };
         Self::new(env).parse_errors_impl()
     }
+}
+
+enum NestingContext {
+    None,
+    List,
+    ShapeTuple,
 }
 
 pub fn parse_errors<'a, State: Clone>(

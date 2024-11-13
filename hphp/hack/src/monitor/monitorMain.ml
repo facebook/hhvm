@@ -403,7 +403,7 @@ let hand_off_client_connection_wrapper ~tracker server_fd client_fd =
         ensure_fd_closed client_fd)
 
 (** Send (possibly empty) sequences of messages before handing off to
-      server. *)
+    server. *)
 let rec client_prehandoff
     ~tracker
     ~is_purgatory_client
@@ -417,8 +417,10 @@ let rec client_prehandoff
   | Alive server ->
     let server_fd =
       snd
-      @@ List.find_exn server.out_fds ~f:(fun x ->
-             String.equal (fst x) handoff_options.MonitorRpc.pipe_name)
+      @@ List.find_exn server.out_fds ~f:(fun (pipe_type, _fd) ->
+             MonitorRpc.equal_pipe_type
+               pipe_type
+               handoff_options.MonitorRpc.pipe_type)
     in
     let t_ready = Unix.gettimeofday () in
     let tracker =
@@ -428,7 +430,7 @@ let rec client_prehandoff
     log
       "Got %s request for typechecker. Prior request %.1f seconds ago"
       ~tracker
-      handoff_options.MonitorRpc.pipe_name
+      (MonitorRpc.pipe_type_to_string handoff_options.MonitorRpc.pipe_type)
       (t_ready -. !(server.last_request_handoff));
     msg_to_channel client_fd (PH.Sentinel server.server_specific_files);
     let tracker =

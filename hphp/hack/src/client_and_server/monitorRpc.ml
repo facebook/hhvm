@@ -10,6 +10,7 @@ type pipe_type =
   | Default
   | Priority
   | Force_dormant_start_only
+[@@deriving eq]
 
 let pipe_type_to_string = function
   | Default -> "default"
@@ -17,13 +18,13 @@ let pipe_type_to_string = function
   | Force_dormant_start_only -> "force_dormant_start_only"
 
 type handoff_options = {
-  (* If server is dormant because it is waiting for Informant to start one,
-   * set this to true to start a server anyway. *)
   force_dormant_start: bool;
-  (* There can be multiple named channels between server and monitor in order
-   * to prioritize some requests over others. Connecting code needs to specify
-   * which channel it wants to use. *)
-  pipe_name: string;
+      (** If server is dormant because it is waiting for Informant to start one,
+          set this to true to start a server anyway. *)
+  pipe_type: pipe_type;
+      (** There can be multiple channels between server and monitor in order
+          to prioritize some requests over others. Connecting code needs to specify
+          which channel it wants to use. *)
 }
 
 type command =

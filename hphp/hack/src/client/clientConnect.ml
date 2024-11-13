@@ -265,14 +265,13 @@ let rec connect
   let handoff_options =
     {
       MonitorRpc.force_dormant_start;
-      pipe_name =
-        MonitorRpc.pipe_type_to_string
-          (if force_dormant_start then
-            MonitorRpc.Force_dormant_start_only
-          else if use_priority_pipe then
-            MonitorRpc.Priority
-          else
-            MonitorRpc.Default);
+      pipe_type =
+        (if force_dormant_start then
+          MonitorRpc.Force_dormant_start_only
+        else if use_priority_pipe then
+          MonitorRpc.Priority
+        else
+          MonitorRpc.Default);
     }
   in
   let tracker = Connection_tracker.create () in

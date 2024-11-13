@@ -305,9 +305,10 @@
     connection_tracker
     hh_json
     logging
-    sys_utils
-  )
-)
+    sys_utils)
+  (preprocess
+   (pps ppx_deriving.std)))
+
 
 (library
  (name server_progress)

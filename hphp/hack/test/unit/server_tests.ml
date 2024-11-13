@@ -21,7 +21,7 @@ let test_process_data =
         { ServerCommandTypes.server_finale_file = "2758734.fin" };
       start_t = 0.0;
       in_fd = Unix.stdin;
-      out_fds = [("default", Unix.stdout)];
+      out_fds = [(MonitorRpc.Default, Unix.stdout)];
       last_request_handoff = ref 0.0;
     }
 

@@ -13,7 +13,7 @@ type process_data = {
   start_t: float;
   in_fd: Unix.file_descr; [@opaque]
       (** Get occasional updates about status/busyness from typechecker here. *)
-  out_fds: (string * Unix.file_descr) list; [@opaque]
+  out_fds: (MonitorRpc.pipe_type * Unix.file_descr) list; [@opaque]
       (** Send client's File Descriptors to the typechecker over this. *)
   last_request_handoff: float ref;
 }

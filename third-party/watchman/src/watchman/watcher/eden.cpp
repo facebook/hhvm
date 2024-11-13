@@ -903,7 +903,7 @@ class EdenView final : public QueryableView {
       auto file = make_unique<EdenFileResult>(
           rootPath_,
           thriftChannel_,
-          w_string::pathCat({mountPoint_, item.name}),
+          w_string::pathCat({mountPoint_, relative_root, item.name}),
           /*ticks=*/nullptr,
           /*isNew=*/false,
           item.dtype);

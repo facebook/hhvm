@@ -64,7 +64,7 @@ func main() {
 }
 
 func newServer(processor thrift.Processor, addr string) (thrift.Server, net.Addr, error) {
-	listener, err := thrift.NewListener(addr)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, nil, err
 	}

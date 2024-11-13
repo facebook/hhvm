@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"errors"
+	"net"
 	"testing"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -27,13 +28,13 @@ import (
 
 // TestSimpleServer is a simple tests that simple sends an empty message to a server and receives an empty result.
 func TestSimpleServer(t *testing.T) {
-	serverSocket, err := NewListener("[::]:0")
+	listener, err := net.Listen("tcp", "[::]:0")
 	if err != nil {
-		t.Fatalf("could not create server socket: %s", err)
+		t.Fatalf("could not create listener: %s", err)
 	}
-	addr := serverSocket.Addr()
+	addr := listener.Addr()
 	handler := &testProcessor{}
-	server := NewSimpleServer(handler, serverSocket, TransportIDHeader)
+	server := NewSimpleServer(handler, listener, TransportIDHeader)
 	errChan := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -112,13 +113,13 @@ func (p *testProcessorFunction) RunContext(ctx context.Context, reqStruct types.
 // This tests that S425600 does not happen again.
 // The client is allowed to set a serializaton format to the non default and the server should adjust accordingly.
 func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
-	serverSocket, err := NewListener("[::]:0")
+	listener, err := net.Listen("tcp", "[::]:0")
 	if err != nil {
-		t.Fatalf("could not create server socket: %s", err)
+		t.Fatalf("could not create listener: %s", err)
 	}
-	addr := serverSocket.Addr()
+	addr := listener.Addr()
 	handler := &testProcessor{}
-	server := NewSimpleServer(handler, serverSocket, TransportIDHeader)
+	server := NewSimpleServer(handler, listener, TransportIDHeader)
 	errChan := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {

@@ -26,7 +26,7 @@ import (
 )
 
 func TestCloseWithoutSendingMessages(t *testing.T) {
-	serverSocket, err := NewListener("[::]:0")
+	serverSocket, err := net.Listen("tcp", "[::]:0")
 	if err != nil {
 		t.Fatalf("could not create server socket: %s", err)
 	}

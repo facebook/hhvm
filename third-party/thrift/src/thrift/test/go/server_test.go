@@ -37,7 +37,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 	ctx, cancel := context.WithCancel(context.Background())
 	processor := thrifttest.NewThriftTestProcessor(handler)
 
-	listener, err := thrift.NewListener("[::]:0")
+	listener, err := net.Listen("tcp", "[::]:0")
 	if err != nil {
 		return cancel, nil, fmt.Errorf("failed to open test socket: %w", err)
 	}

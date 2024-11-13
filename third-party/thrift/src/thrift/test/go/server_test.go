@@ -66,11 +66,13 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 func connectTestHeaderServer(
 	addr net.Addr,
 ) (*thrifttest.ThriftTestClient, error) {
-	conn, err := thrift.DialHostPort(addr.String())
-	if err != nil {
-		return nil, err
-	}
-	prot, err := thrift.NewClient(thrift.WithUpgradeToRocket(), thrift.WithConn(conn), thrift.WithTimeout(localConnTimeout))
+	prot, err := thrift.NewClient(
+		thrift.WithUpgradeToRocket(),
+		thrift.WithDialer(func() (net.Conn, error) {
+			return net.Dial("tcp", addr.String())
+		}),
+		thrift.WithTimeout(localConnTimeout),
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -1048,6 +1048,9 @@ void validate_module_name_collision(
   }
 }
 
+void validate_named(sema_context& ctx, const t_named& d) {
+  validate_module_name_collision(d, d.name(), ctx, diagnostic_level::error);
+}
 void warn_named(sema_context& ctx, const t_named& d) {
   validate_module_name_collision(d, d.name(), ctx, diagnostic_level::warning);
 }
@@ -1102,7 +1105,8 @@ class t_mstch_python_generator : public t_mstch_generator {
     if (get_py3_namespace(program_).empty()) {
       validator.add_structured_definition_visitor(
           module_name_collision_validator::warn_named);
-      validator.add_enum_visitor(module_name_collision_validator::warn_named);
+      validator.add_enum_visitor(
+          module_name_collision_validator::validate_named);
       validator.add_const_visitor(module_name_collision_validator::warn_named);
       validator.add_typedef_visitor(
           module_name_collision_validator::warn_named);

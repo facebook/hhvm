@@ -410,6 +410,15 @@ struct FrameStateMgr final {
   bool localsCleared() const { return cur().localsCleared; }
 
   /*
+   * Recover the state of a local `id' from input state of `from' blocks,
+   * that are successors of immediate dominator of the current block.
+   *
+   * The caller must ensure the local `id' is not modified on any path
+   * between the dominator of the current block and the current block.
+   */
+  void recoverLocal(const std::vector<Block*>& from, uint32_t id);
+
+  /*
    * Generic accessors for LocationState members.
    */
   SSATmp* valueOf(Location l) const;

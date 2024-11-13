@@ -295,7 +295,7 @@ static const struct {
   { OpIterBase,    {Stack1,           Stack1,       OutUnknown      }},
   { OpIterGetKey,  {Local,            Stack1,       OutUnknown      }},
   { OpIterGetValue,{Local,            Stack1,       OutUnknown      }},
-  { OpIterSetValue,{Local|Stack1,     None,         OutNone         }},
+  { OpIterSetValue,{Local|Stack1,     Local,        OutNone         }},
   { OpIterInit,    {Local,            None,         OutUnknown      }},
   { OpIterNext,    {Local,            None,         OutUnknown      }},
   { OpIterFree,    {None,             None,         OutNone         }},

@@ -1365,6 +1365,32 @@ bool FrameStateMgr::validStackOffset(IRSPRelOffset off) const {
   return optStk(off).has_value();
 }
 
+void FrameStateMgr::recoverLocal(const std::vector<Block*>& from, uint32_t id) {
+  assertx(!from.empty());
+
+  Type t = TBottom;
+
+  for (auto const block : from) {
+    auto const sit = m_states.find(block);
+    assertx(sit != m_states.end());
+    auto const& inState = sit->second.in.back();
+
+    // If we don't know anything about the local in one of the paths,
+    // it might be anything.
+    auto const lit = inState.locals.find(id);
+    if (lit == inState.locals.end()) return;
+
+    t |= lit->second.type;
+  }
+
+  // At least one path from the immediate dominator to the current block had to
+  // be reachable to emit the current block.
+  assertx(t != TBottom);
+
+  ITRACE(2, "recovering local {}: {}\n", id, t);
+  refineType(loc(id), t, std::nullopt);
+}
+
 /*
  * We consider it logically const to extend with default-constructed stack
  * values.

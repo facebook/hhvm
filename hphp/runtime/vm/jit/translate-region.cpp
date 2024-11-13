@@ -438,6 +438,111 @@ TransID canonTransID(const TransIDSet& tids) {
   return tids.size() == 0 ? kInvalidTransID : *tids.begin();
 }
 
+/*
+ * Find a set of locals that might be modified on any paths between `from' and
+ * `to', where `from' is a dominator of `to'.
+ */
+boost::dynamic_bitset<> findModifiedLocals(
+  const RegionDesc& region,
+  RegionDesc::BlockId from,
+  RegionDesc::BlockId to
+) {
+  FTRACE(2, "findModifiedLocals B{} -> B{}\n", from, to);
+  auto const numLocals = region.block(to)->func()->numLocals();
+  auto modified = boost::dynamic_bitset<>(numLocals);
+  auto seen = RegionDesc::BlockIdSet{from};
+  auto queue = RegionDesc::BlockIdVec{};
+
+  if (auto const pr = region.prevRetrans(to)) queue.push_back(*pr);
+  for (auto const pred : region.preds(to)) queue.push_back(pred);
+
+  while (!queue.empty()) {
+    auto const bid = queue.back();
+    queue.pop_back();
+
+    if (!seen.insert(bid).second) continue;
+
+    if (auto const pr = region.prevRetrans(bid)) queue.push_back(*pr);
+    for (auto const pred : region.preds(bid)) queue.push_back(pred);
+
+    auto const& b = *region.block(bid);
+
+    auto sk = b.start();
+    for (uint32_t i = 0; i < b.length(); ++i, sk.advance(b.func())) {
+      if (sk.funcEntry()) continue;
+      auto const& ii = getInstrInfo(sk.op());
+      if (ii.out & InstrFlags::Local) {
+        modified[getLocalOperand(sk)] = true;
+      }
+      if (sk.op() == Op::BaseL) {
+        // While BaseL does not directly modify a local, it is a starting
+        // instruction of a linear sequence of MInstrs that will end up
+        // modifying it.
+        auto const mode = MOpMode(getImm(sk.pc(), 1).u_OA);
+        switch (mode) {
+          case MOpMode::None:
+          case MOpMode::Warn:
+            break;
+          case MOpMode::Define:
+          case MOpMode::Unset:
+          case MOpMode::InOut:
+            modified[getLocalOperand(sk)] = true;
+            break;
+        }
+      }
+    }
+  }
+
+  return modified;
+}
+
+/*
+ * Given a block with unprocessed preds with cleared local state, attempt
+ * to recover the state of locals using an immediate dominator of the block.
+ *
+ * Find all locals that are guaranteed to not be modified and recover the state
+ * from successors of the immediate dominator. Since every path to the current
+ * block must go through one of these blocks and the local is not modified
+ * afterwards, the state can be reused.
+ */
+void recoverLocalState(
+  irgen::IRGS& env,
+  RegionDesc::BlockId bid,
+  const BlockIdToIRBlockMap& blockIdToIRBlock,
+  const RegionDesc::BlockIdSet& processedBlocks
+) {
+  auto const idom = env.region->idom(bid);
+  if (!idom) return;
+
+  // Dominator block must have been processed, otherwise `bid' would not
+  // be reachable.
+  assertx(processedBlocks.contains(*idom));
+  auto const modifiedLocals = findModifiedLocals(*env.region, *idom, bid);
+
+  std::vector<Block*> idomSuccs;
+  auto const add = [&](RegionDesc::BlockId bid) {
+    auto const it = blockIdToIRBlock.find(bid);
+    assertx(it != blockIdToIRBlock.end());
+    auto const irBlock = it->second;
+
+    // If we don't have a state for a successor, it is not directly reachable
+    // from the immediate dominator. It is safe to ignore even if it becomes
+    // reachable later, as all paths to this successor from the idom must go
+    // via other successors.
+    if (!env.irb->fs().hasStateFor(irBlock)) return;
+
+    idomSuccs.push_back(irBlock);
+  };
+  if (auto const nr = env.region->nextRetrans(*idom)) add(*nr);
+  for (auto const succ : env.region->succs(*idom)) add(succ);
+
+  for (auto i = 0; i < modifiedLocals.size(); ++i) {
+    if (!modifiedLocals[i]) {
+      env.irb->fs().recoverLocal(idomSuccs, i);
+    }
+  }
+}
+
 TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
                                 const RegionDesc& region,
                                 double profFactor,
@@ -538,6 +643,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         blockId
       );
     }
+    // If we cleared local state due to unprocessed preds, try to restore it
+    // from its immediate dominator's output state.
+    if (hasUnprocPred) recoverLocalState(irgs, blockId, blockIdToIRBlock, processedBlocks);
+
     auto const guardFailBlock =
       setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
 

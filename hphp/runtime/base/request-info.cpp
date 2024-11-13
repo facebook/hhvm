@@ -226,13 +226,17 @@ static Exception* generate_request_cpu_timeout_exception(
 }
 
 static Exception* generate_memory_exceeded_exception(c_WaitableWaitHandle* wh) {
+  auto exceptionMsg = folly::sformat(
+    "request has exceeded memory limit {} of {} used", 
+    tl_heap->getStatsCopy().usage(), 
+    RID().getMemoryLimitNumeric());
+
   auto exceptionStack = createBacktrace(BacktraceArgs()
                                         .fromWaitHandle(wh)
                                         .withSelf()
                                         .withThis()
                                         .withMetadata());
-  return new RequestMemoryExceededException(
-    "request has exceeded memory limit", exceptionStack);
+  return new RequestMemoryExceededException(exceptionMsg, exceptionStack);
 }
 
 static Exception* generate_cli_client_terminated_exception(

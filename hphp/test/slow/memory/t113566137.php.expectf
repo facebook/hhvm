@@ -1,1 +1,1 @@
-Fatal error: request has exceeded memory limit in %s/t113566137.php on line %d
+Fatal error: request has exceeded memory limit %d of %d used in %s/t113566137.php on line %d

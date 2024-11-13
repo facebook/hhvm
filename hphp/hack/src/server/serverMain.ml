@@ -768,7 +768,7 @@ let watchman_interrupt_handler genv : env MultiThreadedCall.interrupt_handler =
   ) else
     (env, MultiThreadedCall.Continue)
 
-(** Handler for events on the priority socket, which is used priority commands which
+(** Handler for events on the priority socket, which is used for priority commands which
     must be served immediately. *)
 let priority_client_interrupt_handler genv client_provider :
     env MultiThreadedCall.interrupt_handler =

@@ -43,7 +43,7 @@ let log_check_response env =
     (Errors.get_error_list env.ServerEnv.errorl
     |> List.map ~f:(fun { User_error.code; _ } -> code))
 
-(* Might raise {!Naming_table.File_info_not_found} *)
+(** Might raise {!Naming_table.File_info_not_found} *)
 let handle :
     type a.
     ServerEnv.genv ->

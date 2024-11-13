@@ -35,10 +35,10 @@ let with_dependency_table_reads mode full_recheck_needed f =
             (Typing_deps.allow_dependency_table_reads mode deptable_unlocked
               : bool)))
 
-(* Construct a continuation that will finish handling the command and update
- * the environment. Server can execute the continuation immediately, or store it
- * to be completed later (when full recheck is completed, when workers are
- * available, when current recheck is cancelled... *)
+(** Construct a continuation that will finish handling the command and update
+    the environment. The server can execute the continuation immediately, or store it
+    to be completed later (when full recheck is completed, when workers are
+    available, when current recheck is cancelled... *)
 let actually_handle genv client msg full_recheck_needed ~is_stale env =
   Hh_logger.debug "SeverCommand.actually_handle preamble";
   with_dependency_table_reads env.ServerEnv.deps_mode full_recheck_needed

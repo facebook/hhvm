@@ -346,7 +346,7 @@ let watchman_get_raw_updates_since
       Lwt.return_ok files
   end
 
-(** This helper will trying to open the errors.bin file.
+(** [keep_trying_to_open] tries to open the errors.bin file.
   There is a whole load of ceremony to do with what happens when you want to open errors.bin,
   e.g. start the server if necessary, check for version mismatch, report failures to the user.
   Concrete examples:
@@ -359,7 +359,11 @@ let watchman_get_raw_updates_since
     "hh check" must cause it to shut down, and a new server start up, before it can stream errors.
   * There is an errors.bin from an existing server, and its typecheck started 20s ago, but moments
     before "hh check" a file was changed on disk. "hh check" must detect this,
-    learn that it cannot use the existing errors.bin, and instead use the new errors.bin that will be forthcoming.
+    learn that it cannot use the existing errors.bin, and instead use the
+    new errors.bin that will be forthcoming.
+    We care about that case very much as we anticipate a common use case is to
+    save a file and immediately type hh afterwards. We wouldn't want that `hh`
+    call to return the old errors.
 
   How this function fulfills those cases:
   * It of course has to check whether files on disk have changed since this errors.bin was started.
@@ -382,7 +386,7 @@ let watchman_get_raw_updates_since
   1. server starts a check at clock0, hence starts errors.bin as of clock0
   2. modify file A
   3. modify file B
-  4. user does "hh", sees that files have changed since clock0, so repeats [keep_trying_to_open]
+  4. user does "hh", hh sees that files have changed since clock0, so repeats [keep_trying_to_open]
   5. server picks up change to file A and restarts errors.bin as of clockA
   6. repeat of [keep_trying_to_open] must NOT use errors.bin since that would miss "B"
 

@@ -1,5 +1,6 @@
 <?hh
 // copyright: the company
+//@bento-notebook:{"name": "N1234"}
 
 //@bento-cell:{"id": 2, "cell_type": "markdown"}
 /*

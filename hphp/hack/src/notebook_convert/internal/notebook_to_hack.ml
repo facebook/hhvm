@@ -109,7 +109,15 @@ let hack_of_cells_exn
     |> Printf.sprintf "function notebook_main_%s(): void {\n%s\n}" notebook_name
   in
   let unformatted =
-    Printf.sprintf "<?hh\n%s\n%s\n\n%s\n" header non_stmts_code main_fn_code
+    let notebook_name_comment =
+      Printf.sprintf {|//@bento-notebook:{name: "%s"}|} notebook_name
+    in
+    Printf.sprintf
+      "<?hh\n%s\n%s\n%s\n\n%s\n"
+      header
+      notebook_name_comment
+      non_stmts_code
+      main_fn_code
   in
   Notebook_convert_util.hackfmt unformatted
 

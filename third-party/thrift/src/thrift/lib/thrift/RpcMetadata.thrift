@@ -85,6 +85,38 @@ enum RpcPriority {
   N_PRIORITIES = 5,
 }
 
+// TTransform is the precursor to CompressionAlgorithm and was originally a
+// C++-only enum. It was manually copied to other languages. Wherever
+// convenient, any of those duplicate copies should be made to rely on this
+// common thrift definition. This enum should be deprecated with THeader.
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U16}
+enum TTransform {
+  NONE = 0,
+
+  ZLIB = 1,
+  // HMAC = 2, Deprecated and no longer supported
+  // SNAPPY = 3, Deprecated and no longer supported
+  // QLZ = 4, Deprecated and no longer supported
+
+  ZSTD = 5,
+
+  // Values from this point onward are not directly suppored in THeader. These
+  // values exist only so that the associated compression settings may be set
+  // from ServiceRouter.
+
+  LZ4 = 6,
+
+  CUSTOM = 7,
+
+  ZLIB_LESS = 8,
+  ZSTD_LESS = 9,
+  LZ4_LESS = 10,
+
+  ZLIB_MORE = 11,
+  ZSTD_MORE = 12,
+  LZ4_MORE = 13,
+}
+
 enum CompressionAlgorithm {
   NONE = 0,
 

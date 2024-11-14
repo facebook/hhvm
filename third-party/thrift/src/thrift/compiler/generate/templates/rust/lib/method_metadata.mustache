@@ -36,7 +36,7 @@
               {{/function:sink?}}{{/function:stream?}}
               name: "{{function:name}}",
               starts_interaction: {{#function:creates_interaction?}}true{{/function:creates_interaction?}}{{^function:creates_interaction?}}false{{/function:creates_interaction?}},
-              interaction_name: {{#function:creates_interaction?}}Some("{{service:name}}"){{/function:creates_interaction?}}{{^function:creates_interaction?}}None{{/function:creates_interaction?}},
+              interaction_name: {{#function:creates_interaction?}}Some("{{function:interaction_name}}"){{/function:creates_interaction?}}{{^function:creates_interaction?}}None{{/function:creates_interaction?}},
             },
 {{/function:starts_interaction?}}{{/service:rustFunctions}}
 {{#service:interactions}}{{#service:rustFunctions}}

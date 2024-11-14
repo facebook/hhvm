@@ -2054,7 +2054,7 @@ where
               rpc_kind: ::fbthrift::processor::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
               name: "startPingInteraction",
               starts_interaction: true,
-              interaction_name: Some("MyService"),
+              interaction_name: Some("MyInteraction"),
             },
             ::fbthrift::processor::MethodMetadata{
               interaction_type: ::fbthrift::processor::InteractionType::InteractionV1,

@@ -64,7 +64,7 @@ func (p *httpProtocol) resetProtocol() error {
 	case types.ProtocolIDCompact:
 		p.Format = NewCompactFormat(p.transport)
 	default:
-		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
+		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 	}
 	return nil
 }

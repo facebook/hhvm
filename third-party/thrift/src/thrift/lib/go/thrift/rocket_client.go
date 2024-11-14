@@ -85,7 +85,7 @@ func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, 
 		p.Decoder = newCompactDecoder(p.rbuf)
 		p.Encoder = newCompactEncoder(p.wbuf)
 	default:
-		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
+		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 	}
 	return p, nil
 }

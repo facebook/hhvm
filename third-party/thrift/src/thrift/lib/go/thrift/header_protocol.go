@@ -67,7 +67,7 @@ func (p *headerProtocol) resetProtocol() error {
 	case types.ProtocolIDCompact:
 		p.Format = NewCompactFormat(p.trans)
 	default:
-		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", p.protoID))
+		return types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", p.protoID))
 	}
 	return nil
 }

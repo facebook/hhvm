@@ -56,7 +56,7 @@ func newProtocolBuffer(respHeaders map[string]string, protoID types.ProtocolID, 
 		p.Decoder = newCompactDecoder(p.rbuf)
 		p.Encoder = newCompactEncoder(p.wbuf)
 	default:
-		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %#x", protoID))
+		return nil, types.NewProtocolException(fmt.Errorf("Unknown protocol id: %d", protoID))
 	}
 	return p, nil
 }

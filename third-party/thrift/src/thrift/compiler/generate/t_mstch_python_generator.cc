@@ -1481,6 +1481,15 @@ class t_python_patch_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
+  std::optional<whisker_options> use_whisker() const override {
+    whisker_options opts;
+    opts.allowed_undefined_variables = {
+        "field:has_adapter?",
+        "field:type",
+    };
+    return opts;
+  }
+
   std::string template_prefix() const override { return "python"; }
 
   void generate_program() override {

@@ -43,4 +43,7 @@ t_function::t_function(
   }
   assert(!sink_or_stream_ || sink() || stream());
 }
+
+t_function::~t_function() = default;
+
 } // namespace apache::thrift::compiler

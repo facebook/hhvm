@@ -38,6 +38,8 @@ class t_container : public t_type {
 
   virtual type container_type() const = 0;
 
+  ~t_container() override;
+
  protected:
   t_container() = default;
 

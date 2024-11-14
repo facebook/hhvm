@@ -72,6 +72,8 @@ class t_structured : public t_type {
     return it != fields_by_name_.end() ? it->second : nullptr;
   }
 
+  ~t_structured() override;
+
  protected:
   t_field_list fields_;
   std::vector<const t_field*> fields_id_order_;

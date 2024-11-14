@@ -36,6 +36,8 @@ class t_list final : public t_container {
     return "list<" + elem_type_->get_full_name() + ">";
   }
 
+  ~t_list() override;
+
  private:
   t_type_ref elem_type_;
 

@@ -36,6 +36,8 @@ class t_set final : public t_container {
     return "set<" + elem_type_->get_full_name() + ">";
   }
 
+  ~t_set() override;
+
  private:
   t_type_ref elem_type_;
 

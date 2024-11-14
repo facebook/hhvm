@@ -28,6 +28,7 @@ class t_union : public t_struct {
  public:
   using t_struct::t_struct;
 
+  ~t_union() override;
   // TODO(afuller): Remove everything below this comment. It is only provided
   // for backwards compatibility.
  public:

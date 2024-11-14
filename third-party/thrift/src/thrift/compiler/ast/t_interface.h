@@ -38,6 +38,8 @@ class t_interface : public t_type {
   t_interface(t_program* program, std::string name)
       : t_type(program, std::move(name)) {}
 
+  ~t_interface() override;
+
   node_list_view<t_function> functions() { return functions_; }
   node_list_view<const t_function> functions() const { return functions_; }
 

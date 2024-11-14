@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-#pragma once
-
-#include <algorithm>
-#include <vector>
-
-#include <thrift/compiler/ast/t_service.h>
+#include "t_list.h"
 
 namespace apache::thrift::compiler {
 
-class t_program;
-
-/**
- * Represents an interaction definition.
- *
- * An interaction is an interface with context.
- */
-// TODO(afuller): Inherit from t_interface directly.
-class t_interaction : public t_service {
- public:
-  using t_service::t_service;
-  ~t_interaction() override;
-};
+t_list::~t_list() = default;
 
 } // namespace apache::thrift::compiler

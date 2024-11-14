@@ -74,6 +74,8 @@ class t_primitive_type : public t_type {
     return type_name(primitive_type_);
   }
 
+  ~t_primitive_type() override;
+
  private:
   type primitive_type_;
 

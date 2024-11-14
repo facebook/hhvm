@@ -47,4 +47,6 @@ bool t_interface::is_serial_interaction() const {
   return false;
 }
 
+t_interface::~t_interface() = default;
+
 } // namespace apache::thrift::compiler

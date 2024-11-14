@@ -66,6 +66,7 @@ class t_field final : public t_named {
         explicit_id_(id) {}
 
   t_field(t_field&&) = delete;
+  ~t_field() override;
   t_field& operator=(t_field&&) = delete;
 
   const t_type_ref& type() const { return type_; }

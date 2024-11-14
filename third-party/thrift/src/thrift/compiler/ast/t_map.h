@@ -40,6 +40,8 @@ class t_map final : public t_container {
         val_type_->get_full_name() + ">";
   }
 
+  ~t_map() override;
+
  private:
   t_type_ref key_type_;
   t_type_ref val_type_;

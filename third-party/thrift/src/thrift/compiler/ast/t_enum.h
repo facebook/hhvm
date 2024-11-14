@@ -56,6 +56,8 @@ class t_enum : public t_type {
   node_list_view<const t_const> consts() const { return constants_; }
   const t_const* find_const_by_name(std::string_view name) const;
 
+  ~t_enum() override;
+
  private:
   t_enum_value_list values_;
   node_list<t_const> constants_;

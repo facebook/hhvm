@@ -71,6 +71,8 @@ class t_exception : public t_struct {
     return value ? get_field_by_name(*value) : nullptr;
   }
 
+  ~t_exception() override;
+
  private:
   t_error_kind kind_{};
   t_error_blame blame_{};

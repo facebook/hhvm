@@ -89,4 +89,6 @@ void t_structured::append(std::unique_ptr<t_field> field) {
   fields_.push_back(std::move(field));
 }
 
+t_structured::~t_structured() = default;
+
 } // namespace apache::thrift::compiler

@@ -50,6 +50,7 @@ class t_function final : public t_named {
       std::unique_ptr<t_paramlist> params = {},
       std::unique_ptr<t_node> sink_or_stream = {},
       t_type_ref interaction = {});
+  ~t_function() override;
 
   // Returns the function qualifier.
   t_function_qualifier qualifier() const { return qualifier_; }

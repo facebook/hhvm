@@ -68,4 +68,6 @@ const t_primitive_type& t_primitive_type::t_float() {
   return type;
 }
 
+t_primitive_type::~t_primitive_type() = default;
+
 } // namespace apache::thrift::compiler

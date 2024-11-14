@@ -61,18 +61,26 @@ add_library(
   ast/t_primitive_type.cc
   ast/t_const.cc
   ast/t_const_value.cc
+  ast/t_container.cc
   ast/t_enum.cc
+  ast/t_exception.cc
+  ast/t_field.cc
   ast/t_function.cc
+  ast/t_interaction.cc
   ast/t_interface.cc
+  ast/t_list.cc
   ast/t_named.cc
   ast/t_node.cc
+  ast/t_map.cc
   ast/t_package.cc
   ast/t_paramlist.cc
   ast/t_program.cc
   ast/t_scope.cc
+  ast/t_set.cc
   ast/t_structured.cc
   ast/t_type.cc
   ast/t_typedef.cc
+  ast/t_union.cc
 )
 target_link_libraries(
   compiler_ast

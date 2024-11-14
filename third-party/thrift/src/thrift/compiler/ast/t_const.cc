@@ -43,4 +43,6 @@ const t_const_value* t_const::get_value_from_structured_annotation_or_null(
   return (it != annotations.end()) ? it->second : nullptr;
 }
 
+t_const::~t_const() = default;
+
 } // namespace apache::thrift::compiler

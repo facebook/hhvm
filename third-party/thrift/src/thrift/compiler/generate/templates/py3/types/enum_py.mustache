@@ -42,6 +42,12 @@ class {{enum:name}}(thrift.py3.types.{{!
         return "{{program:name}}.{{enum:name}}"
 
     def _to_python(self):
+        if _fbthrift_python_types is None:
+            raise AttributeError(
+                "Enum {{enum:name}} doesn't define `_to_python` because couldn't import "
+                "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types"
+            )
+
         return _fbthrift_python_types.{{enum:name}}(self._fbthrift_value_)
 
     def _to_py3(self):

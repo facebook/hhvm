@@ -8,7 +8,10 @@
 import enum
 import thrift.py3.types
 import my.namespacing.test.hsmodule.thrift_metadata as _fbthrift_python_metadata
-import my.namespacing.test.hsmodule.thrift_types as _fbthrift_python_types
+try:
+    import my.namespacing.test.hsmodule.thrift_types as _fbthrift_python_types
+except Exception: # TODO(T205494848): fix thrift-python import failures
+    _fbthrift_python_types = None
 
 _fbthrift__module_name__ = "my.namespacing.test.hsmodule.types"
 

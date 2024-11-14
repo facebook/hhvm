@@ -25,7 +25,10 @@ are re-exported via types.pyx
 import enum
 import thrift.py3.types
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_metadata as _fbthrift_python_metadata
-import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
+try:
+    import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.thrift_types as _fbthrift_python_types
+except Exception: # TODO(T205494848): fix thrift-python import failures
+    _fbthrift_python_types = None
 
 _fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
 

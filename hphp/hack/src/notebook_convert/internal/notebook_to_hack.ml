@@ -25,10 +25,11 @@ let head_id (chunks : Notebook_chunk.t list) : Notebook_chunk.Id.t =
 *)
 let chunks_of_hack_exn ~(acc : Notebook_chunk.t list) id (source : string) :
     Notebook_chunk.t list =
-  let (syn, errors) = Notebook_convert_util.parse source in
-  let () =
-    if not @@ List.is_empty errors then failwith "Hack input has syntax errors"
-  in
+  (* We tolerate some syntax errors in the Hack in notebooks,
+     the intent being that users will fix such errors in their editor
+     or in the notebook, using standard tooling for feedback on syntax errors.
+  *)
+  let (syn, _errors) = Notebook_convert_util.parse source in
   match Syn.syntax syn with
   | Syn.(Script { script_declarations }) ->
     List.fold ~init:acc (Syn.children script_declarations) ~f:(fun acc syn ->

@@ -8,15 +8,13 @@
  *)
 
 open Hh_prelude
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
 
 type disposition =
   | DStopped [@value 1]
   | DWorking [@value 2]
   | DReady [@value 3]
-[@@deriving show { with_path = false }, enum]
-
-let _unused = (min_disposition, max_disposition)
-(* to suppress "unused" warning *)
+[@@deriving show { with_path = false }, yojson]
 
 type t = {
   pid: int;
@@ -24,6 +22,7 @@ type t = {
   message: string;
   timestamp: float;
 }
+[@@deriving yojson]
 
 let stack : string ref list ref = ref [ref ""]
 
@@ -65,18 +64,7 @@ let write_file (t : t) : unit =
   match server_progress_file () with
   | None -> ()
   | Some server_progress_file ->
-    let open Hh_json in
-    let { pid; disposition; message; timestamp } = t in
-    let content =
-      JSON_Object
-        [
-          ("pid", int_ pid);
-          ("disposition", int_ (disposition_to_enum disposition));
-          ("progress", string_ message);
-          ("timestamp", float_ timestamp);
-        ]
-      |> json_to_multiline
-    in
+    let content = yojson_of_t t |> Yojson.Safe.pretty_to_string in
     (try Sys_utils.protected_write_exn server_progress_file content with
     | exn ->
       let e = Exception.wrap exn in
@@ -107,19 +95,11 @@ let read () : t =
     let content = ref "[not yet read content]" in
     (try
        content := Sys_utils.protected_read_exn server_progress_file;
-       let json = Some (Hh_json.json_of_string !content) in
-       let pid = Hh_json_helpers.Jget.int_exn json "pid" in
-       let message = Hh_json_helpers.Jget.string_exn json "progress" in
-       let timestamp = Hh_json_helpers.Jget.float_exn json "timestamp" in
-       let disposition =
-         Hh_json_helpers.Jget.int_opt json "disposition"
-         |> Option.bind ~f:disposition_of_enum
-         |> Option.value ~default:DReady
-       in
+       let t = t_of_yojson @@ Yojson.Safe.from_string !content in
        (* If the status had been left behind on disk by a process that terminated without deleting it,
           well, we'll return the same 'unknown' as if the file didn't exist. *)
-       if Proc.is_alive ~pid ~expected:"" then
-         { pid; message; disposition; timestamp }
+       if Proc.is_alive ~pid:t.pid ~expected:"" then
+         t
        else
          synthesize_stopped "stopped"
      with

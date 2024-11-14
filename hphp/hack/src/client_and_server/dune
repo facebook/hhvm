@@ -320,7 +320,10 @@
    server_files
    watchman)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps
+   lwt_ppx
+   ppx_deriving.std
+   ppx_yojson_conv)))
 
 (library
  (name server_notifier)

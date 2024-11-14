@@ -261,40 +261,31 @@ inline uint32_t JSONProtocolWriterCommon::writeJSONEscapeChar(uint8_t ch) {
   return 6;
 }
 
-inline uint32_t JSONProtocolWriterCommon::writeJSONChar(uint8_t ch) {
-  if (ch >= 0x30) {
-    // Only special character >= 0x30 is '\'
-    if (ch == apache::thrift::detail::json::kJSONBackslash) {
-      out_.write(apache::thrift::detail::json::kJSONBackslash);
-      out_.write(apache::thrift::detail::json::kJSONBackslash);
-      return 2;
-    } else {
-      out_.write(ch);
-      return 1;
-    }
-  } else {
-    uint8_t outCh = kJSONCharTable[ch];
-    // Check if regular character, backslash escaped, or JSON escaped
-    if (outCh == 1) {
-      out_.write(ch);
-      return 1;
-    } else if (outCh > 1) {
-      out_.write(apache::thrift::detail::json::kJSONBackslash);
-      out_.write(outCh);
-      return 2;
-    } else {
-      return writeJSONEscapeChar(ch);
-    }
-  }
-}
-
 inline uint32_t JSONProtocolWriterCommon::writeJSONString(
     folly::StringPiece str) {
-  uint32_t ret = 2;
-
   out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
-  for (auto c : str) {
-    ret += writeJSONChar(c);
+  uint32_t ret = 2;
+  for (uint8_t ch : str) {
+    // Only special characters >= 32 are '\' and '"'
+    if (ch == apache::thrift::detail::json::kJSONBackslash ||
+        ch == apache::thrift::detail::json::kJSONStringDelimiter) {
+      out_.write(apache::thrift::detail::json::kJSONBackslash);
+      ret += 1;
+    }
+    if (ch >= 32) {
+      out_.write(ch);
+      ret += 1;
+    } else {
+      uint8_t outCh = kJSONCharTable[ch];
+      // Check if regular character, backslash escaped, or JSON escaped
+      if (outCh != 0) {
+        out_.write(apache::thrift::detail::json::kJSONBackslash);
+        out_.write(outCh);
+        ret += 2;
+      } else {
+        ret += writeJSONEscapeChar(ch);
+      }
+    }
   }
   out_.write(apache::thrift::detail::json::kJSONStringDelimiter);
 

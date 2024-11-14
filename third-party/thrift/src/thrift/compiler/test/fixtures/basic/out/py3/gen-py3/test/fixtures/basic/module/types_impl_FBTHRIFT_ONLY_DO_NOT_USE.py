@@ -8,10 +8,7 @@
 import enum
 import thrift.py3.types
 import test.fixtures.basic.module.thrift_metadata as _fbthrift_python_metadata
-try:
-    import test.fixtures.basic.module.thrift_types as _fbthrift_python_types
-except Exception: # TODO(T205494848): fix thrift-python import failures
-    _fbthrift_python_types = None
+import test.fixtures.basic.module.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "test.fixtures.basic.module.types"
 
@@ -33,12 +30,6 @@ class MyEnum(thrift.py3.types.CompiledEnum):
         return "module.MyEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum MyEnum doesn't define `_to_python` because couldn't import "
-                "test.fixtures.basic.module.thrift_types"
-            )
-
         return _fbthrift_python_types.MyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -72,12 +63,6 @@ class HackEnum(thrift.py3.types.CompiledEnum):
         return "module.HackEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum HackEnum doesn't define `_to_python` because couldn't import "
-                "test.fixtures.basic.module.thrift_types"
-            )
-
         return _fbthrift_python_types.HackEnum(self._fbthrift_value_)
 
     def _to_py3(self):

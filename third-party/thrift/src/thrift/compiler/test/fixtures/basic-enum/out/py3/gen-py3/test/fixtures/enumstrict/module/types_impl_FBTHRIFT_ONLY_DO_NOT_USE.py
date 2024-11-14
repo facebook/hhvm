@@ -8,10 +8,7 @@
 import enum
 import thrift.py3.types
 import test.fixtures.enumstrict.module.thrift_metadata as _fbthrift_python_metadata
-try:
-    import test.fixtures.enumstrict.module.thrift_types as _fbthrift_python_types
-except Exception: # TODO(T205494848): fix thrift-python import failures
-    _fbthrift_python_types = None
+import test.fixtures.enumstrict.module.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "test.fixtures.enumstrict.module.types"
 
@@ -31,12 +28,6 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
         return "module.EmptyEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum EmptyEnum doesn't define `_to_python` because couldn't import "
-                "test.fixtures.enumstrict.module.thrift_types"
-            )
-
         return _fbthrift_python_types.EmptyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -70,12 +61,6 @@ class MyEnum(thrift.py3.types.CompiledEnum):
         return "module.MyEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum MyEnum doesn't define `_to_python` because couldn't import "
-                "test.fixtures.enumstrict.module.thrift_types"
-            )
-
         return _fbthrift_python_types.MyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -110,12 +95,6 @@ class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
         return "module.MyUseIntrinsicDefaultEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum MyUseIntrinsicDefaultEnum doesn't define `_to_python` because couldn't import "
-                "test.fixtures.enumstrict.module.thrift_types"
-            )
-
         return _fbthrift_python_types.MyUseIntrinsicDefaultEnum(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -167,12 +146,6 @@ class MyBigEnum(thrift.py3.types.CompiledEnum):
         return "module.MyBigEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum MyBigEnum doesn't define `_to_python` because couldn't import "
-                "test.fixtures.enumstrict.module.thrift_types"
-            )
-
         return _fbthrift_python_types.MyBigEnum(self._fbthrift_value_)
 
     def _to_py3(self):

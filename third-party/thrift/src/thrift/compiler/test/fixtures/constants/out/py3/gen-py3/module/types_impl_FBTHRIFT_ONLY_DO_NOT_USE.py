@@ -8,10 +8,7 @@
 import enum
 import thrift.py3.types
 import module.thrift_metadata as _fbthrift_python_metadata
-try:
-    import module.thrift_types as _fbthrift_python_types
-except Exception: # TODO(T205494848): fix thrift-python import failures
-    _fbthrift_python_types = None
+import module.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "module.types"
 
@@ -31,12 +28,6 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
         return "module.EmptyEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum EmptyEnum doesn't define `_to_python` because couldn't import "
-                "module.thrift_types"
-            )
-
         return _fbthrift_python_types.EmptyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -72,12 +63,6 @@ class City(thrift.py3.types.CompiledEnum):
         return "module.City"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum City doesn't define `_to_python` because couldn't import "
-                "module.thrift_types"
-            )
-
         return _fbthrift_python_types.City(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -113,12 +98,6 @@ class Company(thrift.py3.types.CompiledEnum):
         return "module.Company"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum Company doesn't define `_to_python` because couldn't import "
-                "module.thrift_types"
-            )
-
         return _fbthrift_python_types.Company(self._fbthrift_value_)
 
     def _to_py3(self):

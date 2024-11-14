@@ -23,10 +23,21 @@
 
 namespace apache::thrift::rocket {
 
+template <typename TEnum>
+[[noreturn]] void throwUnknownTEnumTApplicationException(const TEnum& tEnum) {
+  throw TApplicationException(
+      TApplicationException::PROTOCOL_ERROR,
+      fmt::format(
+          "Unknown {} enum value: {}",
+          TEnumTraits<std::decay_t<decltype(tEnum)>>::typeName(),
+          folly::to_underlying(tEnum)));
+}
+
 CompressionAlgorithm fromZlibConfig(
     const ZlibCompressionCodecConfig& zlibConfig) {
-  switch (
-      zlibConfig.levelPreset().value_or(ZlibCompressionLevelPreset::DEFAULT)) {
+  const auto& levelPreset =
+      zlibConfig.levelPreset().value_or(ZlibCompressionLevelPreset::DEFAULT);
+  switch (levelPreset) {
     case ZlibCompressionLevelPreset::DEFAULT:
       return CompressionAlgorithm::ZLIB;
     case ZlibCompressionLevelPreset::LESS:
@@ -35,18 +46,14 @@ CompressionAlgorithm fromZlibConfig(
       return CompressionAlgorithm::ZLIB_MORE;
   };
 
-  throw TApplicationException(
-      TApplicationException::PROTOCOL_ERROR,
-      fmt::format(
-          "Unknown {} enum value: {}",
-          TEnumTraits<ZlibCompressionLevelPreset>::typeName(),
-          folly::to_underlying(zlibConfig.levelPreset().value())));
+  throwUnknownTEnumTApplicationException(levelPreset);
 }
 
 CompressionAlgorithm fromZstdConfig(
     const ZstdCompressionCodecConfig& zstdConfig) {
-  switch (
-      zstdConfig.levelPreset().value_or(ZstdCompressionLevelPreset::DEFAULT)) {
+  const auto& levelPreset =
+      zstdConfig.levelPreset().value_or(ZstdCompressionLevelPreset::DEFAULT);
+  switch (levelPreset) {
     case ZstdCompressionLevelPreset::DEFAULT:
       return CompressionAlgorithm::ZSTD;
     case ZstdCompressionLevelPreset::LESS:
@@ -55,17 +62,13 @@ CompressionAlgorithm fromZstdConfig(
       return CompressionAlgorithm::ZSTD_MORE;
   };
 
-  throw TApplicationException(
-      TApplicationException::PROTOCOL_ERROR,
-      fmt::format(
-          "Unknown {} enum value: {}",
-          TEnumTraits<ZstdCompressionLevelPreset>::typeName(),
-          folly::to_underlying(zstdConfig.levelPreset().value())));
+  throwUnknownTEnumTApplicationException(levelPreset);
 }
 
 CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
-  switch (
-      lz4Config.levelPreset().value_or(Lz4CompressionLevelPreset::DEFAULT)) {
+  const auto& levelPreset =
+      lz4Config.levelPreset().value_or(ZstdCompressionLevelPreset::DEFAULT);
+  switch (levelPreset) {
     case Lz4CompressionLevelPreset::DEFAULT:
       return CompressionAlgorithm::LZ4;
     case Lz4CompressionLevelPreset::LESS:
@@ -74,17 +77,13 @@ CompressionAlgorithm fromLz4Config(const Lz4CompressionCodecConfig& lz4Config) {
       return CompressionAlgorithm::LZ4_MORE;
   };
 
-  throw TApplicationException(
-      TApplicationException::PROTOCOL_ERROR,
-      fmt::format(
-          "Unknown {} enum value: {}",
-          TEnumTraits<Lz4CompressionLevelPreset>::typeName(),
-          folly::to_underlying(lz4Config.levelPreset().value())));
+  throwUnknownTEnumTApplicationException(levelPreset);
 }
 
-CompressionAlgorithm CompressionAlgorithmSelector::fromCodecConfig(
+/* static */ CompressionAlgorithm CompressionAlgorithmSelector::fromCodecConfig(
     const CodecConfig& codecConfig) {
-  switch (codecConfig.getType()) {
+  const auto& codecConfigType = codecConfig.getType();
+  switch (codecConfigType) {
     case CodecConfig::Type::zlibConfig:
       return fromZlibConfig(*codecConfig.zlibConfig_ref());
     case CodecConfig::Type::zstdConfig:
@@ -101,10 +100,64 @@ CompressionAlgorithm CompressionAlgorithmSelector::fromCodecConfig(
       TApplicationException::PROTOCOL_ERROR,
       fmt::format(
           "Unknown CodecConfig::Type enum value: {}",
-          folly::to_underlying(codecConfig.getType())));
+          folly::to_underlying(codecConfigType)));
 }
 
-std::pair<folly::io::CodecType, int>
+/* static */ CodecConfig CompressionAlgorithmSelector::toCodecConfig(
+    const CompressionAlgorithm& compressionAlgorithm) {
+  CodecConfig codecConfig;
+  switch (compressionAlgorithm) {
+    case CompressionAlgorithm::ZLIB:
+      codecConfig.set_zlibConfig();
+      return codecConfig;
+    case CompressionAlgorithm::ZSTD:
+      codecConfig.set_zstdConfig();
+      return codecConfig;
+    case CompressionAlgorithm::LZ4:
+      codecConfig.set_lz4Config();
+      return codecConfig;
+    case CompressionAlgorithm::CUSTOM:
+      codecConfig.set_customConfig();
+      return codecConfig;
+    case CompressionAlgorithm::ZLIB_LESS:
+      codecConfig.set_zlibConfig();
+      codecConfig.zlibConfig_ref()->levelPreset() =
+          ZlibCompressionLevelPreset::LESS;
+      return codecConfig;
+    case CompressionAlgorithm::ZSTD_LESS:
+      codecConfig.set_zstdConfig();
+      codecConfig.zstdConfig_ref()->levelPreset() =
+          ZstdCompressionLevelPreset::LESS;
+      return codecConfig;
+    case CompressionAlgorithm::LZ4_LESS:
+      codecConfig.set_lz4Config();
+      codecConfig.lz4Config_ref()->levelPreset() =
+          Lz4CompressionLevelPreset::LESS;
+      return codecConfig;
+    case CompressionAlgorithm::ZLIB_MORE:
+      codecConfig.set_zlibConfig();
+      codecConfig.zlibConfig_ref()->levelPreset() =
+          ZlibCompressionLevelPreset::MORE;
+      return codecConfig;
+    case CompressionAlgorithm::ZSTD_MORE:
+      codecConfig.set_zstdConfig();
+      codecConfig.zstdConfig_ref()->levelPreset() =
+          ZstdCompressionLevelPreset::MORE;
+      return codecConfig;
+    case CompressionAlgorithm::LZ4_MORE:
+      codecConfig.set_lz4Config();
+      codecConfig.lz4Config_ref()->levelPreset() =
+          Lz4CompressionLevelPreset::MORE;
+      return codecConfig;
+    case CompressionAlgorithm::NONE:
+      codecConfig.set_customConfig();
+      return codecConfig;
+  };
+
+  throwUnknownTEnumTApplicationException(compressionAlgorithm);
+}
+
+/* static */ std::pair<folly::io::CodecType, int>
 CompressionAlgorithmSelector::toCodecTypeAndLevel(
     const CompressionAlgorithm& compressionAlgorithm) {
   // clang-format off
@@ -167,11 +220,66 @@ CompressionAlgorithmSelector::toCodecTypeAndLevel(
   };
   // clang-format on
 
-  throw TApplicationException(
-      TApplicationException::PROTOCOL_ERROR,
-      fmt::format(
-          "Unknown {} enum value: {}",
-          TEnumTraits<CompressionAlgorithm>::typeName(),
-          folly::to_underlying(compressionAlgorithm)));
+  throwUnknownTEnumTApplicationException(compressionAlgorithm);
+}
+
+/* static */ CompressionAlgorithm CompressionAlgorithmSelector::fromTTransform(
+    const TTransform& tTransform) {
+  switch (tTransform) {
+    case TTransform::NONE:
+      return CompressionAlgorithm::NONE;
+    case TTransform::ZLIB:
+      return CompressionAlgorithm::ZLIB;
+    case TTransform::ZSTD:
+      return CompressionAlgorithm::ZSTD;
+    case TTransform::LZ4:
+      return CompressionAlgorithm::LZ4;
+    case TTransform::CUSTOM:
+      return CompressionAlgorithm::CUSTOM;
+    case TTransform::ZLIB_LESS:
+      return CompressionAlgorithm::ZLIB_LESS;
+    case TTransform::ZSTD_LESS:
+      return CompressionAlgorithm::ZSTD_LESS;
+    case TTransform::LZ4_LESS:
+      return CompressionAlgorithm::LZ4_LESS;
+    case TTransform::ZLIB_MORE:
+      return CompressionAlgorithm::ZLIB_MORE;
+    case TTransform::ZSTD_MORE:
+      return CompressionAlgorithm::ZSTD_MORE;
+    case TTransform::LZ4_MORE:
+      return CompressionAlgorithm::LZ4_MORE;
+  };
+
+  throwUnknownTEnumTApplicationException(tTransform);
+}
+
+/* static */ TTransform CompressionAlgorithmSelector::toTTransform(
+    const CompressionAlgorithm& compressionAlgorithm) {
+  switch (compressionAlgorithm) {
+    case CompressionAlgorithm::NONE:
+      return TTransform::NONE;
+    case CompressionAlgorithm::ZLIB:
+      return TTransform::ZLIB;
+    case CompressionAlgorithm::ZSTD:
+      return TTransform::ZSTD;
+    case CompressionAlgorithm::LZ4:
+      return TTransform::LZ4;
+    case CompressionAlgorithm::CUSTOM:
+      return TTransform::CUSTOM;
+    case CompressionAlgorithm::ZLIB_LESS:
+      return TTransform::ZLIB_LESS;
+    case CompressionAlgorithm::ZSTD_LESS:
+      return TTransform::ZSTD_LESS;
+    case CompressionAlgorithm::LZ4_LESS:
+      return TTransform::LZ4_LESS;
+    case CompressionAlgorithm::ZLIB_MORE:
+      return TTransform::ZLIB_MORE;
+    case CompressionAlgorithm::ZSTD_MORE:
+      return TTransform::ZSTD_MORE;
+    case CompressionAlgorithm::LZ4_MORE:
+      return TTransform::LZ4_MORE;
+  };
+
+  throwUnknownTEnumTApplicationException(compressionAlgorithm);
 }
 } // namespace apache::thrift::rocket

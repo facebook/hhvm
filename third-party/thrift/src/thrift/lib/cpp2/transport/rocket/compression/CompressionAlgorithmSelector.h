@@ -25,9 +25,15 @@ namespace apache::thrift::rocket {
 class CompressionAlgorithmSelector {
  public:
   static CompressionAlgorithm fromCodecConfig(const CodecConfig& codecConfig);
+  static CodecConfig toCodecConfig(
+      const CompressionAlgorithm& CompressionAlgorithm);
 
   static std::pair<folly::io::CodecType, int> toCodecTypeAndLevel(
       const CompressionAlgorithm& compressionAlgorithm);
+
+  static CompressionAlgorithm fromTTransform(const TTransform& tTransform);
+  static TTransform toTTransform(
+      const CompressionAlgorithm& CompressionAlgorithm);
 };
 
 } // namespace apache::thrift::rocket

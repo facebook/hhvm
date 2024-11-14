@@ -85,7 +85,9 @@ void testFromCodecConfigWithLevelPresetSucceeds(
   EXPECT_EQ(compressionAlgorithm, expectCompressionAlgorithm);
 }
 
-TEST(CompressionTest, zlibFromCodecConfigWithLevelPresetSucceeds) {
+TEST(
+    CompressionAlgorithmSelectorTest,
+    zlibFromCodecConfigWithLevelPresetSucceeds) {
   for (auto [levelPreset, expectCompressionAlgorithm] : std::initializer_list<
            std::pair<ZlibCompressionLevelPreset, CompressionAlgorithm>>{
            {ZlibCompressionLevelPreset::DEFAULT, CompressionAlgorithm::ZLIB},
@@ -97,7 +99,9 @@ TEST(CompressionTest, zlibFromCodecConfigWithLevelPresetSucceeds) {
   }
 }
 
-TEST(CompressionTest, zstdFromCodecConfigWithLevelPresetSucceeds) {
+TEST(
+    CompressionAlgorithmSelectorTest,
+    zstdFromCodecConfigWithLevelPresetSucceeds) {
   for (auto [levelPreset, expectCompressionAlgorithm] : std::initializer_list<
            std::pair<ZstdCompressionLevelPreset, CompressionAlgorithm>>{
            {ZstdCompressionLevelPreset::DEFAULT, CompressionAlgorithm::ZSTD},
@@ -109,7 +113,9 @@ TEST(CompressionTest, zstdFromCodecConfigWithLevelPresetSucceeds) {
   }
 }
 
-TEST(CompressionTest, lz4FromCodecConfigWithLevelPresetSucceeds) {
+TEST(
+    CompressionAlgorithmSelectorTest,
+    lz4FromCodecConfigWithLevelPresetSucceeds) {
   for (auto [levelPreset, expectCompressionAlgorithm] : std::initializer_list<
            std::pair<Lz4CompressionLevelPreset, CompressionAlgorithm>>{
            {Lz4CompressionLevelPreset::DEFAULT, CompressionAlgorithm::LZ4},
@@ -129,4 +135,27 @@ TEST(
   EXPECT_THROW(
       CompressionAlgorithmSelector::toCodecTypeAndLevel(compressionAlgorithm),
       TApplicationException);
+}
+
+TEST(
+    CompressionAlgorithmSelectorTest,
+    fromTTransformMapsTTransformOntoCompressionAlgorithm) {
+  for (const auto& expectTTransform : TEnumTraits<TTransform>::values) {
+    auto tTransform = CompressionAlgorithmSelector::toTTransform(
+        CompressionAlgorithmSelector::fromTTransform(expectTTransform));
+
+    EXPECT_EQ(tTransform, expectTTransform);
+  }
+}
+
+TEST(
+    CompressionAlgorithmSelectorTest,
+    toTTransformMapsCompressionAlgorithmOntoTTransform) {
+  for (const auto& expectCompressionAlgorithm :
+       TEnumTraits<CompressionAlgorithm>::values) {
+    auto compressionAlgorithm = CompressionAlgorithmSelector::fromTTransform(
+        CompressionAlgorithmSelector::toTTransform(expectCompressionAlgorithm));
+
+    EXPECT_EQ(compressionAlgorithm, expectCompressionAlgorithm);
+  }
 }

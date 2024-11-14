@@ -102,6 +102,10 @@ class RequestCommon : public MessageCommon {
     sourceIpAddr_ = sourceIpAddr;
   }
 
+  void setWriteTimestamp(uint64_t writeTimestamp) noexcept {
+    writeTimestamp_ = writeTimestamp;
+  }
+
  protected:
   void markBufferAsDirty() {
     serializedBuffer_ = nullptr;
@@ -115,6 +119,8 @@ class RequestCommon : public MessageCommon {
   std::optional<std::string> clientIdentifier_;
   // Source ip address.
   std::optional<folly::IPAddress> sourceIpAddr_;
+  // write timestamp
+  std::optional<uint64_t> writeTimestamp_;
 };
 
 } // namespace carbon

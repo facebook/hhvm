@@ -7,5 +7,6 @@ class MyClass {}
 function notebook_main_n1234(): void {
     //@bento-cell:{"id": 1, "cell_type": "code"}
     $x = new MyClass();
+    // The next line is not valid Hack:
     =$x;
 }

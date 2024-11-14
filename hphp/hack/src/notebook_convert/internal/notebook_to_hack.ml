@@ -33,8 +33,9 @@ let chunks_of_hack_exn ~(acc : Notebook_chunk.t list) id (source : string) :
   match Syn.syntax syn with
   | Syn.(Script { script_declarations }) ->
     List.fold ~init:acc (Syn.children script_declarations) ~f:(fun acc syn ->
-        let contents = Syn.text syn in
-        if String.(is_empty @@ strip contents) then
+        (* We strip to avoid extra newlines when we concatenate chunks of code to create Hack file contents *)
+        let contents = String.strip @@ Syn.full_text syn in
+        if String.is_empty contents then
           acc
         else
           (* We distinguish statements from things that can go at the top level (decls, comments)

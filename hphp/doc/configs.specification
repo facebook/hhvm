@@ -247,6 +247,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Allow running hhvm as root
 
 - int64_t Server.RequestMemoryMaxBytes = 16LL << 30, UNKNOWN, staticdefault(INT64_MAX)
+- bool Server.RequestMemoryMaxBytesSet = false, UNKNOWN
 - int64_t Server.LowestMaxPostSize = INT64_MAX, UNKNOWN, nobind
 - int64_t Server.Upload.MaxFileSize = 100, UNKNOWN, postprocess|lookuppath(Server.Upload.UploadMaxFileSize)
 - std::string Server.Upload.TmpDir = "/tmp", UNKNOWN, lookuppath(Server.Upload.UploadsTmpDir)

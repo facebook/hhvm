@@ -33,7 +33,8 @@ namespace {
 template <typename String>
 void write_stderr(const String& str) {
   w_string_piece piece = str;
-  ignore_result(::write(STDERR_FILENO, piece.data(), piece.size()));
+  ignore_result(
+      folly::fileops::write(STDERR_FILENO, piece.data(), piece.size()));
 }
 
 template <typename String, typename... Strings>
@@ -202,7 +203,7 @@ void Log::doLogToStdErr() {
 
   for (auto& item : items) {
     auto& log = json_to_w_string(item->payload.get("log"));
-    ignore_result(::write(STDERR_FILENO, log.data(), log.size()));
+    ignore_result(folly::fileops::write(STDERR_FILENO, log.data(), log.size()));
 
     auto level = json_to_w_string(item->payload.get("level"));
     if (level == kFatal) {

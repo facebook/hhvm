@@ -141,7 +141,7 @@ std::optional<std::string> detect_starting_command(pid_t ppid) {
   int fd = ::open("/dev/null", O_RDONLY);
   if (fd != -1) {
     ignore_result(::dup2(fd, STDIN_FILENO));
-    ::close(fd);
+    folly::fileops::close(fd);
   }
 
   if (logging::log_name != "-") {
@@ -149,7 +149,7 @@ std::optional<std::string> detect_starting_command(pid_t ppid) {
     if (fd != -1) {
       ignore_result(::dup2(fd, STDOUT_FILENO));
       ignore_result(::dup2(fd, STDERR_FILENO));
-      ::close(fd);
+      folly::fileops::close(fd);
     }
   }
 
@@ -259,7 +259,7 @@ static void close_random_fds() {
   }
 
   for (max_fd = open_max; max_fd > STDERR_FILENO; --max_fd) {
-    close(max_fd);
+    folly::fileops::close(max_fd);
   }
 #endif
 }

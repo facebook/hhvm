@@ -61,8 +61,9 @@ template <class Protocol>
 Object parseObject(const folly::IOBuf& buf, bool string_to_binary = true) {
   Protocol prot;
   prot.setInput(&buf);
-  auto result = detail::parseValue(prot, protocol::T_STRUCT, string_to_binary);
-  return std::move(*result.objectValue_ref());
+  Object obj;
+  detail::parseObjectInplace(prot, obj, string_to_binary);
+  return obj;
 }
 
 // Schemaless deserialization of thrift serialized data with mask.

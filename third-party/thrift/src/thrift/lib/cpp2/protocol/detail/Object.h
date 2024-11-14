@@ -409,6 +409,24 @@ inline TType unifyStringType(TType type) {
 template <class Protocol>
 Value parseValue(Protocol& prot, TType arg_type, bool string_to_binary = true);
 
+template <class Protocol>
+void parseObjectInplace(
+    Protocol& prot, Object& objectValue, bool string_to_binary = true) {
+  std::string name;
+  int16_t fid;
+  TType ftype;
+  prot.readStructBegin(name);
+  while (true) {
+    prot.readFieldBegin(name, ftype, fid);
+    if (ftype == protocol::T_STOP) {
+      break;
+    }
+    parseValueInplace(prot, ftype, objectValue[FieldId{fid}], string_to_binary);
+    prot.readFieldEnd();
+  }
+  prot.readStructEnd();
+}
+
 // Schemaless deserialization of thrift serialized data of specified
 // thrift type into conformance::Value
 // Protocol: protocol to use eg. apache::thrift::BinaryProtocolReader
@@ -473,21 +491,7 @@ void parseValueInplace(
       break;
     }
     case protocol::T_STRUCT: {
-      std::string name;
-      int16_t fid;
-      TType ftype;
-      auto& objectValue = result.ensure_object();
-      prot.readStructBegin(name);
-      while (true) {
-        prot.readFieldBegin(name, ftype, fid);
-        if (ftype == protocol::T_STOP) {
-          break;
-        }
-        parseValueInplace(
-            prot, ftype, objectValue[FieldId{fid}], string_to_binary);
-        prot.readFieldEnd();
-      }
-      prot.readStructEnd();
+      parseObjectInplace(prot, result.ensure_object(), string_to_binary);
       break;
     }
     case protocol::T_MAP: {

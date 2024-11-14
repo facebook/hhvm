@@ -214,6 +214,19 @@ let read_and_process_job ic oc : job_outcome =
        leave them all to the catch-all handler below. *)
     Hh_logger.log "Worker got EPIPE due to server shutdown";
     `Controller_has_died
+  | Poll.Poll_exception flags as e ->
+    (* TODO @catg. This occasionally happen. I'm temporarily logging more info
+       about the flags to be able to debug. *)
+    let msg =
+      Printf.sprintf
+        "Poll_exception (%s). Stack: \n%s"
+        (Poll.Flags.to_string flags)
+        (Exception.wrap e |> Exception.to_string |> Exception.clean_stack)
+    in
+    Hh_logger.log "%s" msg;
+    EventLogger.log_if_initialized (fun () ->
+        HackEventLogger.invariant_violation_bug msg);
+    `Error Exit_status.Type_error
   | exn ->
     let e = Exception.wrap exn in
     Hh_logger.log

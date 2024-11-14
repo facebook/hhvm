@@ -11,7 +11,7 @@
 #include <cassert>
 #include <memory>
 
-#include "core_infra_security/thrift_authentication_module/detail/ClientIdentifierHelper.h"
+#include "core_infra_security/thrift_authentication_module/ClientIdentifierHelper.h"
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/RequestAclChecker.h"
 #include "mcrouter/config.h"
@@ -170,8 +170,9 @@ class ServerOnRequest {
     if (FOLLY_UNLIKELY(enableKeyClientBinding_) &&
         ctxRef.getThriftRequestContext()) {
       auto mayBeHashedIdentities =
-          core_infra_security::thrift_authentication_module::detail::
-              getTlsClientIdentifier(*ctxRef.getThriftRequestContext());
+          core_infra_security::thrift_authentication_module::
+              ClientIdentifierHelper::getTlsClientIdentifier(
+                  *ctxRef.getThriftRequestContext());
       // if has valid hashed identity string, set it on the request
       if (mayBeHashedIdentities.hasValue() &&
           std::holds_alternative<std::string>(mayBeHashedIdentities.value())) {

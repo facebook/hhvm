@@ -40,6 +40,7 @@
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
+#include <thrift/lib/cpp2/test/gen-cpp2/Calculator.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/Child.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyControl.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/DummyMonitor.h>
@@ -129,6 +130,88 @@ TEST(AsyncProcessorMetadataTest, ChildMetadata) {
   EXPECT_NE(metadataMap.find("childMethod2"), metadataMap.end());
   EXPECT_NE(
       metadataMap.find("Interaction.interactionMethod"), metadataMap.end());
+}
+
+void EXPECT_METHOD_METADATA(
+    const MethodMetadata& expected, const MethodMetadata& actual) {
+  EXPECT_EQ(expected.executorType, actual.executorType);
+  EXPECT_EQ(expected.interactionType, actual.interactionType);
+  EXPECT_EQ(expected.rpcKind, actual.rpcKind);
+  EXPECT_EQ(expected.priority, actual.priority);
+  EXPECT_EQ(expected.interactionName, actual.interactionName);
+  EXPECT_EQ(expected.createsInteraction, actual.createsInteraction);
+}
+
+TEST(AsyncProcessorMetadataTest, InteractionMetadata) {
+  ServiceHandler<Calculator> service;
+  auto createMethodMetadataResult = service.createMethodMetadata();
+  auto& metadataMap = expectMethodMetadataMap(createMethodMetadataResult);
+
+  // Factory function
+  auto metadata = metadataMap.at("newAddition");
+  EXPECT_METHOD_METADATA(
+      MethodMetadata(
+          MethodMetadata::ExecutorType::ANY,
+          MethodMetadata::InteractionType::NONE,
+          RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+          concurrency::PRIORITY::NORMAL,
+          "Addition",
+          /*createsInteract=*/true),
+      *metadata);
+
+  // EB-mode factory function
+  metadata = metadataMap.at("veryFastAddition");
+  EXPECT_METHOD_METADATA(
+      MethodMetadata(
+          MethodMetadata::ExecutorType::EVB,
+          MethodMetadata::InteractionType::NONE,
+          RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+          concurrency::PRIORITY::NORMAL,
+          "AdditionFast",
+          /*createsInteract=*/true),
+      *metadata);
+
+  // Method inside interaction
+  metadata = metadataMap.at("Addition.accumulatePrimitive");
+  EXPECT_METHOD_METADATA(
+      MethodMetadata(
+          MethodMetadata::ExecutorType::ANY,
+          MethodMetadata::InteractionType::INTERACTION_V1,
+          RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+          concurrency::PRIORITY::NORMAL,
+          "Addition",
+          /*createsInteract=*/false),
+      *metadata);
+
+  // Method inside EB-mode interaction
+  metadata = metadataMap.at("AdditionFast.accumulatePrimitive");
+  EXPECT_METHOD_METADATA(
+      MethodMetadata(
+          MethodMetadata::ExecutorType::EVB,
+          MethodMetadata::InteractionType::INTERACTION_V1,
+          RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+          concurrency::PRIORITY::NORMAL,
+          "AdditionFast",
+          /*createsInteract=*/false),
+      *metadata);
+}
+
+TEST(AsyncProcessorMetadataTest, NonInteractionMetadata) {
+  ChildHandler service;
+  auto createMethodMetadataResult = service.createMethodMetadata();
+  auto& metadataMap = expectMethodMetadataMap(createMethodMetadataResult);
+
+  // non-Interaction method
+  auto metadata = metadataMap.at("childMethod2");
+  EXPECT_METHOD_METADATA(
+      MethodMetadata(
+          MethodMetadata::ExecutorType::ANY,
+          MethodMetadata::InteractionType::NONE,
+          RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+          concurrency::PRIORITY::NORMAL,
+          std::nullopt,
+          /*createsInteract=*/false),
+      *metadata);
 }
 
 namespace {

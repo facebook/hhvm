@@ -282,7 +282,7 @@ void emitIterSetValue(IRGS& env, IterArgs ita, int32_t baseLocalId) {
       decRef(env, oldVal);
       auto const cowElm = gen(env, GetDictPtrIter, cowBase, pos);
       auto const updatedBase = gen(env, StPtrIterVal, cowBase, cowElm, val);
-      gen(env, StLocMeta, LocalId(baseLocalId), fp(env), updatedBase);
+      gen(env, StLoc, LocalId(baseLocalId), fp(env), updatedBase);
     }
     return;
   }

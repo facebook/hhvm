@@ -1097,11 +1097,13 @@ class t_mstch_python_generator : public t_mstch_generator {
         enum_member_union_field_names_validator::validate_enum);
     validator.add_struct_visitor(
         enum_member_union_field_names_validator::validate_structured);
-    add_explicit_include_validators(
-        validator,
-        diagnostic_level::error,
-        /* skip_annotations*/ true,
-        /* skip_service_includes*/ true);
+    if (!has_option("disable_explicit_include_validator")) {
+      add_explicit_include_validators(
+          validator,
+          diagnostic_level::error,
+          /* skip_annotations*/ true,
+          /* skip_service_includes*/ true);
+    }
     if (get_py3_namespace(program_).empty()) {
       validator.add_structured_definition_visitor(
           module_name_collision_validator::warn_named);

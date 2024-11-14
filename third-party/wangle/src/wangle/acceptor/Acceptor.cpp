@@ -357,7 +357,7 @@ void Acceptor::acceptConnection(
     // Send a RST to free kernel memory faster
     struct linger optLinger = {1, 0};
     fsp::setsockopt(fd, SOL_SOCKET, SO_LINGER, &optLinger, sizeof(optLinger));
-    close(fd);
+    folly::fileops::close(fd);
     return;
   }
   auto acceptTime = std::chrono::steady_clock::now();

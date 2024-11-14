@@ -90,7 +90,7 @@ func WithNumWorkers(num int) ServerOption {
 
 // WithConnContext adds connContext option
 // that specifies a function that modifies the context passed to procedures per connection.
-func WithConnContext(connContext ConnContextFunc) func(*serverOptions) {
+func WithConnContext(connContext ConnContextFunc) ServerOption {
 	return func(server *serverOptions) {
 		server.connContext = func(ctx context.Context, conn net.Conn) context.Context {
 			ctx = WithConnInfo(ctx, conn)
@@ -101,7 +101,7 @@ func WithConnContext(connContext ConnContextFunc) func(*serverOptions) {
 
 // WithLog allows you to over-ride the location that exceptional server events are logged.
 // The default is stderr.
-func WithLog(log func(format string, args ...interface{})) func(*serverOptions) {
+func WithLog(log func(format string, args ...interface{})) ServerOption {
 	return func(server *serverOptions) {
 		server.log = log
 	}

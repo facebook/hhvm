@@ -60,10 +60,6 @@ class ProxyStats {
     return asyncLogDurationUs_;
   }
 
-  ExponentialSmoothData<64>& axonLogDurationUs() {
-    return axonLogDurationUs_;
-  }
-
   ExponentialSmoothData<64>& axonProxyDurationUs() {
     return axonProxyDurationUs_;
   }
@@ -205,9 +201,6 @@ class ProxyStats {
 
   // Time spent for asynclog spooling
   ExponentialSmoothData<64> asyncLogDurationUs_;
-
-  // Time spent for axonlog writing
-  ExponentialSmoothData<64> axonLogDurationUs_;
 
   // Time spent for axonlog writing
   ExponentialSmoothData<64> axonProxyDurationUs_;

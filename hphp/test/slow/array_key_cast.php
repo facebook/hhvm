@@ -34,7 +34,9 @@ abstract final class FuncMaker2Statics {
   public static $x = 1;
 }
 function func_maker2() :mixed{
-  return 'test' . FuncMaker2Statics::$x++;
+  $s = FuncMaker2Statics::$x;
+  FuncMaker2Statics::$x++;
+  return 'test' . $s;
 }
 
 function make_tests($func) :mixed{

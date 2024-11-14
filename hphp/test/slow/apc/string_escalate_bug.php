@@ -5,7 +5,9 @@ abstract final class BarStatics {
 }
 
 function bar($n) :mixed{
-  return str_repeat("x", $n) . BarStatics::$x++;
+  $s = str_repeat("x", $n) . BarStatics::$x;
+  BarStatics::$x++;
+  return $s;
 }
 
 function foo() :mixed{

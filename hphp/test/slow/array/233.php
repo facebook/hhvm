@@ -7,7 +7,8 @@ abstract final class PushStackStatics {
 
 function push_stack():mixed{
 
-  $val = PushStackStatics::$index++;
+  $val = PushStackStatics::$index;
+  PushStackStatics::$index++;
   $stack = PushStackStatics::$stack;
   array_push(inout $stack, $val);
   PushStackStatics::$stack = $stack;

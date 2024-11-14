@@ -9,7 +9,8 @@ class X implements Serializable {
 }
 function test() :mixed{
   $a = vec[];
-  $a[] = $x = new X;
+  $x = new X;
+  $a[] = $x;
   $a[] = $x;
   $a[] = $x;
   apc_store('foo', $a);

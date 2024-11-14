@@ -10,11 +10,15 @@ function main() :mixed{
   $ix = 10;
   $dx = 10.7;
 
-  var_dump($io **= $ix);
-  var_dump($dx **= $dx);
+  $io **= $ix;
+  var_dump($io);
+  $dx **= $dx;
+  var_dump($dx);
 
-  var_dump($it **= $dt);
-  var_dump($dt **= $it);
+  $it **= $dt;
+  var_dump($it);
+  $dt **= $it;
+  var_dump($dt);
 }
 
 

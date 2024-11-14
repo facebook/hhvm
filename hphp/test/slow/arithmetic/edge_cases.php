@@ -1,7 +1,8 @@
 <?hh
 
 function add($x, $y, $u) :mixed{
-  var_dump((int)$u + ($x += $y));
+  $x += $y;
+  var_dump((int)$u + $x);
 }
 
 function div($x, $y, $z) :mixed{

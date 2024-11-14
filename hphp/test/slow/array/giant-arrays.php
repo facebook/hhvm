@@ -6,7 +6,9 @@ abstract final class FStatics {
 }
 
 function f() :mixed{
-  return FStatics::$counter++;
+  $x = FStatics::$counter;
+  FStatics::$counter++;
+  return $x;
 }
 
 function big_keyset() :mixed{

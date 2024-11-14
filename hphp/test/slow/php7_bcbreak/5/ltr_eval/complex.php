@@ -1,6 +1,12 @@
 <?hh
-
-class Foo { public static int $n = 0; }
+class Foo {
+  public static int $n = 0;
+  public static function incr(): int {
+    $x = Foo::$n;
+    Foo::$n += 1;
+    return $x;
+  }
+}
 <<__EntryPoint>>
 function entrypoint_complex(): void {
 
@@ -19,19 +25,19 @@ function entrypoint_complex(): void {
   };
 
   list(
-    $a[Foo::$n++ + $foo(0)],
+    $a[Foo::incr() + $foo(0)],
     list(
-      $a[Foo::$n++ + $foo(10)],
-      $a[Foo::$n++ + $foo(20)],
+      $a[Foo::incr() + $foo(10)],
+      $a[Foo::incr() + $foo(20)],
     ),
-    $a[Foo::$n++ + $foo(2)]
+    $a[Foo::incr() + $foo(2)]
   ) = vec[
-    "S0: n = " . (Foo::$n++ + $bar(0)),
+    "S0: n = " . (Foo::incr() + $bar(0)),
     vec[
-      "T0: n = " . (Foo::$n++ + $bar(10)),
-      "T1: n = " . (Foo::$n++ + $bar(20)),
+      "T0: n = " . (Foo::incr() + $bar(10)),
+      "T1: n = " . (Foo::incr() + $bar(20)),
     ],
-    "S2: n = " . (Foo::$n++ + $bar(2))
+    "S2: n = " . (Foo::incr() + $bar(2))
   ];
 
   var_dump($a);

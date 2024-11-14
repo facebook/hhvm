@@ -28,7 +28,7 @@ use sha1::Digest;
 use sha1::Sha1;
 
 pub const FILE_PATH_RELATIVE_TO_ROOT: &str = ".hhconfig";
-pub const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
+const PACKAGE_FILE_PATH_RELATIVE_TO_ROOT: &str = "PACKAGES.toml";
 
 /// For now, this struct only contains the parts of .hhconfig which
 /// have been needed in Rust tools.
@@ -69,56 +69,58 @@ impl HhConfig {
         Self::from_files(root, hhconfig_path, hh_conf_path, overrides)
     }
 
-    pub fn create_packages_path(hhconfig_path: &Path) -> PathBuf {
-        // Unwrap is safe because hhconfig_path is always at least one nonempty string
-        let mut packages_path = hhconfig_path.parent().unwrap().to_path_buf();
-        packages_path.push("PACKAGES.toml");
-        packages_path
-    }
-
-    pub fn create_custom_errors_path(hhconfig_path: &Path) -> PathBuf {
+    fn create_custom_errors_path(hhconfig_path: &Path) -> PathBuf {
         // Unwrap is safe because hhconfig_path is always at least one nonempty string
         let mut packages_path = hhconfig_path.parent().unwrap().to_path_buf();
         packages_path.push("CUSTOM_ERRORS.json");
         packages_path
     }
 
-    pub fn package_v2_enabled(hhconfig: &ConfigFile, overrides: &ConfigFile) -> bool {
-        let package_v2_config: bool = hhconfig
-            .get_bool_or("package_v2", GlobalOptions::default().po.package_v2)
-            .unwrap_or(GlobalOptions::default().po.package_v2);
-        let package_v2: bool = overrides
-            .get_bool_or("package_v2", package_v2_config)
-            .unwrap_or(package_v2_config);
-        package_v2
+    fn get_repo_packages_config_path<'a>(config: &'a ConfigFile, default: &'a str) -> &'a str {
+        config.get_str("packages_config_path").unwrap_or(default)
     }
 
-    pub fn from_files(
+    /// Get package info from hhconfig with overrides already applied
+    fn get_package_info(root: impl AsRef<Path>, hhconfig: &ConfigFile) -> PackageInfo {
+        let package_config_pathbuf =
+            Self::get_repo_packages_config_path(hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
+        let package_v2 = hhconfig
+            .get_bool_or("package_v2", GlobalOptions::default().po.package_v2)
+            .unwrap_or(GlobalOptions::default().po.package_v2);
+        PackageInfo::from_text_strict(
+            package_v2,
+            root.as_ref().to_str().unwrap_or_default(),
+            root.as_ref()
+                .join(package_config_pathbuf)
+                .to_str()
+                .unwrap_or_default(),
+        )
+        .unwrap_or_default()
+    }
+
+    fn from_files(
         root: impl AsRef<Path>,
         hhconfig_path: impl AsRef<Path>,
         hh_conf_path: impl AsRef<Path>,
         overrides: &ConfigFile,
     ) -> Result<Self> {
         let hhconfig_path = hhconfig_path.as_ref();
-        let package_config_pathbuf = Self::create_packages_path(hhconfig_path);
-        let package_config_path = package_config_pathbuf.as_path();
         let custom_error_config_path = Self::create_custom_errors_path(hhconfig_path);
         let (contents, mut hhconfig) = ConfigFile::from_file_with_contents(hhconfig_path)
             .with_context(|| hhconfig_path.display().to_string())?;
         // Grab extra config and use it to process the hash
+        let package_config_path_from_hhconfig =
+            Self::get_repo_packages_config_path(&hhconfig, PACKAGE_FILE_PATH_RELATIVE_TO_ROOT);
+        let package_config_path: PathBuf =
+            Self::get_repo_packages_config_path(&hhconfig, package_config_path_from_hhconfig)
+                .into();
         let package_contents: String = if package_config_path.exists() {
             let ctxt = || package_config_path.display().to_string();
-            let bytes = std::fs::read(package_config_path).with_context(ctxt)?;
+            let bytes = std::fs::read(package_config_path.as_path()).with_context(ctxt)?;
             String::from_utf8(bytes).unwrap()
         } else {
             String::new()
         };
-        let package_info: PackageInfo = PackageInfo::from_text_strict(
-            Self::package_v2_enabled(&hhconfig, overrides),
-            root.as_ref().to_str().unwrap_or_default(),
-            package_config_pathbuf.to_str().unwrap_or_default(),
-        )
-        .unwrap_or_default();
         let custom_error_contents: String = if custom_error_config_path.exists() {
             let ctxt = || custom_error_config_path.as_path().display().to_string();
             let bytes = std::fs::read(&custom_error_config_path).with_context(ctxt)?;
@@ -151,13 +153,13 @@ impl HhConfig {
             CustomErrorConfig::from_str(&custom_error_contents).unwrap_or_default();
         Ok(Self {
             hash,
-            ..Self::from_configs(hhconfig, hh_conf, custom_error_config, package_info)?
+            ..Self::from_configs(root, hhconfig, hh_conf, custom_error_config)?
         })
     }
 
     pub fn into_config_files(
         root: impl AsRef<Path>,
-    ) -> Result<(ConfigFile, ConfigFile, CustomErrorConfig, PackageInfo)> {
+    ) -> Result<(ConfigFile, ConfigFile, CustomErrorConfig)> {
         let hhconfig_path = root.as_ref().join(FILE_PATH_RELATIVE_TO_ROOT);
         let hh_conf_path = system_config_path();
         let custom_error_config_pathbuf = Self::create_custom_errors_path(hhconfig_path.as_path());
@@ -167,24 +169,7 @@ impl HhConfig {
         let hh_conf_file = ConfigFile::from_file(&hh_conf_path)
             .with_context(|| hh_conf_path.display().to_string())?;
         let custom_error_config = CustomErrorConfig::from_path(custom_error_config_path)?;
-        let package_config_pathbuf = Self::create_packages_path(hhconfig_path.as_path());
-        let package_config_path = package_config_pathbuf.as_path();
-        let package_info: PackageInfo = PackageInfo::from_text_strict(
-            // FIXME
-            hh_config_file
-                .get_bool_or("package_v2", GlobalOptions::default().po.package_v2)
-                .unwrap_or(GlobalOptions::default().po.package_v2),
-            root.as_ref().to_str().unwrap_or_default(),
-            package_config_path.to_str().unwrap_or_default(),
-        )
-        .unwrap_or_default();
-
-        Ok((
-            hh_conf_file,
-            hh_config_file,
-            custom_error_config,
-            package_info,
-        ))
+        Ok((hh_conf_file, hh_config_file, custom_error_config))
     }
 
     fn hash(
@@ -208,20 +193,20 @@ impl HhConfig {
         Ok(Self {
             hash,
             ..Self::from_configs(
+                PathBuf::new(),
                 config,
                 Default::default(),
                 Default::default(),
-                PackageInfo::default(),
             )?
         })
     }
 
     /// Construct from .hhconfig and hh.conf files with CLI overrides already applied.
     pub fn from_configs(
+        root: impl AsRef<Path>,
         hhconfig: ConfigFile,
         hh_conf: ConfigFile,
         custom_error_config: CustomErrorConfig,
-        package_info: PackageInfo,
     ) -> Result<Self> {
         let current_rolled_out_flag_idx = hhconfig
             .get_int("current_saved_state_rollout_flag_index")
@@ -238,6 +223,7 @@ impl HhConfig {
             deactivate_saved_state_rollout,
             &hh_conf,
         )?;
+        let package_info: PackageInfo = Self::get_package_info(root, &hhconfig);
 
         let default = ParserOptions::default();
         let experimental_features = hhconfig.get_str("enable_experimental_stx_features");

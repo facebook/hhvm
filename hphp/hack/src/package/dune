@@ -42,6 +42,7 @@
   parsing_error
   package_info
   package_ocaml_ffi
-  pos_or_decl)
+  pos_or_decl
+  utils_config_file_common)
  (preprocess
   (pps ppx_deriving.std)))

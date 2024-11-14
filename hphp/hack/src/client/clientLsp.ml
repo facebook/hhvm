@@ -605,7 +605,7 @@ let read_hhconfig_version (root : Path.t) : string Lwt.t =
   let file = Filename.concat (Path.to_string root) ".hhconfig" in
   let%lwt config = Config_file_lwt.parse_hhconfig file in
   match config with
-  | Ok (_hash, config) ->
+  | Ok config ->
     let version =
       config
       |> Config_file.Getters.string_opt "version"

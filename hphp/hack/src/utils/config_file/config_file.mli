@@ -22,8 +22,6 @@ val version_to_string_opt : ?pad:bool -> version -> string option
 
 val file_path_relative_to_repo_root : string
 
-val pkgs_config_path_relative_to_repo_root : string
-
 val compare_versions : version -> version -> int
 
 val parse_version : string option -> version
@@ -34,11 +32,14 @@ val print_to_stderr : t -> unit
 
 val parse_contents : string -> t
 
-(** [parse_hhconfig file_path] parses the content of [file_path] concatenated with
-the content of the package config. The first returned value is a hash of that concatenated content. *)
-val parse_hhconfig : string -> string * t
+(** [parse_hhconfig file_path] parses the content of [file_path]. *)
+val parse_hhconfig : string -> t
 
 val parse_local_config : string -> t
+
+val cat_packages_file : string -> string
+
+val cat_hhconfig_file : string -> string
 
 (** Apply overrides using provided overrides.
 [log_reason] is solely used for logging, so we can write to stderr indicating where

@@ -511,12 +511,11 @@ let load
     ~(cli_config_overrides : (string * string) list)
     ~(ai_options : Ai_options.t option) : t * ServerLocalConfig.t =
   let command_line_overrides = Config_file.of_list cli_config_overrides in
-  let (config_hash, config) =
-    Config_file.parse_hhconfig (Relative_path.to_absolute repo_config_path)
-  in
+  let hhconfig_abs_path = Relative_path.to_absolute repo_config_path in
+  let original_config = Config_file.parse_hhconfig hhconfig_abs_path in
   let config =
     Config_file.apply_overrides
-      ~config
+      ~config:original_config
       ~overrides:command_line_overrides
       ~log_reason:None
   in
@@ -584,7 +583,23 @@ let load
       (Config_file.Getters.string_opt "formatter_override" config)
       ~f:maybe_relative_path
   in
-  let package_info = PackageConfig.load_and_parse ~package_v2 () in
+  string_opt "packages_config_path" config
+  |> Option.iter ~f:Config_file_common.set_pkgconfig_path;
+  let pkgs_config_abs_path =
+    Relative_path.(
+      to_absolute
+      @@ from_root ~suffix:(Config_file_common.get_pkgconfig_path ()))
+  in
+  let config_hash =
+    Config_file_common.hash
+      original_config
+      ~hhconfig_contents:(Config_file.cat_hhconfig_file hhconfig_abs_path)
+      ~pkgconfig_contents:(Config_file.cat_packages_file pkgs_config_abs_path)
+  in
+  Hh_logger.log "Parsing and loading packages config at %s" pkgs_config_abs_path;
+  let package_info =
+    PackageConfig.load_and_parse ~strict:true ~package_v2 ~pkgs_config_abs_path
+  in
   let global_opts =
     let tco_custom_error_config = CustomErrorConfig.load_and_parse () in
     let local_config_opts =

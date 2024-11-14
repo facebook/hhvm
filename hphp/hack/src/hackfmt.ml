@@ -76,7 +76,7 @@ let get_www_root_for_format files =
   | None -> cur
 
 let read_hhconfig path =
-  let (_hash, config) = Config_file.parse_hhconfig path in
+  let config = Config_file.parse_hhconfig path in
   ( FEnv.
       {
         add_trailing_commas =

@@ -226,7 +226,7 @@ let parse_options () =
         naming_table := Some (Hh_single_common.find_naming_table_or_fail ());
 
       (* Following will throw an exception if .hhconfig not found *)
-      let (_config_hash, config) =
+      let config =
         Config_file.parse_hhconfig
           (Filename.concat root Config_file.file_path_relative_to_repo_root)
       in

@@ -10,9 +10,9 @@ type t
 
 val file_path_relative_to_repo_root : string
 
-val pkgs_config_path_relative_to_repo_root : string
+val get_pkgconfig_path : unit -> string
 
-val get_packages_absolute_path : hhconfig_path:string -> string
+val set_pkgconfig_path : string -> unit
 
 val empty : unit -> t
 
@@ -27,8 +27,8 @@ val parse_contents : string -> t
 
 val parse_local_config : string -> t
 
-(** Compute the hhconfig hash *)
-val hash : t -> config_contents:string -> package_config:string option -> string
+(** Compute the hhconfig hash using the concatenation of hhconfig's and package config's content *)
+val hash : t -> hhconfig_contents:string -> pkgconfig_contents:string -> string
 
 val to_json : t -> Hh_json.json
 

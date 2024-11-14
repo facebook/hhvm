@@ -305,7 +305,6 @@ let parse_options () =
   in
   let memtrace = ref None in
   let enable_global_access_check = ref false in
-  let packages_config_path = ref None in
   let custom_error_config_path = ref None in
   let allow_all_files_for_module_declarations = ref true in
   let loop_iteration_upper_bound = ref None in
@@ -733,9 +732,6 @@ let parse_options () =
       ( "--count-imprecise-types",
         Arg.Unit (fun () -> set_mode CountImpreciseTypes ()),
         " Counts the number of mixed, dynamic, and nonnull types in a file" );
-      ( "--packages-config-path",
-        Arg.String (fun s -> packages_config_path := Some s),
-        " Config file for a list of package definitions" );
       ( "--custom-error-config-path",
         Arg.String (fun s -> custom_error_config_path := Some s),
         " Config file for custom error messages" );
@@ -786,20 +782,33 @@ let parse_options () =
   then
     failwith "--custom-hhi-path needs --no-builtins";
 
+  let config =
+    List.fold
+      (List.rev !config_overrides)
+      ~init:(Config_file_common.empty ())
+      ~f:(fun config setting ->
+        let c = Config_file_common.parse_contents setting in
+        Config_file_common.apply_overrides ~config ~overrides:c ~log_reason:None)
+  in
+  let packages_config_path =
+    config |> Config_file.Getters.string_opt "packages_config_path"
+  in
   (* --root implies certain things... *)
   let root =
     match !root with
     | None ->
-      (match !packages_config_path with
-      | Some p ->
-        Path.make (Filename.dirname p)
-        (* if a package config path is supplied, use its directory name as the root *)
+      (match packages_config_path with
+      | Some _ ->
+        Path.make (Sys.getcwd ())
+        (* the package_config path supplied as a --config value is relative to the
+           parent directory of .hhconfig; to mimic that behavior, use the current working
+           directory as the root *)
       | None -> Path.make "/" (* otherwise, we use this dummy *))
     | Some root ->
       if Option.is_none !naming_table then
         naming_table := Some (Hh_single_common.find_naming_table_or_fail ());
       (* Following will throw an exception if .hhconfig not found *)
-      let (_config_hash, config) =
+      let config =
         Config_file.parse_hhconfig
           (Filename.concat root Config_file.file_path_relative_to_repo_root)
       in
@@ -822,6 +831,7 @@ let parse_options () =
       (* Path.make canonicalizes it, i.e. resolves symlinks *)
       Path.make root
   in
+
   (match !mode with
   | Get_some_file_deps { depth; _ } ->
     if Option.is_none !naming_table then
@@ -933,21 +943,7 @@ let parse_options () =
       ~tco_loop_iteration_upper_bound:!loop_iteration_upper_bound
       GlobalOptions.default
   in
-
-  let tcopt =
-    let config =
-      List.fold
-        (List.rev !config_overrides)
-        ~init:(Config_file_common.empty ())
-        ~f:(fun config setting ->
-          let c = Config_file_common.parse_contents setting in
-          Config_file_common.apply_overrides
-            ~config
-            ~overrides:c
-            ~log_reason:None)
-    in
-    ServerConfig.load_config config tcopt
-  in
+  let tcopt = ServerConfig.load_config config tcopt in
 
   Errors.allowed_fixme_codes_strict :=
     GlobalOptions.allowed_fixme_codes_strict tcopt;
@@ -1014,7 +1010,7 @@ let parse_options () =
       memtrace = !memtrace;
       rust_provider_backend = !rust_provider_backend;
       naming_table_path = !naming_table;
-      packages_config_path = !packages_config_path;
+      packages_config_path;
     },
     root,
     if !rust_provider_backend then
@@ -2506,13 +2502,13 @@ let decl_and_run_mode
     Errors.do_ @@ fun () ->
     match packages_config_path with
     | None -> PackageInfo.empty
-    | Some _ ->
+    | Some pkgs_config_relpath ->
       let info =
         PackageConfig.load_and_parse
           ~package_v2:(TypecheckerOptions.package_v2 tcopt)
           ~strict:false
-          ~pkgs_config_abs_path:packages_config_path
-          ()
+          ~pkgs_config_abs_path:
+            Relative_path.(to_absolute @@ from_root ~suffix:pkgs_config_relpath)
       in
       info
   in

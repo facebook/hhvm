@@ -14,9 +14,6 @@ type t = Config_file_common.t
 let file_path_relative_to_repo_root =
   Config_file_common.file_path_relative_to_repo_root
 
-let pkgs_config_path_relative_to_repo_root =
-  Config_file_common.pkgs_config_path_relative_to_repo_root
-
 let empty = Config_file_common.empty
 
 let print_to_stderr = Config_file_common.print_to_stderr
@@ -32,29 +29,21 @@ let cat_packages_file (fn : string) =
     try Sys_utils.cat fn with
     | exn ->
       let e = Exception.wrap exn in
-      Hh_logger.exception_ ~prefix:"PACKAGES.toml deleted: " e;
+      Hh_logger.exception_ ~prefix:(Printf.sprintf "%s deleted: " fn) e;
       ""
   ) else
     ""
 
-let parse_hhconfig (fn : string) : string * t =
-  let contents =
-    try Sys_utils.cat fn with
-    | exn ->
-      let e = Exception.wrap exn in
-      Hh_logger.exception_ ~prefix:".hhconfig deleted: " e;
-      Exit.exit Exit_status.Hhconfig_deleted
-  in
-  let parsed = Config_file_common.parse_contents contents in
-  (* Take the PACKAGES.toml in the same directory as the .hhconfig *)
-  let package_path =
-    Config_file_common.get_packages_absolute_path ~hhconfig_path:fn
-  in
-  let package_config = Some (cat_packages_file package_path) in
-  let hash =
-    Config_file_common.hash parsed ~config_contents:contents ~package_config
-  in
-  (hash, parsed)
+let cat_hhconfig_file (fn : string) =
+  try Sys_utils.cat fn with
+  | exn ->
+    let e = Exception.wrap exn in
+    Hh_logger.exception_ ~prefix:".hhconfig deleted: " e;
+    Exit.exit Exit_status.Hhconfig_deleted
+
+let parse_hhconfig (fn : string) : t =
+  let contents = cat_hhconfig_file fn in
+  Config_file_common.parse_contents contents
 
 let parse_local_config = Config_file_common.parse_local_config
 

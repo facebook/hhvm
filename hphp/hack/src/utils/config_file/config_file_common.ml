@@ -14,7 +14,7 @@ type t = Config_file_ffi_externs.config
 
 let file_path_relative_to_repo_root = ".hhconfig"
 
-let pkgs_config_path_relative_to_repo_root = "PACKAGES.toml"
+let pkgs_config_path_relative_to_repo_root = ref "PACKAGES.toml"
 
 let empty = Config_file_ffi_externs.empty
 
@@ -128,6 +128,11 @@ module Getters : Getters_S = struct
         false
 end
 
+let get_pkgconfig_path () = !pkgs_config_path_relative_to_repo_root
+
+let set_pkgconfig_path (fn : string) =
+  pkgs_config_path_relative_to_repo_root := fn
+
 let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
     : t =
   if is_empty overrides then
@@ -140,13 +145,6 @@ let apply_overrides ~(config : t) ~(overrides : t) ~(log_reason : string option)
         Printf.eprintf "\n%!");
     config
 
-(* Given an hhconfig_path, get the path to the PACKAGES.toml file in the same directory *)
-let get_packages_absolute_path ~(hhconfig_path : string) =
-  Path.make hhconfig_path
-  |> Path.dirname
-  |> (fun p -> Path.concat p pkgs_config_path_relative_to_repo_root)
-  |> Path.to_string
-
 (*
  * Config file format:
  * # Some comment. Indicate by a pound sign at the start of a new line
@@ -156,23 +154,19 @@ let parse_contents (contents : string) : t =
   Config_file_ffi_externs.parse_contents contents
 
 let hash
-    (parsed : t) ~(config_contents : string) ~(package_config : string option) :
+    (parsed : t) ~(hhconfig_contents : string) ~(pkgconfig_contents : string) :
     string =
   match Getters.string_opt "override_hhconfig_hash" parsed with
   | Some hash -> hash
   | None ->
-    let contents =
-      match package_config with
-      | Some package_config -> config_contents ^ package_config
-      | None -> config_contents
-    in
+    let contents = hhconfig_contents ^ pkgconfig_contents in
     Sha1.digest contents
 
 (* Non-lwt implementation of parse *)
 let parse (fn : string) : string * t =
   let contents = Sys_utils.cat fn in
   let parsed = parse_contents contents in
-  let hash = hash parsed ~config_contents:contents ~package_config:None in
+  let hash = hash parsed ~hhconfig_contents:contents ~pkgconfig_contents:"" in
   (hash, parsed)
 
 let parse_local_config (fn : string) : t =

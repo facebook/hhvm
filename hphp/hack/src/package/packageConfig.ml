@@ -13,10 +13,8 @@ external extract_packages_from_text :
   bool -> bool -> string -> string -> string -> (Package.t list, errors) result
   = "extract_packages_from_text_ffi"
 
-let pkgs_config_path_relative_to_repo_root = "PACKAGES.toml"
-
 let repo_config_path =
-  Relative_path.from_root ~suffix:pkgs_config_path_relative_to_repo_root
+  Relative_path.from_root ~suffix:(Config_file_common.get_pkgconfig_path ())
 
 let log_debug (msg : ('a, unit, string, string, string, unit) format6) : 'a =
   Hh_logger.debug ~category:"packages" ?exn:None msg
@@ -45,16 +43,12 @@ let parse (package_v2 : bool) (strict : bool) (path : string) =
   | Ok packages -> PackageInfo.from_packages packages
 
 let load_and_parse
-    ~(package_v2 : bool) ?(strict = true) ?(pkgs_config_abs_path = None) () :
+    ~(strict : bool) ~(package_v2 : bool) ~(pkgs_config_abs_path : string) :
     PackageInfo.t =
-  let pkgs_config_abs_path =
-    match pkgs_config_abs_path with
-    | None -> Relative_path.to_absolute repo_config_path
-    | Some path -> path
-  in
-  if not @@ Sys.file_exists pkgs_config_abs_path then
+  if not @@ Sys.file_exists pkgs_config_abs_path then (
+    log_debug "Package config at %s does not exist" pkgs_config_abs_path;
     PackageInfo.empty
-  else
+  ) else
     let result = parse package_v2 strict pkgs_config_abs_path in
     log_debug "Parsed %s" pkgs_config_abs_path;
     result

@@ -241,7 +241,7 @@ let is_config_version_matching env =
   let filename =
     Relative_path.from_root ~suffix:Config_file.file_path_relative_to_repo_root
   in
-  let (_hash, config) =
+  let config =
     Config_file.parse_hhconfig (Relative_path.to_absolute filename)
   in
   let new_version =

@@ -556,7 +556,6 @@ static ResumptionStateResult getResumptionState(
     return ResumptionStateResult(
         std::make_pair(PskType::Rejected, folly::none));
   } else {
-    FOLLY_SDT(fizz, session_cache_ResumptionSuccess);
     const auto& ident = psks->identities[kPskIndex].psk_identity;
     return ResumptionStateResult(
         ticketCipher->decrypt(ident->clone()),
@@ -1319,6 +1318,8 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             pskType = PskType::Rejected;
             pskMode = folly::none;
             resState = folly::none;
+          } else {
+            FOLLY_SDT(fizz, session_cache_ResumptionSuccess);
           }
         } else {
           pskMode = folly::none;

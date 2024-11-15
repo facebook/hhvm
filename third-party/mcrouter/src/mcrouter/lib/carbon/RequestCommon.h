@@ -102,8 +102,12 @@ class RequestCommon : public MessageCommon {
     sourceIpAddr_ = sourceIpAddr;
   }
 
-  void setWriteTimestamp(uint64_t writeTimestamp) noexcept {
+  void setWriteTimestampNs(uint64_t writeTimestamp) noexcept {
     writeTimestamp_ = writeTimestamp;
+  }
+
+  std::optional<uint64_t> getWriteTimestampNs() const noexcept {
+    return writeTimestamp_;
   }
 
  protected:

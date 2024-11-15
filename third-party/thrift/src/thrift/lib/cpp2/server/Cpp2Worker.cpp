@@ -19,15 +19,12 @@
 #include <vector>
 
 #include <folly/GLog.h>
-#include <folly/Overload.h>
-#include <folly/String.h>
 #include <folly/experimental/io/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseLocal.h>
 #include <folly/io/async/fdsock/AsyncFdSocket.h>
 #include <folly/portability/Sockets.h>
-#include <thrift/lib/cpp/concurrency/Util.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/security/extensions/ThriftParametersContext.h>

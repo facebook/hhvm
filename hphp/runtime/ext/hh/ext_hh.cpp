@@ -1667,7 +1667,7 @@ static struct HHExtension final : Extension {
 
 static struct XHPExtension final : Extension {
   XHPExtension(): Extension("xhp", NO_EXTENSION_VERSION_YET, NO_ONCALL_YET) { }
-  bool moduleEnabled() const override { return Cfg::Eval::EnableXHP; }
+  bool moduleEnabled() const override { return RuntimeOption::EnableXHP; }
 
   std::vector<std::string> hackFiles() const override {
     return {};

@@ -136,6 +136,9 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Cfg::LoadForCompiler(ini, config);
 
+  Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
+               RuntimeOption::EnableXHP);
+
   Config::Bind(ParserThreadCount, ini, config, "ParserThreadCount", 0);
   if (ParserThreadCount <= 0) {
     ParserThreadCount = Process::GetCPUCount();

@@ -1517,6 +1517,9 @@ std::string mangleUnitSha1(const folly::StringPiece fileSha1,
     folly::to<std::string>(
       fileSha1, '|',
       repoSchemaId().toString(),
+#define R(Opt)  RuntimeOption::Opt, '|',
+      UNITCACHEFLAGS()
+#undef R
 #define C(Config, ...) Config, '|',
       CONFIGS_FOR_UNITCACHEFLAGS()
 #undef C

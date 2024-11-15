@@ -498,21 +498,15 @@ namespace apache::thrift {
 /// We can write the following code.
 ///
 ///     // `Oncall` annotation exists on MyStruct.field
-///     assert(get_field_annotation<Oncall, MyStruct, ident::field>() ==
+///     assert(get_field_annotation<Oncall, MyStruct, ident::field>());
+///
+///     // Check the value of `Oncall` annotation on MyStruct.field
+///     assert(*get_field_annotation<Oncall, MyStruct, ident::field>() ==
 ///            Oncall{"thrift"});
 ///
-///     // `Sensitive` annotation exists on MyStruct.field
-///     assert(has_field_annotation<Sensitive, MyStruct, ident::field>);
-///
-///     // `Doc` annotation does not exist on MyStruct.field
-///     assert(!has_field_annotation<Doc, MyStruct, ident::field>);
-///
-///     // Build failure since MyStruct.field doesn't have `Doc` annotation
-///     get_field_annotation<Doc, MyStruct, ident::field>();
-///
 ///     // Build failure since `Other` is not marked with
-///     // @cpp.RuntimeAnnotation.
-///     has_field_annotation<Other, MyStruct, ident::field>;
+///     @cpp.RuntimeAnnotation.
+///     get_field_annotation<Other, MyStruct, ident::field>;
 ///
 template <class Annotation, class Struct, class Id>
 const Annotation* get_field_annotation() {

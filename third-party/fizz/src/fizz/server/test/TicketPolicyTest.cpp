@@ -9,7 +9,6 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
-#include <fizz/crypto/test/Mocks.h>
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/clock/test/Mocks.h>
 #include <fizz/server/TicketPolicy.h>

@@ -12,7 +12,6 @@
 #include <fizz/experimental/batcher/Batcher.h>
 #include <fizz/experimental/client/BatchSignaturePeerCert.h>
 #include <fizz/experimental/server/BatchSignatureAsyncSelfCert.h>
-#include <fizz/server/State.h>
 #include <fizz/server/test/Mocks.h>
 #include <folly/portability/GTest.h>
 

@@ -10,8 +10,6 @@
 #include <fizz/client/PskSerializationUtils.h>
 #include <fizz/experimental/protocol/BatchSignatureFactory.h>
 #include <fizz/tool/FizzCommandCommon.h>
-#include <fizz/util/Parse.h>
-#include <folly/FileUtil.h>
 #include <folly/Format.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>

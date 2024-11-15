@@ -9,7 +9,6 @@
 #include <fizz/backend/openssl/crypto/aead/OpenSSLEVPCipher.h>
 #include <fizz/crypto/aead/CryptoUtil.h>
 #include <folly/lang/CheckedMath.h>
-#include <functional>
 
 namespace fizz {
 namespace openssl {

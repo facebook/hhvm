@@ -13,7 +13,6 @@
 #include <fizz/extensions/tokenbinding/TokenBindingServerExtension.h>
 #include <fizz/extensions/tokenbinding/Types.h>
 #include <fizz/record/Extensions.h>
-#include <fizz/server/ServerExtensions.h>
 
 using namespace testing;
 

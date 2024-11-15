@@ -16,10 +16,7 @@
 #include <fizz/server/SlidingBloomReplayCache.h>
 #include <fizz/server/TicketTypes.h>
 #include <fizz/tool/FizzCommandCommon.h>
-#include <fizz/util/KeyLogWriter.h>
-#include <fizz/util/Parse.h>
 
-#include <folly/Format.h>
 #include <folly/executors/IOThreadPoolExecutor.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncSSLSocket.h>

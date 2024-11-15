@@ -11,8 +11,6 @@
 #include <fizz/backend/openssl/crypto/OpenSSLKeyUtils.h>
 #include <fizz/crypto/test/TestUtil.h>
 
-#include <folly/String.h>
-
 namespace fizz {
 using namespace test;
 

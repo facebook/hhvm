@@ -6,7 +6,6 @@
  *  LICENSE file in the root directory of this source tree.
  */
 #include <fizz/extensions/delegatedcred/DelegatedCredentialCertManager.h>
-#include <fizz/extensions/delegatedcred/DelegatedCredentialUtils.h>
 
 using namespace fizz::server;
 

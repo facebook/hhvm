@@ -8,12 +8,8 @@
 
 #include <fizz/server/SlidingBloomReplayCache.h>
 
-#include <sys/types.h>
-
 #include <fstream>
 
-#include <folly/Conv.h>
-#include <folly/hash/Hash.h>
 #include <folly/io/IOBuf.h>
 #include <folly/portability/Unistd.h>
 

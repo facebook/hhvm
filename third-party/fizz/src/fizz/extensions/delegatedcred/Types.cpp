@@ -8,7 +8,6 @@
 #include <fizz/extensions/delegatedcred/Types.h>
 #include <fizz/record/Types.h>
 
-#include <folly/String.h>
 #include <folly/io/Cursor.h>
 
 using namespace fizz::extensions;

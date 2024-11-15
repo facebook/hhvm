@@ -8,10 +8,8 @@
 
 #include <fizz/backend/openssl/crypto/OpenSSLKeyUtils.h>
 #include <fizz/backend/openssl/crypto/signature/Signature.h>
-#include <openssl/crypto.h>
 
 #include <folly/Conv.h>
-#include <folly/ScopeGuard.h>
 #include <folly/ssl/OpenSSLPtrTypes.h>
 
 using namespace folly;

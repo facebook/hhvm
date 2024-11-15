@@ -16,7 +16,6 @@
 #include <fizz/crypto/test/TestUtil.h>
 #include <fizz/protocol/clock/test/Mocks.h>
 #include <fizz/protocol/test/Mocks.h>
-#include <folly/String.h>
 
 using namespace fizz::test;
 using namespace testing;

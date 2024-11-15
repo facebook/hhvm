@@ -11,7 +11,6 @@
 
 #include <fizz/record/Extensions.h>
 #include <fizz/record/test/ExtensionTestsBase.h>
-#include <folly/String.h>
 
 using namespace folly;
 

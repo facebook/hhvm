@@ -13,7 +13,6 @@
 #include <fizz/crypto/Utils.h>
 #include <fizz/server/AsyncFizzServer.h>
 #include <fizz/server/TicketTypes.h>
-#include <folly/String.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/SSLContext.h>
 #include <folly/portability/GFlags.h>

@@ -8,7 +8,6 @@
 
 #include <fizz/extensions/tokenbinding/Validator.h>
 
-#include <fizz/backend/openssl/OpenSSL.h>
 #include <fizz/extensions/tokenbinding/Utils.h>
 #include <fizz/protocol/DefaultFactory.h>
 

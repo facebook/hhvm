@@ -57,7 +57,7 @@ class ChecksumPayloadSerializerStrategy final
   template <class T>
   FOLLY_ERASE folly::Try<T> unpackAsCompressed(
       Payload&& payload, bool decodeMetadataUsingBinary) {
-    return unpackImpl<T>(
+    return unpackImpl<T, /*VerifyChecksum=*/false>(
         std::move(payload),
         [this, decodeMetadataUsingBinary](Payload&& payload) -> folly::Try<T> {
           return delegate_.template unpackAsCompressed<T>(
@@ -68,7 +68,7 @@ class ChecksumPayloadSerializerStrategy final
   template <typename T>
   FOLLY_ERASE folly::Try<T> unpack(
       Payload&& payload, bool decodeMetadataUsingBinary) {
-    return unpackImpl<T>(
+    return unpackImpl<T, /*VerifyChecksum=*/true>(
         std::move(payload),
         [this, decodeMetadataUsingBinary](Payload&& payload) -> folly::Try<T> {
           return delegate_.template unpack<T>(
@@ -215,12 +215,14 @@ class ChecksumPayloadSerializerStrategy final
   folly::Function<void()> recordChecksumSuccess_;
   folly::Function<void()> recordChecksumCalculated_;
 
-  template <typename T, typename DelegateFunc>
+  template <typename T, bool VerifyChecksum, typename DelegateFunc>
   FOLLY_ERASE folly::Try<T> unpackImpl(Payload&& payload, DelegateFunc func) {
     if (payload.hasNonemptyMetadata()) {
       folly::Try<T> t = func(std::move(payload));
       folly::IOBuf& buf = *t->payload.get();
-      if (t.hasException() || validateChecksum(buf, t->metadata.checksum())) {
+      if (t.hasException() || !VerifyChecksum) {
+        return t;
+      } else if (validateChecksum(buf, t->metadata.checksum())) {
         return t;
       } else {
         return folly::Try<T>(std::runtime_error("Checksum mismatch"));

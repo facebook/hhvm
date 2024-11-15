@@ -63,3 +63,38 @@ TEST(ChecksumPayloadSerializerStrategyTest, TestPackWithChecksumHappyPath) {
       metadata.checksum().value().checksum(),
       other->metadata.checksum().value().checksum());
 }
+
+TEST(
+    ChecksumPayloadSerializerStrategyTest,
+    TestPackWithChecksumNotCheckedWhenNotUncompressing) {
+  ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy> strategy;
+  RequestRpcMetadata metadata;
+  metadata.protocol() = ProtocolId::COMPACT;
+  metadata.compression() = CompressionAlgorithm::ZSTD;
+  metadata.compressionConfig()
+      .ensure()
+      .codecConfig()
+      .ensure()
+      .zstdConfig_ref()
+      .ensure();
+
+  Checksum checksum;
+  checksum.algorithm() = ChecksumAlgorithm::XXH3_64;
+
+  metadata.checksum() = checksum;
+
+  auto payload = strategy.packWithFds(
+      &metadata,
+      folly::IOBuf::copyBuffer("test"),
+      folly::SocketFds(),
+      false,
+      nullptr);
+
+  auto other =
+      strategy.unpackAsCompressed<RequestPayload>(std::move(payload), false);
+  EXPECT_EQ(other.hasException(), false);
+  EXPECT_TRUE(other->metadata.checksum().has_value());
+  EXPECT_EQ(
+      metadata.checksum().value().checksum(),
+      other->metadata.checksum().value().checksum());
+}

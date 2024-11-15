@@ -35,11 +35,7 @@ class DefaultPayloadSerializerStrategy final
   folly::Try<T> unpackAsCompressed(
       rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
     return folly::makeTryWith([&]() {
-      T t = unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
-      if (auto compression = t.metadata.compression()) {
-        t.payload = uncompressBuffer(std::move(t.payload), *compression);
-      }
-      return t;
+      return unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
     });
   }
 
@@ -47,7 +43,11 @@ class DefaultPayloadSerializerStrategy final
   folly::Try<T> unpack(
       rocket::Payload&& payload, bool decodeMetadataUsingBinary) {
     return folly::makeTryWith([&]() {
-      return unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
+      T t = unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
+      if (auto compression = t.metadata.compression()) {
+        t.payload = uncompressBuffer(std::move(t.payload), *compression);
+      }
+      return t;
     });
   }
 

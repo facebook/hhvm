@@ -1009,6 +1009,7 @@ HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
     const char* serviceName,
+    const char* definingServiceName,
     const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
@@ -1021,6 +1022,7 @@ HandlerCallback<void>::HandlerCallback(
           std::move(req),
           std::move(ctx),
           serviceName,
+          definingServiceName,
           methodName,
           ewp,
           eb,
@@ -1035,6 +1037,7 @@ HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
     const char* serviceName,
+    const char* definingServiceName,
     const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
@@ -1050,6 +1053,7 @@ HandlerCallback<void>::HandlerCallback(
           std::move(req),
           std::move(ctx),
           serviceName,
+          definingServiceName,
           methodName,
           ewp,
           eb,
@@ -1151,6 +1155,7 @@ HandlerCallbackBase::processServiceInterceptorsOnRequest(
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
         arguments,
         serviceName_,
+        definingServiceName_,
         methodName_};
     try {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onRequest(
@@ -1198,6 +1203,7 @@ HandlerCallbackBase::processServiceInterceptorsOnResponse(
         reqCtx_->getStorageForServiceInterceptorOnRequestByIndex(i),
         resultOrActiveException,
         serviceName_,
+        definingServiceName_,
         methodName_};
     try {
       co_await serviceInterceptorsInfo[i].interceptor->internal_onResponse(

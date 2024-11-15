@@ -69,6 +69,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRe
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "FooBarBazService"
     , "foo"
     , return_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_foo<ProtocolIn_, ProtocolOut_>
@@ -175,6 +176,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRe
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "FooBarBazService"
     , "bar"
     , return_bar<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bar<ProtocolIn_, ProtocolOut_>
@@ -281,6 +283,7 @@ void FooBarBazServiceAsyncProcessor::executeRequest_baz(apache::thrift::ServerRe
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "FooBarBazService"
     , "baz"
     , return_baz<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_baz<ProtocolIn_, ProtocolOut_>

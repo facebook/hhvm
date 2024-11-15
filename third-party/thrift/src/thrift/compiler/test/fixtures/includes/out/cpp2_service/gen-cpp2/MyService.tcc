@@ -73,6 +73,7 @@ void MyServiceAsyncProcessor::executeRequest_query(apache::thrift::ServerRequest
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "query"
     , return_query<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_query<ProtocolIn_, ProtocolOut_>
@@ -185,6 +186,7 @@ void MyServiceAsyncProcessor::executeRequest_has_arg_docs(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "has_arg_docs"
     , return_has_arg_docs<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_has_arg_docs<ProtocolIn_, ProtocolOut_>

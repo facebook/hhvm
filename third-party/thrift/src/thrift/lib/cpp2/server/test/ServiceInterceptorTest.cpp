@@ -1122,6 +1122,29 @@ CO_TEST_P(ServiceInterceptorTestP, RequestArguments) {
   EXPECT_EQ(interceptor->arg3, requestArgs);
 }
 
+namespace {
+struct ServiceNameInfo {
+  std::string serviceName;
+  std::string definingServiceName;
+  std::string methodName;
+
+  [[maybe_unused]] friend bool operator==(
+      const ServiceNameInfo& lhs, const ServiceNameInfo& rhs) {
+    return std::tie(lhs.serviceName, lhs.definingServiceName, lhs.methodName) ==
+        std::tie(rhs.serviceName, rhs.definingServiceName, rhs.methodName);
+  }
+
+  [[maybe_unused]] friend std::ostream& operator<<(
+      std::ostream& out, const ServiceNameInfo& info) {
+    return out << fmt::format(
+               "[{}, {}, {}]",
+               info.serviceName,
+               info.definingServiceName,
+               info.methodName);
+  }
+};
+} // namespace
+
 CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
   struct ServiceInterceptorCheckingServiceAndMethodNames
       : public NamedServiceInterceptor<folly::Unit> {
@@ -1136,12 +1159,14 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
         ConnectionState*, RequestInfo requestInfo) override {
       names.emplace_back(
           requestInfo.serviceName ? std::string(requestInfo.serviceName) : "",
+          requestInfo.definingServiceName
+              ? std::string(requestInfo.definingServiceName)
+              : "",
           requestInfo.methodName ? std::string(requestInfo.methodName) : "");
       co_return std::nullopt;
     }
 
-    using Entry = std::pair<std::string, std::string>;
-    std::vector<Entry> names;
+    std::vector<ServiceNameInfo> names;
   };
   auto interceptor =
       std::make_shared<ServiceInterceptorCheckingServiceAndMethodNames>();
@@ -1155,19 +1180,23 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
   co_await client->co_echo("");
   co_await client->co_noop();
 
-  std::vector<ServiceInterceptorCheckingServiceAndMethodNames::Entry>
-      expectedNames = {
-          {"ServiceInterceptorTest", "echo"},
-          {"ServiceInterceptorTest", "noop"},
-      };
+  std::vector<ServiceNameInfo> expectedNames = {
+      {"ServiceInterceptorTest", "ServiceInterceptorTest", "echo"},
+      {"ServiceInterceptorTest", "ServiceInterceptorTestBase", "noop"},
+  };
 
   if (transportType() == TransportType::ROCKET) {
     // only rocket supports interactions
     auto interaction = co_await client->co_createInteraction();
     co_await interaction.co_echo("");
-    expectedNames.emplace_back("ServiceInterceptorTest", "createInteraction");
     expectedNames.emplace_back(
-        "ServiceInterceptorTest", "SampleInteraction.echo");
+        "ServiceInterceptorTest",
+        "ServiceInterceptorTest",
+        "createInteraction");
+    expectedNames.emplace_back(
+        "ServiceInterceptorTest",
+        "ServiceInterceptorTest",
+        "SampleInteraction.echo");
   }
 
   EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));

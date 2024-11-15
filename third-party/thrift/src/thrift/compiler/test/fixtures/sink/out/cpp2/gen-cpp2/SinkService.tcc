@@ -105,6 +105,7 @@ void SinkServiceAsyncProcessor::executeRequest_method(apache::thrift::ServerRequ
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SinkService"
     , "method"
     , return_method<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_method<ProtocolIn_, ProtocolOut_>
@@ -225,6 +226,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodAndReponse(apache::thrift::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SinkService"
     , "methodAndReponse"
     , return_methodAndReponse<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodAndReponse<ProtocolIn_, ProtocolOut_>
@@ -347,6 +349,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodThrow(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SinkService"
     , "methodThrow"
     , return_methodThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodThrow<ProtocolIn_, ProtocolOut_>
@@ -484,6 +487,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodSinkThrow(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SinkService"
     , "methodSinkThrow"
     , return_methodSinkThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodSinkThrow<ProtocolIn_, ProtocolOut_>
@@ -604,6 +608,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFinalThrow(apache::thrift::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SinkService"
     , "methodFinalThrow"
     , return_methodFinalThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodFinalThrow<ProtocolIn_, ProtocolOut_>
@@ -734,6 +739,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodBothThrow(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SinkService"
     , "methodBothThrow"
     , return_methodBothThrow<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodBothThrow<ProtocolIn_, ProtocolOut_>
@@ -867,6 +873,7 @@ void SinkServiceAsyncProcessor::executeRequest_methodFast(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SinkService"
     , "methodFast"
     , return_methodFast<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodFast<ProtocolIn_, ProtocolOut_>

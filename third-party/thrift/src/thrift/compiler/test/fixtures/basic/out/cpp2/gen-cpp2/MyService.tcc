@@ -82,6 +82,7 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "ping"
     , return_ping<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_ping<ProtocolIn_, ProtocolOut_>
@@ -188,6 +189,7 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "getRandomData"
     , return_getRandomData<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getRandomData<ProtocolIn_, ProtocolOut_>
@@ -299,6 +301,7 @@ void MyServiceAsyncProcessor::executeRequest_sink(apache::thrift::ServerRequest&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "sink"
     , return_sink<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sink<ProtocolIn_, ProtocolOut_>
@@ -411,6 +414,7 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "putDataById"
     , return_putDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_putDataById<ProtocolIn_, ProtocolOut_>
@@ -520,6 +524,7 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "hasDataById"
     , return_hasDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_hasDataById<ProtocolIn_, ProtocolOut_>
@@ -631,6 +636,7 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "getDataById"
     , return_getDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataById<ProtocolIn_, ProtocolOut_>
@@ -742,6 +748,7 @@ void MyServiceAsyncProcessor::executeRequest_deleteDataById(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "deleteDataById"
     , return_deleteDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_deleteDataById<ProtocolIn_, ProtocolOut_>
@@ -849,6 +856,7 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "lobDataById"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
@@ -934,6 +942,7 @@ void MyServiceAsyncProcessor::executeRequest_invalid_return_for_hack(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "invalid_return_for_hack"
     , return_invalid_return_for_hack<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_invalid_return_for_hack<ProtocolIn_, ProtocolOut_>
@@ -1042,6 +1051,7 @@ void MyServiceAsyncProcessor::executeRequest_rpc_skipped_codegen(apache::thrift:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "rpc_skipped_codegen"
     , return_rpc_skipped_codegen<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_rpc_skipped_codegen<ProtocolIn_, ProtocolOut_>

@@ -71,6 +71,7 @@ void RaiserAsyncProcessor::executeRequest_doBland(apache::thrift::ServerRequest&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Raiser"
     , "doBland"
     , return_doBland<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_doBland<ProtocolIn_, ProtocolOut_>
@@ -177,6 +178,7 @@ void RaiserAsyncProcessor::executeRequest_doRaise(apache::thrift::ServerRequest&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Raiser"
     , "doRaise"
     , return_doRaise<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_doRaise<ProtocolIn_, ProtocolOut_>
@@ -320,6 +322,7 @@ void RaiserAsyncProcessor::executeRequest_get200(apache::thrift::ServerRequest&&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Raiser"
     , "get200"
     , return_get200<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get200<ProtocolIn_, ProtocolOut_>
@@ -428,6 +431,7 @@ void RaiserAsyncProcessor::executeRequest_get500(apache::thrift::ServerRequest&&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Raiser"
     , "get500"
     , return_get500<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get500<ProtocolIn_, ProtocolOut_>

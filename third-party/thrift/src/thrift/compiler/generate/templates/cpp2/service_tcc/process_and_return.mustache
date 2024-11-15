@@ -132,6 +132,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "{{service:parent_service_name}}"
     , "{{ > common/function_name}}"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
@@ -157,6 +158,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::executeRequest_{{#servic
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "{{service:parent_service_name}}"
     , "{{ > common/function_name}}"
     , return_{{function:prefixed_name}}<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_{{#service:interaction?}}{{service:name}}_{{/service:interaction?}}{{function:cpp_name}}<ProtocolIn_, ProtocolOut_>

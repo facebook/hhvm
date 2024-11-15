@@ -65,6 +65,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_do_some_similar_things(apa
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "do_some_similar_things"
     , return_do_some_similar_things<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_some_similar_things<ProtocolIn_, ProtocolOut_>
@@ -190,6 +191,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_frobnicate(a
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "MyInteraction.frobnicate"
     , return_MyInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_frobnicate<ProtocolIn_, ProtocolOut_>
@@ -312,6 +314,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_ping(apache:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "MyInteraction.ping"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
@@ -399,6 +402,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_truthify(apa
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "MyInteraction.truthify"
     , return_MyInteraction_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_truthify<ProtocolIn_, ProtocolOut_>
@@ -512,6 +516,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_MyInteraction_encode(apach
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "MyInteraction.encode"
     , return_MyInteraction_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_encode<ProtocolIn_, ProtocolOut_>
@@ -642,6 +647,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_init(apa
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "SharedInteraction.init"
     , return_SharedInteraction_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_init<ProtocolIn_, ProtocolOut_>
@@ -752,6 +758,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_do_somet
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "SharedInteraction.do_something"
     , return_SharedInteraction_do_something<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_do_something<ProtocolIn_, ProtocolOut_>
@@ -862,6 +869,7 @@ void InteractWithSharedAsyncProcessor::executeRequest_SharedInteraction_tear_dow
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractWithShared"
     , "SharedInteraction.tear_down"
     , return_SharedInteraction_tear_down<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_tear_down<ProtocolIn_, ProtocolOut_>

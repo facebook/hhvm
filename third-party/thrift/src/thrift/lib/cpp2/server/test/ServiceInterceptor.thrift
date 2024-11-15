@@ -36,9 +36,11 @@ struct ResponseArgsStruct {
   2: string bar;
 }
 
-service ServiceInterceptorTest {
+service ServiceInterceptorTestBase {
   void noop();
+}
 
+service ServiceInterceptorTest extends ServiceInterceptorTestBase {
   string echo(1: string str);
 
   SampleInteraction createInteraction();

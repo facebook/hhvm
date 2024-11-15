@@ -67,6 +67,7 @@ void AdapterServiceAsyncProcessor::executeRequest_count(apache::thrift::ServerRe
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "AdapterService"
     , "count"
     , return_count<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_count<ProtocolIn_, ProtocolOut_>
@@ -178,6 +179,7 @@ void AdapterServiceAsyncProcessor::executeRequest_adaptedTypes(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "AdapterService"
     , "adaptedTypes"
     , return_adaptedTypes<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_adaptedTypes<ProtocolIn_, ProtocolOut_>

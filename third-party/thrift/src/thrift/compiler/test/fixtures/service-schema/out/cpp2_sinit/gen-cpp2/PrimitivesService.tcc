@@ -75,6 +75,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_init(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PrimitivesService"
     , "init"
     , return_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_init<ProtocolIn_, ProtocolOut_>
@@ -183,6 +184,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_method_that_throws(apache::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PrimitivesService"
     , "method_that_throws"
     , return_method_that_throws<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_method_that_throws<ProtocolIn_, ProtocolOut_>
@@ -311,6 +313,7 @@ void PrimitivesServiceAsyncProcessor::executeRequest_return_void_method(apache::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PrimitivesService"
     , "return_void_method"
     , return_return_void_method<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_return_void_method<ProtocolIn_, ProtocolOut_>

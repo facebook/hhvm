@@ -62,6 +62,14 @@ class ServiceInterceptorBase {
      */
     const char* serviceName = nullptr;
     /**
+     * The name of the service definition (where the corresponding method name)
+     * as specified in Thrift IDL. In most cases, this will be the same as the
+     * service name. However, if method name is pulled in via service
+     * inheritance, then this name will match the base class that defines the
+     * method.
+     */
+    const char* definingServiceName = nullptr;
+    /**
      * The name of the method as specified in Thrift IDL. This does NOT include
      * the service name. If the method is an interaction method, then it will be
      * in the format `{interaction_name}.{method_name}`.
@@ -79,6 +87,14 @@ class ServiceInterceptorBase {
      * The name of the service definition as specified in Thrift IDL.
      */
     const char* serviceName = nullptr;
+    /**
+     * The name of the service definition (where the corresponding method name)
+     * as specified in Thrift IDL. In most cases, this will be the same as the
+     * service name. However, if method name is pulled in via service
+     * inheritance, then this name will match the base class that defines the
+     * method.
+     */
+    const char* definingServiceName = nullptr;
     /**
      * The name of the method as specified in Thrift IDL. This does NOT include
      * the service name. If the method is an interaction method, then it will be

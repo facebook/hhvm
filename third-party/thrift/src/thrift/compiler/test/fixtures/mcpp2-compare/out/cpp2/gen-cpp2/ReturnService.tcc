@@ -108,6 +108,7 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "noReturn"
     , return_noReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_noReturn<ProtocolIn_, ProtocolOut_>
@@ -214,6 +215,7 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "boolReturn"
     , return_boolReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_boolReturn<ProtocolIn_, ProtocolOut_>
@@ -322,6 +324,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "i16Return"
     , return_i16Return<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i16Return<ProtocolIn_, ProtocolOut_>
@@ -430,6 +433,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "i32Return"
     , return_i32Return<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i32Return<ProtocolIn_, ProtocolOut_>
@@ -538,6 +542,7 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "i64Return"
     , return_i64Return<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_i64Return<ProtocolIn_, ProtocolOut_>
@@ -646,6 +651,7 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "floatReturn"
     , return_floatReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_floatReturn<ProtocolIn_, ProtocolOut_>
@@ -754,6 +760,7 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "doubleReturn"
     , return_doubleReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_doubleReturn<ProtocolIn_, ProtocolOut_>
@@ -865,6 +872,7 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "stringReturn"
     , return_stringReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_stringReturn<ProtocolIn_, ProtocolOut_>
@@ -973,6 +981,7 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "binaryReturn"
     , return_binaryReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_binaryReturn<ProtocolIn_, ProtocolOut_>
@@ -1081,6 +1090,7 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "mapReturn"
     , return_mapReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapReturn<ProtocolIn_, ProtocolOut_>
@@ -1189,6 +1199,7 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "simpleTypedefReturn"
     , return_simpleTypedefReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simpleTypedefReturn<ProtocolIn_, ProtocolOut_>
@@ -1297,6 +1308,7 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(apache::th
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "complexTypedefReturn"
     , return_complexTypedefReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_complexTypedefReturn<ProtocolIn_, ProtocolOut_>
@@ -1405,6 +1417,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(a
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "list_mostComplexTypedefReturn"
     , return_list_mostComplexTypedefReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_mostComplexTypedefReturn<ProtocolIn_, ProtocolOut_>
@@ -1516,6 +1529,7 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "enumReturn"
     , return_enumReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_enumReturn<ProtocolIn_, ProtocolOut_>
@@ -1627,6 +1641,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(apache::thrift:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "list_EnumReturn"
     , return_list_EnumReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_EnumReturn<ProtocolIn_, ProtocolOut_>
@@ -1735,6 +1750,7 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "structReturn"
     , return_structReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_structReturn<ProtocolIn_, ProtocolOut_>
@@ -1843,6 +1859,7 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "set_StructReturn"
     , return_set_StructReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_set_StructReturn<ProtocolIn_, ProtocolOut_>
@@ -1954,6 +1971,7 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "unionReturn"
     , return_unionReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_unionReturn<ProtocolIn_, ProtocolOut_>
@@ -2062,6 +2080,7 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "list_UnionReturn"
     , return_list_UnionReturn<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_UnionReturn<ProtocolIn_, ProtocolOut_>
@@ -2176,6 +2195,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "readDataEb"
     , return_readDataEb<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_readDataEb<ProtocolIn_, ProtocolOut_>
@@ -2287,6 +2307,7 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "ReturnService"
     , "readData"
     , return_readData<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_readData<ProtocolIn_, ProtocolOut_>

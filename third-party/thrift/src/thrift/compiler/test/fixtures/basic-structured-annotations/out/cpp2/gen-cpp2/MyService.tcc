@@ -67,6 +67,7 @@ void MyServiceAsyncProcessor::executeRequest_first(apache::thrift::ServerRequest
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "first"
     , return_first<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_first<ProtocolIn_, ProtocolOut_>
@@ -178,6 +179,7 @@ void MyServiceAsyncProcessor::executeRequest_second(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "second"
     , return_second<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_second<ProtocolIn_, ProtocolOut_>

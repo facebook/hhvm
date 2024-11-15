@@ -68,6 +68,7 @@ void TestServiceAsyncProcessor::executeRequest_init(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "TestService"
     , "init"
     , return_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_init<ProtocolIn_, ProtocolOut_>

@@ -65,6 +65,7 @@ void GoodServiceAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "BadService"
     , "bar"
     , return_bar<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bar<ProtocolIn_, ProtocolOut_>
@@ -178,6 +179,7 @@ void GoodServiceAsyncProcessor::executeRequest_BadInteraction_foo(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "BadService"
     , "BadInteraction.foo"
     , return_BadInteraction_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_BadInteraction_foo<ProtocolIn_, ProtocolOut_>

@@ -74,6 +74,7 @@ void MyServiceAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "foo"
     , return_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_foo<ProtocolIn_, ProtocolOut_>
@@ -184,6 +185,7 @@ void MyServiceAsyncProcessor::executeRequest_interact(apache::thrift::ServerRequ
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "interact"
     , return_interact<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_interact<ProtocolIn_, ProtocolOut_>
@@ -291,6 +293,7 @@ void MyServiceAsyncProcessor::executeRequest_interactFast(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "interactFast"
     , return_interactFast<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_interactFast<ProtocolIn_, ProtocolOut_>
@@ -400,6 +403,7 @@ void MyServiceAsyncProcessor::executeRequest_serialize(apache::thrift::ServerReq
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "serialize"
     , return_serialize<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_serialize<ProtocolIn_, ProtocolOut_>
@@ -530,6 +534,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::th
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteraction.frobnicate"
     , return_MyInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_frobnicate<ProtocolIn_, ProtocolOut_>
@@ -652,6 +657,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteraction.ping"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
@@ -739,6 +745,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteraction.truthify"
     , return_MyInteraction_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_truthify<ProtocolIn_, ProtocolOut_>
@@ -852,6 +859,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteraction.encode"
     , return_MyInteraction_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_encode<ProtocolIn_, ProtocolOut_>
@@ -988,6 +996,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteractionFast.frobnicate"
     , return_MyInteractionFast_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_frobnicate<ProtocolIn_, ProtocolOut_>
@@ -1091,6 +1100,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteractionFast.ping"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
@@ -1176,6 +1186,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteractionFast.truthify"
     , return_MyInteractionFast_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_truthify<ProtocolIn_, ProtocolOut_>
@@ -1287,6 +1298,7 @@ void MyServiceAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::th
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "MyInteractionFast.encode"
     , return_MyInteractionFast_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_encode<ProtocolIn_, ProtocolOut_>
@@ -1413,6 +1425,7 @@ void MyServiceAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "SerialInteraction.frobnicate"
     , return_SerialInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SerialInteraction_frobnicate<ProtocolIn_, ProtocolOut_>

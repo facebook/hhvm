@@ -68,6 +68,7 @@ void FB303ServiceAsyncProcessor::executeRequest_simple_rpc(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "FB303Service"
     , "simple_rpc"
     , return_simple_rpc<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_simple_rpc<ProtocolIn_, ProtocolOut_>

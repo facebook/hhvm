@@ -119,6 +119,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "get"
     , return_get<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get<ProtocolIn_, ProtocolOut_>
@@ -227,6 +228,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "getter"
     , return_getter<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getter<ProtocolIn_, ProtocolOut_>
@@ -335,6 +337,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "lists"
     , return_lists<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_lists<ProtocolIn_, ProtocolOut_>
@@ -443,6 +446,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(apache::thrif
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "maps"
     , return_maps<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_maps<ProtocolIn_, ProtocolOut_>
@@ -551,6 +555,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(apache::thrif
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "name"
     , return_name<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_name<ProtocolIn_, ProtocolOut_>
@@ -659,6 +664,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(apac
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "name_to_value"
     , return_name_to_value<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_name_to_value<ProtocolIn_, ProtocolOut_>
@@ -767,6 +773,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "names"
     , return_names<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_names<ProtocolIn_, ProtocolOut_>
@@ -875,6 +882,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(apache
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "prefix_tree"
     , return_prefix_tree<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_prefix_tree<ProtocolIn_, ProtocolOut_>
@@ -983,6 +991,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(apache::thrif
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "sets"
     , return_sets<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sets<ProtocolIn_, ProtocolOut_>
@@ -1091,6 +1100,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "setter"
     , return_setter<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_setter<ProtocolIn_, ProtocolOut_>
@@ -1199,6 +1209,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "str"
     , return_str<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_str<ProtocolIn_, ProtocolOut_>
@@ -1307,6 +1318,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(apache::th
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "strings"
     , return_strings<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_strings<ProtocolIn_, ProtocolOut_>
@@ -1415,6 +1427,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(apache::thrif
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "type"
     , return_type<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_type<ProtocolIn_, ProtocolOut_>
@@ -1523,6 +1536,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "value"
     , return_value<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_value<ProtocolIn_, ProtocolOut_>
@@ -1631,6 +1645,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(apac
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "value_to_name"
     , return_value_to_name<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_value_to_name<ProtocolIn_, ProtocolOut_>
@@ -1739,6 +1754,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "values"
     , return_values<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_values<ProtocolIn_, ProtocolOut_>
@@ -1847,6 +1863,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(apache::thrift:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "id"
     , return_id<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_id<ProtocolIn_, ProtocolOut_>
@@ -1955,6 +1972,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "ids"
     , return_ids<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_ids<ProtocolIn_, ProtocolOut_>
@@ -2063,6 +2081,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(apache:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "descriptor"
     , return_descriptor<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_descriptor<ProtocolIn_, ProtocolOut_>
@@ -2171,6 +2190,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(apache
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "descriptors"
     , return_descriptors<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_descriptors<ProtocolIn_, ProtocolOut_>
@@ -2279,6 +2299,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "key"
     , return_key<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_key<ProtocolIn_, ProtocolOut_>
@@ -2387,6 +2408,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(apache::thrif
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "keys"
     , return_keys<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_keys<ProtocolIn_, ProtocolOut_>
@@ -2495,6 +2517,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(apache:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "annotation"
     , return_annotation<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_annotation<ProtocolIn_, ProtocolOut_>
@@ -2603,6 +2626,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(apache
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "annotations"
     , return_annotations<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_annotations<ProtocolIn_, ProtocolOut_>
@@ -2711,6 +2735,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "member"
     , return_member<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_member<ProtocolIn_, ProtocolOut_>
@@ -2819,6 +2844,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(apache::th
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "members"
     , return_members<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_members<ProtocolIn_, ProtocolOut_>
@@ -2927,6 +2953,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "field"
     , return_field<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_field<ProtocolIn_, ProtocolOut_>
@@ -3035,6 +3062,7 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service_with_special_names"
     , "fields"
     , return_fields<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_fields<ProtocolIn_, ProtocolOut_>

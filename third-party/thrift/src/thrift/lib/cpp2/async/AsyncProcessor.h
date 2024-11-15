@@ -1280,6 +1280,7 @@ class HandlerCallbackBase {
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
       const char* serviceName,
+      const char* definingServiceName,
       const char* methodName,
       exnw_ptr ewp,
       folly::EventBase* eb,
@@ -1290,6 +1291,7 @@ class HandlerCallbackBase {
         ctx_(std::move(ctx)),
         interaction_(std::move(interaction)),
         serviceName_(serviceName),
+        definingServiceName_(definingServiceName),
         methodName_(methodName),
         ewp_(ewp),
         eb_(eb),
@@ -1306,6 +1308,7 @@ class HandlerCallbackBase {
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
       const char* serviceName,
+      const char* definingServiceName,
       const char* methodName,
       exnw_ptr ewp,
       folly::EventBase* eb,
@@ -1319,6 +1322,7 @@ class HandlerCallbackBase {
         ctx_(std::move(ctx)),
         interaction_(std::move(interaction)),
         serviceName_(serviceName),
+        definingServiceName_(definingServiceName),
         methodName_(methodName),
         ewp_(ewp),
         eb_(eb),
@@ -1525,7 +1529,11 @@ class HandlerCallbackBase {
   ResponseChannelRequest::UniquePtr req_;
   ContextStack::UniquePtr ctx_;
   TilePtr interaction_;
+  // The "leaf" or most derived service name
   const char* const serviceName_ = "";
+  // The service name where the incoming method name is defined (could be
+  // different if inherited service)
+  const char* const definingServiceName_ = "";
   const char* const methodName_ = "";
 
   // May be null in a oneway call
@@ -1626,6 +1634,7 @@ class HandlerCallback : public HandlerCallbackBase {
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
       const char* serviceName,
+      const char* definingServiceName,
       const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
@@ -1639,6 +1648,7 @@ class HandlerCallback : public HandlerCallbackBase {
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
       const char* serviceName,
+      const char* definingServiceName,
       const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
@@ -1716,6 +1726,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
       const char* serviceName,
+      const char* definingServiceName,
       const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
@@ -1729,6 +1740,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       ResponseChannelRequest::UniquePtr req,
       ContextStack::UniquePtr ctx,
       const char* serviceName,
+      const char* definingServiceName,
       const char* methodName,
       cob_ptr cp,
       exnw_ptr ewp,
@@ -2078,6 +2090,7 @@ HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
     const char* serviceName,
+    const char* definingServiceName,
     const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
@@ -2090,6 +2103,7 @@ HandlerCallback<T>::HandlerCallback(
           std::move(req),
           std::move(ctx),
           serviceName,
+          definingServiceName,
           methodName,
           ewp,
           eb,
@@ -2105,6 +2119,7 @@ HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
     ContextStack::UniquePtr ctx,
     const char* serviceName,
+    const char* definingServiceName,
     const char* methodName,
     cob_ptr cp,
     exnw_ptr ewp,
@@ -2120,6 +2135,7 @@ HandlerCallback<T>::HandlerCallback(
           std::move(req),
           std::move(ctx),
           serviceName,
+          definingServiceName,
           methodName,
           ewp,
           eb,

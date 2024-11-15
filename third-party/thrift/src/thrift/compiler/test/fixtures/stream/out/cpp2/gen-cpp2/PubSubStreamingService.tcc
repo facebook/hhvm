@@ -114,6 +114,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "returnstream"
     , return_returnstream<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_returnstream<ProtocolIn_, ProtocolOut_>
@@ -228,6 +229,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "streamthrows"
     , return_streamthrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_streamthrows<ProtocolIn_, ProtocolOut_>
@@ -352,6 +354,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "servicethrows"
     , return_servicethrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_servicethrows<ProtocolIn_, ProtocolOut_>
@@ -483,6 +486,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows2(apache:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "servicethrows2"
     , return_servicethrows2<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_servicethrows2<ProtocolIn_, ProtocolOut_>
@@ -624,6 +628,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "boththrows"
     , return_boththrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_boththrows<ProtocolIn_, ProtocolOut_>
@@ -765,6 +770,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "responseandstreamstreamthrows"
     , return_responseandstreamstreamthrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamstreamthrows<ProtocolIn_, ProtocolOut_>
@@ -891,6 +897,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "responseandstreamservicethrows"
     , return_responseandstreamservicethrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamservicethrows<ProtocolIn_, ProtocolOut_>
@@ -1024,6 +1031,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "responseandstreamboththrows"
     , return_responseandstreamboththrows<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_responseandstreamboththrows<ProtocolIn_, ProtocolOut_>
@@ -1173,6 +1181,7 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstreamFast(apach
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "PubSubStreamingService"
     , "returnstreamFast"
     , return_returnstreamFast<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_returnstreamFast<ProtocolIn_, ProtocolOut_>

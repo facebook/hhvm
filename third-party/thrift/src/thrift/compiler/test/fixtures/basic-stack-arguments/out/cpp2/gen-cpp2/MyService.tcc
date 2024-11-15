@@ -73,6 +73,7 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "hasDataById"
     , return_hasDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_hasDataById<ProtocolIn_, ProtocolOut_>
@@ -184,6 +185,7 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "getDataById"
     , return_getDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataById<ProtocolIn_, ProtocolOut_>
@@ -298,6 +300,7 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "putDataById"
     , return_putDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_putDataById<ProtocolIn_, ProtocolOut_>
@@ -405,6 +408,7 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyService"
     , "lobDataById"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)

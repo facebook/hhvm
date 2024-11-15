@@ -75,6 +75,7 @@ void service3AsyncProcessor::executeRequest_methodA(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service3"
     , "methodA"
     , return_methodA<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodA<ProtocolIn_, ProtocolOut_>
@@ -190,6 +191,7 @@ void service3AsyncProcessor::executeRequest_methodB(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service3"
     , "methodB"
     , return_methodB<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodB<ProtocolIn_, ProtocolOut_>
@@ -296,6 +298,7 @@ void service3AsyncProcessor::executeRequest_methodC(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service3"
     , "methodC"
     , return_methodC<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodC<ProtocolIn_, ProtocolOut_>
@@ -413,6 +416,7 @@ void service3AsyncProcessor::executeRequest_methodD(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service3"
     , "methodD"
     , return_methodD<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodD<ProtocolIn_, ProtocolOut_>
@@ -521,6 +525,7 @@ void service3AsyncProcessor::executeRequest_methodE(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service3"
     , "methodE"
     , return_methodE<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodE<ProtocolIn_, ProtocolOut_>
@@ -638,6 +643,7 @@ void service3AsyncProcessor::executeRequest_methodF(apache::thrift::ServerReques
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "service3"
     , "methodF"
     , return_methodF<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_methodF<ProtocolIn_, ProtocolOut_>

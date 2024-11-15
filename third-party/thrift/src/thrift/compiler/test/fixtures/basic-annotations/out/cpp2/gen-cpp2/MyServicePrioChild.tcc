@@ -65,6 +65,7 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyServicePrioChild"
     , "pang"
     , return_pang<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_pang<ProtocolIn_, ProtocolOut_>

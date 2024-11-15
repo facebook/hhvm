@@ -70,6 +70,7 @@ void HeaderClientMethodsAnnotationOnFunctionAsyncProcessor::executeRequest_echo(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "HeaderClientMethodsAnnotationOnFunction"
     , "echo"
     , return_echo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_echo<ProtocolIn_, ProtocolOut_>
@@ -181,6 +182,7 @@ void HeaderClientMethodsAnnotationOnFunctionAsyncProcessor::executeRequest_echo_
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "HeaderClientMethodsAnnotationOnFunction"
     , "echo_2"
     , return_echo_2<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_echo_2<ProtocolIn_, ProtocolOut_>

@@ -76,6 +76,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapList(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "NestedContainers"
     , "mapList"
     , return_mapList<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapList<ProtocolIn_, ProtocolOut_>
@@ -185,6 +186,7 @@ void NestedContainersAsyncProcessor::executeRequest_mapSet(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "NestedContainers"
     , "mapSet"
     , return_mapSet<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_mapSet<ProtocolIn_, ProtocolOut_>
@@ -294,6 +296,7 @@ void NestedContainersAsyncProcessor::executeRequest_listMap(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "NestedContainers"
     , "listMap"
     , return_listMap<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listMap<ProtocolIn_, ProtocolOut_>
@@ -403,6 +406,7 @@ void NestedContainersAsyncProcessor::executeRequest_listSet(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "NestedContainers"
     , "listSet"
     , return_listSet<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_listSet<ProtocolIn_, ProtocolOut_>
@@ -512,6 +516,7 @@ void NestedContainersAsyncProcessor::executeRequest_turtles(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "NestedContainers"
     , "turtles"
     , return_turtles<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_turtles<ProtocolIn_, ProtocolOut_>

@@ -72,6 +72,7 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_init(apache
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractLocally"
     , "SharedInteraction.init"
     , return_SharedInteraction_init<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_init<ProtocolIn_, ProtocolOut_>
@@ -182,6 +183,7 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_do_somethin
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractLocally"
     , "SharedInteraction.do_something"
     , return_SharedInteraction_do_something<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_do_something<ProtocolIn_, ProtocolOut_>
@@ -292,6 +294,7 @@ void InteractLocallyAsyncProcessor::executeRequest_SharedInteraction_tear_down(a
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "InteractLocally"
     , "SharedInteraction.tear_down"
     , return_SharedInteraction_tear_down<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SharedInteraction_tear_down<ProtocolIn_, ProtocolOut_>

@@ -72,6 +72,7 @@ void CAsyncProcessor::executeRequest_f(apache::thrift::ServerRequest&& serverReq
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "C"
     , "f"
     , return_f<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_f<ProtocolIn_, ProtocolOut_>
@@ -178,6 +179,7 @@ void CAsyncProcessor::executeRequest_numbers(apache::thrift::ServerRequest&& ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "C"
     , "numbers"
     , return_numbers<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_numbers<ProtocolIn_, ProtocolOut_>
@@ -298,6 +300,7 @@ void CAsyncProcessor::executeRequest_thing(apache::thrift::ServerRequest&& serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "C"
     , "thing"
     , return_thing<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_thing<ProtocolIn_, ProtocolOut_>

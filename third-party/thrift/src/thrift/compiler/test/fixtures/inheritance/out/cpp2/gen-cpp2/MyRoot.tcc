@@ -65,6 +65,7 @@ void MyRootAsyncProcessor::executeRequest_do_root(apache::thrift::ServerRequest&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyRoot"
     , "do_root"
     , return_do_root<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_root<ProtocolIn_, ProtocolOut_>

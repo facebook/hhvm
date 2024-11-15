@@ -70,6 +70,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "DbMixedStackArguments"
     , "getDataByKey0"
     , return_getDataByKey0<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataByKey0<ProtocolIn_, ProtocolOut_>
@@ -181,6 +182,7 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "DbMixedStackArguments"
     , "getDataByKey1"
     , return_getDataByKey1<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataByKey1<ProtocolIn_, ProtocolOut_>

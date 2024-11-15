@@ -65,6 +65,7 @@ void DerivedServiceAsyncProcessor::executeRequest_get_six(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "DerivedService"
     , "get_six"
     , return_get_six<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_six<ProtocolIn_, ProtocolOut_>

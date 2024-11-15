@@ -76,6 +76,7 @@ void MyServiceFastAsyncProcessor::executeRequest_hasDataById(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyServiceFast"
     , "hasDataById"
     , return_hasDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_hasDataById<ProtocolIn_, ProtocolOut_>
@@ -190,6 +191,7 @@ void MyServiceFastAsyncProcessor::executeRequest_getDataById(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyServiceFast"
     , "getDataById"
     , return_getDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_getDataById<ProtocolIn_, ProtocolOut_>
@@ -307,6 +309,7 @@ void MyServiceFastAsyncProcessor::executeRequest_putDataById(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyServiceFast"
     , "putDataById"
     , return_putDataById<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_putDataById<ProtocolIn_, ProtocolOut_>
@@ -413,6 +416,7 @@ void MyServiceFastAsyncProcessor::executeRequest_lobDataById(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "MyServiceFast"
     , "lobDataById"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)

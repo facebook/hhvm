@@ -147,6 +147,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_five(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_five"
     , return_get_five<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_five<ProtocolIn_, ProtocolOut_>
@@ -258,6 +259,7 @@ void SimpleServiceAsyncProcessor::executeRequest_add_five(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "add_five"
     , return_add_five<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_add_five<ProtocolIn_, ProtocolOut_>
@@ -366,6 +368,7 @@ void SimpleServiceAsyncProcessor::executeRequest_do_nothing(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "do_nothing"
     , return_do_nothing<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_do_nothing<ProtocolIn_, ProtocolOut_>
@@ -478,6 +481,7 @@ void SimpleServiceAsyncProcessor::executeRequest_concat(apache::thrift::ServerRe
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "concat"
     , return_concat<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_concat<ProtocolIn_, ProtocolOut_>
@@ -589,6 +593,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_value(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_value"
     , return_get_value<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_value<ProtocolIn_, ProtocolOut_>
@@ -700,6 +705,7 @@ void SimpleServiceAsyncProcessor::executeRequest_negate(apache::thrift::ServerRe
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "negate"
     , return_negate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_negate<ProtocolIn_, ProtocolOut_>
@@ -811,6 +817,7 @@ void SimpleServiceAsyncProcessor::executeRequest_tiny(apache::thrift::ServerRequ
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "tiny"
     , return_tiny<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_tiny<ProtocolIn_, ProtocolOut_>
@@ -922,6 +929,7 @@ void SimpleServiceAsyncProcessor::executeRequest_small(apache::thrift::ServerReq
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "small"
     , return_small<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_small<ProtocolIn_, ProtocolOut_>
@@ -1033,6 +1041,7 @@ void SimpleServiceAsyncProcessor::executeRequest_big(apache::thrift::ServerReque
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "big"
     , return_big<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_big<ProtocolIn_, ProtocolOut_>
@@ -1144,6 +1153,7 @@ void SimpleServiceAsyncProcessor::executeRequest_two(apache::thrift::ServerReque
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "two"
     , return_two<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_two<ProtocolIn_, ProtocolOut_>
@@ -1252,6 +1262,7 @@ void SimpleServiceAsyncProcessor::executeRequest_expected_exception(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "expected_exception"
     , return_expected_exception<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_expected_exception<ProtocolIn_, ProtocolOut_>
@@ -1375,6 +1386,7 @@ void SimpleServiceAsyncProcessor::executeRequest_unexpected_exception(apache::th
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "unexpected_exception"
     , return_unexpected_exception<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_unexpected_exception<ProtocolIn_, ProtocolOut_>
@@ -1486,6 +1498,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i16_list(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "sum_i16_list"
     , return_sum_i16_list<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sum_i16_list<ProtocolIn_, ProtocolOut_>
@@ -1597,6 +1610,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i32_list(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "sum_i32_list"
     , return_sum_i32_list<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sum_i32_list<ProtocolIn_, ProtocolOut_>
@@ -1708,6 +1722,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_i64_list(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "sum_i64_list"
     , return_sum_i64_list<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sum_i64_list<ProtocolIn_, ProtocolOut_>
@@ -1819,6 +1834,7 @@ void SimpleServiceAsyncProcessor::executeRequest_concat_many(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "concat_many"
     , return_concat_many<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_concat_many<ProtocolIn_, ProtocolOut_>
@@ -1930,6 +1946,7 @@ void SimpleServiceAsyncProcessor::executeRequest_count_structs(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "count_structs"
     , return_count_structs<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_count_structs<ProtocolIn_, ProtocolOut_>
@@ -2041,6 +2058,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_set(apache::thrift::ServerR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "sum_set"
     , return_sum_set<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sum_set<ProtocolIn_, ProtocolOut_>
@@ -2155,6 +2173,7 @@ void SimpleServiceAsyncProcessor::executeRequest_contains_word(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "contains_word"
     , return_contains_word<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_contains_word<ProtocolIn_, ProtocolOut_>
@@ -2269,6 +2288,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_map_value(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_map_value"
     , return_get_map_value<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_map_value<ProtocolIn_, ProtocolOut_>
@@ -2380,6 +2400,7 @@ void SimpleServiceAsyncProcessor::executeRequest_map_length(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "map_length"
     , return_map_length<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_map_length<ProtocolIn_, ProtocolOut_>
@@ -2491,6 +2512,7 @@ void SimpleServiceAsyncProcessor::executeRequest_sum_map_values(apache::thrift::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "sum_map_values"
     , return_sum_map_values<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sum_map_values<ProtocolIn_, ProtocolOut_>
@@ -2602,6 +2624,7 @@ void SimpleServiceAsyncProcessor::executeRequest_complex_sum_i32(apache::thrift:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "complex_sum_i32"
     , return_complex_sum_i32<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_complex_sum_i32<ProtocolIn_, ProtocolOut_>
@@ -2713,6 +2736,7 @@ void SimpleServiceAsyncProcessor::executeRequest_repeat_name(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "repeat_name"
     , return_repeat_name<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_repeat_name<ProtocolIn_, ProtocolOut_>
@@ -2821,6 +2845,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct(apache::thrift::Serv
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_struct"
     , return_get_struct<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_struct<ProtocolIn_, ProtocolOut_>
@@ -2932,6 +2957,7 @@ void SimpleServiceAsyncProcessor::executeRequest_fib(apache::thrift::ServerReque
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "fib"
     , return_fib<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_fib<ProtocolIn_, ProtocolOut_>
@@ -3043,6 +3069,7 @@ void SimpleServiceAsyncProcessor::executeRequest_unique_words(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "unique_words"
     , return_unique_words<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_unique_words<ProtocolIn_, ProtocolOut_>
@@ -3154,6 +3181,7 @@ void SimpleServiceAsyncProcessor::executeRequest_words_count(apache::thrift::Ser
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "words_count"
     , return_words_count<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_words_count<ProtocolIn_, ProtocolOut_>
@@ -3265,6 +3293,7 @@ void SimpleServiceAsyncProcessor::executeRequest_set_enum(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "set_enum"
     , return_set_enum<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_set_enum<ProtocolIn_, ProtocolOut_>
@@ -3379,6 +3408,7 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_lists(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "list_of_lists"
     , return_list_of_lists<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_of_lists<ProtocolIn_, ProtocolOut_>
@@ -3490,6 +3520,7 @@ void SimpleServiceAsyncProcessor::executeRequest_word_character_frequency(apache
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "word_character_frequency"
     , return_word_character_frequency<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_word_character_frequency<ProtocolIn_, ProtocolOut_>
@@ -3601,6 +3632,7 @@ void SimpleServiceAsyncProcessor::executeRequest_list_of_sets(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "list_of_sets"
     , return_list_of_sets<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_list_of_sets<ProtocolIn_, ProtocolOut_>
@@ -3712,6 +3744,7 @@ void SimpleServiceAsyncProcessor::executeRequest_nested_map_argument(apache::thr
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "nested_map_argument"
     , return_nested_map_argument<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_nested_map_argument<ProtocolIn_, ProtocolOut_>
@@ -3823,6 +3856,7 @@ void SimpleServiceAsyncProcessor::executeRequest_make_sentence(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "make_sentence"
     , return_make_sentence<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_make_sentence<ProtocolIn_, ProtocolOut_>
@@ -3934,6 +3968,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_union(apache::thrift::Serve
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_union"
     , return_get_union<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_union<ProtocolIn_, ProtocolOut_>
@@ -4045,6 +4080,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_keys(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_keys"
     , return_get_keys<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_keys<ProtocolIn_, ProtocolOut_>
@@ -4156,6 +4192,7 @@ void SimpleServiceAsyncProcessor::executeRequest_lookup_double(apache::thrift::S
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "lookup_double"
     , return_lookup_double<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_lookup_double<ProtocolIn_, ProtocolOut_>
@@ -4267,6 +4304,7 @@ void SimpleServiceAsyncProcessor::executeRequest_retrieve_binary(apache::thrift:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "retrieve_binary"
     , return_retrieve_binary<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_retrieve_binary<ProtocolIn_, ProtocolOut_>
@@ -4378,6 +4416,7 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_binary(apache::thrift::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "contain_binary"
     , return_contain_binary<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_contain_binary<ProtocolIn_, ProtocolOut_>
@@ -4489,6 +4528,7 @@ void SimpleServiceAsyncProcessor::executeRequest_contain_enum(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "contain_enum"
     , return_contain_enum<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_contain_enum<ProtocolIn_, ProtocolOut_>
@@ -4600,6 +4640,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_binary_union_struct(apache:
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_binary_union_struct"
     , return_get_binary_union_struct<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_binary_union_struct<ProtocolIn_, ProtocolOut_>
@@ -4708,6 +4749,7 @@ void SimpleServiceAsyncProcessor::executeRequest_get_struct_hidden(apache::thrif
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SimpleService"
     , "get_struct_hidden"
     , return_get_struct_hidden<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_get_struct_hidden<ProtocolIn_, ProtocolOut_>

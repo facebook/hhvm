@@ -65,6 +65,7 @@ void AAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&& serverR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "A"
     , "foo"
     , return_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_foo<ProtocolIn_, ProtocolOut_>
@@ -178,6 +179,7 @@ void AAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "A"
     , "I.interact"
     , return_I_interact<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_I_interact<ProtocolIn_, ProtocolOut_>
@@ -303,6 +305,7 @@ void BAsyncProcessor::executeRequest_bar(apache::thrift::ServerRequest&& serverR
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "B"
     , "bar"
     , return_bar<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bar<ProtocolIn_, ProtocolOut_>
@@ -409,6 +412,7 @@ void BAsyncProcessor::executeRequest_stream_stuff(apache::thrift::ServerRequest&
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "B"
     , "stream_stuff"
     , return_stream_stuff<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_stream_stuff<ProtocolIn_, ProtocolOut_>
@@ -520,6 +524,7 @@ void BAsyncProcessor::executeRequest_sink_stuff(apache::thrift::ServerRequest&& 
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "B"
     , "sink_stuff"
     , return_sink_stuff<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_sink_stuff<ProtocolIn_, ProtocolOut_>
@@ -649,6 +654,7 @@ void CAsyncProcessor::executeRequest_I_interact(apache::thrift::ServerRequest&& 
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "C"
     , "I.interact"
     , return_I_interact<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_I_interact<ProtocolIn_, ProtocolOut_>

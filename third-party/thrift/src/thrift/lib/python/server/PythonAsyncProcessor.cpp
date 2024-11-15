@@ -378,6 +378,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
             std::move(req),
             std::move(ctxStack),
             serviceName,
+            serviceName, /* definingServiceName */
             methodName,
             nullptr,
             eb,
@@ -408,6 +409,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
             std::move(req),
             std::move(ctxStack),
             serviceName,
+            serviceName, /* definingServiceName */
             methodName,
             return_streaming,
             throw_wrapped,
@@ -438,6 +440,7 @@ folly::SemiFuture<folly::Unit> PythonAsyncProcessor::dispatchRequest(
             std::move(req),
             std::move(ctxStack),
             serviceName,
+            serviceName, /* definingServiceName */
             methodName,
             return_serialized,
             throw_wrapped,

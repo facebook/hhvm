@@ -65,6 +65,7 @@ void PerformAsyncProcessor::executeRequest_foo(apache::thrift::ServerRequest&& s
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "foo"
     , return_foo<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_foo<ProtocolIn_, ProtocolOut_>
@@ -188,6 +189,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_frobnicate(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteraction.frobnicate"
     , return_MyInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_frobnicate<ProtocolIn_, ProtocolOut_>
@@ -310,6 +312,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_ping(apache::thrift::Se
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteraction.ping"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
@@ -397,6 +400,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_truthify(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteraction.truthify"
     , return_MyInteraction_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_truthify<ProtocolIn_, ProtocolOut_>
@@ -510,6 +514,7 @@ void PerformAsyncProcessor::executeRequest_MyInteraction_encode(apache::thrift::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteraction.encode"
     , return_MyInteraction_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteraction_encode<ProtocolIn_, ProtocolOut_>
@@ -646,6 +651,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_frobnicate(apache::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteractionFast.frobnicate"
     , return_MyInteractionFast_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_frobnicate<ProtocolIn_, ProtocolOut_>
@@ -749,6 +755,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_ping(apache::thrift
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteractionFast.ping"
     , nullptr /* exceptionFuncPointer */
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
@@ -834,6 +841,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_truthify(apache::th
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteractionFast.truthify"
     , return_MyInteractionFast_truthify<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_truthify<ProtocolIn_, ProtocolOut_>
@@ -945,6 +953,7 @@ void PerformAsyncProcessor::executeRequest_MyInteractionFast_encode(apache::thri
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "MyInteractionFast.encode"
     , return_MyInteractionFast_encode<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_MyInteractionFast_encode<ProtocolIn_, ProtocolOut_>
@@ -1071,6 +1080,7 @@ void PerformAsyncProcessor::executeRequest_SerialInteraction_frobnicate(apache::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "Perform"
     , "SerialInteraction.frobnicate"
     , return_SerialInteraction_frobnicate<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_SerialInteraction_frobnicate<ProtocolIn_, ProtocolOut_>

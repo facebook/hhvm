@@ -70,6 +70,7 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(apache::thrift::Server
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SomeService"
     , "bounce_map"
     , return_bounce_map<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_bounce_map<ProtocolIn_, ProtocolOut_>
@@ -181,6 +182,7 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(apache::thrift::
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
     , this->getServiceName()
+    , "SomeService"
     , "binary_keyed_map"
     , return_binary_keyed_map<ProtocolIn_,ProtocolOut_>
     , throw_wrapped_binary_keyed_map<ProtocolIn_, ProtocolOut_>

@@ -13,8 +13,8 @@ namespace fizz {
 
 extern "C" {
 void fizz_probe_secret_available(
-    long unsigned int secretSize,
     unsigned char* secretData,
+    unsigned char secretSize,
     fizz::KeyLogWriter::Label nssLabel,
     unsigned char* clientRandom);
 }

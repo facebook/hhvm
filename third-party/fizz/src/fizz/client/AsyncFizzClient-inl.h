@@ -662,8 +662,8 @@ template <typename SM>
 void AsyncFizzClientT<SM>::ActionMoveVisitor::operator()(
     SecretAvailable& secret) {
   fizz_probe_secret_available(
-      secret.secret.secret.size(),
       secret.secret.secret.data(),
+      secret.secret.secret.size(),
       KeyLogWriter::secretToNSSLabel(secret.secret.type)
           .value_or(std::numeric_limits<KeyLogWriter::Label>::max()),
       client_.getClientRandom()->data());

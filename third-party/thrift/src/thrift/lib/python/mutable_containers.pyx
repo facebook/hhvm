@@ -725,9 +725,14 @@ cdef class MapItemsView:
         if item is None:
             return False
 
+        is_container = self._val_typeinfo.is_container();
+        # Implicit container wrapping for cases like
+        # ("a", [1, 2]) in my_map_items
+        value = _ThriftContainerWrapper(item[1]) if is_container else item[1]
+
         try:
             internal_item = (self._key_typeinfo.to_internal_data(item[0]),
-                             self._val_typeinfo.to_internal_data(item[1]))
+                             self._val_typeinfo.to_internal_data(value))
         except (TypeError, OverflowError):
             return False
 

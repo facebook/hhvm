@@ -351,6 +351,39 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotIn(("A", 65), items_view)
         self.assertNotIn(("a", 97), items_view)
 
+    def test_items_view_container_value(self) -> None:
+        mutable_map: MutableMap[str, MutableList[int]] = MutableMap(
+            typeinfo_string,
+            MutableListTypeInfo(typeinfo_i32),
+            {},
+        )
+
+        # The `items()` method returns a view of the map's items. Any modifications
+        # made to the map will be reflected in the `items_view`.
+        items_view = mutable_map.items()
+        self.assertIsInstance(items_view, MapItemsView)
+        self.assertEqual(0, len(items_view))
+
+        mutable_map["A"] = to_thrift_list([1, 2, 3])
+
+        self.assertEqual(1, len(items_view))
+        self.assertIn(("A", [1, 2, 3]), items_view)
+        self.assertNotIn(("A", [3, 2, 1]), items_view)
+        self.assertNotIn(("a", [3, 2, 1]), items_view)
+
+        mutable_map["a"] = to_thrift_list([3, 2, 1])
+
+        self.assertEqual(2, len(items_view))
+        self.assertIn(("A", [1, 2, 3]), items_view)
+        self.assertNotIn(("A", [3, 2, 1]), items_view)
+        self.assertIn(("a", [3, 2, 1]), items_view)
+
+        mutable_map.clear()
+
+        self.assertEqual(0, len(items_view))
+        self.assertNotIn(("A", [1, 2, 3]), items_view)
+        self.assertNotIn(("a", [3, 2, 1]), items_view)
+
     def test_values(self) -> None:
         mutable_map = _create_MutableMap_str_i32({})
 
@@ -413,7 +446,7 @@ class MutableMapTest(unittest.TestCase):
 
     def test_mutation_via_values_view(self) -> None:
         internal_map = {1: [1, 2, 3], 2: [4, 5], 3: [6]}
-        mutable_map = MutableMap(
+        mutable_map: MutableMap[int, MutableList[int]] = MutableMap(
             typeinfo_i32,
             MutableListTypeInfo(typeinfo_i32),
             # pyre-ignore[6]
@@ -440,7 +473,7 @@ class MutableMapTest(unittest.TestCase):
 
     def test_pickle_round_trip(self) -> None:
         internal_map = {1: [1, 2, 3], 2: [4, 5], 3: [6]}
-        mutable_map = MutableMap(
+        mutable_map: MutableMap[int, MutableList[int]] = MutableMap(
             typeinfo_i32,
             MutableListTypeInfo(typeinfo_i32),
             # pyre-ignore[6]
@@ -511,7 +544,7 @@ class MutableMapTest(unittest.TestCase):
             mutable_map.setdefault("new-key")
 
     def test_setdefault_container_value(self) -> None:
-        mutable_map = MutableMap(
+        mutable_map: MutableMap[str, MutableList[int]] = MutableMap(
             typeinfo_string,
             MutableListTypeInfo(typeinfo_i32),
             {},

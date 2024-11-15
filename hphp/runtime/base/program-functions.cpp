@@ -1159,8 +1159,8 @@ static void set_execution_mode(ExecutionMode mode) {
 
 static void init_repo_file() {
   if (!Cfg::Repo::Authoritative) return;
-  assertx(!Cfg::Repo::Path.empty());
-  RepoFile::init(Cfg::Repo::Path);
+  assertx(!RO::RepoPath.empty());
+  RepoFile::init(RO::RepoPath);
 }
 
 static int start_server(const std::string &username) {

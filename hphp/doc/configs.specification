@@ -15,20 +15,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Need to use staticdefault because we sometimes changes the value between static
   init and config load
 
-- std::string Repo.Local.Path = "", UNKNOWN, postprocess
-- std::string Repo.Central.Path = "", UNKNOWN, postprocess
-- int32_t Repo.Central.FileMode = 0, UNKNOWN
-- std::string Repo.Central.FileUser = "", UNKNOWN
-- std::string Repo.Central.FileGroup = "", UNKNOWN
-- bool Repo.AllowFallbackPath = true, UNKNOWN
-- std::string Repo.Journal = "delete", UNKNOWN
-- bool Repo.Commit = true, UNKNOWN
-- uint32_t Repo.BusyTimeoutMS = 15000, UNKNOWN
-
-- std::string Repo.Path = Repo.Path, UNKNOWN, postprocess|staticdefault("")
-- bool Repo.LitstrLazyLoad = true, UNKNOWN
-- bool Repo.DebugInfo = true, UNKNOWN, unitcacheflag|compileroption(Repo.DebugInfo)
-
 # Server
 
   A lot of configs uses Server.Mode but not Repo so put this second
@@ -910,13 +896,13 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.EnableCallBuiltin = true, UNKNOWN, unitcacheflag
 
-- bool Eval.EnableNuma, UNKNOWN, postprocess
+- bool Eval.EnableNuma, UNKNOWN
 
 - bool Eval.EnableReusableTC, UNKNOWN
 
 - bool Eval.LogServerRestartStats = false, UNKNOWN
 
-- uint32_t Eval.ReusableTCPadding = 128, UNKNOWN, postprocess
+- uint32_t Eval.ReusableTCPadding = 128, UNKNOWN
 
   Extra bytes added to each area (Hot/Cold/Frozen) of a translation.
   If we don't end up using a reusable TC, we'll drop the padding.
@@ -1317,7 +1303,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Whether to remove the existence of the REQUEST superglobal
 
-- bool Eval.FastMethodIntercept = false, UNKNOWN, postprocess
+- bool Eval.FastMethodIntercept = false, UNKNOWN
 
   Enables the non-surprise flag based implementation of
   fb_intercept2

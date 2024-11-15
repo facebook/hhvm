@@ -599,7 +599,7 @@ bool UnitEmitter::check(bool verbose) const {
 }
 
 bool needs_extended_line_table() {
-  return Cfg::Repo::DebugInfo &&
+  return RuntimeOption::RepoDebugInfo &&
     (Cfg::Eval::DumpHhas ||
      Cfg::Debugger::EnableHphpd ||
      Cfg::Debugger::EnableVSDebugger ||
@@ -920,7 +920,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
       seq(
         m_rats,
         [&] (auto& sd, size_t i) {
-          if (lazy && Cfg::Repo::LitstrLazyLoad) {
+          if (lazy && RO::RepoLitstrLazyLoad) {
             assertx(m_rats.size() == i);
             m_rats.emplace_back(RATArrayOrToken::FromToken(sd.advanced()));
             sd.skipWithSize();
@@ -1040,7 +1040,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
               }
             );
 
-            if (!lazy || !Cfg::Repo::LitstrLazyLoad) {
+            if (!lazy || !RO::RepoLitstrLazyLoad) {
               // If we're not using lazy loading, call lookupArray to
               // triger the load of every array. We set
               // m_litarrayBuffer to ensure lookupArray knows where to
@@ -1084,7 +1084,7 @@ void UnitEmitter::serde(SerDe& sd, bool lazy) {
           seq(
             m_litstrs,
             [&] (auto& sd, size_t i) {
-              if (lazy && Cfg::Repo::LitstrLazyLoad) {
+              if (lazy && RO::RepoLitstrLazyLoad) {
                 assertx(m_litstrs.size() == i);
                 // When lazy loading, check if the string corresponds to
                 // an already existing static string. If so, put that in

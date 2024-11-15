@@ -693,16 +693,16 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
   Cfg::Repo::Authoritative = true;
   // Set RepoPath to satisfy assertions (we need a path set in
   // RepoAuthoritative). It will never actually be used.
-  Cfg::Repo::Path = "/tmp/dummy.hhbc";
+  RuntimeOption::RepoPath = "/tmp/dummy.hhbc";
   // We don't want debug info in repo builds, since we don't support attaching
   // a debugger in repo authoritative mode, but we want the default for debug
   // info to be true so that it's present in sandboxes. Override that default
   // here, since we only get here when building for repo authoritative mode.
-  Cfg::Repo::DebugInfo = false;
+  RuntimeOption::RepoDebugInfo = false;
   RuntimeOption::Load(ini, runtime);
   Option::Load(ini, config);
   Cfg::Repo::Authoritative = false;
-  Cfg::Repo::Path = "";
+  RuntimeOption::RepoPath = "";
   Cfg::Jit::Enabled = false;
   Cfg::Eval::LowStaticArrays = false;
 

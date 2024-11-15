@@ -42,6 +42,7 @@ const StaticString s_stat_branch_pages("ms_branch_pages");
 const StaticString s_stat_leaf_pages("ms_leaf_pages");
 const StaticString s_stat_overflow_pages("ms_overflow_pages");
 const StaticString s_stat_entries("ms_entries");
+
 } // namespace
 
 template <typename T>
@@ -368,6 +369,7 @@ Array HHVM_FUNCTION(lmdb_mdb_stat, const Array& txn, const Array& dbi) {
   return mdbStatToArray(stat);
 }
 
+namespace {
 // The string used by the return value must
 // outlive the return value.
 MDB_val wrapStringIntoVal(const String& str) {
@@ -377,13 +379,13 @@ MDB_val wrapStringIntoVal(const String& str) {
   return val;
 }
 
-// int mdb_get(MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data);
-int64_t HHVM_FUNCTION(
-    lmdb_mdb_get,
+int64_t get(
     const Array& txn,
     const Array& dbi,
     const Variant& key,
-    Variant& data) {
+    Variant& data,
+    bool raw
+) {
   auto* txn_ptr = getTransaction(txn);
 
   MDB_val kv;
@@ -402,11 +404,15 @@ int64_t HHVM_FUNCTION(
     return err;
   }
 
-  VariableUnserializer vu(
-      (const char*)dv.mv_data,
-      dv.mv_size,
-      VariableUnserializer::Type::Serialize);
-  data = vu.unserialize();
+  if (raw) {
+    data = String::attach(StringData::Make((const char*)dv.mv_data, dv.mv_size, CopyString));
+  } else {
+    VariableUnserializer vu(
+        (const char*)dv.mv_data,
+        dv.mv_size,
+        VariableUnserializer::Type::Serialize);
+    data = vu.unserialize();
+  }
   return 0;
 }
 
@@ -423,21 +429,25 @@ MDB_val keyToMdbVal(const Variant& key) {
   return kv;
 }
 
-// int  mdb_put(MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data, unsigned
-// int flags);
-int64_t HHVM_FUNCTION(
-    lmdb_mdb_put,
+int64_t put(
     const Array& txn,
     const Array& dbi,
     const Variant& key,
     Variant& data,
-    int64_t flags) {
+    int64_t flags,
+    bool raw
+) {
   auto* txn_ptr = getTransaction(txn);
 
   MDB_val kv = keyToMdbVal(key);
 
-  VariableSerializer vs(VariableSerializer::Type::Serialize);
-  String serialized_value = vs.serializeValue(data, true);
+  String serialized_value;
+  if (raw && data.isString()) {
+    serialized_value = data.toString();
+  } else {
+    VariableSerializer vs(VariableSerializer::Type::Serialize);
+    serialized_value = vs.serializeValue(data, true);
+  }
 
   MDB_val dv = wrapStringIntoVal(serialized_value);
 
@@ -446,12 +456,60 @@ int64_t HHVM_FUNCTION(
     return err;
   }
 
-  VariableUnserializer vu(
-      (const char*)dv.mv_data,
-      dv.mv_size,
-      VariableUnserializer::Type::Serialize);
-  data = vu.unserialize();
+  // The inout value of dv only gets updated if this flag is set
+  if ((flags & MDB_NOOVERWRITE) != 0) {
+    if (raw) {
+      data = String::attach(StringData::Make((const char*)dv.mv_data, dv.mv_size, CopyString));
+    } else {
+      VariableUnserializer vu(
+          (const char*)dv.mv_data,
+          dv.mv_size,
+          VariableUnserializer::Type::Serialize);
+      data = vu.unserialize();
+    }
+  }
   return 0;
+}
+
+} // namespace
+
+// int mdb_get(MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data);
+int64_t HHVM_FUNCTION(
+    lmdb_mdb_get,
+    const Array& txn,
+    const Array& dbi,
+    const Variant& key,
+    Variant& data) {
+  return get(txn, dbi, key, data, false);
+}
+
+int64_t HHVM_FUNCTION(
+    lmdb_mdb_get_raw,
+    const Array& txn,
+    const Array& dbi,
+    const Variant& key,
+    Variant& data) {
+  return get(txn, dbi, key, data, true);
+}
+
+int64_t HHVM_FUNCTION(
+    lmdb_mdb_put,
+    const Array& txn,
+    const Array& dbi,
+    const Variant& key,
+    Variant& data,
+    int64_t flags) {
+  return put(txn, dbi, key, data, flags, false);
+}
+
+int64_t HHVM_FUNCTION(
+    lmdb_mdb_put_raw,
+    const Array& txn,
+    const Array& dbi,
+    const Variant& key,
+    Variant& data,
+    int64_t flags) {
+  return put(txn, dbi, key, data, flags, true);
 }
 
 // int  mdb_del(MDB_txn *txn, MDB_dbi dbi, MDB_val *key, MDB_val *data);
@@ -586,7 +644,9 @@ struct LmdbExtension final : HPHP::Extension {
     HHVM_NAMED_FE(HH\\lmdb\\mdb_reader_check, HHVM_FN(lmdb_mdb_reader_check));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_stat, HHVM_FN(lmdb_mdb_stat));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_get, HHVM_FN(lmdb_mdb_get));
+    HHVM_NAMED_FE(HH\\lmdb\\mdb_get_raw, HHVM_FN(lmdb_mdb_get_raw));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_put, HHVM_FN(lmdb_mdb_put));
+    HHVM_NAMED_FE(HH\\lmdb\\mdb_put_raw, HHVM_FN(lmdb_mdb_put_raw));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_del, HHVM_FN(lmdb_mdb_del));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_cursor_open, HHVM_FN(lmdb_mdb_cursor_open));
     HHVM_NAMED_FE(HH\\lmdb\\mdb_cursor_get, HHVM_FN(lmdb_mdb_cursor_get));

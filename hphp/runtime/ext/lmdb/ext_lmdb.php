@@ -138,7 +138,13 @@ function mdb_txn_abort(/* MDB_txn */ darray<string, dynamic> $txn): void;
 function mdb_get(/* MDB_txn */ darray<string, dynamic> $txn, /* MDB_dbi */ darray<string, dynamic> $dbi, mixed /* MDB_val */ $key, inout mixed /* MDB_val */ $data): int;
 
 <<__Native>>
+function mdb_get_raw(/* MDB_txn */ darray<string, dynamic> $txn, /* MDB_dbi */ darray<string, dynamic> $dbi, mixed /* MDB_val */ $key, inout mixed /* MDB_val */ $data): int;
+
+<<__Native>>
 function mdb_put(/* MDB_txn */ darray<string, dynamic> $txn, /* MDB_dbi */ darray<string, dynamic> $dbi, mixed $key, inout mixed $data, int $flags): int;
+
+<<__Native>>
+function mdb_put_raw(/* MDB_txn */ darray<string, dynamic> $txn, /* MDB_dbi */ darray<string, dynamic> $dbi, mixed $key, inout mixed $data, int $flags): int;
 
 <<__Native>>
 function mdb_del(/* MDB_txn */ darray<string, dynamic> $txn, /* MDB_dbi */ darray<string, dynamic> $dbi, mixed $key, mixed $data): int;

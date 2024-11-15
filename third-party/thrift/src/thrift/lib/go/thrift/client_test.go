@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -38,10 +39,8 @@ func TestClient(t *testing.T) {
 	defer cancel()
 	go func() {
 		err := server.ServeContext(serverCtx)
-		if err != nil {
-			// TODO: rocket server is inconsistent with header server:
-			// It returns error upon context cancellation.
-			// t.Fatalf("failed to serve: %v", err)
+		if !errors.Is(err, context.Canceled) {
+			t.Fatalf("unexpected error in ServeContext: %v", err)
 		}
 	}()
 

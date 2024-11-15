@@ -18,6 +18,7 @@ package thrift
 
 import (
 	"context"
+	"crypto/tls"
 	"log"
 	"net"
 	"os"
@@ -118,5 +119,26 @@ func WithServerStats(serverStats *stats.ServerStats) ServerOption {
 func WithProcessorStats(processorStats map[string]*stats.TimingSeries) ServerOption {
 	return func(server *serverOptions) {
 		server.processorStats = processorStats
+	}
+}
+
+// WithALPNHeader adds the ALPN value "thrift" to the provided tls.Config
+func WithALPNHeader() func(*tls.Config) {
+	return func(tlsConfig *tls.Config) {
+		tlsConfig.NextProtos = []string{"thrift"}
+	}
+}
+
+// WithALPNRocket adds the ALPN value "rs" to the provided tls.Config
+func WithALPNRocket() func(*tls.Config) {
+	return func(tlsConfig *tls.Config) {
+		tlsConfig.NextProtos = []string{"rs"}
+	}
+}
+
+// WithALPNUpgradeToRocket adds the ALPN value "rs" and "thrift" to the provided tls.Config
+func WithALPNUpgradeToRocket() func(*tls.Config) {
+	return func(tlsConfig *tls.Config) {
+		tlsConfig.NextProtos = []string{"rs" /* preferred */, "thrift" /* fallback */}
 	}
 }

@@ -66,6 +66,10 @@ void HandshakeLogging::populateFromClientHello(const ClientHello& chlo) {
   clientSessionIdSent =
       chlo.legacy_session_id && !chlo.legacy_session_id->empty();
   clientRandom = chlo.random;
+
+  if (chlo.originalEncoding.hasValue()) {
+    originalChloSize = chlo.originalEncoding.value()->computeChainDataLength();
+  }
 }
 
 folly::StringPiece toString(StateEnum state) {

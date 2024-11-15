@@ -5074,7 +5074,13 @@ TEST_F(ServerProtocolTest, TestClientHelloRejectEarlyDataInvalidAppToken) {
 TEST_F(ServerProtocolTest, TestClientHelloHandshakeLogging) {
   setUpExpectingClientHello();
   state_.handshakeLogging() = std::make_unique<HandshakeLogging>();
-  fizz::Param param = TestMessages::clientHello();
+  auto chlo = TestMessages::clientHello();
+  size_t originalEncodingSize = 0;
+  if (chlo.originalEncoding.hasValue()) {
+    originalEncodingSize =
+        chlo.originalEncoding.value()->computeChainDataLength();
+  }
+  fizz::Param param = std::move(chlo);
   auto actions = getActions(detail::processEvent(state_, param));
   processStateMutations(actions);
   EXPECT_EQ(
@@ -5103,7 +5109,8 @@ TEST_F(ServerProtocolTest, TestClientHelloHandshakeLogging) {
           {SignatureScheme::ecdsa_secp256r1_sha256,
            SignatureScheme::rsa_pss_sha256}));
   EXPECT_EQ(*state_.handshakeLogging()->clientSessionIdSent, false);
-  EXPECT_TRUE(state_.handshakeLogging()->clientRandom.has_value());
+  EXPECT_TRUE(state_.handshakeLogging()->clientRandom.hasValue());
+  EXPECT_EQ(originalEncodingSize, state_.handshakeLogging()->originalChloSize);
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloTestByte) {

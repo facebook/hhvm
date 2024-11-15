@@ -66,6 +66,7 @@ struct HandshakeLogging {
   folly::Optional<Random> clientRandom;
   folly::Optional<uint8_t> testExtensionByte;
   std::vector<std::string> clientAlpns;
+  size_t originalChloSize{0};
 
   void populateFromClientHello(const ClientHello& chlo);
 };

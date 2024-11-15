@@ -22,33 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
-	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 )
-
-type headerServerTestProcessor struct {
-	requests chan<- *MyTestStruct
-}
-
-func (t *headerServerTestProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
-	return map[string]types.ProcessorFunction{"test": &headerServerTestProcessorFunction{&testProcessorFunction{}, t.requests}}
-}
-
-func (t *headerServerTestProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-	return nil
-}
-
-type headerServerTestProcessorFunction struct {
-	types.ProcessorFunction
-	requests chan<- *MyTestStruct
-}
-
-func (p *headerServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct types.Struct) (types.WritableStruct, types.ApplicationException) {
-	if p.requests != nil {
-		p.requests <- reqStruct.(*MyTestStruct)
-	}
-	return reqStruct, nil
-}
 
 // Test that header server stops serving if listener is closed.
 func TestHeaderServerCloseListener(t *testing.T) {
@@ -60,7 +35,8 @@ func TestHeaderServerCloseListener(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := NewSimpleServer(&headerServerTestProcessor{}, listener, TransportIDHeader)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDHeader)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -73,16 +49,14 @@ func TestHeaderServerCloseListener(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	resp := &MyTestStruct{}
-	if err := client.Call(context.Background(), "test", req, resp); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
-	if resp.St != "hello" {
-		t.Fatalf("expected response to be a hello, got %s", resp.St)
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	listener.Close()
 	select {

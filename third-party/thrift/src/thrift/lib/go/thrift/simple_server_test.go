@@ -22,8 +22,8 @@ import (
 	"net"
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
-	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
 
 // TestSimpleServer is a simple tests that simple sends an empty message to a server and receives an empty result.
@@ -33,8 +33,8 @@ func TestSimpleServer(t *testing.T) {
 		t.Fatalf("could not create listener: %s", err)
 	}
 	addr := listener.Addr()
-	handler := &testProcessor{}
-	server := NewSimpleServer(handler, listener, TransportIDHeader)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDHeader)
 	errChan := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -50,64 +50,20 @@ func TestSimpleServer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	if err := client.Call(context.Background(), "test", &MyTestStruct{}, &MyTestStruct{}); err != nil {
-		t.Fatalf("could not send message: %s", err)
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
+		t.Fatalf("could not complete call: %v", err)
+	}
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	cancel()
 	err = <-errChan
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("expected %v, got %v", context.Canceled, err)
 	}
-}
-
-type testProcessor struct {
-}
-
-func (t *testProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
-	return map[string]types.ProcessorFunction{"test": &testProcessorFunction{}}
-}
-
-func (t *testProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-	return nil
-}
-
-type testProcessorFunction struct{}
-
-func (p *testProcessorFunction) Read(prot types.Decoder) (types.Struct, types.Exception) {
-	args := NewMyTestStruct()
-	if err := args.Read(prot); err != nil {
-		return nil, err
-	}
-	prot.ReadMessageEnd()
-	return args, nil
-}
-
-func (p *testProcessorFunction) Write(seqID int32, result types.WritableStruct, oprot types.Encoder) (err types.Exception) {
-	var err2 error
-	messageType := types.REPLY
-	switch result.(type) {
-	case types.ApplicationException:
-		messageType = types.EXCEPTION
-	}
-
-	if err2 = oprot.WriteMessageBegin("test", messageType, seqID); err2 != nil {
-		err = err2
-	}
-	if err2 = result.Write(oprot); err == nil && err2 != nil {
-		err = err2
-	}
-	if err2 = oprot.WriteMessageEnd(); err == nil && err2 != nil {
-		err = err2
-	}
-	if err2 = oprot.Flush(); err == nil && err2 != nil {
-		err = err2
-	}
-	return err
-}
-
-func (p *testProcessorFunction) RunContext(ctx context.Context, reqStruct types.Struct) (types.WritableStruct, types.ApplicationException) {
-	return reqStruct, nil
 }
 
 // This tests that S425600 does not happen again.
@@ -118,8 +74,8 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 		t.Fatalf("could not create listener: %s", err)
 	}
 	addr := listener.Addr()
-	handler := &testProcessor{}
-	server := NewSimpleServer(handler, listener, TransportIDHeader)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDHeader)
 	errChan := make(chan error)
 	ctx, cancel := context.WithCancel(context.Background())
 	go func() {
@@ -137,9 +93,14 @@ func TestSimpleServerClientSetsDifferentProtocol(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	if err := client.Call(context.Background(), "test", &MyTestStruct{}, &MyTestStruct{}); err != nil {
-		t.Fatalf("could not send message: %s", err)
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
+		t.Fatalf("could not complete call: %v", err)
+	}
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	cancel()
 	<-errChan

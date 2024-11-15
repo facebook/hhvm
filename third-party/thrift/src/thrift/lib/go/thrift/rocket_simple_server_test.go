@@ -17,43 +17,14 @@
 package thrift
 
 import (
-	"bytes"
 	"context"
 	"net"
 	"testing"
 	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
-	"github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
 )
-
-type rocketServerTestProcessor struct {
-	requests chan<- *MyTestStruct
-}
-
-func (t *rocketServerTestProcessor) ProcessorFunctionMap() map[string]types.ProcessorFunction {
-	return map[string]types.ProcessorFunction{"test": &rocketServerTestProcessorFunction{&testProcessorFunction{}, t.requests}}
-}
-
-func (t *rocketServerTestProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
-	return nil
-}
-
-type rocketServerTestProcessorFunction struct {
-	types.ProcessorFunction
-	requests chan<- *MyTestStruct
-}
-
-func (p *rocketServerTestProcessorFunction) RunContext(ctx context.Context, reqStruct types.Struct) (types.WritableStruct, types.ApplicationException) {
-	v, ok := ConnInfoFromContext(ctx)
-	if ok {
-		reqStruct.(*MyTestStruct).Bin = []byte(v.RemoteAddr.String())
-	}
-	if p.requests != nil {
-		p.requests <- reqStruct.(*MyTestStruct)
-	}
-	return reqStruct, nil
-}
 
 // Make sure that ConnInfo is added to the context of a rocket server.
 func TestRocketServerConnInfo(t *testing.T) {
@@ -65,7 +36,8 @@ func TestRocketServerConnInfo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := NewSimpleServer(&rocketServerTestProcessor{}, listener, TransportIDRocket)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -78,19 +50,14 @@ func TestRocketServerConnInfo(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	resp := &MyTestStruct{}
-	if err := client.Call(context.Background(), "test", req, resp); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
-	if resp.St != "hello" {
-		t.Fatalf("expected response to be a hello, got %s", resp.St)
-	}
-	if !bytes.Equal(resp.GetBin(), []byte(conn.LocalAddr().String())) {
-		t.Fatalf("expected response to be an address %s, got %s", conn.LocalAddr().String(), resp.GetBin())
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	cancel()
 	<-errChan
@@ -106,8 +73,9 @@ func TestRocketServerOneWay(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	received := make(chan *MyTestStruct)
-	server := NewSimpleServer(&rocketServerTestProcessor{received}, listener, TransportIDRocket)
+	received := make(chan string)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{OnewayRPCRequests: received})
+	server := NewSimpleServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -120,11 +88,10 @@ func TestRocketServerOneWay(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	if err := client.Oneway(context.Background(), "test", req); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	err = client.OnewayRPC(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
 	<-received
@@ -142,7 +109,8 @@ func TestRocketServerCloseListener(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := NewSimpleServer(&rocketServerTestProcessor{}, listener, TransportIDRocket)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -155,16 +123,14 @@ func TestRocketServerCloseListener(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	resp := &MyTestStruct{}
-	if err := client.Call(context.Background(), "test", req, resp); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
-	if resp.St != "hello" {
-		t.Fatalf("expected response to be a hello, got %s", resp.St)
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	listener.Close()
 	select {

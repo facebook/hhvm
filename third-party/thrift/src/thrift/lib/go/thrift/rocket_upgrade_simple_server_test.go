@@ -21,6 +21,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -34,8 +35,9 @@ func TestUpgradeToRocketServerOneWay(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	received := make(chan *MyTestStruct)
-	server := NewSimpleServer(&rocketServerTestProcessor{received}, listener, TransportIDUpgradeToRocket)
+	received := make(chan string)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{OnewayRPCRequests: received})
+	server := NewSimpleServer(processor, listener, TransportIDUpgradeToRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -48,11 +50,10 @@ func TestUpgradeToRocketServerOneWay(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	if err := client.Oneway(context.Background(), "test", req); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	err = client.OnewayRPC(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
 	<-received

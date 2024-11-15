@@ -17,12 +17,12 @@
 package thrift
 
 import (
-	"bytes"
 	"context"
 	"net"
 	"testing"
 	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -44,7 +44,8 @@ func TestRocketClientClose(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := NewSimpleServer(&rocketServerTestProcessor{}, listener, TransportIDRocket)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -58,19 +59,13 @@ func TestRocketClientClose(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	resp := &MyTestStruct{}
-	if err := client.Call(context.Background(), "test", req, resp); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
-	if resp.St != "hello" {
-		t.Fatalf("expected response to be a hello, got %s", resp.St)
-	}
-	if !bytes.Equal(resp.GetBin(), []byte(conn.LocalAddr().String())) {
-		t.Fatalf("expected response to be an address %s, got %s", conn.LocalAddr().String(), resp.GetBin())
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	go client.Close()
 	select {
@@ -90,7 +85,8 @@ func TestRocketClientUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := NewSimpleServer(&rocketServerTestProcessor{}, listener, TransportIDRocket)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -103,19 +99,14 @@ func TestRocketClientUnix(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	resp := &MyTestStruct{}
-	if err := client.Call(context.Background(), "test", req, resp); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
-	if resp.St != "hello" {
-		t.Fatalf("expected response to be a hello, got %s", resp.St)
-	}
-	if !bytes.Equal(resp.GetBin(), []byte(conn.LocalAddr().String())) {
-		t.Fatalf("expected response to be an address %s, got %s", conn.LocalAddr().String(), resp.GetBin())
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	cancel()
 	<-errChan

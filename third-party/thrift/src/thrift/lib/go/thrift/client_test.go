@@ -26,6 +26,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -34,7 +35,8 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := NewServer(&testProcessor{}, listener, TransportIDRocket)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewServer(processor, listener, TransportIDRocket)
 	serverCtx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	go func() {

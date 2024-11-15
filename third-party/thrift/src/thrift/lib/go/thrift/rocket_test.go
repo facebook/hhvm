@@ -21,6 +21,7 @@ import (
 	"net"
 	"testing"
 
+	"github.com/facebook/fbthrift/thrift/lib/go/thrift/dummy"
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -34,7 +35,8 @@ func TestRocket(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to listen: %v", err)
 	}
-	server := NewSimpleServer(&testProcessor{}, listener, TransportIDRocket)
+	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
+	server := NewSimpleServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -47,16 +49,14 @@ func TestRocket(t *testing.T) {
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}
-	client := NewSerialChannel(proto)
-	req := &MyTestStruct{
-		St: "hello",
-	}
-	resp := &MyTestStruct{}
-	if err := client.Call(context.Background(), "test", req, resp); err != nil {
+	client := dummy.NewDummyChannelClient(NewSerialChannel(proto))
+	defer client.Close()
+	result, err := client.Echo(context.TODO(), "hello")
+	if err != nil {
 		t.Fatalf("could not complete call: %v", err)
 	}
-	if resp.St != "hello" {
-		t.Fatalf("expected response to be %s, got %s", "hello", resp.St)
+	if result != "hello" {
+		t.Fatalf("expected response to be a hello, got %s", result)
 	}
 	cancel()
 	<-errChan

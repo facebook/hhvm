@@ -1753,7 +1753,7 @@ union CheckoutProgressInfoResponse {
 }
 
 /*
- * Structs/Unionts for changesSince API
+ * Structs/Unions for changesSinceV2 API
  */
 struct Added {
   1: Dtype fileType;
@@ -1808,6 +1808,22 @@ union LargeChangeNotification {
 union ChangeNotification {
   1: SmallChangeNotification smallChange;
   2: LargeChangeNotification largeChange;
+}
+
+/**
+ * Return value of the changesSinceV2 API
+ */
+struct ChangesSinceV2Result {
+  1: JournalPosition toPosition;
+  2: list<ChangeNotification> changes;
+}
+
+/**
+ * Argument to changesSinceV2 API
+ */
+struct ChangesSinceV2Params {
+  1: PathString mountPoint;
+  2: JournalPosition fromPosition;
 }
 
 service EdenService extends fb303_core.BaseService {
@@ -2644,6 +2660,17 @@ service EdenService extends fb303_core.BaseService {
    * consuming disk space. Also, materialized files slow down checkout and status operations.
    */
   void ensureMaterialized(1: EnsureMaterializedParams params) throws (
+    1: EdenError ex,
+  );
+
+  /**
+   * Returns a list of change notifications along with a new journal position for a given mount
+   * since a specific journal position.
+   *
+   * This does not resolve expensive operations like moving a directory or changing
+   * commits. Callers must query Sapling to evaluate those potentially expensive operations.
+   */
+  ChangesSinceV2Result changesSinceV2(1: ChangesSinceV2Params params) throws (
     1: EdenError ex,
   );
 }

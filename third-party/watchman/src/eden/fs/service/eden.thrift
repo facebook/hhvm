@@ -1752,6 +1752,64 @@ union CheckoutProgressInfoResponse {
   2: CheckoutNotInProgress noProgress;
 }
 
+/*
+ * Structs/Unionts for changesSince API
+ */
+struct Added {
+  1: Dtype fileType;
+  3: PathString path;
+}
+
+struct Modified {
+  1: Dtype fileType;
+  3: PathString path;
+}
+
+struct Renamed {
+  1: Dtype fileType;
+  2: PathString from;
+  3: PathString to;
+}
+
+struct Replaced {
+  1: Dtype fileType;
+  2: PathString from;
+  3: PathString to;
+}
+
+struct Removed {
+  1: Dtype fileType;
+  3: PathString path;
+}
+
+union SmallChangeNotification {
+  1: Added added;
+  2: Modified modified;
+  3: Renamed renamed;
+  4: Replaced replaced;
+  5: Removed removed;
+}
+
+struct DirectoryRenamed {
+  1: PathString from;
+  2: PathString to;
+}
+
+struct CommitTransition {
+  1: ThriftRootId from;
+  2: ThriftRootId to;
+}
+
+union LargeChangeNotification {
+  1: DirectoryRenamed directoryRenamed;
+  2: CommitTransition commitTransition;
+}
+
+union ChangeNotification {
+  1: SmallChangeNotification smallChange;
+  2: LargeChangeNotification largeChange;
+}
+
 service EdenService extends fb303_core.BaseService {
   list<MountInfo> listMounts() throws (1: EdenError ex);
   void mount(1: MountArgument info) throws (1: EdenError ex);

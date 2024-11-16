@@ -62,61 +62,6 @@ const i64 FS_EVENT_READ = 1;
 const i64 FS_EVENT_WRITE = 2;
 const i64 FS_EVENT_OTHER = 4;
 
-struct Added {
-  1: eden.Dtype fileType;
-  3: eden.PathString path;
-}
-
-struct Modified {
-  1: eden.Dtype fileType;
-  3: eden.PathString path;
-}
-
-struct Renamed {
-  1: eden.Dtype fileType;
-  2: eden.PathString from;
-  3: eden.PathString to;
-}
-
-struct Replaced {
-  1: eden.Dtype fileType;
-  2: eden.PathString from;
-  3: eden.PathString to;
-}
-
-struct Removed {
-  1: eden.Dtype fileType;
-  3: eden.PathString path;
-}
-
-union SmallChangeNotification {
-  1: Added added;
-  2: Modified modified;
-  3: Renamed renamed;
-  4: Replaced replaced;
-  5: Removed removed;
-}
-
-struct DirectoryRenamed {
-  1: eden.PathString from;
-  2: eden.PathString to;
-}
-
-struct CommitTransition {
-  1: eden.ThriftRootId from;
-  2: eden.ThriftRootId to;
-}
-
-union LargeChangeNotification {
-  1: DirectoryRenamed directoryRenamed;
-  2: CommitTransition commitTransition;
-}
-
-union ChangeNotification {
-  1: SmallChangeNotification smallChange;
-  2: LargeChangeNotification largeChange;
-}
-
 /**
  * The value of a stream item.
  *
@@ -144,7 +89,7 @@ struct ChangesSinceResult {
  * since the notification clock provided.
  */
 struct ChangeNotificationResult {
-  1: ChangeNotification change;
+  1: eden.ChangeNotification change;
 }
 
 /**

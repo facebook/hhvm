@@ -90,11 +90,8 @@ struct Removed {
 }
 
 union SmallChangeNotification {
-  // @lint-ignore-every FBTHRIFTCOMPAT FBTHRIFTCOMPAT1 FBTHRIFTCOMPAT2
   1: Added added;
-  // @lint-ignore-every FBTHRIFTCOMPAT FBTHRIFTCOMPAT1 FBTHRIFTCOMPAT2
   2: Modified modified;
-  // @lint-ignore-every FBTHRIFTCOMPAT FBTHRIFTCOMPAT1 FBTHRIFTCOMPAT2
   3: Renamed renamed;
   4: Replaced replaced;
   5: Removed removed;
@@ -104,6 +101,7 @@ struct DirectoryRenamed {
   1: eden.PathString from;
   2: eden.PathString to;
 }
+
 struct CommitTransition {
   1: eden.ThriftRootId from;
   2: eden.ThriftRootId to;

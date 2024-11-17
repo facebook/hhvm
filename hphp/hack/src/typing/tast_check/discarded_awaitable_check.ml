@@ -60,7 +60,7 @@ let rec enforce_not_awaitable env p ty =
   | Taccess _
   | Tlabel _
   | Tneg _
-  | Tclass_args _ ->
+  | Tclass_ptr _ ->
     ()
   | Tunapplied_alias _ ->
     Typing_defs.error_Tunapplied_alias_in_illegal_context ()

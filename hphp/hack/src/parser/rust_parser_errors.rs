@@ -5596,7 +5596,7 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
                     ));
                 }
             }
-            ClassArgsTypeSpecifier(_) => {
+            ClassPtrTypeSpecifier(_) => {
                 self.check_can_use_feature(node, &FeatureName::ClassType);
             }
             TupleOrUnionOrIntersectionElementTypeSpecifier(c) => {

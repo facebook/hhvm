@@ -157,7 +157,7 @@ let rec is_byval_collection_or_string_or_any_type env ty =
     | Taccess _
     | Tlabel _
     | Tneg _
-    | Tclass_args _ ->
+    | Tclass_ptr _ ->
       false
     | Tunapplied_alias _ ->
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()

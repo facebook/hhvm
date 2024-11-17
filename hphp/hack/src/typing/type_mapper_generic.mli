@@ -125,7 +125,7 @@ class type ['env] type_mapper_type =
     method on_tlabel :
       'env -> Typing_reason.t -> string -> 'env * Typing_defs.locl_ty
 
-    method on_tclass_args :
+    method on_tclass_ptr :
       'env ->
       Typing_reason.t ->
       Typing_defs.locl_ty ->

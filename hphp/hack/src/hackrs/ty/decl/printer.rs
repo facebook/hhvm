@@ -92,7 +92,7 @@ impl<R: Reason> Display for Ty_<R> {
                 let (kty, vty) = &**params;
                 write!(f, "vec_or_dict<{}, {}>", kty, vty)
             }
-            TclassArgs(ty) => write!(f, "class<{}>", ty),
+            TclassPtr(ty) => write!(f, "class<{}>", ty),
         }
     }
 }

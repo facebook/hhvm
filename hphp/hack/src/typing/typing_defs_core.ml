@@ -384,7 +384,7 @@ and _ ty_ =
       (** Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Taccess : 'phase taccess_type -> 'phase ty_
       (** Name of class, name of type const, remaining names of type consts *)
-  | Tclass_args : 'phase ty -> 'phase ty_
+  | Tclass_ptr : 'phase ty -> 'phase ty_
       (** A type of a class pointer, class<T>. To be compatible with classname<T>,
         * it takes an arbitrary type. In the future, it should only take a string
         * that is a class name, and be named Tclass. The current Tclass would be
@@ -707,8 +707,8 @@ module Pp = struct
       Format.fprintf fmt "(@[<2>Tlabel@ ";
       Format.fprintf fmt "%S" a0;
       Format.fprintf fmt "@])"
-    | Tclass_args a0 ->
-      Format.fprintf fmt "(@[<2>Tclass_args@ ";
+    | Tclass_ptr a0 ->
+      Format.fprintf fmt "(@[<2>Tclass_ptr@ ";
       pp_ty fmt a0;
       Format.fprintf fmt "@])"
 
@@ -888,7 +888,7 @@ let ty_con_ordinal_ : type a. a ty_ -> int = function
   | Tintersection _ -> 14
   | Taccess _ -> 24
   | Tvec_or_dict _ -> 25
-  | Tclass_args _ -> 26
+  | Tclass_ptr _ -> 26
   (* only locl constructors *)
   | Tunapplied_alias _ -> 200
   | Tnewtype _ -> 201
@@ -987,12 +987,12 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
     | (Tnonnull, Tnonnull) -> 0
     | (Tdynamic, Tdynamic) -> 0
     | (Tlabel name1, Tlabel name2) -> String.compare name1 name2
-    | (Tclass_args ty1, Tclass_args ty2) -> ty_compare ty1 ty2
+    | (Tclass_ptr ty1, Tclass_ptr ty2) -> ty_compare ty1 ty2
     | ( ( Tprim _ | Toption _ | Tvec_or_dict _ | Tfun _ | Tintersection _
         | Tunion _ | Ttuple _ | Tgeneric _ | Tnewtype _ | Tdependent _
         | Tclass _ | Tshape _ | Tvar _ | Tunapplied_alias _ | Tnonnull
         | Tdynamic | Taccess _ | Tany _ | Tneg _ | Trefinement _ | Tlabel _
-        | Tclass_args _ ),
+        | Tclass_ptr _ ),
         _ ) ->
       ty_con_ordinal_ ty_1 - ty_con_ordinal_ ty_2
   and shape_field_type_compare :

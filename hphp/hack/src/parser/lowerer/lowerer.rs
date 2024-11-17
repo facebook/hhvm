@@ -1076,10 +1076,10 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
             };
             Ok(Happly(name, type_args))
         }
-        ClassArgsTypeSpecifier(c) => {
+        ClassPtrTypeSpecifier(c) => {
             let cls = p_hint(&c.type_, env)?;
             if env.parser_options.enable_class_pointer_hint {
-                Ok(HclassArgs(cls))
+                Ok(HclassPtr(cls))
             } else {
                 let p = p_pos(&c.keyword, env);
                 Ok(Happly(

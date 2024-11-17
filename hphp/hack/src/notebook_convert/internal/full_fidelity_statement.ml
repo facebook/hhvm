@@ -172,7 +172,7 @@ let is_statement =
     | TypeInRefinement _
     | CtxInRefinement _
     | ClassnameTypeSpecifier _
-    | ClassArgsTypeSpecifier _
+    | ClassPtrTypeSpecifier _
     | FieldSpecifier _
     | FieldInitializer _
     | ShapeTypeSpecifier _

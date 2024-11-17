@@ -1795,8 +1795,8 @@ where
         Self::make(syntax, value)
     }
 
-    fn make_class_args_type_specifier(ctx: &C, keyword: Self, left_angle: Self, type_: Self, trailing_comma: Self, right_angle: Self) -> Self {
-        let syntax = SyntaxVariant::ClassArgsTypeSpecifier(ctx.get_arena().alloc(ClassArgsTypeSpecifierChildren {
+    fn make_class_ptr_type_specifier(ctx: &C, keyword: Self, left_angle: Self, type_: Self, trailing_comma: Self, right_angle: Self) -> Self {
+        let syntax = SyntaxVariant::ClassPtrTypeSpecifier(ctx.get_arena().alloc(ClassPtrTypeSpecifierChildren {
             keyword,
             left_angle,
             type_,

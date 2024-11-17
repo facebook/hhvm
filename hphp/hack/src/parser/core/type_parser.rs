@@ -218,7 +218,7 @@ where
             | TokenKind::Tilde => self.parse_like_type_specifier(),
             | TokenKind::At => self.parse_soft_type_specifier(),
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
-            | TokenKind::Class => self.parse_class_args_type_specifier(),
+            | TokenKind::Class => self.parse_class_ptr_type_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),
             | _ => {
                 let pos = self.pos(); self.sc_mut().make_missing(pos)
@@ -1060,16 +1060,16 @@ where
             .make_attributized_specifier(attribute_spec_opt, attributized_type)
     }
 
-    fn parse_class_args_type_specifier(&mut self) -> S::Output {
+    fn parse_class_ptr_type_specifier(&mut self) -> S::Output {
         // SPEC
-        // class-args-type-specifier:
+        // class-ptr-type-specifier:
         //   class  <  qualified-name generic-type-argument-list-opt >
         let class = self.fetch_token();
         let left_angle = self.require_left_angle();
         let class_type = self.parse_type_specifier(false, true);
         let optional_comma = self.optional_token(TokenKind::Comma);
         let right_angle = self.require_right_angle();
-        self.sc_mut().make_class_args_type_specifier(
+        self.sc_mut().make_class_ptr_type_specifier(
             class,
             left_angle,
             class_type,

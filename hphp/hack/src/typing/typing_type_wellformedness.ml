@@ -194,7 +194,7 @@ and hint_ ~in_signature env p h_ =
           hints env tup_optional @ hint_opt env tup_variadic
         | Hsplat h -> hint env h
       end
-  | Hclass_args h
+  | Hclass_ptr h
   | Hoption h
   | Hsoft h
   | Hlike h ->

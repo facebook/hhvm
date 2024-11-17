@@ -1486,14 +1486,14 @@ ss.serialize_field("classname_trailing_comma", &self.with(trailing_comma))?;
 ss.serialize_field("classname_right_angle", &self.with(right_angle))?;
       ss.end()
 } 
-SyntaxVariant::ClassArgsTypeSpecifier (ClassArgsTypeSpecifierChildren{keyword,left_angle,type_,trailing_comma,right_angle} ) => {
+SyntaxVariant::ClassPtrTypeSpecifier (ClassPtrTypeSpecifierChildren{keyword,left_angle,type_,trailing_comma,right_angle} ) => {
       let mut ss = s.serialize_struct("", 6)?;
-      ss.serialize_field("kind", "class_args_type_specifier")?;
-      ss.serialize_field("class_args_keyword", &self.with(keyword))?;
-ss.serialize_field("class_args_left_angle", &self.with(left_angle))?;
-ss.serialize_field("class_args_type", &self.with(type_))?;
-ss.serialize_field("class_args_trailing_comma", &self.with(trailing_comma))?;
-ss.serialize_field("class_args_right_angle", &self.with(right_angle))?;
+      ss.serialize_field("kind", "class_ptr_type_specifier")?;
+      ss.serialize_field("class_ptr_keyword", &self.with(keyword))?;
+ss.serialize_field("class_ptr_left_angle", &self.with(left_angle))?;
+ss.serialize_field("class_ptr_type", &self.with(type_))?;
+ss.serialize_field("class_ptr_trailing_comma", &self.with(trailing_comma))?;
+ss.serialize_field("class_ptr_right_angle", &self.with(right_angle))?;
       ss.end()
 } 
 SyntaxVariant::FieldSpecifier (FieldSpecifierChildren{question,name,arrow,type_} ) => {

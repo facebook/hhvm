@@ -62,7 +62,7 @@ class type ['a] decl_type_visitor_type =
     method on_trefinement :
       'a -> decl_phase Reason.t_ -> decl_ty -> decl_class_refinement -> 'a
 
-    method on_tclass_args : 'a -> decl_phase Reason.t_ -> decl_ty -> 'a
+    method on_tclass_ptr : 'a -> decl_phase Reason.t_ -> decl_ty -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
@@ -167,7 +167,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
 
-    method on_tclass_args acc _ ty = this#on_type acc ty
+    method on_tclass_ptr acc _ ty = this#on_type acc ty
 
     method on_type acc ty =
       let (r, x) = deref ty in
@@ -191,7 +191,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
       | Tshape s -> this#on_tshape acc r s
-      | Tclass_args ty -> this#on_tclass_args acc r ty
+      | Tclass_ptr ty -> this#on_tclass_ptr acc r ty
   end
 
 class type ['a] locl_type_visitor_type =
@@ -249,7 +249,7 @@ class type ['a] locl_type_visitor_type =
 
     method on_tlabel : 'a -> Reason.t -> string -> 'a
 
-    method on_tclass_args : 'a -> Reason.t -> locl_ty -> 'a
+    method on_tclass_ptr : 'a -> Reason.t -> locl_ty -> 'a
   end
 
 class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
@@ -369,7 +369,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
 
     method on_tlabel acc _r _name = acc
 
-    method on_tclass_args acc _r ty = this#on_type acc ty
+    method on_tclass_ptr acc _r ty = this#on_type acc ty
 
     method on_type acc ty =
       let (r, x) = deref ty in
@@ -394,7 +394,7 @@ class virtual ['a] locl_type_visitor : ['a] locl_type_visitor_type =
       | Taccess (ty, ids) -> this#on_taccess acc r (ty, ids)
       | Tneg tneg -> this#on_neg_type acc r tneg
       | Tlabel name -> this#on_tlabel acc r name
-      | Tclass_args ty -> this#on_tclass_args acc r ty
+      | Tclass_ptr ty -> this#on_tclass_ptr acc r ty
   end
 
 class type ['a] internal_type_visitor_type =

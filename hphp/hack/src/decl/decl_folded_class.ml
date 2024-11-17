@@ -445,7 +445,7 @@ let class_class_decl (ctx : Provider_context.t) (class_id : Typing_defs.pos_id)
   let tco = Provider_context.get_tcopt ctx in
   let classname_ty =
     if TypecheckerOptions.(class_class_type tco) then
-      mk (reason, Tclass_args (mk (reason, Tthis)))
+      mk (reason, Tclass_ptr (mk (reason, Tthis)))
     else
       mk (reason, Tapply ((pos, SN.Classes.cClassname), [mk (reason, Tthis)]))
   in

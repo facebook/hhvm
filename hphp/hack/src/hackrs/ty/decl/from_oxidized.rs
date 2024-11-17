@@ -196,7 +196,7 @@ impl<R: Reason> From<&obr::typing_defs::Ty<'_>> for Ty<R> {
                 TvecOrDict(Box::new((ty1.into(), ty2.into())))
             }
             typing_defs_core::Ty_::Taccess(taccess_type) => Taccess(Box::new(taccess_type.into())),
-            typing_defs_core::Ty_::TclassArgs(class_type) => TclassArgs(class_type.into()),
+            typing_defs_core::Ty_::TclassPtr(class_type) => TclassPtr(class_type.into()),
             typing_defs_core::Ty_::TunappliedAlias(_)
             | typing_defs_core::Ty_::Tnewtype(_)
             | typing_defs_core::Ty_::Tdependent(_)

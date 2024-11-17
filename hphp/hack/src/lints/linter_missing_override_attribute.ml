@@ -48,7 +48,7 @@ let rec parent_hint_name (_p, hint) =
   | Hlike _
   | Hfun _
   | Htuple _
-  | Hclass_args _
+  | Hclass_ptr _
   | Hshape _
   | Haccess _
   | Hsoft _

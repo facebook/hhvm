@@ -701,9 +701,9 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
               s_unknown_value = shape_kind;
               s_fields = tym;
             } ) )
-  | Tclass_args ty ->
+  | Tclass_ptr ty ->
     let ((env, ty_err_opt, cycles), ty) = localize ~ety_env env ty in
-    ((env, ty_err_opt, cycles), mk (r, Tclass_args ty))
+    ((env, ty_err_opt, cycles), mk (r, Tclass_ptr ty))
 
 and localize_tuple_extra ~ety_env env e =
   match e with

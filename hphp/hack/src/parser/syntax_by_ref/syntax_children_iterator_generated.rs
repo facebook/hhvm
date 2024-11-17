@@ -1647,7 +1647,7 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
-            ClassArgsTypeSpecifier(x) => {
+            ClassPtrTypeSpecifier(x) => {
                 get_index(5).and_then(|index| { match index {
                         0 => Some(&x.keyword),
                     1 => Some(&x.left_angle),

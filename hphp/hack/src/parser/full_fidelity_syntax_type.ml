@@ -1111,12 +1111,12 @@ struct
         classname_trailing_comma: t;
         classname_right_angle: t;
       }
-    | ClassArgsTypeSpecifier of {
-        class_args_keyword: t;
-        class_args_left_angle: t;
-        class_args_type: t;
-        class_args_trailing_comma: t;
-        class_args_right_angle: t;
+    | ClassPtrTypeSpecifier of {
+        class_ptr_keyword: t;
+        class_ptr_left_angle: t;
+        class_ptr_type: t;
+        class_ptr_trailing_comma: t;
+        class_ptr_right_angle: t;
       }
     | FieldSpecifier of {
         field_question: t;

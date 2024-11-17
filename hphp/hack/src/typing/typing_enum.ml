@@ -159,7 +159,7 @@ let enum_check_type env (pos : Pos_or_decl.t) ur ty_interface ty _on_error =
     | Tlabel _
     | Tneg _ ->
       false
-    | Tclass_args _ ->
+    | Tclass_ptr _ ->
       (* TODO(T199606542) deprecate static ban on ::class for enums *)
       false
   in

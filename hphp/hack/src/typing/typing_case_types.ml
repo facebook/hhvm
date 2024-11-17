@@ -783,7 +783,7 @@ end = struct
     | Tneg predicate ->
       let (env, right) = fromPredicate ~trail env predicate in
       (env, Set.diff (mixed ~reason) right)
-    | Tclass_args _ ->
+    | Tclass_ptr _ ->
       (* TODO(T199606542) This likely needs a new DataType to represent
        * class pointers but should also take care to model the tri-state
        * while the types are still on logging enforcement *)

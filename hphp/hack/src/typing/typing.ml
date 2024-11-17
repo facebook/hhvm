@@ -9581,8 +9581,8 @@ end = struct
           when String.equal classname SN.Classes.cClassname ->
           let wrap ty = mk (Reason.none, Tnewtype (classname, [ty], as_ty)) in
           resolve_class_pointer env wrap the_cls
-        | (_, Tclass_args the_cls) ->
-          let wrap ty = mk (Reason.none, Tclass_args ty) in
+        | (_, Tclass_ptr the_cls) ->
+          let wrap ty = mk (Reason.none, Tclass_ptr ty) in
           resolve_class_pointer env wrap the_cls
         | (_, Tgeneric _)
         | (_, Tclass _) ->
@@ -11366,7 +11366,7 @@ end = struct
       Typing_defs.error_Tunapplied_alias_in_illegal_context ()
     | ( _,
         ( Tvar _ | Tnonnull | Tvec_or_dict _ | Toption _ | Tprim _ | Tfun _
-        | Ttuple _ | Tshape _ | Taccess _ | Tneg _ | Tlabel _ | Tclass_args _ )
+        | Ttuple _ | Tshape _ | Taccess _ | Tneg _ | Tlabel _ | Tclass_ptr _ )
       ) ->
       if not (TUtils.is_tyvar_error env cty) then
         Typing_error_utils.add_typing_error

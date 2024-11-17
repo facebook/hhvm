@@ -105,7 +105,7 @@ impl std::fmt::Debug for Ty_ {
                 .field(exact)
                 .field(tys)
                 .finish(),
-            TclassArgs(ty) => f.debug_tuple("TclassArgs").field(ty).finish(),
+            TclassPtr(ty) => f.debug_tuple("TclassPtr").field(ty).finish(),
         }
     }
 }

@@ -62,7 +62,7 @@ let rec is_stringish env ty =
   | Tlabel _
   | Taccess _ ->
     false
-  | Tclass_args _ ->
+  | Tclass_ptr _ ->
     (* TODO(T199606542) May need to relax this, possibly can use this to drive a codemod *)
     false
   | Tunapplied_alias _ ->

@@ -112,7 +112,7 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Taccess _
   | Tunapplied_alias _ ->
     (env, [], [cty])
-  | Tclass_args _ ->
+  | Tclass_ptr _ ->
     (* TODO(T199606542) Does it matter if we have a class pointer to an XHP class? *)
     (env, [], [cty])
 

@@ -95,7 +95,7 @@ let rec validate_free_type env locl_ty =
        Interestingly it doesn't validate that the given "as" matches
        the defined one *)
     validate_l env tyargs @ validate_free_type env as_ty
-  | Tclass_args ty -> validate_free_type env ty
+  | Tclass_ptr ty -> validate_free_type env ty
   (* These aren't even created by Typing_print.json_to_locl_ty *)
   | Tneg _
   | Tvar _

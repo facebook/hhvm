@@ -184,7 +184,7 @@ impl<T: LexableToken, V> Syntax<'_, T, V> {
             SyntaxVariant::TypeInRefinement {..} => SyntaxKind::TypeInRefinement,
             SyntaxVariant::CtxInRefinement {..} => SyntaxKind::CtxInRefinement,
             SyntaxVariant::ClassnameTypeSpecifier {..} => SyntaxKind::ClassnameTypeSpecifier,
-            SyntaxVariant::ClassArgsTypeSpecifier {..} => SyntaxKind::ClassArgsTypeSpecifier,
+            SyntaxVariant::ClassPtrTypeSpecifier {..} => SyntaxKind::ClassPtrTypeSpecifier,
             SyntaxVariant::FieldSpecifier {..} => SyntaxKind::FieldSpecifier,
             SyntaxVariant::FieldInitializer {..} => SyntaxKind::FieldInitializer,
             SyntaxVariant::ShapeTypeSpecifier {..} => SyntaxKind::ShapeTypeSpecifier,

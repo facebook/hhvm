@@ -548,7 +548,7 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     in
     get_typarams_variance_list empty variancel tyl
   | Tvec_or_dict (ty1, ty2) -> union (get_typarams ty1) (get_typarams ty2)
-  | Tclass_args ty -> get_typarams ty
+  | Tclass_ptr ty -> get_typarams ty
 
 let get_positive_negative_generics ~tracked ~is_mutable env acc ty =
   let r = get_typarams ~tracked env ty in
@@ -656,7 +656,7 @@ let rec hint : Env.t -> variance -> Aast_defs.hint -> unit =
       env.Env.enclosing_class
       ~default:()
       ~f:(check_final_this_pos_variance env.Env.env variance pos)
-  | Hclass_args h
+  | Hclass_ptr h
   | Hoption h
   | Hlike h
   | Hsoft h

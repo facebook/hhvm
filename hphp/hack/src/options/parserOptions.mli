@@ -76,8 +76,8 @@ type t = {
       (** Option for the package v2 to strip the multifile filename mangling used in Hack tests.
           Should be set to true only by the unit tests in the Hack test suite *)
   enable_class_pointer_hint: bool;
-      (** When false, type hint class<T> (Hclass_args) becomes decl ty classname<T> (Tnewtype).
-          When true, it becomes decl ty class<T> (Tclass_args). This option is similar to the
+      (** When false, type hint class<T> (Hclass_ptr) becomes decl ty classname<T> (Tnewtype).
+          When true, it becomes decl ty class<T> (Tclass_ptr). This option is similar to the
           interpret_soft_types_as_like_types switch. **)
 }
 [@@deriving show, eq]

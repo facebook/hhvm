@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d4e4874901551dce2821497a07b608b1>>
+// @generated SignedSource<<c3bbd77239a0199da2b711e897512b65>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2619,8 +2619,8 @@ pub enum Hint_ {
     Hlike(Hint),
     Hfun(HintFun),
     Htuple(TupleInfo),
-    #[rust_to_ocaml(name = "Hclass_args")]
-    HclassArgs(Hint),
+    #[rust_to_ocaml(name = "Hclass_ptr")]
+    HclassPtr(Hint),
     Hshape(NastShapeInfo),
     /// Accessing a type constant. Type constants are accessed like normal
     /// class constants, but in type positions.

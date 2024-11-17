@@ -144,9 +144,9 @@ module Locl_Inst = struct
     | Taccess (ty, ids) ->
       let ty = instantiate subst ty in
       Taccess (ty, ids)
-    | Tclass_args ty ->
+    | Tclass_ptr ty ->
       let ty = instantiate subst ty in
-      Tclass_args ty
+      Tclass_ptr ty
 
   and instantiate_tuple_extra subst e =
     match e with
@@ -495,7 +495,7 @@ module Simple = struct
       | Decl_entry.NotYetAvailable ->
         ()
     end
-    | Tclass_args ty -> check ty
+    | Tclass_ptr ty -> check ty
 
   (** Check that the given type is a well-kinded type whose kind matches the provided one.
   Otherwise, reports errors.

@@ -1656,7 +1656,7 @@ and get_tyvars_i env (ty : internal_type) =
     | Tunapplied_alias _ -> (env, Tvid.Set.empty, Tvid.Set.empty)
     | Tlabel _name -> (env, Tvid.Set.empty, Tvid.Set.empty)
     | Taccess (ty, _ids) -> get_tyvars env ty
-    | Tclass_args ty -> get_tyvars env ty)
+    | Tclass_ptr ty -> get_tyvars env ty)
   | ConstraintType ty ->
     (match deref_constraint_type ty with
     | (_, Tdestructure { d_required; d_optional; d_variadic; d_kind = _ }) ->

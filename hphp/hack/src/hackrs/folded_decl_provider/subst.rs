@@ -230,7 +230,7 @@ impl<'a, R: Reason> Substitution<'a, R> {
                         .collect(),
                 },
             })),
-            Ty_::TclassArgs(ty) => Ty_::TclassArgs(self.instantiate(ty)),
+            Ty_::TclassPtr(ty) => Ty_::TclassPtr(self.instantiate(ty)),
         }
     }
 

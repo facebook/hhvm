@@ -121,7 +121,7 @@ let rec of_decl_ty (ty : decl_ty) : string =
       "%s with %s"
       (of_decl_ty ty)
       (Class_refinement.to_string of_decl_ty rs)
-  | Tclass_args ty -> Printf.sprintf "class<%s>" (of_decl_ty ty)
+  | Tclass_ptr ty -> Printf.sprintf "class<%s>" (of_decl_ty ty)
 
 and of_fun_param fp : string = of_decl_ty fp.fp_type
 

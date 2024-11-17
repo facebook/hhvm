@@ -149,7 +149,7 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
         Htuple(TupleInfo { required, .. }) => format!("({})", fmt_hints(tparams, required)?),
         Hlike(t) => format!("~{}", fmt_hint(tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t)?),
-        HclassArgs(_)
+        HclassPtr(_)
         | HfunContext(_)
         | Hdynamic
         | Hintersection(_)
@@ -175,7 +175,7 @@ fn hint_to_string<'a>(h: &'a Hint_) -> &'a str {
         Habstr(_, _)
         | Haccess(_, _)
         | Happly(_, _)
-        | HclassArgs(_)
+        | HclassPtr(_)
         | Hfun(_)
         | HfunContext(_)
         | Hlike(_)
@@ -214,7 +214,7 @@ fn can_be_nullable(hint: &Hint_) -> bool {
             id != "\\HH\\dynamic" && id != "\\HH\\nonnull" && id != "\\HH\\mixed"
         }
         Habstr(_, _)
-        | HclassArgs(_)
+        | HclassPtr(_)
         | HfunContext(_)
         | Hintersection(_)
         | Hlike(_)
@@ -317,7 +317,7 @@ fn hint_to_type_constraint(
             hint_to_type_constraint(kind, tparams, skipawaitable, hint)?
         }
         // TODO: should probably just return Result::Err for some of these
-        HclassArgs(_)
+        HclassPtr(_)
         | HfunContext(_)
         | Hnonnull
         | Hnothing
@@ -431,7 +431,7 @@ fn param_hint_to_type_info(
         Habstr(s, hs) => hs.is_empty() && !tparams.contains(&s.as_str()),
         Hprim(_)
         | Htuple(_)
-        | HclassArgs(_)
+        | HclassPtr(_)
         | Hshape(_)
         | Hrefinement(_, _)
         | Hwildcard
@@ -572,7 +572,7 @@ fn get_flags(tparams: &[&str], flags: TypeConstraintFlags, hint: &Hint_) -> Type
         }
         Habstr(_, _)
         | Happly(_, _)
-        | HclassArgs(_)
+        | HclassPtr(_)
         | Hdynamic
         | Hfun(_)
         | HfunContext(_)

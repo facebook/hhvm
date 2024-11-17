@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d24d31773d129a5b045a4e1838791a83>>
+// @generated SignedSource<<dab82539c4b384628adfbfa099772335>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -786,8 +786,8 @@ pub enum Ty_<'a> {
     /// that is a class name, and be named Tclass. The current Tclass would be
     /// renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    #[rust_to_ocaml(name = "Tclass_args")]
-    TclassArgs(&'a Ty<'a>),
+    #[rust_to_ocaml(name = "Tclass_ptr")]
+    TclassPtr(&'a Ty<'a>),
     Tvar(isize),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they

@@ -75,7 +75,7 @@ pub(crate) fn has_reified_type_constraint<'a>(env: &Env<'a>, h: &aast::Hint) -> 
                 })
             }
         }
-        Hint_::Hsoft(h) | Hint_::Hlike(h) | Hint_::HclassArgs(h) | Hint_::Hoption(h) => {
+        Hint_::Hsoft(h) | Hint_::Hlike(h) | Hint_::HclassPtr(h) | Hint_::Hoption(h) => {
             has_reified_type_constraint(env, h)
         }
         Hint_::Hprim(_)
@@ -122,7 +122,7 @@ fn remove_awaitable(aast::Hint(pos, hint): aast::Hint) -> aast::Hint {
         | Hint_::Hfun(_)
         | Hint_::Haccess(_, _)
         | Hint_::Hrefinement(_, _)
-        | Hint_::HclassArgs(_)
+        | Hint_::HclassPtr(_)
         | Hint_::Happly(_, _)
         | Hint_::HfunContext(_)
         | Hint_::Hvar(_)
@@ -189,7 +189,7 @@ pub(crate) fn remove_erased_generics<'a>(env: &Env<'a>, h: aast::Hint) -> aast::
             }
             Hint_::Hsoft(h) => Hint_::Hsoft(rec(env, h)),
             Hint_::Hlike(h) => Hint_::Hlike(rec(env, h)),
-            Hint_::HclassArgs(h) => Hint_::HclassArgs(rec(env, h)),
+            Hint_::HclassPtr(h) => Hint_::HclassPtr(rec(env, h)),
             Hint_::Hoption(h) => Hint_::Hoption(rec(env, h)),
             Hint_::Htuple(TupleInfo { required, extra }) => {
                 let extra = match extra {

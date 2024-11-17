@@ -252,8 +252,8 @@ impl<R: Reason> Ty<R> {
         Self::new(reason, Ty_::Tapply(Box::new((type_name, tparams))))
     }
 
-    pub fn class_args(reason: R, cls: Ty<R>) -> Self {
-        Self::new(reason, Ty_::TclassArgs(cls))
+    pub fn class_ptr(reason: R, cls: Ty<R>) -> Self {
+        Self::new(reason, Ty_::TclassPtr(cls))
     }
 
     pub fn generic(reason: R, name: TypeName, tparams: Box<[Ty<R>]>) -> Self {
@@ -410,7 +410,7 @@ pub enum Ty_<R: Reason> {
     TvecOrDict(Box<(Ty<R>, Ty<R>)>),
     Taccess(Box<TaccessType<R, Ty<R>>>),
     /// Class pointer type, matches classname<T>
-    TclassArgs(Ty<R>),
+    TclassPtr(Ty<R>),
 }
 
 // We've boxed all variants of Ty_ which are larger than two usizes, so the
@@ -460,7 +460,7 @@ impl<R: Reason> crate::visitor::Walkable<R> for Ty_<R> {
             }
             Taccess(tt) => tt.accept(v),
             Trefinement(tr) => tr.accept(v),
-            TclassArgs(ty) => ty.accept(v),
+            TclassPtr(ty) => ty.accept(v),
         }
     }
 }

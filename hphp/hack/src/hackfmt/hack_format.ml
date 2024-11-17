@@ -2371,13 +2371,13 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           t env cp_type;
           t env ellipsis;
         ]
-    | Syntax.ClassArgsTypeSpecifier
+    | Syntax.ClassPtrTypeSpecifier
         {
-          class_args_keyword = kw;
-          class_args_left_angle = left_a;
-          class_args_type = class_type;
-          class_args_trailing_comma = trailing_comma;
-          class_args_right_angle = right_a;
+          class_ptr_keyword = kw;
+          class_ptr_left_angle = left_a;
+          class_ptr_type = class_type;
+          class_ptr_trailing_comma = trailing_comma;
+          class_ptr_right_angle = right_a;
         }
     | Syntax.ClassnameTypeSpecifier
         {

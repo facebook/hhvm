@@ -161,7 +161,7 @@ let check_param : env -> Nast.fun_param -> unit =
           Typing_error_utils.add_typing_error ~env
           @@ Typing_error.primary
           @@ error ty
-        | Tclass_args _ ->
+        | Tclass_ptr _ ->
           (* Follow classname<T> memo check via string bound *)
           ()
     in

@@ -353,7 +353,7 @@ and _ ty_ =
    * that is a class name, and be named Tclass. The current Tclass would be
    * renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
    *)
-  | Tclass_args : 'phase ty -> 'phase ty_
+  | Tclass_ptr : 'phase ty -> 'phase ty_
   (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
   | Tvar : Tvid.t -> locl_phase ty_
   (* This represents a type alias that lacks necessary type arguments. Given

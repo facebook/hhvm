@@ -288,7 +288,7 @@ let next_missing_types
     end
     | Tapply ((_, name), _tys) -> do_type_name d goal name (acc, visited)
     | Taccess _ -> (acc, visited)
-    | Tclass_args ty -> do_ty d goal (acc, visited) ty
+    | Tclass_ptr ty -> do_ty d goal (acc, visited) ty
   in
   let acc = { next_to_fold = []; next_to_ty = [] } in
   let (acc, visited) =

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<27c2b55e4f634381609c05f27cb98d31>>
+// @generated SignedSource<<831ed8b36eab629e54260ff13520847b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3535,8 +3535,8 @@ impl Hint_ {
     pub fn mk_htuple(p0: TupleInfo) -> Self {
         Hint_::Htuple(p0)
     }
-    pub fn mk_hclass_args(p0: Hint) -> Self {
-        Hint_::HclassArgs(p0)
+    pub fn mk_hclass_ptr(p0: Hint) -> Self {
+        Hint_::HclassPtr(p0)
     }
     pub fn mk_hshape(p0: NastShapeInfo) -> Self {
         Hint_::Hshape(p0)
@@ -3622,9 +3622,9 @@ impl Hint_ {
             _ => false,
         }
     }
-    pub fn is_hclass_args(&self) -> bool {
+    pub fn is_hclass_ptr(&self) -> bool {
         match self {
-            Hint_::HclassArgs(..) => true,
+            Hint_::HclassPtr(..) => true,
             _ => false,
         }
     }
@@ -3760,9 +3760,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hclass_args(&self) -> Option<&Hint> {
+    pub fn as_hclass_ptr(&self) -> Option<&Hint> {
         match self {
-            Hint_::HclassArgs(p0) => Some(p0),
+            Hint_::HclassPtr(p0) => Some(p0),
             _ => None,
         }
     }
@@ -3862,9 +3862,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hclass_args_mut(&mut self) -> Option<&mut Hint> {
+    pub fn as_hclass_ptr_mut(&mut self) -> Option<&mut Hint> {
         match self {
-            Hint_::HclassArgs(p0) => Some(p0),
+            Hint_::HclassPtr(p0) => Some(p0),
             _ => None,
         }
     }
@@ -3964,9 +3964,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hclass_args_into(self) -> Option<Hint> {
+    pub fn as_hclass_ptr_into(self) -> Option<Hint> {
         match self {
-            Hint_::HclassArgs(p0) => Some(p0),
+            Hint_::HclassPtr(p0) => Some(p0),
             _ => None,
         }
     }

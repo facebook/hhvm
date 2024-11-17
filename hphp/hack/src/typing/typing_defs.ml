@@ -434,7 +434,7 @@ let is_union_or_inter_type (ty : locl_ty) =
   | Tvec_or_dict _
   | Tlabel _
   | Taccess _
-  | Tclass_args _ ->
+  | Tclass_ptr _ ->
     false
 
 module InternalType = struct
@@ -524,7 +524,7 @@ let rec is_denotable ty =
     not
       (DependentKind.is_generic_dep_ty nm
       || String.is_substring ~substring:"#" nm)
-  | Tclass_args ty -> is_denotable ty
+  | Tclass_ptr ty -> is_denotable ty
   | Tunion _
   | Tintersection _
   | Tneg _

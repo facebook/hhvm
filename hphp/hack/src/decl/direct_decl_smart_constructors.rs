@@ -2354,7 +2354,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             }
             Ty_::Tlike(ty) => Ty_::Tlike(self.convert_tapply_to_tgeneric(ty)),
             Ty_::Toption(ty) => Ty_::Toption(self.convert_tapply_to_tgeneric(ty)),
-            Ty_::TclassArgs(ty) => Ty_::TclassArgs(self.convert_tapply_to_tgeneric(ty)),
+            Ty_::TclassPtr(ty) => Ty_::TclassPtr(self.convert_tapply_to_tgeneric(ty)),
             Ty_::Tfun(fun_type) => {
                 let convert_param = |param: &'a FunParam<'a>| {
                     self.alloc(FunParam {
@@ -5746,7 +5746,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         }
     }
 
-    fn make_class_args_type_specifier(
+    fn make_class_ptr_type_specifier(
         &mut self,
         class: Self::Output,
         _lt: Self::Output,
@@ -5759,9 +5759,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
             let cls = match self.node_to_ty(targ) {
                 Some(ty) => ty,
-                None => return Node::Ignored(SK::ClassArgsTypeSpecifier),
+                None => return Node::Ignored(SK::ClassPtrTypeSpecifier),
             };
-            Node::Ty(self.alloc(Ty(reason, Ty_::TclassArgs(cls))))
+            Node::Ty(self.alloc(Ty(reason, Ty_::TclassPtr(cls))))
         } else {
             self.make_apply(
                 (

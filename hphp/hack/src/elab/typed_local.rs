@@ -364,7 +364,7 @@ impl TypedLocal {
     fn simplify_hint(&self, hint: &mut Hint) {
         let Hint(pos, box hint_) = hint;
         match hint_ {
-            Hint_::Hoption(h) | Hint_::Hlike(h) | Hint_::HclassArgs(h) => self.simplify_hint(h),
+            Hint_::Hoption(h) | Hint_::Hlike(h) | Hint_::HclassPtr(h) => self.simplify_hint(h),
             Hint_::Htuple(_) => {
                 // enforce tuples as just vec
                 *hint_ = Hint_::Happly(

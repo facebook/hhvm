@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e294a61033c2ebcdd660d27d0623a28d>>
+// @generated SignedSource<<9082b9e1996be3d1efe1b22a9ce27050>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1412,7 +1412,7 @@ impl<P: Params> Node<P> for Hint_ {
             Hint_::Hlike(a0) => a0.accept(c, v),
             Hint_::Hfun(a0) => a0.accept(c, v),
             Hint_::Htuple(a0) => a0.accept(c, v),
-            Hint_::HclassArgs(a0) => a0.accept(c, v),
+            Hint_::HclassPtr(a0) => a0.accept(c, v),
             Hint_::Hshape(a0) => a0.accept(c, v),
             Hint_::Haccess(a0, a1) => {
                 a0.accept(c, v)?;

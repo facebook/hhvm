@@ -142,7 +142,7 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
         let name = self.child.name.id();
         let reason = R::class_class(pos.clone(), name);
         let classname_ty = if self.opts.class_class_type {
-            Ty::class_args(reason.clone(), Ty::this(reason))
+            Ty::class_ptr(reason.clone(), Ty::this(reason))
         } else {
             Ty::apply(
                 reason.clone(),

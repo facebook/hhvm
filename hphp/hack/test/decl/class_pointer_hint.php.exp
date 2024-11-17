@@ -10,7 +10,7 @@
              [{ fp_pos = [5:25-27]; fp_name = (Some "$c");
                 fp_type =
                 (Rhint ([5:16-24]),
-                 (Tclass_args
+                 (Tclass_ptr
                     (Rhint ([5:22-23]), (Tapply (([5:22-23], "\\C"), [])))));
                 fp_flags =
                 { Typing_defs_flags.FunParam.accept_disposable = false;
@@ -41,7 +41,7 @@
               ft_implicit_params = { capability = (CapDefaults [6:10-13]) };
               ft_ret =
               (Rhint ([6:17-25]),
-               (Tclass_args
+               (Tclass_ptr
                   (Rhint ([6:23-24]), (Tapply (([6:23-24], "\\C"), [])))));
               ft_flags =
               { Typing_defs_flags.Fun.return_disposable = false;
@@ -70,7 +70,7 @@
            (Rhint ([8:17-26]),
             (Toption
                (Rhint ([8:18-26]),
-                (Tclass_args
+                (Tclass_ptr
                    (Rhint ([8:24-25]), (Tapply (([8:24-25], "\\C"), [])))))));
            sp_visibility = Public;
            sp_flags =

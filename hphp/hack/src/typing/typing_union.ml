@@ -312,10 +312,10 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
         let (env, tyl) = union_newtype ~approx_cancel_neg env id1 tyl1 tyl2 in
         let (env, tcstr) = union ~approx_cancel_neg env tcstr1 tcstr2 in
         (env, Some (mk (r, Tnewtype (id1, tyl, tcstr))))
-    | ((_, Tclass_args ty1), (_, Tclass_args ty2)) ->
+    | ((_, Tclass_ptr ty1), (_, Tclass_ptr ty2)) ->
       (* Follows newtype classname<T> equal case above *)
       let (env, ty) = union ~approx_cancel_neg env ty1 ty2 in
-      (env, Some (mk (r, Tclass_args ty)))
+      (env, Some (mk (r, Tclass_ptr ty)))
     (* TODO: optional and variadic fields T201398626 T201398652 *)
     | ( ( _,
           Ttuple
@@ -468,7 +468,7 @@ and simplify_non_subtype_union ~approx_cancel_neg env ty1 ty2 r =
            * types, etc. - so for now we leave it here.
            * TODO improve that. *)
           | Tnonnull | Tany _ | Tintersection _ | Toption _ | Tunion _
-          | Tlabel _ | Taccess _ | Tclass_args _ ) ),
+          | Tlabel _ | Taccess _ | Tclass_ptr _ ) ),
         (_, _) ) ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
   with

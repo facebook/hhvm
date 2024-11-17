@@ -89,7 +89,7 @@ let rec print_ty_exn ?(allow_nothing = false) ty =
   | Tvec_or_dict (ty1, ty2) ->
     Printf.sprintf "vec_or_dict<%s, %s>" (print_ty_exn ty1) (print_ty_exn ty2)
   | Taccess (ty, id) -> Printf.sprintf "%s::%s" (print_ty_exn ty) (snd id)
-  | Tclass_args ty -> Printf.sprintf "class<%s>" (print_ty_exn ty)
+  | Tclass_ptr ty -> Printf.sprintf "class<%s>" (print_ty_exn ty)
 
 and print_tyl_exn tyl = String.concat ~sep:", " (List.map tyl ~f:print_ty_exn)
 

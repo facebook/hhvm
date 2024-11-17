@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<397264fafdfba8849fad187440260932>>
+// @generated SignedSource<<1143a8585158d3004427b41789b13018>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -764,8 +764,8 @@ pub enum Ty_ {
     /// it takes an arbitrary type. In the future, it should only take a string
     /// that is a class name, and be named Tclass. The current Tclass would be
     /// renamed to Tinstance, where a Tinstance is an instantiation of a Tclass
-    #[rust_to_ocaml(name = "Tclass_args")]
-    TclassArgs(Ty),
+    #[rust_to_ocaml(name = "Tclass_ptr")]
+    TclassPtr(Ty),
     Tvar(isize),
     /// The type of an opaque type or enum. Outside their defining files or
     /// when they represent enums, they are "opaque", which means that they

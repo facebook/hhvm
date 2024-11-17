@@ -5867,7 +5867,7 @@ void memoSetImpl(ISS& env, const Op& op, bool eager) {
   // an immediate instruction, record that fact so that we can
   // optimize away the corresponding MemoGet.
   auto effectFree = [&] {
-    auto const last = last_op(env);
+    auto const last = op_from_slot(env, 0);
     return last && pushes_immediate(last->op);
   }();
 

@@ -249,6 +249,33 @@ TypeOrReduced builtin_package_exists(ISS& env, const php::Func* func,
     ? TTrue : TFalse;
 }
 
+TypeOrReduced builtin_autoload_is_native(ISS& env, const php::Func*,
+                                         const FCallArgs& fca) {
+  assertx(fca.numArgs() == 0);
+  reduce(env, bc::True {});
+  return Reduced{};
+}
+
+const StaticString s_hhvm_repo_authoritative("hhvm.repo.authoritative");
+const StaticString s_one("1");
+
+TypeOrReduced builtin_ini_get(ISS& env, const php::Func* func,
+                              const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const arg = getArg(env, func, fca, 0);
+  if (!arg.strictSubtypeOf(BStr)) return NoReduced{};
+  auto const iniTV = tv(arg);
+  if (!iniTV) return NoReduced{};
+  auto const iniName = iniTV->m_data.pstr;
+
+  if (iniName->same(s_hhvm_repo_authoritative.get())) {
+    reduce(env, bc::PopC {}, bc::String { s_one.get() });
+    return Reduced{};
+  }
+
+  return NoReduced{};
+}
+
 TypeOrReduced builtin_array_key_cast(ISS& env, const php::Func* func,
                                      const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -587,6 +614,8 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(interface_exists, interface_exists)                                 \
   X(trait_exists, trait_exists)                                         \
   X(package_exists, HH\\package_exists)                                 \
+  X(autoload_is_native, HH\\autoload_is_native)                         \
+  X(ini_get, ini_get)                                                   \
   X(array_key_cast, HH\\array_key_cast)                                 \
   X(is_callable, is_callable)                                           \
   X(is_list_like, HH\\is_list_like)                                     \

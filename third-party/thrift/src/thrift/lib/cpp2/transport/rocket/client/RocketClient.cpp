@@ -180,7 +180,9 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
     ServerPushMetadata serverMeta;
     try {
       PayloadSerializer::getInstance().unpack(
-          serverMeta, std::move(mdPushFrame.metadata()), false);
+          serverMeta,
+          std::move(mdPushFrame.metadata()),
+          encodeMetadataUsingBinary_);
     } catch (...) {
       close(transport::TTransportException(
           transport::TTransportException::CORRUPTED_DATA,
@@ -388,7 +390,7 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
   }
   auto firstResponse =
       rocket::PayloadSerializer::getInstance().unpack<FirstResponsePayload>(
-          std::move(fullPayload), false /* decodeMetadataUsingBinary */);
+          std::move(fullPayload), encodeMetadataUsingBinary_);
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
     return StreamChannelStatus::Complete;
@@ -444,7 +446,7 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
   if (next) {
     auto streamPayload =
         rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
-            std::move(fullPayload), false /* decodeMetadataUsingBinary */);
+            std::move(fullPayload), encodeMetadataUsingBinary_);
     if (streamPayload.hasException()) {
       return serverCallback.onStreamError(std::move(streamPayload.exception()));
     }
@@ -513,7 +515,7 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
   if (next) {
     auto streamPayload =
         rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
-            std::move(fullPayload), false /* decodeMetadataUsingBinary */);
+            std::move(fullPayload), encodeMetadataUsingBinary_);
     if (streamPayload.hasException()) {
       return serverCallback.onFinalResponseError(
           std::move(streamPayload.exception()));

@@ -3,6 +3,6 @@ Cannot use unstable feature: `shape_destructure` (Parsing[1002])
 ERROR: File "tuple_rvalue_only.php", line 5, characters 3-27:
 Invalid assignment (Typing[4110])
   File "tuple_rvalue_only.php", line 5, characters 3-15:
-  Expected `(nothing, nothing)`
+  Expected `(nothing, nothing)` resulting from a list destructuring assignment or a splat
   File "tuple_rvalue_only.php", line 5, characters 19-27:
   But got `vec<int>`

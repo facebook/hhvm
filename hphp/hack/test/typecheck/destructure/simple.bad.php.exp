@@ -1,0 +1,30 @@
+ERROR: File "simple.bad.php", line 5, characters 3-32:
+Invalid assignment (Typing[4110])
+  File "simple.bad.php", line 5, characters 3-15:
+  Expected `(nothing, nothing)` resulting from a list destructuring assignment or a splat
+  File "simple.bad.php", line 5, characters 19-32:
+  But got `(int, int, int)`
+ERROR: File "simple.bad.php", line 6, characters 3-28:
+Invalid assignment (Typing[4110])
+  File "simple.bad.php", line 6, characters 3-15:
+  Expected `(nothing, nothing)` resulting from a list destructuring assignment or a splat
+  File "simple.bad.php", line 6, characters 19-28:
+  But got `vec<int>`
+ERROR: File "simple.bad.php", line 8, characters 3-34:
+Invalid assignment (Typing[4110])
+  File "simple.bad.php", line 7, characters 15-17:
+  Expected `int`
+  File "simple.bad.php", line 8, characters 28-30:
+  But got `string`
+ERROR: File "simple.bad.php", line 10, characters 3-47:
+Invalid assignment (Typing[4057])
+  File "simple.bad.php", line 10, characters 33-47:
+  The field `a` is missing
+  File "simple.bad.php", line 10, characters 9-11:
+  The field `a` is defined
+ERROR: File "simple.bad.php", line 11, characters 3-46:
+Invalid assignment (Typing[4057])
+  File "simple.bad.php", line 11, characters 3-18:
+  The field `a` is missing
+  File "simple.bad.php", line 11, characters 28-30:
+  The field `a` is defined

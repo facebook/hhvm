@@ -9,6 +9,6 @@ Invalid argument (Typing[4110])
 ERROR: File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
 Invalid argument to an `inout` parameter (Typing[4110])
   File "bad_inout_use_lvalue9.php", line 6, characters 11-23:
-  Expected `(int, int)`
+  Expected `(nothing, nothing)` resulting from a list destructuring assignment or a splat
   File "bad_inout_use_lvalue9.php", line 3, characters 18-28:
   But got `vec<int>`

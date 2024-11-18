@@ -10794,7 +10794,91 @@ end = struct
           assign_with_subtype_err_ pos ur env e pos2 ty2
         in
         (env, (ty, pos, Aast.ReadonlyExpr te1), ty, err)
+      | (_, _pos, (Shape _ | Tuple _)) ->
+        let is_error_type = TUtils.is_tyvar_error env ty2 in
+        let env = Env.open_tyvars env p in
+        let (env, (te, ty)) =
+          assign_shape_tuple
+            ?expr_for_string_check
+            ~rhs:(get_reason ty2)
+            ~is_error_type
+            p
+            ur
+            pos2
+            env
+            e1
+        in
+        let (env, ty_err1) =
+          Type.sub_type p ur env ty2 ty Typing_error.Callback.unify_error
+        in
+        let (env, ty_err2) = Typing_solver.close_tyvars_and_solve env in
+        let ty_err_opt = Option.merge ty_err1 ty_err2 ~f:Typing_error.both in
+        Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
+        (env, te, ty, None)
       | _ -> assign_simple p ur env e1 ty2)
+
+  (* Traverse the shape/tuple skeleton and build a shape/tuple with type variables
+     in the leaves *)
+  and assign_shape_tuple
+      ?expr_for_string_check ~rhs ~is_error_type p ur pos2 env e1 =
+    match e1 with
+    | (_, pos, Tuple es) ->
+      let (env, te_tys) =
+        List.map_env
+          ~f:
+            (assign_shape_tuple
+               ?expr_for_string_check
+               ~rhs
+               ~is_error_type
+               p
+               ur
+               pos2)
+          env
+          es
+      in
+      let (tes, tys) = List.unzip te_tys in
+      let ty = MakeType.tuple (Reason.destructure pos) tys in
+      let (env, te, ty) = make_result env p (Aast.Tuple tes) ty in
+      (env, (te, ty))
+    | (_, pos, Shape fields) ->
+      let (env, te_tys) =
+        List.map_env
+          ~f:(fun env (field, e) ->
+            let (env, (te, ty)) =
+              assign_shape_tuple
+                ?expr_for_string_check
+                ~rhs
+                ~is_error_type
+                p
+                ur
+                pos2
+                env
+                e
+            in
+            ( env,
+              ( (field, te),
+                ( TShapeField.of_ast Pos_or_decl.of_raw_pos field,
+                  { sft_optional = false; sft_ty = ty } ) ) ))
+          env
+          fields
+      in
+      let (tes, tys) = List.unzip te_tys in
+      let ty =
+        MakeType.closed_shape (Reason.destructure pos) (TShapeMap.of_list tys)
+      in
+      let (env, te, ty) = make_result env p (Aast.Shape tes) ty in
+      (env, (te, ty))
+    | (_, p, _) ->
+      let (env, tvar) =
+        if is_error_type then
+          Env.fresh_type_error env p
+        else
+          Env.fresh_type env p
+      in
+      let (env, te1, ty, _) =
+        assign_with_subtype_err_ ?expr_for_string_check p ur env e1 pos2 tvar
+      in
+      (env, (te1, ty))
 
   (* Deal with assignment of a value of type ty2 to lvalue e1 *)
   and assign ?expr_for_string_check p env e1 pos2 ty2 =

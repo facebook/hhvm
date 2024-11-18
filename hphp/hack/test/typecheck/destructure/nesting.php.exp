@@ -14,27 +14,27 @@ ERROR: File "nesting.php", line 5, characters 16-27:
 `list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
 ERROR: File "nesting.php", line 7, characters 9-20:
 `list()` can only be used for destructuring assignment. Did you mean `tuple()` or `vec[]`? (NastCheck[3092])
-ERROR: File "nesting.php", line 4, characters 3-56:
-Invalid assignment (Typing[4110])
-  File "nesting.php", line 4, characters 21-22:
-  Expected `nothing`
-  File "nesting.php", line 4, characters 51-51:
-  But got `int`
 ERROR: File "nesting.php", line 5, characters 3-56:
 Invalid assignment (Typing[4110])
   File "nesting.php", line 5, characters 21-22:
   Expected `nothing`
   File "nesting.php", line 5, characters 51-51:
   But got `int`
-ERROR: File "nesting.php", line 6, characters 3-42:
+ERROR: File "nesting.php", line 5, characters 3-56:
 Invalid assignment (Typing[4110])
-  File "nesting.php", line 6, characters 14-15:
+  File "nesting.php", line 5, characters 25-26:
   Expected `nothing`
-  File "nesting.php", line 6, characters 37-37:
+  File "nesting.php", line 5, characters 54-54:
   But got `int`
 ERROR: File "nesting.php", line 7, characters 3-42:
 Invalid assignment (Typing[4110])
   File "nesting.php", line 7, characters 14-15:
   Expected `nothing`
   File "nesting.php", line 7, characters 37-37:
+  But got `int`
+ERROR: File "nesting.php", line 7, characters 3-42:
+Invalid assignment (Typing[4110])
+  File "nesting.php", line 7, characters 18-19:
+  Expected `nothing`
+  File "nesting.php", line 7, characters 40-40:
   But got `int`

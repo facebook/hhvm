@@ -28,7 +28,6 @@
 #include "hphp/runtime/ext/server/ext_server.h"
 #include "hphp/runtime/ext/std/ext_std_output.h"
 #include "hphp/runtime/server/access-log.h"
-#include "hphp/runtime/server/accounting.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/http-protocol.h"
 #include "hphp/runtime/server/http-request-handler.h"
@@ -94,8 +93,6 @@ void XboxRequestHandler::setLogInfo(bool logInfo) {
 
 void XboxRequestHandler::teardownRequest(Transport* transport) noexcept {
   if (!vmStack().isAllocated()) return;
-
-  Accounting::onRequestEnd(transport);
 
   hphp_context_exit();
   hphp_session_exit();

@@ -57,7 +57,7 @@ private:
   time_t m_lastReset;
   Optional<CLIContext> m_cli;
 
-  void initState(RequestId requestId);
+  void initState(RequestId requestId, Transport* transport);
 
   bool executePHPFunction(Transport *transport);
 

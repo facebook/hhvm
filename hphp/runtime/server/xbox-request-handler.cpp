@@ -64,8 +64,8 @@ XboxRequestHandler::~XboxRequestHandler() {
   assertx(!vmStack().isAllocated());
 }
 
-void XboxRequestHandler::initState(RequestId requestId) {
-  hphp_session_init(Treadmill::SessionKind::RpcRequest, nullptr, requestId);
+void XboxRequestHandler::initState(RequestId requestId, Transport* transport) {
+  hphp_session_init(Treadmill::SessionKind::RpcRequest, transport, requestId);
   m_context = g_context.getNoCheck();
   if (!is_any_cli_mode() && !m_cli) {
     m_context->obStart(uninit_null(),
@@ -103,13 +103,12 @@ void XboxRequestHandler::teardownRequest(Transport* transport) noexcept {
 
 void XboxRequestHandler::handleRequest(Transport *transport) {
   auto const requestId = RequestId::allocate();
-  initState(requestId);
+  initState(requestId, transport);
 
   ExecutionProfiler ep(RequestInfo::RuntimeFunctions);
 
   Logger::OnNewRequest(requestId.id());
   GetAccessLog().onNewRequest();
-  m_context->setTransport(transport);
   transport->enableCompression();
   InitFiniNode::RequestStart();
 
@@ -315,8 +314,6 @@ bool XboxRequestHandler::executePHPFunction(Transport *transport) {
                      k_PHP_OUTPUT_HANDLER_CLEAN |
                      k_PHP_OUTPUT_HANDLER_END);
   m_context->restoreSession();
-  // Context is long-lived, but cached transport is not, so clear it.
-  m_context->setTransport(nullptr);
   return !error;
 }
 

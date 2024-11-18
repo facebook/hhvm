@@ -1,1 +1,2 @@
-No errors
+ERROR: File "shapes_args.php", line 5, characters 17-24:
+Shape field name must not be a `C::class` expression (Parsing[1002])

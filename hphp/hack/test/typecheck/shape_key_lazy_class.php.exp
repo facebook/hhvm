@@ -1,2 +1,4 @@
 ERROR: File "shape_key_lazy_class.php", line 4, characters 24-34:
 Shape field name must not be a `self::class` expression (Parsing[1002])
+ERROR: File "shape_key_lazy_class.php", line 6, characters 16-23:
+Shape field name must not be a `C::class` expression (Parsing[1002])

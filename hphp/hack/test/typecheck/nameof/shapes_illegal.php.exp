@@ -2,6 +2,8 @@ ERROR: File "shapes_illegal.php", line 5, characters 26-36:
 Shape field name must not be a `self::class` expression (Parsing[1002])
 ERROR: File "shapes_illegal.php", line 6, characters 26-36:
 Shape field name must not be a `self::class` expression (Parsing[1002])
+ERROR: File "shapes_illegal.php", line 9, characters 25-32:
+Shape field name must not be a `C::class` expression (Parsing[1002])
 ERROR: File "shapes_illegal.php", line 12, characters 9-21:
 Shape access requires a string literal, integer literal, or a class constant (Typing[4051])
 ERROR: File "shapes_illegal.php", line 13, characters 9-21:

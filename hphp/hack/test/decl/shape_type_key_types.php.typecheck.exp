@@ -1,12 +1,10 @@
 ERROR: File "shape_type_key_types.php", line 4, characters 3-3:
 Shape field name must be a nonempty single-quoted string or a class constant (Parsing[1002])
-ERROR: File "shape_type_key_types.php", line 6, characters 3-3:
-Unbound name: `C` (an object type) (Naming[2049])
 ERROR: File "shape_type_key_types.php", line 6, characters 25-25:
 Unbound name: `C` (Naming[2049])
 ERROR: File "shape_type_key_types.php", line 7, characters 3-3:
 Unbound name: `C` (an object type) (Naming[2049])
-ERROR: File "shape_type_key_types.php", line 6, characters 3-10:
+ERROR: File "shape_type_key_types.php", line 6, characters 10-10:
 Shape uses class constant as field name (Typing[4049])
   File "shape_type_key_types.php", line 4, characters 3-3:
   But expected a literal string. Shape fields cannot be a mix of literals and constants.

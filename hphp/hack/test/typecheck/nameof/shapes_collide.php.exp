@@ -1,3 +1,21 @@
+ERROR: File "shapes_collide.php", line 3, characters 18-25:
+Shape field name must not be a `C::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 7, characters 26-33:
+Shape field name must not be a `C::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 7, characters 45-52:
+Shape field name must not be a `C::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 8, characters 26-33:
+Shape field name must not be a `C::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 9, characters 45-52:
+Shape field name must not be a `C::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 13, characters 25-32:
+Shape field name must not be a `B::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 13, characters 44-51:
+Shape field name must not be a `C::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 14, characters 25-32:
+Shape field name must not be a `B::class` expression (Parsing[1002])
+ERROR: File "shapes_collide.php", line 15, characters 44-51:
+Shape field name must not be a `C::class` expression (Parsing[1002])
 ERROR: File "shapes_collide.php", line 7, characters 48-52:
 Field name already bound (Naming[2015])
 ERROR: File "shapes_collide.php", line 8, characters 52-52:

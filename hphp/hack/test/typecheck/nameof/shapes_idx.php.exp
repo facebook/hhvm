@@ -1,3 +1,5 @@
+ERROR: File "shapes_idx.php", line 5, characters 18-25:
+Shape field name must not be a `C::class` expression (Parsing[1002])
 ERROR: File "shapes_idx.php", line 11, characters 34-41:
 Using `C::class` in this position will trigger an implicit runtime conversion to string, please use `nameof C` (Typing[4482])
 ERROR: File "shapes_idx.php", line 13, characters 34-41:

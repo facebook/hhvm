@@ -820,13 +820,11 @@ fn p_shape_field_name<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::ShapeFi
             let cls_name = pos_name(&c.qualifier, env)?;
             let const_name = p_pstring(&c.name, env)?;
             if string_utils::is_class(&const_name.1) && env.is_typechecker() {
-                if string_utils::class_id_is_dynamic(&cls_name.1) {
-                    raise_parsing_error(
-                        node,
-                        env,
-                        &syntax_error::invalid_lazy_class_shape_field(&cls_name.1),
-                    );
-                };
+                raise_parsing_error(
+                    node,
+                    env,
+                    &syntax_error::invalid_lazy_class_shape_field(&cls_name.1),
+                );
             }
             Ok(SFclassConst(cls_name, const_name))
         }

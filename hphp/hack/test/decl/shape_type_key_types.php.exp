@@ -18,8 +18,8 @@
                      ([7:6-9], "KEY"))) ->
                   { sft_optional = false;
                     sft_ty = (Rhint ([7:13-19]), (Tprim Tstring)) };
-                  (Typing_defs_core.TSFclass_const (([6:3-4], "\\C"),
-                     ([6:6-11], "class"))) ->
+                  (Typing_defs_core.TSFclass_const (([6:10-11], "\\C"),
+                     ([6:10-11], "class"))) ->
                   { sft_optional = false;
                     sft_ty =
                     (Rhint ([6:15-27]),

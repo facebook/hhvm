@@ -187,330 +187,420 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
     @parameterized.expand(
         [
             (
+                "TestStructWithDefaultValuesAbstract.unqualified_integer",
                 TestStructWithDefaultValuesAbstract.unqualified_integer,
                 int,
             ),
             (
+                "TestStructWithDefaultValuesAbstract.optional_integer",
                 TestStructWithDefaultValuesAbstract.optional_integer,
                 typing.Optional[int],
             ),
             (
+                "TestStructWithDefaultValuesAbstract.unqualified_string",
                 TestStructWithDefaultValuesAbstract.unqualified_struct,
                 TestStructAbstract,
             ),
             (
+                "TestStructWithDefaultValuesAbstract.optional_struct",
                 TestStructWithDefaultValuesAbstract.optional_struct,
                 typing.Optional[TestStructAbstract],
             ),
             (
+                "TestStructWithDefaultValuesAbstract.unqualified_struct_intrinsic_default",
                 TestStructWithDefaultValuesAbstract.unqualified_struct_intrinsic_default,
                 TestStructAbstract,
             ),
             (
+                "TestStructWithDefaultValuesAbstract.optional_struct_intrinsic_default",
                 TestStructWithDefaultValuesAbstract.optional_struct_intrinsic_default,
                 typing.Optional[TestStructAbstract],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_bool",
                 TestStructAllThriftPrimitiveTypesAbstract.unqualified_bool,
                 bool,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.optional_bool",
                 TestStructAllThriftPrimitiveTypesAbstract.optional_bool,
                 typing.Optional[bool],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_byte",
                 TestStructAllThriftPrimitiveTypesAbstract.unqualified_byte,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.optional_byte",
                 TestStructAllThriftPrimitiveTypesAbstract.optional_byte,
                 typing.Optional[int],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_i16",
                 TestStructAllThriftPrimitiveTypesAbstract.unqualified_i16,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.optional_i16",
                 TestStructAllThriftPrimitiveTypesAbstract.optional_i16,
                 typing.Optional[int],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_i32",
                 TestStructAllThriftPrimitiveTypesAbstract.unqualified_i32,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.optional_i32",
                 TestStructAllThriftPrimitiveTypesAbstract.optional_i32,
                 typing.Optional[int],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_i64",
                 TestStructAllThriftPrimitiveTypesAbstract.unqualified_i64,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.optional_i64",
                 TestStructAllThriftPrimitiveTypesAbstract.optional_i64,
                 typing.Optional[int],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_float",
                 TestStructAllThriftPrimitiveTypesAbstract.unqualified_float,
                 float,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.optional_float",
                 TestStructAllThriftPrimitiveTypesAbstract.optional_float,
                 typing.Optional[float],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.unqualified_double",
                 TestStructAllThriftPrimitiveTypesAbstract.unqualified_double,
                 float,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesAbstract.optional_double",
                 TestStructAllThriftPrimitiveTypesAbstract.optional_double,
                 typing.Optional[float],
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_bool",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_bool,
                 bool,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_byte",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_byte,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i16",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i16,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i32",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i32,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i64",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_i64,
                 int,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_float",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_float,
                 float,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_double",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_double,
                 float,
             ),
             (
+                "TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_string",
                 TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract.unqualified_string,
                 str,
             ),
             (
+                "TestStructAllThriftContainerTypesAbstract.unqualified_list_i32",
                 TestStructAllThriftContainerTypesAbstract.unqualified_list_i32,
                 typing.Sequence[int],
             ),
             (
+                "TestStructAllThriftContainerTypesAbstract.optional_list_i32",
                 TestStructAllThriftContainerTypesAbstract.optional_list_i32,
                 typing.Optional[typing.Sequence[int]],
             ),
             (
+                "TestStructAllThriftContainerTypesAbstract.unqualified_set_string",
                 TestStructAllThriftContainerTypesAbstract.unqualified_set_string,
                 typing.AbstractSet[str],
             ),
             (
+                "TestStructAllThriftContainerTypesAbstract.optional_set_string",
                 TestStructAllThriftContainerTypesAbstract.optional_set_string,
                 typing.Optional[typing.AbstractSet[str]],
             ),
             (
+                "TestStructAllThriftContainerTypesAbstract.unqualified_map_string_i32",
                 TestStructAllThriftContainerTypesAbstract.unqualified_map_string_i32,
                 typing.Mapping[str, int],
             ),
             (
+                "TestStructAllThriftContainerTypesAbstract.optional_map_string_i32",
                 TestStructAllThriftContainerTypesAbstract.optional_map_string_i32,
                 typing.Optional[typing.Mapping[str, int]],
             ),
             (
+                "TestStructWithTypedefFieldAbstract.empty_struct",
                 TestStructWithTypedefFieldAbstract.empty_struct,
                 TestStructEmptyAbstract,
             ),
             (
+                "TestStructWithTypedefFieldAbstract.empty_struct_alias",
                 TestStructWithTypedefFieldAbstract.empty_struct_alias,
                 TestStructEmptyAbstract,
             ),
             (
+                "TestStructNested_0Abstract.nested_1",
                 TestStructNested_0Abstract.nested_1,
                 TestStructNested_1Abstract,
             ),
             (
+                "TestStructNested_1Abstract.nested_2",
                 TestStructNested_1Abstract.nested_2,
                 TestStructNested_2Abstract,
             ),
             (
+                "TestStructWithUnionFieldAbstract.union_field",
                 TestStructWithUnionFieldAbstract.union_field,
                 thrift.test.thrift_python.struct_test.thrift_abstract_types.TestUnion,
             ),
             (
+                "TestStructWithUnionFieldAbstract.union_field_from_included",
                 TestStructWithUnionFieldAbstract.union_field_from_included,
                 thrift.test.thrift_python.included.thrift_abstract_types.TestUnion,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_bool",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_bool,
                 bool,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_bool",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_bool,
                 typing.Optional[bool],
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_byte",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_byte,
                 int,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_byte",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_byte,
                 typing.Optional[int],
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i16",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i16,
                 int,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_i16",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_i16,
                 typing.Optional[int],
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i32",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i32,
                 int,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_i32",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_i32,
                 typing.Optional[int],
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i64",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_i64,
                 int,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_i64",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_i64,
                 typing.Optional[int],
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_float",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_float,
                 float,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_float",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_float,
                 typing.Optional[float],
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_double",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_double,
                 float,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_double",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_double,
                 typing.Optional[float],
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_string",
                 TestExceptionAllThriftPrimitiveTypesAbstract.unqualified_string,
                 str,
             ),
             (
+                "TestExceptionAllThriftPrimitiveTypesAbstract.optional_string",
                 TestExceptionAllThriftPrimitiveTypesAbstract.optional_string,
                 typing.Optional[str],
             ),
             (
+                "TestStructWithExceptionFieldAbstract.i32_field",
                 TestStructWithExceptionFieldAbstract.i32_field,
                 int,
             ),
             (
+                "TestStructWithExceptionFieldAbstract.exception_field",
                 TestStructWithExceptionFieldAbstract.exception_field,
                 TestExceptionAllThriftPrimitiveTypesAbstract,
             ),
             (
+                "TestStructCopyAbstract.unqualified_i32",
                 TestStructCopyAbstract.unqualified_i32,
                 int,
             ),
             (
+                "TestStructCopyAbstract.optional_i32",
                 TestStructCopyAbstract.optional_i32,
                 typing.Optional[int],
             ),
             (
+                "TestStructCopyAbstract.unqualified_string",
                 TestStructCopyAbstract.unqualified_string,
                 str,
             ),
             (
+                "TestStructCopyAbstract.optional_string",
                 TestStructCopyAbstract.optional_string,
                 typing.Optional[str],
             ),
             (
+                "TestStructCopyAbstract.unqualified_list_i32",
                 TestStructCopyAbstract.unqualified_list_i32,
                 typing.Sequence[int],
             ),
             (
+                "TestStructCopyAbstract.unqualified_set_string",
                 TestStructCopyAbstract.unqualified_set_string,
                 typing.AbstractSet[str],
             ),
             (
+                "TestStructCopyAbstract.unqualified_map_string_i32",
                 TestStructCopyAbstract.unqualified_map_string_i32,
                 typing.Mapping[str, int],
             ),
             (
+                "TestStructCopyAbstract.recursive_struct",
                 TestStructCopyAbstract.recursive_struct,
                 typing.Optional[TestStructCopyAbstract],
             ),
             (
+                "TestStructCopyAbstract.unqualified_binary",
                 TestStructCopyAbstract.unqualified_binary,
                 iobuf.IOBuf,
             ),
             (
+                "TestExceptionCopyAbstract.unqualified_i32",
                 TestExceptionCopyAbstract.unqualified_i32,
                 int,
             ),
             (
+                "TestExceptionCopyAbstract.optional_i32",
                 TestExceptionCopyAbstract.optional_i32,
                 typing.Optional[int],
             ),
             (
+                "TestExceptionCopyAbstract.unqualified_string",
                 TestExceptionCopyAbstract.unqualified_string,
                 str,
             ),
             (
+                "TestExceptionCopyAbstract.optional_string",
                 TestExceptionCopyAbstract.optional_string,
                 typing.Optional[str],
             ),
             (
+                "TestExceptionCopyAbstract.unqualified_list_i32",
                 TestExceptionCopyAbstract.unqualified_list_i32,
                 typing.Sequence[int],
             ),
             (
+                "TestExceptionCopyAbstract.optional_list_i32",
                 TestExceptionCopyAbstract.optional_list_i32,
                 typing.Optional[typing.Sequence[int]],
             ),
             (
+                "TestExceptionCopyAbstract.unqualified_set_string",
                 TestExceptionCopyAbstract.unqualified_set_string,
                 typing.AbstractSet[str],
             ),
             (
+                "TestExceptionCopyAbstract.optional_set_string",
                 TestExceptionCopyAbstract.optional_set_string,
                 typing.Optional[typing.AbstractSet[str]],
             ),
             (
+                "TestExceptionCopyAbstract.unqualified_map_string_i32",
                 TestExceptionCopyAbstract.unqualified_map_string_i32,
                 typing.Mapping[str, int],
             ),
             (
+                "TestExceptionCopyAbstract.recursive_exception",
                 TestExceptionCopyAbstract.recursive_exception,
                 typing.Optional[TestExceptionCopyAbstract],
             ),
             (
+                "TestUnionAbstract.string_field",
                 TestUnionAbstract.string_field,
                 str,
             ),
             (
+                "TestUnionAbstract.int_field",
                 TestUnionAbstract.int_field,
                 int,
             ),
             (
+                "TestUnionAbstract.struct_field",
                 TestUnionAbstract.struct_field,
                 thrift.test.thrift_python.union_test.thrift_abstract_types.TestStruct,
             ),
-            (TestUnionAmbiguousTypeFieldNameAbstract.Type, int),
+            (
+                "TestUnionAmbiguousTypeFieldNameAbstract.Type",
+                TestUnionAmbiguousTypeFieldNameAbstract.Type,
+                int,
+            ),
         ]
     )
-    # pyre-ignore[2]: Ignore types for tests.
-    def test_property_type_hints(self, interface_property, expected_type) -> None:
+    def test_property_type_hints(
+        self,
+        test_name: str,
+        # pyre-ignore[2]: Ignore types for tests.
+        interface_property,
+        # pyre-ignore[2]: Ignore types for tests.
+        expected_type,
+    ) -> None:
         # GIVEN
         expected = expected_type
 

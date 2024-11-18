@@ -43,7 +43,7 @@ func createTestHeaderServer(handler thrifttest.ThriftTest) (context.CancelFunc, 
 	}
 	taddr := listener.Addr()
 
-	server := thrift.NewSimpleServer(processor, listener, thrift.TransportIDHeader)
+	server := thrift.NewServer(processor, listener, thrift.TransportIDHeader)
 	go func(server thrift.Server) {
 		err = server.ServeContext(ctx)
 		if err != nil && !errors.Is(err, context.Canceled) {

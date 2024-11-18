@@ -29,7 +29,7 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-import includes.thrift_types as _fbthrift__includes__thrift_types
+import includes.thrift_mutable_types as _fbthrift__includes__thrift_mutable_types
 
 
 class _fbthrift_compatible_with_MyStruct:

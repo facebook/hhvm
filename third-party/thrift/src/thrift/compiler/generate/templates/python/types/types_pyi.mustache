@@ -41,7 +41,7 @@ import {{program:base_library_package}}.mutable_containers as _fbthrift_python_m
 {{#program:include_namespaces}}
 {{#has_types?}}
 
-import {{included_module_path}}.thrift_types as {{included_module_mangle}}__thrift_types
+import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
 {{/has_types?}}
 {{/program:include_namespaces}}
 {{#program:adapter_type_hint_modules}}

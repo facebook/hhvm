@@ -933,6 +933,10 @@ struct FactsStoreImpl final
         m_symbolMap.getFileAttributeArgs(Path{*file.get()}, *attribute.get()));
   }
 
+  Optional<std::string> getSha1(const String& path) {
+    return m_symbolMap.getSha1(Path{*path.get()});
+  }
+
   /**
    * Update whenever a file in the filesystem changes.
    */

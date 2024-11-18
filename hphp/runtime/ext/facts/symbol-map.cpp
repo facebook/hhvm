@@ -1154,6 +1154,24 @@ Optional<SHA1> SymbolMap::getSha1Hash(Path path) const {
   return {it->second};
 }
 
+Optional<std::string> SymbolMap::getSha1(Path path) {
+  return readOrUpdate<std::string>(
+      [&](const Data& data) -> Optional<std::string> {
+        auto it = data.m_sha1Hashes.find(path);
+        if (it == data.m_sha1Hashes.end()) {
+          return {};
+        }
+        return it->second.toString();
+      },
+      [&](std::shared_ptr<AutoloadDB> db) {
+        return db->getSha1Hex(path.slice());
+      },
+      [&](Data& data, std::string sha1) -> std::string {
+        data.m_sha1Hashes[path] = SHA1{sha1};
+        return sha1;
+      });
+}
+
 void SymbolMap::update(
     const Clock& since,
     const Clock& clock,

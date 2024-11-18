@@ -254,6 +254,10 @@ Array RepoAutoloadMap::getFileModules(const String& path) {
   return getSymbolFromPath(path, RepoSymbolType::MODULE);
 }
 
+Optional<std::string> RepoAutoloadMap::getSha1(const String& path) {
+  return {};
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 } // HPHP

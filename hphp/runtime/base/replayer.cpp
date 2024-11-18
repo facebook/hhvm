@@ -902,6 +902,12 @@ struct Replayer::FactsStore final : public HPHP::FactsStore {
     static const auto wrapper{wrap(m, "isTypeFinal")};
     return wrapper(type);
   }
+
+  Optional<std::string> getSha1(const String& path) override {
+    static constexpr auto m{&HPHP::FactsStore::getSha1};
+    static const auto wrapper{wrap(m, "getSha1")};
+    return wrapper(path);
+  }
 };
 
 struct Replayer::StreamWrapper final : public Stream::Wrapper {

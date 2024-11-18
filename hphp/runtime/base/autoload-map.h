@@ -183,6 +183,12 @@ struct AutoloadMap {
   virtual Array getFileConstants(const String& path) = 0;
   virtual Array getFileTypeAliases(const String& path) = 0;
   virtual Array getFileModules(const String& path) = 0;
+
+  /**
+   * Implementation specific APIs.
+   * Non symbol related mapping.
+   */
+  virtual Optional<std::string> getSha1(const String& path) = 0;
 };
 
 /**

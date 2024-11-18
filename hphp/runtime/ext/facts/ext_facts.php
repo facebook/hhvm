@@ -147,6 +147,12 @@ function path_to_type_aliases(string $path)[]: vec<string>;
 function path_to_module_membership(string $path)[]: ?string;
 
 /**
+ * Return the sha1 of the path, if any.
+ */
+<<__Native>>
+function sha1(string $path)[]: ?string;
+
+/**
  * Resolve a string into a classname that's properly capitalized and
  * properly typed.
  *

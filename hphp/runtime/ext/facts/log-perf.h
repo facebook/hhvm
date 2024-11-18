@@ -77,6 +77,8 @@ struct FactsLogger final : public FactsStore,
   Optional<std::filesystem::path> getModuleFileRelative(
       std::string_view) override;
 
+  Optional<std::string> getSha1(const String& path) override;
+
   Array getFileTypes(const String&) override;
   Array getFileFunctions(const String&) override;
   Array getFileConstants(const String&) override;

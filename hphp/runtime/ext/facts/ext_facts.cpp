@@ -696,6 +696,12 @@ Variant HHVM_FUNCTION(facts_kind, const String& type) {
   return Facts::getFactsOrThrow().getKind(type);
 }
 
+Variant HHVM_FUNCTION(facts_sha1, const String& path) {
+  auto maybeSha1 = Facts::getFactsOrThrow().getSha1(path);
+  return maybeSha1.has_value() ? Variant{maybeSha1.value()}
+                               : Variant{Variant::NullInit{}};
+}
+
 bool HHVM_FUNCTION(facts_is_abstract, const String& type) {
   return Facts::getFactsOrThrow().isTypeAbstract(type);
 }
@@ -865,6 +871,7 @@ void FactsExtension::moduleRegisterNative() {
       HHVM_FN(facts_path_to_module_membership));
   HHVM_NAMED_FE(HH\\Facts\\type_name, HHVM_FN(facts_type_name));
   HHVM_NAMED_FE(HH\\Facts\\kind, HHVM_FN(facts_kind));
+  HHVM_NAMED_FE(HH\\Facts\\sha1, HHVM_FN(facts_sha1));
   HHVM_NAMED_FE(HH\\Facts\\is_abstract, HHVM_FN(facts_is_abstract));
   HHVM_NAMED_FE(HH\\Facts\\is_final, HHVM_FN(facts_is_final));
   HHVM_NAMED_FE(HH\\Facts\\subtypes, HHVM_FN(facts_subtypes));

@@ -76,6 +76,8 @@ struct RepoAutoloadMap final : AutoloadMap {
   Array getFileTypeAliases(const String& path) override;
   Array getFileModules(const String& path) override;
 
+  Optional<std::string> getSha1(const String& path) override;
+
   void ensureUpdated() override {}
 
   void validate(const std::set<std::string>&) override {}

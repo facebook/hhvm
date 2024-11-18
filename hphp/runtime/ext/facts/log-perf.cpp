@@ -211,6 +211,11 @@ Optional<std::filesystem::path> FactsLogger::getTypeAliasFileRelative(
   });
 }
 
+Optional<std::string> FactsLogger::getSha1(const String& path) {
+  return logPerf(
+      __func__, path.slice(), [&]() { return m_inner->getSha1(path); });
+}
+
 Optional<std::filesystem::path> FactsLogger::getModuleFile(
     std::string_view name) {
   return logPerf(

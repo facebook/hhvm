@@ -345,6 +345,7 @@ struct SymbolMap {
    * Return a hash representing the given path's last-known checksum.
    */
   Optional<SHA1> getSha1Hash(Path path) const;
+  Optional<std::string> getSha1(Path path);
 
   /**
    * For each file, update the SymbolMap with the given file facts.

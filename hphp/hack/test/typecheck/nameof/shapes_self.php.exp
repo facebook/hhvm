@@ -1,1 +1,4 @@
-No errors
+ERROR: File "shapes_self.php", line 10, characters 22-32:
+Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
+ERROR: File "shapes_self.php", line 12, characters 22-32:
+Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])

@@ -589,45 +589,6 @@ let get_base_type ?(expand_supportdyn = true) env ty =
 
 let get_printable_shape_field_name = Typing_defs.TShapeField.name
 
-let shape_field_name_with_ty_err env (_, p, field) =
-  let resolve_self env =
-    let this =
-      match Env.get_self_ty env with
-      | None -> None
-      | Some c_ty ->
-        (match get_node c_ty with
-        | Tclass (sid, _, _) -> Some (Positioned.unsafe_to_raw_positioned sid)
-        | _ -> None)
-    in
-    match this with
-    | Some sid -> Ok sid
-    | None ->
-      Error
-        Typing_error.(
-          primary @@ Primary.Expected_class { pos = p; suffix = None })
-  in
-  match field with
-  | Aast.Int name -> Ok (Ast_defs.SFregex_group (p, name))
-  | Aast.String name -> Ok (Ast_defs.SFlit_str (p, name))
-  | Aast.Class_const ((_, _, Aast.CI x), y) ->
-    Ok (Ast_defs.SFclass_const (x, y))
-  | Aast.Nameof (_, _, Aast.CI x) ->
-    Ok (Ast_defs.SFclass_const (x, (p, "class")))
-  | Aast.Class_const ((_, _, Aast.CIself), y) ->
-    let self_id = resolve_self env in
-    Result.map ~f:(fun sid -> Ast_defs.SFclass_const (sid, y)) self_id
-  | Aast.Nameof (_, _, Aast.CIself) ->
-    let self_id = resolve_self env in
-    Result.map
-      ~f:(fun sid -> Ast_defs.SFclass_const (sid, (p, "class")))
-      self_id
-  | _ ->
-    let err =
-      Typing_error.Primary.Shape.(
-        Invalid_shape_field_name { pos = p; is_empty = false })
-    in
-    Error (Typing_error.shape err)
-
 (*****************************************************************************)
 (* Class types *)
 (*****************************************************************************)

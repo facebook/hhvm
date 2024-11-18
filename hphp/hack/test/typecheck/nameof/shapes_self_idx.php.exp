@@ -1,1 +1,4 @@
-No errors
+ERROR: File "shapes_self_idx.php", line 10, characters 36-46:
+Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])
+ERROR: File "shapes_self_idx.php", line 12, characters 36-46:
+Using `self::class` in this position will trigger an implicit runtime conversion to string, please use `nameof self` (Typing[4482])

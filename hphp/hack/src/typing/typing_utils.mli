@@ -206,11 +206,6 @@ val get_base_type :
 
 val get_printable_shape_field_name : Typing_defs.tshape_field_name -> string
 
-val shape_field_name_with_ty_err :
-  Typing_env_types.env ->
-  ('a, 'b) Aast.expr ->
-  (Ast_defs.shape_field_name, Typing_error.t) Result.t
-
 type add_constraint =
   Typing_env_types.env ->
   Ast_defs.constraint_kind ->

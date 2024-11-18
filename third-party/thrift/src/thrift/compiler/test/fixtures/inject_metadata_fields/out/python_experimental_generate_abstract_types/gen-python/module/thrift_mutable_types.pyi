@@ -23,7 +23,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -36,7 +36,7 @@ class _fbthrift_compatible_with_Fields:
     pass
 
 
-class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Fields, module.thrift_abstract_types.Fields):
+class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Fields, _fbthrift_python_abstract_types.Fields):
 
     @property
     def injected_field(self) -> str: ...
@@ -63,7 +63,7 @@ class _fbthrift_compatible_with_FieldsInjectedToEmptyStruct:
     pass
 
 
-class FieldsInjectedToEmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct, module.thrift_abstract_types.FieldsInjectedToEmptyStruct):
+class FieldsInjectedToEmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
 
     @property
     def injected_field(self) -> str: ...
@@ -90,7 +90,7 @@ class _fbthrift_compatible_with_FieldsInjectedToStruct:
     pass
 
 
-class FieldsInjectedToStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToStruct, module.thrift_abstract_types.FieldsInjectedToStruct):
+class FieldsInjectedToStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedToStruct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
 
     @property
     def injected_field(self) -> str: ...
@@ -125,7 +125,7 @@ class _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct:
     pass
 
 
-class FieldsInjectedWithIncludedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct, module.thrift_abstract_types.FieldsInjectedWithIncludedStruct):
+class FieldsInjectedWithIncludedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
 
     @property
     def injected_unstructured_annotation_field(self) -> _typing.Optional[str]: ...

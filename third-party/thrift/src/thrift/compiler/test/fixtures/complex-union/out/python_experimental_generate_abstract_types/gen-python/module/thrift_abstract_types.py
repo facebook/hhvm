@@ -48,13 +48,13 @@ class ComplexUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: ComplexUnion.FbThriftUnionFieldEnum = 0
-        intValue: ComplexUnion.FbThriftUnionFieldEnum = 1
-        intListValue: ComplexUnion.FbThriftUnionFieldEnum = 2
-        stringListValue: ComplexUnion.FbThriftUnionFieldEnum = 3
-        stringValue: ComplexUnion.FbThriftUnionFieldEnum = 5
-        typedefValue: ComplexUnion.FbThriftUnionFieldEnum = 9
-        stringRef: ComplexUnion.FbThriftUnionFieldEnum = 14
+        EMPTY = 0
+        intValue = 1
+        intListValue = 2
+        stringListValue = 3
+        stringValue = 5
+        typedefValue = 9
+        stringRef = 14
 
     FbThriftUnionFieldEnum.__name__ = "ComplexUnion"
 
@@ -79,9 +79,9 @@ class ListUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ListUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: ListUnion.FbThriftUnionFieldEnum = 0
-        intListValue: ListUnion.FbThriftUnionFieldEnum = 2
-        stringListValue: ListUnion.FbThriftUnionFieldEnum = 3
+        EMPTY = 0
+        intListValue = 2
+        stringListValue = 3
 
     FbThriftUnionFieldEnum.__name__ = "ListUnion"
 
@@ -106,9 +106,9 @@ class DataUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.DataUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: DataUnion.FbThriftUnionFieldEnum = 0
-        binaryData: DataUnion.FbThriftUnionFieldEnum = 1
-        stringData: DataUnion.FbThriftUnionFieldEnum = 2
+        EMPTY = 0
+        binaryData = 1
+        stringData = 2
 
     FbThriftUnionFieldEnum.__name__ = "DataUnion"
 
@@ -154,9 +154,9 @@ class ValUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ValUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: ValUnion.FbThriftUnionFieldEnum = 0
-        v1: ValUnion.FbThriftUnionFieldEnum = 1
-        v2: ValUnion.FbThriftUnionFieldEnum = 2
+        EMPTY = 0
+        v1 = 1
+        v2 = 2
 
     FbThriftUnionFieldEnum.__name__ = "ValUnion"
 
@@ -181,9 +181,9 @@ class VirtualComplexUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.VirtualComplexUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: VirtualComplexUnion.FbThriftUnionFieldEnum = 0
-        thingOne: VirtualComplexUnion.FbThriftUnionFieldEnum = 1
-        thingTwo: VirtualComplexUnion.FbThriftUnionFieldEnum = 2
+        EMPTY = 0
+        thingOne = 1
+        thingTwo = 2
 
     FbThriftUnionFieldEnum.__name__ = "VirtualComplexUnion"
 
@@ -220,8 +220,8 @@ class NonCopyableUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: NonCopyableUnion.FbThriftUnionFieldEnum = 0
-        s: NonCopyableUnion.FbThriftUnionFieldEnum = 1
+        EMPTY = 0
+        s = 1
 
     FbThriftUnionFieldEnum.__name__ = "NonCopyableUnion"
 

@@ -10,7 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -19,7 +19,7 @@ class _fbthrift_compatible_with_Limits:
     pass
 
 
-class Limits(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Limits, module.thrift_abstract_types.Limits):
+class Limits(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Limits, _fbthrift_python_abstract_types.Limits):
     max_i64_field: _typing.Final[int] = ...
     min_i64_field: _typing.Final[int] = ...
     max_i32_field: _typing.Final[int] = ...

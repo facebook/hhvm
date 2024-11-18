@@ -414,14 +414,14 @@ class Onion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Onion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: Onion.FbThriftUnionFieldEnum = 0
-        myEnum: Onion.FbThriftUnionFieldEnum = 1
-        myStruct: Onion.FbThriftUnionFieldEnum = 2
-        myString: Onion.FbThriftUnionFieldEnum = 4
-        intSet: Onion.FbThriftUnionFieldEnum = 6
-        doubleList: Onion.FbThriftUnionFieldEnum = 8
-        strMap: Onion.FbThriftUnionFieldEnum = 9
-        adapted_int: Onion.FbThriftUnionFieldEnum = 10
+        EMPTY = 0
+        myEnum = 1
+        myStruct = 2
+        myString = 4
+        intSet = 6
+        doubleList = 8
+        strMap = 9
+        adapted_int = 10
 
     FbThriftUnionFieldEnum.__name__ = "Onion"
 

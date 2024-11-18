@@ -337,13 +337,13 @@ class MyUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: MyUnion.FbThriftUnionFieldEnum = 0
-        myEnum: MyUnion.FbThriftUnionFieldEnum = 1
-        myStruct: MyUnion.FbThriftUnionFieldEnum = 2
-        myDataItem: MyUnion.FbThriftUnionFieldEnum = 3
-        complexNestedStruct: MyUnion.FbThriftUnionFieldEnum = 4
-        longValue: MyUnion.FbThriftUnionFieldEnum = 5
-        intValue: MyUnion.FbThriftUnionFieldEnum = 6
+        EMPTY = 0
+        myEnum = 1
+        myStruct = 2
+        myDataItem = 3
+        complexNestedStruct = 4
+        longValue = 5
+        intValue = 6
 
     FbThriftUnionFieldEnum.__name__ = "MyUnion"
 
@@ -374,11 +374,11 @@ class MyUnionFloatFieldThrowExp(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnionFloatFieldThrowExp": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 0
-        myEnum: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 1
-        setFloat: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 2
-        myDataItem: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 3
-        complexNestedStruct: MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum = 4
+        EMPTY = 0
+        myEnum = 1
+        setFloat = 2
+        myDataItem = 3
+        complexNestedStruct = 4
 
     FbThriftUnionFieldEnum.__name__ = "MyUnionFloatFieldThrowExp"
 

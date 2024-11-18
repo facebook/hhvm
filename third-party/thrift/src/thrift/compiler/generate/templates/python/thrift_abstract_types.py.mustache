@@ -89,9 +89,9 @@ class {{struct:py_name}}({{!
     {{#struct:union?}}
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: {{struct:py_name}}.FbThriftUnionFieldEnum = 0
+        EMPTY = 0
     {{#struct:fields_ordered_by_id}}
-        {{field:py_name}}: {{struct:py_name}}.FbThriftUnionFieldEnum = {{field:key}}
+        {{field:py_name}} = {{field:key}}
     {{/struct:fields_ordered_by_id}}
 
     {{! For backwards compatibility, set the name to the name

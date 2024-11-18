@@ -174,9 +174,9 @@ class union1(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.union1": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: union1.FbThriftUnionFieldEnum = 0
-        i: union1.FbThriftUnionFieldEnum = 1
-        d: union1.FbThriftUnionFieldEnum = 2
+        EMPTY = 0
+        i = 1
+        d = 2
 
     FbThriftUnionFieldEnum.__name__ = "union1"
 
@@ -207,11 +207,11 @@ class union2(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.union2": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: union2.FbThriftUnionFieldEnum = 0
-        i: union2.FbThriftUnionFieldEnum = 1
-        d: union2.FbThriftUnionFieldEnum = 2
-        s: union2.FbThriftUnionFieldEnum = 3
-        u: union2.FbThriftUnionFieldEnum = 4
+        EMPTY = 0
+        i = 1
+        d = 2
+        s = 3
+        u = 4
 
     FbThriftUnionFieldEnum.__name__ = "union2"
 

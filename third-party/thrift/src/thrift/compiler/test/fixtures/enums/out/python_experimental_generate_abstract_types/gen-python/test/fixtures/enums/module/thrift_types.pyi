@@ -10,7 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
-import test.fixtures.enums.module.thrift_abstract_types
+import test.fixtures.enums.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -18,7 +18,7 @@ class _fbthrift_compatible_with_Metasyntactic:
     pass
 
 
-class Metasyntactic(_fbthrift_python_types.Enum, int, test.fixtures.enums.module.thrift_abstract_types.Metasyntactic, _fbthrift_compatible_with_Metasyntactic):
+class Metasyntactic(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.Metasyntactic, _fbthrift_compatible_with_Metasyntactic):
     FOO: Metasyntactic = ...
     BAR: Metasyntactic = ...
     BAZ: Metasyntactic = ...
@@ -31,7 +31,7 @@ class _fbthrift_compatible_with_MyEnum1:
     pass
 
 
-class MyEnum1(_fbthrift_python_types.Enum, int, test.fixtures.enums.module.thrift_abstract_types.MyEnum1, _fbthrift_compatible_with_MyEnum1):
+class MyEnum1(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyEnum1, _fbthrift_compatible_with_MyEnum1):
     ME1_0: MyEnum1 = ...
     ME1_1: MyEnum1 = ...
     ME1_2: MyEnum1 = ...
@@ -46,7 +46,7 @@ class _fbthrift_compatible_with_MyEnum2:
     pass
 
 
-class MyEnum2(_fbthrift_python_types.Enum, int, test.fixtures.enums.module.thrift_abstract_types.MyEnum2, _fbthrift_compatible_with_MyEnum2):
+class MyEnum2(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyEnum2, _fbthrift_compatible_with_MyEnum2):
     ME2_0: MyEnum2 = ...
     ME2_1: MyEnum2 = ...
     ME2_2: MyEnum2 = ...
@@ -58,7 +58,7 @@ class _fbthrift_compatible_with_MyEnum3:
     pass
 
 
-class MyEnum3(_fbthrift_python_types.Enum, int, test.fixtures.enums.module.thrift_abstract_types.MyEnum3, _fbthrift_compatible_with_MyEnum3):
+class MyEnum3(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyEnum3, _fbthrift_compatible_with_MyEnum3):
     ME3_0: MyEnum3 = ...
     ME3_1: MyEnum3 = ...
     ME3_N2: MyEnum3 = ...
@@ -73,7 +73,7 @@ class _fbthrift_compatible_with_MyEnum4:
     pass
 
 
-class MyEnum4(_fbthrift_python_types.Enum, int, test.fixtures.enums.module.thrift_abstract_types.MyEnum4, _fbthrift_compatible_with_MyEnum4):
+class MyEnum4(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyEnum4, _fbthrift_compatible_with_MyEnum4):
     ME4_A: MyEnum4 = ...
     ME4_B: MyEnum4 = ...
     ME4_C: MyEnum4 = ...
@@ -86,7 +86,7 @@ class _fbthrift_compatible_with_MyBitmaskEnum1:
     pass
 
 
-class MyBitmaskEnum1(_fbthrift_python_types.Enum, int, test.fixtures.enums.module.thrift_abstract_types.MyBitmaskEnum1, _fbthrift_compatible_with_MyBitmaskEnum1):
+class MyBitmaskEnum1(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyBitmaskEnum1, _fbthrift_compatible_with_MyBitmaskEnum1):
     ONE: MyBitmaskEnum1 = ...
     TWO: MyBitmaskEnum1 = ...
     FOUR: MyBitmaskEnum1 = ...
@@ -98,7 +98,7 @@ class _fbthrift_compatible_with_MyBitmaskEnum2:
     pass
 
 
-class MyBitmaskEnum2(_fbthrift_python_types.Enum, int, test.fixtures.enums.module.thrift_abstract_types.MyBitmaskEnum2, _fbthrift_compatible_with_MyBitmaskEnum2):
+class MyBitmaskEnum2(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyBitmaskEnum2, _fbthrift_compatible_with_MyBitmaskEnum2):
     ONE: MyBitmaskEnum2 = ...
     TWO: MyBitmaskEnum2 = ...
     FOUR: MyBitmaskEnum2 = ...
@@ -111,7 +111,7 @@ class _fbthrift_compatible_with_SomeStruct:
     pass
 
 
-class SomeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SomeStruct, test.fixtures.enums.module.thrift_abstract_types.SomeStruct):
+class SomeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SomeStruct, _fbthrift_python_abstract_types.SomeStruct):
     reasonable: _typing.Final[Metasyntactic] = ...
     fine: _typing.Final[Metasyntactic] = ...
     questionable: _typing.Final[Metasyntactic] = ...
@@ -142,7 +142,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, test.fixtures.enums.module.thrift_abstract_types.MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
     me2_3: _typing.Final[MyEnum2] = ...
     me3_n3: _typing.Final[MyEnum3] = ...
     me1_t1: _typing.Final[MyEnum1] = ...

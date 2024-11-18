@@ -10,7 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
-import test.fixtures.interactions.module.thrift_abstract_types
+import test.fixtures.interactions.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -21,7 +21,7 @@ class _fbthrift_compatible_with_CustomException:
     pass
 
 
-class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_CustomException, test.fixtures.interactions.module.thrift_abstract_types.CustomException):
+class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_CustomException, _fbthrift_python_abstract_types.CustomException):
     message: _typing.Final[str] = ...
     def __init__(
         self, *,

@@ -12,7 +12,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
-import module.thrift_abstract_types
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -20,7 +20,7 @@ class _fbthrift_compatible_with_MyEnum:
     pass
 
 
-class MyEnum(_fbthrift_python_types.Enum, int, module.thrift_abstract_types.MyEnum, _fbthrift_compatible_with_MyEnum):
+class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyEnum, _fbthrift_compatible_with_MyEnum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
     MyValue3: MyEnum = ...
@@ -35,7 +35,7 @@ class _fbthrift_compatible_with_MyStructFloatFieldThrowExp:
     pass
 
 
-class MyStructFloatFieldThrowExp(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructFloatFieldThrowExp, module.thrift_abstract_types.MyStructFloatFieldThrowExp):
+class MyStructFloatFieldThrowExp(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructFloatFieldThrowExp, _fbthrift_python_abstract_types.MyStructFloatFieldThrowExp):
     myLongField: _typing.Final[int] = ...
     MyByteField: _typing.Final[int] = ...
     myStringField: _typing.Final[str] = ...
@@ -66,7 +66,7 @@ class _fbthrift_compatible_with_MyStructMapFloatThrowExp:
     pass
 
 
-class MyStructMapFloatThrowExp(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructMapFloatThrowExp, module.thrift_abstract_types.MyStructMapFloatThrowExp):
+class MyStructMapFloatThrowExp(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructMapFloatThrowExp, _fbthrift_python_abstract_types.MyStructMapFloatThrowExp):
     myLongField: _typing.Final[int] = ...
     mapListOfFloats: _typing.Final[_typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]] = ...
     def __init__(
@@ -91,7 +91,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, module.thrift_abstract_types.MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     MyDataField: _typing.Final[MyDataItem] = ...
@@ -194,7 +194,7 @@ class _fbthrift_compatible_with_SimpleStruct:
     pass
 
 
-class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SimpleStruct, module.thrift_abstract_types.SimpleStruct):
+class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SimpleStruct, _fbthrift_python_abstract_types.SimpleStruct):
     age: _typing.Final[int] = ...
     name: _typing.Final[str] = ...
     def __init__(
@@ -219,7 +219,7 @@ class _fbthrift_compatible_with_defaultStruct:
     pass
 
 
-class defaultStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_defaultStruct, module.thrift_abstract_types.defaultStruct):
+class defaultStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_defaultStruct, _fbthrift_python_abstract_types.defaultStruct):
     myLongDFset: _typing.Final[int] = ...
     myLongDF: _typing.Final[int] = ...
     portDFset: _typing.Final[int] = ...
@@ -304,7 +304,7 @@ class _fbthrift_compatible_with_MyStructTypeDef:
     pass
 
 
-class MyStructTypeDef(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructTypeDef, module.thrift_abstract_types.MyStructTypeDef):
+class MyStructTypeDef(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructTypeDef, _fbthrift_python_abstract_types.MyStructTypeDef):
     myLongField: _typing.Final[int] = ...
     myLongTypeDef: _typing.Final[int] = ...
     myStringField: _typing.Final[str] = ...
@@ -350,7 +350,7 @@ class _fbthrift_compatible_with_MyDataItem:
     pass
 
 
-class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem, module.thrift_abstract_types.MyDataItem):
+class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem, _fbthrift_python_abstract_types.MyDataItem):
     def __init__(
         self,
     ) -> None: ...
@@ -369,7 +369,7 @@ class _fbthrift_compatible_with_MyUnion:
     pass
 
 
-class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, module.thrift_abstract_types.MyUnion):
+class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, _fbthrift_python_abstract_types.MyUnion):
     myEnum: _typing.Final[MyEnum] = ...
     myStruct: _typing.Final[MyStruct] = ...
     myDataItem: _typing.Final[MyDataItem] = ...
@@ -387,13 +387,13 @@ class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, m
     ) -> None: ...
 
 
-    Type = FbThriftUnionFieldEnum
+    Type = _fbthrift_python_abstract_types.MyUnion.FbThriftUnionFieldEnum
 
     @classmethod
     def fromValue(cls, value: _typing.Union[None, MyEnum, MyStruct, MyDataItem, ComplexNestedStruct, int, int]) -> MyUnion: ...
     value: _typing.Final[_typing.Union[None, MyEnum, MyStruct, MyDataItem, ComplexNestedStruct, int, int]]
-    type: _typing.Final[Type]
-    def get_type(self) -> Type:...
+    type: _typing.Final[_fbthrift_python_abstract_types.MyUnion.FbThriftUnionFieldEnum]
+    def get_type(self) -> _fbthrift_python_abstract_types.MyUnion.FbThriftUnionFieldEnum: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.MyUnion": ...  # type: ignore
     def _to_py3(self) -> "module.types.MyUnion": ...  # type: ignore
@@ -404,7 +404,7 @@ class _fbthrift_compatible_with_MyUnionFloatFieldThrowExp:
     pass
 
 
-class MyUnionFloatFieldThrowExp(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnionFloatFieldThrowExp, module.thrift_abstract_types.MyUnionFloatFieldThrowExp):
+class MyUnionFloatFieldThrowExp(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnionFloatFieldThrowExp, _fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp):
     myEnum: _typing.Final[MyEnum] = ...
     setFloat: _typing.Final[_typing.Sequence[_typing.Sequence[float]]] = ...
     myDataItem: _typing.Final[MyDataItem] = ...
@@ -418,13 +418,13 @@ class MyUnionFloatFieldThrowExp(_fbthrift_python_types.Union, _fbthrift_compatib
     ) -> None: ...
 
 
-    Type = FbThriftUnionFieldEnum
+    Type = _fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum
 
     @classmethod
     def fromValue(cls, value: _typing.Union[None, MyEnum, _typing.Sequence[_typing.Sequence[float]], MyDataItem, ComplexNestedStruct]) -> MyUnionFloatFieldThrowExp: ...
     value: _typing.Final[_typing.Union[None, MyEnum, _typing.Sequence[_typing.Sequence[float]], MyDataItem, ComplexNestedStruct]]
-    type: _typing.Final[Type]
-    def get_type(self) -> Type:...
+    type: _typing.Final[_fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum]
+    def get_type(self) -> _fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp.FbThriftUnionFieldEnum: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.MyUnionFloatFieldThrowExp": ...  # type: ignore
     def _to_py3(self) -> "module.types.MyUnionFloatFieldThrowExp": ...  # type: ignore
@@ -435,7 +435,7 @@ class _fbthrift_compatible_with_ComplexNestedStruct:
     pass
 
 
-class ComplexNestedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexNestedStruct, module.thrift_abstract_types.ComplexNestedStruct):
+class ComplexNestedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexNestedStruct, _fbthrift_python_abstract_types.ComplexNestedStruct):
     setOfSetOfInt: _typing.Final[_typing.AbstractSet[_typing.AbstractSet[int]]] = ...
     listofListOfListOfListOfEnum: _typing.Final[_typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[MyEnum]]]]] = ...
     listOfListOfMyStruct: _typing.Final[_typing.Sequence[_typing.Sequence[MyStruct]]] = ...
@@ -508,7 +508,7 @@ class _fbthrift_compatible_with_TypeRemapped:
     pass
 
 
-class TypeRemapped(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TypeRemapped, module.thrift_abstract_types.TypeRemapped):
+class TypeRemapped(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TypeRemapped, _fbthrift_python_abstract_types.TypeRemapped):
     lsMap: _typing.Final[_typing.Mapping[int, str]] = ...
     ioMap: _typing.Final[_typing.Mapping[int, _typing.Mapping[int, int]]] = ...
     BigInteger: _typing.Final[int] = ...
@@ -539,7 +539,7 @@ class _fbthrift_compatible_with_emptyXcep:
     pass
 
 
-class emptyXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_emptyXcep, module.thrift_abstract_types.emptyXcep):
+class emptyXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_emptyXcep, _fbthrift_python_abstract_types.emptyXcep):
     def __init__(
         self,
     ) -> None: ...
@@ -555,7 +555,7 @@ class _fbthrift_compatible_with_reqXcep:
     pass
 
 
-class reqXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_reqXcep, module.thrift_abstract_types.reqXcep):
+class reqXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_reqXcep, _fbthrift_python_abstract_types.reqXcep):
     message: _typing.Final[str] = ...
     errorCode: _typing.Final[int] = ...
     def __init__(
@@ -575,7 +575,7 @@ class _fbthrift_compatible_with_optXcep:
     pass
 
 
-class optXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_optXcep, module.thrift_abstract_types.optXcep):
+class optXcep(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_optXcep, _fbthrift_python_abstract_types.optXcep):
     message: _typing.Final[_typing.Optional[str]] = ...
     errorCode: _typing.Final[_typing.Optional[int]] = ...
     def __init__(
@@ -595,7 +595,7 @@ class _fbthrift_compatible_with_complexException:
     pass
 
 
-class complexException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_complexException, module.thrift_abstract_types.complexException):
+class complexException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_complexException, _fbthrift_python_abstract_types.complexException):
     message: _typing.Final[str] = ...
     listStrings: _typing.Final[_typing.Sequence[str]] = ...
     errorEnum: _typing.Final[MyEnum] = ...

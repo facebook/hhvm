@@ -121,11 +121,11 @@ class MyUnion(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: MyUnion.FbThriftUnionFieldEnum = 0
-        myEnum: MyUnion.FbThriftUnionFieldEnum = 1
-        myStruct: MyUnion.FbThriftUnionFieldEnum = 2
-        myDataItem: MyUnion.FbThriftUnionFieldEnum = 3
-        floatSet: MyUnion.FbThriftUnionFieldEnum = 4
+        EMPTY = 0
+        myEnum = 1
+        myStruct = 2
+        myDataItem = 3
+        floatSet = 4
 
     FbThriftUnionFieldEnum.__name__ = "MyUnion"
 
@@ -210,8 +210,8 @@ class UnionToBeRenamed(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.UnionToBeRenamed": ...  # type: ignore
 
     class FbThriftUnionFieldEnum(_enum.Enum):
-        EMPTY: UnionToBeRenamed.FbThriftUnionFieldEnum = 0
-        reserved_field: UnionToBeRenamed.FbThriftUnionFieldEnum = 1
+        EMPTY = 0
+        reserved_field = 1
 
     FbThriftUnionFieldEnum.__name__ = "UnionToBeRenamed"
 

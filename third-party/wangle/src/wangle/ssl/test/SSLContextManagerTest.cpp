@@ -44,9 +44,13 @@ std::string get_resource(const char* res) {
 }
 } // namespace
 
-const char* kClientTestChain = "folly/io/async/test/certs/client_chain.pem";
-const char* kClientTestCert = "folly/io/async/test/certs/client_cert.pem";
-const char* kTestCert = "folly/io/async/test/certs/tests-cert.pem";
+#if !defined(FOLLY_CERTS_DIR)
+#define FOLLY_CERTS_DIR "folly/io/async/test/certs"
+#endif
+
+const char* kClientTestChain = FOLLY_CERTS_DIR "/client_chain.pem";
+const char* kClientTestCert = FOLLY_CERTS_DIR "/client_cert.pem";
+const char* kTestCert = FOLLY_CERTS_DIR "/tests-cert.pem";
 #endif
 
 using std::shared_ptr;

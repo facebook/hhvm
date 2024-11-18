@@ -269,6 +269,7 @@ if(BUILD_TESTS)
   )
   target_link_libraries(
     ${test_name}
+    Folly::folly_test_util
     wangle
     ${LIBGMOCK_LIBRARIES}
     ${LIBEVENT_LIB}

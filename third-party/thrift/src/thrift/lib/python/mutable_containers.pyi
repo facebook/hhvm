@@ -15,7 +15,12 @@
 # pyre-strict
 
 import typing
-from collections.abc import Iterator, MutableSequence, MutableSet as MutableSetAbc
+from collections.abc import (
+    Iterator,
+    MutableMapping as MutableMappingAbc,
+    MutableSequence,
+    MutableSet as MutableSetAbc,
+)
 from typing import (
     Any,
     Generic,
@@ -195,7 +200,7 @@ V = TypeVar("V")
 _K = TypeVar("_K")
 _V = TypeVar("_V")
 
-class MutableMap(Generic[K, V]):
+class MutableMap(MutableMappingAbc[K, V]):
     def __init__(
         self,
         key_typeinfo: object,
@@ -205,6 +210,7 @@ class MutableMap(Generic[K, V]):
     def __len__(self) -> int: ...
     def __getitem__(self, key: K) -> V: ...
     def __iter__(self) -> ValueIterator[K]: ...
+    # pyre-ignore[14]: Inconsistent override
     def get(self, key: K, default: Optional[V] = None) -> V: ...
     @overload
     def __setitem__(self, key: K, value: V) -> None: ...
@@ -228,6 +234,7 @@ class MutableMap(Generic[K, V]):
     ) -> None: ...
     def __delitem__(self, key: K) -> None: ...
     def __contains__(self, key: T) -> bool: ...
+    # pyre-ignore[14]: Inconsistent override
     def update(
         self,
         other: Union[
@@ -237,12 +244,17 @@ class MutableMap(Generic[K, V]):
         /,
         **keywords: object,
     ) -> None: ...
+    # pyre-ignore[14]: Inconsistent override
     def pop(self, key: T, default: Optional[object] = MapKwargsSentinelType()) -> V: ...
     def popitem(self) -> Tuple[K, V]: ...
     def clear(self) -> None: ...
+    # pyre-ignore[15]: Inconsistent override
     def keys(self) -> MapKeysView[K]: ...
+    # pyre-ignore[15]: Inconsistent override
     def items(self) -> MapItemsView[K, V]: ...
+    # pyre-ignore[15]: Inconsistent override
     def values(self) -> MapValuesView[V]: ...
+    # pyre-ignore[14]: Inconsistent override
     def setdefault(self, key: object, default: typing.Optional[object] = None) -> V: ...
 
 class MapKeysView(Generic[K]):

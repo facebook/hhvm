@@ -17,7 +17,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <folly/Benchmark.h>
-#include <folly/init/Init.h>
 #include <folly/portability/GFlags.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -185,8 +184,6 @@ TEST(sdf, sdfsd) {
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   gflags::ParseCommandLineFlags(&argc, &argv, true);
-  // necessary for Thrift Flags, their singletons, and observers
-  folly::Init init(&argc, &argv);
 
   srand(time(0));
 

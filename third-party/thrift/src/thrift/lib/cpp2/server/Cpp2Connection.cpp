@@ -40,8 +40,6 @@ THRIFT_FLAG_DEFINE_bool(server_header_reject_all, true);
 
 THRIFT_FLAG_DEFINE_int64(monitoring_over_header_logging_sample_rate, 1'000'000);
 
-THRIFT_FLAG_DECLARE_bool(enforce_header_transport_valid_protocol);
-
 namespace apache::thrift {
 
 using namespace std;
@@ -425,8 +423,7 @@ void Cpp2Connection::requestReceived(
   auto msgBegin = apache::thrift::detail::ap::deserializeMessageBegin(
       *hreq->getBuf(), protoId);
 
-  if (THRIFT_FLAG(enforce_header_transport_valid_protocol) &&
-      !msgBegin.metadata.isValid) {
+  if (!msgBegin.metadata.isValid) {
     disconnect("Rejecting unparseable message begin");
     return;
   }

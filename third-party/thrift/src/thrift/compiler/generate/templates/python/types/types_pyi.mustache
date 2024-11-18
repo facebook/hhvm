@@ -94,18 +94,14 @@ class {{> structs/unadapted_name}}({{!
     }}{{/program:generate_immutable_types}}{{!
     }}{{#program:generate_mutable_types}}{{!
     }}{{#struct:fields_ordered_by_id}}{{!
-    }}{{^field:is_container_type}}
-    {{field:py_name}}: {{> fields/field_type_pyi}} = ...
-    {{/field:is_container_type}}{{!
-    }}{{#field:is_container_type}}
+    }}
 
     @property
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
     @{{field:py_name}}.setter
-    def {{field:py_name}}(self, value: {{> fields/field_type_pyi}}{{> types/thrift_container_wrapper}}): ...
+    def {{field:py_name}}(self, value: {{> fields/field_type_pyi}}{{#field:is_container_type}}{{> types/thrift_container_wrapper}}{{/field:is_container_type}}): ...
 
-    {{/field:is_container_type}}{{!
-    }}{{/struct:fields_ordered_by_id}}{{!
+    {{/struct:fields_ordered_by_id}}{{!
     }}{{/program:generate_mutable_types}}
     def __init__(
         self,{{#struct:fields?}} *{{/struct:fields?}}{{!

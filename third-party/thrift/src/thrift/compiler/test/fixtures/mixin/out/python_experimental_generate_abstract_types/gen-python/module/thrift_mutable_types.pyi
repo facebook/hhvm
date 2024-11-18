@@ -35,7 +35,12 @@ class _fbthrift_compatible_with_Mixin1:
 
 
 class Mixin1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin1, module.thrift_abstract_types.Mixin1):
-    field1: str = ...
+
+    @property
+    def field1(self) -> str: ...
+    @field1.setter
+    def field1(self, value: str): ...
+
     def __init__(
         self, *,
         field1: _typing.Optional[str]=...
@@ -57,8 +62,18 @@ class _fbthrift_compatible_with_Mixin2:
 
 
 class Mixin2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin2, module.thrift_abstract_types.Mixin2):
-    m1: Mixin1 = ...
-    field2: _typing.Optional[str] = ...
+
+    @property
+    def m1(self) -> Mixin1: ...
+    @m1.setter
+    def m1(self, value: Mixin1): ...
+
+
+    @property
+    def field2(self) -> _typing.Optional[str]: ...
+    @field2.setter
+    def field2(self, value: _typing.Optional[str]): ...
+
     def __init__(
         self, *,
         m1: _typing.Optional[_fbthrift_compatible_with_Mixin1]=...,
@@ -82,7 +97,12 @@ class _fbthrift_compatible_with_Mixin3Base:
 
 
 class Mixin3Base(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin3Base, module.thrift_abstract_types.Mixin3Base):
-    field3: str = ...
+
+    @property
+    def field3(self) -> str: ...
+    @field3.setter
+    def field3(self, value: str): ...
+
     def __init__(
         self, *,
         field3: _typing.Optional[str]=...
@@ -104,9 +124,24 @@ class _fbthrift_compatible_with_Foo:
 
 
 class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Foo, module.thrift_abstract_types.Foo):
-    field4: str = ...
-    m2: Mixin2 = ...
-    m3: Mixin3Base = ...
+
+    @property
+    def field4(self) -> str: ...
+    @field4.setter
+    def field4(self, value: str): ...
+
+
+    @property
+    def m2(self) -> Mixin2: ...
+    @m2.setter
+    def m2(self, value: Mixin2): ...
+
+
+    @property
+    def m3(self) -> Mixin3Base: ...
+    @m3.setter
+    def m3(self, value: Mixin3Base): ...
+
     def __init__(
         self, *,
         field4: _typing.Optional[str]=...,

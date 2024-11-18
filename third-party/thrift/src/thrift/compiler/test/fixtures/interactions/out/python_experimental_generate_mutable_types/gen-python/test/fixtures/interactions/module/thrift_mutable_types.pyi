@@ -36,7 +36,12 @@ class _fbthrift_compatible_with_CustomException:
 
 
 class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomException):
-    message: str = ...
+
+    @property
+    def message(self) -> str: ...
+    @message.setter
+    def message(self, value: str): ...
+
     def __init__(
         self, *,
         message: _typing.Optional[str]=...

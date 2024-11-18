@@ -35,7 +35,12 @@ class _fbthrift_compatible_with_Foo:
 
 
 class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Foo, test.namespace_from_package.module.thrift_abstract_types.Foo):
-    MyInt: int = ...
+
+    @property
+    def MyInt(self) -> int: ...
+    @MyInt.setter
+    def MyInt(self, value: int): ...
+
     def __init__(
         self, *,
         MyInt: _typing.Optional[int]=...

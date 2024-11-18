@@ -35,7 +35,12 @@ class _fbthrift_compatible_with_Fiery:
 
 
 class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Fiery, module.thrift_abstract_types.Fiery):
-    message: str = ...
+
+    @property
+    def message(self) -> str: ...
+    @message.setter
+    def message(self, value: str): ...
+
     def __init__(
         self, *,
         message: _typing.Optional[str]=...
@@ -53,7 +58,12 @@ class _fbthrift_compatible_with_Serious:
 
 
 class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Serious, module.thrift_abstract_types.Serious):
-    not_sonnet: _typing.Optional[str] = ...
+
+    @property
+    def not_sonnet(self) -> _typing.Optional[str]: ...
+    @not_sonnet.setter
+    def not_sonnet(self, value: _typing.Optional[str]): ...
+
     def __init__(
         self, *,
         not_sonnet: _typing.Optional[str]=...
@@ -71,8 +81,18 @@ class _fbthrift_compatible_with_ComplexFieldNames:
 
 
 class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ComplexFieldNames, module.thrift_abstract_types.ComplexFieldNames):
-    error_message: str = ...
-    internal_error_message: str = ...
+
+    @property
+    def error_message(self) -> str: ...
+    @error_message.setter
+    def error_message(self, value: str): ...
+
+
+    @property
+    def internal_error_message(self) -> str: ...
+    @internal_error_message.setter
+    def internal_error_message(self, value: str): ...
+
     def __init__(
         self, *,
         error_message: _typing.Optional[str]=...,
@@ -91,8 +111,18 @@ class _fbthrift_compatible_with_CustomFieldNames:
 
 
 class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomFieldNames, module.thrift_abstract_types.CustomFieldNames):
-    error_message: str = ...
-    internal_error_message: str = ...
+
+    @property
+    def error_message(self) -> str: ...
+    @error_message.setter
+    def error_message(self, value: str): ...
+
+
+    @property
+    def internal_error_message(self) -> str: ...
+    @internal_error_message.setter
+    def internal_error_message(self, value: str): ...
+
     def __init__(
         self, *,
         error_message: _typing.Optional[str]=...,
@@ -111,8 +141,18 @@ class _fbthrift_compatible_with_ExceptionWithPrimitiveField:
 
 
 class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField, module.thrift_abstract_types.ExceptionWithPrimitiveField):
-    message: str = ...
-    error_code: int = ...
+
+    @property
+    def message(self) -> str: ...
+    @message.setter
+    def message(self, value: str): ...
+
+
+    @property
+    def error_code(self) -> int: ...
+    @error_code.setter
+    def error_code(self, value: int): ...
+
     def __init__(
         self, *,
         message: _typing.Optional[str]=...,
@@ -131,8 +171,18 @@ class _fbthrift_compatible_with_ExceptionWithStructuredAnnotation:
 
 
 class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation, module.thrift_abstract_types.ExceptionWithStructuredAnnotation):
-    message_field: str = ...
-    error_code: int = ...
+
+    @property
+    def message_field(self) -> str: ...
+    @message_field.setter
+    def message_field(self, value: str): ...
+
+
+    @property
+    def error_code(self) -> int: ...
+    @error_code.setter
+    def error_code(self, value: int): ...
+
     def __init__(
         self, *,
         message_field: _typing.Optional[str]=...,

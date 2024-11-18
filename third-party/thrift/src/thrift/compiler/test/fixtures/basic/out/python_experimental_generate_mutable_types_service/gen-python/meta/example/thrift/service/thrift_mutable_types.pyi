@@ -34,7 +34,12 @@ class _fbthrift_compatible_with_EchoRequest:
 
 
 class EchoRequest(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_EchoRequest):
-    text: str = ...
+
+    @property
+    def text(self) -> str: ...
+    @text.setter
+    def text(self, value: str): ...
+
     def __init__(
         self, *,
         text: _typing.Optional[str]=...
@@ -56,7 +61,12 @@ class _fbthrift_compatible_with_EchoResponse:
 
 
 class EchoResponse(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_EchoResponse):
-    text: str = ...
+
+    @property
+    def text(self) -> str: ...
+    @text.setter
+    def text(self, value: str): ...
+
     def __init__(
         self, *,
         text: _typing.Optional[str]=...
@@ -78,7 +88,12 @@ class _fbthrift_compatible_with_WhisperException:
 
 
 class WhisperException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_WhisperException):
-    message: str = ...
+
+    @property
+    def message(self) -> str: ...
+    @message.setter
+    def message(self, value: str): ...
+
     def __init__(
         self, *,
         message: _typing.Optional[str]=...

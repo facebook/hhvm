@@ -66,6 +66,13 @@ Object parseObject(const folly::IOBuf& buf, bool string_to_binary = true) {
   return obj;
 }
 
+template <class Protocol>
+Object parseObject(Protocol& prot, bool string_to_binary = true) {
+  Object obj;
+  detail::parseObjectInplace(prot, obj, string_to_binary);
+  return obj;
+}
+
 // Schemaless deserialization of thrift serialized data with mask.
 // Only parses values that are masked. Unmasked fields are stored in MaskedData.
 template <typename Protocol>
@@ -158,6 +165,18 @@ template <class Protocol, typename Tag>
 Value parseValue(const folly::IOBuf& buf, bool string_to_binary = true) {
   return parseValue<Protocol>(
       buf, type::detail::getBaseType(Tag{}), string_to_binary);
+}
+
+template <class Protocol>
+Value parseValue(
+    Protocol& prot, type::BaseType baseType, bool string_to_binary) {
+  return detail::parseValue(prot, type::toTType(baseType), string_to_binary);
+}
+
+template <class Protocol, typename Tag>
+Value parseValue(Protocol& prot, bool string_to_binary = true) {
+  return parseValue<Protocol>(
+      prot, type::detail::getBaseType(Tag{}), string_to_binary);
 }
 
 /// Convert protocol::Value to native thrift value.

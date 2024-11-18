@@ -195,7 +195,8 @@ bool compile_systemlib(const std::filesystem::path& path, std::string output_dir
   );
 
   if (decls.has_errors) {
-    Logger::Error("Something went wrong when getting decls for %s because it has errors",
+    Logger::Error("Something went wrong when getting decls for %s because it "
+                  "has errors",
                   fname.c_str());
     return false;
   }
@@ -229,6 +230,10 @@ bool process(CompilerOptions &po) {
 
   for (auto extension : ExtensionRegistry::getExtensions()) {
     for (auto file : extension->hackFiles()) {
+      if (!files.count(file)) {
+        Logger::Error(
+          "Error while compiling stdlib: %s not found in input files - did you add an extension without any hack files? If so, override hackFiles to return an empty vector.", file.c_str());
+      }
       auto path = files.at("ext_" + file);
       if (!compile_systemlib(path.string(), po.outputDir, extension)) {
         return false;

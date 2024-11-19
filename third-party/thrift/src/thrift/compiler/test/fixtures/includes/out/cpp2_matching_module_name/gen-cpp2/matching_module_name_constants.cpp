@@ -11,11 +11,34 @@
 
 #include "other/gen-cpp2/matching_module_name_constants.h"
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+// other/matching_module_name.thrift
+namespace matching_module_name {namespace matching_module_name_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_6f485429c010b1a7();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_6f485429c010b1a7_includes();
+}} // namespace matching_module_name
+
+#endif
 
 namespace matching_module_name {
 namespace matching_module_name_constants {
 
 
+::std::string_view _fbthrift_schema_1cd40e8dd523bf67() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_1cd40e8dd523bf67_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 2> includes = {
+    _fbthrift_schema_1cd40e8dd523bf67(),
+    ::apache::thrift::detail::mc::readSchema(::matching_module_name::matching_module_name_constants::_fbthrift_schema_6f485429c010b1a7),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace matching_module_name_constants
 } // namespace matching_module_name

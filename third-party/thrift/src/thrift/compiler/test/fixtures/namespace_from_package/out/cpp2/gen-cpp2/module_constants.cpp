@@ -10,11 +10,27 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+#endif
 
 namespace test::namespace_from_package::module {
 namespace module_constants {
 
 
+::std::string_view _fbthrift_schema_fb6dbefc3ac27d1f() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_fb6dbefc3ac27d1f_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 1> includes = {
+    _fbthrift_schema_fb6dbefc3ac27d1f(),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace module_constants
 } // namespace test::namespace_from_package::module

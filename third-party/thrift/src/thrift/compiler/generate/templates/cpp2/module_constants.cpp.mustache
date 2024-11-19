@@ -25,7 +25,6 @@
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
 {{/program:thrift_includes}}
 
-{{#program:has_schema?}}
 #if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
 
 {{#program:thrift_includes}}
@@ -38,7 +37,6 @@ FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> {{program:schema_name}
 
 {{/program:thrift_includes}}
 #endif
-{{/program:has_schema?}}
 
 {{ > common/namespace_cpp2_begin}}
 
@@ -70,7 +68,11 @@ namespace {{program:name}}_constants {
 
 {{/constant:value}}{{/constant:type}}{{/program:constants}}
 
-{{#program:has_schema?}}
+{{^program:has_schema?}}
+::std::string_view {{program:schema_name}}() {
+  return "";
+}
+{{/program:has_schema?}}
 ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
 #if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
   static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> includes = {
@@ -83,7 +85,6 @@ namespace {{program:name}}_constants {
   return {};
 #endif
 }
-{{/program:has_schema?}}
 
 } // namespace {{program:name}}_constants
 {{ > common/namespace_cpp2_end}}

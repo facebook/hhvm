@@ -10,11 +10,27 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+#endif
 
 namespace test::fixtures::python_capi {
 namespace serialized_dep_constants {
 
 
+::std::string_view _fbthrift_schema_b748ca241bc21635() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 1> includes = {
+    _fbthrift_schema_b748ca241bc21635(),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace serialized_dep_constants
 } // namespace test::fixtures::python_capi

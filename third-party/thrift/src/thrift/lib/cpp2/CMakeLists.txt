@@ -243,6 +243,7 @@ add_library(
   async/ServerRequestData.cpp
   async/ServerSinkBridge.cpp
   async/ThreadBoundAdaptorChannel.cpp
+  gen/module_constants_cpp.cpp
   gen/module_metadata_cpp.cpp
   gen/module_types_cpp.cpp
   runtime/BaseSchemaRegistry.cpp

@@ -11,6 +11,15 @@
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_constants.h"
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+// transitive.thrift
+namespace cpp2 {namespace transitive_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_acc59018aeab0283();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_acc59018aeab0283_includes();
+}} // namespace cpp2
+
+#endif
 
 namespace cpp2 {
 namespace includes_constants {
@@ -22,6 +31,20 @@ namespace includes_constants {
 
 
 
+::std::string_view _fbthrift_schema_708c30a658df2a09() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_708c30a658df2a09_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 2> includes = {
+    _fbthrift_schema_708c30a658df2a09(),
+    ::apache::thrift::detail::mc::readSchema(::cpp2::transitive_constants::_fbthrift_schema_acc59018aeab0283),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace includes_constants
 } // namespace cpp2

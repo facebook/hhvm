@@ -10,11 +10,27 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+#endif
 
 namespace facebook::thrift::test::terse_write {
 namespace terse_write_constants {
 
 
+::std::string_view _fbthrift_schema_b2d2455fa6f0dfdd() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_b2d2455fa6f0dfdd_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 1> includes = {
+    _fbthrift_schema_b2d2455fa6f0dfdd(),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace terse_write_constants
 } // namespace facebook::thrift::test::terse_write

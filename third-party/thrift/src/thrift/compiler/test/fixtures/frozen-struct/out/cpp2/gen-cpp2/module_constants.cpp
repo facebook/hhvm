@@ -12,11 +12,41 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_constants.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_constants.h"
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+// include1.thrift
+namespace some::ns {namespace include1_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_4e5fea264ed24d13();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_4e5fea264ed24d13_includes();
+}} // namespace some::ns
+
+// include2.thrift
+namespace some::ns {namespace include2_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_b10a3ad77ea57434();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_b10a3ad77ea57434_includes();
+}} // namespace some::ns
+
+#endif
 
 namespace some::ns {
 namespace module_constants {
 
 
+::std::string_view _fbthrift_schema_82239cb6679d7868() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_82239cb6679d7868_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 3> includes = {
+    _fbthrift_schema_82239cb6679d7868(),
+    ::apache::thrift::detail::mc::readSchema(::some::ns::include1_constants::_fbthrift_schema_4e5fea264ed24d13),
+    ::apache::thrift::detail::mc::readSchema(::some::ns::include2_constants::_fbthrift_schema_b10a3ad77ea57434),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace module_constants
 } // namespace some::ns

@@ -11,11 +11,34 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/included_constants.h"
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+// included.thrift
+namespace apache::thrift::fixtures::types {namespace included_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_b4a934370009b432();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_b4a934370009b432_includes();
+}} // namespace apache::thrift::fixtures::types
+
+#endif
 
 namespace apache::thrift::fixtures::types {
 namespace module_constants {
 
 
+::std::string_view _fbthrift_schema_e891a7857e533163() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_e891a7857e533163_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 2> includes = {
+    _fbthrift_schema_e891a7857e533163(),
+    ::apache::thrift::detail::mc::readSchema(::apache::thrift::fixtures::types::included_constants::_fbthrift_schema_b4a934370009b432),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace module_constants
 } // namespace apache::thrift::fixtures::types

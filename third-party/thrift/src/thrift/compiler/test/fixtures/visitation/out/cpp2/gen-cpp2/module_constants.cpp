@@ -12,6 +12,21 @@
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_B_constants.h"
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_C_constants.h"
 
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+
+// reflection_dep_B.thrift
+namespace test_cpp2::cpp_reflection {namespace reflection_dep_B_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_73d2e4ac7b154360();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_73d2e4ac7b154360_includes();
+}} // namespace test_cpp2::cpp_reflection
+
+// reflection_dep_C.thrift
+namespace test_cpp2::cpp_reflection {namespace reflection_dep_C_constants {
+FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_5c8bee323039ecdf();
+FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_5c8bee323039ecdf_includes();
+}} // namespace test_cpp2::cpp_reflection
+
+#endif
 
 namespace test_cpp2::cpp_reflection {
 namespace module_constants {
@@ -21,6 +36,22 @@ namespace module_constants {
 
 
 
+::std::string_view _fbthrift_schema_c10aed29f43b19bb() {
+  return "";
+}
+::folly::Range<const ::std::string_view*> _fbthrift_schema_c10aed29f43b19bb_includes() {
+#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
+  static const ::std::array<::std::string_view, 4> includes = {
+    _fbthrift_schema_c10aed29f43b19bb(),
+    ::apache::thrift::detail::mc::readSchema(::test_cpp2::cpp_reflection::reflection_dep_B_constants::_fbthrift_schema_73d2e4ac7b154360),
+    ::apache::thrift::detail::mc::readSchema(::test_cpp2::cpp_reflection::reflection_dep_C_constants::_fbthrift_schema_5c8bee323039ecdf),
+    ::apache::thrift::detail::mc::readSchemaInclude(::test_cpp2::cpp_reflection::reflection_dep_C_constants::_fbthrift_schema_5c8bee323039ecdf_includes, 1),
+  };
+  return ::folly::range(includes);
+#else
+  return {};
+#endif
+}
 
 } // namespace module_constants
 } // namespace test_cpp2::cpp_reflection

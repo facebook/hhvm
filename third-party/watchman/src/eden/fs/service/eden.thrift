@@ -1859,6 +1859,31 @@ struct CommitTransition {
 }
 
 /*
+ * Large change notification returned when invoking changesSinceV2.
+ * Indicates that EdenfS was unable to track changes within the given
+ * mount point since the provided journal poistion. Callers should
+ * treat all filesystem entries as changed.
+ */
+enum LostChangesReason {
+  // Unknown reason.
+  UNKNOWN = 0,
+  // The given mount point was remounted (or EdenFS was restarted).
+  EDENFS_REMOUNTED = 1,
+  // EdenFS' journal was truncated.
+  JOURNAL_TRUNCATED = 2,
+  // There were too many change notifications to report to the caller.
+  TOO_MANY_CHANGES = 3,
+}
+
+/*
+ * Large change notification returned when invoking changesSinceV2.
+ * Indicates that EdenFS was unable to provide the changes to the caller.
+ */
+struct LostChanges {
+  1: LostChangesReason reason;
+}
+
+/*
  * Change notification returned when invoking changesSinceV2.
  * Indicates that the given change is large in impact - affecting
  * an unknown number of filesystem entries.
@@ -1866,6 +1891,7 @@ struct CommitTransition {
 union LargeChangeNotification {
   1: DirectoryRenamed directoryRenamed;
   2: CommitTransition commitTransition;
+  3: LostChanges lostChanges;
 }
 
 /*

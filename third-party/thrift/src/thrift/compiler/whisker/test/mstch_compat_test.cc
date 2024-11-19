@@ -79,7 +79,7 @@ TEST_F(MstchCompatTest, map_lookups) {
       "`-'key2'\n"
       "  |-null\n");
 
-  eval_context ctx{converted};
+  auto ctx = eval_context::with_root_scope(converted);
   EXPECT_EQ(*ctx.lookup_object({}), converted);
   EXPECT_TRUE(is_mstch_map(*ctx.lookup_object({"key"})));
   EXPECT_FALSE(is_mstch_array(*ctx.lookup_object({"key"})));
@@ -132,7 +132,7 @@ TEST_F(MstchCompatTest, array_iteration) {
       "  |   |   |   |-i64(3)\n");
 
   {
-    eval_context ctx{converted};
+    auto ctx = eval_context::with_root_scope(converted);
     EXPECT_TRUE(is_mstch_array(*ctx.lookup_object({"key"})));
     EXPECT_FALSE(is_mstch_map(*ctx.lookup_object({"key"})));
     EXPECT_FALSE(is_mstch_object(*ctx.lookup_object({"key"})));
@@ -179,7 +179,7 @@ TEST_F(MstchCompatTest, mstch_object) {
   EXPECT_EQ(converted, from_mstch(mstch_obj));
 
   {
-    eval_context ctx{converted};
+    auto ctx = eval_context::with_root_scope(converted);
     EXPECT_TRUE(is_mstch_object(*ctx.lookup_object({})));
     EXPECT_FALSE(is_mstch_map(*ctx.lookup_object({})));
     EXPECT_FALSE(is_mstch_array(*ctx.lookup_object({})));

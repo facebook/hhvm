@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <functional>
 #include <iterator>
-#include <map>
 
 #include <fmt/core.h>
 
@@ -93,10 +92,17 @@ const object* eval_context::lexical_scope::lookup_property(
   return find_property(this_ref_, identifier);
 }
 
-eval_context::eval_context(const object& root_scope, map globals)
+eval_context::eval_context(map globals)
     : global_scope_(
           w::make_native_object<global_scope_object>(std::move(globals))),
-      stack_({lexical_scope(global_scope_), lexical_scope(root_scope)}) {}
+      stack_({lexical_scope(global_scope_)}) {}
+
+/* static */ eval_context eval_context::with_root_scope(
+    const object& root_scope, map globals) {
+  eval_context result{std::move(globals)};
+  result.push_scope(root_scope);
+  return result;
+}
 
 eval_context::~eval_context() noexcept = default;
 
@@ -111,8 +117,8 @@ void eval_context::push_scope(const object& object) {
 }
 
 void eval_context::pop_scope() {
-  // The root scope cannot be popped.
-  assert(stack_depth() > 1);
+  // The global scope cannot be popped.
+  assert(stack_depth() > 0);
   stack_.pop_back();
 }
 

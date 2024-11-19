@@ -19,10 +19,9 @@
 #include <thrift/compiler/whisker/expected.h>
 #include <thrift/compiler/whisker/object.h>
 
-#include <cstdint>
+#include <cstddef>
 #include <deque>
 #include <functional>
-#include <optional>
 #include <string>
 #include <variant>
 #include <vector>
@@ -144,13 +143,22 @@ class eval_name_already_bound_error {
  */
 class eval_context {
  public:
-  explicit eval_context(const object& root_scope, map globals = {});
-  /* implicit */ eval_context(object&&) = delete;
+  eval_context() : eval_context(map()) {}
+  explicit eval_context(map globals);
+
+  /**
+   * Creates an eval_context with an initial root scope.
+   *
+   * Post-conditions:
+   *   - stack_depth() == 1
+   */
+  static eval_context with_root_scope(
+      const object& root_scope, map globals = {});
+
   ~eval_context() noexcept;
 
   /**
-   * Returns the number of frames (lexical_scopes) currently in the stack. This
-   * is guaranteed to be greater than 0.
+   * Returns the number of frames (lexical_scopes) currently in the stack.
    *
    * The stack depth changes with push_scope() and pop_scope() calls.
    */
@@ -168,14 +176,19 @@ class eval_context {
    * Pops the top-most lexical scope from the stack. The previous scope becomes
    * the current scope.
    *
+   * Calling pop_scope() decreases the stack depth by 1. The global scope cannot
+   * be popped.
+   *
    * Preconditions:
-   *   - The stack depth is greater than 1.
+   *   - The stack depth is greater than 0.
    */
   void pop_scope();
 
   /**
    * Returns the global scope. That is, the bottom-most lexical scope that is
-   * implicitly created before the provided root scope.
+   * implicitly present before the stack.
+   *
+   * The global scope cannot be popped off the stack.
    */
   const object& global_scope() const;
 
@@ -261,11 +274,11 @@ class eval_context {
     locals_map locals_;
   };
 
-  // The bottom of the stack holding all global bindings.
+  // The bottom of the stack that holds all global bindings.
   object global_scope_;
   // We're using a deque because we want to maintain reference stability when
   // push_scope() / pop_scope() are called. This is because there may be
-  // manaed_object's passed around with references into those scope objects.
+  // references passed around to those scope objects.
   std::deque<lexical_scope> stack_;
 };
 

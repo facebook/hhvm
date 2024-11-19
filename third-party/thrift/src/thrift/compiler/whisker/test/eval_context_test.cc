@@ -78,7 +78,7 @@ class delegate_to : public native_object {
 TEST(EvalContextTest, basic_name_resolution) {
   auto root =
       w::map({{"foo", w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}})}});
-  eval_context ctx{root};
+  auto ctx = eval_context::with_root_scope(root);
   EXPECT_EQ(*ctx.lookup_object({"foo", "bar"}), i64(3));
   EXPECT_EQ(*ctx.lookup_object({"foo", "baz"}), i64(4));
   EXPECT_EQ(
@@ -93,7 +93,7 @@ TEST(EvalContextTest, parent_scope) {
        {"parent", w::string("works")}});
   object child_1 = w::map({{"foo", w::map({{"abc", w::i64(5)}})}});
   object child_2 = w::map({{"bar", w::map({{"baz", w::boolean(true)}})}});
-  eval_context ctx{root};
+  auto ctx = eval_context::with_root_scope(root);
   ctx.push_scope(child_1);
   ctx.push_scope(child_2);
 
@@ -140,7 +140,7 @@ TEST(EvalContextTest, locals) {
        {"foo-2", w::f64(2.0)}});
   object child_1 = w::map({{"foo-2", w::string("shadowed")}});
 
-  eval_context ctx{root};
+  auto ctx = eval_context::with_root_scope(root);
   ctx.push_scope(child_1);
 
   EXPECT_EQ(*ctx.lookup_object({"foo-2"}), "shadowed");
@@ -172,14 +172,14 @@ TEST(EvalContextTest, self_reference) {
       w::native_object(std::make_shared<empty_native_object>())};
 
   for (const auto& obj : objects) {
-    eval_context ctx(obj);
+    auto ctx = eval_context::with_root_scope(obj);
     EXPECT_EQ(*ctx.lookup_object({}), obj);
   }
 }
 
 TEST(EvalContextTest, native_object_basic) {
   auto o = w::make_native_object<double_property_name>();
-  eval_context ctx{o};
+  auto ctx = eval_context::with_root_scope(o);
   EXPECT_EQ(*ctx.lookup_object({"foo"}), string("foofoo"));
   EXPECT_EQ(*ctx.lookup_object({"bar"}), string("barbar"));
 }
@@ -190,7 +190,7 @@ TEST(EvalContextTest, native_object_delegator) {
   object doubler = w::native_object(doubler_ref);
   object delegator = w::make_native_object<delegate_to>(doubler);
 
-  eval_context ctx{delegator};
+  auto ctx = eval_context::with_root_scope(delegator);
   EXPECT_EQ(*ctx.lookup_object({"foo"}), doubler);
   EXPECT_EQ(*ctx.lookup_object({"foo", "bar"}), string("barbar"));
 
@@ -206,7 +206,7 @@ TEST(EvalContextTest, globals) {
   map globals{{"global", w::i64(1)}};
   object root;
 
-  eval_context ctx{root, globals};
+  auto ctx = eval_context::with_root_scope(root, globals);
   EXPECT_EQ(*ctx.lookup_object({"global"}), i64(1));
 
   object shadowing = w::map({{"global", w::i64(2)}});

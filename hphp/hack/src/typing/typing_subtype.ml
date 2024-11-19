@@ -4186,8 +4186,12 @@ end = struct
                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
             in
             param_props env &&& ret_prop
-        | (_, Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } })
-          ->
+        | (_, Ttuple { t_required; t_extra }) ->
+          let extras =
+            match t_extra with
+            | Textra { t_variadic; t_optional } -> t_variadic :: t_optional
+            | Tsplat t_splat -> [t_splat]
+          in
           List.fold_left
             ~init:(env, TL.valid)
             ~f:(fun res ty_sub ->
@@ -4198,9 +4202,7 @@ end = struct
                     ~lhs:{ sub_supportdyn; ty_sub }
                     ~rhs:
                       { super_like = false; super_supportdyn = false; ty_super })
-            ((t_variadic :: t_optional) @ t_required)
-        (* TODO splats in tuples *)
-        | (_, Ttuple { t_extra = Tsplat _; _ }) -> invalid env ~fail
+            (extras @ t_required)
         | ( _,
             Tshape
               {

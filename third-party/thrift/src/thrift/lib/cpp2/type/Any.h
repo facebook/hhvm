@@ -74,6 +74,12 @@ class AnyData : public detail::Wrap<AnyStruct> {
   }
 
   template <typename Tag>
+  bool contains() const {
+    // TODO(dokwon): Check the type hash.
+    return type() == Type{Tag{}};
+  }
+
+  template <typename Tag>
   type::native_type<Tag> get() const {
     type::native_type<Tag> v;
     get<Tag>(v);
@@ -125,6 +131,7 @@ AnyData AnyData::toAny(const native_type<Tag>& v) {
 
 template <typename Tag>
 void AnyData::get(native_type<Tag>& v) const {
+  // TODO(dokwon): Check the type hash.
   if (type() != Type{Tag{}}) {
     throwTypeMismatchException(Type{Tag{}}, type());
   }

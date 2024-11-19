@@ -79,6 +79,8 @@ TEST(AnyTest, BaseApi) {
   builder.data() = folly::IOBuf::wrapBufferAsValue("hi", 2);
 
   AnyData any(builder);
+  EXPECT_TRUE(any.contains<type::i16_t>());
+  EXPECT_FALSE(any.contains<type::i32_t>());
   EXPECT_EQ(any.type(), Type::get<i16_t>());
   EXPECT_EQ(any.protocol(), Protocol::get<StandardProtocol::Compact>());
   EXPECT_EQ(any.data().data(), builder.data()->data());
@@ -109,6 +111,7 @@ TYPED_TEST(AnyTestFixture, ToAny) {
     any.get<TypeParam>(v1);
   }
   EXPECT_EQ(v1, any.get<TypeParam>());
+  EXPECT_TRUE(any.contains<TypeParam>());
   EXPECT_EQ(v1, value);
 
   EXPECT_EQ(any.type(), Type{TypeParam{}});
@@ -186,6 +189,7 @@ TYPED_TEST(AnyTestFixture, BinaryProtocol) {
   EXPECT_EQ(any.type(), Type{TypeParam{}});
   EXPECT_EQ(any.protocol(), Protocol::get<StandardProtocol::Binary>());
 
+  EXPECT_TRUE(any.contains<TypeParam>());
   EXPECT_EQ(any.get<TypeParam>(), value);
 }
 

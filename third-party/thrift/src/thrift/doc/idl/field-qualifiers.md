@@ -50,7 +50,7 @@ The `deprecated_terse_writes` compiler option is deprecated. Please use `@thrift
 
 :::
 
-Some of the space savings of `optional` fields can be obtained with `default` storage (not `optional`, not `required`) by passing the `deprecated_terse_writes` option to the compiler. `deprecated_terse_writes` will suppress serializing fields where the values are the same as their present default value, when doing that comparison is cheap (e.g. i32/i64, empty strings/list/map). This will lead to smaller output and lower deserialization cost - particularly when fields are sparsely used.
+Some of the space savings of `optional` fields can be obtained with unqualified fields by passing the `deprecated_terse_writes` option to the compiler (deprecated and C++ only) or using the `@thrift.TerseWrite` annotation to suppress serialization of fields equal to their default value (standard / intrinsic, respectively), which will lead to smaller output and lower deserialization cost - particularly when fields are sparsely used.
 
 ## Practical Recommendations
 

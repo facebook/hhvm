@@ -360,6 +360,8 @@ void MysqlFetchOperationImpl::specializedTimeoutTriggered() {
 void MysqlFetchOperationImpl::specializedCompleteOperation() {
   FetchOperation& op = getOp();
 
+  auto& connection = conn();
+
   // Get all logging information
   db::QueryLoggingData logging_data(
       getOp().getOperationType(),
@@ -369,9 +371,9 @@ void MysqlFetchOperationImpl::specializedCompleteOperation() {
       rendered_query_,
       rows_received_,
       total_result_size_,
-      conn().serverInfo(),
+      connection.ok() ? connection.serverInfo() : "",
       no_index_used_,
-      use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
+      use_checksum_ || connection.getConnectionOptions().getUseChecksum(),
       getAttributes(),
       readResponseAttributes(),
       getMaxThreadBlockTime(),
@@ -381,12 +383,12 @@ void MysqlFetchOperationImpl::specializedCompleteOperation() {
   // Stats for query
   if (result() == OperationResult::Succeeded) {
     // set last successful query time to MysqlConnectionHolder
-    conn().setLastActivityTime(Clock::now());
-    client_.logQuerySuccess(logging_data, conn());
+    connection.setLastActivityTime(Clock::now());
+    client_.logQuerySuccess(logging_data, connection);
   } else {
     auto reason = operationResultToFailureReason(result());
     client_.logQueryFailure(
-        logging_data, reason, mysql_errno(), mysql_error(), conn());
+        logging_data, reason, mysql_errno(), mysql_error(), connection);
   }
 
   if (result() != OperationResult::Succeeded) {
@@ -394,7 +396,7 @@ void MysqlFetchOperationImpl::specializedCompleteOperation() {
   }
   // This frees the `Operation::wait()` call. We need to free it here because
   // callback can stealConnection and we can't notify anymore.
-  conn().notify();
+  connection.notify();
   op.notifyOperationCompleted(result());
 }
 

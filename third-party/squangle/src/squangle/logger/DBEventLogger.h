@@ -133,12 +133,14 @@ struct CommonLoggingData {
   CommonLoggingData(
       OperationType op,
       Duration duration,
-      std::optional<Duration> timeout,
+      std::optional<Duration> timeout = std::nullopt,
+      std::optional<std::string> db_version = std::nullopt,
       Duration max_thread_block_time = Duration(0),
       Duration total_thread_block_time = Duration(0))
       : operation_type(op),
         operation_duration(duration),
         operation_timeout(timeout),
+        db_version(std::move(db_version)),
         max_thread_block_time(max_thread_block_time),
         total_thread_block_time(total_thread_block_time) {}
   OperationType operation_type;
@@ -146,6 +148,7 @@ struct CommonLoggingData {
   Duration operation_duration;
   // Configured timeout for the operation
   std::optional<Duration> operation_timeout;
+  std::optional<std::string> db_version;
   // The most time spent executing code in a single iteration
   // of socketActionable
   Duration max_thread_block_time;
@@ -162,6 +165,7 @@ struct QueryLoggingData : CommonLoggingData {
       std::shared_ptr<folly::fbstring> queryString,
       int rows,
       uint64_t resultSize = 0,
+      std::optional<std::string> db_version = std::nullopt,
       bool noIndexUsed = false,
       bool useChecksum = false,
       const AttributeMap& queryAttributes = AttributeMap(),
@@ -174,6 +178,7 @@ struct QueryLoggingData : CommonLoggingData {
             op,
             duration,
             timeout,
+            std::move(db_version),
             maxThreadBlockTime,
             totalThreadBlockTime),
         queries_executed(queries),

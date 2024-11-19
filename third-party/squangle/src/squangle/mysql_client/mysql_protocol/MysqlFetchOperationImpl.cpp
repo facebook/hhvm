@@ -369,6 +369,7 @@ void MysqlFetchOperationImpl::specializedCompleteOperation() {
       rendered_query_,
       rows_received_,
       total_result_size_,
+      conn().serverInfo(),
       no_index_used_,
       use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
       getAttributes(),

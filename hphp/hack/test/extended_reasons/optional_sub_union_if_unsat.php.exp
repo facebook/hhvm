@@ -123,4 +123,3 @@ File optional_sub_union_if_unsat.php, line 3, character 14 - line 3, character 2
  6 |   foo($x);
  7 | }
 
-1 error found

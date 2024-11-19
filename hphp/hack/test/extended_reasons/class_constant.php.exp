@@ -110,4 +110,3 @@ File class_constant.php, line 7, character 17 - line 7, character 19:
  9 |   return $x;
 10 | }
 
-1 error found

@@ -453,4 +453,3 @@ File arraykey_sub_newtype_if_unsat.php, line 3, character 19 - line 3, character
  4 | 
  5 | function foo(MyThing $_): void {}
 
-3 errors found

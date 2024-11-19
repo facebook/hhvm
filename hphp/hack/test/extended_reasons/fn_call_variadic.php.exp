@@ -123,4 +123,3 @@ File fn_call_variadic.php, line 3, character 26 - line 3, character 27:
  6 |   foo($x, $y, $z);
  7 | }
 
-1 error found

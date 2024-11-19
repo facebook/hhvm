@@ -201,4 +201,3 @@ File assign_list.php, line 4, character 7 - line 4, character 9:
  8 | function bar_1((string,Super,bool) $xyz): void {
  9 |   list($_, $y, $_) = $xyz;
 
-1 error found

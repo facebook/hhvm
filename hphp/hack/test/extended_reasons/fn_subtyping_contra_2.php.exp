@@ -194,4 +194,3 @@ File fn_subtyping_contra_2.php, line 4, character 7 - line 4, character 9:
  6 | function foo_2((function((function(Sub): void)): void) $_): void {}
  7 | function bar_2((function((function(Super): void)): void) $f): void {
 
-1 error found

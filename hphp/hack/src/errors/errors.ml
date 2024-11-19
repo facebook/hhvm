@@ -490,8 +490,7 @@ let format_summary
     ~(max_errors : int option) : string option =
   match format with
   | Context
-  | Highlighted
-  | Extended ->
+  | Highlighted ->
     let error_count_message =
       if Int.( = ) error_count 0 then
         "No errors!"
@@ -544,6 +543,7 @@ let format_summary
       ^ found_s
       ^ truncated_message
       ^ "\n")
+  | Extended
   | Raw
   | Plain ->
     None

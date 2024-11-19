@@ -110,4 +110,3 @@ File static_method.php, line 9, character 17 - line 9, character 19:
 11 |   return $x;
 12 | }
 
-1 error found

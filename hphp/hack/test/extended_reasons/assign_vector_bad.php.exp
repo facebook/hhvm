@@ -214,4 +214,3 @@ File assign_vector_bad.php, line 3, character 22 - line 3, character 27:
  5 |   return $v;
  6 | }
 
-2 errors found

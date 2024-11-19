@@ -838,4 +838,3 @@ File optional_sub_newtype_if_unsat.php, line 5, character 14 - line 5, character
  8 |   foo($x);
  9 | }
 
-4 errors found

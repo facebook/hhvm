@@ -440,4 +440,3 @@ File union_subtyping_r.php, line 3, character 7 - line 3, character 7:
  5 | <<__NoAutoLikes>>
  6 | function union_r(C $c): (A|B) {
 
-3 errors found

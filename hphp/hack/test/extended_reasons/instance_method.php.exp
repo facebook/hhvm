@@ -110,4 +110,3 @@ File instance_method.php, line 9, character 21 - line 9, character 23:
 11 |   return $x;
 12 | }
 
-1 error found

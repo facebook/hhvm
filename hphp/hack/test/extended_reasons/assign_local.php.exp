@@ -169,4 +169,3 @@ File assign_local.php, line 4, character 7 - line 4, character 9:
  9 | function bar(Super $f): void {
 10 |   $g = $f;
 
-1 error found

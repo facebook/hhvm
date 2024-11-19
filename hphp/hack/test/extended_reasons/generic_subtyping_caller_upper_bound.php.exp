@@ -306,4 +306,3 @@ File generic_subtyping_caller_upper_bound.php, line 5, character 7 - line 5, cha
  6 | 
  7 | function rcvr_concrete(B $x): void {}
 
-2 errors found

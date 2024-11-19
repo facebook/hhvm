@@ -166,4 +166,3 @@ File fn_subtyping_contra_1.php, line 4, character 7 - line 4, character 9:
  6 | function foo_1((function(Super): void) $_): void {}
  7 | function bar_1((function(Sub): void) $f): void {
 
-1 error found

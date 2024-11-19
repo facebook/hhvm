@@ -278,4 +278,3 @@ File vector_invariant.php, line 3, character 24 - line 3, character 26:
  6 |   $z = $y;
  7 |   // hh_force_solve();
 
-1 error found

@@ -157,4 +157,3 @@ File generic_subtyping_rcvr_upper_bound.php, line 7, character 32 - line 7, char
 10 |   rcvr_upper_bound($x);
 11 | }
 
-1 error found

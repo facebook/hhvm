@@ -324,4 +324,3 @@ File generic_subtyping_caller_implicit_upper_bound.php, line 5, character 7 - li
  6 | 
  7 | function rcvr_concrete(B $x): void {}
 
-2 errors found

@@ -335,4 +335,3 @@ File generic_subtyping_upper_bound.php, line 7, character 32 - line 7, character
 10 |   rcvr_upper_bound($x);
 11 | }
 
-2 errors found

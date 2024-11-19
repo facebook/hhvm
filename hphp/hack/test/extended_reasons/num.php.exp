@@ -226,4 +226,3 @@ File num.php, line 3, character 23 - line 3, character 28:
  5 |   $x = 5 + $x;
  6 |   $x = $x + 5;
 
-2 errors found

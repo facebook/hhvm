@@ -123,4 +123,3 @@ File fn_call.php, line 3, character 14 - line 3, character 19:
  6 |   foo($y);
  7 | }
 
-1 error found

@@ -166,4 +166,3 @@ File fn_subtyping_variadic_2.php, line 4, character 7 - line 4, character 9:
  6 | function foo_variadic_2((function(Sub, Super...):void) $_): void {}
  7 | function bar_variadic_2((function(Sub...):void) $x): void {
 
-1 error found

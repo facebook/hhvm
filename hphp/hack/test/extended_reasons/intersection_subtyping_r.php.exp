@@ -158,4 +158,3 @@ File intersection_subtyping_r.php, line 3, character 11 - line 3, character 11:
  4 | class A {}
  5 | class C extends A {}
 
-1 error found

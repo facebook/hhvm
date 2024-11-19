@@ -599,4 +599,3 @@ File workplace_invariant.php, line 15, character 47 - line 15, character 48:
  16 |     return foo::class;
  17 | }
 
-3 errors found

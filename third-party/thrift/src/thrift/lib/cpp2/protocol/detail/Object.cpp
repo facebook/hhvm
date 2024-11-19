@@ -21,23 +21,23 @@ namespace apache::thrift::protocol::detail {
 type::Type toType(const protocol::Value& value) {
   switch (value.getType()) {
     case Value::Type::boolValue:
-      return type::Type::create<type::bool_t>();
+      return type::Type::get<type::bool_t>();
     case Value::Type::byteValue:
-      return type::Type::create<type::byte_t>();
+      return type::Type::get<type::byte_t>();
     case Value::Type::i16Value:
-      return type::Type::create<type::i16_t>();
+      return type::Type::get<type::i16_t>();
     case Value::Type::i32Value:
-      return type::Type::create<type::i32_t>();
+      return type::Type::get<type::i32_t>();
     case Value::Type::i64Value:
-      return type::Type::create<type::i64_t>();
+      return type::Type::get<type::i64_t>();
     case Value::Type::floatValue:
-      return type::Type::create<type::float_t>();
+      return type::Type::get<type::float_t>();
     case Value::Type::doubleValue:
-      return type::Type::create<type::double_t>();
+      return type::Type::get<type::double_t>();
     case Value::Type::stringValue:
-      return type::Type::create<type::string_t>();
+      return type::Type::get<type::string_t>();
     case Value::Type::binaryValue:
-      return type::Type::create<type::binary_t>();
+      return type::Type::get<type::binary_t>();
     case Value::Type::listValue: {
       const auto& c = *value.listValue_ref();
       return type::Type::create<type::list_c>(

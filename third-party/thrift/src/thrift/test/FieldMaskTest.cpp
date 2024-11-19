@@ -1380,7 +1380,7 @@ TEST(FieldMaskTest, FilterAny) {
 }
 
 TEST(FieldMaskTest, FilterAnyWithHashedURI) {
-  auto fooType = type::Type::create<type::infer_tag<Foo>>();
+  auto fooType = type::Type::get<type::infer_tag<Foo>>();
   convertToHashedURI(fooType);
 
   Foo foo;
@@ -2085,7 +2085,7 @@ TEST(FieldMaskTest, ClearAnyStruct) {
            .field1_ref());
 }
 TEST(FieldMaskTest, ClearAnyStructWithHashedUri) {
-  auto fooType = type::Type::create<type::infer_tag<Foo>>();
+  auto fooType = type::Type::get<type::infer_tag<Foo>>();
   convertToHashedURI(fooType);
 
   Foo foo;
@@ -3744,7 +3744,7 @@ TEST(FieldMaskTest, ValidateSinglePathInvalid) {
 }
 
 TEST(FieldMaskTest, ValidateSinglePathInvalidNested) {
-  auto type = type::Type::create<type::infer_tag<Foo>>();
+  auto type = type::Type::get<type::infer_tag<Foo>>();
   {
     // exclusive field mask
     Mask mask;
@@ -3798,7 +3798,7 @@ TEST(FieldMaskTest, ValidateSinglePathInvalidNested) {
 }
 
 TEST(FieldMaskTest, ValidateSinglePathValid) {
-  auto type = type::Type::create<type::infer_tag<Foo>>();
+  auto type = type::Type::get<type::infer_tag<Foo>>();
   {
     // allMask
     Mask mask = allMask();
@@ -3831,7 +3831,7 @@ TEST(FieldMaskTest, ValidateSinglePathValid) {
 }
 
 TEST(FieldMaskTest, ValidateSinglePathValidNested) {
-  auto type = type::Type::create<type::infer_tag<Foo>>();
+  auto type = type::Type::get<type::infer_tag<Foo>>();
   {
     // inclusive field mask
     Mask mask;

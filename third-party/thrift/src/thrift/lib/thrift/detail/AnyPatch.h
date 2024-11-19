@@ -286,7 +286,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       }
 
       VPatch patch;
-      const type::Type type_ = type::Type::create<VTag>();
+      const type::Type type_ = type::Type::get<VTag>();
     };
     AnyPatchExtractionVisitor visitor;
     customVisit(visitor);
@@ -305,7 +305,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   template <typename Tag>
   bool ensures() {
-    return ensures(type::Type::create<Tag>());
+    return ensures(type::Type::get<Tag>());
   }
 
   // If assign has value and specified 'VPatch' is the corresponding patch
@@ -315,7 +315,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
   void tryPatchable() {
     using VType = typename VPatch::value_type;
     using VTag = type::infer_tag<VType>;
-    tryPatchable(type::Type::create<VTag>());
+    tryPatchable(type::Type::get<VTag>());
   }
   void tryPatchable(const type::Type& type) {
     if (data_.assign().has_value()) {
@@ -330,8 +330,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   template <typename VPatch>
   void patchIfTypeIsImpl(const VPatch& patch, bool after) {
-    auto type =
-        type::Type::create<type::infer_tag<typename VPatch::value_type>>();
+    auto type = type::Type::get<type::infer_tag<typename VPatch::value_type>>();
     auto anyStruct =
         type::AnyData::toAny<type::infer_tag<VPatch>>(patch).toThrift();
     patchIfTypeIsImpl(type, std::move(anyStruct), after);

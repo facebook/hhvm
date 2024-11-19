@@ -76,7 +76,7 @@ class AnyData : public detail::Wrap<AnyStruct> {
   template <typename Tag>
   bool contains() const {
     // TODO(dokwon): Check the type hash.
-    return type() == Type{Tag{}};
+    return type() == Type::get<Tag>();
   }
 
   template <typename Tag>
@@ -125,15 +125,15 @@ AnyData AnyData::toAny(const native_type<Tag>& v) {
   SemiAny builder;
   builder.data() = queue.moveAsValue();
   builder.protocol() = Protocol;
-  builder.type() = Tag{};
+  builder.type() = Type::get<Tag>();
   return AnyData{std::move(builder)};
 }
 
 template <typename Tag>
 void AnyData::get(native_type<Tag>& v) const {
   // TODO(dokwon): Check the type hash.
-  if (type() != Type{Tag{}}) {
-    throwTypeMismatchException(Type{Tag{}}, type());
+  if (type() != Type::get<Tag>()) {
+    throwTypeMismatchException(Type::get<Tag>(), type());
   }
 
   if (protocol() == Protocol::get<StandardProtocol::Binary>()) {

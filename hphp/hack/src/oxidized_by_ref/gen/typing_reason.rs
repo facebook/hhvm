@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8b720bd5fb648d1b6ae82b3311f68dd8>>
+// @generated SignedSource<<b4cac21a6bc0559cd04fbd5e8a1d2c09>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -411,6 +411,9 @@ pub enum WitnessLocl<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Join_point")]
     JoinPoint(&'a pos::Pos<'a>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Static_property_access")]
+    StaticPropertyAccess(&'a pos::Pos<'a>),
 }
 impl<'a> TrivialDrop for WitnessLocl<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(WitnessLocl<'arena>);

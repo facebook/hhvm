@@ -350,6 +350,7 @@ type witness_locl =
   | Unsafe_cast of Pos.t
   | Pattern of Pos.t
   | Join_point of Pos.t
+  | Static_property_access of Pos.t
 [@@deriving hash]
 
 let witness_locl_to_raw_pos = function
@@ -409,7 +410,8 @@ let witness_locl_to_raw_pos = function
   | Captured_like pos
   | Unsafe_cast pos
   | Pattern pos
-  | Join_point pos ->
+  | Join_point pos
+  | Static_property_access pos ->
     Pos_or_decl.of_raw_pos pos
 
 let get_pri_witness_locl = function
@@ -477,6 +479,7 @@ let map_pos_witness_locl pos pos_or_decl w =
   | Unsafe_cast p -> Unsafe_cast (pos p)
   | Pattern p -> Pattern (pos p)
   | Join_point p -> Join_point (pos p)
+  | Static_property_access p -> Static_property_access (pos p)
 
 let constructor_string_of_witness_locl = function
   | Witness _ -> "Rwitness"
@@ -536,6 +539,7 @@ let constructor_string_of_witness_locl = function
   | Unsafe_cast _ -> "Runsafe_cast"
   | Pattern _ -> "Rpattern"
   | Join_point _ -> "Rjoin_point"
+  | Static_property_access _ -> "Rstatic_property_access"
 
 let pp_witness_locl fmt witness =
   let comma_ fmt () = Format.fprintf fmt ",@ " in
@@ -605,7 +609,8 @@ let pp_witness_locl fmt witness =
     | Witness p
     | Captured_like p
     | Pattern p
-    | Join_point p ->
+    | Join_point p
+    | Static_property_access p ->
       Pos.pp fmt p
     | Unset_field (p, s)
     | Shape (p, s)
@@ -781,6 +786,9 @@ let witness_locl_to_json witness =
     Hh_json.(JSON_Object [("Pattern", JSON_Array [pos_to_json pos])])
   | Join_point pos ->
     Hh_json.(JSON_Object [("Join_point", JSON_Array [pos_to_json pos])])
+  | Static_property_access pos ->
+    Hh_json.(
+      JSON_Object [("Static_property_access", JSON_Array [pos_to_json pos])])
 
 let witness_locl_to_string prefix witness =
   match witness with
@@ -978,6 +986,9 @@ let witness_locl_to_string prefix witness =
     (Pos_or_decl.of_raw_pos pos, prefix ^ " because of this pattern")
   | Join_point pos ->
     (Pos_or_decl.of_raw_pos pos, prefix ^ " because of this statement")
+  | Static_property_access pos ->
+    ( Pos_or_decl.of_raw_pos pos,
+      prefix ^ " because of this static property access" )
 
 (** Witness the reason for a type during decling using the position of a hint *)
 type witness_decl =
@@ -2414,6 +2425,8 @@ module Constructors = struct
   let no_return_async p = from_witness_locl @@ No_return_async p
 
   let ret_fun_kind (p, k) = from_witness_locl @@ Ret_fun_kind (p, k)
+
+  let static_prop_access p = from_witness_locl @@ Static_property_access p
 
   let ret_fun_kind_from_decl (p, k) =
     from_witness_decl @@ Ret_fun_kind_from_decl (p, k)
@@ -4045,6 +4058,9 @@ module Derivation = struct
           (Pos_or_decl.of_raw_pos pos, "destructure expression")
       | Join_point pos ->
         Explanation.Witness (Pos_or_decl.of_raw_pos pos, "join point")
+      | Static_property_access pos ->
+        Explanation.Witness
+          (Pos_or_decl.of_raw_pos pos, "static property access expression")
       | _ -> Explanation.Witness (witness_locl_to_raw_pos witness, "element")
 
     and explain_witness_decl witness =

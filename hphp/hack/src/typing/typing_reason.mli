@@ -200,6 +200,8 @@ val no_return_async : Pos.t -> t
 
 val ret_fun_kind : Pos.t * Ast_defs.fun_kind -> t
 
+val static_prop_access : Pos.t -> t
+
 val ret_fun_kind_from_decl : Pos_or_decl.t * Ast_defs.fun_kind -> 'phase t_
 
 val hint : Pos_or_decl.t -> 'phase t_

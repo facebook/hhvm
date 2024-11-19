@@ -3859,6 +3859,11 @@ end = struct
       let (env, ty) =
         Env.FakeMembers.check_static_invalid env cid_ (snd mid) ty
       in
+      let ty =
+        Typing_defs.map_reason ty ~f:(fun def ->
+            let use = Typing_reason.static_prop_access p in
+            Typing_reason.flow_prop_access ~def ~use)
+      in
       make_result
         env
         p

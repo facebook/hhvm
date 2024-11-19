@@ -47,7 +47,20 @@ File static_prop.php, line 4, character 17 - line 4, character 20:
  6 | 
  7 | function bar(C $c): int {
 
-and flows into this expression
+and flows into this static property access expression
+
+File static_prop.php, line 8, character 8 - line 8, character 14:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+ 8 |   $x = »C::$foo«;
+ 9 |   return $x;
+10 | }
+
+as the type of property
+
+which itself flows into this expression
 
 File static_prop.php, line 8, character 3 - line 8, character 4:
 

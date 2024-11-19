@@ -67,7 +67,8 @@ impl<'a> WitnessLocl<'a> {
             | WitnessLocl::CapturedLike(p)
             | WitnessLocl::UnsafeCast(p)
             | WitnessLocl::Pattern(p)
-            | WitnessLocl::JoinPoint(p) => p,
+            | WitnessLocl::JoinPoint(p)
+            | WitnessLocl::StaticPropertyAccess(p) => p,
         }
     }
 }

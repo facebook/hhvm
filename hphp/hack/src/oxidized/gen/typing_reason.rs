@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<4f8f4d52a8e4379833bc5baf0a95d91f>>
+// @generated SignedSource<<1b55d398042dda68e9fb341693623214>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -468,6 +468,8 @@ pub enum WitnessLocl {
     Pattern(pos::Pos),
     #[rust_to_ocaml(name = "Join_point")]
     JoinPoint(pos::Pos),
+    #[rust_to_ocaml(name = "Static_property_access")]
+    StaticPropertyAccess(pos::Pos),
 }
 
 /// Witness the reason for a type during decling using the position of a hint

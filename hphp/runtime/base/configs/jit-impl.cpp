@@ -72,15 +72,15 @@ uint32_t JitLoader::RetranslateAllSecondsDefault() {
   return Cfg::Server::Mode ? 180 : 0;
 }
 
-bool JitLoader::PGOLayoutSplitHotColdDefault() {
-  return arch() != Arch::ARM;
-}
-
 uint32_t JitLoader::PGOVasmBlockCountersMinEntryValueDefault() {
   return Cfg::Server::Mode ? 200 : 0;
 }
 
-bool JitLoader::LayoutPrologueSplitHotColdDefault() {
+bool JitLoader::LayoutLiveSplitHotColdDefault() {
+  return arch() != Arch::ARM;
+}
+
+bool JitLoader::LayoutProfileSplitHotColdDefault() {
   return arch() != Arch::ARM;
 }
 

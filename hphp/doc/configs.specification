@@ -1556,7 +1556,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.RetranslateAllSeconds, UNKNOWN
 - bool Jit.RerunRetranslateAll = false, UNKNOWN
 - bool Jit.BuildOutliningHashes = false, UNKNOWN
-- bool Jit.PGOLayoutSplitHotCold, UNKNOWN
+- bool Jit.PGOLayoutSplitHotCold = true, UNKNOWN
 - bool Jit.PGOLayoutResplitFrozen = true, UNKNOWN
 - bool Jit.PGOVasmBlockCounters = true, UNKNOWN
 - bool Jit.PGOVasmBlockCountersOptPrologue = true, UNKNOWN
@@ -1564,9 +1564,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint32_t Jit.PGOVasmBlockCountersMinEntryValue, UNKNOWN
 - double Jit.PGOVasmBlockCountersHotWeightMultiplier = 0, UNKNOWN
 - bool Jit.LayoutSeparateZeroWeightBlocks = false, UNKNOWN
-- bool Jit.LayoutPrologueSplitHotCold, UNKNOWN
-- bool Jit.LayoutLiveSplitHotCold = true, UNKNOWN
-- bool Jit.LayoutProfileSplitHotCold = true, UNKNOWN
+- bool Jit.LayoutPrologueSplitHotCold = true, UNKNOWN
+- bool Jit.LayoutLiveSplitHotCold, UNKNOWN
+- bool Jit.LayoutProfileSplitHotCold, UNKNOWN
 - bool Jit.LayoutSplitFrozen = true, UNKNOWN
 - uint64_t Jit.LayoutMinHotThreshold = 0, UNKNOWN
 - uint64_t Jit.LayoutMinColdThreshold = 0, UNKNOWN

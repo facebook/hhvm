@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/server/metrics/PendingConnectionsMetrics.h>
+#include "folly/GLog.h"
 
 THRIFT_FLAG_DEFINE_bool(enable_pending_connections_metrics, true);
 
@@ -61,7 +62,14 @@ void PendingConnectionsMetrics::onConnectionDequedByIoWorker() {
 }
 
 void PendingConnectionsMetrics::onPendingConnectionsChange() {
-  observer_->pendingConnections(pendingConnections_.load());
+  auto pendingConnections = pendingConnections_.load();
+  if (pendingConnections >= 0) {
+    observer_->pendingConnections(pendingConnections);
+  } else {
+    FB_LOG_EVERY_MS(INFO, 10000)
+        << "Pending connections < 0 due to possible race condition. Current value="
+        << pendingConnections;
+  }
 }
 
 } // namespace apache::thrift

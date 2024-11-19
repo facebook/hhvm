@@ -550,21 +550,27 @@ class ThriftServer::ConnectionEventCallback
   void onConnectionEnqueuedForAcceptorCallback(
       const folly::NetworkSocket,
       const folly::SocketAddress& clientAddr) noexcept override {
-    THRIFT_CONNECTION_EVENT(connection_enqueued_acceptor)
-        .log(thriftServer_, clientAddr);
+    // Increment counters prior to logging Scuba events to mitigate the risk of
+    // race conditions between increment and decrement operations.
     if (pendingConnectionsMetrics_) {
       pendingConnectionsMetrics_->onConnectionEnqueuedToIoWorker();
     }
+
+    THRIFT_CONNECTION_EVENT(connection_enqueued_acceptor)
+        .log(thriftServer_, clientAddr);
   }
 
   void onConnectionDequeuedByAcceptorCallback(
       const folly::NetworkSocket,
       const folly::SocketAddress& clientAddr) noexcept override {
-    THRIFT_CONNECTION_EVENT(connection_dequeued_acceptor)
-        .log(thriftServer_, clientAddr);
+    // Increment counters prior to logging Scuba events to mitigate the risk of
+    // race conditions between increment and decrement operations.
     if (pendingConnectionsMetrics_) {
       pendingConnectionsMetrics_->onConnectionDequedByIoWorker();
     }
+
+    THRIFT_CONNECTION_EVENT(connection_dequeued_acceptor)
+        .log(thriftServer_, clientAddr);
   }
 
   void onBackoffStarted() noexcept override {}

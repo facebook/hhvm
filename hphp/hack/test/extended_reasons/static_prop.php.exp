@@ -1,0 +1,100 @@
+error: Typing[4110] Invalid return type
+
+File static_prop.php, line 9, character 10 - line 9, character 11:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+ 8 |   $x = C::$foo;
+ 9 |   return »$x«;
+10 | }
+
+Expected int
+
+File static_prop.php, line 7, character 21 - line 7, character 23:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): »int« {
+ 8 |   $x = C::$foo;
+ 9 |   return $x;
+10 | }
+
+But got bool
+
+File static_prop.php, line 4, character 17 - line 4, character 20:
+
+ 3 | class C {
+ 4 |   public static »bool« $foo = true;
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+
+Here's why:
+
+
+  Step 1 of 1                                 (here is where the error occurred) 
+
+I started by checking this subtype relationship.
+
+The subtype comes from this hint
+
+File static_prop.php, line 4, character 17 - line 4, character 20:
+
+ 3 | class C {
+ 4 |   public static »bool« $foo = true;
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+
+and flows into this expression
+
+File static_prop.php, line 8, character 3 - line 8, character 4:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+ 8 |   »$x« = C::$foo;
+ 9 |   return $x;
+10 | }
+
+via an assignment
+
+which itself flows into this expression
+
+File static_prop.php, line 9, character 10 - line 9, character 11:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+ 8 |   $x = C::$foo;
+ 9 |   return »$x«;
+10 | }
+
+as the type of the local variable
+
+which itself flows into this expression
+
+File static_prop.php, line 9, character 3 - line 9, character 12:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): int {
+ 8 |   $x = C::$foo;
+ 9 |   »return $x;«
+10 | }
+
+because it is used in a return position
+
+The supertype comes from this hint
+
+File static_prop.php, line 7, character 21 - line 7, character 23:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(C $c): »int« {
+ 8 |   $x = C::$foo;
+ 9 |   return $x;
+10 | }
+
+1 error found

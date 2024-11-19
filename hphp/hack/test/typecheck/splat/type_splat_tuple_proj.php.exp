@@ -1,0 +1,4 @@
+ERROR: File "type_splat_tuple_proj.php", line 9, characters 13-13:
+Invalid index type for this tuple (Typing[4116])
+ERROR: File "type_splat_tuple_proj.php", line 19, characters 13-13:
+Invalid index type for this tuple (Typing[4116])

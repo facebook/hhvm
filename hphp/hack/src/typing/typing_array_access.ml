@@ -595,7 +595,62 @@ let rec array_get
         in
         Option.iter ty_err1 ~f:(Typing_error_utils.add_typing_error ~env);
         (env, (ty, dflt_arr_res, idx_err_res))
-      (* TODO splats in tuples *)
+      | Ttuple { t_required; t_extra = Tsplat t_splat } -> begin
+        (* requires integer literal *)
+        match e2 with
+        | (a, p, Int idx_str) ->
+          let idx = int_of_string_opt idx_str in
+          let count_required = List.length t_required in
+          (match idx with
+          (* Index is within required elements *)
+          | Some n when Int.(n >= 0) && Int.(n < count_required) ->
+            (env, (List.nth_exn t_required n, dflt_arr_res, Ok ty2))
+          (* Index is within splat elements; delegate to splat tuple *)
+          | Some n when Int.(n >= count_required) ->
+            let (env, (ty, err_opt_arr, err_opt_idx)) =
+              array_get
+                ~array_pos
+                ~expr_pos
+                ~expr_ty
+                ~lhs_of_null_coalesce
+                is_lvalue
+                env
+                t_splat
+                (* Clunky hack so we can recurse with a new index expression *)
+                (a, p, Int (Int.to_string (n - count_required)))
+                ty2
+            in
+            let err_res_idx =
+              Option.value_map
+                err_opt_idx
+                ~default:(Ok ty2)
+                ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+            in
+            let err_res_arr =
+              Option.value_map
+                err_opt_arr
+                ~default:dflt_arr_res
+                ~f:(fun (ty_have, ty_expect) -> Error (ty_have, ty_expect))
+            in
+            (env, (ty, err_res_arr, err_res_idx))
+            (* Index is not an integer literal, or is negative *)
+          | _ ->
+            let (env, ty) = err_witness env p in
+            add_error_tuple env p;
+            (env, (ty, dflt_arr_res, Ok ty2)))
+        | (_, p, _) ->
+          Typing_error_utils.add_typing_error
+            ~env
+            Typing_error.(
+              primary
+              @@ Primary.Generic_unify
+                   {
+                     pos = p;
+                     msg = Reason.string_of_ureason Reason.URtuple_access;
+                   });
+          let (env, ty) = err_witness env expr_pos in
+          (env, (ty, dflt_arr_res, Error (ty2, MakeType.int Reason.none)))
+      end
       | Ttuple { t_required; t_extra = Textra { t_optional; t_variadic } } ->
       begin
         (* requires integer literal *)
@@ -865,7 +920,6 @@ let rec array_get
       | Tintersection _
       | Taccess _
       | Tlabel _
-      | Ttuple { t_extra = Tsplat _; _ }
       | Tneg _
       | Tclass_ptr _ ->
         if not ignore_error then error_array env expr_pos expr_ty;

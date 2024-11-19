@@ -7,13 +7,13 @@
  *)
 
 (** Note: the tracking in this module is best effort only;
- * it's not guaranteed to always reflect accurate merge base transitions:
- * - in some init types, initial merge base is not known so we will only notice
- *   the second transition
- * - to avoid blocking rest of the system, mergebase queries time out after 30
- *   seconds and are not retried in case of errors
- * - we only record "new" mergebases as we see them, not detecting transitions
- *   between already visited revisions
+  it's not guaranteed to always reflect accurate merge base transitions:
+  - in some init types, initial merge base is not known so we will only notice
+    the second transition
+  - to avoid blocking rest of the system, mergebase queries time out after 30
+    seconds and are not retried in case of errors
+  - we only record "new" mergebases as we see them, not detecting transitions
+    between already visited revisions
  **)
 open Hh_prelude
 
@@ -83,10 +83,16 @@ let tracker_state =
     mergebase_queries = Stdlib.Hashtbl.create 200;
   }
 
+let set_current_mergebase rev =
+  tracker_state.current_mergebase <- Some rev;
+  HackEventLogger.set_mergebase_globalrev rev;
+  ()
+
 let initialize (mergebase : Hg.global_rev) =
   Hh_logger.log "ServerRevisionTracker: Initializing mergebase to r%d" mergebase;
   tracker_state.is_enabled <- true;
-  tracker_state.current_mergebase <- Some mergebase
+  set_current_mergebase mergebase;
+  ()
 
 let add_query ~(hg_rev : Hg.Rev.t) root =
   if Stdlib.Hashtbl.mem tracker_state.mergebase_queries hg_rev then
@@ -223,7 +229,7 @@ let check_query future ~timeout ~current_t =
     HackEventLogger.check_mergebase_success current_t;
     (match tracker_state.current_mergebase with
     | Some global_rev when global_rev <> new_global_rev ->
-      tracker_state.current_mergebase <- Some new_global_rev;
+      set_current_mergebase new_global_rev;
       tracker_state.did_change_mergebase <- true;
       HackEventLogger.set_changed_mergebase true;
       Hh_logger.log

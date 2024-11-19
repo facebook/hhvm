@@ -238,6 +238,37 @@ let download_and_load_state_exn
   in
   run_saved_state_future genv ctx dependency_table_saved_state_future
 
+let mergebase_info (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
+    ServerEnv.saved_state_revs_info =
+  let root_path = Path.to_string root_path in
+  let future =
+    Future.continue_with_future (Hg.current_mergebase_hg_rev root_path)
+    @@ fun mergebase_rev ->
+    Future.continue_with_future
+      (Hg.get_closest_global_ancestor mergebase_rev root_path)
+    @@ fun mergebase_globalrev ->
+    let saved_state_revs_info =
+      {
+        age = None;
+        distance = None;
+        saved_state_rev;
+        saved_state_globalrev = None;
+        saved_state_rev_timestamp = None;
+        mergebase_rev = Some mergebase_rev;
+        mergebase_globalrev = Some mergebase_globalrev;
+        mergebase_rev_timestamp = None;
+      }
+    in
+    Future.of_value saved_state_revs_info
+  in
+  match Future.get future with
+  | Ok x -> x
+  | Error e ->
+    Hh_logger.log
+      "[serverLazyInit]: mergebase_info failed: %s"
+      (Future.error_to_string e);
+    ServerEnv.SavedStateRevsInfo.default ~saved_state_rev
+
 let calculate_state_distance_and_age_from_hg
     (root_path : Path.t) (saved_state_rev : Hg.Rev.t) :
     ServerEnv.saved_state_revs_info =
@@ -344,8 +375,7 @@ let use_precomputed_state_exn
     if log_saved_state_age_and_distance then
       calculate_state_distance_and_age_from_hg root corresponding_base_revision
     else
-      ServerEnv.SavedStateRevsInfo.default
-        ~saved_state_rev:corresponding_base_revision
+      mergebase_info root corresponding_base_revision
   in
   {
     naming_table_fn = naming_table_path;
@@ -1228,6 +1258,9 @@ let post_saved_state_initialization
     if ServerArgs.is_using_precomputed_saved_state genv.options then begin
       HackEventLogger.tried_to_be_hg_aware_with_precomputed_saved_state_warning
         ();
+      Option.iter
+        ~f:HackEventLogger.set_mergebase_globalrev
+        saved_state_revs_info.ServerEnv.mergebase_globalrev;
       Hh_logger.log
         "Warning: disabling restart on rebase (server was started with precomputed saved-state)"
     end else

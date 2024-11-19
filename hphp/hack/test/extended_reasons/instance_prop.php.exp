@@ -69,7 +69,7 @@ File instance_prop.php, line 8, character 8 - line 8, character 14:
  9 |   return $x;
 10 | }
 
-as the type of property
+as the type of the property
 
 which itself flows into this expression
 

@@ -54,7 +54,18 @@ File classname.hhi, line 19, character 42 - line 19, character 52:
  21 |   /**
  22 |    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
 
-and flows into this expression
+and flows into this class constant access expression
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 21:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo::class«;
+ 17 | }
+
+as the type of the constant
+
+which itself flows into this expression
 
 File workplace_invariant.php, line 16, character 5 - line 16, character 22:
 
@@ -262,7 +273,18 @@ File classname.hhi, line 19, character 42 - line 19, character 52:
  21 |   /**
  22 |    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
 
-and flows into this expression
+and flows into this class constant access expression
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 21:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo::class«;
+ 17 | }
+
+as the type of the constant
+
+which itself flows into this expression
 
 File workplace_invariant.php, line 16, character 5 - line 16, character 22:
 
@@ -447,7 +469,18 @@ File classname.hhi, line 19, character 42 - line 19, character 52:
  21 |   /**
  22 |    * Creates a runtime KindOfClass (class pointer) from input $cn. Migration function
 
-and flows into this expression
+and flows into this class constant access expression
+
+File workplace_invariant.php, line 16, character 12 - line 16, character 21:
+
+ 14 | 
+ 15 | function getClass<Tu as num>(): classname<bar<Tu>> {
+ 16 |     return »foo::class«;
+ 17 | }
+
+as the type of the constant
+
+which itself flows into this expression
 
 File workplace_invariant.php, line 16, character 5 - line 16, character 22:
 

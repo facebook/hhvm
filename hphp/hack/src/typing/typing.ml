@@ -3814,6 +3814,11 @@ end = struct
     | Class_const ((_, pcid, CI sid), pstr)
       when String.equal (snd pstr) "class" && Env.is_typedef env (snd sid) ->
       typename_expr env pcid sid outer (fun env ty ->
+          let ty =
+            map_reason ty ~f:(fun def ->
+                let use = Typing_reason.class_const_access p in
+                Reason.flow_const_access ~def ~use)
+          in
           make_result env p (Class_const ((ty, pcid, CI sid), pstr)) ty)
     | Class_const (cid, mid) ->
       class_const
@@ -3838,6 +3843,11 @@ end = struct
               }
           env
           local
+      in
+      let ty =
+        map_reason ty ~f:(fun def ->
+            let use = Typing_reason.class_const_access p in
+            Reason.flow_const_access ~def ~use)
       in
       let (env, _tal, te, _) = Class_id.class_expr env [] cid in
       make_result env p (Aast.Class_get (te, Aast.CGstring mid, Is_prop)) ty
@@ -4661,6 +4671,11 @@ end = struct
         cty
         mid
         cid
+    in
+    let const_ty =
+      map_reason const_ty ~f:(fun def ->
+          let use = Typing_reason.class_const_access p in
+          Reason.flow_const_access ~def ~use)
     in
     make_result env p (Aast.Class_const (ce, mid)) const_ty
 

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1b55d398042dda68e9fb341693623214>>
+// @generated SignedSource<<2337a3a78f206543dedb8ac5ada2a89d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -338,6 +338,8 @@ pub enum FlowKind {
     FlowCall,
     #[rust_to_ocaml(name = "Flow_prop_access")]
     FlowPropAccess,
+    #[rust_to_ocaml(name = "Flow_const_access")]
+    FlowConstAccess,
     #[rust_to_ocaml(name = "Flow_local")]
     FlowLocal,
     #[rust_to_ocaml(name = "Flow_fun_return")]
@@ -470,6 +472,8 @@ pub enum WitnessLocl {
     JoinPoint(pos::Pos),
     #[rust_to_ocaml(name = "Static_property_access")]
     StaticPropertyAccess(pos::Pos),
+    #[rust_to_ocaml(name = "Class_constant_access")]
+    ClassConstantAccess(pos::Pos),
 }
 
 /// Witness the reason for a type during decling using the position of a hint

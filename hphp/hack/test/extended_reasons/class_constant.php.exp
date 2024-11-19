@@ -47,7 +47,20 @@ File class_constant.php, line 4, character 9 - line 4, character 14:
  6 | 
  7 | function bar(): int {
 
-and flows into this expression
+and flows into this class constant access expression
+
+File class_constant.php, line 8, character 8 - line 8, character 13:
+
+ 5 | }
+ 6 | 
+ 7 | function bar(): int {
+ 8 |   $x = »C::FOO«;
+ 9 |   return $x;
+10 | }
+
+as the type of the constant
+
+which itself flows into this expression
 
 File class_constant.php, line 8, character 3 - line 8, character 4:
 

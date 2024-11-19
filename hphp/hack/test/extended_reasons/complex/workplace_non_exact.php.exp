@@ -172,7 +172,7 @@ File workplace_non_exact.php, line 12, character 18 - line 12, character 26:
  14 |     $c1->f($c1);
  15 |   }
 
-as the type of property
+as the type of the property
 
 The supertype comes from this hint
 

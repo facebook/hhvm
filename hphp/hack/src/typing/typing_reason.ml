@@ -271,6 +271,7 @@ type flow_kind =
   | Flow_assign
   | Flow_call
   | Flow_prop_access
+  | Flow_const_access
   | Flow_local
   | Flow_fun_return
   | Flow_param_hint
@@ -282,6 +283,7 @@ let flow_kind_to_json = function
   | Flow_assign -> Hh_json.string_ "Flow_assign"
   | Flow_call -> Hh_json.string_ "Flow_call"
   | Flow_prop_access -> Hh_json.string_ "Flow_prop_access"
+  | Flow_const_access -> Hh_json.string_ "Flow_const_access"
   | Flow_local -> Hh_json.string_ "Flow_local"
   | Flow_fun_return -> Hh_json.string_ "Flow_fun_return"
   | Flow_param_hint -> Hh_json.string_ "Flow_param_hint"
@@ -351,6 +353,7 @@ type witness_locl =
   | Pattern of Pos.t
   | Join_point of Pos.t
   | Static_property_access of Pos.t
+  | Class_constant_access of Pos.t
 [@@deriving hash]
 
 let witness_locl_to_raw_pos = function
@@ -411,7 +414,8 @@ let witness_locl_to_raw_pos = function
   | Unsafe_cast pos
   | Pattern pos
   | Join_point pos
-  | Static_property_access pos ->
+  | Static_property_access pos
+  | Class_constant_access pos ->
     Pos_or_decl.of_raw_pos pos
 
 let get_pri_witness_locl = function
@@ -480,6 +484,7 @@ let map_pos_witness_locl pos pos_or_decl w =
   | Pattern p -> Pattern (pos p)
   | Join_point p -> Join_point (pos p)
   | Static_property_access p -> Static_property_access (pos p)
+  | Class_constant_access p -> Class_constant_access (pos p)
 
 let constructor_string_of_witness_locl = function
   | Witness _ -> "Rwitness"
@@ -540,6 +545,7 @@ let constructor_string_of_witness_locl = function
   | Pattern _ -> "Rpattern"
   | Join_point _ -> "Rjoin_point"
   | Static_property_access _ -> "Rstatic_property_access"
+  | Class_constant_access _ -> "Rclass_constant_access"
 
 let pp_witness_locl fmt witness =
   let comma_ fmt () = Format.fprintf fmt ",@ " in
@@ -610,7 +616,8 @@ let pp_witness_locl fmt witness =
     | Captured_like p
     | Pattern p
     | Join_point p
-    | Static_property_access p ->
+    | Static_property_access p
+    | Class_constant_access p ->
       Pos.pp fmt p
     | Unset_field (p, s)
     | Shape (p, s)
@@ -789,6 +796,9 @@ let witness_locl_to_json witness =
   | Static_property_access pos ->
     Hh_json.(
       JSON_Object [("Static_property_access", JSON_Array [pos_to_json pos])])
+  | Class_constant_access pos ->
+    Hh_json.(
+      JSON_Object [("Class_constant_access", JSON_Array [pos_to_json pos])])
 
 let witness_locl_to_string prefix witness =
   match witness with
@@ -989,6 +999,9 @@ let witness_locl_to_string prefix witness =
   | Static_property_access pos ->
     ( Pos_or_decl.of_raw_pos pos,
       prefix ^ " because of this static property access" )
+  | Class_constant_access pos ->
+    ( Pos_or_decl.of_raw_pos pos,
+      prefix ^ " because of this class constant access" )
 
 (** Witness the reason for a type during decling using the position of a hint *)
 type witness_decl =
@@ -2428,6 +2441,8 @@ module Constructors = struct
 
   let static_prop_access p = from_witness_locl @@ Static_property_access p
 
+  let class_const_access p = from_witness_locl @@ Class_constant_access p
+
   let ret_fun_kind_from_decl (p, k) =
     from_witness_decl @@ Ret_fun_kind_from_decl (p, k)
 
@@ -2602,6 +2617,9 @@ module Constructors = struct
 
   let flow_prop_access ~def ~use =
     flow ~from:def ~into:use ~kind:Flow_prop_access
+
+  let flow_const_access ~def ~use =
+    flow ~from:def ~into:use ~kind:Flow_const_access
 
   let flow_return_expr ~expr ~ret =
     flow ~from:expr ~into:ret ~kind:Flow_return_expr
@@ -3783,7 +3801,8 @@ module Derivation = struct
     let explain_flow_kind = function
       | Flow_assign -> "via an assignment"
       | Flow_call -> "as the return type of the function call"
-      | Flow_prop_access -> "as the type of property"
+      | Flow_prop_access -> "as the type of the property"
+      | Flow_const_access -> "as the type of the constant"
       | Flow_local -> "as the type of the local variable"
       | Flow_fun_return -> "as the return hint"
       | Flow_param_hint -> "as the parameter hint"
@@ -4061,6 +4080,9 @@ module Derivation = struct
       | Static_property_access pos ->
         Explanation.Witness
           (Pos_or_decl.of_raw_pos pos, "static property access expression")
+      | Class_constant_access pos ->
+        Explanation.Witness
+          (Pos_or_decl.of_raw_pos pos, "class constant access expression")
       | _ -> Explanation.Witness (witness_locl_to_raw_pos witness, "element")
 
     and explain_witness_decl witness =

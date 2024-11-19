@@ -202,6 +202,8 @@ val ret_fun_kind : Pos.t * Ast_defs.fun_kind -> t
 
 val static_prop_access : Pos.t -> t
 
+val class_const_access : Pos.t -> t
+
 val ret_fun_kind_from_decl : Pos_or_decl.t * Ast_defs.fun_kind -> 'phase t_
 
 val hint : Pos_or_decl.t -> 'phase t_
@@ -368,6 +370,8 @@ val flow_local : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
 val flow_call : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
 
 val flow_prop_access : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
+
+val flow_const_access : def:locl_phase t_ -> use:locl_phase t_ -> locl_phase t_
 
 val flow_return_expr : expr:locl_phase t_ -> ret:locl_phase t_ -> locl_phase t_
 

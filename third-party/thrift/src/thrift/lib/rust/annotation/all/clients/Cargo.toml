@@ -22,6 +22,8 @@ async-trait = "0.1.71"
 codegen_includer_proc_macro = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }
 cpp = { version = "0.0.1+unstable", path = "../../cpp" }
 cpp_clients = { version = "0.0.1+unstable", path = "../../cpp/clients" }
+erlang = { version = "0.0.1+unstable", path = "../../erlang" }
+erlang_clients = { version = "0.0.1+unstable", path = "../../erlang/clients" }
 fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.30", features = ["async-await", "compat"] }
 go = { version = "0.0.1+unstable", path = "../../go" }

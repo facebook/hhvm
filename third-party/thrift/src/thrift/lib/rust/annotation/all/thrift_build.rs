@@ -7,6 +7,7 @@ use thrift_compiler::Config;
 use thrift_compiler::GenContext;
 const CRATEMAP: &str = "\
 thrift/annotation/cpp.thrift cpp //thrift/annotation:cpp-rust
+thrift/annotation/erlang.thrift erlang //thrift/annotation:erlang-rust
 thrift/annotation/go.thrift go //thrift/annotation:go-rust
 thrift/annotation/hack.thrift hack //thrift/annotation:hack-rust
 thrift/annotation/internal.thrift internal //thrift/annotation:internal-rust

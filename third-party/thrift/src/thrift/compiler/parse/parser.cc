@@ -194,12 +194,22 @@ class parser {
     assert(token_.kind == tok::kw_package);
     auto range = range_tracker(loc, end_);
     consume_token();
-    if (token_.kind != tok::string_literal) {
-      report_expected("string literal");
+    std::string name;
+    switch (token_.kind) {
+      case tok::string_literal:
+        name = lex_string_literal(token_);
+        consume_token();
+        if (name.empty()) {
+          report_error("package name cannot be empty");
+        }
+        try_consume_token(';');
+        break;
+      case tok::semi:
+        consume_token();
+        break;
+      default:
+        report_expected("string literal");
     }
-    auto name = lex_string_literal(token_);
-    consume_token();
-    try_consume_token(';');
     actions_.on_package(range, std::move(attrs), name);
   }
 

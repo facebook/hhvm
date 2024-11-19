@@ -258,7 +258,7 @@ Including a file only provides access to symbols defined directly in that file; 
 A package declaration determines the default namespaces for target languages, e.g. the namespace for the generated C++ code and the package for Java. It is also used for applying file-level annotations and as the default [universal name](../features/universal-name.md) prefix.
 
 ```grammar
-package_declaration ::=  [annotations] "package" package_name [";"]
+package_declaration ::=  [annotations] "package" package_name [";"] | [annotations] "package" ";"
 ```
 
 A package name is a string containing a domain name and a path separated with `/`, for example:
@@ -349,6 +349,13 @@ package "facebook.com/peoplesearch"
 
 // Has the universal name "facebook.com/peoplesearch/PeopleSearchRequest".
 struct PeopleSearchRequest { /* ... */ }
+```
+
+The package name may be omitted to allow applying annotations to a file before a package name has been chosen. In this case the trailing semicolon is required. For example:
+
+```thrift
+@thrift.TerseWrite
+package;
 ```
 
 ### Namespace Directives

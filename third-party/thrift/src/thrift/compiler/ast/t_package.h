@@ -32,6 +32,9 @@ class t_package : public t_node {
   explicit t_package(std::string name);
   // Throws std::invalid_argument if an invalid package domain/path is provided.
   t_package(std::vector<std::string> domain, std::vector<std::string> path);
+  // Explicit empty package (to hold annotations without doing anything else).
+  struct explicitly_empty_tag {};
+  explicit t_package(explicitly_empty_tag) : explicit_(true) {}
 
   // The domain 'labels'.
   const std::vector<std::string>& domain() const { return domain_; }
@@ -43,6 +46,7 @@ class t_package : public t_node {
   std::string get_uri(const std::string& name) const;
 
   // If the package has been set.
+  bool is_explicit() const { return explicit_; }
   bool empty() const { return uriPrefix_.empty(); }
 
   // The raw package name.
@@ -58,6 +62,7 @@ class t_package : public t_node {
   std::string uriPrefix_;
   std::vector<std::string> domain_;
   std::vector<std::string> path_;
+  bool explicit_ = false;
 
   friend bool operator==(const t_package& lhs, const t_package& rhs) {
     return lhs.uriPrefix_ == rhs.uriPrefix_;

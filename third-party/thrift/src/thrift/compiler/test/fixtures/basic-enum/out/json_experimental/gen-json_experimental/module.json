@@ -17,163 +17,163 @@
         "name": "kOne",
         "type": "module.MyEnum",
         "value": 1,
-        "lineno": 61
+        "lineno": 62
       },
       "enumNames": {
         "name": "enumNames",
         "type": "map<module.MyEnum, string>",
         "value": {"1": "one", "2": "two"},
-        "lineno": 63
+        "lineno": 64
       }
   },
   "enumerations" :
   {
       "EmptyEnum" : {
         "name" : "EmptyEnum",
-        "lineno" : 23
+        "lineno" : 24
       },
       "MyEnum" : {
         "name" : "MyEnum",
         "constants" : {
           "ONE" : {
             "name" : "ONE",
-            "lineno" : 27,
+            "lineno" : 28,
             "value" : 1
           },
           "TWO" : {
             "name" : "TWO",
-            "lineno" : 28,
+            "lineno" : 29,
             "value" : 2
           }
         },
-        "lineno" : 26
+        "lineno" : 27
       },
       "MyUseIntrinsicDefaultEnum" : {
         "name" : "MyUseIntrinsicDefaultEnum",
         "constants" : {
           "ZERO" : {
             "name" : "ZERO",
-            "lineno" : 33,
+            "lineno" : 34,
             "value" : 0
           },
           "ONE" : {
             "name" : "ONE",
-            "lineno" : 34,
+            "lineno" : 35,
             "value" : 1
           },
           "TWO" : {
             "name" : "TWO",
-            "lineno" : 35,
+            "lineno" : 36,
             "value" : 2
           }
         },
-        "lineno" : 31
+        "lineno" : 32
       },
       "MyBigEnum" : {
         "name" : "MyBigEnum",
         "constants" : {
           "UNKNOWN" : {
             "name" : "UNKNOWN",
-            "lineno" : 39,
+            "lineno" : 40,
             "value" : 0
           },
           "ONE" : {
             "name" : "ONE",
-            "lineno" : 40,
+            "lineno" : 41,
             "value" : 1
           },
           "TWO" : {
             "name" : "TWO",
-            "lineno" : 41,
+            "lineno" : 42,
             "value" : 2
           },
           "THREE" : {
             "name" : "THREE",
-            "lineno" : 42,
+            "lineno" : 43,
             "value" : 3
           },
           "FOUR" : {
             "name" : "FOUR",
-            "lineno" : 43,
+            "lineno" : 44,
             "value" : 4
           },
           "FIVE" : {
             "name" : "FIVE",
-            "lineno" : 44,
+            "lineno" : 45,
             "value" : 5
           },
           "SIX" : {
             "name" : "SIX",
-            "lineno" : 45,
+            "lineno" : 46,
             "value" : 6
           },
           "SEVEN" : {
             "name" : "SEVEN",
-            "lineno" : 46,
+            "lineno" : 47,
             "value" : 7
           },
           "EIGHT" : {
             "name" : "EIGHT",
-            "lineno" : 47,
+            "lineno" : 48,
             "value" : 8
           },
           "NINE" : {
             "name" : "NINE",
-            "lineno" : 48,
+            "lineno" : 49,
             "value" : 9
           },
           "TEN" : {
             "name" : "TEN",
-            "lineno" : 49,
+            "lineno" : 50,
             "value" : 10
           },
           "ELEVEN" : {
             "name" : "ELEVEN",
-            "lineno" : 50,
+            "lineno" : 51,
             "value" : 11
           },
           "TWELVE" : {
             "name" : "TWELVE",
-            "lineno" : 51,
+            "lineno" : 52,
             "value" : 12
           },
           "THIRTEEN" : {
             "name" : "THIRTEEN",
-            "lineno" : 52,
+            "lineno" : 53,
             "value" : 13
           },
           "FOURTEEN" : {
             "name" : "FOURTEEN",
-            "lineno" : 53,
+            "lineno" : 54,
             "value" : 14
           },
           "FIFTEEN" : {
             "name" : "FIFTEEN",
-            "lineno" : 54,
+            "lineno" : 55,
             "value" : 15
           },
           "SIXTEEN" : {
             "name" : "SIXTEEN",
-            "lineno" : 55,
+            "lineno" : 56,
             "value" : 16
           },
           "SEVENTEEN" : {
             "name" : "SEVENTEEN",
-            "lineno" : 56,
+            "lineno" : 57,
             "value" : 17
           },
           "EIGHTEEN" : {
             "name" : "EIGHTEEN",
-            "lineno" : 57,
+            "lineno" : 58,
             "value" : 18
           },
           "NINETEEN" : {
             "name" : "NINETEEN",
-            "lineno" : 58,
+            "lineno" : 59,
             "value" : 19
           }
         },
-        "lineno" : 38
+        "lineno" : 39
       }
       },
   "structs" :
@@ -184,7 +184,7 @@
           "myEnum" : {
             "name" : "myEnum",
             "key" : 1,
-            "lineno" : 66,
+            "lineno" : 67,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -195,7 +195,7 @@
             "name" : "myBigEnum",
             "default_value" : 1,
             "key" : 2,
-            "lineno" : 67,
+            "lineno" : 68,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -205,7 +205,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 65
+        "lineno" : 66
       }
       },
   "source_path" : "thrift/compiler/test/fixtures/basic-enum/src/module",

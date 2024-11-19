@@ -99,7 +99,8 @@ std::vector<std::string> parseDomain(const std::string& domain) {
 
 namespace apache::thrift::compiler {
 
-t_package::t_package(std::string name) : uriPrefix_(std::move(name)) {
+t_package::t_package(std::string name)
+    : uriPrefix_(std::move(name)), explicit_(true) {
   boost::algorithm::split(
       path_, uriPrefix_, [](auto ch) { return ch == kPathDelim[0]; });
   check(path_.size() >= 2, "invalid package name");
@@ -118,7 +119,7 @@ std::string t_package::get_uri(const std::string& name) const {
 
 t_package::t_package(
     std::vector<std::string> domain, std::vector<std::string> path)
-    : domain_(std::move(domain)), path_(std::move(path)) {
+    : domain_(std::move(domain)), path_(std::move(path)), explicit_(true) {
   checkDomain(domain_);
   checkPath(path_);
   uriPrefix_ = genPrefix(domain_, path_);

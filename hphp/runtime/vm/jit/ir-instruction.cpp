@@ -763,6 +763,21 @@ Type structDictTypeBoundCheckReturn(const IRInstruction* inst) {
   return inst->src(0)->type() & type;
 }
 
+Type ldClsReturn(const IRInstruction* inst) {
+  assertx(inst->is(LdCls, LdClsCached));
+
+  auto const extra = inst->extra<LdClsFallbackData>();
+  switch (extra->fallback) {
+    case LdClsFallback::Fatal:
+    case LdClsFallback::FatalResolveClass:
+    case LdClsFallback::ThrowClassnameToClassString:
+    case LdClsFallback::ThrowClassnameToClassLazyClass:
+      return TCls;
+    case LdClsFallback::Silent:
+      return TCls | TNullptr;
+  }
+}
+
 // Is this instruction an array cast that always modifies the type of the
 // input array? Such casts are guaranteed to return vanilla arrays.
 bool isNontrivialArrayCast(const IRInstruction* inst) {
@@ -863,6 +878,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #define DElemLvalPos    return elemLvalPos(inst);
 #define DCOW            return cowReturn(inst);
 #define DStructTypeBound return structDictTypeBoundCheckReturn(inst);
+#define DLdCls          return ldClsReturn(inst);
 
 #define O(name, dstinfo, srcinfo, flags) case name: dstinfo not_reached();
 
@@ -920,6 +936,7 @@ Type outputType(const IRInstruction* inst, int /*dstId*/) {
 #undef DElemLvalPos
 #undef DCOW
 #undef DStructTypeBound
+#undef DLdCls
 
 }
 

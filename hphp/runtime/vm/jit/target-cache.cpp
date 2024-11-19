@@ -164,6 +164,8 @@ void ClassCache::loadFail(const StringData* name, const LdClsFallback fallback) 
                     k, name->data());
       SystemLib::throwInvalidArgumentExceptionObject(msg);
     }
+    case LdClsFallback::Silent:
+      return;
   }
 }
 
@@ -184,6 +186,7 @@ const Class* ClassCache::lookup(rds::Handle handle, StringData* name,
     Class* c = Class::load(name);
     if (UNLIKELY(!c)) {
       loadFail(name, fallback);
+      return c;
     }
     if (pair->m_key) decRefStr(pair->m_key);
     pair->m_key = name;

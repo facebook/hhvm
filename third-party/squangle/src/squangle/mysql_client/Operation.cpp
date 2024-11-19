@@ -404,6 +404,17 @@ std::ostream& operator<<(std::ostream& os, OperationResult result) {
   return os << Operation::toString(result);
 }
 
+db::FailureReason operationResultToFailureReason(OperationResult result) {
+  switch (result) {
+    case OperationResult::Cancelled:
+      return db::FailureReason::CANCELLED;
+    case OperationResult::TimedOut:
+      return db::FailureReason::TIMEOUT;
+    default:
+      return db::FailureReason::DATABASE_ERROR;
+  }
+}
+
 std::unique_ptr<Connection> blockingConnectHelper(
     std::shared_ptr<ConnectOperation> conn_op) {
   conn_op->run().wait();

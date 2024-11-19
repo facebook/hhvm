@@ -359,53 +359,33 @@ void MysqlFetchOperationImpl::specializedTimeoutTriggered() {
 
 void MysqlFetchOperationImpl::specializedCompleteOperation() {
   FetchOperation& op = getOp();
+
+  // Get all logging information
+  db::QueryLoggingData logging_data(
+      getOp().getOperationType(),
+      opElapsed(),
+      getTimeout(),
+      num_queries_executed_,
+      rendered_query_,
+      rows_received_,
+      total_result_size_,
+      no_index_used_,
+      use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
+      getAttributes(),
+      readResponseAttributes(),
+      getMaxThreadBlockTime(),
+      getTotalThreadBlockTime(),
+      was_slow_);
+
   // Stats for query
   if (result() == OperationResult::Succeeded) {
     // set last successful query time to MysqlConnectionHolder
     conn().setLastActivityTime(Clock::now());
-    db::QueryLoggingData logging_data(
-        getOp().getOperationType(),
-        opElapsed(),
-        getTimeout(),
-        num_queries_executed_,
-        rendered_query_,
-        rows_received_,
-        total_result_size_,
-        no_index_used_,
-        use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
-        getAttributes(),
-        readResponseAttributes(),
-        getMaxThreadBlockTime(),
-        getTotalThreadBlockTime(),
-        was_slow_);
     client_.logQuerySuccess(logging_data, conn());
   } else {
-    db::FailureReason reason = db::FailureReason::DATABASE_ERROR;
-    if (result() == OperationResult::Cancelled) {
-      reason = db::FailureReason::CANCELLED;
-    } else if (result() == OperationResult::TimedOut) {
-      reason = db::FailureReason::TIMEOUT;
-    }
+    auto reason = operationResultToFailureReason(result());
     client_.logQueryFailure(
-        db::QueryLoggingData(
-            getOp().getOperationType(),
-            opElapsed(),
-            getTimeout(),
-            num_queries_executed_,
-            rendered_query_,
-            rows_received_,
-            total_result_size_,
-            no_index_used_,
-            use_checksum_ || conn().getConnectionOptions().getUseChecksum(),
-            getAttributes(),
-            readResponseAttributes(),
-            getMaxThreadBlockTime(),
-            getTotalThreadBlockTime(),
-            was_slow_),
-        reason,
-        mysql_errno(),
-        mysql_error(),
-        conn());
+        logging_data, reason, mysql_errno(), mysql_error(), conn());
   }
 
   if (result() != OperationResult::Succeeded) {

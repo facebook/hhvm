@@ -45,6 +45,7 @@
 #include <variant>
 
 #include "squangle/logger/DBEventCounter.h"
+#include "squangle/logger/DBEventLogger.h"
 #include "squangle/mysql_client/DbResult.h"
 #include "squangle/mysql_client/Flags.h"
 
@@ -130,6 +131,8 @@ enum class OperationResult {
 
 // overload of operator<< for OperationResult
 std::ostream& operator<<(std::ostream& os, OperationResult result);
+
+db::FailureReason operationResultToFailureReason(OperationResult result);
 
 enum class StreamState { InitQuery, RowsReady, QueryEnded, Failure, Success };
 

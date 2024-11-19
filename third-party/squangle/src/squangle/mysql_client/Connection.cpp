@@ -340,6 +340,16 @@ DbQueryResult Connection::internalQueryWithGenerator(
       query_generator.query(), std::move(cb), std::move(options));
 }
 
+DbQueryResult Connection::internalQueryWithGenerator(
+    QueryGenerator& query_generator,
+    QueryCallback&& cb,
+    QueryOptions&& options) {
+  facebook::common::mysql_client::sql_builder::OdsCounterHelper::
+      bumpOdsOverallCounter();
+  return Connection::query(
+      query_generator.query(), std::move(cb), std::move(options));
+}
+
 template <>
 DbQueryResult Connection::queryWithGenerator(
     QueryGenerator&& query_generator,
@@ -351,10 +361,27 @@ DbQueryResult Connection::queryWithGenerator(
 
 template <>
 DbQueryResult Connection::queryWithGenerator(
+    QueryGenerator& query_generator,
+    QueryCallback&& cb,
+    QueryOptions&& options) {
+  return internalQueryWithGenerator(
+      query_generator, std::move(cb), std::move(options));
+}
+
+template <>
+DbQueryResult Connection::queryWithGenerator(
     QueryGenerator&& query_generator,
     QueryOptions&& options) {
   return Connection::queryWithGenerator(
       std::move(query_generator), (QueryCallback) nullptr, std::move(options));
+}
+
+template <>
+DbQueryResult Connection::queryWithGenerator(
+    QueryGenerator& query_generator,
+    QueryOptions&& options) {
+  return Connection::queryWithGenerator(
+      query_generator, (QueryCallback) nullptr, std::move(options));
 }
 
 template <>
@@ -364,11 +391,24 @@ DbQueryResult Connection::queryWithGenerator(QueryGenerator&& query_generator) {
 }
 
 template <>
+DbQueryResult Connection::queryWithGenerator(QueryGenerator& query_generator) {
+  return Connection::queryWithGenerator(query_generator, QueryOptions());
+}
+
+template <>
 DbQueryResult Connection::queryWithGenerator(
     QueryGenerator&& query_generator,
     QueryCallback&& cb) {
   return Connection::queryWithGenerator(
       std::move(query_generator), std::move(cb), QueryOptions());
+}
+
+template <>
+DbQueryResult Connection::queryWithGenerator(
+    QueryGenerator& query_generator,
+    QueryCallback&& cb) {
+  return Connection::queryWithGenerator(
+      query_generator, std::move(cb), QueryOptions());
 }
 
 // MultiQuery

@@ -159,6 +159,17 @@ class Connection {
       Args&&... args);
 
   template <typename... Args>
+  DbQueryResult queryWithGenerator(
+      QueryGenerator& query_generator,
+      Args&&... args);
+
+  template <>
+  DbQueryResult queryWithGenerator(
+      QueryGenerator& query_generator,
+      QueryCallback&& cb,
+      QueryOptions&& options);
+
+  template <typename... Args>
   DbMultiQueryResult multiQueryWithGenerators(
       std::vector<std::unique_ptr<QueryGenerator>>&& query_generators,
       Args&&... args);
@@ -648,9 +659,18 @@ class Connection {
   // QueryWithGenerator
 
   // This method holds the core logic for queryWithGenerator and can be
-  // overridden in derived class
+  // overridden in derived class.  QueryGenerator is passed as an rvalue
+  // reference
   virtual DbQueryResult internalQueryWithGenerator(
       QueryGenerator&& query_Generator,
+      QueryCallback&& cb,
+      QueryOptions&& options);
+
+  // This method holds the core logic for queryWithGenerator and can be
+  // overridden in derived class. QueryGenerator is passed as an lvalue
+  // reference
+  virtual DbQueryResult internalQueryWithGenerator(
+      QueryGenerator& query_Generator,
       QueryCallback&& cb,
       QueryOptions&& options);
 

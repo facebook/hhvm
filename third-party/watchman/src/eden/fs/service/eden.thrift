@@ -1755,33 +1755,81 @@ union CheckoutProgressInfoResponse {
 /*
  * Structs/Unions for changesSinceV2 API
  */
+
+/*
+ * Small change notification returned when invoking changesSinceV2.
+ * Indicates that a new filesystem entry has been added to the
+ * given mount point since the provided journal position.
+ *
+ * fileType - Dtype of added filesystem entry.
+ * path - path (vector of bytes) of added filesystem entry.
+ */
 struct Added {
   1: Dtype fileType;
   3: PathString path;
 }
 
+/*
+ * Small change notification returned when invoking changesSinceV2.
+ * Indicates that an existing filesystem entry has been modified within
+ * the given mount point since the provided journal position.
+ *
+ * fileType - Dtype of modified filesystem entry.
+ * path - path (vector of bytes) of modified filesystem entry.
+ */
 struct Modified {
   1: Dtype fileType;
   3: PathString path;
 }
 
+/*
+ * Small change notification returned when invoking changesSinceV2.
+ * Indicates that an existing filesystem entry has been renamed within
+ * the given mount point since the provided journal position.
+ *
+ * fileType - Dtype of renamed filesystem entry.
+ * from - path (vector of bytes) the filesystem entry was previously located at.
+ * to - path (vector of bytes) the filesystem entry was relocated to.
+ */
 struct Renamed {
   1: Dtype fileType;
   2: PathString from;
   3: PathString to;
 }
 
+/*
+ * Small change notification returned when invoking changesSinceV2.
+ * Indicates that an existing filesystem entry has been replaced within
+ * the given mount point since the provided journal position.
+ *
+ * fileType - Dtype of replaced filesystem entry.
+ * from - path (vector of bytes) the filesystem entry was previously located at.
+ * to - path (vector of bytes) the filesystem entry was relocated over.
+ */
 struct Replaced {
   1: Dtype fileType;
   2: PathString from;
   3: PathString to;
 }
 
+/*
+ * Small change notification returned when invoking changesSinceV2.
+ * Indicates that an existing filesystem entry has been removed from
+ * the given mount point since the provided journal position.
+ *
+ * fileType - Dtype of removed filesystem entry.
+ * path - path (vector of bytes) of removed filesystem entry.
+ */
 struct Removed {
   1: Dtype fileType;
   3: PathString path;
 }
 
+/*
+ * Change notification returned when invoking changesSinceV2.
+ * Indicates that the given change is small in impact - affecting
+ * one or two filesystem entries at most.
+ */
 union SmallChangeNotification {
   1: Added added;
   2: Modified modified;
@@ -1790,21 +1838,41 @@ union SmallChangeNotification {
   5: Removed removed;
 }
 
+/*
+ * Large change notification returned when invoking changesSinceV2.
+ * Indicates that an existing directory has been renamed within
+ * the given mount point since the provided journal position.
+ */
 struct DirectoryRenamed {
   1: PathString from;
   2: PathString to;
 }
 
+/*
+ * Large change notification returned when invoking changesSinceV2.
+ * Indicates that a commit transition has occurred within the
+ * given mount point since the provided journal position.
+ */
 struct CommitTransition {
   1: ThriftRootId from;
   2: ThriftRootId to;
 }
 
+/*
+ * Change notification returned when invoking changesSinceV2.
+ * Indicates that the given change is large in impact - affecting
+ * an unknown number of filesystem entries.
+ */
 union LargeChangeNotification {
   1: DirectoryRenamed directoryRenamed;
   2: CommitTransition commitTransition;
 }
 
+/*
+ * Changed returned when invoking changesSinceV2.
+ * Contains a change that occured within the given mount point
+ * since the provided journal position.
+ */
 union ChangeNotification {
   1: SmallChangeNotification smallChange;
   2: LargeChangeNotification largeChange;
@@ -1812,6 +1880,13 @@ union ChangeNotification {
 
 /**
  * Return value of the changesSinceV2 API
+ *
+ * toPosition - a new journal poistion that indicates the next change
+ * that will occur in the future. Should be used in the next call to
+ * changesSinceV2 go get the next list of changes.
+ *
+ * changes -  a list of all change notifications that have ocurred in
+ * within the given mount point since the provided journal position.
  */
 struct ChangesSinceV2Result {
   1: JournalPosition toPosition;
@@ -1820,6 +1895,14 @@ struct ChangesSinceV2Result {
 
 /**
  * Argument to changesSinceV2 API
+ *
+ * mountPoint - the EdenFS checkout to request changes about.
+ *
+ * fromPosition - the journal position used as the starting point to
+ * request changes since. Typically, fromPosition is the set to the
+ * toPostiion value returned in ChangesSinceV2Result. However, for
+ * the initial invocation of changesSinceV2, the caller can obtain
+ * the current journal position by calling getCurrentJournalPosition.
  */
 struct ChangesSinceV2Params {
   1: PathString mountPoint;
@@ -2665,7 +2748,7 @@ service EdenService extends fb303_core.BaseService {
 
   /**
    * Returns a list of change notifications along with a new journal position for a given mount
-   * since a specific journal position.
+   * point since a provided journal position.
    *
    * This does not resolve expensive operations like moving a directory or changing
    * commits. Callers must query Sapling to evaluate those potentially expensive operations.

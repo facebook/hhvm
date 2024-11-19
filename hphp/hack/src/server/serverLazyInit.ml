@@ -285,7 +285,6 @@ let calculate_state_distance_and_age_from_hg
 
 let use_precomputed_state_exn
     ~(root : Path.t)
-    (env : ServerEnv.env)
     (genv : ServerEnv.genv)
     (ctx : Provider_context.t)
     (info : ServerArgs.saved_state_target_info)
@@ -345,12 +344,8 @@ let use_precomputed_state_exn
     if log_saved_state_age_and_distance then
       calculate_state_distance_and_age_from_hg root corresponding_base_revision
     else
-      {
-        (ServerEnv.SavedStateRevsInfo.default
-           ~saved_state_rev:corresponding_base_revision)
-        with
-        mergebase_rev = env.init_env.mergebase;
-      }
+      ServerEnv.SavedStateRevsInfo.default
+        ~saved_state_rev:corresponding_base_revision
   in
   {
     naming_table_fn = naming_table_path;
@@ -1357,7 +1352,7 @@ let load_saved_state_exn env genv load_state_approach root cgroup_steps =
   let ctx = Provider_utils.ctx_from_server_env env in
   match load_state_approach with
   | Precomputed info ->
-    Ok (use_precomputed_state_exn ~root env genv ctx info cgroup_steps)
+    Ok (use_precomputed_state_exn ~root genv ctx info cgroup_steps)
   | Load_state_natively -> download_and_load_state_exn ~genv ~ctx ~root
 
 let saved_state_init

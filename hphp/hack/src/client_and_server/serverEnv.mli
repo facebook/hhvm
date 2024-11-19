@@ -82,7 +82,6 @@ type init_env = {
   init_id: string;
   init_start_t: float;
   init_type: string;
-  mergebase: Hg.Rev.t option;
   mergebase_warning_hashes: Warnings_saved_state.t option;
   why_needed_full_check: Init_telemetry.t option;
       (** This is about the first full check (if any) which was deferred after init.

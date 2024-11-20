@@ -29,18 +29,9 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import include.thrift_mutable_types as _fbthrift__include__thrift_mutable_types
+from module.thrift_enums import _fbthrift_compatible_with_Result
 
-class _fbthrift_compatible_with_Result:
-    pass
-
-
-class Result(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Result):
-    OK: Result = ...
-    SO_SO: Result = ...
-    GOOD: Result = ...
-    def _to_python(self) -> Result: ...
-    def _to_py3(self) -> "module.types.Result": ...  # type: ignore
-    def _to_py_deprecated(self) -> int: ...
+from module.thrift_enums import *
 
 
 class _fbthrift_compatible_with_CustomException:

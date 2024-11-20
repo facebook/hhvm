@@ -30,6 +30,8 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import includes.thrift_mutable_types as _fbthrift__includes__thrift_mutable_types
 
+from module.thrift_enums import *
+
 
 class _fbthrift_compatible_with_MyStruct:
     pass

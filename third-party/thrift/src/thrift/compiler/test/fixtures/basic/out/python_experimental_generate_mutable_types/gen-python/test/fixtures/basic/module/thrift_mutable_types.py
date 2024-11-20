@@ -655,66 +655,13 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.UnionToBeRenamed, self)
 
-
-
-class MyEnum(_fbthrift_python_types.Enum, int):
-    MyValue1 = 0
-    MyValue2 = 1
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.MyEnum"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "test.dev/fixtures/basic/MyEnum"
-
-    @staticmethod
-    def __get_metadata__():
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_MyEnum()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        return py3_types.MyEnum(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-class HackEnum(_fbthrift_python_types.Enum, int):
-    Value1 = 0
-    Value2 = 1
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.HackEnum"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return "test.dev/fixtures/basic/HackEnum"
-
-    @staticmethod
-    def __get_metadata__():
-        return test.fixtures.basic.module.thrift_metadata.gen_metadata_enum_HackEnum()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("test.fixtures.basic.module.types")
-        return py3_types.HackEnum(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
+from test.fixtures.basic.module.thrift_enums import *
 
 _fbthrift_all_enums = [
     MyEnum,
     HackEnum,
 ]
+
 
 _fbthrift_all_structs = [
     MyStruct,

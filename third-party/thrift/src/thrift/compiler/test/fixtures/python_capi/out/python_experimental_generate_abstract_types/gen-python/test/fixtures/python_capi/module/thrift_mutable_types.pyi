@@ -38,28 +38,10 @@ import apache.thrift.type.schema.thrift_mutable_types as _fbthrift__apache__thri
 import test.fixtures.python_capi.serialized_dep.thrift_mutable_types as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types
 
 import test.fixtures.python_capi.thrift_dep.thrift_mutable_types as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types
+from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_AnnoyingEnum
 
-class _fbthrift_compatible_with_MyEnum:
-    pass
-
-
-class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.MyEnum, _fbthrift_compatible_with_MyEnum):
-    MyValue1: MyEnum = ...
-    MyValue2: MyEnum = ...
-    def _to_python(self) -> MyEnum: ...
-    def _to_py3(self) -> "test.fixtures.python_capi.module.types.MyEnum": ...  # type: ignore
-    def _to_py_deprecated(self) -> int: ...
-
-class _fbthrift_compatible_with_AnnoyingEnum:
-    pass
-
-
-class AnnoyingEnum(_fbthrift_python_types.Enum, int, _fbthrift_python_abstract_types.AnnoyingEnum, _fbthrift_compatible_with_AnnoyingEnum):
-    FOO: AnnoyingEnum = ...
-    BAR: AnnoyingEnum = ...
-    def _to_python(self) -> AnnoyingEnum: ...
-    def _to_py3(self) -> "test.fixtures.python_capi.module.types.AnnoyingEnum": ...  # type: ignore
-    def _to_py_deprecated(self) -> int: ...
+from test.fixtures.python_capi.module.thrift_enums import *
 
 
 class _fbthrift_compatible_with_MyStruct:

@@ -180,10 +180,11 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
             py_asyncio_types = importlib.import_module("service.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.WhisperException, self)
 
-
+from meta.example.thrift.service.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 _fbthrift_all_structs = [
     EchoRequest,

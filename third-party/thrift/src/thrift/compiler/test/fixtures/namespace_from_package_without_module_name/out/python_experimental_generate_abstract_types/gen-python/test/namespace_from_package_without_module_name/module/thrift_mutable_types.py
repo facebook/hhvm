@@ -74,10 +74,11 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             py_asyncio_types = importlib.import_module("test.namespace_from_package_without_module_name.module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Foo, self)
 
-
+from test.namespace_from_package_without_module_name.module.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 _fbthrift_all_structs = [
     Foo,

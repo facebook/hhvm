@@ -47,6 +47,7 @@ import {{included_module_path}}.{{> types/types_import_path}} as {{included_modu
 {{#program:adapter_type_hint_modules}}
 import {{module_path}}
 {{/program:adapter_type_hint_modules}}
+{{#program:generate_immutable_types}}
 {{#program:enums}}
 
 class _fbthrift_compatible_with_{{enum:name}}:
@@ -69,6 +70,20 @@ class {{enum:name}}(_fbthrift_python_types.{{!
     def _to_py_deprecated(self) -> int: ...
     {{/enum:legacy_api?}}
 {{/program:enums}}
+{{/program:generate_immutable_types}}
+{{#program:generate_mutable_types}}
+{{!
+    from module_path.thrift_enums import *
+
+below does not import private symbols _fbthrift_compatible_with_*.
+These are referenced in the generated pyi files and, for simplicity,
+need to be imported through the types modules.
+}}{{#program:enums}}
+from {{program:module_path}}.thrift_enums import _fbthrift_compatible_with_{{enum:name}}
+{{/program:enums}}
+
+from {{program:module_path}}.thrift_enums import *
+{{/program:generate_mutable_types}}
 {{#program:structs}}
 
 

@@ -187,8 +187,24 @@ Until we resolve the above error, register the class as virtual subclass of the 
 {{#program:generate_immutable_types}}
 # This unfortunately has to be down here to prevent circular imports
 import {{program:module_path}}.thrift_metadata
-{{/program:generate_immutable_types}}
 {{> enums/thrift_enums }}
+{{/program:generate_immutable_types}}
+{{#program:generate_mutable_types}}
+from {{program:module_path}}.thrift_enums import *
+
+{{!
+    The symbol below is only required for AnyRegistry.register_module.
+    Currently, calls to that method only pass thrift_types.
+    register_module in its current form expects _fbthrift_all_enums
+    to be defined in thrift_types. For now define
+    _fbthrift_all_enums here.
+}}
+_fbthrift_all_enums = [
+    {{#program:enums}}
+    {{enum:name}},
+    {{/program:enums}}
+]
+{{/program:generate_mutable_types}}
 {{#program:generate_immutable_types}}{{!
 }}{{#program:structs}}
 

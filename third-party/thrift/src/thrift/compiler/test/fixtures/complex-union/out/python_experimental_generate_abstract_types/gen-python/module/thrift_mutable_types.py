@@ -598,10 +598,11 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.NonCopyableUnion, self)
 
-
+from module.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 _fbthrift_all_structs = [
     ComplexUnion,

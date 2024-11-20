@@ -652,96 +652,14 @@ class union2(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.union2, self)
 
-
-
-class EmptyEnum(_fbthrift_python_types.Enum, int):
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.EmptyEnum"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return None
-
-    @staticmethod
-    def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_EmptyEnum()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.EmptyEnum(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-class City(_fbthrift_python_types.Enum, int):
-    NYC = 0
-    MPK = 1
-    SEA = 2
-    LON = 3
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.City"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return None
-
-    @staticmethod
-    def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_City()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.City(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-class Company(_fbthrift_python_types.Enum, int):
-    FACEBOOK = 0
-    WHATSAPP = 1
-    OCULUS = 2
-    INSTAGRAM = 3
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.Company"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return None
-
-    @staticmethod
-    def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_Company()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.Company(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
+from module.thrift_enums import *
 
 _fbthrift_all_enums = [
     EmptyEnum,
     City,
     Company,
 ]
+
 
 _fbthrift_all_structs = [
     Internship,

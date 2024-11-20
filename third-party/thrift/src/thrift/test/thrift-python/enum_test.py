@@ -91,8 +91,13 @@ class ThriftPython_Enum(unittest.TestCase):
             s.number_list.append(test_types.Color.green)
         self.assertEqual([2, 5], s.number_list)
 
+    def test_enum_identity(self) -> None:
+        self.assertIs(enums.PositiveNumber, mutable_types.PositiveNumber)
+
     def test_value(self) -> None:
         self.assertEqual(0, enums.PositiveNumber.NONE)
         self.assertEqual(1, enums.PositiveNumber.ONE)
         self.assertEqual(2, enums.PositiveNumber.TWO)
         self.assertEqual(5, enums.PositiveNumber.FIVE)
+
+        self.assertEqual(enums.PositiveNumber.ONE, mutable_types.PositiveNumber.ONE)

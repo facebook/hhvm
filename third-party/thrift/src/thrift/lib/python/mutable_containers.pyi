@@ -259,8 +259,27 @@ class MutableMap(MutableMappingAbc[K, V]):
     def items(self) -> MapItemsView[K, V]: ...
     # pyre-ignore[15]: Inconsistent override
     def values(self) -> MapValuesView[V]: ...
-    # pyre-ignore[14]: Inconsistent override
-    def setdefault(self, key: object, default: typing.Optional[object] = None) -> V: ...
+    @overload
+    def setdefault(self, key: K, default: V, /) -> V: ...
+    @overload
+    def setdefault(
+        self: MutableMap[K, _V | None], key: K, default: None = None, /
+    ) -> _V | None: ...
+    @overload
+    def setdefault(
+        self: MutableMap[K, MutableList[_V]], key: K, default: V | _ThriftListWrapper, /
+    ) -> V: ...
+    @overload
+    def setdefault(
+        self: MutableMap[K, MutableSet[_V]], key: K, default: V | _ThriftSetWrapper, /
+    ) -> V: ...
+    @overload
+    def setdefault(
+        self: MutableMap[K, MutableMap[_K, _V]],
+        key: K,
+        default: V | _ThriftMapWrapper,
+        /,
+    ) -> V: ...
 
 class MapKeysView(Generic[K]):
     def __len__(self) -> int: ...

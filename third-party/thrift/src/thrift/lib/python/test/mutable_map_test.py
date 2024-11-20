@@ -535,6 +535,7 @@ class MutableMapTest(unittest.TestCase):
         with self.assertRaisesRegex(
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
+            # pyre-ignore[6]: Intentional for test
             mutable_map.setdefault(123, 999)
 
         # Default value for `setdefault()` is `None`, however, `None` is not a

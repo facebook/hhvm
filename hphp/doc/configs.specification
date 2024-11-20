@@ -1848,7 +1848,6 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string AdminServer.IP = Server.IP, UNKNOWN
 - int AdminServer.Port = 0, UNKNOWN
 - int AdminServer.ThreadCount = 1, UNKNOWN
-- bool AdminServer.EnableSSLWithPlainText = false, UNKNOWN
 - bool AdminServer.StatsNeedPassword = true, UNKNOWN
 - std::string AdminServer.Password = "", UNKNOWN, nobind
 - std::set<std::string> AdminServer.Passwords = {}, UNKNOWN, nobind

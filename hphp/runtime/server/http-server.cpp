@@ -205,9 +205,6 @@ HttpServer::HttpServer() {
   m_adminServer = serverFactory->createServer(admin_options);
   m_adminServer->setRequestHandlerFactory<AdminRequestHandler>(
     Cfg::Server::RequestTimeoutSeconds);
-  if (Cfg::AdminServer::EnableSSLWithPlainText) {
-    m_adminServer->enableSSLWithPlainText();
-  }
 
   m_counterCallback.init(
     [this](std::map<std::string, int64_t>& counters) {

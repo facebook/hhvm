@@ -58,9 +58,6 @@ module Flags = struct
     in
     res
 
-  let contains_error_flags flags =
-    IPoll.Flags.mem flags IPoll.Flags.(pollerr + pollnval + pollpri)
-
   let error_to_string = function
     | Pollerr -> "POLLERR"
     | Pollnval -> "POLLNVAL"
@@ -102,15 +99,24 @@ let wait_fd
     Ok Timeout
   else
     let rflags = IPoll.get_revents poll 0 in
-    if Flags.contains_error_flags rflags then
+    let pollhup = IPoll.Flags.mem rflags IPoll.Flags.pollhup in
+    let is_out = IPoll.Flags.mem flags IPoll.Flags.pollout in
+    let pollerr = IPoll.Flags.mem rflags IPoll.Flags.pollerr in
+    let pollpri = IPoll.Flags.mem rflags IPoll.Flags.pollpri in
+    let pollnval = IPoll.Flags.mem rflags IPoll.Flags.pollnval in
+    let hup =
+      pollhup
+      || (* According to the poll man page, POLLERR
+            "is also set for a file descriptor
+            referring to the write end of a pipe when the read end has
+            been closed." *)
+      (pollerr && is_out)
+    in
+    let has_errors = pollpri || pollnval || (pollerr && not is_out) in
+    if has_errors then
       Error (Flags.flags rflags)
     else
-      Ok
-        (Event
-           {
-             hup = IPoll.Flags.mem rflags IPoll.Flags.pollhup;
-             ready = IPoll.Flags.mem rflags flags;
-           })
+      Ok (Event { hup; ready = IPoll.Flags.mem rflags flags })
 
 let rec f_non_interrupted f x y ~timeout_ms =
   let start_time = Unix.gettimeofday () in

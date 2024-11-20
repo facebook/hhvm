@@ -29,6 +29,7 @@ from typing import (
     Mapping,
     Optional,
     overload,
+    Protocol,
     Tuple,
     TypeVar,
     Union,
@@ -39,8 +40,6 @@ from thrift.python.mutable_types import (
     _ThriftMapWrapper,
     _ThriftSetWrapper,
 )
-
-class MapKwargsSentinelType: ...
 
 T = TypeVar("T")
 
@@ -200,6 +199,10 @@ V = TypeVar("V")
 _K = TypeVar("_K")
 _V = TypeVar("_V")
 
+class SupportsKeysAndGetItem(Protocol[K, V]):
+    def keys(self) -> Iterable[K]: ...
+    def __getitem__(self, k: K) -> V: ...
+
 class MutableMap(MutableMappingAbc[K, V]):
     def __init__(
         self,
@@ -234,18 +237,20 @@ class MutableMap(MutableMappingAbc[K, V]):
     ) -> None: ...
     def __delitem__(self, key: K) -> None: ...
     def __contains__(self, key: T) -> bool: ...
-    # pyre-ignore[14]: Inconsistent override
-    def update(
-        self,
-        other: Union[
-            Iterable[Tuple[object, object]],
-            Mapping[object, object],
-        ] = (),
-        /,
-        **keywords: object,
-    ) -> None: ...
-    # pyre-ignore[14]: Inconsistent override
-    def pop(self, key: T, default: Optional[object] = MapKwargsSentinelType()) -> V: ...
+    @overload
+    def update(self, m: SupportsKeysAndGetItem[K, V], /, **kwargs: V) -> None: ...
+    @overload
+    def update(self, m: Mapping[K, V], /, **kwargs: V) -> None: ...
+    @overload
+    def update(self, m: Iterable[tuple[K, V]], /, **kwargs: V) -> None: ...
+    @overload
+    def update(self, **kwargs: V) -> None: ...
+    @overload
+    def pop(self, key: K, /) -> V: ...
+    @overload
+    def pop(self, key: K, /, default: V) -> V: ...
+    @overload
+    def pop(self, key: K, /, default: T) -> V | T: ...
     def popitem(self) -> Tuple[K, V]: ...
     def clear(self) -> None: ...
     # pyre-ignore[15]: Inconsistent override

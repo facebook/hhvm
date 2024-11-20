@@ -508,6 +508,7 @@ class MutableMapTest(unittest.TestCase):
 
         # Wrong key type raises a KeyError not a TypeError
         with self.assertRaisesRegex(KeyError, "123"):
+            # pyre-ignore[6]: Intentional for test
             mutable_map.pop(123)
 
     def test_popitem(self) -> None:
@@ -603,6 +604,7 @@ class MutableMapTest(unittest.TestCase):
             TypeError, "Expected type <class 'str'>, got: <class 'int'>"
         ):
             # `{"B": 66}` raises before keyword argument
+            # pyre-ignore[6]: Intentional for test
             mutable_map.update({1: 999}, A=65)
 
         self.assertEqual({"A": 65, "a": 97}, mutable_map)
@@ -611,6 +613,7 @@ class MutableMapTest(unittest.TestCase):
             TypeError, "not a <class 'int'>, is actually of type <class 'str'>"
         ):
             # `{"B": 66}` updates the mutable map before keyword argument raises
+            # pyre-ignore[6]: Intentional for test
             mutable_map.update({"B": 66}, x="Not an Integer")
 
         self.assertEqual({"A": 65, "a": 97, "B": 66}, mutable_map)

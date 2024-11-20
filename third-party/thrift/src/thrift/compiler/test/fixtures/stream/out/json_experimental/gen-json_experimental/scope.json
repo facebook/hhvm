@@ -268,6 +268,22 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 137
+      },
+      "DisableSchemaConst" : {
+        "name" : "DisableSchemaConst",
+        "structured_annotations": {
+          "scope.Program" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Program"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Not a scope, just here for dependency cycle reasons.\nDisables schema const injection for the program.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 148
       }
       },
   "source_path" : "thrift/annotation/scope",

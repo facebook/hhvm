@@ -1241,6 +1241,78 @@ func (x *Definition) setDefaults() *Definition {
     return x
 }
 
+type DisableSchemaConst struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*DisableSchemaConst)(nil)
+
+func NewDisableSchemaConst() *DisableSchemaConst {
+    return (&DisableSchemaConst{}).setDefaults()
+}
+
+
+
+func (x *DisableSchemaConst) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("DisableSchemaConst"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *DisableSchemaConst) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *DisableSchemaConst) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *DisableSchemaConst) setDefaults() *DisableSchemaConst {
+    return x
+}
+
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
@@ -1264,5 +1336,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/Interface", func() any { return NewInterface() })
     registry.RegisterType("facebook.com/thrift/annotation/RootDefinition", func() any { return NewRootDefinition() })
     registry.RegisterType("facebook.com/thrift/annotation/Definition", func() any { return NewDefinition() })
+    registry.RegisterType("facebook.com/thrift/annotation/DisableSchemaConst", func() any { return NewDisableSchemaConst() })
 
 }

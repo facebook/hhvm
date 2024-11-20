@@ -40,17 +40,7 @@ namespace module_constants {
   return "";
 }
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_c10aed29f43b19bb_includes() {
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-  static const ::std::array<::std::string_view, 4> includes = {
-    _fbthrift_schema_c10aed29f43b19bb(),
-    ::apache::thrift::detail::mc::readSchema(::test_cpp2::cpp_reflection::reflection_dep_B_constants::_fbthrift_schema_73d2e4ac7b154360),
-    ::apache::thrift::detail::mc::readSchema(::test_cpp2::cpp_reflection::reflection_dep_C_constants::_fbthrift_schema_5c8bee323039ecdf),
-    ::apache::thrift::detail::mc::readSchemaInclude(::test_cpp2::cpp_reflection::reflection_dep_C_constants::_fbthrift_schema_5c8bee323039ecdf_includes, 1),
-  };
-  return ::folly::range(includes);
-#else
   return {};
-#endif
 }
 
 } // namespace module_constants

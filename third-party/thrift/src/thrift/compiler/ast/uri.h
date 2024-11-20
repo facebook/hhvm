@@ -50,6 +50,8 @@ inline constexpr auto kAllowReservedIdentifierUri =
     "facebook.com/thrift/annotation/AllowReservedIdentifier";
 inline constexpr auto kAllowReservedFilenameUri =
     "facebook.com/thrift/annotation/AllowReservedFilename";
+inline constexpr auto kDisableSchemaConstUri =
+    "facebook.com/thrift/annotation/DisableSchemaConst";
 
 // Scope:
 inline constexpr auto kScopeProgramUri =

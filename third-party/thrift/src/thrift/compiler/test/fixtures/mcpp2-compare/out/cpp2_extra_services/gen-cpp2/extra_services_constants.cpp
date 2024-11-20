@@ -29,16 +29,7 @@ namespace extra_services_constants {
   return "";
 }
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_6e8480798c558f9d_includes() {
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-  static const ::std::array<::std::string_view, 3> includes = {
-    _fbthrift_schema_6e8480798c558f9d(),
-    ::apache::thrift::detail::mc::readSchemaInclude(::some::valid::ns::module_constants::_fbthrift_schema_f1130b1f0cb75c42_includes, 1),
-    ::apache::thrift::detail::mc::readSchema(::some::valid::ns::module_constants::_fbthrift_schema_f1130b1f0cb75c42),
-  };
-  return ::folly::range(includes);
-#else
   return {};
-#endif
 }
 
 } // namespace extra_services_constants

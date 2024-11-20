@@ -37,6 +37,7 @@ var (
     premadeThriftType_scope_Interface *metadata.ThriftType = nil
     premadeThriftType_scope_RootDefinition *metadata.ThriftType = nil
     premadeThriftType_scope_Definition *metadata.ThriftType = nil
+    premadeThriftType_scope_DisableSchemaConst *metadata.ThriftType = nil
 )
 
 // Premade Thrift type initializer
@@ -109,6 +110,10 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
         metadata.NewThriftStructType().
             SetName("scope.Definition"),
     )
+    premadeThriftType_scope_DisableSchemaConst = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("scope.DisableSchemaConst"),
+    )
 })
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -142,6 +147,7 @@ var premadeThriftTypesMapOnce = sync.OnceValue(
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Interface", premadeThriftType_scope_Interface })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.RootDefinition", premadeThriftType_scope_RootDefinition })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.Definition", premadeThriftType_scope_Definition })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "scope.DisableSchemaConst", premadeThriftType_scope_DisableSchemaConst })
 
         fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
@@ -207,6 +213,9 @@ var structMetadatasOnce = sync.OnceValue(
     SetIsUnion(false))
         fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
     SetName("scope.Definition").
+    SetIsUnion(false))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
+    SetName("scope.DisableSchemaConst").
     SetIsUnion(false))
         return fbthriftResults
     },

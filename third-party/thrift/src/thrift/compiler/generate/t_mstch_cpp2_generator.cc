@@ -367,6 +367,8 @@ class cpp_mstch_program : public mstch_program {
          {"program:split_enums", &cpp_mstch_program::split_enums},
          {"program:has_schema?", &cpp_mstch_program::has_schema},
          {"program:schema_name", &cpp_mstch_program::schema_name},
+         {"program:schema_includes_const?",
+          &cpp_mstch_program::schema_includes_const},
          {"program:needs_sinit?", &cpp_mstch_program::needs_sinit},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
@@ -516,6 +518,10 @@ class cpp_mstch_program : public mstch_program {
     auto includes = std::make_unique<transitive_include_map>();
     auto local_includes = program->get_includes_for_codegen();
     for (const auto* include : local_includes) {
+      if (include->find_structured_annotation_or_null(kDisableSchemaConstUri)) {
+        continue;
+      }
+
       includes->emplace(
           include,
           fmt::format(
@@ -757,9 +763,35 @@ class cpp_mstch_program : public mstch_program {
 
   mstch::node schema_name() { return schematizer::name_schema(sm_, *program_); }
 
+  mstch::node schema_includes_const() {
+    return supports_schema_includes(program_);
+  }
+
   mstch::node needs_sinit() { return has_option("any"); }
 
  private:
+  bool supports_schema_includes(const t_program* program) {
+    enum class strong_bool {};
+    strong_bool supports = context_.cache().get(*program, [&] {
+      bool ret =
+          // Opting out of schema const should disable all of its failure modes.
+          !program->find_structured_annotation_or_null(
+              kDisableSchemaConstUri) &&
+          // File-relative includes break schema const naming,
+          // so exclude programs with includes that don't contain a path
+          // separator.
+          std::all_of(
+              program->includes().begin(),
+              program->includes().end(),
+              [](const t_include* inc) {
+                auto path = inc->raw_path();
+                return std::find(path.begin(), path.end(), '/') != path.end();
+              });
+      return std::make_unique<strong_bool>(static_cast<strong_bool>(ret));
+    });
+    return static_cast<bool>(supports);
+  }
+
   const std::optional<int32_t> split_id_;
   const std::optional<std::vector<t_structured*>> split_structs_;
   std::optional<std::vector<t_enum*>> split_enums_;

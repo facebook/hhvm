@@ -29,15 +29,7 @@ namespace module_constants {
   return "";
 }
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_2eeb0c928daeecf7_includes() {
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-  static const ::std::array<::std::string_view, 2> includes = {
-    _fbthrift_schema_2eeb0c928daeecf7(),
-    ::apache::thrift::detail::mc::readSchema(::cpp2::foo_constants::_fbthrift_schema_7c73f7c34c3ca82),
-  };
-  return ::folly::range(includes);
-#else
   return {};
-#endif
 }
 
 } // namespace module_constants

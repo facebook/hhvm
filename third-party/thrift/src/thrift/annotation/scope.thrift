@@ -140,3 +140,10 @@ struct RootDefinition {}
 @EnumValue
 @Transitive
 struct Definition {}
+
+/**
+ * Not a scope, just here for dependency cycle reasons.
+ * Disables schema const injection for the program.
+ */
+@Program
+struct DisableSchemaConst {}

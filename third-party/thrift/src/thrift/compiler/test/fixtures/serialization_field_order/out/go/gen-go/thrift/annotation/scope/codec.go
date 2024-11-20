@@ -36,6 +36,7 @@ var (
     premadeCodecTypeSpec_scope_Interface *thrift.TypeSpec = nil
     premadeCodecTypeSpec_scope_RootDefinition *thrift.TypeSpec = nil
     premadeCodecTypeSpec_scope_Definition *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_scope_DisableSchemaConst *thrift.TypeSpec = nil
 )
 
 // Premade codec specs initializer
@@ -193,6 +194,15 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 },
 
     }
+    premadeCodecTypeSpec_scope_DisableSchemaConst = &thrift.TypeSpec{
+        FullName: "scope.DisableSchemaConst",
+        CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "scope.DisableSchemaConst",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewDisableSchemaConst() },
+},
+
+    }
 })
 
 // Premade struct specs
@@ -214,6 +224,7 @@ var (
     premadeStructSpec_Interface *thrift.StructSpec = nil
     premadeStructSpec_RootDefinition *thrift.StructSpec = nil
     premadeStructSpec_Definition *thrift.StructSpec = nil
+    premadeStructSpec_DisableSchemaConst *thrift.StructSpec = nil
 )
 
 // Premade struct specs initializer
@@ -422,6 +433,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
+    premadeStructSpec_DisableSchemaConst = &thrift.StructSpec{
+    Name:                 "DisableSchemaConst",
+    ScopedName:           "scope.DisableSchemaConst",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
 })
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
@@ -447,6 +470,7 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interface.FullName] = premadeCodecTypeSpec_scope_Interface
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_RootDefinition.FullName] = premadeCodecTypeSpec_scope_RootDefinition
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Definition.FullName] = premadeCodecTypeSpec_scope_Definition
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_DisableSchemaConst.FullName] = premadeCodecTypeSpec_scope_DisableSchemaConst
         return fbthriftTypeSpecsMap
     },
 )

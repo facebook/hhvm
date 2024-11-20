@@ -51,16 +51,7 @@ namespace module2_constants {
   return "";
 }
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_9188ad030fa5981a_includes() {
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-  static const ::std::array<::std::string_view, 3> includes = {
-    _fbthrift_schema_9188ad030fa5981a(),
-    ::apache::thrift::detail::mc::readSchema(::module0::module0_constants::_fbthrift_schema_169bb3654f104fee),
-    ::apache::thrift::detail::mc::readSchema(::module1::module1_constants::_fbthrift_schema_f9949ea953b7f21b),
-  };
-  return ::folly::range(includes);
-#else
   return {};
-#endif
 }
 
 } // namespace module2_constants

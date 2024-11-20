@@ -517,6 +517,10 @@ void lower_type_annotations(
 }
 
 void inject_schema_const(sema_context& ctx, mutator_context&, t_program& prog) {
+  if (prog.find_structured_annotation_or_null(kDisableSchemaConstUri)) {
+    return;
+  }
+
   detail::schematizer::options opts;
   opts.only_root_program_ = true;
   opts.use_hash = true;

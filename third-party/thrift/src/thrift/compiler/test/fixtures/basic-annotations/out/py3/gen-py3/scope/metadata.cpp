@@ -29,6 +29,7 @@ namespace annotation {
   ::apache::thrift::detail::md::StructMetadata<Interface>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<RootDefinition>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Definition>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<DisableSchemaConst>::gen(metadata);
   return metadata;
 }
 } // namespace facebook

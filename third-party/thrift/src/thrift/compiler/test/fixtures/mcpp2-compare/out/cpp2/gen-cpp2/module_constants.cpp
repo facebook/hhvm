@@ -99,15 +99,7 @@ namespace module_constants {
   return "";
 }
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_461f120cd2880445_includes() {
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-  static const ::std::array<::std::string_view, 2> includes = {
-    _fbthrift_schema_461f120cd2880445(),
-    ::apache::thrift::detail::mc::readSchema(::a::different::ns::includes_constants::_fbthrift_schema_cdf048da88f231fa),
-  };
-  return ::folly::range(includes);
-#else
   return {};
-#endif
 }
 
 } // namespace module_constants

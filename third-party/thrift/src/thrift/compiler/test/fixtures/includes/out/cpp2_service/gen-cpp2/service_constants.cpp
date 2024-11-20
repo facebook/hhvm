@@ -36,17 +36,7 @@ namespace service_constants {
   return "";
 }
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_819f854565f620aa_includes() {
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-  static const ::std::array<::std::string_view, 4> includes = {
-    _fbthrift_schema_819f854565f620aa(),
-    ::apache::thrift::detail::mc::readSchemaInclude(::cpp2::module_constants::_fbthrift_schema_b42ad5ae3d672fa7_includes, 1),
-    ::apache::thrift::detail::mc::readSchema(::cpp2::module_constants::_fbthrift_schema_b42ad5ae3d672fa7),
-    ::apache::thrift::detail::mc::readSchemaInclude(::cpp2::module_constants::_fbthrift_schema_b42ad5ae3d672fa7_includes, 2),
-  };
-  return ::folly::range(includes);
-#else
   return {};
-#endif
 }
 
 } // namespace service_constants

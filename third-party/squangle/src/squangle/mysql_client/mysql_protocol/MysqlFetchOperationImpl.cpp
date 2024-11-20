@@ -371,7 +371,7 @@ void MysqlFetchOperationImpl::specializedCompleteOperation() {
       rendered_query_,
       rows_received_,
       total_result_size_,
-      connection.ok() ? connection.serverInfo() : "",
+      connection.serverInfo(),
       no_index_used_,
       use_checksum_ || connection.getConnectionOptions().getUseChecksum(),
       getAttributes(),

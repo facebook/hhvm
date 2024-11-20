@@ -233,7 +233,10 @@ class Connection {
   // Returns the MySQL server version. If the connection has been closed
   // an error is generated.
   [[nodiscard]] std::string serverInfo() const {
-    CHECK_THROW(mysql_connection_ != nullptr, db::InvalidConnectionException);
+    if (!mysql_connection_) {
+      return "";
+    }
+
     return mysql_connection_->serverInfo();
   }
 

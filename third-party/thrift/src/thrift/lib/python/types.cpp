@@ -314,9 +314,10 @@ PyObject* createStructTupleWithDefaultValues(
  *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
  *      empty `IOBuf` if applicable).
  *
- * The default value for container types chang based if they are mutable or
- * not:
- *  Mutable:
+ * The default value for container types change based on whether they are
+ * mutable or not:
+ *
+ * Mutable:
  *    * An empty `list` for lists.
  *    * An empty `dict` for maps.
  *    * An empty `set` for sets.

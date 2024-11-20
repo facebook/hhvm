@@ -25,13 +25,13 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_e97c3188d96b91fe() {
+::std::string_view _fbthrift_schema_42852c5394bb7dbf() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_e97c3188d96b91fe_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_42852c5394bb7dbf_includes() {
 #if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
   static const ::std::array<::std::string_view, 1> includes = {
-    _fbthrift_schema_e97c3188d96b91fe(),
+    _fbthrift_schema_42852c5394bb7dbf(),
   };
   return ::folly::range(includes);
 #else

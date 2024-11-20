@@ -371,8 +371,6 @@ class FizzClientContext {
 
   std::shared_ptr<ECHPolicy> echPolicy_;
   std::shared_ptr<PskCache> pskCache_;
-  // Legacy to support non cert mgr api.
-  std::shared_ptr<SelfCert> clientCert_{nullptr};
   std::shared_ptr<CertManager> certManager_{nullptr};
   std::shared_ptr<CertDecompressionManager> certDecompressionManager_;
   std::shared_ptr<Clock> clock_;

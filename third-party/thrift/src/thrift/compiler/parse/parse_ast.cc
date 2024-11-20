@@ -17,7 +17,6 @@
 #include <thrift/compiler/parse/parse_ast.h>
 
 #include <stdlib.h>
-#include <cmath>
 #include <cstddef>
 #include <limits>
 #include <optional>

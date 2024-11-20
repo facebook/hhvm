@@ -180,12 +180,32 @@ class diagnostic_results {
     return counts_.at(static_cast<size_t>(level));
   }
 
+  template <typename F>
+  void retain_if(F&& f) {
+    diagnostics_.erase(
+        std::remove_if(
+            diagnostics_.begin(),
+            diagnostics_.end(),
+            [&](const diagnostic& diag) {
+              if (!f(diag)) {
+                decrement(diag.level());
+                return true;
+              }
+              return false;
+            }),
+        diagnostics_.end());
+  }
+
  private:
   std::vector<diagnostic> diagnostics_;
   std::array<int, static_cast<size_t>(diagnostic_level::debug) + 1> counts_{};
 
   void increment(diagnostic_level level) {
     ++counts_.at(static_cast<size_t>(level));
+  }
+
+  void decrement(diagnostic_level level) {
+    --counts_.at(static_cast<size_t>(level));
   }
 };
 

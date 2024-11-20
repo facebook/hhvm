@@ -1,0 +1,57 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+Generated Python enums for Thrift types
+}}
+{{> common/auto_generated_py}}
+
+import {{program:base_library_package}}.types as _fbthrift_python_types
+import {{program:module_path}}.thrift_metadata
+{{#program:enums}}
+
+class {{enum:name}}(_fbthrift_python_types.{{!
+        }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
+        }}{{^enum:flags?}}Enum, int{{/enum:flags?}}):
+    {{#enum:values}}
+    {{enum_value:py_name}} = {{enum_value:value}}
+    {{/enum:values}}
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "{{program:name}}.{{enum:name}}"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return {{#enum:thrift_uri}}"{{enum:thrift_uri}}"{{/enum:thrift_uri}}{{!
+            }}{{^enum:thrift_uri}}None{{/enum:thrift_uri}}
+
+    @staticmethod
+    def __get_metadata__():
+        return {{program:module_path}}.thrift_metadata.gen_metadata_enum_{{enum:name}}()
+
+    {{#enum:legacy_api?}}
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("{{program:module_path}}.types")
+        return py3_types.{{enum:name}}(self.value)
+
+    def _to_py_deprecated(self):
+        return self.value
+    {{/enum:legacy_api?}}
+{{/program:enums}}

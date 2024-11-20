@@ -17,6 +17,8 @@
 import types
 import unittest
 
+import thrift.test.thrift_python.enum_test.thrift_enums as enums
+
 import thrift.test.thrift_python.enum_test.thrift_mutable_types as mutable_types  # @manual=//thrift/test/thrift-python:enum_test_thrift-python-types
 import thrift.test.thrift_python.enum_test.thrift_types as immutable_types
 
@@ -88,3 +90,9 @@ class ThriftPython_Enum(unittest.TestCase):
         with self.assertRaisesRegex(TypeError, "Color.green is not '.*PositiveNumber'"):
             s.number_list.append(test_types.Color.green)
         self.assertEqual([2, 5], s.number_list)
+
+    def test_value(self) -> None:
+        self.assertEqual(0, enums.PositiveNumber.NONE)
+        self.assertEqual(1, enums.PositiveNumber.ONE)
+        self.assertEqual(2, enums.PositiveNumber.TWO)
+        self.assertEqual(5, enums.PositiveNumber.FIVE)

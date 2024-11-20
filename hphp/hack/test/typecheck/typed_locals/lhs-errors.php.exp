@@ -2,3 +2,7 @@ ERROR: File "lhs-errors.php", line 6, characters 3-17:
 Illegal definition of typed local variable $x. (Naming[2126])
   File "lhs-errors.php", line 5, characters 9-10:
   It is already defined. Typed locals must have their type declared before they can be assigned.
+ERROR: File "lhs-errors.php", line 8, characters 3-18:
+Illegal definition of typed local variable $x1. (Naming[2126])
+  File "lhs-errors.php", line 7, characters 10-12:
+  It is already defined. Typed locals must have their type declared before they can be assigned.

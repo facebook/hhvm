@@ -62,6 +62,7 @@ const int JSON_FB_THRIFT_SIMPLE_JSON;
 const int JSON_FB_WARN_KEYSETS;
 const int JSON_FB_FORCE_HACK_ARRAYS;
 const int JSON_FB_SORT_KEYS;
+const int JSON_FB_FULL_FLOAT_PRECISION;
 
 <<__PHPStdLib>>
 function json_encode(

@@ -112,6 +112,7 @@ struct VariableSerializer {
   void setVecLikeDArrayWarn()  { m_vdWarn = true; }
   void setDictLikeDArrayWarn() { m_ddWarn = true; }
   void setSortArrayKeys() { m_sortArrayKeys = true; }
+  void setFullFloatPrecision() { m_fullFloatPrecision = true; }
 
   // ignore uninitialized late init props and do not attempt to serialize them
   void setIgnoreLateInit() { m_ignoreLateInit = true; }
@@ -296,6 +297,7 @@ private:
   bool m_hasDDWarned{false};  // have we already warned on non-vec-like darrays?
   bool m_pure{false};            // should we call the pure callbacks?
   bool m_sortArrayKeys{false};   // Sort keys of associative arrays
+  bool m_fullFloatPrecision{false}; // Output full precision for floats (17 decimal places)
   RefCount m_refCount{OneReference}; // current variable's reference count
   String m_objClass;             // for object serialization
   char m_objCode{0};             // for object serialization

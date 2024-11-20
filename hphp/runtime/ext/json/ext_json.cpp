@@ -49,6 +49,7 @@ const int64_t k_JSON_PRESERVE_ZERO_FRACTION  = 1ll << 10;
 // FB json_encode() options
 // intentionally higher so when PHP adds more options we're fine
 const int64_t k_JSON_FB_SORT_KEYS  = 1ll << 19;
+const int64_t k_JSON_FB_FULL_FLOAT_PRECISION  = 1ll << 20;
 
 // json_decode() options
 const int64_t k_JSON_OBJECT_AS_ARRAY   = 1ll << 0;
@@ -139,6 +140,7 @@ TypedValue json_encode_impl(const Variant& value, int64_t options,
   if (options & k_JSON_FB_WARN_DICT_LIKE_DARRAYS) vs.setDictLikeDArrayWarn();
   if (options & k_JSON_FB_IGNORE_LATEINIT) vs.setIgnoreLateInit();
   if (options & k_JSON_FB_SORT_KEYS) vs.setSortArrayKeys();
+  if (options & k_JSON_FB_FULL_FLOAT_PRECISION) vs.setFullFloatPrecision();
   if (pure) vs.setPure();
 
   String json = vs.serializeValue(value, !(options & k_JSON_FB_UNLIMITED));
@@ -352,6 +354,7 @@ struct JsonExtension final : Extension {
     HHVM_RC_INT(JSON_FB_WARN_KEYSETS, k_JSON_FB_WARN_KEYSETS);
     HHVM_RC_INT(JSON_FB_FORCE_HACK_ARRAYS, k_JSON_FB_FORCE_HACK_ARRAYS);
     HHVM_RC_INT(JSON_FB_SORT_KEYS, k_JSON_FB_SORT_KEYS);
+    HHVM_RC_INT(JSON_FB_FULL_FLOAT_PRECISION, k_JSON_FB_FULL_FLOAT_PRECISION);
 
     HHVM_RC_INT(JSON_ERROR_NONE, k_JSON_ERROR_NONE);
     HHVM_RC_INT(JSON_ERROR_DEPTH, k_JSON_ERROR_DEPTH);

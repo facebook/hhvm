@@ -348,11 +348,7 @@ class virtual endo =
         let op' = self#on_bop env op in
         let e1' = self#on_expr (Env.set_val_kind env Typing_defs.Lval) e1 in
         let e2' = self#on_expr env e2 in
-        if Ast_defs.equal_bop op op' && phys_equal e1 e2' && phys_equal e2 e2'
-        then
-          this
-        else
-          Aast.(Binop { bop = op'; lhs = e1'; rhs = e2' })
+        Aast.(Binop { bop = op'; lhs = e1'; rhs = e2' })
       | _ -> super#on_Binop env this binop
 
     method! on_Is env e h =

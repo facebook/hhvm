@@ -1106,7 +1106,7 @@ class t_mstch_python_generator : public t_mstch_generator {
     }
     if (get_py3_namespace(program_).empty()) {
       validator.add_structured_definition_visitor(
-          module_name_collision_validator::warn_named);
+          module_name_collision_validator::validate_named);
       validator.add_enum_visitor(
           module_name_collision_validator::validate_named);
       validator.add_const_visitor(module_name_collision_validator::warn_named);

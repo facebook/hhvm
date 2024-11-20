@@ -1361,43 +1361,6 @@ struct reflected_enum {};
 template <typename T>
 using reflect_enum = reflected_enum<T>;
 
-/**
- * Tells whether the given type is a Thrift enum with compile-time reflection
- * support.
- *
- * Example:
- *
- *  /////////////////////
- *  // MyModule.thrift //
- *  /////////////////////
- *  namespace cpp2 My.Namespace
- *
- *  union MyUnion {
- *    1: i32 a
- *    2: string b
- *    3: double c
- *  }
- *
- *  enum MyEnum { a, b, c }
- *
- *  /////////////
- *  // foo.cpp //
- *  /////////////
- *
- *  // yields `std::true_type`
- *  using result1 = is_reflectable_enum<MyEnum>;
- *
- *  // yields `std::false_type`
- *  using result2 = is_reflectable_enum<MyUnion>;
- *
- *  // yields `std::false_type`
- *  using result3 = is_reflectable_enum<void>;
- *
- * @author: Marcelo Juchem <marcelo@fb.com>
- */
-template <typename T>
-using is_reflectable_enum = fatal::has_enum_traits<T>;
-
 //////////////////////////////////
 // SECTION: VARIANT (UNION) API //
 //////////////////////////////////

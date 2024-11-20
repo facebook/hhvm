@@ -944,8 +944,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
   folly::Optional<ClientPresharedKey> greasePsk;
 
   if (echParams.has_value()) {
-    // Swap out randoms first.
-    echRandom = std::move(random);
+    echRandom = random;
     context->getFactory()->makeRandomBytes(random.data(), random.size());
 
     // Generate GREASE PSK (if needed)

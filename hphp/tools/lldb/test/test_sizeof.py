@@ -4,7 +4,6 @@ import hphp.tools.lldb.utils as utils
 
 
 class SizeofCommandHHVMTestCase(base.TestHHVMBinary):
-
     def setUp(self):
         super().setUp(test_file="quick/properties2.php", interp=True)
 
@@ -28,7 +27,6 @@ class SizeofCommandHHVMTestCase(base.TestHHVMBinary):
 
 
 class SizeofCommandTypesTestCase(base.TestHHVMTypesBinary):
-
     def setUp(self):
         super().setUp(test_type="sizeof-values")
 

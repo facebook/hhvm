@@ -1,7 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-""" The main module you load in your .lldbinit. """
-
+"""The main module you load in your .lldbinit."""
 
 import sys
 

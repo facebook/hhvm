@@ -42,7 +42,6 @@ class SaveStateResult(NamedTuple):
 
 
 class SavedStateTestDriver(common_tests.CommonTestDriver):
-
     repo_dir: str
     enable_naming_table_fallback = False
     saved_state_dir: str
@@ -83,7 +82,6 @@ class SavedStateTestDriver(common_tests.CommonTestDriver):
         saved_state_path: Optional[str] = None,
         ignore_errors: bool = False,
     ) -> SaveStateCommandResult:
-
         actual_saved_state_path: str = (
             saved_state_path if saved_state_path is not None else cls.saved_state_path()
         )

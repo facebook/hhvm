@@ -9,7 +9,6 @@ from hphp.hack.test.integration.test_case import TestCase
 
 
 class TypeErrorAtPosDriver(CommonTestDriver):
-
     error_file_ext = ".err"
     auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
     enable_experimental_stx_features = '{"like_type_hints": "Unstable"}'
@@ -28,9 +27,7 @@ disable_xhp_element_mangling = false
 enable_sound_dynamic_type = true
 everything_sdt = true
 enable_experimental_stx_features = {}
-""".format(
-                    self.auto_namespace_map, self.enable_experimental_stx_features
-                )
+""".format(self.auto_namespace_map, self.enable_experimental_stx_features)
             )
 
     def expected_file_name(self, file_name: str, row_num: int, col_num: int) -> str:

@@ -54,7 +54,6 @@ class LspCommandProcessor:
     def communicate(
         self, json_commands, request_timeout=30, notify_timeout=1, verbose=False
     ):
-
         transcript = self._send_commands({}, json_commands, verbose)
 
         # we are expecting at least one response per request sent so

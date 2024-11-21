@@ -283,7 +283,6 @@ def _format_rip(rip):
 
 
 class SymValueWrapper:
-
     def __init__(self, symbol, value):
         self.sym = symbol
         self.val = value
@@ -296,7 +295,6 @@ class SymValueWrapper:
 
 
 class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
-
     def __init__(self, fobj, regs):
         super(JittedFrameDecorator, self).__init__(fobj)
         self.regs = regs
@@ -399,7 +397,6 @@ class JittedFrameDecorator(gdb.FrameDecorator.FrameDecorator):
 
 
 class JittedFrameFilter:
-
     def __init__(self):
         self.name = "JittedFrameFilter"
         self.priority = 100

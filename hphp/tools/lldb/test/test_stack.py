@@ -4,7 +4,6 @@ from . import base  # usort: skip (must be first, needed for sys.path side-effec
 
 
 class WalkStkCommandTestCase(base.TestHHVMBinary):
-
     def setUp(self):
         super().setUp(test_file="slow/reified-generics/reified-parent.php")
 

@@ -180,9 +180,7 @@ def main(args: List[str]) -> int:
                 exit_code |= 1 << 1
                 source, filename = (
                     # pyre-fixme[16]: `Optional` has no attribute `__getitem__`.
-                    ("expected", act[0])
-                    if exp is None
-                    else ("actual", exp[0])
+                    ("expected", act[0]) if exp is None else ("actual", exp[0])
                 )
                 log.error(f"missing filename in {source} HHAS: {filename}")
                 if not compare_all:

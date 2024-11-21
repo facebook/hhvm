@@ -450,9 +450,7 @@ def get(struct: lldb.SBValue, *field_names: str) -> lldb.SBValue:
     assert struct.GetError().Success(), f"invalid struct '{struct.name}'"
     # Note: You can also do lldb.value(val).<name>
     v = struct.GetChildMemberWithName(field_names[0])
-    assert (
-        v.GetError().Success()
-    ), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
+    assert v.GetError().Success(), f"couldn't find field '{field_names[0]}' in struct '{struct.name}' with type '{struct.type.name}'"
 
     if len(field_names) == 1:
         return v

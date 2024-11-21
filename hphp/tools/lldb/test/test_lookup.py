@@ -4,7 +4,6 @@ import hphp.tools.lldb.utils as utils
 
 
 class LookupCommandTestCase(base.TestHHVMBinary):
-
     def setUp(self):
         super().setUp(test_file="quick/method2.php", interp=True)
 
@@ -19,7 +18,6 @@ class LookupCommandTestCase(base.TestHHVMBinary):
 
 
 class LookupHelperTestCase(base.TestHHVMBinary):
-
     def setUp(self):
         super().setUp(test_file="slow/reified-generics/reified-parent.php")
 

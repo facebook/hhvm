@@ -125,7 +125,6 @@ def uninterpolate_variables(payload: Json, variables: VariableMap) -> Json:
     )
 
     for variable, value in variable_bindings:
-
         # pyre-fixme[53]: Captured variable `value` is not annotated.
         def uninterpolate(json: JsonScalar) -> JsonScalar:
             if isinstance(json, str):

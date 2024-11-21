@@ -825,9 +825,9 @@ the previous call left off.
             f"HhxCommand:__init__(): bcpos=0x{self.bcpos.unsigned:x}, bcoff={self.bcoff}, count={self.count}, end={hex(self.end.unsigned) if self.end else None}"
         )
 
-        bctype = utils.Type(
-            "uint8_t", target
-        ).GetPointerType()  # TODO(T159273123): This was HPHP::PC, but looking up typedefs often fails
+        bctype = (
+            utils.Type("uint8_t", target).GetPointerType()
+        )  # TODO(T159273123): This was HPHP::PC, but looking up typedefs often fails
         self.bcpos = self.bcpos.Cast(bctype)
 
         assert (

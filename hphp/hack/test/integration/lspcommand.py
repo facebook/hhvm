@@ -242,9 +242,7 @@ class LspCommandProcessor:
             timeout_seconds = 30.0
             message = self._try_read_logged(timeout_seconds=timeout_seconds)
             comment = comment or "<none>"
-            assert (
-                message is not None
-            ), f"""\
+            assert message is not None, f"""\
 Timed out after {timeout_seconds} seconds while waiting for a {method!r} message
 to be sent from the server (comment: {comment}), which must not have an ID in
 {processed_transcript_ids!r}. The message was expected to have params:

@@ -5,7 +5,6 @@ import hphp.tools.lldb.idx as idx
 
 
 class IdxCommandTestCase(base.TestHHVMBinary):
-
     def setUp(self):
         super().setUp(test_file="slow/reified-generics/reified-parent.php")
 

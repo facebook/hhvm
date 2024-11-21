@@ -192,7 +192,6 @@ class TestHHVMBinary(LLDBTestBase):
 
 
 class TestHHVMTypesBinary(LLDBTestBase):
-
     # pyre-fixme[14]: `setUp` overrides method defined in `LLDBTestBase` inconsistently.
     def setUp(self, test_type: str):
         self.test_type = test_type

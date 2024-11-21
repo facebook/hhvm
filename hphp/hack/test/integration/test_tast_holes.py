@@ -9,7 +9,6 @@ from hphp.hack.test.integration.test_case import TestCase
 
 
 class TastHolesDriver(CommonTestDriver):
-
     error_file_ext = ".holes"
     auto_namespace_map = '{"PHP": "HH\\\\Lib\\\\PHP"}'
     repo_dir = "hphp/hack/test/integration/data/holes"
@@ -24,9 +23,7 @@ auto_namespace_map = {}
 allowed_fixme_codes_strict = 4101,4323,4110
 allowed_decl_fixme_codes = 4101,4323,4110
 disable_xhp_element_mangling = false
-""".format(
-                    self.auto_namespace_map
-                )
+""".format(self.auto_namespace_map)
             )
 
     def expected_file_name(self, file_name: str) -> str:

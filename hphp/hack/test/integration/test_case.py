@@ -58,7 +58,6 @@ class TestCase(unittest.TestCase, Generic[T]):
         test_driver.tearDownClass()
 
     def setUp(self) -> None:
-
         # These scripts assume working directory fbcode.
         cwd = os.path.basename(os.getcwd())
         if cwd == "fbcode":

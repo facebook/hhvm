@@ -62,7 +62,6 @@ enable_sound_dynamic_type = true
         )
 
     def test_one_upcast_one_function(self) -> None:
-
         self.write_and_test_one_file(
             """<?hh
             <<file:__EnableUnstableFeatures('upcast_expression')>>
@@ -79,7 +78,6 @@ enable_sound_dynamic_type = true
         )
 
     def test_one_upcast_one_class(self) -> None:
-
         self.write_and_test_one_file(
             """
 <?hh

@@ -1,6 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
-""" Pretty printers for HPHP types """
+"""Pretty printers for HPHP types"""
 
 import re
 import sys

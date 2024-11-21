@@ -5,7 +5,6 @@ import unittest
 
 
 class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
-
     def setUp(self):
         super().setUp(test_type="typed-values")
 
@@ -144,7 +143,6 @@ class PrettyPrintTypedValuesTestCase(base.TestHHVMTypesBinary):
 
 
 class PrettyPrintOtherValuesTestCase(base.TestHHVMTypesBinary):
-
     def setUp(self):
         super().setUp(test_type="other-values")
 

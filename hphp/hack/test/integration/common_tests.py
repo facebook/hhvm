@@ -29,7 +29,6 @@ class AllLogs(NamedTuple):
 
 
 class CommonTestDriver(TestDriver):
-
     # This needs to be overridden in child classes. The files in this
     # directory will be used to set up the initial environment for each
     # test.
@@ -426,7 +425,6 @@ class CommonTestDriver(TestDriver):
 # The most basic of tests.
 # Exercises server responsiveness, and updating errors after changing files
 class BarebonesTests(TestCase[CommonTestDriver]):
-
     # hh should should work with 0 retries.
     def test_responsiveness(self) -> None:
         self.test_driver.start_hh_server()

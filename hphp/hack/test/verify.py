@@ -713,7 +713,6 @@ def run_tests(
     only_compare_error_lines: bool = False,
     filter_glog_failures: bool = False,
 ) -> List[Result]:
-
     # for each file, create a test case
     test_cases = [
         TestCase(
@@ -967,14 +966,12 @@ def main() -> None:
     # directory. buck1 runs this test from fbsource/fbocde, buck2 runs
     # it from fbsource.
     if os.path.basename(os.getcwd()) != "fbsource":
-
         # If running under buck1 then we are in fbcode, if running
         # under dune then some ancestor directory of fbcode. These two
         # cases are handled by the logic of this script and
         # 'review.sh' and there are no adjustments to make.
         pass
     else:
-
         # The buck2 case has us running in fbsource. This puts us in
         # fbcode.
         os.chdir("fbcode")

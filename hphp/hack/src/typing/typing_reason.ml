@@ -255,6 +255,7 @@ type prj_asymm =
   | Prj_asymm_nullable
   | Prj_asymm_arraykey
   | Prj_asymm_num
+  | Prj_rewrite_classname
 [@@deriving hash]
 
 let prj_asymm_to_json = function
@@ -264,6 +265,7 @@ let prj_asymm_to_json = function
   | Prj_asymm_nullable -> Hh_json.JSON_String "Prj_asymm_nullable"
   | Prj_asymm_arraykey -> Hh_json.JSON_String "Prj_asymm_arraykey"
   | Prj_asymm_num -> Hh_json.JSON_String "Prj_asymm_num"
+  | Prj_rewrite_classname -> Hh_json.JSON_String "Prj_rewrite_classname"
 
 (* ~~ Flow kinds ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
@@ -2745,6 +2747,9 @@ module Constructors = struct
   let prj_arraykey_super ~super ~super_prj =
     prj_asymm_super ~super ~super_prj Prj_asymm_arraykey
 
+  let prj_rewrite_classname ~sub ~sub_prj =
+    prj_asymm_sub ~sub ~sub_prj Prj_rewrite_classname
+
   let missing_field = Missing_field
 
   let pessimised_this p = from_witness_decl @@ Pessimised_this p
@@ -3262,6 +3267,8 @@ module Derivation = struct
         "The subtype is an arraykey type so next I checked the subtype constraint is satisfied for both the int and string parts."
       | Prj_asymm_neg ->
         "The subtype is a negated type so next I checked the inner type."
+      | Prj_rewrite_classname ->
+        "The subtype is a class<T> type and the supertype might be classname<T> or one of its supertypes, so next I checked the constraint with the subtype rewritten to classname<T>."
 
     let explain_prj_asymm_super prj =
       match prj with
@@ -3277,6 +3284,8 @@ module Derivation = struct
         "The supertype is an arraykey type so next I checked the subtype constraint is satisfied for either the int or string part."
       | Prj_asymm_neg ->
         "The supertype is a negated type so I checked the inner type."
+      | Prj_rewrite_classname ->
+        failwith "The rewrites only happen for the subtype"
 
     let explain = function
       | Using_prj prj -> explain_prj prj

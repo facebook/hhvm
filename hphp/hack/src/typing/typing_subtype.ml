@@ -3171,32 +3171,32 @@ end = struct
            && is_nonexact exact_super
            && (String.equal class_nm_super SN.Classes.cXHPChild
               || String.equal class_nm_super SN.Classes.cStringish) ->
-      (* TODO(T199610905) replace reason with upcoming rewrite reasons *)
+      let ty_classname = MakeType.classname r_sub [ty_sub] in
+      let t =
+        Typing_env.update_reason env ty_classname ~f:(fun r_sub_prj ->
+            Typing_reason.prj_rewrite_classname ~sub:r_sub ~sub_prj:r_sub_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = MakeType.classname r_sub [ty_sub] }
+        ~lhs:{ sub_supportdyn; ty_sub = t }
         ~rhs:{ super_like; super_supportdyn; ty_super }
         env
     (* -- Rewrite: class<T> <: N ---> classname<T> <: N
           instead of e.g. considering class<T> as an element in a case type *)
     | ((r_sub, Tclass_ptr ty_sub), (_r_super, Tnewtype _))
-      when TypecheckerOptions.class_sub_classname env.genv.tcopt ->
-      (* TODO(T199610905) replace reason with upcoming rewrite reasons *)
-      simplify
-        ~subtype_env
-        ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = MakeType.classname r_sub [ty_sub] }
-        ~rhs:{ super_like; super_supportdyn; ty_super }
-        env
     (* -- Rewrite: class<T> <: prim ---> classname<T> <: prim *)
     | ((r_sub, Tclass_ptr ty_sub), (_r_super, Tprim _))
       when TypecheckerOptions.class_sub_classname env.genv.tcopt ->
-      (* TODO(T199610905) replace reason with upcoming rewrite reasons *)
+      let ty_classname = MakeType.classname r_sub [ty_sub] in
+      let t =
+        Typing_env.update_reason env ty_classname ~f:(fun r_sub_prj ->
+            Typing_reason.prj_rewrite_classname ~sub:r_sub ~sub_prj:r_sub_prj)
+      in
       simplify
         ~subtype_env
         ~this_ty
-        ~lhs:{ sub_supportdyn; ty_sub = MakeType.classname r_sub [ty_sub] }
+        ~lhs:{ sub_supportdyn; ty_sub = t }
         ~rhs:{ super_like; super_supportdyn; ty_super }
         env
     (* -- C-Var-R ----------------------------------------------------------- *)

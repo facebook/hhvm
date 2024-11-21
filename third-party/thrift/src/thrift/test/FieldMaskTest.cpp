@@ -2135,6 +2135,12 @@ void testLogicalOperations(Mask A, Mask B) {
   EXPECT_EQ(maskSubtractBA, B & maskSubtractBA);
   EXPECT_EQ(maskSubtractBA, maskUnion - A);
 }
+TEST(FieldMaskTest, LogicalOpEmpty) {
+  Mask a, b;
+  EXPECT_THROW(a | b, std::runtime_error);
+  EXPECT_THROW(a & b, std::runtime_error);
+  EXPECT_THROW(a - b, std::runtime_error);
+}
 
 TEST(FieldMaskTest, LogicalOpSimple) {
   // maskA = includes{1: excludes{},

@@ -177,6 +177,14 @@ struct SubtractMaskImpl {
   }
 };
 
+const FieldIdToMask& toFieldMask(const Mask& mask) {
+  if (const auto* fieldMask = detail::getFieldMask(mask)) {
+    return *fieldMask;
+  }
+
+  folly::throw_exception<std::runtime_error>("Incompatible masks");
+}
+
 const MapStringToMask& toStringMapMask(const Mask& mask) {
   using detail::getStringMapMask;
 
@@ -255,7 +263,7 @@ Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
     return mask;
   }
 
-  mask.includes_ref() = func(*getFieldMask(lhs), *getFieldMask(rhs));
+  mask.includes_ref() = func(toFieldMask(lhs), toFieldMask(rhs));
   return mask;
 }
 

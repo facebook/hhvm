@@ -169,6 +169,7 @@ enum class Company {
   WHATSAPP = 1,
   OCULUS = 2,
   INSTAGRAM = 3,
+  __FRIEND__FEED = 4,
 };
 
 
@@ -246,7 +247,7 @@ template <> struct TEnumDataStorage<::cpp2::Company>;
 template <> struct TEnumTraits<::cpp2::Company> {
   using type = ::cpp2::Company;
 
-  static constexpr std::size_t const size = 4;
+  static constexpr std::size_t const size = 5;
   static folly::Range<type const*> const values;
   static folly::Range<std::string_view const*> const names;
   static const std::string_view __fbthrift_module_name_internal_do_not_use;
@@ -265,7 +266,7 @@ template <> struct TEnumTraits<::cpp2::Company> {
     return ret.data();
   }
   static constexpr type min() { return type::FACEBOOK; }
-  static constexpr type max() { return type::INSTAGRAM; }
+  static constexpr type max() { return type::__FRIEND__FEED; }
 };
 
 

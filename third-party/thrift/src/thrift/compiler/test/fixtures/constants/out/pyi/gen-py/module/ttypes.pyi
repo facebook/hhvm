@@ -39,6 +39,7 @@ class Company(int):
     WHATSAPP: __T.ClassVar[Company]
     OCULUS: __T.ClassVar[Company]
     INSTAGRAM: __T.ClassVar[Company]
+    __FRIEND__FEED: __T.ClassVar[Company]
 
     _VALUES_TO_NAMES: __T.ClassVar[__T.Dict[Company, str]]
     _NAMES_TO_VALUES: __T.ClassVar[__T.Dict[str, Company]]

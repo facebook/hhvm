@@ -303,6 +303,7 @@ def _fbthrift_gen_metadata_enum_Company(metadata_struct: _fbthrift_metadata.Thri
         1: "WHATSAPP",
         2: "OCULUS",
         3: "INSTAGRAM",
+        4: "__FRIEND__FEED",
     }
     structured_annotations = [
     ]

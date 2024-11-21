@@ -43,6 +43,12 @@ namespace module_constants {
   return *instance;
 }
 
+::std::vector<::cpp2::Company> const& my_apps() {
+  static folly::Indestructible<::std::vector<::cpp2::Company>> const instance{ std::initializer_list<::cpp2::Company>{  ::cpp2::Company::FACEBOOK,
+   ::cpp2::Company::__FRIEND__FEED } };
+  return *instance;
+}
+
 ::cpp2::Internship const& instagram() {
   static folly::Indestructible<::cpp2::Internship> const instance{ ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Software Engineer")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>( ::cpp2::Company::INSTAGRAM), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1200)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::school>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Monters University"))) };
   return *instance;
@@ -294,13 +300,13 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_8493d5f955645dbe() {
+::std::string_view _fbthrift_schema_600be8feae51e639() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_8493d5f955645dbe_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_600be8feae51e639_includes() {
 #if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
   static const ::std::array<::std::string_view, 1> includes = {
-    _fbthrift_schema_8493d5f955645dbe(),
+    _fbthrift_schema_600be8feae51e639(),
   };
   return ::folly::range(includes);
 #else

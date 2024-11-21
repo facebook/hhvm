@@ -352,6 +352,7 @@ impl Company {
     pub const WHATSAPP: Self = Company(1i32);
     pub const OCULUS: Self = Company(2i32);
     pub const INSTAGRAM: Self = Company(3i32);
+    pub const __FRIEND__FEED: Self = Company(4i32);
 }
 
 impl ::fbthrift::ThriftEnum for Company {
@@ -361,6 +362,7 @@ impl ::fbthrift::ThriftEnum for Company {
             (Self::WHATSAPP, "WHATSAPP"),
             (Self::OCULUS, "OCULUS"),
             (Self::INSTAGRAM, "INSTAGRAM"),
+            (Self::__FRIEND__FEED, "__FRIEND__FEED"),
         ]
     }
 
@@ -370,6 +372,7 @@ impl ::fbthrift::ThriftEnum for Company {
             "WHATSAPP",
             "OCULUS",
             "INSTAGRAM",
+            "__FRIEND__FEED",
         ]
     }
 
@@ -379,6 +382,7 @@ impl ::fbthrift::ThriftEnum for Company {
             Self::WHATSAPP,
             Self::OCULUS,
             Self::INSTAGRAM,
+            Self::__FRIEND__FEED,
         ]
     }
 
@@ -422,6 +426,7 @@ impl ::std::fmt::Display for Company {
             ("WHATSAPP", 1),
             ("OCULUS", 2),
             ("INSTAGRAM", 3),
+            ("__FRIEND__FEED", 4),
         ];
         ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
     }
@@ -442,6 +447,7 @@ impl ::std::str::FromStr for Company {
             ("INSTAGRAM", 3),
             ("OCULUS", 2),
             ("WHATSAPP", 1),
+            ("__FRIEND__FEED", 4),
         ];
         ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "Company").map(Self)
     }

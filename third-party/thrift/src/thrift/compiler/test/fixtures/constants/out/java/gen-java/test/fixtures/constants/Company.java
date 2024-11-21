@@ -16,7 +16,8 @@ public enum Company implements com.facebook.thrift.enums.BaseEnum, com.facebook.
     FACEBOOK(0),
     WHATSAPP(1),
     OCULUS(2),
-    INSTAGRAM(3);
+    INSTAGRAM(3),
+    __FRIEND__FEED(4);
 
     private final int value;
 
@@ -39,6 +40,8 @@ public enum Company implements com.facebook.thrift.enums.BaseEnum, com.facebook.
             return OCULUS;
         case 3:
             return INSTAGRAM;
+        case 4:
+            return __FRIEND__FEED;
         default:
             return null;
         }

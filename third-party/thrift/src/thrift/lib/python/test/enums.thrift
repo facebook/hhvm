@@ -40,6 +40,8 @@ enum Color {
   red = 0,
   blue = 1,
   green = 2,
+  _Color__pleurigloss = 3,
+  __octarine = 4,
 }
 
 @python.Flags{}
@@ -71,3 +73,11 @@ struct OptionalFile {
   1: optional string name;
   3: optional i32 type;
 }
+
+const map<Color, string> ColorMap = {
+  Color.red: "r",
+  Color.blue: "b",
+  Color.green: "g",
+  Color._Color__pleurigloss: "p",
+  Color.__octarine: "o",
+};

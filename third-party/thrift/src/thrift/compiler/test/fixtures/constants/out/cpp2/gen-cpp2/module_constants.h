@@ -104,6 +104,9 @@ namespace module_constants {
   /** Glean {"constant": "mymap"} */
   ::cpp2::MyMapIdentifier const& mymap();
 
+  /** Glean {"constant": "my_apps"} */
+  ::std::vector<::cpp2::Company> const& my_apps();
+
   /** Glean {"constant": "instagram"} */
   ::cpp2::Internship const& instagram();
 
@@ -447,8 +450,8 @@ namespace module_constants {
   /** Glean {"constant": "I2B_REF"} */
   ::std::map<::std::int32_t, bool> const& I2B_REF();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_8493d5f955645dbe();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_8493d5f955645dbe_includes();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_600be8feae51e639();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_600be8feae51e639_includes();
 
 } // namespace module_constants
 } // namespace cpp2

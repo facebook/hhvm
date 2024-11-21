@@ -67,6 +67,15 @@ public final class ModuleConstants {
         .build();
     }
 
+    public static final List<test.fixtures.constants.Company> MY_APPS = construct_MY_APPS();
+
+    private static List<test.fixtures.constants.Company> construct_MY_APPS() {
+      return ImmutableList.<test.fixtures.constants.Company>builder()
+        .add(test.fixtures.constants.Company.FACEBOOK)
+        .add(test.fixtures.constants.Company.__FRIEND__FEED)
+        .build();
+    }
+
     public static final test.fixtures.constants.Internship INSTAGRAM = construct_INSTAGRAM();
 
     private static test.fixtures.constants.Internship construct_INSTAGRAM() {

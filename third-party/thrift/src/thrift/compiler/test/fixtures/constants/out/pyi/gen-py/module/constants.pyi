@@ -22,6 +22,7 @@ my_company: Company
 foo: str
 bar: int
 mymap: __T.Dict[str, str]
+my_apps: __T.List[Company]
 instagram: Internship
 partial_const: Internship
 kRanges: __T.List[Range]

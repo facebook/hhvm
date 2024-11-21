@@ -442,6 +442,12 @@ def get_reflection__Map__string_string() -> __MapSpec:
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 
+def get_reflection__List__Company() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=_module_types.Company,
+        kind=__NumberType.NOT_A_NUMBER,
+    )
+
 def get_reflection__List__Range() -> __ListSpec :
     return __ListSpec._fbthrift_create(
         value=_module_types.Range,

@@ -687,6 +687,8 @@ bar = 42
 
 mymap = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string, { "keys": "values"})
 
+my_apps = _fbthrift_python_types.List(_fbthrift_python_types.EnumTypeInfo(Company), (Company.FACEBOOK, Company._Company__FRIEND__FEED, ))
+
 instagram = Internship(weeks=12, title="Software Engineer", employer=Company.INSTAGRAM, compensation=float(1200), school="Monters University")
 
 partial_const = Internship(weeks=8, title="Some Job")

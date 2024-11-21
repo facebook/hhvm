@@ -58,6 +58,11 @@ mymap = {
   "keys" : "values",
 }
 
+my_apps = [
+    0,
+    4,
+]
+
 instagram = Internship(**{
   "weeks" : 12,
   "title" : "Software Engineer",

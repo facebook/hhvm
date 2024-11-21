@@ -60,6 +60,12 @@ public class Constants {
     mymap.put("keys", "values");
   }
 
+  public static final List<Company> my_apps = new ArrayList<Company>();
+  static {
+    my_apps.add(Company.FACEBOOK);
+    my_apps.add(Company.__FRIEND__FEED);
+  }
+
   public static final Internship instagram = new Internship();
   static {
     instagram.setWeeks(12);

@@ -33,6 +33,7 @@ from python_test.enums.thrift_types import (
     BadMembers,
     Color,
     ColorGroups,
+    ColorMap,
     File,
     Kind,
     OptionalColorGroups,
@@ -348,8 +349,17 @@ class EnumTests(unittest.TestCase):
     def test_enum(self) -> None:
         lst = list(self.Color)
         self.assertEqual(len(lst), len(self.Color))
-        self.assertEqual(len(self.Color), 3)
-        self.assertEqual([self.Color.red, self.Color.blue, self.Color.green], lst)
+        self.assertEqual(len(self.Color), 5)
+        self.assertEqual(
+            [
+                self.Color.red,
+                self.Color.blue,
+                self.Color.green,
+                self.Color._Color__pleurigloss,
+                self.Color._Color__octarine,
+            ],
+            lst,
+        )
         for i, color in enumerate("red blue green".split(), 0):
             e = self.Color(i)
             self.assertEqual(e, getattr(self.Color, color))
@@ -369,10 +379,21 @@ class EnumTests(unittest.TestCase):
         self.assertTrue(issubclass(self.Color, Enum))
 
     def test_callable(self) -> None:
-        vals = range(3)
+        vals = range(len(self.Color))
         # this is done to verify pyre typestub more than anything
         colors = list(map(self.Color, vals))
         self.assertEqual(colors, list(self.Color))
+
+    def test_class_mangled_color(self) -> None:
+        self.assertEqual(self.Color._Color__pleurigloss, 3)
+        self.assertEqual(self.Color._Color__octarine, 4)
+        self.assertFalse(hasattr(self.Color, "__octarine"))
+
+    def test_map_mangled_color_constant(self) -> None:
+        for arm in self.Color:
+            arm_name = arm.name.rsplit("__", 1)[1] if "__" in arm.name else arm.name
+            # const ColorMap returns first character of arm name
+            self.assertEqual(ColorMap[arm], arm_name[0])
 
 
 # tt = test_types, ser = serializer
@@ -503,7 +524,7 @@ class EnumMetaTests(unittest.TestCase):
         self.assertNotIn(self.Perm.read, self.Color)
 
         self.assertNotIn(-1, self.Color)
-        self.assertNotIn(3, self.Color)
+        self.assertNotIn(len(Color), self.Color)
 
         # this is more lenient behavior than thrift-py3
         self.assertIn(0, self.Color)
@@ -512,7 +533,7 @@ class EnumMetaTests(unittest.TestCase):
 
     def test_enum_metaclass_dir(self) -> None:
         attrs = set(dir(self.Color))
-        self.assertEqual(len(self.Color), 3)
+        self.assertEqual(len(self.Color), 5)
         self.assertEqual(len(attrs), 4 + len(self.Color))
         self.assertIn("red", attrs)
         self.assertIn("blue", attrs)

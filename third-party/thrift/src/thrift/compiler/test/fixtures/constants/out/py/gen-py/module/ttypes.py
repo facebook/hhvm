@@ -83,12 +83,14 @@ class Company:
   WHATSAPP = 1
   OCULUS = 2
   INSTAGRAM = 3
+  __FRIEND__FEED = 4
 
   _VALUES_TO_NAMES = {
     0: "FACEBOOK",
     1: "WHATSAPP",
     2: "OCULUS",
     3: "INSTAGRAM",
+    4: "__FRIEND__FEED",
   }
 
   _NAMES_TO_VALUES = {
@@ -96,6 +98,7 @@ class Company:
     "WHATSAPP": 1,
     "OCULUS": 2,
     "INSTAGRAM": 3,
+    "__FRIEND__FEED": 4,
   }
 
 class Internship:

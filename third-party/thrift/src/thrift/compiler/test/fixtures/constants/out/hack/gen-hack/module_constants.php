@@ -111,6 +111,18 @@ class module_CONSTANTS implements \IThriftConstants {
 
   /**
    * Original thrift constant:-
+   * list<module.Company> my_apps
+   */
+  <<__Memoize>>
+  public static function my_apps()[write_props]: \ConstVector<Company>{
+    return ImmVector {
+      Company::FACEBOOK,
+      Company::__FRIEND__FEED,
+    };
+  }
+
+  /**
+   * Original thrift constant:-
    * module.Internship instagram
    */
   <<__Memoize>>

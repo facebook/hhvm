@@ -701,6 +701,7 @@ class Company(_fbthrift_python_types.Enum, int):
     WHATSAPP = 1
     OCULUS = 2
     INSTAGRAM = 3
+    __FRIEND__FEED = 4
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.Company"
@@ -803,6 +804,8 @@ foo = "foo"
 bar = 42
 
 mymap = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string, { "keys": "values"})
+
+my_apps = _fbthrift_python_types.List(_fbthrift_python_types.EnumTypeInfo(Company), (Company.FACEBOOK, Company._Company__FRIEND__FEED, ))
 
 instagram = Internship(weeks=12, title="Software Engineer", employer=Company.INSTAGRAM, compensation=float(1200), school="Monters University")
 

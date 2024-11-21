@@ -67,6 +67,7 @@ class Company(_fbthrift_python_types.Enum, int):
     WHATSAPP = 1
     OCULUS = 2
     INSTAGRAM = 3
+    __FRIEND__FEED = 4
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.Company"

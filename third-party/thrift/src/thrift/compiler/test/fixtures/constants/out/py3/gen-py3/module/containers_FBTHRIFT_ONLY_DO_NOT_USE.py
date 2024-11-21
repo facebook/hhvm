@@ -111,6 +111,47 @@ class List__Map__string_i32(thrift.py3.types.List):
 Sequence.register(List__Map__string_i32)
 
 __all__.append('List__Map__string_i32')
+class List__Company(thrift.py3.types.List):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_list_private_ctor:
+            _py_obj = items
+        elif isinstance(items, List__Company):
+            _py_obj = list(items)
+        elif items is None:
+            _py_obj = []
+        else:
+            check_method = List__Company._check_item_type_or_raise
+            _py_obj = [check_method(item) for item in items]
+
+        super().__init__(_py_obj, List__Company)
+
+    @staticmethod
+    def _check_item_type_or_raise(item):
+        if not (
+            isinstance(item, _module_types.Company) or
+            isinstance(item, thrift.py3.types.BadEnum)
+        ):
+            raise TypeError(f"{item!r} is not of type _module_types.Company")
+        return item
+
+    @staticmethod
+    def _check_item_type_or_none(item):
+        if item is None:
+            return None
+        if isinstance(item, _module_types.Company):
+            return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__List__Company()
+
+
+Sequence.register(List__Company)
+
+__all__.append('List__Company')
 class List__Range(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()

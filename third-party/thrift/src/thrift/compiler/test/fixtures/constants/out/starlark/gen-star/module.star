@@ -24,6 +24,7 @@ __Company_enum__ = record(
     WHATSAPP = __StarlarkEnum__,
     OCULUS = __StarlarkEnum__,
     INSTAGRAM = __StarlarkEnum__,
+    __FRIEND__FEED = __StarlarkEnum__,
 )
 
 Company = __Company_enum__(
@@ -31,6 +32,7 @@ Company = __Company_enum__(
     WHATSAPP = __StarlarkEnum__(name="WHATSAPP", value=1),
     OCULUS = __StarlarkEnum__(name="OCULUS", value=2),
     INSTAGRAM = __StarlarkEnum__(name="INSTAGRAM", value=3),
+    __FRIEND__FEED = __StarlarkEnum__(name="__FRIEND__FEED", value=4),
 )
 
 myInt = 1337
@@ -70,6 +72,11 @@ bar = 42
 mymap = {
   "keys": "values",
 }
+
+my_apps = [
+  Company.FACEBOOK,
+  Company.__FRIEND__FEED,
+]
 
 apostrophe = "'"
 

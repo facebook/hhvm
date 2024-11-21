@@ -64,6 +64,7 @@ from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__i32,
     List__Map__string_i32,
+    List__Company,
     List__Range,
     List__Internship,
     List__string,
@@ -1515,6 +1516,23 @@ cdef shared_ptr[cmap[string,string]] Map__string_string__make_instance(object it
 
 
 
+cdef vector[_module_cbindings.cCompany] List__Company__make_instance(object items) except *:
+    cdef vector[_module_cbindings.cCompany] c_inst
+    if items is not None:
+        for item in items:
+            if not isinstance(item, Company):
+                raise TypeError(f"{item!r} is not of type Company")
+            c_inst.push_back(<_module_cbindings.cCompany><int>item)
+    return cmove(c_inst)
+
+cdef object List__Company__from_cpp(const vector[_module_cbindings.cCompany]& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(translate_cpp_enum_to_python(Company, <int> c_vec[idx]))
+    return List__Company(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+
 cdef vector[_module_cbindings.cRange] List__Range__make_instance(object items) except *:
     cdef vector[_module_cbindings.cRange] c_inst
     if items is not None:
@@ -1915,6 +1933,7 @@ my_company = Company(<int> (_module_cbindings.cmy_company()))
 foo = _module_cbindings.cfoo().decode('UTF-8')
 bar = 42
 mymap = Map__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cmymap()))
+my_apps = List__Company__from_cpp(_module_cbindings.cmy_apps())
 instagram = Internship._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cinstagram()))
 partial_const = Internship._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cpartial_const()))
 kRanges = List__Range__from_cpp(_module_cbindings.ckRanges())

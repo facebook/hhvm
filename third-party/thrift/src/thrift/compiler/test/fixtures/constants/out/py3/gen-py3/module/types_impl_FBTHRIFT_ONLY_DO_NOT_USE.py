@@ -100,6 +100,7 @@ class Company(thrift.py3.types.CompiledEnum):
     WHATSAPP = 1
     OCULUS = 2
     INSTAGRAM = 3
+    __FRIEND__FEED = 4
 
     __module__ = _fbthrift__module_name__
     __slots__ = ()

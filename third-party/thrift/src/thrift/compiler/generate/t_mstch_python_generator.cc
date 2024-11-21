@@ -1240,10 +1240,12 @@ class python_mstch_const_value : public mstch_const_value {
   }
 
   mstch::node py3_enum_value_name() {
-    if (const_value_->is_enum() && const_value_->get_enum_value() != nullptr) {
-      return python::get_py3_name(*const_value_->get_enum_value());
+    if (!const_value_->is_enum() || const_value_->get_enum_value() == nullptr) {
+      return mstch::node();
     }
-    return mstch::node();
+    const auto& enum_name = const_value_->get_enum()->get_name();
+    return python::get_py3_name_class_scope(
+        *const_value_->get_enum_value(), enum_name);
   }
 
   mstch::node list_elem_type() {

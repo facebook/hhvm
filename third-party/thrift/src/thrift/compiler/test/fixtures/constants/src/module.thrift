@@ -50,6 +50,7 @@ enum Company {
   WHATSAPP = 1,
   OCULUS = 2,
   INSTAGRAM = 3,
+  __FRIEND__FEED = 4,
 }
 
 typedef Company MyCompany
@@ -70,6 +71,7 @@ typedef map<string, string> MyMapIdentifier
 const MyStringIdentifier foo = "foo";
 const MyIntIdentifier bar = 42;
 const MyMapIdentifier mymap = {"keys": "values"};
+const list<Company> my_apps = [Company.FACEBOOK, Company.__FRIEND__FEED];
 
 const Internship instagram = {
   "weeks": 12,

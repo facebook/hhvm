@@ -40,18 +40,20 @@ template <> struct TEnumDataStorage<::cpp2::City> {
 
 template <> struct TEnumDataStorage<::cpp2::Company> {
   using type = ::cpp2::Company;
-  static constexpr const std::size_t size = 4;
+  static constexpr const std::size_t size = 5;
   static constexpr std::array<type, size> values = { {
       type::FACEBOOK,
       type::WHATSAPP,
       type::OCULUS,
       type::INSTAGRAM,
+      type::__FRIEND__FEED,
   }};
   static constexpr std::array<std::string_view, size> names = { {
       "FACEBOOK"sv,
       "WHATSAPP"sv,
       "OCULUS"sv,
       "INSTAGRAM"sv,
+      "__FRIEND__FEED"sv,
   }};
 };
 

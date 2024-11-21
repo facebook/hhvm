@@ -75,6 +75,7 @@ enum Company: int {
   WHATSAPP = 1;
   OCULUS = 2;
   INSTAGRAM = 3;
+  __FRIEND__FEED = 4;
 }
 
 class Company_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -87,6 +88,7 @@ class Company_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
           1 => "WHATSAPP",
           2 => "OCULUS",
           3 => "INSTAGRAM",
+          4 => "__FRIEND__FEED",
         ],
       )
     );

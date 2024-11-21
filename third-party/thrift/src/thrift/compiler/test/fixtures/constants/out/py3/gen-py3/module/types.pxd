@@ -187,6 +187,9 @@ cdef class Map__string_string(thrift.py3.types.Map):
 
 cdef shared_ptr[cmap[string,string]] Map__string_string__make_instance(object items) except *
 
+cdef vector[_module_cbindings.cCompany] List__Company__make_instance(object items) except *
+cdef object List__Company__from_cpp(const vector[_module_cbindings.cCompany]&) except *
+
 cdef vector[_module_cbindings.cRange] List__Range__make_instance(object items) except *
 cdef object List__Range__from_cpp(const vector[_module_cbindings.cRange]&) except *
 

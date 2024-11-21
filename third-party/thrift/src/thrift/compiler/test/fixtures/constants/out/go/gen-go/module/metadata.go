@@ -405,6 +405,7 @@ var enumMetadatasOnce = sync.OnceValue(
             1: "WHATSAPP",
             2: "OCULUS",
             3: "INSTAGRAM",
+            4: "__FRIEND__FEED",
         },
     ))
         return fbthriftResults

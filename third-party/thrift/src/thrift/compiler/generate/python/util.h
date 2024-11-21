@@ -88,6 +88,21 @@ class cached_properties {
 };
 
 template <class T>
+std::string_view get_python_name_override(const T& node) {
+  if (const t_const* annot =
+          node.find_structured_annotation_or_null(kPythonNameUri)) {
+    if (auto name =
+            annot->get_value_from_structured_annotation_or_null("name")) {
+      return name->get_string();
+    }
+  }
+  if (const auto* name = node.find_annotation_or_null("py3.name")) {
+    return *name;
+  }
+  return {};
+}
+
+template <class T>
 std::string get_py3_name(const T& node) {
   // Reserved Cython / Python keywords that are not blocked by thrift grammer
   // TODO: get rid of this list and force users to rename explicitly
@@ -103,16 +118,11 @@ std::string get_py3_name(const T& node) {
       "ctypedef",
   };
 
-  if (const t_const* annot =
-          node.find_structured_annotation_or_null(kPythonNameUri)) {
-    if (auto name =
-            annot->get_value_from_structured_annotation_or_null("name")) {
-      return name->get_string();
-    }
+  auto name_override = get_python_name_override(node);
+  if (!name_override.empty()) {
+    return std::string(name_override);
   }
-  if (const auto* name = node.find_annotation_or_null("py3.name")) {
-    return *name;
-  }
+
   const auto& name = node.get_name();
   const auto& python_keywords = get_python_reserved_names();
   if (cython_keywords.find(name) != cython_keywords.end() ||
@@ -125,6 +135,16 @@ std::string get_py3_name(const T& node) {
 std::unordered_set<std::string_view> extract_modules_and_insert_into(
     std::string_view fully_qualified_name,
     std::unordered_set<std::string_view>& module_paths);
+
+template <class T>
+std::string get_py3_name_class_scope(
+    const T& node, const std::string& parent_name) {
+  auto name = get_py3_name(node);
+  if (name.size() >= 2 && name[0] == '_' && name[1] == '_') {
+    return fmt::format("_{}{}", parent_name, name);
+  }
+  return name;
+}
 
 } // namespace python
 } // namespace apache::thrift::compiler

@@ -25,6 +25,7 @@ const (
     MyCompany_WHATSAPP MyCompany = Company_WHATSAPP
     MyCompany_OCULUS MyCompany = Company_OCULUS
     MyCompany_INSTAGRAM MyCompany = Company_INSTAGRAM
+    MyCompany___FRIEND__FEED MyCompany = Company___FRIEND__FEED
 )
 
 // Enum value maps for Company
@@ -274,6 +275,7 @@ const (
     Company_WHATSAPP Company = 1
     Company_OCULUS Company = 2
     Company_INSTAGRAM Company = 3
+    Company___FRIEND__FEED Company = 4
 )
 
 // Enum value maps for Company
@@ -283,6 +285,7 @@ var (
         Company_WHATSAPP: "WHATSAPP",
         Company_OCULUS: "OCULUS",
         Company_INSTAGRAM: "INSTAGRAM",
+        Company___FRIEND__FEED: "__FRIEND__FEED",
     }
 
     CompanyToValue = map[string]Company {
@@ -290,6 +293,7 @@ var (
         "WHATSAPP": Company_WHATSAPP,
         "OCULUS": Company_OCULUS,
         "INSTAGRAM": Company_INSTAGRAM,
+        "__FRIEND__FEED": Company___FRIEND__FEED,
     }
 )
 

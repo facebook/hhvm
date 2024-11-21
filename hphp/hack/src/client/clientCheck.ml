@@ -94,7 +94,9 @@ let parse_position_string ~(split_on : string) arg =
     Printf.eprintf "Invalid position\n";
     raise Exit_status.(Exit_with Input_error)
 
-let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
+let connect
+    ?(use_priority_pipe = false) ?(do_post_handoff_handshake = true) args :
+    ClientConnect.conn Lwt.t =
   let {
     ClientEnv.root;
     from;
@@ -143,7 +145,7 @@ let connect ?(use_priority_pipe = false) args : ClientConnect.conn Lwt.t =
           ClientSpinner.report
             ~to_stderr:show_spinner
             ~angery_reaccs_only:(ClientMessages.angery_reaccs_only ());
-        do_post_handoff_handshake = true;
+        do_post_handoff_handshake;
         ignore_hh_version;
         save_64bit;
         save_human_readable_64bit_dep_map;
@@ -164,7 +166,7 @@ type connect_fun = unit -> ClientConnect.conn Lwt.t
 
 let connect_then_close (args : ClientEnv.client_check_env) : unit Lwt.t =
   let%lwt ClientConnect.{ channels = (_ic, oc); _ } =
-    connect args ~use_priority_pipe:true
+    connect args ~use_priority_pipe:true ~do_post_handoff_handshake:false
   in
   Out_channel.close oc;
   (* The connection is derived from [Unix.open_connection]. Its docs explain:

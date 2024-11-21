@@ -65,10 +65,6 @@ void PendingConnectionsMetrics::onPendingConnectionsChange() {
   auto pendingConnections = pendingConnections_.load();
   if (pendingConnections >= 0) {
     observer_->pendingConnections(pendingConnections);
-  } else {
-    FB_LOG_EVERY_MS(INFO, 10000)
-        << "Pending connections < 0 due to possible race condition. Current value="
-        << pendingConnections;
   }
 }
 

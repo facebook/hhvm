@@ -105,13 +105,6 @@ func WithTimeout(ioTimeout time.Duration) ClientOption {
 	return WithIoTimeout(ioTimeout)
 }
 
-// Deprecated: use WithDialer() instead.
-func WithConn(conn net.Conn) ClientOption {
-	return WithDialer(func() (net.Conn, error) {
-		return conn, nil
-	})
-}
-
 // WithTLS is a creates a TLS connection to the given address, including ALPN for thrift.
 func WithTLS(addr string, dialTimeout time.Duration, tlsConfig *tls.Config) ClientOption {
 	clonedTLSConfig := tlsConfig.Clone()

@@ -59,11 +59,12 @@ func TestUpgradeToRocketClientUnix(t *testing.T) {
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
-	conn, err := net.Dial(addr.Network(), addr.String())
-	if err != nil {
-		t.Fatalf("failed to dial: %v", err)
-	}
-	proto, err := NewClient(WithConn(conn), WithUpgradeToRocket())
+	proto, err := NewClient(
+		WithUpgradeToRocket(),
+		WithDialer(func() (net.Conn, error) {
+			return net.Dial(addr.Network(), addr.String())
+		}),
+	)
 	if err != nil {
 		t.Fatalf("could not create client protocol: %s", err)
 	}

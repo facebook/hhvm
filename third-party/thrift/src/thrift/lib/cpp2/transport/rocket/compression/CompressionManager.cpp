@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-#include <folly/compression/Compression.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+
 #include <thrift/lib/cpp/TApplicationException.h>
 
-#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 
-namespace apache::thrift::rocket {
+namespace apache {
+namespace thrift {
+namespace rocket {
 namespace detail {
 
 template <typename Metadata>
-void setCompressionCodec(
+static void setCompressionCodec(
     CompressionConfig compressionConfig,
     Metadata& metadata,
     size_t payloadSize) {
@@ -52,7 +54,7 @@ template void setCompressionCodec<>(
     size_t payloadSize);
 } // namespace detail
 
-std::unique_ptr<folly::IOBuf> compressBuffer(
+static std::unique_ptr<folly::IOBuf> compressBuffer(
     std::unique_ptr<folly::IOBuf>&& buffer,
     CompressionAlgorithm compressionAlgorithm) {
   auto [codecType, level] =
@@ -61,7 +63,7 @@ std::unique_ptr<folly::IOBuf> compressBuffer(
   return folly::io::getCodec(codecType, level)->compress(buffer.get());
 }
 
-std::unique_ptr<folly::IOBuf> uncompressBuffer(
+static std::unique_ptr<folly::IOBuf> uncompressBuffer(
     std::unique_ptr<folly::IOBuf>&& buffer,
     CompressionAlgorithm compressionAlgorithm) {
   auto [codecType, level] =
@@ -74,4 +76,51 @@ std::unique_ptr<folly::IOBuf> uncompressBuffer(
         fmt::format("decompression failure: {}", e.what()));
   }
 }
-} // namespace apache::thrift::rocket
+
+CompressionAlgorithm CompressionManager::fromCodecConfig(
+    const CodecConfig& codecConfig) {
+  return CompressionAlgorithmSelector::fromCodecConfig(codecConfig);
+}
+
+std::pair<folly::io::CodecType, int> CompressionManager::toCodecTypeAndLevel(
+    const CompressionAlgorithm& compressionAlgorithm) {
+  return CompressionAlgorithmSelector::toCodecTypeAndLevel(
+      compressionAlgorithm);
+}
+
+void CompressionManager::setCompressionCodec(
+    CompressionConfig compressionConfig,
+    RequestRpcMetadata& metadata,
+    size_t payloadSize) {
+  detail::setCompressionCodec(compressionConfig, metadata, payloadSize);
+}
+
+void CompressionManager::setCompressionCodec(
+    CompressionConfig compressionConfig,
+    ResponseRpcMetadata& metadata,
+    size_t payloadSize) {
+  detail::setCompressionCodec(compressionConfig, metadata, payloadSize);
+}
+
+void CompressionManager::setCompressionCodec(
+    CompressionConfig compressionConfig,
+    StreamPayloadMetadata& metadata,
+    size_t payloadSize) {
+  detail::setCompressionCodec(compressionConfig, metadata, payloadSize);
+}
+
+std::unique_ptr<folly::IOBuf> CompressionManager::compressBuffer(
+    std::unique_ptr<folly::IOBuf>&& buffer,
+    CompressionAlgorithm compressionAlgorithm) {
+  return rocket::compressBuffer(std::move(buffer), compressionAlgorithm);
+}
+
+std::unique_ptr<folly::IOBuf> CompressionManager::uncompressBuffer(
+    std::unique_ptr<folly::IOBuf>&& buffer,
+    CompressionAlgorithm compressionAlgorithm) {
+  return rocket::uncompressBuffer(std::move(buffer), compressionAlgorithm);
+}
+
+} // namespace rocket
+} // namespace thrift
+} // namespace apache

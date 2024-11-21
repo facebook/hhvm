@@ -20,7 +20,7 @@
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -33,7 +33,8 @@ template <typename Metadata>
 void applyCompressionIfNeeded(
     std::unique_ptr<folly::IOBuf>& payload, Metadata* metadata) {
   if (auto compress = metadata->compression_ref()) {
-    payload = compressBuffer(std::move(payload), *compress);
+    payload =
+        CompressionManager().compressBuffer(std::move(payload), *compress);
   }
 }
 

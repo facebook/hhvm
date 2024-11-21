@@ -2870,6 +2870,26 @@ fn emit_special_function<'a, 'd>(
                 _ => Ok(None),
             }
         }
+        ("HH\\ReifiedGenerics\\get_class_from_type", _) => {
+            if !args.is_empty() {
+                return Err(Error::fatal_runtime(
+                    pos,
+                    format!("get_class_from_type() expects exactly 0 parameters, {} given", args.len()),
+                ));
+            }
+            let ntargs = targs.len();
+            if ntargs != 1 {
+                return Err(Error::fatal_runtime(
+                    pos,
+                    format!("get_class_from_type() expects exactly 1 type parameter, {} given", ntargs),
+                ));
+            }
+            Ok(Some(InstrSeq::gather(vec![
+                emit_reified_arg(e, env, pos, false, targs[0].hint())?.0,
+                instr::class_get_ts(),
+                instr::pop_c(),
+            ])))
+        }
         _ => Ok(
             match (args, istype_op(lower_fq_name), is_isexp_op(lower_fq_name)) {
                 ([arg_expr], _, Some(ref h)) => {

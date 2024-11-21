@@ -1,0 +1,1 @@
+Fatal error: get_class_from_type() expects exactly 1 type parameter, 2 given in %s/class-ptr/get-class-from-type-many-targs.php on line 5

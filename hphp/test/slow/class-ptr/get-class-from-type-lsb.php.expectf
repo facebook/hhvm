@@ -1,0 +1,3 @@
+called f
+
+Fatal error: when resolving anonymous type structure, class HH\this does not have non-abstract type constant T in %s/class-ptr/get-class-from-type-lsb.php on line 9

@@ -79,14 +79,6 @@ const t_const* get_transitive_annotation_of_adapter_or_null(
   return nullptr;
 }
 
-std::string_view extract_module_path(std::string_view fully_qualified_name) {
-  size_t last_dot = fully_qualified_name.rfind('.');
-  if (last_dot == std::string_view::npos) {
-    return "";
-  }
-  return fully_qualified_name.substr(0, last_dot);
-}
-
 std::string mangle_program_path(
     const t_program* program, const std::string& root_module_prefix) {
   std::string prefix = root_module_prefix.empty() ? std::string("_fbthrift")
@@ -366,19 +358,19 @@ class python_mstch_program : public mstch_program {
   void visit_types_for_adapters() {
     for (const t_structured* strct : program_->structs_and_unions()) {
       if (auto annotation = find_structured_adapter_annotation(*strct)) {
-        extract_module_and_insert_to(
+        python::extract_modules_and_insert_into(
             get_annotation_property(annotation, "name"), adapter_modules_);
-        extract_module_and_insert_to(
+        python::extract_modules_and_insert_into(
             get_annotation_property(annotation, "typeHint"), adapter_modules_);
-        extract_module_and_insert_to(
+        python::extract_modules_and_insert_into(
             get_annotation_property(annotation, "typeHint"),
             adapter_type_hint_modules_);
       }
       for (const auto& field : strct->fields()) {
         if (auto annotation = find_structured_adapter_annotation(field)) {
-          extract_module_and_insert_to(
+          python::extract_modules_and_insert_into(
               get_annotation_property(annotation, "name"), adapter_modules_);
-          extract_module_and_insert_to(
+          python::extract_modules_and_insert_into(
               get_annotation_property(annotation, "typeHint"),
               adapter_type_hint_modules_);
         }
@@ -386,22 +378,14 @@ class python_mstch_program : public mstch_program {
     }
     for (const auto typedef_def : program_->typedefs()) {
       if (auto annotation = find_structured_adapter_annotation(*typedef_def)) {
-        extract_module_and_insert_to(
+        python::extract_modules_and_insert_into(
             get_annotation_property(annotation, "name"), adapter_modules_);
-        extract_module_and_insert_to(
+        python::extract_modules_and_insert_into(
             get_annotation_property(annotation, "typeHint"), adapter_modules_);
-        extract_module_and_insert_to(
+        python::extract_modules_and_insert_into(
             get_annotation_property(annotation, "typeHint"),
             adapter_type_hint_modules_);
       }
-    }
-  }
-
-  void extract_module_and_insert_to(
-      std::string_view name, std::unordered_set<std::string_view>& modules) {
-    std::string_view module_path = extract_module_path(name);
-    if (module_path != "") {
-      modules.insert(module_path);
     }
   }
 
@@ -416,9 +400,9 @@ class python_mstch_program : public mstch_program {
       return;
     }
     if (auto annotation = find_structured_adapter_annotation(*orig_type)) {
-      extract_module_and_insert_to(
+      python::extract_modules_and_insert_into(
           get_annotation_property(annotation, "name"), adapter_modules_);
-      extract_module_and_insert_to(
+      python::extract_modules_and_insert_into(
           get_annotation_property(annotation, "typeHint"),
           adapter_type_hint_modules_);
     }

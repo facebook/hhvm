@@ -17,6 +17,7 @@
 #include <thrift/compiler/generate/python/util.h>
 
 #include <regex>
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <thrift/compiler/generate/cpp/util.h>
 
@@ -136,5 +137,20 @@ void cached_properties::set_flat_name(
   flat_name_ = std::move(custom_prefix);
 }
 
+std::unordered_set<std::string_view> extract_modules_and_insert_into(
+    std::string_view fully_qualified_name,
+    std::unordered_set<std::string_view>& module_paths) {
+  size_t start = 0;
+  size_t end = 0;
+  while (end != std::string_view::npos) {
+    end = fully_qualified_name.find('[', start);
+    size_t last_dot = fully_qualified_name.rfind('.', end);
+    if (last_dot != std::string_view::npos && last_dot > start) {
+      module_paths.insert(fully_qualified_name.substr(start, last_dot - start));
+    }
+    start = end + 1;
+  }
+  return module_paths;
+}
 } // namespace python
 } // namespace apache::thrift::compiler

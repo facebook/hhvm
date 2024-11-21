@@ -122,5 +122,9 @@ std::string get_py3_name(const T& node) {
   return name;
 }
 
+std::unordered_set<std::string_view> extract_modules_and_insert_into(
+    std::string_view fully_qualified_name,
+    std::unordered_set<std::string_view>& module_paths);
+
 } // namespace python
 } // namespace apache::thrift::compiler

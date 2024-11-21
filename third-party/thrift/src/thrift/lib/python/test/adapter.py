@@ -93,9 +93,11 @@ class AdapterTest(unittest.TestCase):
         )
         self.Foo: Type[Foo] | Type[FooMutable] = self.thrift_types.Foo
         self.NINETEEN_EIGHTY_FOUR: (
+            # pyre-fixme[11]: Annotation is not defined as a type.
             Type[NINETEEN_EIGHTY_FOUR] | Type[NINETEEN_EIGHTY_FOUR_MUTABLE]
         ) = self.thrift_types.NINETEEN_EIGHTY_FOUR
         self._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR: (
+            # pyre-fixme[11]: Annotation is not defined as a type.
             Type[_fbthrift_unadapted_NINETEEN_EIGHTY_FOUR]
             | Type[_fbthrift_unadapted_NINETEEN_EIGHTY_FOUR_MUTABLE]
         ) = self.thrift_types._fbthrift_unadapted_NINETEEN_EIGHTY_FOUR
@@ -216,16 +218,24 @@ class AdapterTest(unittest.TestCase):
         int_to_datetime_map = {42: datetime.fromtimestamp(int(time.time()))}
         foo = (
             self.Foo(
+                # pyre-fixme[6]
                 int_list=to_thrift_list(int_list),
+                # pyre-fixme[6]
                 int_set=to_thrift_set(int_set),
+                # pyre-fixme[6]
                 int_to_datetime_map=to_thrift_map(int_to_datetime_map),
+                # pyre-fixme[6]
                 int_list_list=to_thrift_list(int_list_list),
             )
             if self.is_mutable_run
             else self.Foo(
+                # pyre-fixme[6]
                 int_list=int_list,
+                # pyre-fixme[6]
                 int_set=int_set,
+                # pyre-fixme[6]
                 int_to_datetime_map=int_to_datetime_map,
+                # pyre-fixme[6]
                 int_list_list=int_list_list,
             )
         )

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9082b9e1996be3d1efe1b22a9ce27050>>
+// @generated SignedSource<<f9b16cc0200f54dc8df0c1dd98d77b5f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -387,6 +387,25 @@ impl<P: Params> Node<P> for ClassId_<P::Ex, P::En> {
             ClassId_::CIstatic => Ok(()),
             ClassId_::CIexpr(a0) => a0.accept(c, v),
             ClassId_::CI(a0) => a0.accept(c, v),
+        }
+    }
+}
+impl<P: Params> Node<P> for ClassPtrKind {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_class_ptr_kind(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            ClassPtrKind::CKclass => Ok(()),
+            ClassPtrKind::CKenum => Ok(()),
         }
     }
 }
@@ -1412,7 +1431,10 @@ impl<P: Params> Node<P> for Hint_ {
             Hint_::Hlike(a0) => a0.accept(c, v),
             Hint_::Hfun(a0) => a0.accept(c, v),
             Hint_::Htuple(a0) => a0.accept(c, v),
-            Hint_::HclassPtr(a0) => a0.accept(c, v),
+            Hint_::HclassPtr(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
             Hint_::Hshape(a0) => a0.accept(c, v),
             Hint_::Haccess(a0, a1) => {
                 a0.accept(c, v)?;

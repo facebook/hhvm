@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c3bbd77239a0199da2b711e897512b65>>
+// @generated SignedSource<<5276513781460c921ef927e568c45b06>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2598,6 +2598,31 @@ pub struct HintFun {
 
 #[derive(
     Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(u8)]
+pub enum ClassPtrKind {
+    CKclass,
+    CKenum,
+}
+impl TrivialDrop for ClassPtrKind {}
+arena_deserializer::impl_deserialize_in_arena!(ClassPtrKind);
+
+#[derive(
+    Clone,
     Debug,
     Deserialize,
     Eq,
@@ -2620,7 +2645,7 @@ pub enum Hint_ {
     Hfun(HintFun),
     Htuple(TupleInfo),
     #[rust_to_ocaml(name = "Hclass_ptr")]
-    HclassPtr(Hint),
+    HclassPtr(ClassPtrKind, Hint),
     Hshape(NastShapeInfo),
     /// Accessing a type constant. Type constants are accessed like normal
     /// class constants, but in type positions.

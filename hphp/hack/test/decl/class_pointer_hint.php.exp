@@ -16,10 +16,24 @@
                 { Typing_defs_flags.FunParam.accept_disposable = false;
                   inout = false; is_optional = false; readonly = false;
                   ignore_readonly_error = false; splat = false };
-                fp_def_value = None }
+                fp_def_value = None };
+               { fp_pos = [5:37-39]; fp_name = (Some "$e");
+                 fp_type =
+                 (Rhint ([5:29-36]),
+                  (Tclass_ptr
+                     (Rhint ([5:29-36]),
+                      (Tapply (([5:29-36], "\\HH\\BuiltinEnum"),
+                         [(Rhint ([5:34-35]),
+                           (Tapply (([5:34-35], "\\E"), [])))]
+                         )))));
+                 fp_flags =
+                 { Typing_defs_flags.FunParam.accept_disposable = false;
+                   inout = false; is_optional = false; readonly = false;
+                   ignore_readonly_error = false; splat = false };
+                 fp_def_value = None }
                ];
              ft_implicit_params = { capability = (CapDefaults [5:10-15]) };
-             ft_ret = (Rhint ([5:30-34]), (Tprim Tvoid));
+             ft_ret = (Rhint ([5:42-46]), (Tprim Tvoid));
              ft_flags =
              { Typing_defs_flags.Fun.return_disposable = false;
                async = false; generator = false; fun_kind = FSync;
@@ -53,32 +67,107 @@
         fe_pos = [6:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
+  ("\\ret_enum",
+   (Shallow_decl_defs.Fun
+      { Typing_defs.fe_deprecated = None; fe_module = None;
+        fe_package = None; fe_internal = false;
+        fe_type =
+        (Rwitness_from_decl ([7:10-18]),
+         (Tfun
+            { ft_tparams = []; ft_where_constraints = []; ft_params = [];
+              ft_implicit_params = { capability = (CapDefaults [7:10-18]) };
+              ft_ret =
+              (Rhint ([7:22-29]),
+               (Tclass_ptr
+                  (Rhint ([7:22-29]),
+                   (Tapply (([7:22-29], "\\HH\\BuiltinEnum"),
+                      [(Rhint ([7:27-28]), (Tapply (([7:27-28], "\\E"), [])))
+                        ]
+                      )))));
+              ft_flags =
+              { Typing_defs_flags.Fun.return_disposable = false;
+                async = false; generator = false; fun_kind = FSync;
+                is_function_pointer = false; returns_readonly = false;
+                readonly_this = false; support_dynamic_type = false;
+                is_memoized = false; variadic = false };
+              ft_cross_package = None }));
+        fe_pos = [7:10-18]; fe_php_std_lib = false;
+        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
+        fe_no_auto_likes = false }));
+  ("\\E",
+   (Shallow_decl_defs.Class
+      { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
+        sc_abstract = false; sc_is_xhp = false; sc_internal = false;
+        sc_has_xhp_keyword = false; sc_kind = Cenum; sc_module = None;
+        sc_name = ([8:6-7], "\\E"); sc_tparams = [];
+        sc_extends =
+        [(Rhint ([8:6-7]),
+          (Tapply (([8:6-7], "\\HH\\BuiltinEnum"),
+             [(Rhint ([8:6-7]), (Tapply (([8:6-7], "\\E"), [])))])))
+          ];
+        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
+        sc_xhp_marked_empty = false; sc_req_extends = [];
+        sc_req_implements = []; sc_req_class = []; sc_implements = [];
+        sc_support_dynamic_type = false;
+        sc_consts =
+        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
+           scc_name = ([9:3-4], "A");
+           scc_type = (Rwitness_from_decl ([9:7-8]), (Tprim Tint));
+           scc_refs = []; scc_value = None }
+          ];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = [];
+        sc_enum_type =
+        (Some { Typing_defs.te_base = (Rhint ([8:9-12]), (Tprim Tint));
+                te_constraint = None; te_includes = [] });
+        sc_docs_url = None; sc_package = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
         sc_abstract = false; sc_is_xhp = false; sc_internal = false;
         sc_has_xhp_keyword = false; sc_kind = (Cclass Concrete);
-        sc_module = None; sc_name = ([7:7-8], "\\C"); sc_tparams = [];
+        sc_module = None; sc_name = ([11:7-8], "\\C"); sc_tparams = [];
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
         sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
         sc_typeconsts = []; sc_props = [];
         sc_sprops =
-        [{ Shallow_decl_defs.sp_name = ([8:27-29], "$c"); sp_xhp_attr = None;
+        [{ Shallow_decl_defs.sp_name = ([12:27-29], "$c");
+           sp_xhp_attr = None;
            sp_type =
-           (Rhint ([8:17-26]),
+           (Rhint ([12:17-26]),
             (Toption
-               (Rhint ([8:18-26]),
+               (Rhint ([12:18-26]),
                 (Tclass_ptr
-                   (Rhint ([8:24-25]), (Tapply (([8:24-25], "\\C"), [])))))));
+                   (Rhint ([12:24-25]), (Tapply (([12:24-25], "\\C"), [])))))));
            sp_visibility = Public;
            sp_flags =
            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
              lateinit = false; lsb = false; needs_init = false;
              php_std_lib = false; readonly = false;
              safe_global_variable = false; no_auto_likes = false }
-           }
+           };
+          { Shallow_decl_defs.sp_name = ([13:26-28], "$e");
+            sp_xhp_attr = None;
+            sp_type =
+            (Rhint ([13:17-25]),
+             (Toption
+                (Rhint ([13:18-25]),
+                 (Tclass_ptr
+                    (Rhint ([13:18-25]),
+                     (Tapply (([13:18-25], "\\HH\\BuiltinEnum"),
+                        [(Rhint ([13:23-24]),
+                          (Tapply (([13:23-24], "\\E"), [])))]
+                        )))))));
+            sp_visibility = Public;
+            sp_flags =
+            { Shallow_decl_defs.PropFlags.abstract = false; const = false;
+              lateinit = false; lsb = false; needs_init = false;
+              php_std_lib = false; readonly = false;
+              safe_global_variable = false; no_auto_likes = false }
+            }
           ];
         sc_constructor = None; sc_static_methods = []; sc_methods = [];
         sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;

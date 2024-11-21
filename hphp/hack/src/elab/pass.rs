@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6d53e3dd14519a317916703b215c4c38>>
+// @generated SignedSource<<dd90fc34a9b41bbb91c8ab6d91388dbd>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1132,6 +1132,22 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut Hint,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_ptr_kind_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassPtrKind,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_ptr_kind_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassPtrKind,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -2968,6 +2984,28 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_fld_hint_fun_return_ty_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_ptr_kind_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassPtrKind,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_class_ptr_kind_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_class_ptr_kind_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut ClassPtrKind,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_class_ptr_kind_bottom_up(env, elem)?;
         }
         Continue(())
     }

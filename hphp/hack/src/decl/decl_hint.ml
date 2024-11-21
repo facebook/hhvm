@@ -118,7 +118,13 @@ and hint_ p env = function
   | Habstr (x, argl) ->
     let argl = List.map argl ~f:(hint env) in
     Tgeneric (x, argl)
-  | Hclass_ptr h -> Tclass_ptr (hint env h)
+  | Hclass_ptr (k, h) ->
+    let h =
+      match k with
+      | CKclass -> h
+      | CKenum -> (p, Happly ((p, SN.Classes.cHH_BuiltinEnum), [h]))
+    in
+    Tclass_ptr (hint env h)
   | Hoption h ->
     let h = hint env h in
     Toption h

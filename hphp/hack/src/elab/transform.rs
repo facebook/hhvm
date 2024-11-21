@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5f86f1eac058855eef67b7959dd0012b>>
+// @generated SignedSource<<6f5e023411c62a93f680149e18b781cf>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2356,6 +2356,22 @@ impl Transform for HintFun {
         }
     }
 }
+impl Transform for ClassPtrKind {
+    fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        let mut in_pass = pass.clone();
+        if let Break(..) = pass.on_ty_class_ptr_kind_top_down(env, self) {
+            return;
+        }
+        stack_limit::maybe_grow(|| self.traverse(env, pass));
+        in_pass.on_ty_class_ptr_kind_bottom_up(env, self);
+    }
+    fn traverse(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
+        match self {
+            ClassPtrKind::CKclass => {}
+            ClassPtrKind::CKenum => {}
+        }
+    }
+}
 impl Transform for Hint_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {
         let mut in_pass = pass.clone();
@@ -2378,7 +2394,12 @@ impl Transform for Hint_ {
             Hint_::Hlike(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Hint_::Hfun(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Hint_::Htuple(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
-            Hint_::HclassPtr(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
+            Hint_::HclassPtr(ref mut __binding_0, ref mut __binding_1) => {
+                {
+                    __binding_0.transform(env, &mut pass.clone())
+                }
+                { __binding_1.transform(env, &mut pass.clone()) }
+            }
             Hint_::Hshape(ref mut __binding_0) => __binding_0.transform(env, &mut pass.clone()),
             Hint_::Haccess(ref mut __binding_0, ref mut __binding_1) => {
                 {

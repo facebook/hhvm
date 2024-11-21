@@ -1,7 +1,11 @@
 File "single.php", line 6, characters 3-13:
   classname<C>
-File "single.php", line 14, characters 3-16:
+File "single.php", line 7, characters 3-13:
+  classname<HH\BuiltinEnum<E>>
+File "single.php", line 20, characters 3-16:
   classname<C>
-File "single.php", line 15, characters 3-16:
+File "single.php", line 21, characters 3-16:
   ?classname<C>
+File "single.php", line 22, characters 3-16:
+  ?classname<HH\BuiltinEnum<E>>
 No errors

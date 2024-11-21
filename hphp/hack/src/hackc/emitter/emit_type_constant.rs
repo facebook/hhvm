@@ -453,7 +453,7 @@ fn hint_to_type_constant_list(
             }
         }
         Hint_::Habstr(_, _)
-        | Hint_::HclassPtr(_)
+        | Hint_::HclassPtr(_, _)
         | Hint_::Hdynamic
         | Hint_::HfunContext(_)
         | Hint_::Hmixed

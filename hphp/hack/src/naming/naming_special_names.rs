@@ -65,6 +65,8 @@ pub mod classes {
 
     pub const CLASS_NAME: &str = "\\HH\\classname";
 
+    pub const ENUM_NAME: &str = "\\HH\\enumname";
+
     pub const TYPE_NAME: &str = "\\HH\\typename";
 
     pub const IDISPOSABLE: &str = "\\IDisposable";

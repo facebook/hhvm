@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<831ed8b36eab629e54260ff13520847b>>
+// @generated SignedSource<<47c99ac218c37f51b8f1f0f8b3a1004b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -3516,6 +3516,26 @@ impl XhpChildOp {
         }
     }
 }
+impl ClassPtrKind {
+    pub fn mk_ckclass() -> Self {
+        ClassPtrKind::CKclass
+    }
+    pub fn mk_ckenum() -> Self {
+        ClassPtrKind::CKenum
+    }
+    pub fn is_ckclass(&self) -> bool {
+        match self {
+            ClassPtrKind::CKclass => true,
+            _ => false,
+        }
+    }
+    pub fn is_ckenum(&self) -> bool {
+        match self {
+            ClassPtrKind::CKenum => true,
+            _ => false,
+        }
+    }
+}
 impl Hint_ {
     pub fn mk_hprim(p0: Tprim) -> Self {
         Hint_::Hprim(p0)
@@ -3535,8 +3555,8 @@ impl Hint_ {
     pub fn mk_htuple(p0: TupleInfo) -> Self {
         Hint_::Htuple(p0)
     }
-    pub fn mk_hclass_ptr(p0: Hint) -> Self {
-        Hint_::HclassPtr(p0)
+    pub fn mk_hclass_ptr(p0: ClassPtrKind, p1: Hint) -> Self {
+        Hint_::HclassPtr(p0, p1)
     }
     pub fn mk_hshape(p0: NastShapeInfo) -> Self {
         Hint_::Hshape(p0)
@@ -3760,9 +3780,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hclass_ptr(&self) -> Option<&Hint> {
+    pub fn as_hclass_ptr(&self) -> Option<(&ClassPtrKind, &Hint)> {
         match self {
-            Hint_::HclassPtr(p0) => Some(p0),
+            Hint_::HclassPtr(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -3862,9 +3882,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hclass_ptr_mut(&mut self) -> Option<&mut Hint> {
+    pub fn as_hclass_ptr_mut(&mut self) -> Option<(&mut ClassPtrKind, &mut Hint)> {
         match self {
-            Hint_::HclassPtr(p0) => Some(p0),
+            Hint_::HclassPtr(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }
@@ -3964,9 +3984,9 @@ impl Hint_ {
             _ => None,
         }
     }
-    pub fn as_hclass_ptr_into(self) -> Option<Hint> {
+    pub fn as_hclass_ptr_into(self) -> Option<(ClassPtrKind, Hint)> {
         match self {
-            Hint_::HclassPtr(p0) => Some(p0),
+            Hint_::HclassPtr(p0, p1) => Some((p0, p1)),
             _ => None,
         }
     }

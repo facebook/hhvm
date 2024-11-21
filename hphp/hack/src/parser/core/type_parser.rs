@@ -218,6 +218,7 @@ where
             | TokenKind::Tilde => self.parse_like_type_specifier(),
             | TokenKind::At => self.parse_soft_type_specifier(),
             | TokenKind::LessThanLessThan if allow_attr => self.parse_attributized_specifier(),
+            | TokenKind::Enum
             | TokenKind::Class => self.parse_class_ptr_type_specifier(),
             | TokenKind::Classname => self.parse_classname_type_specifier(),
             | _ => {

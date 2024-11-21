@@ -1,4 +1,5 @@
 aast_defs::Abstraction
+aast_defs::ClassPtrKind
 aast_defs::ConstraintKind
 aast_defs::EmitId
 aast_defs::EnvAnnot

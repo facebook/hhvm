@@ -5748,29 +5748,34 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
 
     fn make_class_ptr_type_specifier(
         &mut self,
-        class: Self::Output,
+        kw: Self::Output,
         _lt: Self::Output,
         targ: Self::Output,
         _trailing_comma: Self::Output,
         gt: Self::Output,
     ) -> Self::Output {
         if self.opts.enable_class_pointer_hint {
-            let pos = self.merge_positions(class, gt);
+            let pos = self.merge_positions(kw, gt);
             let reason = self.alloc(Reason::FromWitnessDecl(self.alloc(WitnessDecl::Hint(pos))));
-            let cls = match self.node_to_ty(targ) {
-                Some(ty) => ty,
-                None => return Node::Ignored(SK::ClassPtrTypeSpecifier),
+            let cls = match (kw.token_kind(), self.node_to_ty(targ)) {
+                (Some(TokenKind::Class), Some(ty)) => ty,
+                (Some(TokenKind::Enum), Some(ty)) => self.alloc(Ty(
+                    reason,
+                    Ty_::Tapply(self.alloc((
+                        (pos, naming_special_names::classes::HH_BUILTIN_ENUM),
+                        self.alloc([ty]),
+                    ))),
+                )),
+                _ => return Node::Ignored(SK::ClassPtrTypeSpecifier),
             };
             Node::Ty(self.alloc(Ty(reason, Ty_::TclassPtr(cls))))
         } else {
-            self.make_apply(
-                (
-                    self.get_pos(class),
-                    naming_special_names::classes::CLASS_NAME,
-                ),
-                targ,
-                self.get_pos(targ),
-            )
+            let id = match kw.token_kind() {
+                Some(TokenKind::Class) => naming_special_names::classes::CLASS_NAME,
+                Some(TokenKind::Enum) => naming_special_names::classes::ENUM_NAME,
+                _ => return Node::Ignored(SK::ClassPtrTypeSpecifier),
+            };
+            self.make_apply((self.get_pos(kw), id), targ, self.get_pos(targ))
         }
     }
 

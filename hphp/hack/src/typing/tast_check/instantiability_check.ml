@@ -106,8 +106,7 @@ let rec check_hint env (pos, hint) =
   | Aast.Hvec_or_dict (hopt1, h2) ->
     Option.iter hopt1 ~f:(check_hint env);
     check_hint env h2
-  | Aast.Hclass_ptr h ->
-    check_hint env h;
+  | Aast.Hclass_ptr (_, h) ->
     validate_classname (Tast_env.tast_env_as_typing_env env) h
   | Aast.Hoption h
   | Aast.Hlike h

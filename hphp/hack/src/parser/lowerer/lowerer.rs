@@ -1077,13 +1077,20 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
         ClassPtrTypeSpecifier(c) => {
             let cls = p_hint(&c.type_, env)?;
             if env.parser_options.enable_class_pointer_hint {
-                Ok(HclassPtr(cls))
+                let kind = match token_kind(&c.keyword) {
+                    Some(TK::Class) => ast::ClassPtrKind::CKclass,
+                    Some(TK::Enum) => ast::ClassPtrKind::CKenum,
+                    _ => missing_syntax("class pointer type", &c.keyword, env)?,
+                };
+                Ok(HclassPtr(kind, cls))
             } else {
                 let p = p_pos(&c.keyword, env);
-                Ok(Happly(
-                    Id(p, special_classes::CLASS_NAME.to_string()),
-                    vec![cls],
-                ))
+                let id = match token_kind(&c.keyword) {
+                    Some(TK::Class) => special_classes::CLASS_NAME,
+                    Some(TK::Enum) => special_classes::ENUM_NAME,
+                    _ => missing_syntax("class pointer type", &c.keyword, env)?,
+                };
+                Ok(Happly(Id(p, id.to_string()), vec![cls]))
             }
         }
         NullableTypeSpecifier(c) => Ok(Hoption(p_hint(&c.type_, env)?)),

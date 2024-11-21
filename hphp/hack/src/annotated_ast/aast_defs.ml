@@ -1228,6 +1228,10 @@ and hint_fun = {
   hf_is_readonly_return: Ast_defs.readonly_kind option; [@transform.opaque]
 }
 
+and class_ptr_kind =
+  | CKclass
+  | CKenum
+
 and hint_ =
   | Hprim of (tprim[@transform.opaque])
   | Happly of class_name * hint list
@@ -1235,7 +1239,7 @@ and hint_ =
   | Hlike of hint
   | Hfun of hint_fun
   | Htuple of tuple_info
-  | Hclass_ptr of hint
+  | Hclass_ptr of class_ptr_kind * hint
   | Hshape of nast_shape_info
   | Haccess of hint * sid list
       (** Accessing a type constant. Type constants are accessed like normal

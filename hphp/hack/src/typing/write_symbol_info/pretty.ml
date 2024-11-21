@@ -100,8 +100,10 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
     | Hfun_context name ->
       append "ctx ";
       append (Typing_print.strip_ns name)
-    | Hclass_ptr hint ->
-      append "class<";
+    | Hclass_ptr (kind, hint) ->
+      (match kind with
+      | CKclass -> append "class<"
+      | CKenum -> append "enum<");
       parse ~is_ctx hint;
       append ">"
     | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
@@ -272,7 +274,8 @@ let rec hint_to_angle h =
     let variadic = Option.map tup_variadic ~f:hint_to_angle in
     Hint.(Key (Tuple { req; opt; variadic }))
   | Hprim t -> Hint.(Key (Prim (Type.Key (Aast_defs.string_of_tprim t))))
-  | Hclass_ptr hint -> Hint.(Key (Class_args (hint_to_angle hint)))
+  (* TODO(T199610905) update glean schema *)
+  | Hclass_ptr (_kind, hint) -> Hint.(Key (Class_args (hint_to_angle hint)))
   | Hfun_context c -> Hint.(Key (Fun_context c))
   | Hvec_or_dict (maybe_k, v) ->
     Hint.(

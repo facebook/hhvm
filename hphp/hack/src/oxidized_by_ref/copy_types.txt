@@ -1,3 +1,4 @@
+aast_defs::ClassPtrKind
 aast_defs::CtxRefinement
 aast_defs::Hint_
 aast_defs::ParamKind

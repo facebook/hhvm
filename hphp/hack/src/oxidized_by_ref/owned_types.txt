@@ -1,4 +1,5 @@
 aast_defs::Tprim
+aast_defs::ClassPtrKind
 aast::Tprim
 decl_defs::CollectionStyle
 decl_defs::ConsistentKind

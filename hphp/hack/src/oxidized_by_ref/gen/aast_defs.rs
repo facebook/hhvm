@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<934c469a8bd9fe3581ccf730a4296a4f>>
+// @generated SignedSource<<56ad43bdc2f9f7a8ded994015c09f610>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -14,6 +14,7 @@ pub use ast_defs::PositionedByteString;
 pub use ast_defs::Pstring;
 pub use local_id::LocalId;
 use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 pub use oxidized::aast_defs::OgNullFlavor;
@@ -3180,6 +3181,31 @@ arena_deserializer::impl_deserialize_in_arena!(HintFun<'arena>);
     Debug,
     Deserialize,
     Eq,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
+#[repr(u8)]
+pub enum ClassPtrKind {
+    CKclass,
+    CKenum,
+}
+impl TrivialDrop for ClassPtrKind {}
+arena_deserializer::impl_deserialize_in_arena!(ClassPtrKind);
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -3207,7 +3233,8 @@ pub enum Hint_<'a> {
     Htuple(&'a TupleInfo<'a>),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(name = "Hclass_ptr")]
-    HclassPtr(&'a Hint<'a>),
+    #[rust_to_ocaml(inline_tuple)]
+    HclassPtr(&'a (ClassPtrKind, &'a Hint<'a>)),
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Hshape(&'a NastShapeInfo<'a>),
     /// Accessing a type constant. Type constants are accessed like normal

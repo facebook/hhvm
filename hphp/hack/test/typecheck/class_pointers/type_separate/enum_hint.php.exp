@@ -1,0 +1,24 @@
+ERROR: File "enum_hint.php", line 11, characters 10-11:
+Invalid return type (Typing[4110])
+  File "enum_hint.php", line 10, characters 30-48:
+  Expected `classname<HH\BuiltinEnum<Opaque>>`
+  File "enum_hint.php", line 10, characters 12-23:
+  But got `class<HH\BuiltinEnum<Opaque>>`
+ERROR: File "enum_hint.php", line 13, characters 35-37:
+Not a valid class name (Typing[4148])
+ERROR: File "enum_hint.php", line 14, characters 10-11:
+Invalid return type (Typing[4110])
+  File "enum_hint.php", line 13, characters 35-37:
+  Expected `int`
+  File "enum_hint.php", line 13, characters 17-22:
+  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+ERROR: File "enum_hint.php", line 17, characters 10-11:
+Invalid return type (Typing[4110])
+  File "enum_hint.php", line 16, characters 49-51:
+  Expected `int`
+  File "BuiltinEnum.hhi", line 77, characters 44-44:
+    via this generic `T`
+  File "enum_hint.php", line 16, characters 24-29:
+  But got `arraykey` arising from an implicit `as arraykey` constraint on this type
+ERROR: File "enum_hint.php", line 19, characters 34-36:
+Not a valid class name (Typing[4148])

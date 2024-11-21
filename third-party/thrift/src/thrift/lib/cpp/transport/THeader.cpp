@@ -21,6 +21,7 @@
 #include <folly/ExceptionString.h>
 #include <folly/MapUtil.h>
 #include <folly/String.h>
+#include <folly/Utility.h>
 #include <folly/compression/Compression.h>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
@@ -34,11 +35,14 @@
 #include <thrift/lib/cpp/util/THttpParser.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Util.h>
 
 #include <algorithm>
 #include <cassert>
 #include <string>
+#include <type_traits>
 
 using std::map;
 using std::pair;
@@ -501,9 +505,9 @@ unique_ptr<IOBuf> THeader::readHeaderFormat(
 
   // For now all transforms consist of only the ID, not data.
   for (int i = 0; i < numTransforms; i++) {
-    int32_t transId = readVarint<int32_t>(c);
+    auto transId = static_cast<TTransform>(readVarint<int32_t>(c));
     c_.readTrans_.push_back(transId);
-    setTransform(transId);
+    setTTransform(transId);
   }
 
   // Info headers
@@ -560,93 +564,63 @@ unique_ptr<IOBuf> THeader::readHeaderFormat(
   return buf;
 }
 
-static unique_ptr<IOBuf> decompressCodec(
-    const IOBuf& buf, folly::io::CodecType codec) {
-  try {
-    return folly::io::getCodec(codec)->uncompress(&buf);
-  } catch (const std::exception& e) {
-    throw TApplicationException(
-        TApplicationException::MISSING_RESULT,
-        folly::exceptionStr(e).toStdString());
-  }
-}
-
 unique_ptr<IOBuf> THeader::untransform(
-    unique_ptr<IOBuf> buf, std::vector<uint16_t>& readTrans) {
-  for (vector<uint16_t>::const_reverse_iterator it = readTrans.rbegin();
+    unique_ptr<IOBuf> buf, std::vector<TTransform>& readTrans) {
+  for (vector<TTransform>::const_reverse_iterator it = readTrans.rbegin();
        it != readTrans.rend();
        ++it) {
-    using folly::io::CodecType;
-    const uint16_t transId = *it;
-
-    switch (transId) {
-      case ZLIB_TRANSFORM:
-        buf = decompressCodec(*buf, CodecType::ZLIB);
-        break;
-      case ZSTD_TRANSFORM:
-        buf = decompressCodec(*buf, CodecType::ZSTD);
-        break;
-      default:
-        throw TApplicationException(
-            TApplicationException::MISSING_RESULT,
-            fmt::format("Unknown transform: {}", transId));
-    }
+    buf = rocket::uncompressBuffer(
+        std::move(buf),
+        rocket::CompressionAlgorithmSelector::fromTTransform(*it));
   }
 
   return buf;
 }
 
-static unique_ptr<IOBuf> compressCodec(
-    const IOBuf& buf,
-    folly::io::CodecType codec,
-    int level = folly::io::COMPRESSION_LEVEL_DEFAULT) {
-  try {
-    return folly::io::getCodec(codec, level)->compress(&buf);
-  } catch (const std::exception& e) {
-    throw TTransportException(
-        TTransportException::CORRUPTED_DATA,
-        folly::exceptionStr(e).toStdString());
-  }
+/* static */ unique_ptr<IOBuf> THeader::untransform(
+    unique_ptr<IOBuf> buf, std::vector<uint16_t>& readTrans) {
+  static_assert(
+      std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+  return untransform(
+      std::move(buf), reinterpret_cast<std::vector<TTransform>&>(readTrans));
 }
 
-unique_ptr<IOBuf> THeader::transform(
+/* static */ std::unique_ptr<IOBuf> THeader::transform(
     unique_ptr<IOBuf> buf,
-    std::vector<uint16_t>& writeTrans,
+    std::vector<TTransform>& tTransforms,
     size_t minCompressBytes) {
   size_t dataSize = buf->computeChainDataLength();
 
-  for (vector<uint16_t>::iterator it = writeTrans.begin();
-       it != writeTrans.end();) {
-    using folly::io::CodecType;
-    const uint16_t transId = *it;
-
-    switch (transId) {
-      case ZLIB_TRANSFORM:
-        if (dataSize < minCompressBytes) {
-          it = writeTrans.erase(it);
-          continue;
-        }
-        buf = compressCodec(*buf, CodecType::ZLIB);
-        break;
-      case ZSTD_TRANSFORM:
-        if (dataSize < minCompressBytes) {
-          it = writeTrans.erase(it);
-          continue;
-        }
-        buf = compressCodec(*buf, CodecType::ZSTD, 1);
-        break;
-      default:
-        throw TTransportException(
-            TTransportException::CORRUPTED_DATA,
-            fmt::format("Unknown transform: {}", transId));
+  for (vector<TTransform>::iterator it = tTransforms.begin();
+       it != tTransforms.end();) {
+    if (dataSize < minCompressBytes) {
+      it = tTransforms.erase(it);
+      continue;
     }
+
+    buf = rocket::compressBuffer(
+        std::move(buf),
+        rocket::CompressionAlgorithmSelector::fromTTransform(*it));
+
     ++it;
   }
 
   return buf;
 }
 
-void THeader::setTransform(uint16_t transId) {
+/* static */ std::unique_ptr<folly::IOBuf> THeader::transform(
+    std::unique_ptr<folly::IOBuf> buf,
+    std::vector<uint16_t>& writeTrans,
+    size_t minCompressBytes) {
+  static_assert(
+      std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+  return transform(
+      std::move(buf),
+      reinterpret_cast<std::vector<TTransform>&>(writeTrans),
+      minCompressBytes);
+}
+
+void THeader::setTTransform(TTransform transId) {
   for (auto& trans : c_.writeTrans_) {
     if (trans == transId) {
       return;
@@ -655,7 +629,7 @@ void THeader::setTransform(uint16_t transId) {
   c_.writeTrans_.push_back(transId);
 }
 
-void THeader::setReadTransform(uint16_t transId) {
+void THeader::setReadTTransform(TTransform transId) {
   for (auto& trans : c_.readTrans_) {
     if (trans == transId) {
       return;
@@ -666,7 +640,7 @@ void THeader::setReadTransform(uint16_t transId) {
 
 void THeader::copyMetadataFrom(const THeader& src) {
   setProtocolId(src.c_.protoId_);
-  setTransforms(src.c_.writeTrans_);
+  setTTransforms(src.c_.writeTrans_);
   setSequenceNumber(src.c_.seqId_);
   setClientType(src.c_.clientType_);
   setFlags(src.c_.flags_);
@@ -841,7 +815,7 @@ void THeader::setIdentity(const string& identity) {
 
 unique_ptr<IOBuf> THeader::addHeader(unique_ptr<IOBuf> buf, bool transform) {
   // We may need to modify some transforms before send.  Make a copy here
-  std::vector<uint16_t> writeTrans = c_.writeTrans_;
+  std::vector<TTransform> writeTrans = c_.writeTrans_;
 
   if (c_.clientType_ == THRIFT_HEADER_CLIENT_TYPE) {
     if (transform) {
@@ -875,7 +849,7 @@ unique_ptr<IOBuf> THeader::addHeader(unique_ptr<IOBuf> buf, bool transform) {
     // header size will need to be updated at the end because of varints.
     // Make it big enough here for max varint size, plus 4 for padding.
     int headerSize =
-        (2 + getNumTransforms(writeTrans) * 2 /* transform data */) * 5 + 4;
+        (2 + getNumTTransforms(writeTrans) * 2 /* transform data */) * 5 + 4;
     // add approximate size of info headers
     headerSize += getMaxWriteHeadersSize();
 
@@ -910,10 +884,10 @@ unique_ptr<IOBuf> THeader::addHeader(unique_ptr<IOBuf> buf, bool transform) {
     headerStart = pkt;
 
     pkt += writeVarint32(c_.protoId_, pkt);
-    pkt += writeVarint32(getNumTransforms(writeTrans), pkt);
+    pkt += writeVarint32(getNumTTransforms(writeTrans), pkt);
 
     for (auto& transId : writeTrans) {
-      pkt += writeVarint32(transId, pkt);
+      pkt += writeVarint32(folly::to_underlying(transId), pkt);
     }
 
     // write info headers

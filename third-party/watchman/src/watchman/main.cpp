@@ -13,6 +13,7 @@
 #include <folly/String.h>
 #include <folly/init/Init.h>
 #include <folly/net/NetworkSocket.h>
+#include <folly/portability/Fcntl.h>
 #include <folly/system/Shell.h>
 
 #include <stdio.h>
@@ -138,14 +139,15 @@ std::optional<std::string> detect_starting_command(pid_t ppid) {
 #endif
 
   // redirect std{in,out,err}
-  int fd = ::open("/dev/null", O_RDONLY);
+  int fd = folly::fileops::open("/dev/null", O_RDONLY);
   if (fd != -1) {
     ignore_result(::dup2(fd, STDIN_FILENO));
     folly::fileops::close(fd);
   }
 
   if (logging::log_name != "-") {
-    fd = open(logging::log_name.c_str(), O_WRONLY | O_APPEND | O_CREAT, 0600);
+    fd = folly::fileops::open(
+        logging::log_name.c_str(), O_WRONLY | O_APPEND | O_CREAT, 0600);
     if (fd != -1) {
       ignore_result(::dup2(fd, STDOUT_FILENO));
       ignore_result(::dup2(fd, STDERR_FILENO));

@@ -40,7 +40,7 @@ class t_mstch_generator : public t_generator {
       const std::map<std::string, std::string>& options) override {
     options_ = options;
     mstch_context_.options = options;
-    gen_template_map(template_prefix());
+    gen_template_map();
   }
 
   virtual std::string template_prefix() const = 0;
@@ -230,7 +230,7 @@ class t_mstch_generator : public t_generator {
   std::map<std::string, std::string> options_;
 
   std::map<std::string, std::string> template_map_;
-  void gen_template_map(const std::filesystem::path& root);
+  void gen_template_map();
 
   struct whisker_render_state {
     whisker::diagnostics_engine diagnostic_engine;

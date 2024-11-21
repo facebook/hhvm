@@ -66,6 +66,7 @@ class RenderTest : public testing::Test {
    private:
     std::optional<ast::root> resolve(
         const std::vector<std::string>& partial_path,
+        source_location,
         diagnostics_engine& diags) override {
       // This implementation is dumb and parses the file every time. But that's
       // ok in a test.

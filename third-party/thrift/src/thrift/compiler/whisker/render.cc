@@ -523,7 +523,8 @@ class render_engine {
       throw abort_rendering();
     }
 
-    auto resolved_partial = partial_resolver->resolve(path, diags_);
+    auto resolved_partial =
+        partial_resolver->resolve(path, partial_apply.loc.begin, diags_);
     if (!resolved_partial.has_value()) {
       diags_.error(
           partial_apply.loc.begin,

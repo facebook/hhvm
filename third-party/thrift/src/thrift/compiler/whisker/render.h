@@ -19,6 +19,7 @@
 #include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/diagnostic.h>
 #include <thrift/compiler/whisker/object.h>
+#include <thrift/compiler/whisker/source_location.h>
 
 #include <iosfwd>
 #include <memory>
@@ -45,7 +46,9 @@ class template_resolver {
    * diagnostics_engine.
    */
   virtual std::optional<ast::root> resolve(
-      const std::vector<std::string>& partial_path, diagnostics_engine&) = 0;
+      const std::vector<std::string>& partial_path,
+      source_location include_from,
+      diagnostics_engine&) = 0;
 };
 
 struct render_options {

@@ -175,10 +175,8 @@ val try_delete : unit -> unit
   it's fine for the client to just wait until a new errors.bin gets created.
 *)
 
-(** If we don't succeed in reading the next errors report, here's why. *)
-type errors_file_error =
-  | NothingYet
-      (** There are no new errors yet available, not until server calls [ErrorsWrite.report]. *)
+(** Reason for marking the errors file as complete (using the "complete" sentinel) *)
+type completion_reason =
   | Complete of Telemetry.t
       (** The typecheck has finished, i.e. server called [ErrorsWrite.complete]. *)
   | Restarted of {
@@ -191,11 +189,9 @@ type errors_file_error =
         contains extra logging information. *)
   | Stopped
       (** Hh_server was stopped gracefully so we can't read errors. i.e. server called [ErrorsWrite.unlink]. *)
-  | Killed of Exit_status.finale_data option
-      (** Hh_server was killed so we can't read errors. *)
-  | Build_id_mismatch
-      (** The hh_server that produced these errors is incompatible with the current binary. *)
 [@@deriving show]
+
+val completion_reason_short_description : completion_reason -> string
 
 (** Each item that a consumer reads from the errors-file is one of these. *)
 type errors_file_item =
@@ -205,7 +201,7 @@ type errors_file_item =
     }
   | Telemetry of Telemetry.t
 
-val is_complete : errors_file_error -> bool
+type errors_file_read_error = Malformed [@@deriving show]
 
 val enable_error_production : bool -> unit
 
@@ -259,24 +255,31 @@ module ErrorsRead : sig
         (** The watchman clock at which this typecheck started. *)
   }
 
-  (** [openfile fd] opens an error-file for reading, one that has been created
-  through [ErrorsWrite.new_empty_file]. The only error conditions this can
-  return are [Error Killed] or [Error Build_id_mismatch]. *)
-  val openfile :
-    Unix.file_descr -> (open_success, errors_file_error * log_message) result
+  type open_error =
+    | ORead_error of errors_file_read_error
+    | OBuild_id_mismatch
+        (** The hh_server that produced these errors is incompatible with the current binary. *)
+    | OKilled of Exit_status.finale_data option
+  [@@deriving show]
 
-  (** This is the return type for [read_next_errors]. In case of success, it includes
-  a timestamp when they were reported. The paths in the [Relative_path.Map.t] are guaranteed
-  to all be root-relative. (it doesn't even make sense to report errors on other files...) *)
-  type read_result = (errors_file_item, errors_file_error * log_message) result
+  val open_error_short_description : open_error -> string
+
+  (** [openfile fd] opens an error-file for reading, one that has been created
+  through [ErrorsWrite.new_empty_file]. *)
+  val openfile :
+    Unix.file_descr -> (open_success, open_error * log_message) result
+
+  type read_result =
+    | RItem of errors_file_item
+    | RCompleted of completion_reason * string
 
   (** Attempt to get the next batch of errors. It returns based on a queue
   of what the server was written to the errors file...
-  * For each time the server did [ErrorsWrite.report errors], this function will return [Ok (errors, timestamp)].
-  * If the server hasn't yet done further [ErrorsWrite.report], this will return [Error NothingYet].
-  * If the server did [ErrorsWrite.complete] then this will return [Error Complete].
-  * If the server did [ErrorsWrite.new_empty_file] then this will return [Error Restarted].
-  * If the server did [ErrorsWrite.unlink_at_server_stop] then this will return [Error Stopped].
-  * If the server was killed, then this will return [Error Killed]. *)
-  val read_next_errors : Unix.file_descr -> read_result
+  * For each time the server did [ErrorsWrite.report errors], this function will return [Ok (Some (RItem (Errors { errors; timestamp })))].
+  * If the server hasn't yet done further [ErrorsWrite.report], this will return [Ok None].
+  * If the server did [ErrorsWrite.complete] then this will return [Ok (Some (RCompleted (Complete _, _)))].
+  * If the server did [ErrorsWrite.new_empty_file] then this will return [Ok (Some (RCompleted (Restarted _, _)))].
+  * If the server did [ErrorsWrite.unlink_at_server_stop] then this will return [Ok (Some (RCompleted (Stopped, _)))]. *)
+  val read_next_errors :
+    Unix.file_descr -> (read_result option, errors_file_read_error) result
 end

@@ -193,18 +193,19 @@ let write_percentage
        ~unit
        ~extra)
 
-type errors_file_error =
-  | NothingYet
+type completion_reason =
   | Complete of Telemetry.t [@printer (fun fmt _t -> fprintf fmt "Complete")]
   | Restarted of {
       user_message: string;
       log_message: string;
     } [@printer (fun fmt _ _ -> fprintf fmt "Restarted")]
   | Stopped
-  | Killed of Exit_status.finale_data option
-      [@printer (fun fmt _ -> fprintf fmt "Killed")]
-  | Build_id_mismatch
 [@@deriving show { with_path = false }]
+
+let completion_reason_short_description = function
+  | Complete _ -> "typecheck completed"
+  | Restarted _ -> "typecheck restarted due to file changes"
+  | Stopped -> "hh_server gracefully stopped"
 
 type errors_file_item =
   | Errors of {
@@ -218,10 +219,7 @@ type errors_file_item =
     }
   | Telemetry of Telemetry.t
 
-let is_complete (e : errors_file_error) : bool =
-  match e with
-  | Complete _ -> true
-  | _ -> false
+type errors_file_read_error = Malformed [@@deriving show]
 
 let is_production_enabled = ref true
 
@@ -268,7 +266,7 @@ module ErrorsFile = struct
       }
     | Item of errors_file_item
     | End of {
-        error: errors_file_error;
+        reason: completion_reason;
         timestamp: float;
         log_message: string;
       }
@@ -282,27 +280,24 @@ module ErrorsFile = struct
         Sys_utils.write_non_intr fd preamble 0 (Bytes.length preamble);
         Sys_utils.write_non_intr fd payload 0 (Bytes.length payload))
 
-  let read_message (fd : Unix.file_descr) : message =
-    let synthesize_end (error : errors_file_error) (log_message : string) :
-        message =
-      End { error; timestamp = Unix.gettimeofday (); log_message }
-    in
+  let read_message (fd : Unix.file_descr) :
+      (message option, errors_file_read_error) result =
     Sys_utils.with_lock fd Unix.F_RLOCK ~f:(fun () ->
         let preamble =
           Sys_utils.read_non_intr fd Marshal_tools.expected_preamble_size
         in
         match preamble with
-        | None -> synthesize_end NothingYet "no additional bytes"
+        | None -> Ok None
         | Some preamble ->
           let size = Marshal_tools.parse_preamble preamble in
           (* This assert is in case the file is garbled, and we read a crazy-big size,
              to avoid allocating say a 20gb bytes array and having the machine get stuck. *)
           assert (size < 20_000_000);
           (match Sys_utils.read_non_intr fd size with
-          | None -> synthesize_end (Killed None) "no payload"
+          | None -> Error Malformed
           | Some payload ->
             let message : message = Marshal.from_bytes payload 0 in
-            message))
+            Ok (Some message)))
 end
 
 module ErrorsWrite = struct
@@ -337,7 +332,7 @@ module ErrorsWrite = struct
      In this way, if a client with an existing file-descriptor should read a sentinel, then it knows
      for sure it can immediately close that file-descriptor and re-open the new errors file. *)
   let unlink_sentinel_close
-      (error : errors_file_error)
+      (reason : completion_reason)
       ~(log_message : string)
       ~(errors_file_path : string)
       ~(after_unlink : unit -> 'a) =
@@ -353,11 +348,11 @@ module ErrorsWrite = struct
           "Errors-file: ending old %s with its %d reports, with sentinel %s"
           (Sys_utils.show_inode fd)
           count
-          (show_errors_file_error error);
+          (show_completion_reason reason);
         ErrorsFile.write_message
           fd
           (ErrorsFile.End
-             { error; timestamp = Unix.gettimeofday (); log_message });
+             { reason; timestamp = Unix.gettimeofday (); log_message });
         Unix.close fd
       | _ -> ()
     end;
@@ -507,7 +502,7 @@ module ErrorsWrite = struct
           fd
           (ErrorsFile.End
              {
-               error = Complete telemetry;
+               reason = Complete telemetry;
                timestamp = Unix.gettimeofday ();
                log_message = "complete";
              });
@@ -552,15 +547,29 @@ module ErrorsRead = struct
     clock: Watchman.clock option;
   }
 
-  type read_result = (errors_file_item, errors_file_error * log_message) result
+  type open_error =
+    | ORead_error of errors_file_read_error
+    | OBuild_id_mismatch
+    | OKilled of Exit_status.finale_data option
+  [@@deriving show]
+
+  let open_error_short_description = function
+    | ORead_error Malformed -> "malformed header"
+    | OBuild_id_mismatch -> "client server version mismatch"
+    | OKilled _ -> "hh_server died"
 
   let openfile (fd : Unix.file_descr) :
-      (open_success, errors_file_error * log_message) result =
-    let message1 = ErrorsFile.read_message fd in
-    let message2 = ErrorsFile.read_message fd in
+      (open_success, open_error * log_message) result =
+    let open Result.Monad_infix in
+    let read_message fd =
+      ErrorsFile.read_message fd
+      |> Result.map_error ~f:(fun e -> (ORead_error e, ""))
+    in
+    read_message fd >>= fun message1 ->
+    read_message fd >>= fun message2 ->
     match (message1, message2) with
-    | ( ErrorsFile.VersionHeader { version; _ },
-        ErrorsFile.Header { pid; cmdline; clock; timestamp } ) ->
+    | ( Some (ErrorsFile.VersionHeader { version; _ }),
+        Some (ErrorsFile.Header { pid; cmdline; clock; timestamp }) ) ->
       if
         String.length version > 16
         && String.length Build_id.build_revision > 16
@@ -574,21 +583,28 @@ module ErrorsRead = struct
             version
             Build_id.build_revision
         in
-        Error (Build_id_mismatch, msg)
+        Error (OBuild_id_mismatch, msg)
       else if not (Proc.is_alive ~pid ~expected:cmdline) then
         let server_finale_file = ServerFiles.server_finale_file pid in
         let finale_data = Exit_status.get_finale_data server_finale_file in
-        Error (Killed finale_data, "Errors-file is from defunct PID")
+        Error (OKilled finale_data, "Errors-file is from defunct PID")
       else
         Ok { pid; clock; timestamp }
     | _ -> failwith "impossible message combination"
 
-  let read_next_errors (fd : Unix.file_descr) : read_result =
-    match ErrorsFile.read_message fd with
-    | ErrorsFile.VersionHeader _
-    | ErrorsFile.Header _ ->
-      failwith
-        "do Server_progress.ErrorsRead.openfile before read_next_error or Server_progress_lwt.watch_errors_file"
-    | ErrorsFile.Item item -> Ok item
-    | ErrorsFile.End { error; log_message; _ } -> Error (error, log_message)
+  type read_result =
+    | RItem of errors_file_item
+    | RCompleted of completion_reason * string
+
+  let read_next_errors (fd : Unix.file_descr) : (read_result option, _) result =
+    let open Result.Monad_infix in
+    ErrorsFile.read_message fd
+    >>| Option.map ~f:(function
+            | ErrorsFile.VersionHeader _
+            | ErrorsFile.Header _ ->
+              failwith
+                "do Server_progress.ErrorsRead.openfile before read_next_error or Server_progress_lwt.watch_errors_file"
+            | ErrorsFile.Item item -> RItem item
+            | ErrorsFile.End { reason; log_message; _ } ->
+              RCompleted (reason, log_message))
 end

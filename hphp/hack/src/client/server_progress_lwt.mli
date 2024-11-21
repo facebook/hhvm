@@ -6,19 +6,25 @@
  *
  *)
 
+type watch_error =
+  | Killed of Exit_status.finale_data option
+      (** Hh_server was killed so we can't read errors. *)
+  | Read_error of Server_progress.errors_file_read_error
+[@@deriving show]
+
+val watch_error_short_description : watch_error -> string
+
 (** This function kicks off a long-running task which watches the errors.bin file that the
 caller has already opened, and has already called openfile upon.
-It returns a Lwt_stream.t as follows.
-* Shortly after a new set of errors has been reported to the file,
-  "Ok errors" will be placed in the stream.
-* Shortly after the file is finished cleanly (completed, restarted, killed),
-  "Error" will be placed in the stream and the stream will be closed
-  and the long-running task will finish.
+It returns a Lwt_stream.t as follows:
+* The stream provides errors, telemetry and completion sentinels written to the file
 * If the producing PID gets killed without a clean finish, then that too will
   be detected and reported with "Error Killed" in the stream, albeit not quite so soon.
   (It only performs this inter-process polling every 5s).
-* There's no way to cancel the long-running task. *)
+* There's no way to cancel the long-running task.
+* The stream should terminate (i.e. return None) iff the previous message
+  was a completion sentinel or an error. *)
 val watch_errors_file :
   pid:int ->
   Unix.file_descr ->
-  Server_progress.ErrorsRead.read_result Lwt_stream.t
+  (Server_progress.ErrorsRead.read_result, watch_error) result Lwt_stream.t

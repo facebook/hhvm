@@ -86,6 +86,17 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
   else
     Exit_status.Type_error
 
+type end_sentinel =
+  | Completed of Server_progress.completion_reason
+  | Watch_error of Server_progress_lwt.watch_error
+  | Max_errors of (Telemetry.t[@opaque])
+[@@deriving show]
+
+let end_sentinel_short_string = function
+  | Max_errors _ -> "Max_errors"
+  | Watch_error _ -> "Killed"
+  | Completed c -> Server_progress.show_completion_reason c
+
 (** This function produces streaming errors: it reads the errors.bin opened
   as [fd], displays errors as they come using the [args.error_format] over stdout, and
   displays a progress-spinner over stderr if [args.show_spinner]. It keeps "tailing"
@@ -146,7 +157,7 @@ let go_streaming_on_fd
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
   let rec consume (error_counts : int * int) :
-      ((int * int) * Server_progress.errors_file_error * string) Lwt.t =
+      ((int * int) * end_sentinel) Lwt.t =
     let add_tuples (i, j) (k, l) = (i + k, j + l) in
     let total_errors (i, j) = i + j in
     let%lwt errors = Lwt_stream.get errors_stream in
@@ -157,64 +168,64 @@ let go_streaming_on_fd
          stream is closed and hence subsequent [Lwt_stream.get] return [None].
          If we're here, it means that contract has been violated. *)
       failwith "Expected end_sentinel before end of stream"
-    | Some (Error (end_sentinel, log_message)) ->
-      Lwt.return (error_counts, end_sentinel, log_message)
-    | Some (Ok (Server_progress.Telemetry telemetry_item)) ->
-      errors_file_telemetry :=
-        Telemetry.merge !errors_file_telemetry telemetry_item;
-      update_partial_telemetry (total_errors error_counts);
-      consume error_counts
-    | Some (Ok (Server_progress.Errors { errors; timestamp = _ })) ->
-      first_error_time :=
-        Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
-      (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
-      progress_callback None;
-      let found_new = ref 0 in
-      let error_format = Errors.format_or_default error_format in
-      let errors =
-        Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
-      in
-      let error_counts =
-        Relative_path.Map.fold
-          errors
-          ~init:error_counts
-          ~f:(fun _ errors error_counts ->
-            Errors.count_errors_and_warnings errors |> add_tuples error_counts)
-      in
-      begin
-        try
-          Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
-              List.iter errors_in_file ~f:(fun error ->
-                  incr found_new;
-                  print_error ~error_format error));
-          Printf.printf "%!"
-        with
-        | Sys_error msg when String.equal msg "Broken pipe" ->
-          (* We catch this error very locally, as small as we can around [printf],
-             since if we caught it more globally then we'd not know which pipe raised it --
-             the pipe to stdout, or stderr, or the pipe used to connect to monitor/server. *)
-          let backtrace = Stdlib.Printexc.get_raw_backtrace () in
-          Stdlib.Printexc.raise_with_backtrace
-            Exit_status.(Exit_with Client_broken_pipe)
-            backtrace
-      end;
-      progress_callback !latest_progress;
-      update_partial_telemetry (total_errors error_counts);
-      if
-        total_errors error_counts
-        >= Option.value max_errors ~default:Int.max_value
-      then
-        Lwt.return
-          ( error_counts,
-            Server_progress.Complete (Telemetry.create ()),
-            "max-errors" )
-      else
+    | Some (Error error) -> Lwt.return (error_counts, Watch_error error)
+    | Some (Ok (Server_progress.ErrorsRead.RCompleted (x, _))) ->
+      Lwt.return (error_counts, Completed x)
+    | Some (Ok (Server_progress.ErrorsRead.RItem item)) ->
+      (match item with
+      | Server_progress.Telemetry telemetry_item ->
+        errors_file_telemetry :=
+          Telemetry.merge !errors_file_telemetry telemetry_item;
+        update_partial_telemetry (total_errors error_counts);
         consume error_counts
+      | Server_progress.Errors { errors; timestamp = _ } ->
+        first_error_time :=
+          Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
+        (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
+        progress_callback None;
+        let found_new = ref 0 in
+        let error_format = Errors.format_or_default error_format in
+        let errors =
+          Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
+        in
+        let error_counts =
+          Relative_path.Map.fold
+            errors
+            ~init:error_counts
+            ~f:(fun _ errors error_counts ->
+              Errors.count_errors_and_warnings errors |> add_tuples error_counts)
+        in
+        begin
+          try
+            Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
+                List.iter errors_in_file ~f:(fun error ->
+                    incr found_new;
+                    print_error ~error_format error));
+            Printf.printf "%!"
+          with
+          | Sys_error msg when String.equal msg "Broken pipe" ->
+            (* We catch this error very locally, as small as we can around [printf],
+               since if we caught it more globally then we'd not know which pipe raised it --
+               the pipe to stdout, or stderr, or the pipe used to connect to monitor/server. *)
+            let backtrace = Stdlib.Printexc.get_raw_backtrace () in
+            Stdlib.Printexc.raise_with_backtrace
+              Exit_status.(Exit_with Client_broken_pipe)
+              backtrace
+        end;
+        progress_callback !latest_progress;
+        update_partial_telemetry (total_errors error_counts);
+        if
+          total_errors error_counts
+          >= Option.value max_errors ~default:Int.max_value
+        then
+          Lwt.return (error_counts, Max_errors (Telemetry.create ()))
+        else
+          consume error_counts)
   in
 
   (* We will show progress indefinitely until "consume" finishes,
      at which Lwt.pick will cancel show_progress. *)
-  let%lwt ((error_count, warning_count), end_sentinel, _log_message) =
+  let%lwt ((error_count, warning_count), end_sentinel) =
     Lwt.pick [consume (0, 0); show_progress ()]
   in
   (* Clear the spinner *)
@@ -222,7 +233,8 @@ let go_streaming_on_fd
 
   let (exit_status, telemetry) =
     match end_sentinel with
-    | Server_progress.Complete telemetry ->
+    | Max_errors telemetry
+    | Completed (Server_progress.Complete telemetry) ->
       (* complete either because the server completed, or we truncated early *)
       let error_format = Errors.format_or_default error_format in
       Option.iter
@@ -242,7 +254,7 @@ let go_streaming_on_fd
         (Exit_status.No_error, telemetry)
       else
         (Exit_status.Type_error, telemetry)
-    | Server_progress.Restarted { user_message; log_message } ->
+    | Completed (Server_progress.Restarted { user_message; log_message }) ->
       Hh_logger.log
         "Errors-file: on %s, read Restarted(%s,%s)"
         (Sys_utils.show_inode fd)
@@ -256,14 +268,15 @@ let go_streaming_on_fd
       in
       Printf.printf "\n%s\n%!" msg;
       raise Exit_status.(Exit_with Exit_status.Typecheck_restarted)
-    | _ ->
+    | Completed Server_progress.Stopped
+    | Watch_error _ ->
       Hh_logger.log
         "Errors-file: on %s, read %s"
         (Sys_utils.show_inode fd)
-        (Server_progress.show_errors_file_error end_sentinel);
+        (show_end_sentinel end_sentinel);
       Printf.printf
-        "Hh_server has terminated. [%s]\n%!"
-        (Server_progress.show_errors_file_error end_sentinel);
+        "hh_server has terminated. [%s]\n%!"
+        (end_sentinel_short_string end_sentinel);
       raise Exit_status.(Exit_with Exit_status.Typecheck_abandoned)
   in
 
@@ -465,12 +478,11 @@ let rec keep_trying_to_open
       ~root
   | Some fd -> begin
     match Server_progress.ErrorsRead.openfile fd with
-    | Error (end_sentinel, log_message) when not has_already_attempted_connect
-      ->
+    | Error (open_error, log_message) when not has_already_attempted_connect ->
       Hh_logger.log
         "Errors-file: on %s, read sentinel %s [%s], so connecting then trying again"
         (Sys_utils.show_inode fd)
-        (Server_progress.show_errors_file_error end_sentinel)
+        (Server_progress.ErrorsRead.show_open_error open_error)
         log_message;
       (* If there was an existing file but it was bad -- e.g. came from a dead server,
          or binary mismatch, then we will connect as before. In the case of binary mismatch,
@@ -487,28 +499,25 @@ let rec keep_trying_to_open
         ~progress_callback
         ~deadline
         ~root
-    | Error (end_sentinel, log_message) -> begin
+    | Error (open_error, log_message) -> begin
       (* But if there was an existing file that's still bad even after our connection
          attempt, there's not much we can do *)
       Hh_logger.log
         "Errors-file: on %s, read sentinel %s [%s], and already connected once, so giving up."
         (Sys_utils.show_inode fd)
-        (Server_progress.show_errors_file_error end_sentinel)
+        (Server_progress.ErrorsRead.show_open_error open_error)
         log_message;
       progress_callback None;
-      match end_sentinel with
-      | Server_progress.Build_id_mismatch ->
+      match open_error with
+      | Server_progress.ErrorsRead.OBuild_id_mismatch ->
         raise (Exit_status.Exit_with Exit_status.Build_id_mismatch)
-      | Server_progress.Killed finale_data ->
+      | Server_progress.(ErrorsRead.ORead_error Malformed) ->
+        raise
+          (Exit_status.Exit_with (Exit_status.Server_hung_up_should_abort None))
+      | Server_progress.ErrorsRead.OKilled finale_data ->
         raise
           (Exit_status.Exit_with
              (Exit_status.Server_hung_up_should_abort finale_data))
-      | _ ->
-        failwith
-          (Printf.sprintf
-             "Unexpected error from openfile: %s [%s]"
-             (Server_progress.show_errors_file_error end_sentinel)
-             log_message)
     end
     | Ok { Server_progress.ErrorsRead.pid; clock = None; _ } ->
       (* If there's an existing file, but it's not using watchman, then we cannot offer

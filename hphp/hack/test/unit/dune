@@ -65,6 +65,7 @@
   asserter
   lwt_utils
   server_progress
+  server_progress_lwt
   utils_core)
  (preprocess
   (pps

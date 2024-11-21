@@ -94,7 +94,7 @@ let test_completed () : bool Lwt.t =
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "errors";
         String_asserter.assert_equals
-          "Complete [complete]"
+          "typecheck completed [complete]"
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "complete";
         Unix.close fd;
@@ -112,7 +112,7 @@ let test_read_empty () : bool Lwt.t =
           errors_file_path;
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         String_asserter.assert_equals
-          "NothingYet [no additional bytes]"
+          "nothing yet"
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "killed";
         Unix.close fd;
@@ -132,7 +132,7 @@ let test_read_unlinked () : bool Lwt.t =
         Server_progress.ErrorsWrite.unlink_at_server_stop ();
         assert (Server_progress.ErrorsRead.openfile fd |> Result.is_ok);
         String_asserter.assert_equals
-          "Stopped [unlink]"
+          "hh_server gracefully stopped [unlink]"
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "end";
         Unix.close fd;
@@ -152,7 +152,7 @@ let test_read_unlinked_empty () : bool Lwt.t =
         assert (Server_progress.ErrorsRead.openfile fd |> Result.is_ok);
         Server_progress.ErrorsWrite.unlink_at_server_stop ();
         String_asserter.assert_equals
-          "Stopped [unlink]"
+          "hh_server gracefully stopped [unlink]"
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "end";
         Unix.close fd;
@@ -180,7 +180,7 @@ let test_read_restarted () : bool Lwt.t =
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "errors";
         String_asserter.assert_equals
-          "Restarted [new_empty_file]"
+          "typecheck restarted due to file changes [new_empty_file]"
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "end";
         Unix.close fd;
@@ -203,7 +203,7 @@ let test_read_half_message () : bool Lwt.t =
         Sys_utils.write_file ~file:errors_file_path (Bytes.to_string preamble);
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         String_asserter.assert_equals
-          "Killed [no payload]"
+          "malformed error"
           (Server_progress.ErrorsRead.read_next_errors fd |> show_read)
           "half";
         Unix.close fd;
@@ -219,11 +219,18 @@ let test_read_dead_pid () : bool Lwt.t =
         let fd = Unix.openfile errors_file_path [Unix.O_RDONLY] 0 in
         begin
           match Server_progress.ErrorsRead.openfile fd with
-          | Error (Server_progress.Killed _, "Errors-file is from defunct PID")
-            ->
+          | Error
+              ( Server_progress.ErrorsRead.OKilled _,
+                "Errors-file is from defunct PID" ) ->
             ()
           | Ok _ -> failwith "Expected a dead-pid failure, not success"
-          | Error e -> failwith ("Expected Killed, not " ^ show_read (Error e))
+          | Error (e, msg) ->
+            failwith
+              ("Expected OKilled, not ("
+              ^ Server_progress.ErrorsRead.show_open_error e
+              ^ ", "
+              ^ msg
+              ^ ")")
         end;
         Unix.close fd;
         Lwt.return_unit)
@@ -354,7 +361,7 @@ let test_async_read_completed () : bool Lwt.t =
         let q = Server_progress_lwt.watch_errors_file ~pid fd in
         let%lwt () = expect_qitem q "Errors [a=2,b=1]" in
         let%lwt () = expect_qitem q "Errors [c=1]" in
-        let%lwt () = expect_qitem q "Complete [complete]" in
+        let%lwt () = expect_qitem q "typecheck completed [complete]" in
         let%lwt () = expect_qitem q "closed" in
         Lwt.return_unit)
   in
@@ -381,7 +388,7 @@ let test_async_read_partial () : bool Lwt.t =
         let%lwt () = expect_qitem q "nothing" in
         (* we'll complete the file, and after this the stream should be closed *)
         Server_progress.ErrorsWrite.complete (Telemetry.create ());
-        let%lwt () = expect_qitem q "Complete [complete]" in
+        let%lwt () = expect_qitem q "typecheck completed [complete]" in
         let%lwt () = expect_qitem q "closed" in
         Lwt.return_unit)
   in
@@ -405,7 +412,7 @@ let test_async_read_unlinked () : bool Lwt.t =
         let q = Server_progress_lwt.watch_errors_file ~pid fd in
         (* we'll unlink the file, and after this the stream should be closed *)
         Server_progress.ErrorsWrite.unlink_at_server_stop ();
-        let%lwt () = expect_qitem q "Stopped [unlink]" in
+        let%lwt () = expect_qitem q "hh_server gracefully stopped [unlink]" in
         let%lwt () = expect_qitem q "closed" in
         Lwt.return_unit)
   in
@@ -454,7 +461,7 @@ let test_async_read_killed () : bool Lwt.t =
         let q = Server_progress_lwt.watch_errors_file ~pid fd in
         (* because the file is incomplete, the queue should assume that the
            creating process was killed *)
-        let%lwt () = expect_qitem q "Killed [no payload]" in
+        let%lwt () = expect_qitem q "malformed error" in
         let%lwt () = expect_qitem q "closed" in
         Lwt.return_unit)
   in
@@ -495,7 +502,7 @@ let test_async_pid_killed () : bool Lwt.t =
         let q = Server_progress_lwt.watch_errors_file ~pid:dead_pid fd in
         (* because the pid is dead, within 5s, the queue should report
            that the creating process was killed *)
-        let%lwt () = expect_qitem ~delay:60.0 q "Killed [pid]" in
+        let%lwt () = expect_qitem ~delay:60.0 q "hh_server died" in
         let%lwt () = expect_qitem q "closed" in
         Lwt.return_unit)
   in

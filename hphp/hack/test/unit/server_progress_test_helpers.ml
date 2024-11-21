@@ -23,23 +23,36 @@ let show_errors (errors : Errors.finalized_error list Relative_path.Map.t) :
   in
   Printf.sprintf "Errors [%s]" counts
 
-let show_read (read : Server_progress.ErrorsRead.read_result) : string =
-  match read with
-  | Ok (Server_progress.Errors { errors; timestamp = _ }) -> show_errors errors
-  | Ok (Server_progress.Telemetry telemetry) ->
-    let key =
-      match Telemetry.to_json telemetry with
-      | Hh_json.JSON_Object elems ->
-        let keys = List.map elems ~f:fst |> List.sort ~compare:String.compare in
-        List.hd keys |> Option.value ~default:"[]"
-      | _ -> "[primitive]"
-    in
-    Printf.sprintf "Telemetry [%s]" key
-  | Error (e, log_message) ->
+let show_read_result = function
+  | Server_progress.ErrorsRead.RCompleted (completion, msg) ->
     Printf.sprintf
       "%s [%s]"
-      (Server_progress.show_errors_file_error e)
-      log_message
+      (Server_progress.completion_reason_short_description completion)
+      msg
+  | Server_progress.ErrorsRead.RItem item ->
+    (match item with
+    | Server_progress.Errors { errors; timestamp = _ } -> show_errors errors
+    | Server_progress.Telemetry telemetry ->
+      let key =
+        match Telemetry.to_json telemetry with
+        | Hh_json.JSON_Object elems ->
+          let keys =
+            List.map elems ~f:fst |> List.sort ~compare:String.compare
+          in
+          List.hd keys |> Option.value ~default:"[]"
+        | _ -> "[primitive]"
+      in
+      Printf.sprintf "Telemetry [%s]" key)
+
+let show_read
+    (read :
+      ( Server_progress.ErrorsRead.read_result option,
+        Server_progress.errors_file_read_error )
+      result) : string =
+  match read with
+  | Error Server_progress.Malformed -> "malformed error"
+  | Ok None -> "nothing yet"
+  | Ok (Some res) -> show_read_result res
 
 (** Reading from ShowProgressLwt.watch_errors_file is inherently racey:
 our test might insert an item into the errors file, but there'll be some time
@@ -53,7 +66,11 @@ For convenience, this function flattens all results into a string:
 *)
 let expect_qitem
     ?(delay : float = 10.0)
-    (q : Server_progress.ErrorsRead.read_result Lwt_stream.t)
+    (q :
+      ( Server_progress.ErrorsRead.read_result,
+        Server_progress_lwt.watch_error )
+      result
+      Lwt_stream.t)
     (expected : string) : unit Lwt.t =
   let%lwt r =
     Lwt.pick
@@ -66,7 +83,11 @@ let expect_qitem
     match r with
     | Error () -> "nothing"
     | Ok None -> "closed"
-    | Ok (Some item) -> show_read item
+    | Ok (Some item) ->
+      (match item with
+      | Error watch_error ->
+        Server_progress_lwt.watch_error_short_description watch_error
+      | Ok res -> show_read_result res)
   in
   String_asserter.assert_equals expected actual "expect_qitem";
   Lwt.return_unit

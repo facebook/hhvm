@@ -391,7 +391,7 @@ let test_errors_complete () : bool Lwt.t =
         let%lwt () = expect_qitem q "Telemetry [will_use_distc]" in
         let%lwt () = expect_qitem q "Telemetry [process_in_parallel]" in
         let%lwt () = expect_qitem q "Errors [b.php=1]" in
-        let%lwt () = expect_qitem q "Complete [complete]" in
+        let%lwt () = expect_qitem q "typecheck completed [complete]" in
         let%lwt () = expect_qitem q "closed" in
         Unix.close fd;
         (* a second client will also observe the files *)
@@ -406,7 +406,7 @@ let test_errors_complete () : bool Lwt.t =
         let%lwt () = expect_qitem q "Telemetry [will_use_distc]" in
         let%lwt () = expect_qitem q "Telemetry [process_in_parallel]" in
         let%lwt () = expect_qitem q "Errors [b.php=1]" in
-        let%lwt () = expect_qitem q "Complete [complete]" in
+        let%lwt () = expect_qitem q "typecheck completed [complete]" in
         let%lwt () = expect_qitem q "closed" in
         Unix.close fd;
         (* let's stop the server and verify that errors are absent *)
@@ -477,9 +477,9 @@ let test_errors_during () : bool Lwt.t =
         let%lwt _ = hh ~root ~tmp [| "stop" |] in
         assert (not (Sys_utils.file_exists errors_file_path));
         (* each of the two clients will see that they're done. *)
-        let%lwt () = expect_qitem q1 "Stopped [unlink]" in
+        let%lwt () = expect_qitem q1 "hh_server gracefully stopped [unlink]" in
         let%lwt () = expect_qitem q1 "closed" in
-        let%lwt () = expect_qitem q2 "Stopped [unlink]" in
+        let%lwt () = expect_qitem q2 "hh_server gracefully stopped [unlink]" in
         let%lwt () = expect_qitem q2 "closed" in
         Unix.close fd1;
         Unix.close fd2;
@@ -592,7 +592,7 @@ let test_errors_kill () : bool Lwt.t =
         Unix.kill server_pid Sys.sigkill;
         (* read the remainding output from hh_client. It should detect the kill. *)
         let%lwt stdout = Lwt_io.read hh_client#stdout in
-        assert_substring stdout ~substring:"Hh_server has terminated. [Killed]";
+        assert_substring stdout ~substring:"hh_server has terminated. [Killed]";
         let errors_file_path = ServerFiles.errors_file_path root in
         assert (Sys_utils.file_exists errors_file_path);
         Lwt.return_unit)
@@ -721,7 +721,7 @@ let test_client_during () : bool Lwt.t =
         let%lwt _ = hh ~root ~tmp [| "stop" |] in
         (* read the remainding output from hh_client *)
         let%lwt stdout = Lwt_io.read hh_client#stdout in
-        assert_substring stdout ~substring:"Hh_server has terminated. [Stopped]";
+        assert_substring stdout ~substring:"hh_server has terminated. [Stopped]";
         Lwt.return_unit)
   in
   Lwt.return_true

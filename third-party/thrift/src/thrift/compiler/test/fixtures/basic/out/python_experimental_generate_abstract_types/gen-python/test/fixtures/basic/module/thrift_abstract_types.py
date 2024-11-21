@@ -86,7 +86,6 @@ class Containers(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
 
 class MyDataItem(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod

@@ -14,6 +14,7 @@
 
 # pyre-strict
 
+import datetime
 import typing
 import unittest
 
@@ -27,8 +28,7 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesAbstract,
     TestExceptionCopy as TestExceptionCopyAbstract,
     TestStruct as TestStructAbstract,
-    # TODO: Uncomment when adapted types work correctly.
-    # TestStructAdaptedTypes as TestStructAdaptedTypesAbstract,
+    TestStructAdaptedTypes as TestStructAdaptedTypesAbstract,
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesAbstract,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesAbstract,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesAbstract,
@@ -186,6 +186,21 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
 
     @parameterized.expand(
         [
+            (
+                "TestStructAdaptedTypesAbstract.unqualified_adapted_i32_to_datetime",
+                TestStructAdaptedTypesAbstract.unqualified_adapted_i32_to_datetime,
+                datetime.datetime,
+            ),
+            (
+                "TestStructAdaptedTypesAbstract.optional_adapted_i32_to_datetime",
+                TestStructAdaptedTypesAbstract.optional_adapted_i32_to_datetime,
+                typing.Optional[datetime.datetime],
+            ),
+            (
+                "TestStructAdaptedTypesAbstract.unqualified_adapted_datetime_to_i32",
+                TestStructAdaptedTypesAbstract.unqualified_adapted_string_to_i32,
+                int,
+            ),
             (
                 "TestStructWithDefaultValuesAbstract.unqualified_integer",
                 TestStructWithDefaultValuesAbstract.unqualified_integer,

@@ -81,7 +81,6 @@ class MyDataItem(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 
 class TransitiveDoubler(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -130,7 +129,6 @@ class StringPair(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.StringPair": ...  # type: ignore
 
 class EmptyStruct(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod

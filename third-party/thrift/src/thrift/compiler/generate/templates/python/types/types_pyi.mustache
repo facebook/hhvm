@@ -99,7 +99,7 @@ class {{> structs/unadapted_name}}({{!
         }}{{/struct:union?}}{{!
         }}, _fbthrift_compatible_with_{{> structs/unadapted_name}}{{!
         }}{{#program:enable_abstract_types?}}{{!
-        }}, _fbthrift_python_abstract_types.{{struct:py_name}}{{!
+        }}, _fbthrift_python_abstract_types.{{> structs/unadapted_name}}{{!
         }}{{/program:enable_abstract_types?}}{{!
         }}):
     {{#program:generate_immutable_types}}{{!
@@ -153,7 +153,7 @@ class {{> structs/unadapted_name}}({{!
 {{/program:enable_abstract_types?}}
 {{#program:enable_abstract_types?}}
 {{#program:generate_immutable_types}}
-    Type = _fbthrift_python_abstract_types.{{struct:py_name}}.FbThriftUnionFieldEnum
+    Type = _fbthrift_python_abstract_types.{{> structs/unadapted_name}}.FbThriftUnionFieldEnum
 {{/program:generate_immutable_types}}
 {{/program:enable_abstract_types?}}
 
@@ -166,8 +166,8 @@ class {{> structs/unadapted_name}}({{!
     def get_type(self) -> Type: ...
 {{/program:enable_abstract_types?}}
 {{#program:enable_abstract_types?}}
-    type: _typing.Final[_fbthrift_python_abstract_types.{{struct:py_name}}.FbThriftUnionFieldEnum]
-    def get_type(self) -> _fbthrift_python_abstract_types.{{struct:py_name}}.FbThriftUnionFieldEnum: ...
+    type: _typing.Final[_fbthrift_python_abstract_types.{{> structs/unadapted_name}}.FbThriftUnionFieldEnum]
+    def get_type(self) -> _fbthrift_python_abstract_types.{{> structs/unadapted_name}}.FbThriftUnionFieldEnum: ...
 {{/program:enable_abstract_types?}}
 {{/program:generate_immutable_types}}
 {{#program:generate_mutable_types}}
@@ -175,7 +175,7 @@ class {{> structs/unadapted_name}}({{!
     fbthrift_current_value: _typing.Final[{{ > types/field_value_pep484_union_type}}]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
 {{/program:enable_abstract_types?}}
-    def get_type(self) -> {{#program:enable_abstract_types?}}_fbthrift_python_abstract_types.{{struct:py_name}}.{{/program:enable_abstract_types?}}FbThriftUnionFieldEnum: ...
+    def get_type(self) -> {{#program:enable_abstract_types?}}_fbthrift_python_abstract_types.{{> structs/unadapted_name}}.{{/program:enable_abstract_types?}}FbThriftUnionFieldEnum: ...
 {{/program:generate_mutable_types}}
     {{/struct:union?}}
     {{^struct:union?}}

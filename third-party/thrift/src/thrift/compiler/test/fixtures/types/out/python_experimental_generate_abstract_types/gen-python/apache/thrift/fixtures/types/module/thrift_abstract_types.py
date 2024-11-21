@@ -28,7 +28,6 @@ class MyForwardRefEnum:
 
 
 class empty_struct(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -290,7 +289,6 @@ class MyStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 
 class MyDataItem(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -399,7 +397,6 @@ class IncompleteMap(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMap": ...  # type: ignore
 
 class IncompleteMapDep(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -427,7 +424,6 @@ class CompleteMap(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMap": ...  # type: ignore
 
 class CompleteMapDep(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -455,7 +451,6 @@ class IncompleteList(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteList": ...  # type: ignore
 
 class IncompleteListDep(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -483,7 +478,6 @@ class CompleteList(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteList": ...  # type: ignore
 
 class CompleteListDep(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod

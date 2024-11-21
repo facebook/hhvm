@@ -18,7 +18,6 @@ import folly.iobuf as _fbthrift_iobuf
 
 
 class FooStreamEx(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -31,7 +30,6 @@ class FooStreamEx(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.FooStreamEx": ...  # type: ignore
 
 class FooEx(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
@@ -44,7 +42,6 @@ class FooEx(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.FooEx": ...  # type: ignore
 
 class FooEx2(_abc.ABC):
-    pass
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod

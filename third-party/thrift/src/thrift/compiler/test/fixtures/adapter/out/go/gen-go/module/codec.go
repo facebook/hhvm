@@ -42,6 +42,9 @@ var (
     premadeCodecTypeSpec_list_i32 *thrift.TypeSpec = nil
     premadeCodecTypeSpec_set_i32 *thrift.TypeSpec = nil
     premadeCodecTypeSpec_map_string_i32 *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_map_i32_i32 *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_list_map_i32_i32 *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_list_list_map_i32_i32 *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_Foo *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_Baz *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_Foo_6868 *thrift.TypeSpec = nil
@@ -295,6 +298,32 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 	ValueTypeSpec: premadeCodecTypeSpec_i32,
     KeyWireType:   thrift.STRING,
 	ValueWireType: thrift.I32,
+},
+
+    }
+    premadeCodecTypeSpec_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "map<i32, i32>",
+        CodecMapSpec: &thrift.CodecMapSpec{
+	KeyTypeSpec:   premadeCodecTypeSpec_i32,
+	ValueTypeSpec: premadeCodecTypeSpec_i32,
+    KeyWireType:   thrift.I32,
+	ValueWireType: thrift.I32,
+},
+
+    }
+    premadeCodecTypeSpec_list_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "list<map<i32, i32>>",
+        CodecListSpec: &thrift.CodecListSpec{
+    ElementWireType: thrift.MAP,
+	ElementTypeSpec: premadeCodecTypeSpec_map_i32_i32,
+},
+
+    }
+    premadeCodecTypeSpec_list_list_map_i32_i32 = &thrift.TypeSpec{
+        FullName: "list<list<map<i32, i32>>>",
+        CodecListSpec: &thrift.CodecListSpec{
+    ElementWireType: thrift.LIST,
+	ElementTypeSpec: premadeCodecTypeSpec_list_map_i32_i32,
 },
 
     }
@@ -1079,6 +1108,14 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
             IsOptional:           false,
             ValueTypeSpec:        premadeCodecTypeSpec_map_string_i32,
             MustBeSetToSerialize: false,
+        },        {
+            ID:                   15,
+            WireType:             thrift.LIST,
+            Name:                 "adapted_list_nested",
+            ReflectIndex:         14,
+            IsOptional:           false,
+            ValueTypeSpec:        premadeCodecTypeSpec_list_list_map_i32_i32,
+            MustBeSetToSerialize: false,
         },    },
     FieldSpecIDToIndex:   map[int16]int{
         1: 0,
@@ -1095,6 +1132,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         12: 11,
         13: 12,
         14: 13,
+        15: 14,
     },
     FieldSpecNameToIndex: map[string]int{
         "intField": 0,
@@ -1111,6 +1149,7 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "adapted_list": 11,
         "adapted_set": 12,
         "adapted_map": 13,
+        "adapted_list_nested": 14,
     },
 }
     premadeStructSpec_Baz = &thrift.StructSpec{

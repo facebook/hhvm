@@ -77,6 +77,9 @@ inline void reset_field<::facebook::thrift::test::Foo>(
     case 13:
       obj.adapted_map_ref().copy_from(default_inst<::facebook::thrift::test::Foo>().adapted_map_ref());
       return;
+    case 14:
+      obj.adapted_list_nested_ref().copy_from(default_inst<::facebook::thrift::test::Foo>().adapted_list_nested_ref());
+      return;
   }
 }
 

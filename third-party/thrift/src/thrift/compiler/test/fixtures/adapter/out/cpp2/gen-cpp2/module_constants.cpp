@@ -127,13 +127,13 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_c6c4e3b6870659fe() {
+::std::string_view _fbthrift_schema_1b995ae4836da474() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_c6c4e3b6870659fe_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_1b995ae4836da474_includes() {
 #if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
   static const ::std::array<::std::string_view, 1> includes = {
-    _fbthrift_schema_c6c4e3b6870659fe(),
+    _fbthrift_schema_1b995ae4836da474(),
   };
   return ::folly::range(includes);
 #else

@@ -1417,6 +1417,7 @@ type Foo struct {
     AdaptedList []int32 `thrift:"adapted_list,12" json:"adapted_list" db:"adapted_list"`
     AdaptedSet []int32 `thrift:"adapted_set,13" json:"adapted_set" db:"adapted_set"`
     AdaptedMap map[string]int32 `thrift:"adapted_map,14" json:"adapted_map" db:"adapted_map"`
+    AdaptedListNested [][]map[int32]int32 `thrift:"adapted_list_nested,15" json:"adapted_list_nested" db:"adapted_list_nested"`
 }
 // Compile time interface enforcer
 var _ thrift.Struct = (*Foo)(nil)
@@ -1506,6 +1507,13 @@ func (x *Foo) GetAdaptedMap() map[string]int32 {
         return make(map[string]int32)
     }
     return x.AdaptedMap
+}
+
+func (x *Foo) GetAdaptedListNested() [][]map[int32]int32 {
+    if !x.IsSetAdaptedListNested() {
+        return make([][]map[int32]int32, 0)
+    }
+    return x.AdaptedListNested
 }
 
 func (x *Foo) SetIntFieldNonCompat(value I32_5137) *Foo {
@@ -1648,6 +1656,16 @@ func (x *Foo) SetAdaptedMap(value map[string]int32) *Foo {
     return x
 }
 
+func (x *Foo) SetAdaptedListNestedNonCompat(value [][]map[int32]int32) *Foo {
+    x.AdaptedListNested = value
+    return x
+}
+
+func (x *Foo) SetAdaptedListNested(value [][]map[int32]int32) *Foo {
+    x.AdaptedListNested = value
+    return x
+}
+
 func (x *Foo) IsSetOptionalIntField() bool {
     return x != nil && x.OptionalIntField != nil
 }
@@ -1682,6 +1700,10 @@ func (x *Foo) IsSetAdaptedSet() bool {
 
 func (x *Foo) IsSetAdaptedMap() bool {
     return x != nil && x.AdaptedMap != nil
+}
+
+func (x *Foo) IsSetAdaptedListNested() bool {
+    return x != nil && x.AdaptedListNested != nil
 }
 
 func (x *Foo) writeField1(p thrift.Encoder) error {  // IntField
@@ -1971,6 +1993,62 @@ func (x *Foo) writeField14(p thrift.Encoder) error {  // AdaptedMap
     return nil
 }
 
+func (x *Foo) writeField15(p thrift.Encoder) error {  // AdaptedListNested
+    if err := p.WriteFieldBegin("adapted_list_nested", thrift.LIST, 15); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.AdaptedListNested
+    if err := p.WriteListBegin(thrift.LIST, len(item)); err != nil {
+        return thrift.PrependError("error writing list begin: ", err)
+    }
+    for _, v := range item {
+        {
+            item := v
+            if err := p.WriteListBegin(thrift.MAP, len(item)); err != nil {
+                return thrift.PrependError("error writing list begin: ", err)
+            }
+            for _, v := range item {
+                {
+                    item := v
+                    if err := p.WriteMapBegin(thrift.I32, thrift.I32, len(item)); err != nil {
+                        return thrift.PrependError("error writing map begin: ", err)
+                    }
+                    for k, v := range item {
+                        {
+                            item := k
+                            if err := p.WriteI32(item); err != nil {
+                                return err
+                            }
+                        }
+                    
+                        {
+                            item := v
+                            if err := p.WriteI32(item); err != nil {
+                                return err
+                            }
+                        }
+                    }
+                    if err := p.WriteMapEnd(); err != nil {
+                        return thrift.PrependError("error writing map end: ", err)
+                    }
+                }
+            }
+            if err := p.WriteListEnd(); err != nil {
+                return thrift.PrependError("error writing list end: ", err)
+            }
+        }
+    }
+    if err := p.WriteListEnd(); err != nil {
+        return thrift.PrependError("error writing list end: ", err)
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
 func (x *Foo) readField1(p thrift.Decoder) error {  // IntField
     result, err := ReadI32_5137(p)
     if err != nil {
@@ -2175,6 +2253,80 @@ func (x *Foo) readField14(p thrift.Decoder) error {  // AdaptedMap
     return nil
 }
 
+func (x *Foo) readField15(p thrift.Decoder) error {  // AdaptedListNested
+    _ /* elemType */, size, err := p.ReadListBegin()
+    if err != nil {
+        return thrift.PrependError("error reading list begin: ", err)
+    }
+    
+    listResult := make([][]map[int32]int32, 0, size)
+    for i := 0; i < size; i++ {
+        var elem []map[int32]int32
+        {
+            _ /* elemType */, size, err := p.ReadListBegin()
+            if err != nil {
+                return thrift.PrependError("error reading list begin: ", err)
+            }
+            
+            listResult := make([]map[int32]int32, 0, size)
+            for i := 0; i < size; i++ {
+                var elem map[int32]int32
+                {
+                    _ /* keyType */, _ /* valueType */, size, err := p.ReadMapBegin()
+                    if err != nil {
+                        return thrift.PrependError("error reading map begin: ", err)
+                    }
+                    
+                    mapResult := make(map[int32]int32, size)
+                    for i := 0; i < size; i++ {
+                        var key int32
+                        {
+                            result, err := p.ReadI32()
+                            if err != nil {
+                                return err
+                            }
+                            key = result
+                        }
+                    
+                        var value int32
+                        {
+                            result, err := p.ReadI32()
+                            if err != nil {
+                                return err
+                            }
+                            value = result
+                        }
+                    
+                        mapResult[key] = value
+                    }
+                    
+                    if err := p.ReadMapEnd(); err != nil {
+                        return thrift.PrependError("error reading map end: ", err)
+                    }
+                    result := mapResult
+                    elem = result
+                }
+                listResult = append(listResult, elem)
+            }
+            
+            if err := p.ReadListEnd(); err != nil {
+                return thrift.PrependError("error reading list end: ", err)
+            }
+            result := listResult
+            elem = result
+        }
+        listResult = append(listResult, elem)
+    }
+    
+    if err := p.ReadListEnd(); err != nil {
+        return thrift.PrependError("error reading list end: ", err)
+    }
+    result := listResult
+
+    x.AdaptedListNested = result
+    return nil
+}
+
 
 
 
@@ -2223,6 +2375,9 @@ func (x *Foo) Write(p thrift.Encoder) error {
         return err
     }
     if err := x.writeField14(p); err != nil {
+        return err
+    }
+    if err := x.writeField15(p); err != nil {
         return err
     }
 
@@ -2281,6 +2436,8 @@ func (x *Foo) Read(p thrift.Decoder) error {
             fieldReadErr = x.readField13(p)
         case ((id == 14 && wireType == thrift.MAP) || (id == thrift.NO_FIELD_ID && fieldName == "adapted_map")):  // adapted_map
             fieldReadErr = x.readField14(p)
+        case ((id == 15 && wireType == thrift.LIST) || (id == thrift.NO_FIELD_ID && fieldName == "adapted_list_nested")):  // adapted_list_nested
+            fieldReadErr = x.readField15(p)
         default:
             fieldReadErr = p.Skip(wireType)
         }
@@ -2317,7 +2474,8 @@ func (x *Foo) setDefaults() *Foo {
         SetDoubleAdaptedFieldNonCompat(NewDoubleTypedefI64()).
         SetAdaptedListNonCompat(make([]int32, 0)).
         SetAdaptedSetNonCompat(make([]int32, 0)).
-        SetAdaptedMapNonCompat(make(map[string]int32))
+        SetAdaptedMapNonCompat(make(map[string]int32)).
+        SetAdaptedListNestedNonCompat(make([][]map[int32]int32, 0))
 }
 
 type Baz struct {

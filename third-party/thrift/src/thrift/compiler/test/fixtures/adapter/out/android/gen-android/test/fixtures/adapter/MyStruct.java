@@ -129,15 +129,15 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
         case SET_STRING:
           if (__field.type == TType.SET) {
             {
-              TSet _set67 = iprot.readSetBegin();
-              tmp_set_string = new HashSet<String>(Math.max(0, 2*_set67.size));
-              for (int _i68 = 0; 
-                   (_set67.size < 0) ? iprot.peekSet() : (_i68 < _set67.size); 
-                   ++_i68)
+              TSet _set80 = iprot.readSetBegin();
+              tmp_set_string = new HashSet<String>(Math.max(0, 2*_set80.size));
+              for (int _i81 = 0; 
+                   (_set80.size < 0) ? iprot.peekSet() : (_i81 < _set80.size); 
+                   ++_i81)
               {
-                String _elem69;
-                _elem69 = iprot.readString();
-                tmp_set_string.add(_elem69);
+                String _elem82;
+                _elem82 = iprot.readString();
+                tmp_set_string.add(_elem82);
               }
               iprot.readSetEnd();
             }
@@ -175,8 +175,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(SET_STRING_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.set_string.size()));
-        for (String _iter70 : this.set_string)        {
-          oprot.writeString(_iter70);
+        for (String _iter83 : this.set_string)        {
+          oprot.writeString(_iter83);
         }
         oprot.writeSetEnd();
       }

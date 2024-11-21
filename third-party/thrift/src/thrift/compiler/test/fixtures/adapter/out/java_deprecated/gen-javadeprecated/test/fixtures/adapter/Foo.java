@@ -40,6 +40,7 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
   private static final TField ADAPTED_LIST_FIELD_DESC = new TField("adapted_list", TType.LIST, (short)12);
   private static final TField ADAPTED_SET_FIELD_DESC = new TField("adapted_set", TType.SET, (short)13);
   private static final TField ADAPTED_MAP_FIELD_DESC = new TField("adapted_map", TType.MAP, (short)14);
+  private static final TField ADAPTED_LIST_NESTED_FIELD_DESC = new TField("adapted_list_nested", TType.LIST, (short)15);
 
   public int intField;
   public int optionalIntField;
@@ -55,6 +56,7 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
   public List<Integer> adapted_list;
   public Set<Integer> adapted_set;
   public Map<String,Integer> adapted_map;
+  public List<List<Map<Integer,Integer>>> adapted_list_nested;
   public static final int INTFIELD = 1;
   public static final int OPTIONALINTFIELD = 2;
   public static final int INTFIELDWITHDEFAULT = 3;
@@ -69,6 +71,7 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
   public static final int ADAPTED_LIST = 12;
   public static final int ADAPTED_SET = 13;
   public static final int ADAPTED_MAP = 14;
+  public static final int ADAPTED_LIST_NESTED = 15;
 
   // isset id assignments
   private static final int __INTFIELD_ISSET_ID = 0;
@@ -123,6 +126,12 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         new MapMetaData(TType.MAP, 
             new FieldValueMetaData(TType.STRING), 
             new FieldValueMetaData(TType.I32))));
+    tmpMetaDataMap.put(ADAPTED_LIST_NESTED, new FieldMetaData("adapted_list_nested", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new ListMetaData(TType.LIST, 
+                new MapMetaData(TType.MAP, 
+                    new FieldValueMetaData(TType.I32), 
+                    new FieldValueMetaData(TType.I32))))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -146,7 +155,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       long doubleAdaptedField,
       List<Integer> adapted_list,
       Set<Integer> adapted_set,
-      Map<String,Integer> adapted_map) {
+      Map<String,Integer> adapted_map,
+      List<List<Map<Integer,Integer>>> adapted_list_nested) {
     this();
     this.intField = intField;
     setIntFieldIsSet(true);
@@ -164,6 +174,7 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
     this.adapted_list = adapted_list;
     this.adapted_set = adapted_set;
     this.adapted_map = adapted_map;
+    this.adapted_list_nested = adapted_list_nested;
   }
 
   public Foo(
@@ -180,7 +191,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       long doubleAdaptedField,
       List<Integer> adapted_list,
       Set<Integer> adapted_set,
-      Map<String,Integer> adapted_map) {
+      Map<String,Integer> adapted_map,
+      List<List<Map<Integer,Integer>>> adapted_list_nested) {
     this();
     this.intField = intField;
     setIntFieldIsSet(true);
@@ -202,6 +214,7 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
     this.adapted_list = adapted_list;
     this.adapted_set = adapted_set;
     this.adapted_map = adapted_map;
+    this.adapted_list_nested = adapted_list_nested;
   }
 
   public static class Builder {
@@ -219,6 +232,7 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
     private List<Integer> adapted_list;
     private Set<Integer> adapted_set;
     private Map<String,Integer> adapted_map;
+    private List<List<Map<Integer,Integer>>> adapted_list_nested;
 
     BitSet __optional_isset = new BitSet(6);
 
@@ -301,6 +315,11 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       return this;
     }
 
+    public Builder setAdapted_list_nested(final List<List<Map<Integer,Integer>>> adapted_list_nested) {
+      this.adapted_list_nested = adapted_list_nested;
+      return this;
+    }
+
     public Foo build() {
       Foo result = new Foo();
       if (__optional_isset.get(__INTFIELD_ISSET_ID)) {
@@ -329,6 +348,7 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       result.setAdapted_list(this.adapted_list);
       result.setAdapted_set(this.adapted_set);
       result.setAdapted_map(this.adapted_map);
+      result.setAdapted_list_nested(this.adapted_list_nested);
       return result;
     }
   }
@@ -372,6 +392,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
     }
     if (other.isSetAdapted_map()) {
       this.adapted_map = TBaseHelper.deepCopy(other.adapted_map);
+    }
+    if (other.isSetAdapted_list_nested()) {
+      this.adapted_list_nested = TBaseHelper.deepCopy(other.adapted_list_nested);
     }
   }
 
@@ -709,6 +732,30 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
     }
   }
 
+  public List<List<Map<Integer,Integer>>> getAdapted_list_nested() {
+    return this.adapted_list_nested;
+  }
+
+  public Foo setAdapted_list_nested(List<List<Map<Integer,Integer>>> adapted_list_nested) {
+    this.adapted_list_nested = adapted_list_nested;
+    return this;
+  }
+
+  public void unsetAdapted_list_nested() {
+    this.adapted_list_nested = null;
+  }
+
+  // Returns true if field adapted_list_nested is set (has been assigned a value) and false otherwise
+  public boolean isSetAdapted_list_nested() {
+    return this.adapted_list_nested != null;
+  }
+
+  public void setAdapted_list_nestedIsSet(boolean __value) {
+    if (!__value) {
+      this.adapted_list_nested = null;
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
@@ -824,6 +871,14 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       }
       break;
 
+    case ADAPTED_LIST_NESTED:
+      if (__value == null) {
+        unsetAdapted_list_nested();
+      } else {
+        setAdapted_list_nested((List<List<Map<Integer,Integer>>>)__value);
+      }
+      break;
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -873,6 +928,9 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
     case ADAPTED_MAP:
       return getAdapted_map();
 
+    case ADAPTED_LIST_NESTED:
+      return getAdapted_list_nested();
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -916,12 +974,14 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
 
     if (!TBaseHelper.equalsNobinary(this.isSetAdapted_map(), that.isSetAdapted_map(), this.adapted_map, that.adapted_map)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetAdapted_list_nested(), that.isSetAdapted_list_nested(), this.adapted_list_nested, that.adapted_list_nested)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {intField, optionalIntField, intFieldWithDefault, setField, optionalSetField, mapField, optionalMapField, binaryField, longField, adaptedLongField, doubleAdaptedField, adapted_list, adapted_set, adapted_map});
+    return Arrays.deepHashCode(new Object[] {intField, optionalIntField, intFieldWithDefault, setField, optionalSetField, mapField, optionalMapField, binaryField, longField, adaptedLongField, doubleAdaptedField, adapted_list, adapted_set, adapted_map, adapted_list_nested});
   }
 
   @Override
@@ -1045,6 +1105,14 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       return lastComparison;
     }
     lastComparison = TBaseHelper.compareTo(adapted_map, other.adapted_map);
+    if (lastComparison != 0) { 
+      return lastComparison;
+    }
+    lastComparison = Boolean.valueOf(isSetAdapted_list_nested()).compareTo(other.isSetAdapted_list_nested());
+    if (lastComparison != 0) {
+      return lastComparison;
+    }
+    lastComparison = TBaseHelper.compareTo(adapted_list_nested, other.adapted_list_nested);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -1280,6 +1348,51 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case ADAPTED_LIST_NESTED:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list33 = iprot.readListBegin();
+              this.adapted_list_nested = new ArrayList<List<Map<Integer,Integer>>>(Math.max(0, _list33.size));
+              for (int _i34 = 0; 
+                   (_list33.size < 0) ? iprot.peekList() : (_i34 < _list33.size); 
+                   ++_i34)
+              {
+                List<Map<Integer,Integer>> _elem35;
+                {
+                  TList _list36 = iprot.readListBegin();
+                  _elem35 = new ArrayList<Map<Integer,Integer>>(Math.max(0, _list36.size));
+                  for (int _i37 = 0; 
+                       (_list36.size < 0) ? iprot.peekList() : (_i37 < _list36.size); 
+                       ++_i37)
+                  {
+                    Map<Integer,Integer> _elem38;
+                    {
+                      TMap _map39 = iprot.readMapBegin();
+                      _elem38 = new HashMap<Integer,Integer>(Math.max(0, 2*_map39.size));
+                      for (int _i40 = 0; 
+                           (_map39.size < 0) ? iprot.peekMap() : (_i40 < _map39.size); 
+                           ++_i40)
+                      {
+                        int _key41;
+                        int _val42;
+                        _key41 = iprot.readI32();
+                        _val42 = iprot.readI32();
+                        _elem38.put(_key41, _val42);
+                      }
+                      iprot.readMapEnd();
+                    }
+                    _elem35.add(_elem38);
+                  }
+                  iprot.readListEnd();
+                }
+                this.adapted_list_nested.add(_elem35);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -1312,8 +1425,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRING, this.setField.size()));
-        for (String _iter33 : this.setField)        {
-          oprot.writeString(_iter33);
+        for (String _iter43 : this.setField)        {
+          oprot.writeString(_iter43);
         }
         oprot.writeSetEnd();
       }
@@ -1324,8 +1437,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         oprot.writeFieldBegin(OPTIONAL_SET_FIELD_FIELD_DESC);
         {
           oprot.writeSetBegin(new TSet(TType.STRING, this.optionalSetField.size()));
-          for (String _iter34 : this.optionalSetField)          {
-            oprot.writeString(_iter34);
+          for (String _iter44 : this.optionalSetField)          {
+            oprot.writeString(_iter44);
           }
           oprot.writeSetEnd();
         }
@@ -1336,12 +1449,12 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, this.mapField.size()));
-        for (Map.Entry<String, List<String>> _iter35 : this.mapField.entrySet())        {
-          oprot.writeString(_iter35.getKey());
+        for (Map.Entry<String, List<String>> _iter45 : this.mapField.entrySet())        {
+          oprot.writeString(_iter45.getKey());
           {
-            oprot.writeListBegin(new TList(TType.STRING, _iter35.getValue().size()));
-            for (String _iter36 : _iter35.getValue())            {
-              oprot.writeString(_iter36);
+            oprot.writeListBegin(new TList(TType.STRING, _iter45.getValue().size()));
+            for (String _iter46 : _iter45.getValue())            {
+              oprot.writeString(_iter46);
             }
             oprot.writeListEnd();
           }
@@ -1355,12 +1468,12 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
         oprot.writeFieldBegin(OPTIONAL_MAP_FIELD_FIELD_DESC);
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, this.optionalMapField.size()));
-          for (Map.Entry<String, List<String>> _iter37 : this.optionalMapField.entrySet())          {
-            oprot.writeString(_iter37.getKey());
+          for (Map.Entry<String, List<String>> _iter47 : this.optionalMapField.entrySet())          {
+            oprot.writeString(_iter47.getKey());
             {
-              oprot.writeListBegin(new TList(TType.STRING, _iter37.getValue().size()));
-              for (String _iter38 : _iter37.getValue())              {
-                oprot.writeString(_iter38);
+              oprot.writeListBegin(new TList(TType.STRING, _iter47.getValue().size()));
+              for (String _iter48 : _iter47.getValue())              {
+                oprot.writeString(_iter48);
               }
               oprot.writeListEnd();
             }
@@ -1388,8 +1501,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(ADAPTED_LIST_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I32, this.adapted_list.size()));
-        for (int _iter39 : this.adapted_list)        {
-          oprot.writeI32(_iter39);
+        for (int _iter49 : this.adapted_list)        {
+          oprot.writeI32(_iter49);
         }
         oprot.writeListEnd();
       }
@@ -1399,8 +1512,8 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(ADAPTED_SET_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I32, this.adapted_set.size()));
-        for (int _iter40 : this.adapted_set)        {
-          oprot.writeI32(_iter40);
+        for (int _iter50 : this.adapted_set)        {
+          oprot.writeI32(_iter50);
         }
         oprot.writeSetEnd();
       }
@@ -1410,11 +1523,35 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       oprot.writeFieldBegin(ADAPTED_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, this.adapted_map.size()));
-        for (Map.Entry<String, Integer> _iter41 : this.adapted_map.entrySet())        {
-          oprot.writeString(_iter41.getKey());
-          oprot.writeI32(_iter41.getValue());
+        for (Map.Entry<String, Integer> _iter51 : this.adapted_map.entrySet())        {
+          oprot.writeString(_iter51.getKey());
+          oprot.writeI32(_iter51.getValue());
         }
         oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.adapted_list_nested != null) {
+      oprot.writeFieldBegin(ADAPTED_LIST_NESTED_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.LIST, this.adapted_list_nested.size()));
+        for (List<Map<Integer,Integer>> _iter52 : this.adapted_list_nested)        {
+          {
+            oprot.writeListBegin(new TList(TType.MAP, _iter52.size()));
+            for (Map<Integer,Integer> _iter53 : _iter52)            {
+              {
+                oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter53.size()));
+                for (Map.Entry<Integer, Integer> _iter54 : _iter53.entrySet())                {
+                  oprot.writeI32(_iter54.getKey());
+                  oprot.writeI32(_iter54.getValue());
+                }
+                oprot.writeMapEnd();
+              }
+            }
+            oprot.writeListEnd();
+          }
+        }
+        oprot.writeListEnd();
       }
       oprot.writeFieldEnd();
     }
@@ -1579,6 +1716,17 @@ public class Foo implements TBase, java.io.Serializable, Cloneable, Comparable<F
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getAdapted_map(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("adapted_list_nested");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getAdapted_list_nested() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getAdapted_list_nested(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

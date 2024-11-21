@@ -628,6 +628,22 @@ _readField_adapted_map:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           14,
+          15,
+          apache::thrift::protocol::T_LIST))) {
+    goto _advance_failure;
+  }
+_readField_adapted_list_nested:
+  {
+    _readState.beforeSubobject(iprot);
+    this->__fbthrift_field_adapted_list_nested = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>>>, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>::readWithContext(*iprot, this->__fbthrift_field_adapted_list_nested, _readState);
+    _readState.afterSubobject(iprot);
+  }
+ this->__isset.set(14, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          15,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _advance_failure;
@@ -762,6 +778,14 @@ _loop:
         goto _skip;
       }
     }
+    case 15:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
+        goto _readField_adapted_list_nested;
+      } else {
+        goto _skip;
+      }
+    }
     default:
     {
 _skip:
@@ -833,6 +857,10 @@ uint32_t Foo::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("adapted_map", apache::thrift::protocol::T_MAP, 14);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_adapted_map);
   }
+  {
+    xfer += prot_->serializedFieldSize("adapted_list_nested", apache::thrift::protocol::T_LIST, 15);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>>>, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>::serializedSize<false>(*prot_, this->__fbthrift_field_adapted_list_nested);
+  }
   xfer += prot_->serializedSizeStop();
   return xfer;
 }
@@ -896,6 +924,10 @@ uint32_t Foo::serializedSizeZC(Protocol_ const* prot_) const {
   {
     xfer += prot_->serializedFieldSize("adapted_map", apache::thrift::protocol::T_MAP, 14);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>>::serializedSize<false>(*prot_, this->__fbthrift_field_adapted_map);
+  }
+  {
+    xfer += prot_->serializedFieldSize("adapted_list_nested", apache::thrift::protocol::T_LIST, 15);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>>>, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>::serializedSize<false>(*prot_, this->__fbthrift_field_adapted_list_nested);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -1008,6 +1040,13 @@ uint32_t Foo::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_MAP, 14, kPrevFieldId>(*prot_, "adapted_map", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>, ::std::map<::std::string, ::std::int32_t>>::write(*prot_, this->__fbthrift_field_adapted_map);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 14;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 15, kPrevFieldId>(*prot_, "adapted_list_nested", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>>>, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>::write(*prot_, this->__fbthrift_field_adapted_list_nested);
     xfer += prot_->writeFieldEnd();
   }
   xfer += prot_->writeFieldStop();

@@ -43,6 +43,9 @@ var (
     premadeThriftType_list_i32 *metadata.ThriftType = nil
     premadeThriftType_set_i32 *metadata.ThriftType = nil
     premadeThriftType_map_string_i32 *metadata.ThriftType = nil
+    premadeThriftType_map_i32_i32 *metadata.ThriftType = nil
+    premadeThriftType_list_map_i32_i32 *metadata.ThriftType = nil
+    premadeThriftType_list_list_map_i32_i32 *metadata.ThriftType = nil
     premadeThriftType_module_Foo *metadata.ThriftType = nil
     premadeThriftType_module_Baz *metadata.ThriftType = nil
     premadeThriftType_module_Foo_6868 *metadata.ThriftType = nil
@@ -215,6 +218,19 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
         metadata.NewThriftMapType().
             SetKeyType(premadeThriftType_string).
             SetValueType(premadeThriftType_i32),
+    )
+    premadeThriftType_map_i32_i32 = metadata.NewThriftType().SetTMap(
+        metadata.NewThriftMapType().
+            SetKeyType(premadeThriftType_i32).
+            SetValueType(premadeThriftType_i32),
+    )
+    premadeThriftType_list_map_i32_i32 = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_map_i32_i32),
+    )
+    premadeThriftType_list_list_map_i32_i32 = metadata.NewThriftType().SetTList(
+        metadata.NewThriftListType().
+            SetValueType(premadeThriftType_list_map_i32_i32),
     )
     premadeThriftType_module_Foo = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
@@ -722,6 +738,11 @@ var structMetadatasOnce = sync.OnceValue(
     SetName("adapted_map").
     SetIsOptional(false).
     SetType(premadeThriftType_map_string_i32),
+            metadata.NewThriftField().
+    SetId(15).
+    SetName("adapted_list_nested").
+    SetIsOptional(false).
+    SetType(premadeThriftType_list_list_map_i32_i32),
         },
     ))
         fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().

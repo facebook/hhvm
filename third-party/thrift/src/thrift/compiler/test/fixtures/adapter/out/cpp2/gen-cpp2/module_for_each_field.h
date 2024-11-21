@@ -40,6 +40,7 @@ struct ForEachField<::facebook::thrift::test::Foo> {
     f(11, static_cast<T&&>(t).adapted_list_ref()...);
     f(12, static_cast<T&&>(t).adapted_set_ref()...);
     f(13, static_cast<T&&>(t).adapted_map_ref()...);
+    f(14, static_cast<T&&>(t).adapted_list_nested_ref()...);
   }
 };
 

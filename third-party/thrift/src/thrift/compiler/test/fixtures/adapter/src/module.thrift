@@ -110,6 +110,11 @@ struct Foo {
   13: set<i32> adapted_set;
   @python.Adapter{name = "my.MapAdapter", typeHint = "typing.Mapping[str, int]"}
   14: map<string, i32> adapted_map;
+  @python.Adapter{
+    name = "thrift.python.test.adapters.atoi.ItoaNestedListAdapter",
+    typeHint = "typing.Sequence[typing.Sequence[typing.Mapping[int, int]]]",
+  }
+  15: list<list<map<i32, i32>>> adapted_list_nested;
 } (
   thrift.uri = "facebook.com/thrift/compiler/test/fixtures/adapter/src/module/Foo",
 )

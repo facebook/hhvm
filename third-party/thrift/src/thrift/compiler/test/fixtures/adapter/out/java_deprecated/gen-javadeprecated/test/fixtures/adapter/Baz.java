@@ -201,15 +201,15 @@ public class Baz extends TUnion<Baz> implements Comparable<Baz> {
         if (__field.type == SET_FIELD_FIELD_DESC.type) {
           Set<String> setField;
           {
-            TSet _set42 = iprot.readSetBegin();
-            setField = new HashSet<String>(Math.max(0, 2*_set42.size));
-            for (int _i43 = 0; 
-                 (_set42.size < 0) ? iprot.peekSet() : (_i43 < _set42.size); 
-                 ++_i43)
+            TSet _set55 = iprot.readSetBegin();
+            setField = new HashSet<String>(Math.max(0, 2*_set55.size));
+            for (int _i56 = 0; 
+                 (_set55.size < 0) ? iprot.peekSet() : (_i56 < _set55.size); 
+                 ++_i56)
             {
-              String _elem44;
-              _elem44 = iprot.readString();
-              setField.add(_elem44);
+              String _elem57;
+              _elem57 = iprot.readString();
+              setField.add(_elem57);
             }
             iprot.readSetEnd();
           }
@@ -220,29 +220,29 @@ public class Baz extends TUnion<Baz> implements Comparable<Baz> {
         if (__field.type == MAP_FIELD_FIELD_DESC.type) {
           Map<String,List<String>> mapField;
           {
-            TMap _map45 = iprot.readMapBegin();
-            mapField = new HashMap<String,List<String>>(Math.max(0, 2*_map45.size));
-            for (int _i46 = 0; 
-                 (_map45.size < 0) ? iprot.peekMap() : (_i46 < _map45.size); 
-                 ++_i46)
+            TMap _map58 = iprot.readMapBegin();
+            mapField = new HashMap<String,List<String>>(Math.max(0, 2*_map58.size));
+            for (int _i59 = 0; 
+                 (_map58.size < 0) ? iprot.peekMap() : (_i59 < _map58.size); 
+                 ++_i59)
             {
-              String _key47;
-              List<String> _val48;
-              _key47 = iprot.readString();
+              String _key60;
+              List<String> _val61;
+              _key60 = iprot.readString();
               {
-                TList _list49 = iprot.readListBegin();
-                _val48 = new ArrayList<String>(Math.max(0, _list49.size));
-                for (int _i50 = 0; 
-                     (_list49.size < 0) ? iprot.peekList() : (_i50 < _list49.size); 
-                     ++_i50)
+                TList _list62 = iprot.readListBegin();
+                _val61 = new ArrayList<String>(Math.max(0, _list62.size));
+                for (int _i63 = 0; 
+                     (_list62.size < 0) ? iprot.peekList() : (_i63 < _list62.size); 
+                     ++_i63)
                 {
-                  String _elem51;
-                  _elem51 = iprot.readString();
-                  _val48.add(_elem51);
+                  String _elem64;
+                  _elem64 = iprot.readString();
+                  _val61.add(_elem64);
                 }
                 iprot.readListEnd();
               }
-              mapField.put(_key47, _val48);
+              mapField.put(_key60, _val61);
             }
             iprot.readMapEnd();
           }
@@ -279,8 +279,8 @@ public class Baz extends TUnion<Baz> implements Comparable<Baz> {
         Set<String> setField = (Set<String>)getFieldValue();
         {
           oprot.writeSetBegin(new TSet(TType.STRING, setField.size()));
-          for (String _iter52 : setField)          {
-            oprot.writeString(_iter52);
+          for (String _iter65 : setField)          {
+            oprot.writeString(_iter65);
           }
           oprot.writeSetEnd();
         }
@@ -289,12 +289,12 @@ public class Baz extends TUnion<Baz> implements Comparable<Baz> {
         Map<String,List<String>> mapField = (Map<String,List<String>>)getFieldValue();
         {
           oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, mapField.size()));
-          for (Map.Entry<String, List<String>> _iter53 : mapField.entrySet())          {
-            oprot.writeString(_iter53.getKey());
+          for (Map.Entry<String, List<String>> _iter66 : mapField.entrySet())          {
+            oprot.writeString(_iter66.getKey());
             {
-              oprot.writeListBegin(new TList(TType.STRING, _iter53.getValue().size()));
-              for (String _iter54 : _iter53.getValue())              {
-                oprot.writeString(_iter54);
+              oprot.writeListBegin(new TList(TType.STRING, _iter66.getValue().size()));
+              for (String _iter67 : _iter66.getValue())              {
+                oprot.writeString(_iter67);
               }
               oprot.writeListEnd();
             }

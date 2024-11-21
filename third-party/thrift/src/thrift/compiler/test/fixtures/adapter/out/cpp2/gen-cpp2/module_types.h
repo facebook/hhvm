@@ -30,6 +30,7 @@ struct doubleAdaptedField;
 struct adapted_list;
 struct adapted_set;
 struct adapted_map;
+struct adapted_list_nested;
 struct intField;
 struct setField;
 struct mapField;
@@ -174,6 +175,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(adapted_set);
 #ifndef APACHE_THRIFT_ACCESSOR_adapted_map
 #define APACHE_THRIFT_ACCESSOR_adapted_map
 APACHE_THRIFT_DEFINE_ACCESSOR(adapted_map);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_adapted_list_nested
+#define APACHE_THRIFT_ACCESSOR_adapted_list_nested
+APACHE_THRIFT_DEFINE_ACCESSOR(adapted_list_nested);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_intField
 #define APACHE_THRIFT_ACCESSOR_intField
@@ -709,10 +714,11 @@ class Foo final  {
     ::apache::thrift::ident::doubleAdaptedField,
     ::apache::thrift::ident::adapted_list,
     ::apache::thrift::ident::adapted_set,
-    ::apache::thrift::ident::adapted_map
+    ::apache::thrift::ident::adapted_map,
+    ::apache::thrift::ident::adapted_list_nested
   >;
 
-  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14};
+  static constexpr std::int16_t __fbthrift_reflection_field_id_list[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
   using __fbthrift_reflection_type_tags = folly::tag_t<
     ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
     ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
@@ -727,10 +733,11 @@ class Foo final  {
     ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>,
     ::apache::thrift::type::list<::apache::thrift::type::i32_t>,
     ::apache::thrift::type::set<::apache::thrift::type::i32_t>,
-    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>
+    ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::i32_t>,
+    ::apache::thrift::type::list<::apache::thrift::type::list<::apache::thrift::type::map<::apache::thrift::type::i32_t, ::apache::thrift::type::i32_t>>>
   >;
 
-  static constexpr std::size_t __fbthrift_field_size_v = 14;
+  static constexpr std::size_t __fbthrift_field_size_v = 15;
 
   template<class T>
   using __fbthrift_id = ::apache::thrift::type::field_id<__fbthrift_reflection_field_id_list[folly::to_underlying(T::value)]>;
@@ -766,7 +773,7 @@ class Foo final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg, ::std::vector<::std::int32_t> adapted_list__arg, ::std::set<::std::int32_t> adapted_set__arg, ::std::map<::std::string, ::std::int32_t> adapted_map__arg);
+  Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::facebook::thrift::test::i32_5137, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::i32_5137, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::facebook::thrift::test::i32_5137, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::facebook::thrift::test::map_string_ListWithElemAdapter_withAdapter_8454, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::facebook::thrift::test::binary_5673, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg, ::std::vector<::std::int32_t> adapted_list__arg, ::std::set<::std::int32_t> adapted_set__arg, ::std::map<::std::string, ::std::int32_t> adapted_map__arg, ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> adapted_list_nested__arg);
 
   Foo(Foo&&) noexcept;
   Foo(const Foo& src);
@@ -806,7 +813,9 @@ class Foo final  {
  private:
   ::std::map<::std::string, ::std::int32_t> __fbthrift_field_adapted_map;
  private:
-  apache::thrift::detail::isset_bitset<14, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> __fbthrift_field_adapted_list_nested;
+ private:
+  apache::thrift::detail::isset_bitset<15, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
@@ -1484,6 +1493,54 @@ class Foo final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_map() && {
     return {static_cast<T&&>(this->__fbthrift_field_adapted_map), __isset.at(13), __isset.bit(13)};
   }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_list_nested_ref() const& {
+    return {this->__fbthrift_field_adapted_list_nested, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_list_nested_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_adapted_list_nested), __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_list_nested_ref() & {
+    return {this->__fbthrift_field_adapted_list_nested, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_list_nested_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_adapted_list_nested), __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> adapted_list_nested() const& {
+    return {this->__fbthrift_field_adapted_list_nested, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adapted_list_nested() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_adapted_list_nested), __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> adapted_list_nested() & {
+    return {this->__fbthrift_field_adapted_list_nested, __isset.at(14), __isset.bit(14)};
+  }
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename..., typename T = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> adapted_list_nested() && {
+    return {static_cast<T&&>(this->__fbthrift_field_adapted_list_nested), __isset.at(14), __isset.bit(14)};
+  }
   /** Glean { "field": "adapted_list" } */
   const ::std::vector<::std::int32_t>& get_adapted_list() const&;
   /** Glean { "field": "adapted_list" } */
@@ -1519,6 +1576,18 @@ class Foo final  {
   ::std::map<::std::string, ::std::int32_t>& set_adapted_map(T_Foo_adapted_map_struct_setter&& adapted_map_) {
     adapted_map_ref() = std::forward<T_Foo_adapted_map_struct_setter>(adapted_map_);
     return __fbthrift_field_adapted_map;
+  }
+  /** Glean { "field": "adapted_list_nested" } */
+  const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& get_adapted_list_nested() const&;
+  /** Glean { "field": "adapted_list_nested" } */
+  ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> get_adapted_list_nested() &&;
+
+  /** Glean { "field": "adapted_list_nested" } */
+  template <typename T_Foo_adapted_list_nested_struct_setter = ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>>
+  [[deprecated("Use `FOO.adapted_list_nested() = BAR;` instead of `FOO.set_adapted_list_nested(BAR);`")]]
+  ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& set_adapted_list_nested(T_Foo_adapted_list_nested_struct_setter&& adapted_list_nested_) {
+    adapted_list_nested_ref() = std::forward<T_Foo_adapted_list_nested_struct_setter>(adapted_list_nested_);
+    return __fbthrift_field_adapted_list_nested;
   }
 
   template <class Protocol_>

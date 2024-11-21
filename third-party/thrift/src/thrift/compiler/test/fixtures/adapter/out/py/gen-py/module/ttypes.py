@@ -245,6 +245,7 @@ class Foo:
    - adapted_list
    - adapted_set
    - adapted_map
+   - adapted_list_nested
   """
 
   thrift_spec = None
@@ -453,6 +454,89 @@ class Foo:
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
+      elif fid == 15:
+        if ftype == TType.LIST:
+          self.adapted_list_nested = []
+          (_etype86, _size83) = iprot.readListBegin()
+          if _size83 >= 0:
+            for _i87 in range(_size83):
+              _elem88 = []
+              (_etype92, _size89) = iprot.readListBegin()
+              if _size89 >= 0:
+                for _i93 in range(_size89):
+                  _elem94 = {}
+                  (_ktype96, _vtype97, _size95 ) = iprot.readMapBegin() 
+                  if _size95 >= 0:
+                    for _i99 in range(_size95):
+                      _key100 = iprot.readI32()
+                      _val101 = iprot.readI32()
+                      _elem94[_key100] = _val101
+                  else: 
+                    while iprot.peekMap():
+                      _key102 = iprot.readI32()
+                      _val103 = iprot.readI32()
+                      _elem94[_key102] = _val103
+                  iprot.readMapEnd()
+                  _elem88.append(_elem94)
+              else: 
+                while iprot.peekList():
+                  _elem104 = {}
+                  (_ktype106, _vtype107, _size105 ) = iprot.readMapBegin() 
+                  if _size105 >= 0:
+                    for _i109 in range(_size105):
+                      _key110 = iprot.readI32()
+                      _val111 = iprot.readI32()
+                      _elem104[_key110] = _val111
+                  else: 
+                    while iprot.peekMap():
+                      _key112 = iprot.readI32()
+                      _val113 = iprot.readI32()
+                      _elem104[_key112] = _val113
+                  iprot.readMapEnd()
+                  _elem88.append(_elem104)
+              iprot.readListEnd()
+              self.adapted_list_nested.append(_elem88)
+          else: 
+            while iprot.peekList():
+              _elem114 = []
+              (_etype118, _size115) = iprot.readListBegin()
+              if _size115 >= 0:
+                for _i119 in range(_size115):
+                  _elem120 = {}
+                  (_ktype122, _vtype123, _size121 ) = iprot.readMapBegin() 
+                  if _size121 >= 0:
+                    for _i125 in range(_size121):
+                      _key126 = iprot.readI32()
+                      _val127 = iprot.readI32()
+                      _elem120[_key126] = _val127
+                  else: 
+                    while iprot.peekMap():
+                      _key128 = iprot.readI32()
+                      _val129 = iprot.readI32()
+                      _elem120[_key128] = _val129
+                  iprot.readMapEnd()
+                  _elem114.append(_elem120)
+              else: 
+                while iprot.peekList():
+                  _elem130 = {}
+                  (_ktype132, _vtype133, _size131 ) = iprot.readMapBegin() 
+                  if _size131 >= 0:
+                    for _i135 in range(_size131):
+                      _key136 = iprot.readI32()
+                      _val137 = iprot.readI32()
+                      _elem130[_key136] = _val137
+                  else: 
+                    while iprot.peekMap():
+                      _key138 = iprot.readI32()
+                      _val139 = iprot.readI32()
+                      _elem130[_key138] = _val139
+                  iprot.readMapEnd()
+                  _elem114.append(_elem130)
+              iprot.readListEnd()
+              self.adapted_list_nested.append(_elem114)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -481,36 +565,36 @@ class Foo:
     if self.setField != None:
       oprot.writeFieldBegin('setField', TType.SET, 4)
       oprot.writeSetBegin(TType.STRING, len(self.setField))
-      for iter83 in self.setField:
-        oprot.writeString(iter83.encode('utf-8')) if UTF8STRINGS and not isinstance(iter83, bytes) else oprot.writeString(iter83)
+      for iter140 in self.setField:
+        oprot.writeString(iter140.encode('utf-8')) if UTF8STRINGS and not isinstance(iter140, bytes) else oprot.writeString(iter140)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.optionalSetField != None:
       oprot.writeFieldBegin('optionalSetField', TType.SET, 5)
       oprot.writeSetBegin(TType.STRING, len(self.optionalSetField))
-      for iter84 in self.optionalSetField:
-        oprot.writeString(iter84.encode('utf-8')) if UTF8STRINGS and not isinstance(iter84, bytes) else oprot.writeString(iter84)
+      for iter141 in self.optionalSetField:
+        oprot.writeString(iter141.encode('utf-8')) if UTF8STRINGS and not isinstance(iter141, bytes) else oprot.writeString(iter141)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.mapField != None:
       oprot.writeFieldBegin('mapField', TType.MAP, 6)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.mapField))
-      for kiter85,viter86 in self.mapField.items():
-        oprot.writeString(kiter85.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter85, bytes) else oprot.writeString(kiter85)
-        oprot.writeListBegin(TType.STRING, len(viter86))
-        for iter87 in viter86:
-          oprot.writeString(iter87.encode('utf-8')) if UTF8STRINGS and not isinstance(iter87, bytes) else oprot.writeString(iter87)
+      for kiter142,viter143 in self.mapField.items():
+        oprot.writeString(kiter142.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter142, bytes) else oprot.writeString(kiter142)
+        oprot.writeListBegin(TType.STRING, len(viter143))
+        for iter144 in viter143:
+          oprot.writeString(iter144.encode('utf-8')) if UTF8STRINGS and not isinstance(iter144, bytes) else oprot.writeString(iter144)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.optionalMapField != None:
       oprot.writeFieldBegin('optionalMapField', TType.MAP, 7)
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(self.optionalMapField))
-      for kiter88,viter89 in self.optionalMapField.items():
-        oprot.writeString(kiter88.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter88, bytes) else oprot.writeString(kiter88)
-        oprot.writeListBegin(TType.STRING, len(viter89))
-        for iter90 in viter89:
-          oprot.writeString(iter90.encode('utf-8')) if UTF8STRINGS and not isinstance(iter90, bytes) else oprot.writeString(iter90)
+      for kiter145,viter146 in self.optionalMapField.items():
+        oprot.writeString(kiter145.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter145, bytes) else oprot.writeString(kiter145)
+        oprot.writeListBegin(TType.STRING, len(viter146))
+        for iter147 in viter146:
+          oprot.writeString(iter147.encode('utf-8')) if UTF8STRINGS and not isinstance(iter147, bytes) else oprot.writeString(iter147)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -533,24 +617,38 @@ class Foo:
     if self.adapted_list != None:
       oprot.writeFieldBegin('adapted_list', TType.LIST, 12)
       oprot.writeListBegin(TType.I32, len(self.adapted_list))
-      for iter91 in self.adapted_list:
-        oprot.writeI32(iter91)
+      for iter148 in self.adapted_list:
+        oprot.writeI32(iter148)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.adapted_set != None:
       oprot.writeFieldBegin('adapted_set', TType.SET, 13)
       oprot.writeSetBegin(TType.I32, len(self.adapted_set))
-      for iter92 in self.adapted_set:
-        oprot.writeI32(iter92)
+      for iter149 in self.adapted_set:
+        oprot.writeI32(iter149)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.adapted_map != None:
       oprot.writeFieldBegin('adapted_map', TType.MAP, 14)
       oprot.writeMapBegin(TType.STRING, TType.I32, len(self.adapted_map))
-      for kiter93,viter94 in self.adapted_map.items():
-        oprot.writeString(kiter93.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter93, bytes) else oprot.writeString(kiter93)
-        oprot.writeI32(viter94)
+      for kiter150,viter151 in self.adapted_map.items():
+        oprot.writeString(kiter150.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter150, bytes) else oprot.writeString(kiter150)
+        oprot.writeI32(viter151)
       oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.adapted_list_nested != None:
+      oprot.writeFieldBegin('adapted_list_nested', TType.LIST, 15)
+      oprot.writeListBegin(TType.LIST, len(self.adapted_list_nested))
+      for iter152 in self.adapted_list_nested:
+        oprot.writeListBegin(TType.MAP, len(iter152))
+        for iter153 in iter152:
+          oprot.writeMapBegin(TType.I32, TType.I32, len(iter153))
+          for kiter154,viter155 in iter153.items():
+            oprot.writeI32(kiter154)
+            oprot.writeI32(viter155)
+          oprot.writeMapEnd()
+        oprot.writeListEnd()
+      oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeStructEnd()
@@ -587,28 +685,28 @@ class Foo:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
     if 'setField' in json_obj and json_obj['setField'] is not None:
       self.setField = set_cls()
-      for _tmp_e95 in json_obj['setField']:
-        self.setField.add(_tmp_e95)
+      for _tmp_e156 in json_obj['setField']:
+        self.setField.add(_tmp_e156)
     if 'optionalSetField' in json_obj and json_obj['optionalSetField'] is not None:
       self.optionalSetField = set_cls()
-      for _tmp_e96 in json_obj['optionalSetField']:
-        self.optionalSetField.add(_tmp_e96)
+      for _tmp_e157 in json_obj['optionalSetField']:
+        self.optionalSetField.add(_tmp_e157)
     if 'mapField' in json_obj and json_obj['mapField'] is not None:
       self.mapField = dict_cls()
-      for _tmp_k97, _tmp_v98 in json_obj['mapField'].items():
-        _tmp_kp99 = _tmp_k97
-        _list100 = []
-        for _tmp_e101 in _tmp_v98:
-          _list100.append(_tmp_e101)
-        self.mapField[_tmp_kp99] = _list100
+      for _tmp_k158, _tmp_v159 in json_obj['mapField'].items():
+        _tmp_kp160 = _tmp_k158
+        _list161 = []
+        for _tmp_e162 in _tmp_v159:
+          _list161.append(_tmp_e162)
+        self.mapField[_tmp_kp160] = _list161
     if 'optionalMapField' in json_obj and json_obj['optionalMapField'] is not None:
       self.optionalMapField = dict_cls()
-      for _tmp_k102, _tmp_v103 in json_obj['optionalMapField'].items():
-        _tmp_kp104 = _tmp_k102
-        _list105 = []
-        for _tmp_e106 in _tmp_v103:
-          _list105.append(_tmp_e106)
-        self.optionalMapField[_tmp_kp104] = _list105
+      for _tmp_k163, _tmp_v164 in json_obj['optionalMapField'].items():
+        _tmp_kp165 = _tmp_k163
+        _list166 = []
+        for _tmp_e167 in _tmp_v164:
+          _list166.append(_tmp_e167)
+        self.optionalMapField[_tmp_kp165] = _list166
     if 'binaryField' in json_obj and json_obj['binaryField'] is not None:
       self.binaryField = json_obj['binaryField']
     if 'longField' in json_obj and json_obj['longField'] is not None:
@@ -619,23 +717,38 @@ class Foo:
       self.doubleAdaptedField = long(json_obj['doubleAdaptedField'])
     if 'adapted_list' in json_obj and json_obj['adapted_list'] is not None:
       self.adapted_list = []
-      for _tmp_e107 in json_obj['adapted_list']:
-        if _tmp_e107 > 0x7fffffff or _tmp_e107 < -0x80000000:
+      for _tmp_e168 in json_obj['adapted_list']:
+        if _tmp_e168 > 0x7fffffff or _tmp_e168 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.adapted_list.append(_tmp_e107)
+        self.adapted_list.append(_tmp_e168)
     if 'adapted_set' in json_obj and json_obj['adapted_set'] is not None:
       self.adapted_set = set_cls()
-      for _tmp_e108 in json_obj['adapted_set']:
-        if _tmp_e108 > 0x7fffffff or _tmp_e108 < -0x80000000:
+      for _tmp_e169 in json_obj['adapted_set']:
+        if _tmp_e169 > 0x7fffffff or _tmp_e169 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.adapted_set.add(_tmp_e108)
+        self.adapted_set.add(_tmp_e169)
     if 'adapted_map' in json_obj and json_obj['adapted_map'] is not None:
       self.adapted_map = dict_cls()
-      for _tmp_k109, _tmp_v110 in json_obj['adapted_map'].items():
-        _tmp_kp111 = _tmp_k109
-        if _tmp_v110 > 0x7fffffff or _tmp_v110 < -0x80000000:
+      for _tmp_k170, _tmp_v171 in json_obj['adapted_map'].items():
+        _tmp_kp172 = _tmp_k170
+        if _tmp_v171 > 0x7fffffff or _tmp_v171 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.adapted_map[_tmp_kp111] = _tmp_v110
+        self.adapted_map[_tmp_kp172] = _tmp_v171
+    if 'adapted_list_nested' in json_obj and json_obj['adapted_list_nested'] is not None:
+      self.adapted_list_nested = []
+      for _tmp_e173 in json_obj['adapted_list_nested']:
+        _list174 = []
+        for _tmp_e175 in _tmp_e173:
+          _map176 = dict_cls()
+          for _tmp_k177, _tmp_v178 in _tmp_e175.items():
+            _tmp_kp179 = int(_tmp_k177)
+            if _tmp_kp179 > 0x7fffffff or _tmp_kp179 < -0x80000000:
+              raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds the limit in key ' + _tmp_k177)
+            if _tmp_v178 > 0x7fffffff or _tmp_v178 < -0x80000000:
+              raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+            _map176[_tmp_kp179] = _tmp_v178
+          _list174.append(_map176)
+        self.adapted_list_nested.append(_list174)
 
   def __repr__(self):
     L = []
@@ -696,6 +809,10 @@ class Foo:
       value = pprint.pformat(self.adapted_map, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    adapted_map=%s' % (value))
+    if self.adapted_list_nested is not None:
+      value = pprint.pformat(self.adapted_list_nested, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adapted_list_nested=%s' % (value))
     return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
 
   def __eq__(self, other):
@@ -723,6 +840,7 @@ class Foo:
       'adapted_list',
       'adapted_set',
       'adapted_map',
+      'adapted_list_nested',
     )
 
   __hash__ = object.__hash__
@@ -859,15 +977,15 @@ class Baz(object):
       elif fid == 4:
         if ftype == TType.SET:
           _fbthrift_setField = set()
-          (_etype115, _size112) = iprot.readSetBegin()
-          if _size112 >= 0:
-            for _i116 in range(_size112):
-              _elem117 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _fbthrift_setField.add(_elem117)
+          (_etype183, _size180) = iprot.readSetBegin()
+          if _size180 >= 0:
+            for _i184 in range(_size180):
+              _elem185 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _fbthrift_setField.add(_elem185)
           else: 
             while iprot.peekSet():
-              _elem118 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _fbthrift_setField.add(_elem118)
+              _elem186 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _fbthrift_setField.add(_elem186)
           iprot.readSetEnd()
           assert self.field == 0 and self.value is None
           self.set_setField(_fbthrift_setField)
@@ -876,37 +994,37 @@ class Baz(object):
       elif fid == 6:
         if ftype == TType.MAP:
           _fbthrift_mapField = {}
-          (_ktype120, _vtype121, _size119 ) = iprot.readMapBegin() 
-          if _size119 >= 0:
-            for _i123 in range(_size119):
-              _key124 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val125 = []
-              (_etype129, _size126) = iprot.readListBegin()
-              if _size126 >= 0:
-                for _i130 in range(_size126):
-                  _elem131 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val125.append(_elem131)
+          (_ktype188, _vtype189, _size187 ) = iprot.readMapBegin() 
+          if _size187 >= 0:
+            for _i191 in range(_size187):
+              _key192 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val193 = []
+              (_etype197, _size194) = iprot.readListBegin()
+              if _size194 >= 0:
+                for _i198 in range(_size194):
+                  _elem199 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val193.append(_elem199)
               else: 
                 while iprot.peekList():
-                  _elem132 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val125.append(_elem132)
+                  _elem200 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val193.append(_elem200)
               iprot.readListEnd()
-              _fbthrift_mapField[_key124] = _val125
+              _fbthrift_mapField[_key192] = _val193
           else: 
             while iprot.peekMap():
-              _key133 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val134 = []
-              (_etype138, _size135) = iprot.readListBegin()
-              if _size135 >= 0:
-                for _i139 in range(_size135):
-                  _elem140 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val134.append(_elem140)
+              _key201 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val202 = []
+              (_etype206, _size203) = iprot.readListBegin()
+              if _size203 >= 0:
+                for _i207 in range(_size203):
+                  _elem208 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val202.append(_elem208)
               else: 
                 while iprot.peekList():
-                  _elem141 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-                  _val134.append(_elem141)
+                  _elem209 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+                  _val202.append(_elem209)
               iprot.readListEnd()
-              _fbthrift_mapField[_key133] = _val134
+              _fbthrift_mapField[_key201] = _val202
           iprot.readMapEnd()
           assert self.field == 0 and self.value is None
           self.set_mapField(_fbthrift_mapField)
@@ -948,19 +1066,19 @@ class Baz(object):
       oprot.writeFieldBegin('setField', TType.SET, 4)
       setField = self.value
       oprot.writeSetBegin(TType.STRING, len(setField))
-      for iter142 in setField:
-        oprot.writeString(iter142.encode('utf-8')) if UTF8STRINGS and not isinstance(iter142, bytes) else oprot.writeString(iter142)
+      for iter210 in setField:
+        oprot.writeString(iter210.encode('utf-8')) if UTF8STRINGS and not isinstance(iter210, bytes) else oprot.writeString(iter210)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.field == 6:
       oprot.writeFieldBegin('mapField', TType.MAP, 6)
       mapField = self.value
       oprot.writeMapBegin(TType.STRING, TType.LIST, len(mapField))
-      for kiter143,viter144 in mapField.items():
-        oprot.writeString(kiter143.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter143, bytes) else oprot.writeString(kiter143)
-        oprot.writeListBegin(TType.STRING, len(viter144))
-        for iter145 in viter144:
-          oprot.writeString(iter145.encode('utf-8')) if UTF8STRINGS and not isinstance(iter145, bytes) else oprot.writeString(iter145)
+      for kiter211,viter212 in mapField.items():
+        oprot.writeString(kiter211.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter211, bytes) else oprot.writeString(kiter211)
+        oprot.writeListBegin(TType.STRING, len(viter212))
+        for iter213 in viter212:
+          oprot.writeString(iter213.encode('utf-8')) if UTF8STRINGS and not isinstance(iter213, bytes) else oprot.writeString(iter213)
         oprot.writeListEnd()
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
@@ -1007,17 +1125,17 @@ class Baz(object):
       self.set_intField(_fbthrift_intField)
     if 'setField' in obj:
       _fbthrift_setField = set_cls()
-      for _tmp_e146 in obj['setField']:
-        _fbthrift_setField.add(_tmp_e146)
+      for _tmp_e214 in obj['setField']:
+        _fbthrift_setField.add(_tmp_e214)
       self.set_setField(_fbthrift_setField)
     if 'mapField' in obj:
       _fbthrift_mapField = dict_cls()
-      for _tmp_k147, _tmp_v148 in obj['mapField'].items():
-        _tmp_kp149 = _tmp_k147
-        _list150 = []
-        for _tmp_e151 in _tmp_v148:
-          _list150.append(_tmp_e151)
-        _fbthrift_mapField[_tmp_kp149] = _list150
+      for _tmp_k215, _tmp_v216 in obj['mapField'].items():
+        _tmp_kp217 = _tmp_k215
+        _list218 = []
+        for _tmp_e219 in _tmp_v216:
+          _list218.append(_tmp_e219)
+        _fbthrift_mapField[_tmp_kp217] = _list218
       self.set_mapField(_fbthrift_mapField)
     if 'binaryField' in obj:
       _fbthrift_binaryField = obj['binaryField']
@@ -1099,38 +1217,38 @@ class Bar:
       elif fid == 3:
         if ftype == TType.LIST:
           self.structListField = []
-          (_etype155, _size152) = iprot.readListBegin()
-          if _size152 >= 0:
-            for _i156 in range(_size152):
-              _elem157 = Foo()
-              _elem157.read(iprot)
-              _elem157 = my.Adapter1.from_thrift(_elem157)
-              self.structListField.append(_elem157)
+          (_etype223, _size220) = iprot.readListBegin()
+          if _size220 >= 0:
+            for _i224 in range(_size220):
+              _elem225 = Foo()
+              _elem225.read(iprot)
+              _elem225 = my.Adapter1.from_thrift(_elem225)
+              self.structListField.append(_elem225)
           else: 
             while iprot.peekList():
-              _elem158 = Foo()
-              _elem158.read(iprot)
-              _elem158 = my.Adapter1.from_thrift(_elem158)
-              self.structListField.append(_elem158)
+              _elem226 = Foo()
+              _elem226.read(iprot)
+              _elem226 = my.Adapter1.from_thrift(_elem226)
+              self.structListField.append(_elem226)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 4:
         if ftype == TType.LIST:
           self.optionalStructListField = []
-          (_etype162, _size159) = iprot.readListBegin()
-          if _size159 >= 0:
-            for _i163 in range(_size159):
-              _elem164 = Foo()
-              _elem164.read(iprot)
-              _elem164 = my.Adapter1.from_thrift(_elem164)
-              self.optionalStructListField.append(_elem164)
+          (_etype230, _size227) = iprot.readListBegin()
+          if _size227 >= 0:
+            for _i231 in range(_size227):
+              _elem232 = Foo()
+              _elem232.read(iprot)
+              _elem232 = my.Adapter1.from_thrift(_elem232)
+              self.optionalStructListField.append(_elem232)
           else: 
             while iprot.peekList():
-              _elem165 = Foo()
-              _elem165.read(iprot)
-              _elem165 = my.Adapter1.from_thrift(_elem165)
-              self.optionalStructListField.append(_elem165)
+              _elem233 = Foo()
+              _elem233.read(iprot)
+              _elem233 = my.Adapter1.from_thrift(_elem233)
+              self.optionalStructListField.append(_elem233)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -1169,39 +1287,39 @@ class Bar:
     oprot.writeStructBegin('Bar')
     if self.structField != None:
       oprot.writeFieldBegin('structField', TType.STRUCT, 1)
-      adpt166 = ::my.Adapter1.to_thrift(self.structField)
-      adpt166.write(oprot)
+      adpt234 = ::my.Adapter1.to_thrift(self.structField)
+      adpt234.write(oprot)
       oprot.writeFieldEnd()
     if self.optionalStructField != None:
       oprot.writeFieldBegin('optionalStructField', TType.STRUCT, 2)
-      adpt167 = my.Adapter1.to_thrift(self.optionalStructField)
-      adpt167.write(oprot)
+      adpt235 = my.Adapter1.to_thrift(self.optionalStructField)
+      adpt235.write(oprot)
       oprot.writeFieldEnd()
     if self.structListField != None:
       oprot.writeFieldBegin('structListField', TType.LIST, 3)
       oprot.writeListBegin(TType.STRUCT, len(self.structListField))
-      for iter168 in self.structListField:
-        adpt169 = my.Adapter1.to_thrift(iter168)
-        adpt169.write(oprot)
+      for iter236 in self.structListField:
+        adpt237 = my.Adapter1.to_thrift(iter236)
+        adpt237.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.optionalStructListField != None:
       oprot.writeFieldBegin('optionalStructListField', TType.LIST, 4)
       oprot.writeListBegin(TType.STRUCT, len(self.optionalStructListField))
-      for iter170 in self.optionalStructListField:
-        adpt171 = my.Adapter1.to_thrift(iter170)
-        adpt171.write(oprot)
+      for iter238 in self.optionalStructListField:
+        adpt239 = my.Adapter1.to_thrift(iter238)
+        adpt239.write(oprot)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.unionField != None:
       oprot.writeFieldBegin('unionField', TType.STRUCT, 5)
-      adpt172 = my.Adapter1.to_thrift(self.unionField)
-      adpt172.write(oprot)
+      adpt240 = my.Adapter1.to_thrift(self.unionField)
+      adpt240.write(oprot)
       oprot.writeFieldEnd()
     if self.optionalUnionField != None:
       oprot.writeFieldBegin('optionalUnionField', TType.STRUCT, 6)
-      adpt173 = my.Adapter1.to_thrift(self.optionalUnionField)
-      adpt173.write(oprot)
+      adpt241 = my.Adapter1.to_thrift(self.optionalUnionField)
+      adpt241.write(oprot)
       oprot.writeFieldEnd()
     if self.adaptedStructField != None:
       oprot.writeFieldBegin('adaptedStructField', TType.STRUCT, 7)
@@ -1236,16 +1354,16 @@ class Bar:
       self.optionalStructField.readFromJson(json_obj['optionalStructField'], is_text=False, **kwargs)
     if 'structListField' in json_obj and json_obj['structListField'] is not None:
       self.structListField = []
-      for _tmp_e174 in json_obj['structListField']:
-        _struct175 = Foo()
-        _struct175.readFromJson(_tmp_e174, is_text=False, **kwargs)
-        self.structListField.append(_struct175)
+      for _tmp_e242 in json_obj['structListField']:
+        _struct243 = Foo()
+        _struct243.readFromJson(_tmp_e242, is_text=False, **kwargs)
+        self.structListField.append(_struct243)
     if 'optionalStructListField' in json_obj and json_obj['optionalStructListField'] is not None:
       self.optionalStructListField = []
-      for _tmp_e176 in json_obj['optionalStructListField']:
-        _struct177 = Foo()
-        _struct177.readFromJson(_tmp_e176, is_text=False, **kwargs)
-        self.optionalStructListField.append(_struct177)
+      for _tmp_e244 in json_obj['optionalStructListField']:
+        _struct245 = Foo()
+        _struct245.readFromJson(_tmp_e244, is_text=False, **kwargs)
+        self.optionalStructListField.append(_struct245)
     if 'unionField' in json_obj and json_obj['unionField'] is not None:
       self.unionField = Baz()
       self.unionField.readFromJson(json_obj['unionField'], is_text=False, **kwargs)
@@ -1766,15 +1884,15 @@ class TerseAdaptedFields:
       elif fid == 3:
         if ftype == TType.SET:
           self.set_field = set()
-          (_etype181, _size178) = iprot.readSetBegin()
-          if _size178 >= 0:
-            for _i182 in range(_size178):
-              _elem183 = iprot.readI32()
-              self.set_field.add(_elem183)
+          (_etype249, _size246) = iprot.readSetBegin()
+          if _size246 >= 0:
+            for _i250 in range(_size246):
+              _elem251 = iprot.readI32()
+              self.set_field.add(_elem251)
           else: 
             while iprot.peekSet():
-              _elem184 = iprot.readI32()
-              self.set_field.add(_elem184)
+              _elem252 = iprot.readI32()
+              self.set_field.add(_elem252)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -1802,8 +1920,8 @@ class TerseAdaptedFields:
     if self.set_field != None:
       oprot.writeFieldBegin('set_field', TType.SET, 3)
       oprot.writeSetBegin(TType.I32, len(self.set_field))
-      for iter185 in self.set_field:
-        oprot.writeI32(iter185)
+      for iter253 in self.set_field:
+        oprot.writeI32(iter253)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -1835,10 +1953,10 @@ class TerseAdaptedFields:
       self.string_field = json_obj['string_field']
     if 'set_field' in json_obj and json_obj['set_field'] is not None:
       self.set_field = set_cls()
-      for _tmp_e186 in json_obj['set_field']:
-        if _tmp_e186 > 0x7fffffff or _tmp_e186 < -0x80000000:
+      for _tmp_e254 in json_obj['set_field']:
+        if _tmp_e254 > 0x7fffffff or _tmp_e254 < -0x80000000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.set_field.add(_tmp_e186)
+        self.set_field.add(_tmp_e254)
 
   def __repr__(self):
     L = []
@@ -2242,15 +2360,15 @@ class MyStruct:
       elif fid == 2:
         if ftype == TType.SET:
           self.set_string = set()
-          (_etype190, _size187) = iprot.readSetBegin()
-          if _size187 >= 0:
-            for _i191 in range(_size187):
-              _elem192 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.set_string.add(_elem192)
+          (_etype258, _size255) = iprot.readSetBegin()
+          if _size255 >= 0:
+            for _i259 in range(_size255):
+              _elem260 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.set_string.add(_elem260)
           else: 
             while iprot.peekSet():
-              _elem193 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.set_string.add(_elem193)
+              _elem261 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.set_string.add(_elem261)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -2274,8 +2392,8 @@ class MyStruct:
     if self.set_string != None:
       oprot.writeFieldBegin('set_string', TType.SET, 2)
       oprot.writeSetBegin(TType.STRING, len(self.set_string))
-      for iter194 in self.set_string:
-        oprot.writeString(iter194.encode('utf-8')) if UTF8STRINGS and not isinstance(iter194, bytes) else oprot.writeString(iter194)
+      for iter262 in self.set_string:
+        oprot.writeString(iter262.encode('utf-8')) if UTF8STRINGS and not isinstance(iter262, bytes) else oprot.writeString(iter262)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -2305,8 +2423,8 @@ class MyStruct:
         raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
     if 'set_string' in json_obj and json_obj['set_string'] is not None:
       self.set_string = set_cls()
-      for _tmp_e195 in json_obj['set_string']:
-        self.set_string.add(_tmp_e195)
+      for _tmp_e263 in json_obj['set_string']:
+        self.set_string.add(_tmp_e263)
 
   def __repr__(self):
     L = []
@@ -2705,47 +2823,47 @@ class AdaptTemplatedTestStruct:
       elif fid == 8:
         if ftype == TType.LIST:
           self.adaptedList = []
-          (_etype199, _size196) = iprot.readListBegin()
-          if _size196 >= 0:
-            for _i200 in range(_size196):
-              _elem201 = iprot.readI64()
-              self.adaptedList.append(_elem201)
+          (_etype267, _size264) = iprot.readListBegin()
+          if _size264 >= 0:
+            for _i268 in range(_size264):
+              _elem269 = iprot.readI64()
+              self.adaptedList.append(_elem269)
           else: 
             while iprot.peekList():
-              _elem202 = iprot.readI64()
-              self.adaptedList.append(_elem202)
+              _elem270 = iprot.readI64()
+              self.adaptedList.append(_elem270)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.SET:
           self.adaptedSet = set()
-          (_etype206, _size203) = iprot.readSetBegin()
-          if _size203 >= 0:
-            for _i207 in range(_size203):
-              _elem208 = iprot.readI64()
-              self.adaptedSet.add(_elem208)
+          (_etype274, _size271) = iprot.readSetBegin()
+          if _size271 >= 0:
+            for _i275 in range(_size271):
+              _elem276 = iprot.readI64()
+              self.adaptedSet.add(_elem276)
           else: 
             while iprot.peekSet():
-              _elem209 = iprot.readI64()
-              self.adaptedSet.add(_elem209)
+              _elem277 = iprot.readI64()
+              self.adaptedSet.add(_elem277)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 10:
         if ftype == TType.MAP:
           self.adaptedMap = {}
-          (_ktype211, _vtype212, _size210 ) = iprot.readMapBegin() 
-          if _size210 >= 0:
-            for _i214 in range(_size210):
-              _key215 = iprot.readI64()
-              _val216 = iprot.readI64()
-              self.adaptedMap[_key215] = _val216
+          (_ktype279, _vtype280, _size278 ) = iprot.readMapBegin() 
+          if _size278 >= 0:
+            for _i282 in range(_size278):
+              _key283 = iprot.readI64()
+              _val284 = iprot.readI64()
+              self.adaptedMap[_key283] = _val284
           else: 
             while iprot.peekMap():
-              _key217 = iprot.readI64()
-              _val218 = iprot.readI64()
-              self.adaptedMap[_key217] = _val218
+              _key285 = iprot.readI64()
+              _val286 = iprot.readI64()
+              self.adaptedMap[_key285] = _val286
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -2792,47 +2910,47 @@ class AdaptTemplatedTestStruct:
       elif fid == 19:
         if ftype == TType.LIST:
           self.adaptedListDefault = []
-          (_etype222, _size219) = iprot.readListBegin()
-          if _size219 >= 0:
-            for _i223 in range(_size219):
-              _elem224 = iprot.readI64()
-              self.adaptedListDefault.append(_elem224)
+          (_etype290, _size287) = iprot.readListBegin()
+          if _size287 >= 0:
+            for _i291 in range(_size287):
+              _elem292 = iprot.readI64()
+              self.adaptedListDefault.append(_elem292)
           else: 
             while iprot.peekList():
-              _elem225 = iprot.readI64()
-              self.adaptedListDefault.append(_elem225)
+              _elem293 = iprot.readI64()
+              self.adaptedListDefault.append(_elem293)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 20:
         if ftype == TType.SET:
           self.adaptedSetDefault = set()
-          (_etype229, _size226) = iprot.readSetBegin()
-          if _size226 >= 0:
-            for _i230 in range(_size226):
-              _elem231 = iprot.readI64()
-              self.adaptedSetDefault.add(_elem231)
+          (_etype297, _size294) = iprot.readSetBegin()
+          if _size294 >= 0:
+            for _i298 in range(_size294):
+              _elem299 = iprot.readI64()
+              self.adaptedSetDefault.add(_elem299)
           else: 
             while iprot.peekSet():
-              _elem232 = iprot.readI64()
-              self.adaptedSetDefault.add(_elem232)
+              _elem300 = iprot.readI64()
+              self.adaptedSetDefault.add(_elem300)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 21:
         if ftype == TType.MAP:
           self.adaptedMapDefault = {}
-          (_ktype234, _vtype235, _size233 ) = iprot.readMapBegin() 
-          if _size233 >= 0:
-            for _i237 in range(_size233):
-              _key238 = iprot.readI64()
-              _val239 = iprot.readI64()
-              self.adaptedMapDefault[_key238] = _val239
+          (_ktype302, _vtype303, _size301 ) = iprot.readMapBegin() 
+          if _size301 >= 0:
+            for _i305 in range(_size301):
+              _key306 = iprot.readI64()
+              _val307 = iprot.readI64()
+              self.adaptedMapDefault[_key306] = _val307
           else: 
             while iprot.peekMap():
-              _key240 = iprot.readI64()
-              _val241 = iprot.readI64()
-              self.adaptedMapDefault[_key240] = _val241
+              _key308 = iprot.readI64()
+              _val309 = iprot.readI64()
+              self.adaptedMapDefault[_key308] = _val309
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -2885,23 +3003,23 @@ class AdaptTemplatedTestStruct:
     if self.adaptedList != None:
       oprot.writeFieldBegin('adaptedList', TType.LIST, 8)
       oprot.writeListBegin(TType.I64, len(self.adaptedList))
-      for iter242 in self.adaptedList:
-        oprot.writeI64(iter242)
+      for iter310 in self.adaptedList:
+        oprot.writeI64(iter310)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.adaptedSet != None:
       oprot.writeFieldBegin('adaptedSet', TType.SET, 9)
       oprot.writeSetBegin(TType.I64, len(self.adaptedSet))
-      for iter243 in self.adaptedSet:
-        oprot.writeI64(iter243)
+      for iter311 in self.adaptedSet:
+        oprot.writeI64(iter311)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.adaptedMap != None:
       oprot.writeFieldBegin('adaptedMap', TType.MAP, 10)
       oprot.writeMapBegin(TType.I64, TType.I64, len(self.adaptedMap))
-      for kiter244,viter245 in self.adaptedMap.items():
-        oprot.writeI64(kiter244)
-        oprot.writeI64(viter245)
+      for kiter312,viter313 in self.adaptedMap.items():
+        oprot.writeI64(kiter312)
+        oprot.writeI64(viter313)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.adaptedBoolDefault != None:
@@ -2939,23 +3057,23 @@ class AdaptTemplatedTestStruct:
     if self.adaptedListDefault != None:
       oprot.writeFieldBegin('adaptedListDefault', TType.LIST, 19)
       oprot.writeListBegin(TType.I64, len(self.adaptedListDefault))
-      for iter246 in self.adaptedListDefault:
-        oprot.writeI64(iter246)
+      for iter314 in self.adaptedListDefault:
+        oprot.writeI64(iter314)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.adaptedSetDefault != None:
       oprot.writeFieldBegin('adaptedSetDefault', TType.SET, 20)
       oprot.writeSetBegin(TType.I64, len(self.adaptedSetDefault))
-      for iter247 in self.adaptedSetDefault:
-        oprot.writeI64(iter247)
+      for iter315 in self.adaptedSetDefault:
+        oprot.writeI64(iter315)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.adaptedMapDefault != None:
       oprot.writeFieldBegin('adaptedMapDefault', TType.MAP, 21)
       oprot.writeMapBegin(TType.I64, TType.I64, len(self.adaptedMapDefault))
-      for kiter248,viter249 in self.adaptedMapDefault.items():
-        oprot.writeI64(kiter248)
-        oprot.writeI64(viter249)
+      for kiter316,viter317 in self.adaptedMapDefault.items():
+        oprot.writeI64(kiter316)
+        oprot.writeI64(viter317)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.doubleTypedefBool != None:
@@ -3005,17 +3123,17 @@ class AdaptTemplatedTestStruct:
       self.adaptedString = json_obj['adaptedString']
     if 'adaptedList' in json_obj and json_obj['adaptedList'] is not None:
       self.adaptedList = []
-      for _tmp_e250 in json_obj['adaptedList']:
-        self.adaptedList.append(_tmp_e250)
+      for _tmp_e318 in json_obj['adaptedList']:
+        self.adaptedList.append(_tmp_e318)
     if 'adaptedSet' in json_obj and json_obj['adaptedSet'] is not None:
       self.adaptedSet = set_cls()
-      for _tmp_e251 in json_obj['adaptedSet']:
-        self.adaptedSet.add(_tmp_e251)
+      for _tmp_e319 in json_obj['adaptedSet']:
+        self.adaptedSet.add(_tmp_e319)
     if 'adaptedMap' in json_obj and json_obj['adaptedMap'] is not None:
       self.adaptedMap = dict_cls()
-      for _tmp_k252, _tmp_v253 in json_obj['adaptedMap'].items():
-        _tmp_kp254 = long(_tmp_k252)
-        self.adaptedMap[_tmp_kp254] = _tmp_v253
+      for _tmp_k320, _tmp_v321 in json_obj['adaptedMap'].items():
+        _tmp_kp322 = long(_tmp_k320)
+        self.adaptedMap[_tmp_kp322] = _tmp_v321
     if 'adaptedBoolDefault' in json_obj and json_obj['adaptedBoolDefault'] is not None:
       self.adaptedBoolDefault = json_obj['adaptedBoolDefault']
     if 'adaptedByteDefault' in json_obj and json_obj['adaptedByteDefault'] is not None:
@@ -3048,17 +3166,17 @@ class AdaptTemplatedTestStruct:
         self.adaptedEnum = ThriftEnumWrapper(ThriftAdaptedEnum, self.adaptedEnum)
     if 'adaptedListDefault' in json_obj and json_obj['adaptedListDefault'] is not None:
       self.adaptedListDefault = []
-      for _tmp_e255 in json_obj['adaptedListDefault']:
-        self.adaptedListDefault.append(_tmp_e255)
+      for _tmp_e323 in json_obj['adaptedListDefault']:
+        self.adaptedListDefault.append(_tmp_e323)
     if 'adaptedSetDefault' in json_obj and json_obj['adaptedSetDefault'] is not None:
       self.adaptedSetDefault = set_cls()
-      for _tmp_e256 in json_obj['adaptedSetDefault']:
-        self.adaptedSetDefault.add(_tmp_e256)
+      for _tmp_e324 in json_obj['adaptedSetDefault']:
+        self.adaptedSetDefault.add(_tmp_e324)
     if 'adaptedMapDefault' in json_obj and json_obj['adaptedMapDefault'] is not None:
       self.adaptedMapDefault = dict_cls()
-      for _tmp_k257, _tmp_v258 in json_obj['adaptedMapDefault'].items():
-        _tmp_kp259 = long(_tmp_k257)
-        self.adaptedMapDefault[_tmp_kp259] = _tmp_v258
+      for _tmp_k325, _tmp_v326 in json_obj['adaptedMapDefault'].items():
+        _tmp_kp327 = long(_tmp_k325)
+        self.adaptedMapDefault[_tmp_kp327] = _tmp_v326
     if 'doubleTypedefBool' in json_obj and json_obj['doubleTypedefBool'] is not None:
       self.doubleTypedefBool = json_obj['doubleTypedefBool']
 
@@ -5594,6 +5712,7 @@ Foo.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (12, TType.LIST, 'adapted_list', (TType.I32,None), None, 2, ), # 12
   (13, TType.SET, 'adapted_set', (TType.I32,None), None, 2, ), # 13
   (14, TType.MAP, 'adapted_map', (TType.STRING,True,TType.I32,None), None, 2, ), # 14
+  (15, TType.LIST, 'adapted_list_nested', (TType.LIST,(TType.MAP,(TType.I32,None,TType.I32,None))), None, 2, ), # 15
 )))
 
 Foo.thrift_struct_annotations = {
@@ -5602,7 +5721,7 @@ Foo.thrift_struct_annotations = {
 Foo.thrift_field_annotations = {
 }
 
-def Foo__init__(self, intField=None, optionalIntField=None, intFieldWithDefault=Foo.thrift_spec[3][4], setField=None, optionalSetField=None, mapField=None, optionalMapField=None, binaryField=None, longField=None, adaptedLongField=None, doubleAdaptedField=None, adapted_list=None, adapted_set=None, adapted_map=None,):
+def Foo__init__(self, intField=None, optionalIntField=None, intFieldWithDefault=Foo.thrift_spec[3][4], setField=None, optionalSetField=None, mapField=None, optionalMapField=None, binaryField=None, longField=None, adaptedLongField=None, doubleAdaptedField=None, adapted_list=None, adapted_set=None, adapted_map=None, adapted_list_nested=None,):
   self.intField = intField
   self.optionalIntField = optionalIntField
   if intFieldWithDefault is self.thrift_spec[3][4]:
@@ -5619,6 +5738,7 @@ def Foo__init__(self, intField=None, optionalIntField=None, intFieldWithDefault=
   self.adapted_list = adapted_list
   self.adapted_set = adapted_set
   self.adapted_map = adapted_map
+  self.adapted_list_nested = adapted_list_nested
 
 Foo.__init__ = Foo__init__
 
@@ -5637,6 +5757,7 @@ def Foo__setstate__(self, state):
   state.setdefault('adapted_list', None)
   state.setdefault('adapted_set', None)
   state.setdefault('adapted_map', None)
+  state.setdefault('adapted_list_nested', None)
   self.__dict__ = state
 
 Foo.__getstate__ = lambda self: self.__dict__.copy()

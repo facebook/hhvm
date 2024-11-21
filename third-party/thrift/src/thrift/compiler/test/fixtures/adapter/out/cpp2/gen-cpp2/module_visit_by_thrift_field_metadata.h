@@ -61,6 +61,8 @@ struct VisitByFieldId<::facebook::thrift::test::Foo> {
       return f(12, static_cast<T&&>(t).adapted_set_ref());
     case 14:
       return f(13, static_cast<T&&>(t).adapted_map_ref());
+    case 15:
+      return f(14, static_cast<T&&>(t).adapted_list_nested_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::Foo");
     }

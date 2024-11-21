@@ -56,7 +56,7 @@ THRIFT_DATA_MEMBER const std::array<int, 2> TStructDataStorage<::facebook::thrif
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Foo>::name = "Foo";
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_names = { {
   "intField"sv,
   "optionalIntField"sv,
   "intFieldWithDefault"sv,
@@ -71,8 +71,9 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::f
   "adapted_list"sv,
   "adapted_set"sv,
   "adapted_map"sv,
+  "adapted_list_nested"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::thrift::test::Foo>::fields_ids = { {
+THRIFT_DATA_MEMBER const std::array<int16_t, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_ids = { {
   1,
   2,
   3,
@@ -87,8 +88,9 @@ THRIFT_DATA_MEMBER const std::array<int16_t, 14> TStructDataStorage<::facebook::
   12,
   13,
   14,
+  15,
 }};
-THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::facebook::thrift::test::Foo>::fields_types = { {
+THRIFT_DATA_MEMBER const std::array<protocol::TType, 15> TStructDataStorage<::facebook::thrift::test::Foo>::fields_types = { {
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
@@ -103,8 +105,9 @@ THRIFT_DATA_MEMBER const std::array<protocol::TType, 14> TStructDataStorage<::fa
   TType::T_LIST,
   TType::T_SET,
   TType::T_MAP,
+  TType::T_LIST,
 }};
-THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::facebook::thrift::test::Foo>::storage_names = { {
+THRIFT_DATA_MEMBER const std::array<std::string_view, 15> TStructDataStorage<::facebook::thrift::test::Foo>::storage_names = { {
   "__fbthrift_field_intField"sv,
   "__fbthrift_field_optionalIntField"sv,
   "__fbthrift_field_intFieldWithDefault"sv,
@@ -119,8 +122,9 @@ THRIFT_DATA_MEMBER const std::array<std::string_view, 14> TStructDataStorage<::f
   "__fbthrift_field_adapted_list"sv,
   "__fbthrift_field_adapted_set"sv,
   "__fbthrift_field_adapted_map"sv,
+  "__fbthrift_field_adapted_list_nested"sv,
 }};
-THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thrift::test::Foo>::isset_indexes = { {
+THRIFT_DATA_MEMBER const std::array<int, 15> TStructDataStorage<::facebook::thrift::test::Foo>::isset_indexes = { {
   0,
   1,
   2,
@@ -135,6 +139,7 @@ THRIFT_DATA_MEMBER const std::array<int, 14> TStructDataStorage<::facebook::thri
   11,
   12,
   13,
+  14,
 }};
 
 THRIFT_DATA_MEMBER const std::string_view TStructDataStorage<::facebook::thrift::test::Baz>::name = "Baz";

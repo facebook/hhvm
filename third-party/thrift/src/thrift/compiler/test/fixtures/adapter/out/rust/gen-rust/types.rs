@@ -117,6 +117,7 @@ pub struct Foo {
     pub adapted_list: ::std::vec::Vec<::std::primitive::i32>,
     pub adapted_set: ::std::collections::BTreeSet<::std::primitive::i32>,
     pub adapted_map: ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>,
+    pub adapted_list_nested: ::std::vec::Vec<::std::vec::Vec<::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32>>>,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
     // the definition in Thrift. If you don't want this, add the annotation
@@ -930,6 +931,7 @@ impl ::std::default::Default for self::Foo {
             adapted_list: ::std::default::Default::default(),
             adapted_set: ::std::default::Default::default(),
             adapted_map: ::std::default::Default::default(),
+            adapted_list_nested: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
     }
@@ -953,6 +955,7 @@ impl ::std::fmt::Debug for self::Foo {
             .field("adapted_list", &self.adapted_list)
             .field("adapted_set", &self.adapted_set)
             .field("adapted_map", &self.adapted_map)
+            .field("adapted_list_nested", &self.adapted_list_nested)
             .finish()
     }
 }
@@ -1034,6 +1037,9 @@ where
         p.write_field_begin("adapted_map", ::fbthrift::TType::Map, 14);
         ::fbthrift::Serialize::write(&self.adapted_map, p);
         p.write_field_end();
+        p.write_field_begin("adapted_list_nested", ::fbthrift::TType::List, 15);
+        ::fbthrift::Serialize::write(&self.adapted_list_nested, p);
+        p.write_field_end();
         p.write_field_stop();
         p.write_struct_end();
     }
@@ -1048,6 +1054,7 @@ where
         static FIELDS: &[::fbthrift::Field] = &[
             ::fbthrift::Field::new("adaptedLongField", ::fbthrift::TType::I64, 10),
             ::fbthrift::Field::new("adapted_list", ::fbthrift::TType::List, 12),
+            ::fbthrift::Field::new("adapted_list_nested", ::fbthrift::TType::List, 15),
             ::fbthrift::Field::new("adapted_map", ::fbthrift::TType::Map, 14),
             ::fbthrift::Field::new("adapted_set", ::fbthrift::TType::Set, 13),
             ::fbthrift::Field::new("binaryField", ::fbthrift::TType::String, 8),
@@ -1075,6 +1082,7 @@ where
         let mut field_adapted_list = ::std::option::Option::None;
         let mut field_adapted_set = ::std::option::Option::None;
         let mut field_adapted_map = ::std::option::Option::None;
+        let mut field_adapted_list_nested = ::std::option::Option::None;
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a Foo")?;
         loop {
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
@@ -1094,6 +1102,7 @@ where
                 (::fbthrift::TType::List, 12) => field_adapted_list = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Set, 13) => field_adapted_set = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 14) => field_adapted_map = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 15) => field_adapted_list_nested = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1114,6 +1123,7 @@ where
             adapted_list: field_adapted_list.unwrap_or_default(),
             adapted_set: field_adapted_set.unwrap_or_default(),
             adapted_map: field_adapted_map.unwrap_or_default(),
+            adapted_list_nested: field_adapted_list_nested.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }
@@ -1467,6 +1477,23 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
                     let mut tmp = ::std::option::Option::Some(python__types::Adapter {
                         name: "my.MapAdapter".to_owned(),
                         typeHint: "typing.Mapping[str, int]".to_owned(),
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if let ::std::option::Option::Some(r) = <python__types::Adapter as ::fbthrift::metadata::ThriftAnnotations>::get_structured_annotation::<T>() {
+                    return ::std::option::Option::Some(r);
+                }
+            },
+            15 => {
+
+                if type_id == ::std::any::TypeId::of::<python__types::Adapter>() {
+                    let mut tmp = ::std::option::Option::Some(python__types::Adapter {
+                        name: "thrift.python.test.adapters.atoi.ItoaNestedListAdapter".to_owned(),
+                        typeHint: "typing.Sequence[typing.Sequence[typing.Mapping[int, int]]]".to_owned(),
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

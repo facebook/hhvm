@@ -13,6 +13,9 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+
+_fbthrift_property = property
+
 import enum as _enum
 
 
@@ -20,22 +23,22 @@ import folly.iobuf as _fbthrift_iobuf
 
 
 class ComplexUnion(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def intValue(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def intListValue(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def stringListValue(self) -> _typing.Sequence[str]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def stringValue(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def typedefValue(self) -> _typing.Mapping[int, str]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def stringRef(self) -> str: ...
     @_abc.abstractmethod
@@ -63,10 +66,10 @@ class ComplexUnion(_abc.ABC):
 
 
 class ListUnion(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def intListValue(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def stringListValue(self) -> _typing.Sequence[str]: ...
     @_abc.abstractmethod
@@ -90,10 +93,10 @@ class ListUnion(_abc.ABC):
 
 
 class DataUnion(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def binaryData(self) -> bytes: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def stringData(self) -> str: ...
     @_abc.abstractmethod
@@ -117,13 +120,13 @@ class DataUnion(_abc.ABC):
 
 
 class Val(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def strVal(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def intVal(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def typedefValue(self) -> _typing.Mapping[int, str]: ...
     @_abc.abstractmethod
@@ -138,10 +141,10 @@ class Val(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Val": ...  # type: ignore
 
 class ValUnion(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def v1(self) -> Val: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def v2(self) -> Val: ...
     @_abc.abstractmethod
@@ -165,10 +168,10 @@ class ValUnion(_abc.ABC):
 
 
 class VirtualComplexUnion(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def thingOne(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def thingTwo(self) -> str: ...
     @_abc.abstractmethod
@@ -192,7 +195,7 @@ class VirtualComplexUnion(_abc.ABC):
 
 
 class NonCopyableStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def num(self) -> int: ...
     @_abc.abstractmethod
@@ -207,7 +210,7 @@ class NonCopyableStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableStruct": ...  # type: ignore
 
 class NonCopyableUnion(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def s(self) -> NonCopyableStruct: ...
     @_abc.abstractmethod

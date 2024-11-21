@@ -13,6 +13,9 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+
+_fbthrift_property = property
+
 import enum as _enum
 
 
@@ -26,31 +29,31 @@ class HackEnum:
 
 
 class MyStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyIntField(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyStringField(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyDataField(self) -> MyDataItem: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myEnum(self) -> MyEnum: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def oneway(self) -> bool: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def readonly(self) -> bool: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def idempotent(self) -> bool: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def floatSet(self) -> _typing.AbstractSet[float]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def no_hack_codegen_field(self) -> str: ...
     @_abc.abstractmethod
@@ -65,13 +68,13 @@ class MyStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 
 class Containers(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def I32List(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def StringSet(self) -> _typing.AbstractSet[str]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def StringToI64Map(self) -> _typing.Mapping[str, int]: ...
     @_abc.abstractmethod
@@ -98,16 +101,16 @@ class MyDataItem(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 
 class MyUnion(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myEnum(self) -> MyEnum: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myStruct(self) -> MyStruct: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myDataItem(self) -> MyDataItem: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def floatSet(self) -> _typing.AbstractSet[float]: ...
     @_abc.abstractmethod
@@ -133,16 +136,16 @@ class MyUnion(_abc.ABC):
 
 
 class MyException(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyIntField(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyStringField(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myStruct(self) -> MyStruct: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myUnion(self) -> MyUnion: ...
     @_abc.abstractmethod
@@ -157,16 +160,16 @@ class MyException(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
 
 class MyExceptionWithMessage(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyIntField(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyStringField(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myStruct(self) -> MyStruct: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def myUnion(self) -> MyUnion: ...
     @_abc.abstractmethod
@@ -181,7 +184,7 @@ class MyExceptionWithMessage(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
 
 class ReservedKeyword(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
     @_abc.abstractmethod
@@ -196,7 +199,7 @@ class ReservedKeyword(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ReservedKeyword": ...  # type: ignore
 
 class UnionToBeRenamed(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
     @_abc.abstractmethod

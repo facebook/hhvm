@@ -14,6 +14,9 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+_fbthrift_property = property
+
+
 import folly.iobuf as _fbthrift_iobuf
 
 class Metasyntactic:
@@ -39,16 +42,16 @@ class MyBitmaskEnum2:
 
 
 class SomeStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def reasonable(self) -> Metasyntactic: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fine(self) -> Metasyntactic: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def questionable(self) -> Metasyntactic: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def tags(self) -> _typing.AbstractSet[int]: ...
     @_abc.abstractmethod
@@ -63,16 +66,16 @@ class SomeStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.SomeStruct": ...  # type: ignore
 
 class MyStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def me2_3(self) -> MyEnum2: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def me3_n3(self) -> MyEnum3: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def me1_t1(self) -> MyEnum1: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def me1_t2(self) -> MyEnum1: ...
     @_abc.abstractmethod

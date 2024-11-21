@@ -14,12 +14,15 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+_fbthrift_property = property
+
+
 import folly.iobuf as _fbthrift_iobuf
 import test.fixtures.another_interactions.shared.thrift_abstract_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_abstract_types
 
 
 class CustomException(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def message(self) -> str: ...
     @_abc.abstractmethod

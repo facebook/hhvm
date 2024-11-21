@@ -13,6 +13,9 @@ from __future__ import annotations
 
 import abc as _abc
 import typing as _typing
+
+_fbthrift_property = property
+
 import enum as _enum
 
 
@@ -29,19 +32,19 @@ class Company:
 
 
 class Internship(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def weeks(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def title(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def employer(self) -> _typing.Optional[Company]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def compensation(self) -> _typing.Optional[float]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def school(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
@@ -56,10 +59,10 @@ class Internship(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Internship": ...  # type: ignore
 
 class Range(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def min(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def max(self) -> int: ...
     @_abc.abstractmethod
@@ -74,10 +77,10 @@ class Range(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Range": ...  # type: ignore
 
 class struct1(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def a(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> str: ...
     @_abc.abstractmethod
@@ -92,16 +95,16 @@ class struct1(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.struct1": ...  # type: ignore
 
 class struct2(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def a(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def c(self) -> struct1: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def d(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
@@ -116,13 +119,13 @@ class struct2(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.struct2": ...  # type: ignore
 
 class struct3(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def a(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def c(self) -> struct2: ...
     @_abc.abstractmethod
@@ -137,13 +140,13 @@ class struct3(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.struct3": ...  # type: ignore
 
 class struct4(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def a(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> _typing.Optional[float]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def c(self) -> _typing.Optional[int]: ...
     @_abc.abstractmethod
@@ -158,10 +161,10 @@ class struct4(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.struct4": ...  # type: ignore
 
 class union1(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def i(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def d(self) -> float: ...
     @_abc.abstractmethod
@@ -185,16 +188,16 @@ class union1(_abc.ABC):
 
 
 class union2(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def i(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def d(self) -> float: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def s(self) -> struct1: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def u(self) -> union1: ...
     @_abc.abstractmethod

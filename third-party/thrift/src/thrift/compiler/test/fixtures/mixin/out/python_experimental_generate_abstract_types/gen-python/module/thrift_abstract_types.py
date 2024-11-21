@@ -14,11 +14,14 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+_fbthrift_property = property
+
+
 import folly.iobuf as _fbthrift_iobuf
 
 
 class Mixin1(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field1(self) -> str: ...
     @_abc.abstractmethod
@@ -33,10 +36,10 @@ class Mixin1(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin1": ...  # type: ignore
 
 class Mixin2(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def m1(self) -> Mixin1: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field2(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
@@ -51,7 +54,7 @@ class Mixin2(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin2": ...  # type: ignore
 
 class Mixin3Base(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field3(self) -> str: ...
     @_abc.abstractmethod
@@ -66,13 +69,13 @@ class Mixin3Base(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Mixin3Base": ...  # type: ignore
 
 class Foo(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field4(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def m2(self) -> Mixin2: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def m3(self) -> Mixin3Base: ...
     @_abc.abstractmethod

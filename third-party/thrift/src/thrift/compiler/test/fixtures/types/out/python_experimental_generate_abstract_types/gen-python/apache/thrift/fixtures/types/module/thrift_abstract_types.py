@@ -14,6 +14,9 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+_fbthrift_property = property
+
+
 import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.fixtures.types.included.thrift_abstract_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_abstract_types
 
@@ -40,7 +43,7 @@ class empty_struct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.empty_struct": ...  # type: ignore
 
 class decorated_struct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> str: ...
     @_abc.abstractmethod
@@ -55,28 +58,28 @@ class decorated_struct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.decorated_struct": ...  # type: ignore
 
 class ContainerStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldB(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldC(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldD(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldE(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldF(self) -> _typing.AbstractSet[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldG(self) -> _typing.Mapping[int, str]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldH(self) -> _typing.Mapping[int, str]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldA(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
@@ -91,7 +94,7 @@ class ContainerStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ContainerStruct": ...  # type: ignore
 
 class CppTypeStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def fieldA(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
@@ -106,7 +109,7 @@ class CppTypeStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CppTypeStruct": ...  # type: ignore
 
 class VirtualStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyIntField(self) -> int: ...
     @_abc.abstractmethod
@@ -121,10 +124,10 @@ class VirtualStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.VirtualStruct": ...  # type: ignore
 
 class MyStructWithForwardRefEnum(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def a(self) -> MyForwardRefEnum: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> MyForwardRefEnum: ...
     @_abc.abstractmethod
@@ -139,10 +142,10 @@ class MyStructWithForwardRefEnum(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructWithForwardRefEnum": ...  # type: ignore
 
 class TrivialNumeric(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def a(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> bool: ...
     @_abc.abstractmethod
@@ -157,10 +160,10 @@ class TrivialNumeric(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNumeric": ...  # type: ignore
 
 class TrivialNestedWithDefault(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def z(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def n(self) -> TrivialNumeric: ...
     @_abc.abstractmethod
@@ -175,10 +178,10 @@ class TrivialNestedWithDefault(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNestedWithDefault": ...  # type: ignore
 
 class ComplexString(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def a(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> _typing.Mapping[str, int]: ...
     @_abc.abstractmethod
@@ -193,10 +196,10 @@ class ComplexString(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexString": ...  # type: ignore
 
 class ComplexNestedWithDefault(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def z(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def n(self) -> ComplexString: ...
     @_abc.abstractmethod
@@ -211,19 +214,19 @@ class ComplexNestedWithDefault(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexNestedWithDefault": ...  # type: ignore
 
 class MinPadding(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def small(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def big(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def medium(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def biggish(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def tiny(self) -> int: ...
     @_abc.abstractmethod
@@ -238,19 +241,19 @@ class MinPadding(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MinPadding": ...  # type: ignore
 
 class MinPaddingWithCustomType(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def small(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def big(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def medium(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def biggish(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def tiny(self) -> int: ...
     @_abc.abstractmethod
@@ -265,16 +268,16 @@ class MinPaddingWithCustomType(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MinPaddingWithCustomType": ...  # type: ignore
 
 class MyStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyIntField(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def MyStringField(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def majorVer(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def data(self) -> MyDataItem: ...
     @_abc.abstractmethod
@@ -301,7 +304,7 @@ class MyDataItem(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 
 class Renaming(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def foo(self) -> int: ...
     @_abc.abstractmethod
@@ -316,10 +319,10 @@ class Renaming(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Renaming": ...  # type: ignore
 
 class AnnotatedTypes(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def binary_field(self) -> bytes: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def list_field(self) -> _typing.Sequence[_typing.Mapping[int, str]]: ...
     @_abc.abstractmethod
@@ -334,10 +337,10 @@ class AnnotatedTypes(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.AnnotatedTypes": ...  # type: ignore
 
 class ForwardUsageRoot(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def ForwardUsageStruct(self) -> _typing.Optional[ForwardUsageStruct]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def ForwardUsageByRef(self) -> _typing.Optional[ForwardUsageByRef]: ...
     @_abc.abstractmethod
@@ -352,7 +355,7 @@ class ForwardUsageRoot(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageRoot": ...  # type: ignore
 
 class ForwardUsageStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def foo(self) -> _typing.Optional[ForwardUsageRoot]: ...
     @_abc.abstractmethod
@@ -367,7 +370,7 @@ class ForwardUsageStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageStruct": ...  # type: ignore
 
 class ForwardUsageByRef(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def foo(self) -> _typing.Optional[ForwardUsageRoot]: ...
     @_abc.abstractmethod
@@ -382,7 +385,7 @@ class ForwardUsageByRef(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageByRef": ...  # type: ignore
 
 class IncompleteMap(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Mapping[int, IncompleteMapDep]]: ...
     @_abc.abstractmethod
@@ -409,7 +412,7 @@ class IncompleteMapDep(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMapDep": ...  # type: ignore
 
 class CompleteMap(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Mapping[int, CompleteMapDep]]: ...
     @_abc.abstractmethod
@@ -436,7 +439,7 @@ class CompleteMapDep(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMapDep": ...  # type: ignore
 
 class IncompleteList(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[IncompleteListDep]]: ...
     @_abc.abstractmethod
@@ -463,7 +466,7 @@ class IncompleteListDep(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteListDep": ...  # type: ignore
 
 class CompleteList(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[CompleteListDep]]: ...
     @_abc.abstractmethod
@@ -490,7 +493,7 @@ class CompleteListDep(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteListDep": ...  # type: ignore
 
 class AdaptedList(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[AdaptedListDep]]: ...
     @_abc.abstractmethod
@@ -505,7 +508,7 @@ class AdaptedList(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedList": ...  # type: ignore
 
 class AdaptedListDep(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> AdaptedList: ...
     @_abc.abstractmethod
@@ -520,7 +523,7 @@ class AdaptedListDep(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedListDep": ...  # type: ignore
 
 class DependentAdaptedList(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[DependentAdaptedListDep]]: ...
     @_abc.abstractmethod
@@ -535,7 +538,7 @@ class DependentAdaptedList(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.DependentAdaptedList": ...  # type: ignore
 
 class DependentAdaptedListDep(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[int]: ...
     @_abc.abstractmethod
@@ -550,25 +553,25 @@ class DependentAdaptedListDep(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.DependentAdaptedListDep": ...  # type: ignore
 
 class AllocatorAware(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def aa_list(self) -> _typing.Sequence[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def aa_set(self) -> _typing.AbstractSet[int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def aa_map(self) -> _typing.Mapping[int, int]: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def aa_string(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def not_a_container(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def aa_unique(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def aa_shared(self) -> int: ...
     @_abc.abstractmethod
@@ -583,10 +586,10 @@ class AllocatorAware(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware": ...  # type: ignore
 
 class AllocatorAware2(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def not_a_container(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def box_field(self) -> _typing.Optional[int]: ...
     @_abc.abstractmethod
@@ -601,13 +604,13 @@ class AllocatorAware2(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware2": ...  # type: ignore
 
 class TypedefStruct(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def i32_field(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def IntTypedef_field(self) -> int: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def UintTypedef_field(self) -> int: ...
     @_abc.abstractmethod
@@ -622,7 +625,7 @@ class TypedefStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.TypedefStruct": ...  # type: ignore
 
 class StructWithDoubleUnderscores(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def _StructWithDoubleUnderscores__field(self) -> int: ...
     @_abc.abstractmethod

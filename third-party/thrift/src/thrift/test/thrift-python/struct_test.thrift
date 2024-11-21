@@ -254,6 +254,15 @@ struct TestStructCopy {
   9: binary unqualified_binary;
 }
 
+# TODO(T208441439) Move this test under thrift/lib/python
+struct TestPropertyAsField {
+  # The presence of this field caused a failure due to the conflict
+  # with the built-in property. Keep this test to ensure
+  # the fix continues to work.
+  1: string property;
+  2: string break_unless_used_with_renamed_built_in_property;
+}
+
 exception TestExceptionCopy {
   1: i32 unqualified_i32;
   2: optional i32 optional_i32;

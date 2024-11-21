@@ -25,6 +25,14 @@ Generated Python classes for abstract thrift-python types.
 
 import abc as _abc
 import typing as _typing
+
+{{!
+    If any type has a field named property, then the use of the built-in property will conflict
+    and fail. For an example of such a field that caused a failure,
+    see TestPropertyAsField in thrift/test/thrift-python/struct_test.thrift.
+}}
+_fbthrift_property = property
+
 {{#program:unions?}}
 import enum as _enum
 
@@ -50,7 +58,7 @@ class {{enum:name}}:
 class {{> structs/unadapted_name}}({{!
         }}_abc.ABC):
     {{#struct:fields_ordered_by_id}}
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
     {{/struct:fields_ordered_by_id}}

@@ -14,11 +14,14 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+_fbthrift_property = property
+
+
 import folly.iobuf as _fbthrift_iobuf
 
 
 class Fiery(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def message(self) -> str: ...
     @_abc.abstractmethod
@@ -33,7 +36,7 @@ class Fiery(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
 
 class Serious(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def not_sonnet(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
@@ -48,10 +51,10 @@ class Serious(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
 
 class ComplexFieldNames(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def error_message(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def internal_error_message(self) -> str: ...
     @_abc.abstractmethod
@@ -66,10 +69,10 @@ class ComplexFieldNames(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
 
 class CustomFieldNames(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def error_message(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def internal_error_message(self) -> str: ...
     @_abc.abstractmethod
@@ -84,10 +87,10 @@ class CustomFieldNames(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
 
 class ExceptionWithPrimitiveField(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def message(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def error_code(self) -> int: ...
     @_abc.abstractmethod
@@ -102,10 +105,10 @@ class ExceptionWithPrimitiveField(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
 
 class ExceptionWithStructuredAnnotation(_abc.ABC):
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def message_field(self) -> str: ...
-    @property
+    @_fbthrift_property
     @_abc.abstractmethod
     def error_code(self) -> int: ...
     @_abc.abstractmethod

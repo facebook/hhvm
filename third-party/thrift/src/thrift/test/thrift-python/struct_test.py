@@ -1218,7 +1218,6 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(None, s.unqualified_map_string_i32.get("Not Exists"))
         self.assertEqual(
             "MyDefaultValue",
-            # pyre-ignore[6]: Intentional for test
             s.unqualified_map_string_i32.get("Not Exists", "MyDefaultValue"),
         )
 

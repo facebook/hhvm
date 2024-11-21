@@ -19,6 +19,8 @@ import pickle
 import string
 import unittest
 
+from typing import cast, Optional
+
 from thrift.python.mutable_containers import (
     MapItemsView,
     MapKeysView,
@@ -40,6 +42,107 @@ def _create_MutableMap_str_i32(map: dict[str, int]) -> MutableMap[str, int]:
     """
     # pyre-ignore[6]: Incompatible parameter type
     return MutableMap(typeinfo_string, typeinfo_i32, map)
+
+
+class MutableMapTypeHints(unittest.TestCase):
+    """
+    Tests type hints for MutableMap class.
+
+    This test suite checks that Pyre correctly identifies and raises errors
+    when there are type mismatches in function calls or assignments.
+
+    Casting an object to MutableMap[K, V] is sufficient to check the type hints.
+
+    The `pyre-ignore` comments in the test are intended to suppress real errors,
+    as we run Pyre with the `--report-unused-ignores` flag.
+    """
+
+    def test_type_hints(self) -> None:
+        mutable_map = cast(MutableMap[str, int], object())
+        try:
+            ### get() ###
+            v1: Optional[int] = mutable_map.get("key")
+
+            # pyre-ignore[9]: v2 is type `int` but is used as type `Optional[int]`
+            v2: int = mutable_map.get("key")
+
+            v3: int = mutable_map.get("key", 42)
+            v4: int | str = mutable_map.get("key", "value")
+
+            # pyre-ignore[6]: 1st positional argument, expected `str` but got `int`
+            v5: int = mutable_map.get(999, 42)
+
+            # to silence F841: not used variable
+            _ = (v1, v2, v3, v4, v5)
+
+            ###################################################################
+
+            ### __setitem__() ###
+            mutable_map["key"] = 1
+
+            # pyre-ignore[6]: expected `int` but got `str`
+            mutable_map["key"] = "value"
+            # pyre-ignore[6]: expected `int` but got `float`
+            mutable_map["key"] = 1.0
+
+            # pyre-ignore[6]: expected `str` but got `int`
+            mutable_map[1] = 1
+            # pyre-ignore[6]: expected `str` but got `bytes`
+            mutable_map[b"key"] = 1
+
+            # pyre-ignore[6]: expected `str` but got `int` and expected `int` but got `str`
+            mutable_map[1] = "value"
+
+        except Exception:
+            pass
+
+    def test_type_hints_with_container_value(self) -> None:
+        mutable_map = cast(MutableMap[str, MutableList[int]], object())
+        try:
+            ### get() ###
+            v1: Optional[MutableList[int]] = mutable_map.get("key")
+
+            # pyre-ignore[9]: v2 is type `MutableList[int]` but is used as type `Optional[MutableList[int]]`.
+            v2: MutableList[int] = mutable_map.get("key")
+
+            default_value_1 = cast(MutableList[int], object())
+            v3: MutableList[int] = mutable_map.get("key", default_value_1)
+
+            default_value_2 = cast(MutableList[str], object())
+            v4: MutableList[int] | MutableList[str] = mutable_map.get(
+                "key", default_value_2
+            )
+
+            # pyre-ignore[6]: 1st positional argument, expected `str` but got `int`
+            v5: MutableList[int] = mutable_map.get(999, default_value_1)
+
+            # to silence F841: not used variable
+            _ = (v1, v2, v3, v4, v5)
+
+            ###################################################################
+
+            ### __setitem__() ###
+            mutable_list_int = cast(MutableList[int], object())
+            mutable_list_str = cast(MutableList[str], object())
+
+            mutable_map["key"] = to_thrift_list([])
+            mutable_map["key"] = mutable_list_int
+
+            # pyre-ignore[6]: expected `MutableList[int]` but got `MutableList[str]`
+            mutable_map["key"] = mutable_list_str
+            # pyre-ignore[6]: expected `MutableList[int]` but got `List[int]`
+            mutable_map["key"] = [1, 2, 3]
+
+            # pyre-ignore[6]: expected `str` but got `int`
+            mutable_map[1] = mutable_list_int
+            # pyre-ignore[6]: expected `str` but got `bytes`
+            mutable_map[b"key"] = mutable_list_int
+
+            # pyre-ignore[6]: expected `str` but got `int` and expected `MutableList[int]` but got `MutableList[str]`
+            mutable_map[1] = mutable_list_str
+
+        except Exception:
+            pass
 
 
 class MutableMapTest(unittest.TestCase):

@@ -4259,6 +4259,15 @@ cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map
             deref(c_inst)[key] = item.encode('UTF-8')
     return cmove(c_inst)
 
+cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] iter = __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](c_map)
+    cdef cint32_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return std_unordered_map__Map__i32_string(py_items)
 
 
 cdef vector[cint64_t] List__i64__make_instance(object items) except *:
@@ -4374,6 +4383,15 @@ cdef shared_ptr[cmap[string,cint64_t]] Map__binary_i64__make_instance(object ite
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+cdef object Map__binary_i64__from_cpp(const cmap[string,cint64_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint64_t]] iter = __map_iter[cmap[string,cint64_t]](c_map)
+    cdef string ckey
+    cdef cint64_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[bytes(<string>ckey)] = cval
+    return Map__binary_i64(py_items)
 
 
 cdef vector[cint32_t] List__i32__make_instance(object items) except *:
@@ -4581,6 +4599,15 @@ cdef shared_ptr[cmap[cint32_t,string]] Map__i32_string__make_instance(object ite
             deref(c_inst)[key] = item.encode('UTF-8')
     return cmove(c_inst)
 
+cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,string]] iter = __map_iter[cmap[cint32_t,string]](c_map)
+    cdef cint32_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return Map__i32_string(py_items)
 
 
 cdef _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *:
@@ -4696,6 +4723,15 @@ cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object ite
             deref(c_inst)[key.encode('UTF-8')] = item
     return cmove(c_inst)
 
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint32_t]] iter = __map_iter[cmap[string,cint32_t]](c_map)
+    cdef string ckey
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_i32(py_items)
 
 
 cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:
@@ -4812,6 +4848,15 @@ cdef shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIn
             deref(c_inst)[key] = deref((<IncompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]] iter = __map_iter[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]](c_map)
+    cdef cint32_t ckey = 0
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = IncompleteMapDep._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return Map__i32_IncompleteMapDep(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -4909,6 +4954,15 @@ cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map
             deref(c_inst)[key] = deref((<CompleteMapDep>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+cdef object std_unordered_map__Map__i32_CompleteMapDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] iter = __map_iter[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]](c_map)
+    cdef cint32_t ckey = 0
+    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = CompleteMapDep._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return std_unordered_map__Map__i32_CompleteMapDep(py_items)
 
 
 cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *:
@@ -5095,6 +5149,15 @@ cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object item
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,cint32_t]] iter = __map_iter[cmap[cint32_t,cint32_t]](c_map)
+    cdef cint32_t ckey = 0
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return Map__i32_i32(py_items)
 
 
 TBinary = bytes

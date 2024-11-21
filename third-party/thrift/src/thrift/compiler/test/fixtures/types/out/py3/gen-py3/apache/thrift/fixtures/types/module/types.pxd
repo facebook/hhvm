@@ -446,6 +446,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]&) except *
 
 cdef vector[cint64_t] List__i64__make_instance(object items) except *
 cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
@@ -457,6 +458,7 @@ cdef class Map__binary_i64(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,cint64_t]] Map__binary_i64__make_instance(object items) except *
+cdef object Map__binary_i64__from_cpp(const cmap[string,cint64_t]&) except *
 
 cdef vector[cint32_t] List__i32__make_instance(object items) except *
 cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
@@ -483,6 +485,7 @@ cdef class Map__i32_string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint32_t,string]] Map__i32_string__make_instance(object items) except *
+cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]&) except *
 
 cdef _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *
 cdef object std_list_int32_t__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t&) except *
@@ -494,6 +497,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object items) except *
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]&) except *
 
 cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
 cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]&) except *
@@ -505,6 +509,7 @@ cdef class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]] Map__i32_IncompleteMapDep__make_instance(object items) except *
+cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]&) except *
 
 cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
     cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -513,6 +518,7 @@ cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *
+cdef object std_unordered_map__Map__i32_CompleteMapDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]&) except *
 
 cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *
 cdef object _std_list__List__IncompleteListDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep]&) except *
@@ -536,5 +542,6 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]&) except *
 
 

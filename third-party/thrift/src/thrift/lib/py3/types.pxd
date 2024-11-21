@@ -75,12 +75,15 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
         set_iter()
         set_iter(const T& cpp_obj)
         void genNextItem(...)
+
     cdef cppclass map_iter[T]:
         map_iter()
         map_iter(const shared_ptr[T]& cpp_obj)
+        map_iter(const T& cpp_obj)
         void genNextKey(const shared_ptr[T]& cpp_obj, ...)
         void genNextValue(const shared_ptr[T]& cpp_obj, ...)
         void genNextItem(const shared_ptr[T]& cpp_obj, ...)
+        void genNextKeyVal(...)
 
 
 ctypedef PyObject* PyObjectPtr

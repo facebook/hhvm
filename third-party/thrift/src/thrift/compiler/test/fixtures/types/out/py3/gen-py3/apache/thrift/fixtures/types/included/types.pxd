@@ -57,6 +57,7 @@ cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]&) except *
 
 cdef vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
 cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]]&) except *

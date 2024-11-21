@@ -291,6 +291,15 @@ cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]]
             deref(c_inst)[<_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key] = item.encode('UTF-8')
     return cmove(c_inst)
 
+cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] iter = __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](c_map)
+    cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum ckey
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[translate_cpp_enum_to_python(MyEnum, <int> ckey)] = __init_unicode_from_cpp(cval)
+    return Map__MyEnum_string(py_items)
 
 
 kOne = MyEnum(<int> (_test_fixtures_enumstrict_module_cbindings.ckOne()))

@@ -188,6 +188,7 @@ cdef class Map__string_i64(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,cint64_t]] Map__string_i64__make_instance(object items) except *
+cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]&) except *
 
 cdef class Map__string_List__i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,vector[cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -196,5 +197,6 @@ cdef class Map__string_List__i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,vector[cint32_t]]] Map__string_List__i32__make_instance(object items) except *
+cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]&) except *
 
 

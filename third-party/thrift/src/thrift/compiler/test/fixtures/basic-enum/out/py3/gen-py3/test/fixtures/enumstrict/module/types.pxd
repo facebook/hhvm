@@ -70,5 +70,6 @@ cdef class Map__MyEnum_string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] Map__MyEnum_string__make_instance(object items) except *
+cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]&) except *
 
 

@@ -241,6 +241,7 @@ cdef class Map__string_string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,string]] Map__string_string__make_instance(object items) except *
+cdef object Map__string_string__from_cpp(const cmap[string,string]&) except *
 
 cdef class Map__string_SimpleStruct(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,_module_cbindings.cSimpleStruct]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -249,6 +250,7 @@ cdef class Map__string_SimpleStruct(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,_module_cbindings.cSimpleStruct]] Map__string_SimpleStruct__make_instance(object items) except *
+cdef object Map__string_SimpleStruct__from_cpp(const cmap[string,_module_cbindings.cSimpleStruct]&) except *
 
 cdef class Map__string_i16(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cint16_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -257,6 +259,7 @@ cdef class Map__string_i16(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,cint16_t]] Map__string_i16__make_instance(object items) except *
+cdef object Map__string_i16__from_cpp(const cmap[string,cint16_t]&) except *
 
 cdef vector[vector[cint32_t]] List__List__i32__make_instance(object items) except *
 cdef object List__List__i32__from_cpp(const vector[vector[cint32_t]]&) except *
@@ -268,6 +271,7 @@ cdef class Map__string_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object items) except *
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]&) except *
 
 cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -276,6 +280,7 @@ cdef class Map__string_Map__string_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] Map__string_Map__string_i32__make_instance(object items) except *
+cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cint32_t]]&) except *
 
 cdef vector[cset[string]] List__Set__string__make_instance(object items) except *
 cdef object List__Set__string__from_cpp(const vector[cset[string]]&) except *
@@ -287,6 +292,7 @@ cdef class Map__string_List__SimpleStruct(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[string,vector[_module_cbindings.cSimpleStruct]]] Map__string_List__SimpleStruct__make_instance(object items) except *
+cdef object Map__string_List__SimpleStruct__from_cpp(const cmap[string,vector[_module_cbindings.cSimpleStruct]]&) except *
 
 cdef vector[vector[string]] List__List__string__make_instance(object items) except *
 cdef object List__List__string__from_cpp(const vector[vector[string]]&) except *
@@ -313,6 +319,7 @@ cdef class _std_unordered_map__Map__i32_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[_module_cbindings._std_unordered_map[cint32_t,cint32_t]] _std_unordered_map__Map__i32_i32__make_instance(object items) except *
+cdef object _std_unordered_map__Map__i32_i32__from_cpp(const _module_cbindings._std_unordered_map[cint32_t,cint32_t]&) except *
 
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *
 cdef object _MyType__List__i32__from_cpp(const _module_cbindings._MyType&) except *
@@ -327,6 +334,7 @@ cdef class _MyType__Map__i32_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[_module_cbindings._MyType] _MyType__Map__i32_i32__make_instance(object items) except *
+cdef object _MyType__Map__i32_i32__from_cpp(const _module_cbindings._MyType&) except *
 
 cdef class Map__i32_i32(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -335,6 +343,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]&) except *
 
 cdef class Map__i32_double(thrift.py3.types.Map):
     cdef shared_ptr[cmap[cint32_t,double]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
@@ -343,6 +352,7 @@ cdef class Map__i32_double(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint32_t,double]] Map__i32_double__make_instance(object items) except *
+cdef object Map__i32_double__from_cpp(const cmap[cint32_t,double]&) except *
 
 cdef vector[cmap[cint32_t,double]] List__Map__i32_double__make_instance(object items) except *
 cdef object List__Map__i32_double__from_cpp(const vector[cmap[cint32_t,double]]&) except *
@@ -354,5 +364,6 @@ cdef class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[_module_cbindings.cAnEnumRenamed,cint32_t]] Map__AnEnumRenamed_i32__make_instance(object items) except *
+cdef object Map__AnEnumRenamed_i32__from_cpp(const cmap[_module_cbindings.cAnEnumRenamed,cint32_t]&) except *
 
 

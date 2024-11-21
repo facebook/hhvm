@@ -626,6 +626,15 @@ cdef shared_ptr[cmap[string,cbool]] Map__string_bool__make_instance(object items
             deref(c_inst)[key.encode('UTF-8')] = item
     return cmove(c_inst)
 
+cdef object Map__string_bool__from_cpp(const cmap[string,cbool]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cbool]] iter = __map_iter[cmap[string,cbool]](c_map)
+    cdef string ckey
+    cdef cbool cval = False
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_bool(py_items)
 
 
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
@@ -799,6 +808,15 @@ cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object ite
             deref(c_inst)[key.encode('UTF-8')] = item
     return cmove(c_inst)
 
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint32_t]] iter = __map_iter[cmap[string,cint32_t]](c_map)
+    cdef string ckey
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_i32(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -897,6 +915,15 @@ cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] Map__string_Map__string_i32_
             deref(c_inst)[key.encode('UTF-8')] = deref((<Map__string_i32>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cint32_t]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cmap[string,cint32_t]]] iter = __map_iter[cmap[string,cmap[string,cint32_t]]](c_map)
+    cdef string ckey
+    cdef shared_ptr[cmap[string,cint32_t]] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return Map__string_Map__string_i32(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -995,6 +1022,15 @@ cdef shared_ptr[cmap[string,cmap[string,cmap[string,cint32_t]]]] Map__string_Map
             deref(c_inst)[key.encode('UTF-8')] = deref((<Map__string_Map__string_i32>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+cdef object Map__string_Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cmap[string,cint32_t]]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cmap[string,cmap[string,cint32_t]]]] iter = __map_iter[cmap[string,cmap[string,cmap[string,cint32_t]]]](c_map)
+    cdef string ckey
+    cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = Map__string_Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return Map__string_Map__string_Map__string_i32(py_items)
 
 
 cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *:
@@ -1112,6 +1148,15 @@ cdef shared_ptr[cmap[string,vector[cint32_t]]] Map__string_List__i32__make_insta
             deref(c_inst)[key.encode('UTF-8')] = List__i32__make_instance(item)
     return cmove(c_inst)
 
+cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,vector[cint32_t]]] iter = __map_iter[cmap[string,vector[cint32_t]]](c_map)
+    cdef string ckey
+    cdef vector[cint32_t] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = List__i32__from_cpp(cval)
+    return Map__string_List__i32(py_items)
 
 
 cdef vector[vector[vector[vector[cint32_t]]]] List__List__List__List__i32__make_instance(object items) except *:
@@ -1355,6 +1400,15 @@ cdef shared_ptr[cmap[vector[cset[string]],string]] Map__List__Set__string_string
             deref(c_inst)[List__Set__string__make_instance(key)] = item.encode('UTF-8')
     return cmove(c_inst)
 
+cdef object Map__List__Set__string_string__from_cpp(const cmap[vector[cset[string]],string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[vector[cset[string]],string]] iter = __map_iter[cmap[vector[cset[string]],string]](c_map)
+    cdef vector[cset[string]] ckey
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[List__Set__string__from_cpp(ckey)] = __init_unicode_from_cpp(cval)
+    return Map__List__Set__string_string(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1459,6 +1513,15 @@ cdef shared_ptr[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]] 
             deref(c_inst)[Set__List__i32__make_instance(key)] = deref((<Map__List__Set__string_string>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+cdef object Map__Set__List__i32_Map__List__Set__string_string__from_cpp(const cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]] iter = __map_iter[cmap[cset[vector[cint32_t]],cmap[vector[cset[string]],string]]](c_map)
+    cdef cset[vector[cint32_t]] ckey
+    cdef shared_ptr[cmap[vector[cset[string]],string]] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[Set__List__i32__from_cpp(ckey)] = Map__List__Set__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return Map__Set__List__i32_Map__List__Set__string_string(py_items)
 
 
 cdef vector[_module_cbindings.Foo] List__Foo__i64__make_instance(object items) except *:

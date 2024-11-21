@@ -112,6 +112,7 @@ cdef class Map__Animal_string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] Map__Animal_string__make_instance(object items) except *
+cdef object Map__Animal_string__from_cpp(const cmap[_module_cbindings.cAnimal,string]&) except *
 
 cdef vector[_module_cbindings.cVehicle] List__Vehicle__make_instance(object items) except *
 cdef object List__Vehicle__from_cpp(const vector[_module_cbindings.cVehicle]&) except *

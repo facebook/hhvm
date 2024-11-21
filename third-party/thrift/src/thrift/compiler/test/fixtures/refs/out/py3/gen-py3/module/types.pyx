@@ -3064,6 +3064,15 @@ cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object item
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,cint32_t]] iter = __map_iter[cmap[cint32_t,cint32_t]](c_map)
+    cdef cint32_t ckey = 0
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return Map__i32_i32(py_items)
 
 
 cdef vector[cint64_t] List__i64__make_instance(object items) except *:

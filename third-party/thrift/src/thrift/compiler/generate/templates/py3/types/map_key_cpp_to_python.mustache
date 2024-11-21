@@ -1,0 +1,50 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+Used to convert C++ `ckey` to python object.
+
+}}{{#type:iobuf?}}{{!
+  }}_fbthrift_iobuf.IOBuf.create(ckey.get(), self){{!
+}}{{/type:iobuf?}}{{!
+}}{{#type:iobufRef?}}{{!
+  }}_fbthrift_iobuf.IOBuf.create(ckey.get().get(), self){{!
+}}{{/type:iobufRef?}}{{!
+}}{{#type:flexibleBinary?}}{{!
+  }}(<const char*>ckey.data())[:ckey.size()]{{!
+}}{{/type:flexibleBinary?}}{{!
+}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{#type:bool?}}ckey{{/type:bool?}}{{!
+}}{{#type:byte?}}ckey{{/type:byte?}}{{!
+}}{{#type:i16?}}ckey{{/type:i16?}}{{!
+}}{{#type:i32?}}ckey{{/type:i32?}}{{!
+}}{{#type:i64?}}ckey{{/type:i64?}}{{!
+}}{{#type:double?}}ckey{{/type:double?}}{{!
+}}{{#type:float?}}ckey{{/type:float?}}{{!
+}}{{#type:string?}}__init_unicode_from_cpp(ckey){{/type:string?}}{{!
+}}{{#type:binary?}}bytes(<string>ckey){{/type:binary?}}{{!
+}}{{#type:struct?}}{{!
+    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(ckey)){{!
+}}{{/type:struct?}}{{!
+}}{{#type:map?}}{{!
+    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(ckey)){{!
+}}{{/type:map?}}{{!
+}}{{#type:list?}}{{> types/container_from_cpp }}(ckey){{/type:list?}}{{!
+}}{{#type:set?}}{{> types/container_from_cpp }}(ckey){{/type:set?}}{{!
+}}{{#type:enum}}translate_cpp_enum_to_python({{!
+    }}{{> types/python_type}}, <int> ckey){{/type:enum}}{{!
+}}{{/type:hasCustomTypeBehavior?}}

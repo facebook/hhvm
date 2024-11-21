@@ -1845,6 +1845,15 @@ cdef shared_ptr[cmap[string,string]] Map__string_string__make_instance(object it
             deref(c_inst)[key.encode('UTF-8')] = item.encode('UTF-8')
     return cmove(c_inst)
 
+cdef object Map__string_string__from_cpp(const cmap[string,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,string]] iter = __map_iter[cmap[string,string]](c_map)
+    cdef string ckey
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = __init_unicode_from_cpp(cval)
+    return Map__string_string(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1941,6 +1950,15 @@ cdef shared_ptr[cmap[string,_module_cbindings.cSimpleStruct]] Map__string_Simple
             deref(c_inst)[key.encode('UTF-8')] = deref((<SimpleStruct>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+cdef object Map__string_SimpleStruct__from_cpp(const cmap[string,_module_cbindings.cSimpleStruct]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,_module_cbindings.cSimpleStruct]] iter = __map_iter[cmap[string,_module_cbindings.cSimpleStruct]](c_map)
+    cdef string ckey
+    cdef shared_ptr[_module_cbindings.cSimpleStruct] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return Map__string_SimpleStruct(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -2038,6 +2056,15 @@ cdef shared_ptr[cmap[string,cint16_t]] Map__string_i16__make_instance(object ite
             deref(c_inst)[key.encode('UTF-8')] = item
     return cmove(c_inst)
 
+cdef object Map__string_i16__from_cpp(const cmap[string,cint16_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint16_t]] iter = __map_iter[cmap[string,cint16_t]](c_map)
+    cdef string ckey
+    cdef cint16_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_i16(py_items)
 
 
 cdef vector[vector[cint32_t]] List__List__i32__make_instance(object items) except *:
@@ -2154,6 +2181,15 @@ cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object ite
             deref(c_inst)[key.encode('UTF-8')] = item
     return cmove(c_inst)
 
+cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint32_t]] iter = __map_iter[cmap[string,cint32_t]](c_map)
+    cdef string ckey
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_i32(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -2252,6 +2288,15 @@ cdef shared_ptr[cmap[string,cmap[string,cint32_t]]] Map__string_Map__string_i32_
             deref(c_inst)[key.encode('UTF-8')] = deref((<Map__string_i32>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
     return cmove(c_inst)
 
+cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,cint32_t]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cmap[string,cint32_t]]] iter = __map_iter[cmap[string,cmap[string,cint32_t]]](c_map)
+    cdef string ckey
+    cdef shared_ptr[cmap[string,cint32_t]] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
+    return Map__string_Map__string_i32(py_items)
 
 
 cdef vector[cset[string]] List__Set__string__make_instance(object items) except *:
@@ -2369,6 +2414,15 @@ cdef shared_ptr[cmap[string,vector[_module_cbindings.cSimpleStruct]]] Map__strin
             deref(c_inst)[key.encode('UTF-8')] = List__SimpleStruct__make_instance(item)
     return cmove(c_inst)
 
+cdef object Map__string_List__SimpleStruct__from_cpp(const cmap[string,vector[_module_cbindings.cSimpleStruct]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,vector[_module_cbindings.cSimpleStruct]]] iter = __map_iter[cmap[string,vector[_module_cbindings.cSimpleStruct]]](c_map)
+    cdef string ckey
+    cdef vector[_module_cbindings.cSimpleStruct] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = List__SimpleStruct__from_cpp(cval)
+    return Map__string_List__SimpleStruct(py_items)
 
 
 cdef vector[vector[string]] List__List__string__make_instance(object items) except *:
@@ -2581,6 +2635,15 @@ cdef shared_ptr[_module_cbindings._std_unordered_map[cint32_t,cint32_t]] _std_un
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+cdef object _std_unordered_map__Map__i32_i32__from_cpp(const _module_cbindings._std_unordered_map[cint32_t,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_module_cbindings._std_unordered_map[cint32_t,cint32_t]] iter = __map_iter[_module_cbindings._std_unordered_map[cint32_t,cint32_t]](c_map)
+    cdef cint32_t ckey = 0
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return _std_unordered_map__Map__i32_i32(py_items)
 
 
 cdef _module_cbindings._MyType _MyType__List__i32__make_instance(object items) except *:
@@ -2717,6 +2780,15 @@ cdef shared_ptr[_module_cbindings._MyType] _MyType__Map__i32_i32__make_instance(
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+cdef object _MyType__Map__i32_i32__from_cpp(const _module_cbindings._MyType& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[_module_cbindings._MyType] iter = __map_iter[_module_cbindings._MyType](c_map)
+    cdef cint32_t ckey = 0
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return _MyType__Map__i32_i32(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -2815,6 +2887,15 @@ cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object item
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,cint32_t]] iter = __map_iter[cmap[cint32_t,cint32_t]](c_map)
+    cdef cint32_t ckey = 0
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return Map__i32_i32(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -2912,6 +2993,15 @@ cdef shared_ptr[cmap[cint32_t,double]] Map__i32_double__make_instance(object ite
             deref(c_inst)[key] = item
     return cmove(c_inst)
 
+cdef object Map__i32_double__from_cpp(const cmap[cint32_t,double]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint32_t,double]] iter = __map_iter[cmap[cint32_t,double]](c_map)
+    cdef cint32_t ckey = 0
+    cdef double cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = cval
+    return Map__i32_double(py_items)
 
 
 cdef vector[cmap[cint32_t,double]] List__Map__i32_double__make_instance(object items) except *:
@@ -3028,6 +3118,15 @@ cdef shared_ptr[cmap[_module_cbindings.cAnEnumRenamed,cint32_t]] Map__AnEnumRena
             deref(c_inst)[<_module_cbindings.cAnEnumRenamed><int>key] = item
     return cmove(c_inst)
 
+cdef object Map__AnEnumRenamed_i32__from_cpp(const cmap[_module_cbindings.cAnEnumRenamed,cint32_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[_module_cbindings.cAnEnumRenamed,cint32_t]] iter = __map_iter[cmap[_module_cbindings.cAnEnumRenamed,cint32_t]](c_map)
+    cdef _module_cbindings.cAnEnumRenamed ckey
+    cdef cint32_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[translate_cpp_enum_to_python(AnEnumRenamed, <int> ckey)] = cval
+    return Map__AnEnumRenamed_i32(py_items)
 
 
 A_BOOL = True

@@ -358,6 +358,7 @@ cdef class Map__i32_i32(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
+cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]&) except *
 
 cdef vector[cint64_t] List__i64__make_instance(object items) except *
 cdef object List__i64__from_cpp(const vector[cint64_t]&) except *

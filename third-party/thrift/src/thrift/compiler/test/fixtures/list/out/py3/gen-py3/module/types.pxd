@@ -60,5 +60,6 @@ cdef class Map__i64_List__string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_instance(object items) except *
+cdef object Map__i64_List__string__from_cpp(const cmap[cint64_t,vector[string]]&) except *
 
 

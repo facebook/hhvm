@@ -1421,6 +1421,15 @@ cdef shared_ptr[cmap[cint16_t,string]] Map__i16_string__make_instance(object ite
             deref(c_inst)[key] = item.encode('UTF-8')
     return cmove(c_inst)
 
+cdef object Map__i16_string__from_cpp(const cmap[cint16_t,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint16_t,string]] iter = __map_iter[cmap[cint16_t,string]](c_map)
+    cdef cint16_t ckey = 0
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = __init_unicode_from_cpp(cval)
+    return Map__i16_string(py_items)
 
 
 containerTypedef = Map__i16_string

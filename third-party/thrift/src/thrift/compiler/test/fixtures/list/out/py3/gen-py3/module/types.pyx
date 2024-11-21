@@ -182,6 +182,15 @@ cdef shared_ptr[cmap[cint64_t,vector[string]]] Map__i64_List__string__make_insta
             deref(c_inst)[key] = List__string__make_instance(item)
     return cmove(c_inst)
 
+cdef object Map__i64_List__string__from_cpp(const cmap[cint64_t,vector[string]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[cint64_t,vector[string]]] iter = __map_iter[cmap[cint64_t,vector[string]]](c_map)
+    cdef cint64_t ckey = 0
+    cdef vector[string] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[ckey] = List__string__from_cpp(cval)
+    return Map__i64_List__string(py_items)
 
 
 TEST_MAP = Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cTEST_MAP()))

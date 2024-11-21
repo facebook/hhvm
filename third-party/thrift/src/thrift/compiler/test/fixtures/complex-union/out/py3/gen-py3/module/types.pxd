@@ -197,5 +197,6 @@ cdef class Map__i16_string(thrift.py3.types.Map):
     cdef _check_key_type(self, key)
 
 cdef shared_ptr[cmap[cint16_t,string]] Map__i16_string__make_instance(object items) except *
+cdef object Map__i16_string__from_cpp(const cmap[cint16_t,string]&) except *
 
 

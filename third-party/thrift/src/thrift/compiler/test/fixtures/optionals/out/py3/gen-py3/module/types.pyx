@@ -694,6 +694,15 @@ cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] Map__Animal_string__make
             deref(c_inst)[<_module_cbindings.cAnimal><int>key] = item.encode('UTF-8')
     return cmove(c_inst)
 
+cdef object Map__Animal_string__from_cpp(const cmap[_module_cbindings.cAnimal,string]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[_module_cbindings.cAnimal,string]] iter = __map_iter[cmap[_module_cbindings.cAnimal,string]](c_map)
+    cdef _module_cbindings.cAnimal ckey
+    cdef string cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[translate_cpp_enum_to_python(Animal, <int> ckey)] = __init_unicode_from_cpp(cval)
+    return Map__Animal_string(py_items)
 
 
 cdef vector[_module_cbindings.cVehicle] List__Vehicle__make_instance(object items) except *:

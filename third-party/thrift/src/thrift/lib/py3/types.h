@@ -26,6 +26,7 @@
 
 #include <folly/Indestructible.h>
 #include <folly/Range.h>
+#include <folly/Traits.h>
 
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp2/FieldRef.h>
@@ -111,10 +112,35 @@ void map_getitem(
 }
 
 template <typename T>
+using cbegin_method_t = decltype(std::declval<T&>().cbegin());
+template <typename T>
+constexpr bool has_cbegin_v = folly::is_detected_v<cbegin_method_t, T>;
+
+template <typename T, typename It = typename T::const_iterator>
+It getConstIterator(const std::shared_ptr<T>& cpp_obj) {
+  if constexpr (has_cbegin_v<T>) {
+    return cpp_obj->cbegin();
+  } else {
+    return cpp_obj->begin();
+  }
+}
+
+template <typename T, typename It = typename T::const_iterator>
+It getConstIterator(const T& cpp_obj) {
+  if constexpr (has_cbegin_v<T>) {
+    return cpp_obj.cbegin();
+  } else {
+    return cpp_obj.begin();
+  }
+}
+
+template <typename T>
 struct map_iter {
   map_iter() = default;
-  map_iter(const std::shared_ptr<T>& cpp_obj) : it{cpp_obj->begin()} {}
-  typename T::iterator it;
+  explicit map_iter(const std::shared_ptr<T>& cpp_obj)
+      : it{getConstIterator(cpp_obj)} {}
+  explicit map_iter(const T& cpp_obj) : it{getConstIterator(cpp_obj)} {}
+  typename T::const_iterator it;
   template <typename K>
   void genNextKey(const std::shared_ptr<T>& cpp_obj, std::shared_ptr<K>& out) {
     out = std::shared_ptr<K>(cpp_obj, const_cast<K*>(&it->first));
@@ -143,6 +169,13 @@ struct map_iter {
     ++it;
   }
   template <typename K, typename V>
+  void genNextKeyVal(K& key_out, V& value_out) {
+    key_out = it->first;
+    value_out = it->second;
+    ++it;
+  }
+
+  template <typename K, typename V>
   void genNextItem(
       const std::shared_ptr<T>& cpp_obj,
       K& key_out,
@@ -152,11 +185,24 @@ struct map_iter {
     ++it;
   }
   template <typename K, typename V>
+  void genNextKeyVal(K& key_out, std::shared_ptr<V>& value_out) {
+    key_out = it->first;
+    value_out = std::make_shared<V>(it->second);
+    ++it;
+  }
+
+  template <typename K, typename V>
   void genNextItem(
       const std::shared_ptr<T>& cpp_obj,
       std::shared_ptr<K>& key_out,
       V& value_out) {
     key_out = std::shared_ptr<K>(cpp_obj, const_cast<K*>(&it->first));
+    value_out = it->second;
+    ++it;
+  }
+  template <typename K, typename V>
+  void genNextKeyVal(std::shared_ptr<K>& key_out, V& value_out) {
+    key_out = std::make_shared<K>(it->first);
     value_out = it->second;
     ++it;
   }
@@ -168,6 +214,13 @@ struct map_iter {
       std::shared_ptr<V>& value_out) {
     key_out = std::shared_ptr<K>(cpp_obj, const_cast<K*>(&it->first));
     value_out = std::shared_ptr<V>(cpp_obj, const_cast<V*>(&it->second));
+    ++it;
+  }
+  template <typename K, typename V>
+  void genNextKeyVal(
+      std::shared_ptr<K>& key_out, std::shared_ptr<V>& value_out) {
+    key_out = std::make_shared<K>(it->first);
+    value_out = std::make_shared<V>(it->second);
     ++it;
   }
 };

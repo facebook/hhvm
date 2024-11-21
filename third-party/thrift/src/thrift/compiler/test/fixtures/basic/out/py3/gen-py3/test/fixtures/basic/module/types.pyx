@@ -1373,6 +1373,15 @@ cdef shared_ptr[cmap[string,cint64_t]] Map__string_i64__make_instance(object ite
             deref(c_inst)[key.encode('UTF-8')] = item
     return cmove(c_inst)
 
+cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,cint64_t]] iter = __map_iter[cmap[string,cint64_t]](c_map)
+    cdef string ckey
+    cdef cint64_t cval = 0
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = cval
+    return Map__string_i64(py_items)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1471,6 +1480,15 @@ cdef shared_ptr[cmap[string,vector[cint32_t]]] Map__string_List__i32__make_insta
             deref(c_inst)[key.encode('UTF-8')] = List__i32__make_instance(item)
     return cmove(c_inst)
 
+cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]& c_map) except *:
+    cdef dict py_items = {}
+    cdef __map_iter[cmap[string,vector[cint32_t]]] iter = __map_iter[cmap[string,vector[cint32_t]]](c_map)
+    cdef string ckey
+    cdef vector[cint32_t] cval
+    for i in range(c_map.size()):
+        iter.genNextKeyVal(ckey, cval)
+        py_items[__init_unicode_from_cpp(ckey)] = List__i32__from_cpp(cval)
+    return Map__string_List__i32(py_items)
 
 
 FLAG = True

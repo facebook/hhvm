@@ -130,11 +130,9 @@ cdef class {{type:flat_name}}(thrift.py3.types.{{!
 cdef {{#type:map?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:map?}}{{!
 }}{{^type:map?}}{{> types/cython_cpp_type}}{{/type:map?}}{{!
 }} {{type:flat_name}}__make_instance(object items) except *
-{{^type:map?}}
 {{^program:auto_migrate?}}
 cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}&) except *
 {{/program:auto_migrate?}}
-{{/type:map?}}
 
 {{/program:containerTypes}}
 

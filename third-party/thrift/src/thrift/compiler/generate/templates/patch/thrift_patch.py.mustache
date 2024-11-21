@@ -49,7 +49,7 @@ import {{program:module_path}}.thrift_types as {{program:module_mangle}}__thrift
 {{#program:include_namespaces}}
 {{#has_types?}}
 
-import {{included_module_path}}.{{> types/types_import_path}} as {{included_module_mangle}}__{{> types/types_import_path}}
+import {{included_module_path}}.{{> ../python/types/types_import_path}} as {{included_module_mangle}}__{{> ../python/types/types_import_path}}
 import {{included_module_path}}.thrift_patch
 {{/has_types?}}
 {{/program:include_namespaces}}
@@ -64,13 +64,13 @@ class {{struct:py_name}}Patch(
 {{#struct:fields_ordered_by_id}}
     @property
     def {{field:py_name}}(self) -> OptionalFieldPatch[
-            {{#field:type}}{{> types/unadapted_pep484_type}}{{/field:type}},
-            {{#field:type}}{{> types/unadapted_pep484_patch_type}}{{/field:type}}]:
+            {{#field:type}}{{> ../python/types/unadapted_pep484_type}}{{/field:type}},
+            {{#field:type}}{{> ../python/types/unadapted_pep484_patch_type}}{{/field:type}}]:
 
         return OptionalFieldPatch(
-            {{#field:type}}{{> common/thrift_patch_callback}}{{/field:type}},
+            {{#field:type}}{{> ../python/common/thrift_patch_callback}}{{/field:type}},
             self._patch,
             {{field:key}},
-            {{#field:type}}{{ >types/typeinfo }}{{/field:type}})
+            {{#field:type}}{{> ../python/types/typeinfo }}{{/field:type}})
 {{/struct:fields_ordered_by_id}}
 {{/program:structs}}

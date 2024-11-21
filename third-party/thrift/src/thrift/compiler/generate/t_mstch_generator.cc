@@ -522,19 +522,26 @@ t_mstch_generator::gen_whisker_render_state(whisker_options whisker_opts) {
       // "field/member" --> "cpp2/field/member"
       std::string template_prefix;
 
+      auto start = partial_path.begin();
       if (include_from == source_location()) {
         // If include_from is empty, we use the stored template_prefix
         template_prefix = template_prefix_;
-      } else {
+      } else if (*start != "..") {
         std::filesystem::path current_file_path =
             resolved_location(include_from, src_manager_).file_name();
         template_prefix = current_file_path.begin()->generic_string();
+      } else {
+        // If path starts with "..", the template_prefix will be the second
+        // element, and the template_name starts at the 3rd element. e.g.,
+        // "../cpp2/field/member": template_prefix = "cpp2"
+        ++start;
+        template_prefix = *start++;
       }
 
       // Whisker always breaks down the path into components. However, the
       // template_map stores them as one concatenated string.
       return fmt::format(
-          "{}/{}", template_prefix, fmt::join(partial_path, "/"));
+          "{}/{}", template_prefix, fmt::join(start, partial_path.end(), "/"));
     }
 
     const std::map<std::string, std::string>& template_map_;

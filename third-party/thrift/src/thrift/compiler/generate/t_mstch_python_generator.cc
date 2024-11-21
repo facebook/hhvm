@@ -1487,7 +1487,7 @@ class t_python_patch_generator : public t_mstch_generator {
     return opts;
   }
 
-  std::string template_prefix() const override { return "python"; }
+  std::string template_prefix() const override { return "patch"; }
 
   void generate_program() override {
     out_dir_base_ = "gen-python-patch";

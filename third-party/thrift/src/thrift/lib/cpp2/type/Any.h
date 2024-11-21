@@ -151,7 +151,7 @@ void AnyData::get(native_type<Tag>& v) const {
 }
 
 inline bool AnyData::isValid(const AnyStruct& any) noexcept {
-  if (!any.data().is_set()) {
+  if (any.data()->empty()) {
     return true;
   }
   return any.type()->isValid() && !any.protocol()->empty();

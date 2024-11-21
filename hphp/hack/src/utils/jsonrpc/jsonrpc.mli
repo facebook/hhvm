@@ -16,7 +16,8 @@ type timestamped_json = {
 
 type t
 
-(** must call Daemon.entry_point at start of your main *)
+(** Make the JsonRPC daemon responsible for parsing and transmitting LSP messages.
+  Must call Daemon.entry_point at start of your main *)
 val make_t : unit -> t
 
 (** says whether there's already an item on the queue, or stdin is readable meaning that there's something pending on it *)

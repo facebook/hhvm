@@ -66,6 +66,7 @@ let see_output_hack = " See Output\xE2\x80\xBAHack for details." (* chevron *)
 
 let fix_by_running_hh = "Try running `hh` at the command-line."
 
+(** Metadata of an incoming LSP message *)
 type incoming_metadata = {
   timestamp: float;  (** time this message arrived at stdin *)
   activity_id: string;
@@ -77,6 +78,7 @@ type incoming_metadata = {
       (** This is just [activity_id].[tracking_suffix]. Is handy to keep it in one place. *)
 }
 
+(** The origin of a diagnostic *)
 type diagnostics_from =
   | Diagnostics_from_clientIdeDaemon of {
       diagnostics: ClientIdeMessage.diagnostic list;
@@ -88,6 +90,7 @@ type diagnostics_from =
   | Diagnostics_from_errors_file
 [@@deriving show { with_path = false }]
 
+(** The state of the errors file seeking state machine. *)
 type seek_reason =
   | Init
   | Unexpected_end_of_stream
@@ -160,6 +163,7 @@ type errors_trigger =
     }  (** In receipt of didOpen/didChange and similar, we update live errors *)
 
 module Run_env = struct
+  (** A file use to stream the output of a shelled out command *)
   type stream_file = {
     file: Path.t;
     q: FindRefsWireFormat.half_open_one_based list Lwt_stream.t;
@@ -259,6 +263,7 @@ let is_post_shutdown (state : state) : bool =
   | Running _ ->
     false
 
+(** A handler for the result of an LSP request *)
 type result_handler = lsp_result -> state -> state Lwt.t
 
 type result_telemetry = {
@@ -276,7 +281,7 @@ let make_result_telemetry
     (count : int) : result_telemetry =
   { result_count = count; result_extra_data; log_immediately }
 
-(* --ide-rename-by-symbol returns a list of patches *)
+(** A patch returned by --ide-rename-by-symbol *)
 type ide_refactor_patch = {
   filename: string;
   line: int;
@@ -731,7 +736,7 @@ clientIdeDaemon, or whether neither is ready within 1s. *)
 let get_client_message_source
     (client : Jsonrpc.t option)
     (ide_service : ClientIdeService.t ref)
-    (q_opt :
+    (errors_q_opt :
       ( Server_progress.ErrorsRead.read_result,
         Server_progress_lwt.watch_error )
       result
@@ -776,7 +781,7 @@ let get_client_message_source
            (let%lwt notification = pop_from_ide_service ide_service in
             Lwt.return (`From_ide_service notification));
          ]
-        @ Option.value_map q_opt ~default:[] ~f:(fun q ->
+        @ Option.value_map errors_q_opt ~default:[] ~f:(fun q ->
               [Lwt_stream.get q |> Lwt.map (fun item -> `From_q item)])
         @ Option.value_map refs_q_opt ~default:[] ~f:(fun q ->
               [Lwt_stream.get q |> Lwt.map (fun item -> `From_refs_q item)])
@@ -791,9 +796,8 @@ let get_client_message_source
     in
     Lwt.return message_source
 
-(** get_next_event: picks up the next available message.
-The way it's implemented, at the first character of a message,
-we block until that message is completely received. *)
+(** Pick up the next available message from the JsonRPC client.
+At the first character of a message, block until that message is completely received. *)
 let get_next_event
     (state : state ref)
     (client : Jsonrpc.t)
@@ -867,12 +871,12 @@ let get_next_event
   | Post_shutdown ->
     (* invariant used by [handle_tick_event]: Errors_file events solely arise
        in state [Running ] in conjunction with [TailingErrors]. *)
-    let q_opt =
+    let errors_queue_opt =
       match (!latest_hh_server_errors, !state) with
       | (TailingErrors { q; _ }, Running _) -> Some q
       | _ -> None
     in
-    let refs_q_opt =
+    let refs_queue_opt =
       match !state with
       | Running
           Run_env.
@@ -898,8 +902,8 @@ let get_next_event
       get_client_message_source
         client
         ide_service
-        q_opt
-        refs_q_opt
+        errors_queue_opt
+        refs_queue_opt
         uri_needs_check
     in
     (match message_source with
@@ -3995,6 +3999,7 @@ let cancel_if_stale (client : Jsonrpc.t) (timestamp : float) (timeout : float) :
   else
     Lwt.return_unit
 
+(** Assert that workers from the worker controller are not stopped. *)
 let assert_workers_are_not_stopped () =
   if WorkerCancel.is_stop_requested () then begin
     HackEventLogger.invariant_violation_bug
@@ -4928,10 +4933,10 @@ let main
    * clientLsp message-loop or hh_server, and can start actually handling.
    * Everything that blocks will update this variable. *)
   let process_next_event () : unit Lwt.t =
-    assert_workers_are_not_stopped ();
-    (* This assertion is satisfied because the only place that stops workers is inside
+    (* The following assertion is satisfied because the only place that stops workers is inside
        [respect_cancellation], but its ~finally clause guarantees that it unstops workers
        before it completes i.e. before we continue this [process_next_event] loop. *)
+    assert_workers_are_not_stopped ();
     try%lwt
       let%lwt event = get_next_event state client ide_service in
       if not (is_tick event) then

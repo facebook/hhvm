@@ -24,7 +24,7 @@
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/RequestPayload.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::rocket {
@@ -93,8 +93,7 @@ inline PayloadType unpackPayload(
   if constexpr (uncompressPayload) {
     auto data = std::move(payload).data();
     if (auto compression = t.metadata.compression()) {
-      data =
-          CompressionManager().uncompressBuffer(std::move(data), *compression);
+      data = uncompressBuffer(std::move(data), *compression);
     }
     t.payload = std::move(data);
   } else {

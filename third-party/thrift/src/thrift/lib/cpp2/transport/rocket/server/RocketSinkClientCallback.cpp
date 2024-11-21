@@ -33,7 +33,6 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
 #include <thrift/lib/cpp2/transport/rocket/Types.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 
@@ -98,7 +97,7 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
 
   // apply compression if client has specified compression codec
   if (compressionConfig_) {
-    CompressionManager().setCompressionCodec(
+    apache::thrift::rocket::detail::setCompressionCodec(
         *compressionConfig_,
         finalResponse.metadata,
         finalResponse.payload->computeChainDataLength());
@@ -131,7 +130,7 @@ void RocketSinkClientCallback::onFinalResponseError(
       [this](::apache::thrift::detail::EncodedStreamError& err) {
         // apply compression if client has specified compression codec
         if (compressionConfig_) {
-          CompressionManager().setCompressionCodec(
+          apache::thrift::rocket::detail::setCompressionCodec(
               *compressionConfig_,
               err.encoded.metadata,
               err.encoded.payload->computeChainDataLength());

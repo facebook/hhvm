@@ -20,7 +20,7 @@
 
 #include <folly/compression/Zstd.h>
 #include <thrift/lib/cpp/TApplicationException.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::rocket;
@@ -65,14 +65,12 @@ CodecConfig toCodecConfig(const Lz4CompressionCodecConfig& lz4Config) {
 // Test compress.
 
 void testCompress(const CompressionAlgorithm& compressionAlgorithm) {
-  auto buffer = CompressionManager().compressBuffer(
-      baseBuffer->clone(), compressionAlgorithm);
+  auto buffer = compressBuffer(baseBuffer->clone(), compressionAlgorithm);
   EXPECT_FALSE(folly::IOBufEqualTo()(buffer, baseBuffer));
 }
 
 TEST(CompressionTest, unsetCompressDoesNotCompress) {
-  auto buffer = CompressionManager().compressBuffer(
-      baseBuffer->clone(), CompressionAlgorithm::NONE);
+  auto buffer = compressBuffer(baseBuffer->clone(), CompressionAlgorithm::NONE);
   EXPECT_TRUE(folly::IOBufEqualTo()(buffer, baseBuffer));
 }
 
@@ -97,11 +95,9 @@ TEST(CompressionTest, Lz4CompressSucceeds) {
 // Test uncompress.
 
 void testUncompress(const CompressionAlgorithm& compressionAlgorithm) {
-  auto buffer = CompressionManager().compressBuffer(
-      baseBuffer->clone(), compressionAlgorithm);
+  auto buffer = compressBuffer(baseBuffer->clone(), compressionAlgorithm);
 
-  buffer = CompressionManager().uncompressBuffer(
-      std::move(buffer), compressionAlgorithm);
+  buffer = uncompressBuffer(std::move(buffer), compressionAlgorithm);
   EXPECT_TRUE(folly::IOBufEqualTo()(buffer, baseBuffer));
 }
 
@@ -133,7 +129,6 @@ template <typename Metadata, typename Config>
 Metadata testSetCompressionCodec(
     const ExpectCompression& expectCompression = ExpectCompression::NotEmpty,
     const std::optional<size_t>& compressionSizeLimitOpt = std::nullopt) {
-  CompressionManager cmb;
   Metadata metadata;
   auto codecConfig = toCodecConfig(Config());
   CompressionConfig compressionConfig;
@@ -142,7 +137,8 @@ Metadata testSetCompressionCodec(
     compressionConfig.compressionSizeLimit_ref() = *compressionSizeLimitOpt;
   }
 
-  cmb.setCompressionCodec(compressionConfig, metadata, basePayloadSize);
+  rocket::detail::setCompressionCodec(
+      compressionConfig, metadata, basePayloadSize);
 
   if (expectCompression == ExpectCompression::Empty) {
     EXPECT_FALSE(metadata.compression_ref().has_value());

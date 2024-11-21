@@ -29,7 +29,7 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataPlugins.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionAlgorithmSelector.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace apache::thrift::detail {
@@ -72,8 +72,8 @@ RequestRpcMetadata makeRequestRpcMetadata(
       }
 
       if (payloadSize > compressionConfig->compressionSizeLimit().value_or(0)) {
-        metadata.compression() =
-            rocket::CompressionManager().fromCodecConfig(*codec);
+        metadata.compression() = apache::thrift::rocket::
+            CompressionAlgorithmSelector::fromCodecConfig(*codec);
       }
 
       metadata.compressionConfig() = *compressionConfig;

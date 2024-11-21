@@ -18,7 +18,7 @@
 
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/Compression.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializerStrategy.h>
 
 namespace apache::thrift::rocket {
@@ -45,8 +45,7 @@ class DefaultPayloadSerializerStrategy final
     return folly::makeTryWith([&]() {
       T t = unpackImpl<T>(std::move(payload), decodeMetadataUsingBinary);
       if (auto compression = t.metadata.compression()) {
-        t.payload = CompressionManager().uncompressBuffer(
-            std::move(t.payload), *compression);
+        t.payload = uncompressBuffer(std::move(t.payload), *compression);
       }
       return t;
     });

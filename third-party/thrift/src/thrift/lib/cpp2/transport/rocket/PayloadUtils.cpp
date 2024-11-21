@@ -22,8 +22,7 @@ template <typename Metadata>
 void applyCompressionIfNeeded(
     std::unique_ptr<folly::IOBuf>& payload, Metadata* metadata) {
   if (auto compress = metadata->compression_ref()) {
-    payload =
-        CompressionManager().compressBuffer(std::move(payload), *compress);
+    payload = compressBuffer(std::move(payload), *compress);
   }
 }
 

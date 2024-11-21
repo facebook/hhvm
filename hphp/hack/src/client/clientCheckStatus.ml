@@ -97,6 +97,70 @@ let end_sentinel_short_string = function
   | Watch_error _ -> "Killed"
   | Completed c -> Server_progress.show_completion_reason c
 
+type errors_info = {
+  errors: Errors.FinalizedErrorSet.t;
+  errors_count: int * int;
+  files_with_errors: Relative_path.Set.t;
+  files_reported_twice: Relative_path.t list;
+}
+
+let empty_errors_info =
+  {
+    errors = Errors.FinalizedErrorSet.empty;
+    errors_count = (0, 0);
+    files_with_errors = Relative_path.Set.empty;
+    files_reported_twice = [];
+  }
+
+let add_tuples (i, j) (k, l) = (i + k, j + l)
+
+let acc_errors_info
+    {
+      errors = errors_acc;
+      errors_count;
+      files_with_errors;
+      files_reported_twice;
+    }
+    (errors : _ Relative_path.Map.t) =
+  let errors_acc =
+    Relative_path.Map.fold errors ~init:errors_acc ~f:(fun _path errors acc ->
+        Errors.FinalizedErrorSet.add_seq (errors |> Stdlib.List.to_seq) acc)
+  in
+  let files_reported_twice =
+    Relative_path.Map.fold
+      errors
+      ~init:files_reported_twice
+      ~f:(fun path _ acc ->
+        if Relative_path.Set.mem files_with_errors path then
+          path :: acc
+        else
+          acc)
+  in
+  let files_with_errors =
+    Relative_path.Map.fold errors ~init:files_with_errors ~f:(fun path _ acc ->
+        Relative_path.Set.add acc path)
+  in
+  let errors_count =
+    Relative_path.Map.fold
+      errors
+      ~init:errors_count
+      ~f:(fun _ errors error_counts ->
+        Errors.count_errors_and_warnings errors |> add_tuples error_counts)
+  in
+  { errors = errors_acc; errors_count; files_with_errors; files_reported_twice }
+
+let validate_files_reported_twice files =
+  (* TODO @catg when we're happy with this validation, delete this or put behind a flag *)
+  if not @@ List.is_empty files then (
+    let msg =
+      Printf.sprintf
+        "ERROR STREAMING: The following files had errors reported multiple times:\n%s"
+      @@ (List.map files ~f:Relative_path.to_absolute |> String.concat ~sep:"\n")
+    in
+    Hh_logger.log "%s" msg;
+    HackEventLogger.invariant_violation_bug msg
+  )
+
 (** This function produces streaming errors: it reads the errors.bin opened
   as [fd], displays errors as they come using the [args.error_format] over stdout, and
   displays a progress-spinner over stderr if [args.show_spinner]. It keeps "tailing"
@@ -110,7 +174,7 @@ let go_streaming_on_fd
     (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(progress_callback : string option -> unit) :
-    (Exit_status.t * Telemetry.t) Lwt.t =
+    (Exit_status.t * Errors.FinalizedErrorSet.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ max_errors; error_format; _ } = args in
   let errors_stream = Server_progress_lwt.watch_errors_file ~pid fd in
   let start_time = Unix.gettimeofday () in
@@ -156,9 +220,8 @@ let go_streaming_on_fd
   (* this lwt process consumes errors from the errors.bin file by polling
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
-  let rec consume (error_counts : int * int) :
-      ((int * int) * end_sentinel) Lwt.t =
-    let add_tuples (i, j) (k, l) = (i + k, j + l) in
+  let rec consume (errors_info : errors_info) :
+      (errors_info * end_sentinel) Lwt.t =
     let total_errors (i, j) = i + j in
     let%lwt errors = Lwt_stream.get errors_stream in
     match errors with
@@ -168,16 +231,16 @@ let go_streaming_on_fd
          stream is closed and hence subsequent [Lwt_stream.get] return [None].
          If we're here, it means that contract has been violated. *)
       failwith "Expected end_sentinel before end of stream"
-    | Some (Error error) -> Lwt.return (error_counts, Watch_error error)
+    | Some (Error error) -> Lwt.return (errors_info, Watch_error error)
     | Some (Ok (Server_progress.ErrorsRead.RCompleted (x, _))) ->
-      Lwt.return (error_counts, Completed x)
+      Lwt.return (errors_info, Completed x)
     | Some (Ok (Server_progress.ErrorsRead.RItem item)) ->
       (match item with
       | Server_progress.Telemetry telemetry_item ->
         errors_file_telemetry :=
           Telemetry.merge !errors_file_telemetry telemetry_item;
-        update_partial_telemetry (total_errors error_counts);
-        consume error_counts
+        update_partial_telemetry (total_errors errors_info.errors_count);
+        consume errors_info
       | Server_progress.Errors { errors; timestamp = _ } ->
         first_error_time :=
           Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
@@ -188,13 +251,7 @@ let go_streaming_on_fd
         let errors =
           Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
         in
-        let error_counts =
-          Relative_path.Map.fold
-            errors
-            ~init:error_counts
-            ~f:(fun _ errors error_counts ->
-              Errors.count_errors_and_warnings errors |> add_tuples error_counts)
-        in
+        let errors_info = acc_errors_info errors_info errors in
         begin
           try
             Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
@@ -213,23 +270,30 @@ let go_streaming_on_fd
               backtrace
         end;
         progress_callback !latest_progress;
-        update_partial_telemetry (total_errors error_counts);
+        update_partial_telemetry (total_errors errors_info.errors_count);
         if
-          total_errors error_counts
+          total_errors errors_info.errors_count
           >= Option.value max_errors ~default:Int.max_value
         then
-          Lwt.return (error_counts, Max_errors (Telemetry.create ()))
+          Lwt.return (errors_info, Max_errors (Telemetry.create ()))
         else
-          consume error_counts)
+          consume errors_info)
   in
 
   (* We will show progress indefinitely until "consume" finishes,
      at which Lwt.pick will cancel show_progress. *)
-  let%lwt ((error_count, warning_count), end_sentinel) =
-    Lwt.pick [consume (0, 0); show_progress ()]
+  let%lwt ( {
+              errors;
+              errors_count = (error_count, warning_count);
+              files_with_errors = _;
+              files_reported_twice;
+            },
+            end_sentinel ) =
+    Lwt.pick [consume empty_errors_info; show_progress ()]
   in
   (* Clear the spinner *)
   progress_callback None;
+  validate_files_reported_twice files_reported_twice;
 
   let (exit_status, telemetry) =
     match end_sentinel with
@@ -280,7 +344,7 @@ let go_streaming_on_fd
       raise Exit_status.(Exit_with Exit_status.Typecheck_abandoned)
   in
 
-  Lwt.return (exit_status, telemetry)
+  Lwt.return (exit_status, errors, telemetry)
 
 (** Gets all files-changed since [clock] which match the standard hack
   predicate [FilesToIgnore.watchman_server_expression_terms].
@@ -615,7 +679,7 @@ let go_streaming
     (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
-    (Exit_status.t * Telemetry.t) Lwt.t =
+    (Exit_status.t * Errors.FinalizedErrorSet.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ root; show_spinner; deadline; _ } = args in
   let progress_callback : string option -> unit =
     ClientSpinner.report ~to_stderr:show_spinner ~angery_reaccs_only:false
@@ -634,7 +698,7 @@ let go_streaming
       ~deadline
       ~root
   in
-  let%lwt (exit_status, telemetry) =
+  let%lwt (exit_status, errors, telemetry) =
     go_streaming_on_fd
       ~pid
       fd
@@ -643,4 +707,4 @@ let go_streaming
       ~partial_telemetry_ref
       ~progress_callback
   in
-  Lwt.return (exit_status, telemetry)
+  Lwt.return (exit_status, errors, telemetry)

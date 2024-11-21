@@ -11,7 +11,7 @@ val go_streaming :
   Filter_errors.Filter.t ->
   partial_telemetry_ref:Telemetry.t option ref ->
   connect_then_close:(unit -> unit Lwt.t) ->
-  (Exit_status.t * Telemetry.t) Lwt.t
+  (Exit_status.t * Errors.FinalizedErrorSet.t * Telemetry.t) Lwt.t
 
 val go :
   ServerCommandTypes.Server_status.t ->

@@ -1093,9 +1093,10 @@ class t_mstch_python_generator : public t_mstch_generator {
           module_name_collision_validator::validate_named);
       validator.add_enum_visitor(
           module_name_collision_validator::validate_named);
-      validator.add_const_visitor(module_name_collision_validator::warn_named);
+      validator.add_const_visitor(
+          module_name_collision_validator::validate_named);
       validator.add_typedef_visitor(
-          module_name_collision_validator::warn_named);
+          module_name_collision_validator::validate_named);
       validator.add_interface_visitor(
           module_name_collision_validator::warn_named);
     }

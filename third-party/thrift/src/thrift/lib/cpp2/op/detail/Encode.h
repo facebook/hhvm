@@ -889,9 +889,7 @@ struct Decode<type::list<Tag>> {
         }
       }
     } else {
-      while (s--) {
-        prot.skip(t);
-      }
+      apache::thrift::skip_n(prot, s, {t});
     }
 
     prot.readListEnd();
@@ -993,9 +991,7 @@ struct Decode<type::set<Tag>> {
     } else if (typeTagToTType<Tag> == t) {
       decode_known_length_set(prot, set, s);
     } else {
-      while (s--) {
-        prot.skip(t);
-      }
+      apache::thrift::skip_n(prot, s, {t});
     }
 
     prot.readSetEnd();
@@ -1075,10 +1071,7 @@ struct Decode<type::map<Key, Value>> {
         typeTagToTType<Key> == keyType && typeTagToTType<Value> == valueType) {
       decode_known_length_map(prot, map, s);
     } else {
-      while (s--) {
-        prot.skip(keyType);
-        prot.skip(valueType);
-      }
+      apache::thrift::skip_n(prot, s, {keyType, valueType});
     }
     prot.readMapEnd();
   }

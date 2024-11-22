@@ -392,6 +392,10 @@ module Primary = struct
           name: string;
           why: Pos_or_decl.t Message.t list Lazy.t;
         }
+      | Invalid_recursive of {
+          pos: Pos.t;
+          name: string;
+        }
     [@@deriving show]
   end
 

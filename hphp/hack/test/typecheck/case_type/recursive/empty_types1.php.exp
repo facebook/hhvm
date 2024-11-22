@@ -1,0 +1,66 @@
+ERROR: File "empty_types1.php", line 28, characters 21-30:
+Type aliases to type constants are not supported (Parsing[1002])
+ERROR: File "empty_types1.php", line 29, characters 19-25:
+Type aliases to type constants are not supported (Parsing[1002])
+ERROR: File "empty_types1.php", line 26, characters 17-41:
+Type refinements cannot appear on the right-hand side of a case type. (NastCheck[3101])
+ERROR: File "empty_types1.php", line 4, characters 11-11:
+This recursive case type is not supported. `A` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 5, characters 11-11:
+This recursive case type is not supported. `B` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 7, characters 11-11:
+This recursive case type is not supported. `C` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 8, characters 11-11:
+This recursive case type is not supported. `D` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 10, characters 11-11:
+This recursive case type is not supported. `E` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 11, characters 11-11:
+This recursive case type is not supported. `F` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 12, characters 11-11:
+This recursive case type is not supported. `G` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 14, characters 11-11:
+This recursive case type is not supported. `H` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 15, characters 11-11:
+This recursive case type is not supported. `I` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 17, characters 11-11:
+This recursive case type is not supported. `J` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 18, characters 11-11:
+This recursive case type is not supported. `K` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 19, characters 11-11:
+This recursive case type is not supported. `L` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 21, characters 11-11:
+Invalid case type declaration. More than one variant of `M` could contain values with the same runtime tag (Typing[4475])
+  File "empty_types1.php", line 21, characters 15-15:
+  This is the type `M`, which includes **ints** because it is a cyclic type
+  File "empty_types1.php", line 21, characters 15-15:
+    via this variant of the case type `M`
+  File "empty_types1.php", line 21, characters 19-21:
+  It overlaps with `int`, which also includes **ints**
+ERROR: File "empty_types1.php", line 22, characters 11-11:
+This recursive case type is not supported. `N` should not be at the top-level. (Typing[4485])
+ERROR: File "empty_types1.php", line 26, characters 17-41:
+Invalid type hint (Typing[4469])
+  File "empty_types1.php", line 26, characters 17-41:
+  Unsupported refinement, only class types can be refined
+ERROR: File "empty_types1.php", line 27, characters 20-29:
+Invalid type hint (Typing[4062])
+  File "empty_types1.php", line 27, characters 29-29:
+  You are trying to access the type constant `T` but this is a mixed value
+  File "empty_types1.php", line 27, characters 21-29:
+  Definition is here
+ERROR: File "empty_types1.php", line 28, characters 21-30:
+Invalid type hint (Typing[4062])
+  File "empty_types1.php", line 28, characters 30-30:
+  You are trying to access the type constant `T` but this is a mixed value
+  File "empty_types1.php", line 28, characters 21-30:
+  Definition is here
+ERROR: File "empty_types1.php", line 29, characters 11-15:
+Invalid case type declaration. More than one variant of `Acces` could contain values with the same runtime tag (Typing[4475])
+  File "empty_types1.php", line 29, characters 19-25:
+  This is the type `Claz::T`, which includes **ints** because it is a cyclic type
+  File "empty_types1.php", line 33, characters 18-22:
+    via this variant of the case type `Acces`
+  File "empty_types1.php", line 29, characters 19-25:
+    resulting from expanding the type constant `Claz::T`
+  File "empty_types1.php", line 29, characters 29-31:
+  It overlaps with `int`, which also includes **ints**

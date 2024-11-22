@@ -807,7 +807,12 @@ type runtime_data_type = decl_ty * DataType.t
 
 let data_type_from_hint = DataType.fromHint
 
-let check_overlapping env ~pos ~name (ty1, data_type1) (ty2, data_type2) =
+let check_overlapping
+    env
+    ~pos
+    ~name
+    (ty1, (data_type1 : DataType.t))
+    (ty2, (data_type2 : DataType.t)) =
   let open DataType in
   match Set.disjoint env data_type1 data_type2 with
   | Set.Sat -> None

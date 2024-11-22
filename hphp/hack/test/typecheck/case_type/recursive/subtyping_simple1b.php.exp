@@ -2,6 +2,8 @@ ERROR: File "subtyping_simple1b.php", line 4, characters 11-11:
 Cyclic type definition (Typing[4014])
   File "subtyping_simple1b.php", line 4, characters 16-16:
   Cyclic use is here
+ERROR: File "subtyping_simple1b.php", line 4, characters 11-11:
+This recursive case type is not supported. `A` should not be at the top-level. (Typing[4485])
 ERROR: File "subtyping_simple1b.php", line 11, characters 17-18:
 Invalid argument (Typing[4110])
   File "subtyping_simple1b.php", line 7, characters 24-29:

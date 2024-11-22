@@ -1,1 +1,4 @@
-No errors
+ERROR: File "subtyping_mutual1.php", line 4, characters 11-11:
+This recursive case type is not supported. `A` should not be at the top-level. (Typing[4485])
+ERROR: File "subtyping_mutual1.php", line 6, characters 11-11:
+This recursive case type is not supported. `B` should not be at the top-level. (Typing[4485])

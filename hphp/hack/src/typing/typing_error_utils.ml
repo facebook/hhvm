@@ -1800,11 +1800,27 @@ end = struct
         [],
         User_error_flags.empty )
 
+    let invalid_recursive pos name =
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "This recursive case type is not supported. %s should not be at the top-level."
+              (Markdown_lite.md_codify @@ Utils.strip_ns name) )
+      in
+      ( Error_code.InvalidRecursiveType,
+        claim,
+        lazy [],
+        lazy Explanation.empty,
+        [],
+        User_error_flags.empty )
+
     let to_error t ~env:_ =
       let open Typing_error.Primary.CaseType in
       match t with
       | Overlapping_variant_types { pos; name; why } ->
         overlapping_variant_types pos name why
+      | Invalid_recursive { pos; name } -> invalid_recursive pos name
   end
 
   let unify_error pos msg_opt reasons_opt =

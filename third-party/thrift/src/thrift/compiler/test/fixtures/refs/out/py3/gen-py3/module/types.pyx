@@ -20,11 +20,10 @@ from thrift.py3.types cimport make_unique
 cimport thrift.py3.types
 cimport thrift.py3.exceptions
 cimport thrift.python.exceptions
+import thrift.python.converter
 from thrift.python.types import EnumMeta as __EnumMeta
 from thrift.python.std_libcpp cimport sv_to_str as __sv_to_str, string_view as __cstring_view
-from thrift.python.types cimport(
-    BadEnum as __BadEnum,
-)
+from thrift.python.types cimport BadEnum as __BadEnum
 from thrift.py3.types cimport (
     richcmp as __richcmp,
     init_unicode_from_cpp as __init_unicode_from_cpp,
@@ -53,6 +52,7 @@ import weakref as __weakref
 import builtins as _builtins
 import importlib
 
+import module.thrift_types as _fbthrift_python_types
 from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
     MyEnum,
     TypedEnum,
@@ -69,7 +69,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 
 cdef object get_types_reflection():
-    import importlib
     return importlib.import_module(
         "module.types_reflection"
     )
@@ -228,18 +227,15 @@ cdef class MyUnion(thrift.py3.types.Union):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.MyUnion,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.MyUnion, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyUnion, self)
@@ -376,18 +372,15 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.NonTriviallyDestructibleUnion,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.NonTriviallyDestructibleUnion, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.NonTriviallyDestructibleUnion, self)
@@ -583,18 +576,15 @@ cdef class MyField(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.MyField,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.MyField, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyField, self)
@@ -724,18 +714,15 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.MyStruct,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.MyStruct, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
@@ -864,18 +851,15 @@ cdef class StructWithUnion(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithUnion,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithUnion, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithUnion, self)
@@ -984,18 +968,15 @@ cdef class RecursiveStruct(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.RecursiveStruct,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.RecursiveStruct, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.RecursiveStruct, self)
@@ -1158,18 +1139,15 @@ cdef class StructWithContainers(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithContainers,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithContainers, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithContainers, self)
@@ -1299,18 +1277,15 @@ cdef class StructWithSharedConst(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithSharedConst,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithSharedConst, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithSharedConst, self)
@@ -1400,18 +1375,15 @@ cdef class Empty(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.Empty,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.Empty, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Empty, self)
@@ -1541,18 +1513,15 @@ cdef class StructWithRef(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithRef,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithRef, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRef, self)
@@ -1683,18 +1652,15 @@ cdef class StructWithBox(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithBox,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithBox, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithBox, self)
@@ -1811,18 +1777,15 @@ cdef class StructWithInternBox(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithInternBox,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithInternBox, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithInternBox, self)
@@ -1937,18 +1900,15 @@ cdef class StructWithTerseInternBox(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithTerseInternBox,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithTerseInternBox, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithTerseInternBox, self)
@@ -2065,18 +2025,15 @@ cdef class AdaptedStructWithInternBox(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.AdaptedStructWithInternBox,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.AdaptedStructWithInternBox, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithInternBox, self)
@@ -2191,18 +2148,15 @@ cdef class AdaptedStructWithTerseInternBox(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.AdaptedStructWithTerseInternBox,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.AdaptedStructWithTerseInternBox, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.AdaptedStructWithTerseInternBox, self)
@@ -2332,18 +2286,15 @@ cdef class StructWithRefTypeUnique(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithRefTypeUnique,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithRefTypeUnique, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeUnique, self)
@@ -2473,18 +2424,15 @@ cdef class StructWithRefTypeShared(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithRefTypeShared,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithRefTypeShared, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeShared, self)
@@ -2614,18 +2562,15 @@ cdef class StructWithRefTypeSharedConst(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithRefTypeSharedConst,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithRefTypeSharedConst, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefTypeSharedConst, self)
@@ -2733,18 +2678,15 @@ cdef class StructWithRefAndAnnotCppNoexceptMoveCtor(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithRefAndAnnotCppNoexceptMoveCtor,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithRefAndAnnotCppNoexceptMoveCtor, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithRefAndAnnotCppNoexceptMoveCtor, self)
@@ -2896,18 +2838,15 @@ cdef class StructWithString(thrift.py3.types.Struct):
 
 
     def _to_python(self):
-        import importlib
-        import thrift.python.converter
-        python_types = importlib.import_module(
-            "module.thrift_types"
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.StructWithString,
+            self,
         )
-        return thrift.python.converter.to_python_struct(python_types.StructWithString, self)
 
     def _to_py3(self):
         return self
 
     def _to_py_deprecated(self):
-        import importlib
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.StructWithString, self)

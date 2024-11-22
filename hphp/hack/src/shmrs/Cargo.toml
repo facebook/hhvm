@@ -18,5 +18,5 @@ nohash-hasher = "0.2"
 static_assertions = "1.1.0"
 
 [dev-dependencies]
-nix = "0.25"
+nix = "0.26.4"
 rand = { version = "0.8", features = ["small_rng"] }

@@ -500,6 +500,9 @@ void parseValueInplace(
       uint32_t size;
       auto& mapValue = result.ensure_map();
       prot.readMapBegin(keyType, valType, size);
+      if (!canReadNElements(prot, size, {keyType, valType})) {
+        TProtocolException::throwTruncatedData();
+      }
       mapValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
         parseValueInplace(
@@ -516,6 +519,9 @@ void parseValueInplace(
       uint32_t size;
       auto& setValue = result.ensure_set();
       prot.readSetBegin(elemType, size);
+      if (!canReadNElements(prot, size, {elemType})) {
+        TProtocolException::throwTruncatedData();
+      }
       setValue.reserve(size);
       for (uint32_t i = 0; i < size; i++) {
         setValue.insert(parseValue(prot, elemType, string_to_binary));
@@ -528,6 +534,9 @@ void parseValueInplace(
       uint32_t size;
       prot.readListBegin(elemType, size);
       auto& listValue = result.ensure_list();
+      if (!canReadNElements(prot, size, {elemType})) {
+        TProtocolException::throwTruncatedData();
+      }
       listValue.resize(size);
       for (auto& v : listValue) {
         parseValueInplace(prot, elemType, v, string_to_binary);

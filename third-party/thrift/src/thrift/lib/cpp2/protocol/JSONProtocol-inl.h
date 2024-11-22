@@ -418,8 +418,8 @@ bool JSONProtocolReader::peekList() {
   return false;
 }
 
-void JSONProtocolReader::skip(TType type) {
-  apache::thrift::skip(*this, type);
+void JSONProtocolReader::skip(TType type, int depth) {
+  apache::thrift::skip(*this, type, depth);
 }
 
 } // namespace thrift

@@ -275,7 +275,10 @@ bool SimpleJSONProtocolReader::peekSet() {
   return peekList();
 }
 
-void SimpleJSONProtocolReader::skip(TType /*type*/) {
+void SimpleJSONProtocolReader::skip(TType /*type*/, int depth) {
+  if (depth >= FLAGS_thrift_protocol_max_depth) {
+    protocol::TProtocolException::throwExceededDepthLimit();
+  }
   bool keyish;
   ensureAndReadContext(keyish);
   readWhitespace();
@@ -288,8 +291,8 @@ void SimpleJSONProtocolReader::skip(TType /*type*/) {
       if (peekCharSafe() == apache::thrift::detail::json::kJSONObjectEnd) {
         break;
       }
-      skip(TType::T_VOID);
-      skip(TType::T_VOID);
+      skip(TType::T_VOID, depth + 1);
+      skip(TType::T_VOID, depth + 1);
     }
     endContext();
     ascend();
@@ -301,7 +304,7 @@ void SimpleJSONProtocolReader::skip(TType /*type*/) {
       if (peekCharSafe() == apache::thrift::detail::json::kJSONArrayEnd) {
         break;
       }
-      skip(TType::T_VOID);
+      skip(TType::T_VOID, depth + 1);
     }
     endContext();
     ascend();

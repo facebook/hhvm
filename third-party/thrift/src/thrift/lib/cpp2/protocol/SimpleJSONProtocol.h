@@ -129,7 +129,7 @@ class SimpleJSONProtocolReader : public JSONProtocolReaderCommon {
   inline bool peekList();
   inline bool peekSet();
 
-  inline void skip(TType type);
+  inline void skip(TType type, int depth = 0);
 };
 
 } // namespace apache::thrift

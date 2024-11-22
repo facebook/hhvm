@@ -255,7 +255,7 @@ void skip(Protocol_& prot, WireType arg_type, int depth = 0) {
         if (ftype == TType::T_STOP) {
           break;
         }
-        apache::thrift::skip(prot, ftype, depth + 1);
+        prot.skip(ftype, depth + 1);
         prot.readFieldEnd();
       }
       prot.readStructEnd();
@@ -347,7 +347,7 @@ void skip_n(
 
   for (uint32_t i = 0; i < n; i++) {
     for (auto type : types) {
-      apache::thrift::skip(prot, type, depth + 1);
+      prot.skip(type, depth + 1);
     }
   }
 }

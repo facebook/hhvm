@@ -163,7 +163,9 @@ class CompactProtocolReaderWithRefill : public VirtualCompactReader {
     readBinaryIOBufImpl(str);
   }
 
-  inline void skip(TType type) override { apache::thrift::skip(*this, type); }
+  inline void skip(TType type, int depth = 0) override {
+    apache::thrift::skip(*this, type, depth);
+  }
 
   inline void skipBytes(size_t bytes) override {
     ensureBuffer(bytes);
@@ -395,7 +397,9 @@ class BinaryProtocolReaderWithRefill : public VirtualBinaryReader {
     readBinaryIOBufImpl(str);
   }
 
-  inline void skip(TType type) override { apache::thrift::skip(*this, type); }
+  inline void skip(TType type, int depth = 0) override {
+    apache::thrift::skip(*this, type, depth);
+  }
 
   inline void skipBytes(size_t bytes) override {
     ensureBuffer(bytes);

@@ -292,7 +292,9 @@ class CompactProtocolReader : public detail::ProtocolBase {
 
   static constexpr std::size_t fixedSizeInContainer(TType type);
   void skipBytes(size_t bytes) { in_.skip(bytes); }
-  void skip(TType type) { apache::thrift::skip(*this, type); }
+  void skip(TType type, int depth = 0) {
+    apache::thrift::skip(*this, type, depth);
+  }
   bool peekMap() { return false; }
   bool peekSet() { return false; }
   bool peekList() { return false; }

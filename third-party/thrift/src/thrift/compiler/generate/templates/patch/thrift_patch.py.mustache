@@ -39,12 +39,14 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
     DoublePatch,
     StringPatch,
     BinaryPatch,
+    StructPatch as DynamicStructPatch,
 )
 
 import thrift.python.types as _fbthrift_python_types
 import folly.iobuf as _fbthrift_iobuf
 
 import {{program:module_path}}.thrift_types as {{program:module_mangle}}__thrift_types
+import {{program:safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_types
 
 {{#program:include_namespaces}}
 {{#has_types?}}
@@ -72,5 +74,18 @@ class {{struct:py_name}}Patch(
             self._patch,
             {{field:key}},
             {{#field:type}}{{> ../python/types/typeinfo }}{{/field:type}})
+
+    def to_safe_patch(self) -> _fbthrift_safe_patch_types.{{struct:name}}SafePatch:
+        return _fbthrift_safe_patch_types.{{struct:name}}SafePatch(
+            version=1, data=self._patch.serialize_to_compact_protocol()
+        )
+
+    @staticmethod
+    def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.{{struct:name}}SafePatch) -> {{struct:py_name}}Patch:
+        patch = {{struct:py_name}}Patch()
+        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        return patch
+
+
 {{/struct:fields_ordered_by_id}}
 {{/program:structs}}

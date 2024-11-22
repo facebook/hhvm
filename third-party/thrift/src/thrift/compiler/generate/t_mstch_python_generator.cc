@@ -130,6 +130,8 @@ class python_mstch_program : public mstch_program {
         this,
         {
             {"program:module_path", &python_mstch_program::module_path},
+            {"program:safe_patch_module_path",
+             &python_mstch_program::safe_patch_module_path},
             {"program:module_mangle", &python_mstch_program::module_mangle},
             {"program:py_deprecated_module_path",
              &python_mstch_program::py_deprecated_module_path},
@@ -199,6 +201,14 @@ class python_mstch_program : public mstch_program {
   mstch::node module_path() {
     return get_py3_namespace_with_name_and_prefix(
         program_, get_option("root_module_prefix"));
+  }
+
+  mstch::node safe_patch_module_path() {
+    auto ns = std::get<std::string>(module_path());
+
+    // Change the namespace from "path.to.file" to "path.to.gen_safe_patch_file"
+    auto pos = ns.rfind('.');
+    return ns.substr(0, pos + 1) + "gen_safe_patch_" + ns.substr(pos + 1);
   }
 
   mstch::node module_mangle() {

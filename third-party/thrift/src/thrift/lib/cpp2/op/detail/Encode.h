@@ -843,6 +843,9 @@ struct Decode<type::list<Tag>> {
         consumeElem();
       }
     } else if (typeTagToTType<Tag> == t) {
+      if (!canReadNElements(prot, s, {t})) {
+        TProtocolException::throwTruncatedData();
+      }
 #ifndef _MSC_VER
       constexpr auto should_resize_without_initialization =
           std::is_trivial_v<typename ListType::value_type> &&
@@ -989,6 +992,9 @@ struct Decode<type::set<Tag>> {
         consumeElem();
       }
     } else if (typeTagToTType<Tag> == t) {
+      if (!canReadNElements(prot, s, {t})) {
+        TProtocolException::throwTruncatedData();
+      }
       decode_known_length_set(prot, set, s);
     } else {
       apache::thrift::skip_n(prot, s, {t});
@@ -1069,6 +1075,9 @@ struct Decode<type::map<Key, Value>> {
       }
     } else if (
         typeTagToTType<Key> == keyType && typeTagToTType<Value> == valueType) {
+      if (!canReadNElements(prot, s, {keyType, valueType})) {
+        TProtocolException::throwTruncatedData();
+      }
       decode_known_length_map(prot, map, s);
     } else {
       apache::thrift::skip_n(prot, s, {keyType, valueType});

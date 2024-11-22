@@ -45,8 +45,13 @@ void testPartialDataHandling(const T& val, size_t bytesToPassTheCheck) {
       apache::thrift::protocol::TProtocolException);
 }
 
-TEST(ProtocolTruncatedDataTest, TruncatedList) {
-  TestStruct s;
+template <class Adapter>
+struct ProtocolTruncatedDataTest : ::testing::Test {};
+using ProtocolTruncatedDataTestTypes =
+    ::testing::Types<TestStruct, OpEncodeTestStruct>;
+TYPED_TEST_CASE(ProtocolTruncatedDataTest, ProtocolTruncatedDataTestTypes);
+TYPED_TEST(ProtocolTruncatedDataTest, TruncatedList) {
+  TypeParam s;
   s.i64_list() = {};
   for (size_t i = 0; i < 30; ++i) {
     s.i64_list()->emplace_back((1ull << i));
@@ -56,8 +61,8 @@ TEST(ProtocolTruncatedDataTest, TruncatedList) {
       s, 3 /* headers */ + 30 /* 1b / element */);
 }
 
-TEST(ProtocolTruncatedDataTest, TruncatedSet) {
-  TestStruct s;
+TYPED_TEST(ProtocolTruncatedDataTest, TruncatedSet) {
+  TypeParam s;
   s.i32_set() = {};
   for (size_t i = 0; i < 30; ++i) {
     s.i32_set()->emplace((1ull << i));
@@ -67,8 +72,8 @@ TEST(ProtocolTruncatedDataTest, TruncatedSet) {
       s, 3 /* headers */ + 30 /* 1b / element */);
 }
 
-TEST(ProtocolTruncatedDataTest, TruncatedMap) {
-  TestStruct s;
+TYPED_TEST(ProtocolTruncatedDataTest, TruncatedMap) {
+  TypeParam s;
   s.i32_i16_map() = {};
   for (size_t i = 0; i < 30; ++i) {
     s.i32_i16_map()->emplace((1ull << i), i);
@@ -78,16 +83,16 @@ TEST(ProtocolTruncatedDataTest, TruncatedMap) {
       s, 3 /* headers */ + 30 * 2 /* 2b / kv pair */);
 }
 
-TEST(ProtocolTruncatedDataTest, TuncatedString_Compact) {
-  TestStruct s;
+TYPED_TEST(ProtocolTruncatedDataTest, TuncatedString_Compact) {
+  TypeParam s;
   s.a_string() = "foobarbazstring";
 
   testPartialDataHandling<CompactSerializer>(
       s, 2 /* field & length header */ + s.a_string()->size());
 }
 
-TEST(ProtocolTruncatedDataTest, TuncatedString_Binary) {
-  TestStruct s;
+TYPED_TEST(ProtocolTruncatedDataTest, TuncatedString_Binary) {
+  TypeParam s;
   s.a_string() = "foobarbazstring";
 
   testPartialDataHandling<BinarySerializer>(

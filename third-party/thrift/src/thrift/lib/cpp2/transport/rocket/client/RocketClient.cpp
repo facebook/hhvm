@@ -180,9 +180,7 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
     ServerPushMetadata serverMeta;
     try {
       PayloadSerializer::getInstance().unpack(
-          serverMeta,
-          std::move(mdPushFrame.metadata()),
-          encodeMetadataUsingBinary_);
+          serverMeta, std::move(mdPushFrame.metadata()), false /* useBinary */);
     } catch (...) {
       close(transport::TTransportException(
           transport::TTransportException::CORRUPTED_DATA,

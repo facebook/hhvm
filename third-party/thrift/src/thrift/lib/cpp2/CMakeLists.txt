@@ -303,7 +303,7 @@ add_library(
   transport/rocket/PayloadUtils.cpp
   transport/rocket/ChecksumGenerator.cpp
   transport/rocket/Types.cpp
-  transport/rocket/compression/Compression.cpp
+  transport/rocket/compression/CompressionManager.cpp
   transport/rocket/compression/CompressionAlgorithmSelector.cpp
   transport/rocket/client/RequestContext.cpp
   transport/rocket/client/RequestContextQueue.cpp

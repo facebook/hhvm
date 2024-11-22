@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/server/LoggingEvent.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
 #include <thrift/lib/cpp2/transport/core/SendCallbacks.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
@@ -375,7 +376,7 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponse(
 
   // apply compression if client has specified compression codec
   if (compressionConfig.has_value()) {
-    rocket::detail::setCompressionCodec(
+    CompressionManager().setCompressionCodec(
         *compressionConfig, metadata, payload->computeChainDataLength());
   }
 

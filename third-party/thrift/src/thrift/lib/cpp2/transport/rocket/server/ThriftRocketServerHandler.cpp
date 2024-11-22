@@ -41,6 +41,7 @@
 #include <thrift/lib/cpp2/transport/rocket/FdSocket.h>
 #include <thrift/lib/cpp2/transport/rocket/PayloadUtils.h>
 #include <thrift/lib/cpp2/transport/rocket/RocketException.h>
+#include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
@@ -526,7 +527,8 @@ void ThriftRocketServerHandler::handleRequestCommon(
   if (metadata.crc32c_ref()) {
     try {
       if (auto compression = metadata.compression_ref()) {
-        data = uncompressBuffer(std::move(data), *compression);
+        data = CompressionManager().uncompressBuffer(
+            std::move(data), *compression);
       }
     } catch (...) {
       handleDecompressionFailure(

@@ -23,45 +23,11 @@
 #include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
-#include <thrift/lib/cpp2/op/detail/PatchTraits.h>
 #include <thrift/lib/cpp2/type/Field.h>
 #include <thrift/lib/cpp2/type/Id.h>
+#include <thrift/lib/cpp2/type/NativeType.h>
 
 namespace apache::thrift::op::detail {
-
-template <typename T>
-struct SafePatchType;
-
-template <typename SafePatch, typename Patch>
-SafePatch toSafePatchImpl(const Patch& patch) {
-  SafePatch safePatch;
-
-  folly::IOBufQueue queue;
-  CompactProtocolWriter writer;
-  writer.setOutput(&queue);
-  op::encode<type::infer_tag<Patch>>(writer, patch);
-
-  safePatch.data() = queue.move();
-  safePatch.version() = calculateMinSafePatchVersion(patch);
-
-  return safePatch;
-}
-
-template <typename Patch, typename SafePatch>
-Patch fromSafePatchImpl(const SafePatch& safePatch) {
-  if (safePatch.version() == 0) {
-    throw std::runtime_error("Invalid Safe Patch");
-  }
-  if (safePatch.version() > detail::kThriftStaticPatchVersion) {
-    throw std::runtime_error(
-        fmt::format("Unsupported patch version: {}", *safePatch.version()));
-  }
-  Patch patch;
-  CompactProtocolReader reader;
-  reader.setInput(safePatch.data()->get());
-  op::decode<type::infer_tag<Patch>>(reader, patch);
-  return patch;
-}
 
 struct FieldIdListToSetAdapter {
   using FieldIdSet = std::unordered_set<FieldId>;
@@ -473,27 +439,6 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   }
 
   void apply(T& val) const { return customVisit(Applier{val}); }
-
-  /**
-   * Returns a Thrift Patch instance corresponding to the (decoded) `SafePatch`.
-   *
-   * @throws std::runtime_error if the given `SafePatch` cannot be successfully
-   * decoded or safely applied in this process (eg. if the version of the Thrift
-   * Patch library in this process is not compatible with the minimum version
-   * required by `SafePatch`).
-   */
-  static auto fromSafePatch(
-      const typename SafePatchType<type::infer_tag<T>>::type& safePatch) {
-    return fromSafePatchImpl<Derived>(safePatch);
-  }
-
-  /**
-   * Returns a `SafePatch` instance corresponding to the encoded Thrift Patch.
-   */
-  auto toSafePatch() const {
-    return toSafePatchImpl<typename SafePatchType<type::infer_tag<T>>::type>(
-        Base::derived());
-  }
 
  protected:
   using Base::apply;

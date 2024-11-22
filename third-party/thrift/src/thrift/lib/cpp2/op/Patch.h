@@ -149,18 +149,36 @@ std::string prettyPrintPatch(
  * required by `SafePatch`).
  */
 template <typename T, typename Tag = type::infer_tag<T>>
-[[deprecated("Use fromSafePatch(...) method instead.")]] op::patch_type<Tag>
-fromSafePatch(const op::safe_patch_type<Tag>& safePatch) {
-  return op::patch_type<Tag>::fromSafePatch(safePatch);
+op::patch_type<Tag> fromSafePatch(const op::safe_patch_type<Tag>& safePatch) {
+  if (safePatch.version() == 0) {
+    throw std::runtime_error("Invalid Safe Patch");
+  }
+  if (safePatch.version() > detail::kThriftStaticPatchVersion) {
+    throw std::runtime_error(
+        fmt::format("Unsupported patch version: {}", *safePatch.version()));
+  }
+  op::patch_type<Tag> patch;
+  CompactProtocolReader reader;
+  reader.setInput(safePatch.data()->get());
+  op::decode<type::infer_tag<op::patch_type<Tag>>>(reader, patch);
+  return patch;
 }
 
 /**
  * Returns a `SafePatch` instance corresponding to the encoded Thrift Patch.
  */
 template <typename T, typename Tag = type::infer_tag<T>>
-[[deprecated("Use toSafePatch(...) method instead.")]] op::safe_patch_type<Tag>
-toSafePatch(const op::patch_type<Tag>& patch) {
-  return patch.toSafePatch();
+op::safe_patch_type<Tag> toSafePatch(const op::patch_type<Tag>& patch) {
+  folly::IOBufQueue queue;
+  CompactProtocolWriter writer;
+  writer.setOutput(&queue);
+  op::encode<type::infer_tag<op::patch_type<Tag>>>(writer, patch);
+
+  op::safe_patch_type<Tag> safePatch;
+  safePatch.data() = queue.move();
+  safePatch.version() = detail::calculateMinSafePatchVersion(patch);
+
+  return safePatch;
 }
 
 } // namespace apache::thrift::op

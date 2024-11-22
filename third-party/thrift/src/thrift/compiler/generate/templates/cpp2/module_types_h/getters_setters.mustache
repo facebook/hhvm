@@ -17,8 +17,8 @@
 }}{{#struct:fields}}{{#field:type}}{{#field:has_deprecated_accessors?}}
 {{#type:resolves_to_base_or_enum?}}
 
-{{^type:string_or_binary?}}
-{{#field:optional?}}
+{{#unless type:string_or_binary?}}
+  {{#if field:optional?}}
   {{ > common/field_docblock}}
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
     return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
@@ -31,23 +31,21 @@
   {{ > common/field_docblock}}
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
 
-{{/field:optional?}}
-{{^field:optional?}}
+  {{else}}
   {{ > common/field_docblock}}
   {{type:cpp_type}} get_{{field:cpp_name}}() const {
     return {{field:cpp_storage_name}};
   }
 
-{{/field:optional?}}
+  {{/if}}
   {{ > common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
   {{type:cpp_type}}& set_{{field:cpp_name}}({{type:cpp_type}} {{field:cpp_name}}_) {
     {{field:cpp_name}}_ref() = {{field:cpp_name}}_;
     return {{field:cpp_storage_name}};
   }
-{{/type:string_or_binary?}}
-{{#type:string_or_binary?}}
-{{#field:optional?}}
+{{else}}
+  {{#if field:optional?}}
   {{ > common/field_docblock}}
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
     return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
@@ -59,8 +57,7 @@
   }
   {{ > common/field_docblock}}
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
-{{/field:optional?}}
-{{^field:optional?}}
+  {{else}}
   {{ > common/field_docblock}}
   const {{type:cpp_type}}& get_{{field:cpp_name}}() const& {
     return {{field:cpp_storage_name}};
@@ -70,7 +67,7 @@
   {{type:cpp_type}} get_{{field:cpp_name}}() && {
     return std::move({{field:cpp_storage_name}});
   }
-{{/field:optional?}}
+  {{/if}}
 
   {{ > common/field_docblock}}
   template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{type:cpp_type}}>
@@ -79,23 +76,22 @@
     {{field:cpp_name}}_ref() = std::forward<T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter>({{field:cpp_name}}_);
     return {{field:cpp_storage_name}};
   }
-{{/type:string_or_binary?}}
+{{/unless}}
 {{/type:resolves_to_base_or_enum?}}
 {{#type:resolves_to_container_or_struct?}}
-{{#field:optional?}}
+  {{#if field:optional?}}
   {{ > common/field_docblock}}
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const&;
   {{ > common/field_docblock}}
   {{type:cpp_type}}* get_{{field:cpp_name}}() &;
   {{ > common/field_docblock}}
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
-{{/field:optional?}}
-{{^field:optional?}}
+  {{else}}
   {{ > common/field_docblock}}
   const {{type:cpp_type}}& get_{{field:cpp_name}}() const&;
   {{ > common/field_docblock}}
   {{type:cpp_type}} get_{{field:cpp_name}}() &&;
-{{/field:optional?}}
+  {{/if}}
 
   {{ > common/field_docblock}}
   template <typename T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter = {{type:cpp_type}}>

@@ -22,26 +22,14 @@
 using apache::thrift::compiler::diagnostic;
 using apache::thrift::compiler::diagnostic_level;
 
-namespace {
-const char* level_to_string(diagnostic_level level) {
-  switch (level) {
-    case diagnostic_level::error:
-      return "ERROR";
-    case diagnostic_level::warning:
-      return "WARNING";
-    case diagnostic_level::info:
-      return "INFO";
-    case diagnostic_level::debug:
-      return "DEBUG";
-  }
-  return "??";
-}
-} // namespace
-
 fmt::format_context::iterator fmt::formatter<diagnostic>::format(
     const diagnostic& d, format_context& ctx) const {
   auto out = ctx.out();
-  fmt::format_to(out, "[{}:{}", level_to_string(d.level()), d.file());
+  fmt::format_to(
+      out,
+      "[{}:{}",
+      apache::thrift::compiler::level_to_string(d.level()),
+      d.file());
   if (d.lineno() > 0) {
     fmt::format_to(out, ":{}", d.lineno());
   }
@@ -60,6 +48,20 @@ fmt::format_context::iterator fmt::formatter<diagnostic>::format(
 }
 
 namespace apache::thrift::compiler {
+
+const char* level_to_string(diagnostic_level level) {
+  switch (level) {
+    case diagnostic_level::error:
+      return "ERROR";
+    case diagnostic_level::warning:
+      return "WARNING";
+    case diagnostic_level::info:
+      return "INFO";
+    case diagnostic_level::debug:
+      return "DEBUG";
+  }
+  return "??";
+}
 
 std::string diagnostic::str() const {
   return fmt::format("{}", *this);

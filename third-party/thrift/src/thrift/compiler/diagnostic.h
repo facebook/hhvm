@@ -16,7 +16,6 @@
 
 #pragma once
 
-#include <any>
 #include <array>
 #include <functional>
 #include <iosfwd>
@@ -37,6 +36,8 @@ enum class diagnostic_level {
   info,
   debug,
 };
+
+const char* level_to_string(diagnostic_level level);
 
 class fixit {
  public:

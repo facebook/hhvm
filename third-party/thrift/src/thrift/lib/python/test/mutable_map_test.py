@@ -30,7 +30,7 @@ from thrift.python.mutable_containers import (
 )
 
 from thrift.python.mutable_typeinfos import MutableListTypeInfo
-from thrift.python.mutable_types import to_thrift_list
+from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 
 from thrift.python.types import typeinfo_i32, typeinfo_string
 
@@ -93,6 +93,39 @@ class MutableMapTypeHints(unittest.TestCase):
             # pyre-ignore[6]: expected `str` but got `int` and expected `int` but got `str`
             mutable_map[1] = "value"
 
+            ###################################################################
+
+            ### __contains__() ###
+            _ = 1 in mutable_map
+            _ = "key" in mutable_map
+            _ = b"key" in mutable_map
+
+            ###################################################################
+
+            ### __delitem() ###
+            del mutable_map["key"]
+
+            # pyre-ignore[6]: expected `str` but got `int`
+            del mutable_map[1]
+            # pyre-ignore[6]: expected `str` but got `bytes`
+            del mutable_map[b"key"]
+
+            ###################################################################
+
+            ### pop() ####
+            v6: int = mutable_map.pop("key")
+
+            # pyre-ignore[6]: expected `str` but got `bytes`
+            v7: int = mutable_map.pop(b"key")
+            # pyre-ignore[9]: v8 type `str` but is used as type `int`
+            v8: str = mutable_map.pop("key")
+
+            v9: int = mutable_map.pop("key", 42)
+            v10: int | float = mutable_map.pop("key", 42.0)
+
+            # to silence F841: not used variable
+            _ = (v6, v7, v8, v9, v10)
+
         except Exception:
             pass
 
@@ -140,6 +173,45 @@ class MutableMapTypeHints(unittest.TestCase):
 
             # pyre-ignore[6]: expected `str` but got `int` and expected `MutableList[int]` but got `MutableList[str]`
             mutable_map[1] = mutable_list_str
+
+            ###################################################################
+
+            ### __contains__() ###
+            _ = [1, 2, 3] in mutable_map
+            _ = to_thrift_list([]) in mutable_map
+            _ = to_thrift_set(set()) in mutable_map
+            _ = to_thrift_map({}) in mutable_map
+
+            ###################################################################
+
+            ### __delitem() ###
+            del mutable_map["key"]
+
+            # pyre-ignore[6]: expected `str` but got `List[int]`
+            del mutable_map[[1, 2, 3]]
+            # pyre-ignore[6]: expected `str` but got `_ThriftListWrapper`
+            del mutable_map[to_thrift_list([])]
+
+            ###################################################################
+
+            ### pop() ####
+            v6: MutableList[int] = mutable_map.pop("key")
+
+            # pyre-ignore[6]: expected `str` but got `bytes`
+            v7: MutableList[int] = mutable_map.pop(b"key")
+            # pyre-ignore[9]: type `MutableList[str]` but is used as type `MutableList[int]`
+            v8: MutableList[str] = mutable_map.pop("key")
+
+            mutable_list_int = cast(MutableList[int], object())
+            v9: MutableList[int] = mutable_map.pop("key", mutable_list_int)
+
+            mutable_list_str = cast(MutableList[str], object())
+            v10: MutableList[int] | MutableList[str] = mutable_map.pop(
+                "key", mutable_list_str
+            )
+
+            # to silence F841: not used variable
+            _ = (v6, v7, v8, v9, v10)
 
         except Exception:
             pass

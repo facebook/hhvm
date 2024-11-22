@@ -281,11 +281,8 @@ void ThriftRocketServerHandler::handleSetupFrame(
     serverMeta.set_setupResponse();
     serverMeta.setupResponse_ref()->version_ref() = version_;
     serverMeta.setupResponse_ref()->zstdSupported_ref() = true;
-    CompactProtocolWriter compactProtocolWriter;
-    folly::IOBufQueue queue;
-    compactProtocolWriter.setOutput(&queue);
-    serverMeta.write(&compactProtocolWriter);
-    connection.sendMetadataPush(std::move(queue).move());
+    connection.sendMetadataPush(
+        PayloadSerializer::getInstance().packCompact(std::move(serverMeta)));
   } catch (const std::exception& e) {
     return connection.close(folly::make_exception_wrapper<RocketException>(
         ErrorCode::INVALID_SETUP,

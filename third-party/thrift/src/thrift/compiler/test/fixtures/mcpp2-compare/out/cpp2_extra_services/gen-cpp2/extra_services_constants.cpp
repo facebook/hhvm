@@ -11,16 +11,6 @@
 
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// module.thrift
-namespace some::valid::ns {namespace module_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_f1130b1f0cb75c42();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_f1130b1f0cb75c42_includes();
-}} // namespace some::valid::ns
-
-#endif
-
 namespace extra::svc {
 namespace extra_services_constants {
 

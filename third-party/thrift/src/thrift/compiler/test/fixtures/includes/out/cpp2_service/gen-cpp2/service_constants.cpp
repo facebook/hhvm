@@ -12,22 +12,6 @@
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/module_constants.h"
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/includes_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// module.thrift
-namespace cpp2 {namespace module_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_b42ad5ae3d672fa7();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_b42ad5ae3d672fa7_includes();
-}} // namespace cpp2
-
-// includes.thrift
-namespace cpp2 {namespace includes_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_f345891752d92dd();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_f345891752d92dd_includes();
-}} // namespace cpp2
-
-#endif
-
 namespace cpp2 {
 namespace service_constants {
 

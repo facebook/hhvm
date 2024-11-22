@@ -10,10 +10,6 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-#endif
-
 namespace facebook::thrift::compiler::test::fixtures::default_values {
 namespace module_constants {
 

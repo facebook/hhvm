@@ -12,22 +12,6 @@
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/included_constants.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/namespaced_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// included.thrift
-namespace cpp2 {namespace included_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_dac6bef1a1ca6b9f();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_dac6bef1a1ca6b9f_includes();
-}} // namespace cpp2
-
-// namespaced.thrift
-namespace cpp2 {namespace namespaced_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_f68d29b3338eea30();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_f68d29b3338eea30_includes();
-}} // namespace cpp2
-
-#endif
-
 namespace test::fixtures::basic-structured-annotations {
 namespace module_constants {
 

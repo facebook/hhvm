@@ -11,16 +11,6 @@
 
 #include "thrift/compiler/test/fixtures/service-schema/gen-cpp2/include_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// include.thrift
-namespace cpp2 {namespace include_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_8569dfae849b43aa();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_8569dfae849b43aa_includes();
-}} // namespace cpp2
-
-#endif
-
 namespace cpp2 {
 namespace module_constants {
 

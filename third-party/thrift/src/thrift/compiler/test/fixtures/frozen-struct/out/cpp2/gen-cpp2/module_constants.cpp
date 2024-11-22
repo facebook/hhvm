@@ -12,22 +12,6 @@
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include1_constants.h"
 #include "thrift/compiler/test/fixtures/frozen-struct/gen-cpp2/include2_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// include1.thrift
-namespace some::ns {namespace include1_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_4e5fea264ed24d13();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_4e5fea264ed24d13_includes();
-}} // namespace some::ns
-
-// include2.thrift
-namespace some::ns {namespace include2_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_b10a3ad77ea57434();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_b10a3ad77ea57434_includes();
-}} // namespace some::ns
-
-#endif
-
 namespace some::ns {
 namespace module_constants {
 

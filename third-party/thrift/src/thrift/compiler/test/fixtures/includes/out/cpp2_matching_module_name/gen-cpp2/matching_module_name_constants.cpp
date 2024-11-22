@@ -11,16 +11,6 @@
 
 #include "other/gen-cpp2/matching_module_name_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// other/matching_module_name.thrift
-namespace matching_module_name {namespace matching_module_name_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_6f485429c010b1a7();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_6f485429c010b1a7_includes();
-}} // namespace matching_module_name
-
-#endif
-
 namespace matching_module_name {
 namespace matching_module_name_constants {
 

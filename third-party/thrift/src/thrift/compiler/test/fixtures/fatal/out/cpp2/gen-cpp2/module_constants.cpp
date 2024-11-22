@@ -12,22 +12,6 @@
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/reflection_dep_B_constants.h"
 #include "thrift/compiler/test/fixtures/fatal/gen-cpp2/reflection_dep_C_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// reflection_dep_B.thrift
-namespace test_cpp2::cpp_reflection {namespace reflection_dep_B_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_73d2e4ac7b154360();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_73d2e4ac7b154360_includes();
-}} // namespace test_cpp2::cpp_reflection
-
-// reflection_dep_C.thrift
-namespace test_cpp2::cpp_reflection {namespace reflection_dep_C_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_5c8bee323039ecdf();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_5c8bee323039ecdf_includes();
-}} // namespace test_cpp2::cpp_reflection
-
-#endif
-
 namespace test_cpp2::cpp_reflection {
 namespace module_constants {
 

@@ -14,34 +14,6 @@
 #include "thrift/lib/thrift/gen-cpp2/id_constants.h"
 #include "thrift/lib/thrift/gen-cpp2/schema_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// thrift/compiler/test/fixtures/python_capi/src/thrift_dep.thrift
-namespace test::fixtures::python_capi {namespace thrift_dep_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_9d745e2f9f74ed17();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_9d745e2f9f74ed17_includes();
-}} // namespace test::fixtures::python_capi
-
-// thrift/compiler/test/fixtures/python_capi/src/serialized_dep.thrift
-namespace test::fixtures::python_capi {namespace serialized_dep_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_b748ca241bc21635();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_b748ca241bc21635_includes();
-}} // namespace test::fixtures::python_capi
-
-// thrift/lib/thrift/id.thrift
-namespace apache::thrift::type {namespace id_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_3b24b2b27d3f87af();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_3b24b2b27d3f87af_includes();
-}} // namespace apache::thrift::type
-
-// thrift/lib/thrift/schema.thrift
-namespace apache::thrift::type {namespace schema_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_4dfe54ee2dab6f9e();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_4dfe54ee2dab6f9e_includes();
-}} // namespace apache::thrift::type
-
-#endif
-
 namespace test::fixtures::python_capi {
 namespace module_constants {
 

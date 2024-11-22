@@ -10,10 +10,6 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-#endif
-
 namespace apache::thrift::test {
 namespace deprecated_terse_writes_constants {
 

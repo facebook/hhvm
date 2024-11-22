@@ -25,19 +25,6 @@
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
 {{/program:thrift_includes}}
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-{{#program:thrift_includes}}
-// {{program:autogen_path}}
-{{ > common/namespace_cpp2_begin}}
-namespace {{program:name}}_constants {
-FOLLY_ATTR_WEAK ::std::string_view {{program:schema_name}}();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes();
-}{{ > common/namespace_cpp2_end}}
-
-{{/program:thrift_includes}}
-#endif
-
 {{ > common/namespace_cpp2_begin}}
 
 namespace {{program:name}}_constants {

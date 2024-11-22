@@ -11,16 +11,6 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/included_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// included.thrift
-namespace apache::thrift::fixtures::types {namespace included_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_b4a934370009b432();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_b4a934370009b432_includes();
-}} // namespace apache::thrift::fixtures::types
-
-#endif
-
 namespace apache::thrift::fixtures::types {
 namespace module_constants {
 

@@ -11,16 +11,6 @@
 
 #include "thrift/compiler/test/fixtures/inject_metadata_fields/gen-cpp2/foo_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// foo.thrift
-namespace cpp2 {namespace foo_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_7c73f7c34c3ca82();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_7c73f7c34c3ca82_includes();
-}} // namespace cpp2
-
-#endif
-
 namespace cpp2 {
 namespace module_constants {
 

@@ -11,16 +11,6 @@
 
 #include "thrift/compiler/test/fixtures/interactions/gen-cpp2/shared_constants.h"
 
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-
-// shared.thrift
-namespace thrift::shared_interactions {namespace shared_constants {
-FOLLY_ATTR_WEAK ::std::string_view _fbthrift_schema_56e9941347408996();
-FOLLY_ATTR_WEAK ::folly::Range<const ::std::string_view*> _fbthrift_schema_56e9941347408996_includes();
-}} // namespace thrift::shared_interactions
-
-#endif
-
 namespace cpp2 {
 namespace module_constants {
 

@@ -21,6 +21,7 @@
 #include <folly/container/F14Map.h>
 #include <thrift/lib/cpp2/Adapter.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
+#include <thrift/lib/cpp2/op/detail/StructPatch.h>
 #include <thrift/lib/cpp2/type/Type.h>
 #include <thrift/lib/thrift/detail/DynamicPatch.h>
 #include <thrift/lib/thrift/gen-cpp2/any_patch_detail_types.h>
@@ -292,6 +293,11 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
     customVisit(visitor);
     return std::move(visitor.patch);
   }
+
+  static auto fromSafePatch(const AnySafePatch& patch) {
+    return fromSafePatchImpl<AnyPatch>(patch);
+  }
+  auto toSafePatch() const { return toSafePatchImpl<AnySafePatch>(*this); }
 
  private:
   using Base::assignOr;

@@ -235,7 +235,7 @@ bool simplify(Env& env, const load& inst, Vlabel b, size_t i) {
 
 bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
   // loadl{d, m}; loadl{d, m} --> loadpairl{s, d0, d1}
-  return if_inst<Vinstr::loadl>(env, b, i + 1, [&](const loadl& ld) {
+  bool simplified = if_inst<Vinstr::loadl>(env, b, i + 1, [&](const loadl& ld) {
     if (inst.d == ld.d) return false;
     if (!inst.d.isGP()) return false;
     if (!ld.d.isGP()) return false;
@@ -252,6 +252,37 @@ bool simplify(Env& env, const loadl& inst, Vlabel b, size_t i) {
     }
     return false;
   });
+  if (simplified) return true;
+
+  // Eliminate IncRef/DecRef redundant load:
+  // B1:
+  //    ...
+  //    loadl      [xI] => xJ
+  //    cmpli      0, xJ => SF
+  //    jcc        GE, SF, B2, else B3
+  // B2:   preds: B1
+  //    loadl      [xI] => xK
+  //    incl/decl  xK => xK, SF
+  //    storel     xK, [xI]
+  if (i == 0 && env.preds[b].size() == 1) {
+    auto const p = env.preds[b][0];
+    if (env.unit.blocks[p].code.size() >= 3) {
+      auto& predCode = env.unit.blocks[p].code;
+      auto const lastIdx = predCode.size() - 1;
+      auto const& pred1 = predCode[lastIdx];
+      auto const& pred2 = predCode[lastIdx - 1];
+      auto const& pred3 = predCode[lastIdx - 2];
+      if (pred1.op == Vinstr::jcc && pred2.op == Vinstr::cmpli &&
+          pred3.op == Vinstr::loadl && pred3.loadl_.s == inst.s) {
+        return simplify_impl(env, b, i, [&] (Vout& v) {
+          v << movl{pred3.loadl_.d, inst.d};
+          return 1;
+        });
+      }
+    }
+  }
+
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

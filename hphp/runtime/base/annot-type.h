@@ -172,10 +172,10 @@ enum class AnnotAction {
   FallbackCoerce,
   ObjectCheck,
   CallableCheck,
-  WarnClass,
-  ConvertClass,
-  WarnLazyClass,
-  ConvertLazyClass,
+  WarnClassToString,
+  ConvertClassToString,
+  WarnLazyClassToString,
+  ConvertLazyClassToString,
   WarnClassname,
 };
 
@@ -212,6 +212,11 @@ enum class AnnotAction {
  * interface, (2) an enum, (3) a type alias, or (4) "self" or "parent".
  * The caller needs to perform more checks to determine whether or not a
  * value with the KindOfObject DataType is compatible with the annotation.
+ *
+ * (Warn|Convert)(Lazy|)ClassToString: 'at' is string, arraykey, Stringish,
+ * or XHPChild and 'dt' is a Class or LazyClass.
+ * When Cfg::Eval::ClassStringHintNoticesSampleRate > 0, a notice is raised
+ * before converison.
  *
  * WarnClassname: 'at' is classname and 'dt' is either a Class or LazyClass
  * and Cfg::Eval::ClassnameNoticesSampleRate is on. The 'dt' is compatible

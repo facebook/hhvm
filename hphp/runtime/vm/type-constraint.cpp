@@ -242,7 +242,7 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
     case AnnotType::SubObject: {
       assertx(tc.typeName());
       m_classes.m_list.emplace_back(tc.m_u.single.class_);
-      m_preciseTypeMask |= kUnionTypeClass;
+      m_preciseTypeMask |= kUnionTypeSubObject;
       switch (m_resolved) {
       case ResolvedType::Unspecified:
         m_resolved = ResolvedType::Resolved;
@@ -259,7 +259,7 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
     case AnnotType::Unresolved: {
       assertx(tc.typeName());
       m_classes.m_list.emplace_back(tc.m_u.single.class_);
-      m_preciseTypeMask |= kUnionTypeClass;
+      m_preciseTypeMask |= kUnionTypeSubObject;
       switch (m_resolved) {
       case ResolvedType::Unspecified:
         m_resolved = ResolvedType::Unresolved;
@@ -778,7 +778,7 @@ std::string showUnionTypeMask(UnionTypeMask mask) {
   bitName(res, mask, TypeConstraint::kUnionTypeString, "string");
   bitName(res, mask, TypeConstraint::kUnionTypeThis, "this");
   bitName(res, mask, TypeConstraint::kUnionTypeVec, "vec");
-  bitName(res, mask, TypeConstraint::kUnionTypeClass, "class");
+  bitName(res, mask, TypeConstraint::kUnionTypeSubObject, "subObject");
   bitName(res, mask, TypeConstraint::kUnionTypeClassname, "classname");
   assertx(mask == 0);
   return res;
@@ -1149,10 +1149,10 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val,
           case AnnotAction::CallableCheck:
             if (!ForProp && (Assert || is_callable(tvAsCVarRef(*val)))) return true;
             continue;
-          case AnnotAction::WarnClass:
-          case AnnotAction::ConvertClass:
-          case AnnotAction::WarnLazyClass:
-          case AnnotAction::ConvertLazyClass:
+          case AnnotAction::WarnClassToString:
+          case AnnotAction::ConvertClassToString:
+          case AnnotAction::WarnLazyClassToString:
+          case AnnotAction::ConvertLazyClassToString:
             // Defer the action to see if there's a more appropriate action later.
             fallback = fallback ? std::min(*fallback, result) : result;
             continue;
@@ -1171,10 +1171,10 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val,
       }
 
       switch (fallback.value_or(AnnotAction::Fail)) {
-        case AnnotAction::WarnClass:
-        case AnnotAction::ConvertClass:
-        case AnnotAction::WarnLazyClass:
-        case AnnotAction::ConvertLazyClass:
+        case AnnotAction::WarnClassToString:
+        case AnnotAction::ConvertClassToString:
+        case AnnotAction::WarnLazyClassToString:
+        case AnnotAction::ConvertLazyClassToString:
           // verify*Fail will deal with the conversion/warning
           return false;
         case AnnotAction::WarnClassname:
@@ -1367,10 +1367,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
           return true;
         }
         break;
-      case AnnotAction::WarnClass:
-      case AnnotAction::ConvertClass:
-      case AnnotAction::WarnLazyClass:
-      case AnnotAction::ConvertLazyClass:
+      case AnnotAction::WarnClassToString:
+      case AnnotAction::ConvertClassToString:
+      case AnnotAction::WarnLazyClassToString:
+      case AnnotAction::ConvertLazyClassToString:
         // Defer the action to see if there's a more appropriate action later.
         fallback = fallback ? std::min(*fallback, result) : result;
         continue;
@@ -1389,10 +1389,10 @@ bool TypeConstraint::checkImpl(tv_rval val,
   }
 
   switch (fallback.value_or(AnnotAction::Fail)) {
-    case AnnotAction::WarnClass:
-    case AnnotAction::ConvertClass:
-    case AnnotAction::WarnLazyClass:
-    case AnnotAction::ConvertLazyClass:
+    case AnnotAction::WarnClassToString:
+    case AnnotAction::ConvertClassToString:
+    case AnnotAction::WarnLazyClassToString:
+    case AnnotAction::ConvertLazyClassToString:
       // verify*Fail will deal with the conversion/warning
       return false;
     case AnnotAction::WarnClassname:
@@ -1487,10 +1487,10 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::FallbackCoerce:
     case AnnotAction::CallableCheck:
     case AnnotAction::ObjectCheck:
-    case AnnotAction::WarnClass:
-    case AnnotAction::ConvertClass:
-    case AnnotAction::WarnLazyClass:
-    case AnnotAction::ConvertLazyClass:
+    case AnnotAction::WarnClassToString:
+    case AnnotAction::ConvertClassToString:
+    case AnnotAction::WarnLazyClassToString:
+    case AnnotAction::ConvertLazyClassToString:
     case AnnotAction::WarnClassname:
       return false;
   }
@@ -2066,7 +2066,7 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
       break;
     }
 
-    case TypeConstraint::kUnionTypeClass: {
+    case TypeConstraint::kUnionTypeSubObject: {
       bool resolved = contains(flags, TypeConstraintFlags::Resolved);
       AnnotType type = resolved ? AnnotType::SubObject : AnnotType::Unresolved;
       m_outTc = TypeConstraint{ type, flags, m_classes->m_list[m_nextClass] };
@@ -2079,7 +2079,7 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
 }
 
 TcUnionPieceIterator& TcUnionPieceIterator::operator++() {
-  if (m_mask == TypeConstraint::kUnionTypeClass) {
+  if (m_mask == TypeConstraint::kUnionTypeSubObject) {
     ++m_nextClass;
     if (m_nextClass == m_classes->m_list.size()) {
       // We're done so signal the end.
@@ -2119,7 +2119,7 @@ TcUnionPieceIterator TcUnionPieceView::begin() const {
     switch (m_kind) {
       case Kind::All: break;
       case Kind::ClassesOnly: {
-        it.m_mask &= TypeConstraint::kUnionTypeClass;
+        it.m_mask &= TypeConstraint::kUnionTypeSubObject;
       }
     }
 

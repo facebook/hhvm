@@ -227,10 +227,10 @@ SSATmp* verifyTypeImpl(IRGS& env,
         // We'll check objects next.
         break;
 
-      case AnnotAction::WarnClass:
-      case AnnotAction::ConvertClass:
+      case AnnotAction::WarnClassToString:
+      case AnnotAction::ConvertClassToString:
         assertx(val->type() <= TCls);
-        if (result == AnnotAction::WarnClass) {
+        if (result == AnnotAction::WarnClassToString) {
           std::string msg;
           string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
             getTcInfo().c_str());
@@ -243,10 +243,10 @@ SSATmp* verifyTypeImpl(IRGS& env,
         }
         return gen(env, LdClsName, val);
 
-      case AnnotAction::WarnLazyClass:
-      case AnnotAction::ConvertLazyClass:
+      case AnnotAction::WarnLazyClassToString:
+      case AnnotAction::ConvertLazyClassToString:
         assertx(val->type() <= TLazyCls);
-        if (result == AnnotAction::WarnLazyClass) {
+        if (result == AnnotAction::WarnLazyClassToString) {
           std::string msg;
           string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT,
             getTcInfo().c_str());
@@ -401,8 +401,8 @@ SSATmp* verifyTypeImpl(IRGS& env,
           case AnnotAction::Pass:
             return AnnotAction::Pass;
 
-          case AnnotAction::ConvertClass:
-          case AnnotAction::ConvertLazyClass:
+          case AnnotAction::ConvertClassToString:
+          case AnnotAction::ConvertLazyClassToString:
             // We must have a classname and are checking a string. Unlike a
             // non-union where we want to make the type more precise for a union
             // just accept the string.
@@ -419,9 +419,9 @@ SSATmp* verifyTypeImpl(IRGS& env,
 
           case AnnotAction::CallableCheck:
           case AnnotAction::ObjectCheck:
-          case AnnotAction::WarnClass:
+          case AnnotAction::WarnClassToString:
           case AnnotAction::WarnClassname:
-          case AnnotAction::WarnLazyClass:
+          case AnnotAction::WarnLazyClassToString:
             if (fallbackAction == AnnotAction::Fail) {
               fallbackAction = action;
             } else {
@@ -474,13 +474,13 @@ SSATmp* verifyTypeImpl(IRGS& env,
           fallbackAction = std::max(fallbackAction, FallbackCoerce);
           break;
         case AnnotAction::CallableCheck:
-        case AnnotAction::ConvertClass:
-        case AnnotAction::ConvertLazyClass:
+        case AnnotAction::ConvertClassToString:
+        case AnnotAction::ConvertLazyClassToString:
         case AnnotAction::ObjectCheck:
         case AnnotAction::Pass:
-        case AnnotAction::WarnClass:
+        case AnnotAction::WarnClassToString:
         case AnnotAction::WarnClassname:
-        case AnnotAction::WarnLazyClass:
+        case AnnotAction::WarnLazyClassToString:
           result.emplace_back(dt, action);
           break;
       }

@@ -203,11 +203,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
     case AnnotMetaType::ArrayKey:
       if (isClassType(dt)) {
         return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
-          ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+          ? AnnotAction::WarnClassToString : AnnotAction::ConvertClassToString;
       }
       if (isLazyClassType(dt)) {
         return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
-          ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+          ? AnnotAction::WarnLazyClassToString
+          : AnnotAction::ConvertLazyClassToString;
       }
       return (isIntType(dt) || isStringType(dt))
         ? AnnotAction::Pass : AnnotAction::Fail;
@@ -254,11 +255,12 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
           metatype == AnnotMetaType::Unresolved);
   if (at == AnnotType::String && dt == KindOfClass) {
     return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
-      ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+      ? AnnotAction::WarnClassToString : AnnotAction::ConvertClassToString;
   }
   if (at == AnnotType::String && dt == KindOfLazyClass) {
     return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
-      ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+      ? AnnotAction::WarnLazyClassToString
+      : AnnotAction::ConvertLazyClassToString;
   }
 
   if (metatype == AnnotMetaType::Precise) {
@@ -297,13 +299,14 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
       case KindOfClass:
         if (interface_supports_string(annotClsName)) {
           return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
-            ? AnnotAction::WarnClass : AnnotAction::ConvertClass;
+            ? AnnotAction::WarnClassToString : AnnotAction::ConvertClassToString;
         }
         return AnnotAction::Fail;
       case KindOfLazyClass:
         if (interface_supports_string(annotClsName)) {
           return Cfg::Eval::ClassStringHintNoticesSampleRate > 0
-            ? AnnotAction::WarnLazyClass : AnnotAction::ConvertLazyClass;
+            ? AnnotAction::WarnLazyClassToString
+            : AnnotAction::ConvertLazyClassToString;
         }
         return AnnotAction::Fail;
       case KindOfClsMeth:

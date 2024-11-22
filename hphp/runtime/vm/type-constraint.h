@@ -114,10 +114,10 @@ struct TypeConstraint {
   constexpr static UnionTypeMask kUnionTypeKeyset    = 1 << 9;
   constexpr static UnionTypeMask kUnionTypeDict      = 1 << 10;
   constexpr static UnionTypeMask kUnionTypeClassname = 1 << 11;
-  // Class should be the last flag because it indicates a list of classnames in
-  // the repr which we want to handle last and repeat until we're out of
+  // SubObject should be the last flag because it indicates a list of classnames
+  // in the repr which we want to handle last and repeat until we're out of
   // classes.
-  constexpr static UnionTypeMask kUnionTypeClass = 1 << 15;
+  constexpr static UnionTypeMask kUnionTypeSubObject = 1 << 15;
 
   struct UnionClassList {
     TinyVector<ClassConstraint, 1> m_list;

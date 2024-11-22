@@ -28,6 +28,7 @@ to a python type.
 }}{{#type:flexibleBinary?}}{{!
   }}(<const char*>result.value().data())[:result.value().size()]{{!
 }}{{/type:flexibleBinary?}}{{!
+}}{{^function:stream?}}{{!
 }}{{^type:hasCustomTypeBehavior?}}{{!
 }}{{#type:bool?}}<bint>result.value(){{/type:bool?}}{{!
 }}{{#type:byte?}}result.value(){{/type:byte?}}{{!
@@ -56,6 +57,7 @@ to a python type.
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{> types/python_type}}(<int> result.value()){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}{{!
+}}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{!
   }}{{> clients/stream_response_class_name}}._fbthrift_create(result.value(), options){{!
 }}{{/function:stream?}}

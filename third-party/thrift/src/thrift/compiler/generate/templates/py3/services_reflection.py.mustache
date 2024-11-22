@@ -69,14 +69,16 @@ def get_reflection__{{service:name}}(for_clients: bool):
                 {{/function:args}}
             ),
             result={{#function:return_type}}{{!
-                }}{{#type:void?}}None{{/type:void?}}{{!
+                }}{{#type:void?}}{{^function:stream?}}None{{/function:stream?}}{{/type:void?}}{{!
                 }}{{#function:stream?}}{{!
                     }}{{> clients/stream_response_class_name}} if for_clients else {{!
                     }}{{> services/stream_response_class_name}}{{!
                 }}{{/function:stream?}}{{!
-                }}{{^type:void?}}{{> types/python_type}}{{/type:void?}}{{!
+                }}{{^type:void?}}{{^function:stream?}}{{> types/python_type}}{{/function:stream?}}{{/type:void?}}{{!
                 }}{{/function:return_type}},
-            result_kind={{#function:return_type}}{{> types/thrift_number_type}}{{/function:return_type}},
+            result_kind={{#function:return_type}}{{!
+            }}{{^function:stream?}}{{> types/thrift_number_type}}{{/function:stream?}}{{!
+            }}{{#function:stream?}}__NumberType.NOT_A_NUMBER{{/function:stream?}}{{/function:return_type}},
             exceptions=(
                 {{#function:exceptions}}
                 {{#field:type}}{{> types/python_type}}{{/field:type}},

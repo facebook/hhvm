@@ -216,12 +216,15 @@ where
 
             }}
             let interaction_client: {{program:crate}}::client::{{function:interaction_name}}Client = ::std::sync::Arc::new(interaction_impl);
+            {{#function:stream?}}
+            ::std::result::Result::Ok((interaction_client, res?))
+            {{/function:stream?}}{{^function:stream?}}
             {{#type:void?}}
             res?;
             ::std::result::Result::Ok(interaction_client)
             {{/type:void?}}{{^type:void?}}
             ::std::result::Result::Ok((interaction_client, res?))
-            {{/type:void?}}{{!
+            {{/type:void?}}{{/function:stream?}}{{!
             }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}
             res
             {{/function:creates_interaction?}}{{/function:return_type}}

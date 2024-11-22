@@ -18,7 +18,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include <thrift/compiler/ast/t_named.h>
 #include <thrift/compiler/ast/t_paramlist.h>

@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{^type:resolves_to_complex_return?}}
+}}{{^function:sync_returns_by_outparam?}}
 {{ > types/return_type_client}} {{ > service_common/client_class_name}}::recv_instance_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
 {{#function:cpp_void?}}
   recv_{{function:cpp_name}}(state);
@@ -23,12 +23,12 @@
   return recv_{{function:cpp_name}}(state);
 {{/function:cpp_void?}}
 }
-{{/type:resolves_to_complex_return?}}
-{{#type:resolves_to_complex_return?}}
+{{/function:sync_returns_by_outparam?}}
+{{#function:sync_returns_by_outparam?}}
 void {{ > service_common/client_class_name}}::recv_instance_{{function:cpp_name}}({{function:cpp_return_type}}& _return, ::apache::thrift::ClientReceiveState& state) {
   return recv_{{function:cpp_name}}(_return, state);
 }
-{{/type:resolves_to_complex_return?}}
+{{/function:sync_returns_by_outparam?}}
 
 {{#function:cpp_void?}}
 folly::exception_wrapper {{ > service_common/client_class_name}}::recv_instance_wrapped_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {

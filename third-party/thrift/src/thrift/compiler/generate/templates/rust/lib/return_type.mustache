@@ -18,7 +18,7 @@
   If we ever add a type here which may not have a Send or Sync impl, the
   unsafe impls in structimpl.mustache need to be revisited.
   ====
-}}{{>lib/type}}{{!
+}}{{^function:stream?}}{{>lib/type}}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{!
     }}{{#function:stream_has_first_response?}}{{!
         }}({{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}, {{!

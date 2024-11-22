@@ -17,17 +17,19 @@
 }}{{#function:creates_interaction?}}{{!
   }}apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}If, {{!
 }}{{/function:creates_interaction?}}{{!
-}}{{#type:resolves_to_complex_return?}}{{!
+
+}}{{#function:sync_returns_by_outparam?}}{{!
 }}{{#function:stack_arguments?}}{{!
   }}{{function:cpp_return_type}}{{!
 }}{{/function:stack_arguments?}}{{!
 }}{{^function:stack_arguments?}}{{!
   }}std::unique_ptr<{{type:cpp_type}}>{{!
 }}{{/function:stack_arguments?}}{{!
-}}{{/type:resolves_to_complex_return?}}{{!
-}}{{^type:resolves_to_complex_return?}}{{!
+}}{{/function:sync_returns_by_outparam?}}{{!
+}}{{^function:sync_returns_by_outparam?}}{{!
   }}{{function:cpp_return_type}}{{!
-}}{{/type:resolves_to_complex_return?}}{{!
+}}{{/function:sync_returns_by_outparam?}}{{!
+
 }}{{#function:creates_interaction?}}{{!
   }}>{{!
 }}{{/function:creates_interaction?}}

@@ -18,10 +18,14 @@
   }}{{ > types/return_type_client_no_handle}}{{!
 }}{{/function:creates_interaction?}}{{!
 }}{{#function:creates_interaction?}}{{!
-  }}{{#type:void?}}{{!
-    }}apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}{{!
-  }}{{/type:void?}}{{!
-  }}{{^type:void?}}{{!
+  }}{{#if function:stream?}}{{!
     }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{ > types/return_type_client_no_handle}}>{{!
-  }}{{/type:void?}}{{!
+  }}{{else}}{{!
+    }}{{#type:void?}}{{!
+      }}apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}{{!
+    }}{{/type:void?}}{{!
+    }}{{^type:void?}}{{!
+      }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{ > types/return_type_client_no_handle}}>{{!
+    }}{{/type:void?}}{{!
+  }}{{/if}}{{!
 }}{{/function:creates_interaction?}}

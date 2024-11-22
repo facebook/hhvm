@@ -416,7 +416,6 @@ mstch::node mstch_field::idl_type() {
       case t_type::type::t_structured:
         return BaseType::Struct;
       case t_type::type::t_service:
-      case t_type::type::t_stream:
       case t_type::type::t_program:
         return std::nullopt;
     }
@@ -515,9 +514,7 @@ mstch::node mstch_function::return_type() {
   if (function_->is_interaction_constructor()) {
     // The old syntax (performs) treats an interaction as a response.
     type = function_->interaction().get_type();
-  } else if (const t_stream* stream = function_->stream()) {
-    type = stream;
-  } else if (function_->sink()) {
+  } else if (function_->sink_or_stream()) {
     type = &t_primitive_type::t_void();
   }
   return context_.type_factory->make_mstch_object(type, context_, pos_);
@@ -569,7 +566,7 @@ mstch::node mstch_function::sink_final_response_exceptions() {
 mstch::node mstch_function::stream_elem_type() {
   const t_stream* stream = function_->stream();
   return stream ? context_.type_factory->make_mstch_object(
-                      stream->get_elem_type(), context_, pos_)
+                      stream->elem_type().get_type(), context_, pos_)
                 : mstch::node();
 }
 

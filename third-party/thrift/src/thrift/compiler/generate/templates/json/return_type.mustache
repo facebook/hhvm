@@ -16,7 +16,7 @@
 
 }}
 {{#function:return_type}}{{!
-}}{{^function:sink?}}{{> type}}{{/function:sink?}}{{!
+}}{{^function:sink_or_stream?}}{{> type}}{{/function:sink_or_stream?}}{{!
 }}{{#function:sink?}}{
   "type" : "sink",
 {{#function:sink_elem_type}}

@@ -86,15 +86,22 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
       {{#unless function:creates_interaction?}}
       return recv_{{function:cpp_name}}(returnState);
       {{else}}
-      {{#unless type:void?}}
+        {{#if function:stream?}}
       return std::make_pair(
         std::move(interactionHandle),
         recv_{{function:cpp_name}}(returnState)
       );
-      {{else}}
+        {{else}}
+          {{#unless type:void?}}
+      return std::make_pair(
+        std::move(interactionHandle),
+        recv_{{function:cpp_name}}(returnState)
+      );
+          {{else}}
       recv_{{function:cpp_name}}(returnState);
       return std::move(interactionHandle);
-      {{/unless}}
+          {{/unless}}
+        {{/if}}
       {{/unless}}
     {{/if}}
   {{else}}

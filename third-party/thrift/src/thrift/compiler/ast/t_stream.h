@@ -17,7 +17,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <utility>
 
 #include <thrift/compiler/ast/t_throws.h>
@@ -25,7 +24,7 @@
 
 namespace apache::thrift::compiler {
 
-class t_stream : public t_type {
+class t_stream : public t_node {
  public:
   explicit t_stream(t_type_ref elem_type) : elem_type_(std::move(elem_type)) {}
 
@@ -43,24 +42,6 @@ class t_stream : public t_type {
  private:
   t_type_ref elem_type_;
   std::unique_ptr<t_throws> exceptions_;
-
-  // TODO(afuller): Remove everything below here. It is provided only for
-  // backwards compatibility.
- public:
-  explicit t_stream(
-      const t_type* elem_type, std::unique_ptr<t_throws> throws = nullptr)
-      : t_stream(t_type_ref::from_req_ptr(elem_type)) {
-    set_exceptions(std::move(throws));
-  }
-
-  const t_type* get_elem_type() const { return elem_type().get_type(); }
-
-  bool is_streamresponse() const override { return true; }
-  type get_type_value() const override { return type::t_stream; }
-
-  std::string get_full_name() const override {
-    return "stream<" + elem_type_->get_full_name() + ">";
-  }
 };
 
 } // namespace apache::thrift::compiler

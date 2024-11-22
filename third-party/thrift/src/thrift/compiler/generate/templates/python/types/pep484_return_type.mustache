@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{> types/pep484_type}}{{!
+}}{{^function:stream?}}{{> types/pep484_type}}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{#function:stream_has_first_response?}}{{#function:stream_first_response_type}}{{!
   }}{{> types/pep484_type}}, {{/function:stream_first_response_type}}{{/function:stream_has_first_response?}}{{!
   }}_typing.AsyncGenerator[{{#function:stream_elem_type}}{{> types/pep484_type}}{{/function:stream_elem_type}}, None]{{!

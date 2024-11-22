@@ -58,11 +58,15 @@ folly::SemiFuture<{{ > types/return_type_client_lift_unit}}> {{ > service_common
           [interactionHandle = std::move(interactionHandle)](CallbackHelper::PromiseResult&& result) mutable {
           auto returnValue = CallbackHelper::processClientInterceptorsAndExtractResult(std::move(result));
           returnValue.throwUnlessValue();
-          {{#unless type:void?}}
+          {{#if type:void?}}
+            {{#if function:stream?}}
             return std::pair{std::move(interactionHandle), std::move(*returnValue)};
-          {{else}}
+            {{else}}
             return std::move(interactionHandle);
-          {{/unless}}
+            {{/if}}
+          {{else}}
+            return std::pair{std::move(interactionHandle), std::move(*returnValue)};
+          {{/if}}
           });
 {{/unless}}
 }

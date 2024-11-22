@@ -75,7 +75,7 @@ new_struct = {{#service:external_program?}}{{service:module_path}}.thrift_metada
 {{/function:exceptions}}
 
 {{#function:return_type}}
-{{> metadata/recursive_call }}{{!
+{{^function:stream?}}{{> metadata/recursive_call }}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{#function:stream_elem_type}}{{> metadata/recursive_call }}{{/function:stream_elem_type}} # elem
 {{#function:stream_first_response_type}}{{> metadata/recursive_call }}{{/function:stream_first_response_type}} # response {{/function:stream?}}{{!
 }}{{#function:sink?}}{{#function:sink_elem_type}}{{> metadata/recursive_call }}{{/function:sink_elem_type}} # elem

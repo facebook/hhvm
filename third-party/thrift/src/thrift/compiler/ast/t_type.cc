@@ -47,8 +47,8 @@ const std::string& t_type::type_name(type t) {
             "service",
             "program",
             "float",
-            "", // unused
-            "stream",
+            "", // unused [sink]
+            "", // unused [stream]
             "binary"}});
   return kTypeNames.at(static_cast<size_t>(t));
 }

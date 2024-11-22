@@ -20,6 +20,11 @@ Used for overriding methods with (thread="eb") annotation
 
 }}{{#function:oneway?}}apache::thrift::HandlerCallbackOneWay::Ptr{{/function:oneway?}}{{!
 }}{{^function:oneway?}}apache::thrift::HandlerCallbackPtr<{{#function:return_type}}{{!
-}}{{#type:void?}}void{{/type:void?}}{{!
-}}{{^type:void?}}{{> services/cpp_return_type}}{{/type:void?}}{{!
+}}{{#function:stream?}}{{!
+  }}{{> services/cpp_return_type}}{{!
+}}{{/function:stream?}}{{!
+}}{{^function:stream?}}{{!
+  }}{{#type:void?}}void{{/type:void?}}{{!
+  }}{{^type:void?}}{{> services/cpp_return_type}}{{/type:void?}}{{!
+}}{{/function:stream?}}{{!
 }}{{/function:return_type}}>{{/function:oneway?}}

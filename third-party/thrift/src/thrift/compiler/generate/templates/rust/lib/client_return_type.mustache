@@ -19,11 +19,17 @@
 
     }}{{#function:return_type}}{{!
         }}{{#function:creates_interaction?}}{{!
-            }}{{#type:void?}}{{!
-                }}{{program:crate}}::client::{{function:interaction_name}}Client{{!
-            }}{{/type:void?}}{{^type:void?}}{{!
+            }}{{#function:stream?}}{{!
                 }}({{program:crate}}::client::{{function:interaction_name}}Client, {{>lib/return_type}}){{!
-            }}{{/type:void?}}{{!
+            }}{{/function:stream?}}{{!
+            }}{{^function:stream?}}{{!
+                }}{{#type:void?}}{{!
+                    }}{{program:crate}}::client::{{function:interaction_name}}Client{{!
+                }}{{/type:void?}}{{!
+                }}{{^type:void?}}{{!
+                    }}({{program:crate}}::client::{{function:interaction_name}}Client, {{>lib/return_type}}){{!
+                }}{{/type:void?}}{{!
+            }}{{/function:stream?}}{{!
         }}{{/function:creates_interaction?}}{{^function:creates_interaction?}}{{!
             }}{{>lib/return_type}}{{!
         }}{{/function:creates_interaction?}}{{!

@@ -319,7 +319,7 @@ class python_mstch_program : public mstch_program {
         if (function.has_return_type()) {
           visit_type(function.return_type().get_type());
         }
-        visit_type(stream->get_elem_type());
+        visit_type(stream->elem_type().get_type());
       } else {
         visit_type(function.return_type().get_type());
       }

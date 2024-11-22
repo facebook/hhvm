@@ -79,7 +79,9 @@ class Async({{#service:extends}}{{!
         rpc_options: _typing.Optional[RpcOptions] = None,
     ) -> {{#function:return_type}}{{!
         }}{{#function:returns_tuple?}}_typing.Tuple[{{/function:returns_tuple?}}{{!
-        }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction}}.Async{{^type:void?}}, {{> types/pep484_return_type}}{{/type:void?}}{{/function:creates_interaction?}}{{!
+        }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction}}.Async{{!
+            }}{{#function:stream?}}, {{> types/pep484_return_type}}{{/function:stream?}}{{!
+            }}{{^type:void?}}, {{> types/pep484_return_type}}{{/type:void?}}{{/function:creates_interaction?}}{{!
         }}{{^function:creates_interaction?}}{{> types/pep484_return_type}}{{/function:creates_interaction?}}{{!
         }}{{#function:returns_tuple?}}]{{/function:returns_tuple?}}{{!
     }}{{/function:return_type}}:

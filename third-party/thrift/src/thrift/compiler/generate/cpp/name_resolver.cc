@@ -137,16 +137,16 @@ const std::string& cpp_name_resolver::get_return_type(const t_function& fun) {
   }
 
   const t_stream* stream = fun.stream();
-  return detail::get_or_gen(type_cache_, stream, [&]() {
+  return detail::get_or_gen(stream_cache_, stream, [&]() {
     if (fun.has_return_type()) {
       return detail::gen_template_type(
           "::apache::thrift::ResponseAndServerStream",
           {resolve(resolve_fn, *fun.return_type().get_type()),
-           resolve(resolve_fn, *stream->get_elem_type())});
+           resolve(resolve_fn, *stream->elem_type().get_type())});
     }
     return detail::gen_template_type(
         "::apache::thrift::ServerStream",
-        {resolve(resolve_fn, *stream->get_elem_type())});
+        {resolve(resolve_fn, *stream->elem_type().get_type())});
   });
 }
 

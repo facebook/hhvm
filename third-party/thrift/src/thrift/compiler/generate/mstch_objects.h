@@ -116,6 +116,7 @@ using mstch_const_map_element_factory = mstch_factory<
     const std::pair<const t_type*, const t_type*>&>;
 using mstch_structured_annotation_factory = mstch_factory<t_const>;
 using mstch_deprecated_annotation_factory = mstch_factory<t_annotation>;
+using mstch_stream_factory = mstch_factory<t_stream>;
 
 namespace detail {
 // Structured annotations don't have a separate AST node type yet so use a
@@ -681,6 +682,9 @@ class mstch_function : public mstch_base {
             {"function:stream_exceptions?",
              &mstch_function::has_stream_exceptions},
             {"function:stream_exceptions", &mstch_function::stream_exceptions},
+
+            // Shared Sink/Stream methods:
+            {"function:sink_or_stream?", &mstch_function::has_sink_or_stream},
         });
   }
 
@@ -778,6 +782,10 @@ class mstch_function : public mstch_base {
     return exceptions && exceptions->has_fields();
   }
   mstch::node stream_exceptions();
+
+  mstch::node has_sink_or_stream() {
+    return function_->sink_or_stream() != nullptr;
+  }
 
  protected:
   const t_function* function_;

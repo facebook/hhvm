@@ -261,7 +261,6 @@ inline protocol::Value const_to_value(const t_const_value& val) {
       break;
     case t_type::type::t_void:
     case t_type::type::t_service:
-    case t_type::type::t_stream:
     case t_type::type::t_program:
       throw std::runtime_error("Unexpected type");
   }

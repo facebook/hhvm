@@ -2448,7 +2448,7 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     auto stream_tmeta = t_const_value::make_map();
     stream_tmeta->add_map(
         std::make_unique<t_const_value>("elemType"),
-        type_to_tmeta(stream->get_elem_type()));
+        type_to_tmeta(stream->elem_type().get_type()));
     if (function->has_return_type()) {
       stream_tmeta->add_map(
           std::make_unique<t_const_value>("initialResponseType"),
@@ -4923,7 +4923,7 @@ std::string t_hack_generator::render_service_metadata_response(
         queue.push(fun->return_type().get_type());
         queue.push(sink->get_final_response_type());
       } else {
-        queue.push(fun->stream()->get_elem_type());
+        queue.push(fun->stream()->elem_type().get_type());
         queue.push(fun->return_type().get_type());
       }
     } else {
@@ -6135,7 +6135,7 @@ void t_hack_generator::generate_php_stream_function_helpers(
   const t_stream* stream = function->stream();
   generate_php_function_result_helpers(
       function,
-      stream->get_elem_type(),
+      stream->elem_type().get_type(),
       stream->exceptions(),
       prefix,
       "_StreamResponse",
@@ -6272,7 +6272,7 @@ void t_hack_generator::generate_php_docstring(
     } else {
       out << "void, ";
     }
-    out << "stream<" << thrift_type_name(stream->get_elem_type());
+    out << "stream<" << thrift_type_name(stream->elem_type().get_type());
     generate_php_docstring_stream_exceptions(out, stream->exceptions());
     out << ">\n";
   } else if (const t_sink* sink = tfunction->sink()) {
@@ -6688,7 +6688,7 @@ std::string t_hack_generator::get_stream_function_return_typehint(
   std::string return_typehint;
 
   auto stream_response_type_hint =
-      type_to_typehint(function->stream()->get_elem_type()) + ">";
+      type_to_typehint(function->stream()->elem_type().get_type()) + ">";
 
   if (function->has_return_type()) {
     auto first_response_type_hint =

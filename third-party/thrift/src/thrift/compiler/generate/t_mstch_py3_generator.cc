@@ -130,6 +130,13 @@ bool is_func_supported(bool no_stream, const t_function* func) {
       !func->is_interaction_constructor();
 }
 
+std::vector<std::string> get_type_py3_namespace(
+    const t_program* prog, const std::string& suffix) {
+  auto ns = get_py3_namespace_with_name(prog);
+  ns.push_back(suffix);
+  return ns;
+}
+
 class py3_mstch_program : public mstch_program {
  public:
   py3_mstch_program(
@@ -555,9 +562,12 @@ class py3_mstch_function : public mstch_function {
       : mstch_function(f, ctx, pos, iface), cppName_(cpp2::get_name(f)) {
     register_cached_methods(
         this,
-        {{"function:eb", &py3_mstch_function::event_based},
-         {"function:stack_arguments?", &py3_mstch_function::stack_arguments},
-         {"function:cppName", &py3_mstch_function::cppName}});
+        {
+            {"function:eb", &py3_mstch_function::event_based},
+            {"function:stack_arguments?", &py3_mstch_function::stack_arguments},
+            {"function:cppName", &py3_mstch_function::cppName},
+            {"function:modulePath", &py3_mstch_function::modulePath},
+        });
   }
 
   mstch::node cppName() { return cppName_; }
@@ -573,6 +583,12 @@ class py3_mstch_function : public mstch_function {
 
   mstch::node stack_arguments() {
     return cpp2::is_stack_arguments(context_.options, *function_);
+  }
+
+  mstch::node modulePath() {
+    return fmt::format(
+        "_{}",
+        fmt::join(get_type_py3_namespace(function_->program(), "types"), "_"));
   }
 
  protected:
@@ -641,12 +657,16 @@ class py3_mstch_type : public mstch_type {
   }
 
   mstch::node modulePath() {
-    return fmt::format("_{}", fmt::join(get_type_py3_namespace("types"), "_"));
+    return fmt::format(
+        "_{}",
+        fmt::join(get_type_py3_namespace(get_type_program(), "types"), "_"));
   }
 
   mstch::node cbinding_path() {
     return fmt::format(
-        "_{}", fmt::join(get_type_py3_namespace("cbindings"), "_"));
+        "_{}",
+        fmt::join(
+            get_type_py3_namespace(get_type_program(), "cbindings"), "_"));
   }
 
   mstch::node flatName() { return cached_props_.flat_name(); }
@@ -720,13 +740,6 @@ class py3_mstch_type : public mstch_type {
       return p;
     }
     return prog_;
-  }
-
-  std::vector<std::string> get_type_py3_namespace(
-      const std::string& suffix) const {
-    auto ns = get_py3_namespace_with_name(get_type_program());
-    ns.push_back(suffix);
-    return ns;
   }
 
   bool need_import_path(const std::string& option) {
@@ -1244,17 +1257,15 @@ void py3_mstch_program::visit_type_single_service(const t_service* service) {
     std::string return_type_name;
     if (stream && !function.is_interaction_constructor()) {
       return_type_name = "Stream__";
-      const t_type* elem_type = stream->get_elem_type();
+      const t_type* elem_type = stream->elem_type().get_type();
       if (function.has_return_type()) {
         return_type_name = "ResponseAndStream__" +
             visit_type(function.return_type().get_type()) + "_";
       }
       std::string elem_type_name = visit_type(elem_type);
       return_type_name += elem_type_name;
-      auto base_type =
-          context_.type_factory->make_mstch_object(stream, context_);
-      py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(base_type.get());
-      type->set_flat_name(return_type_name);
+      auto base_type = context_.type_factory->make_mstch_object(
+          stream->elem_type().get_type(), context_);
       streamTypes_.emplace(elem_type_name, elem_type);
       bool inserted = seenTypeNames_.insert(return_type_name).second;
       if (inserted && function.has_return_type()) {
@@ -1466,8 +1477,8 @@ void t_mstch_py3_generator::generate_types() {
 void t_mstch_py3_generator::generate_services() {
   if (get_program()->services().empty() && !has_option("single_file_service")) {
     // There is no need to generate empty / broken code for non existent
-    // services. However, in single_file_service mode, the build system may not
-    // know ahead of time if these files can exist - so we should always
+    // services. However, in single_file_service mode, the build system may
+    // not know ahead of time if these files can exist - so we should always
     // generate them.
     return;
   }

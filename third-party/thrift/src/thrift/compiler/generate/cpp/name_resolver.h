@@ -20,7 +20,6 @@
 #include <initializer_list>
 #include <string>
 #include <unordered_map>
-#include <utility>
 
 #include <thrift/compiler/ast/t_container.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -186,6 +185,7 @@ class cpp_name_resolver {
   std::unordered_map<const t_named*, std::string> name_cache_;
   std::unordered_map<const t_type*, std::string> type_cache_;
   std::unordered_map<const t_sink*, std::string> sink_cache_;
+  std::unordered_map<const t_stream*, std::string> stream_cache_;
   std::unordered_map<const t_const*, std::string> const_cache_;
   std::unordered_map<const t_field*, std::string> field_type_cache_;
   std::unordered_map<const t_type*, std::string> standard_type_cache_;

@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{> types/cython_cpp_type_ident}}{{!
+}}{{^function:stream?}}{{> types/cython_cpp_type_ident}}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{!
   }}{{#function:stream_has_first_response?}}cResponseAndServerStream__{{!
   }}{{#function:stream_first_response_type}}{{ >types/cython_cpp_type_ident}}{{/function:stream_first_response_type}}_{{!

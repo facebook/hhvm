@@ -6914,24 +6914,8 @@ end = struct
         (fun env -> condition_single env true te),
         (fun env -> condition_single env false te) )
     in
-    let rec branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
+    let branch_for_type_switch env ~p ~ivar ~errs ~reason ~predicate =
       match (snd predicate, ivar) with
-      (* Legacy case: apply refinements to both lsh and rhs for assignments *)
-      | (IsTag NullTag, (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs; rhs }))
-        ->
-        let (env, cond_true_l, cond_false_l) =
-          branch_for_type_switch env ~p ~ivar:lhs ~errs ~reason ~predicate
-        in
-        let (env, cond_true_r, cond_false_r) =
-          branch_for_type_switch env ~p ~ivar:rhs ~errs:None ~reason ~predicate
-        in
-        ( env,
-          (fun env ->
-            let (env, _pkgs) = cond_true_l env in
-            cond_true_r env),
-          fun env ->
-            let (env, _pkgs) = cond_false_l env in
-            cond_false_r env )
       (* Special case: treat Shapes::idx($s, 'k') is nonnull
          roughly like $s is shape('k' => nonnull, ...) *)
       | ( IsTag NullTag,

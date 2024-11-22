@@ -48,12 +48,24 @@ Invalid argument (Typing[4110])
   Expected `CD`
   File "do_assign_in_invariant.php", line 48, characters 14-14:
   But got `B`
+ERROR: File "do_assign_in_invariant.php", line 72, characters 15-16:
+Invalid argument (Typing[4110])
+  File "do_assign_in_invariant.php", line 27, characters 20-21:
+  Expected `AE`
+  File "do_assign_in_invariant.php", line 33, characters 54-55:
+  But got `?(<expr#12> as E | A)`
 ERROR: File "do_assign_in_invariant.php", line 73, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 19, characters 19-19:
   Expected `A`
-  File "do_assign_in_invariant.php", line 33, characters 55-55:
-  But got `E`
+  File "do_assign_in_invariant.php", line 33, characters 54-55:
+  But got `?(<expr#12> as E | A)`
+ERROR: File "do_assign_in_invariant.php", line 74, characters 14-15:
+Invalid argument (Typing[4110])
+  File "do_assign_in_invariant.php", line 22, characters 19-19:
+  Expected `E`
+  File "do_assign_in_invariant.php", line 33, characters 54-55:
+  But got `?(<expr#12> as E | A)`
 ERROR: File "do_assign_in_invariant.php", line 74, characters 14-15:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 22, characters 19-19:
@@ -77,7 +89,13 @@ Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 32, characters 20-21:
   Expected `CE`
   File "do_assign_in_invariant.php", line 33, characters 54-55:
-  But got `?C`
+  But got `?(<expr#22> as E | C)`
+ERROR: File "do_assign_in_invariant.php", line 91, characters 15-16:
+Invalid argument (Typing[4110])
+  File "do_assign_in_invariant.php", line 20, characters 23-23:
+  Expected `C`
+  File "do_assign_in_invariant.php", line 33, characters 55-55:
+  But got `E`
 ERROR: File "do_assign_in_invariant.php", line 92, characters 15-16:
 Invalid argument (Typing[4110])
   File "do_assign_in_invariant.php", line 21, characters 23-23:

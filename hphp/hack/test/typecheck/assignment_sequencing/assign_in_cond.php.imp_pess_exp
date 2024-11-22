@@ -16,3 +16,21 @@ ERROR: File "assign_in_cond.php", line 17, characters 8-9:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
 ERROR: File "assign_in_cond.php", line 23, characters 8-9:
 Assignments can no longer be used as expressions. Pull the assignment out into a separate statement. (Parsing[1002])
+ERROR: File "assign_in_cond.php", line 18, characters 16-17:
+Invalid argument (Typing[4110])
+  File "assign_in_cond.php", line 33, characters 21-23:
+  Expected `int`
+  File "assign_in_cond.php", line 29, characters 15-18:
+  But got `?int`
+ERROR: File "assign_in_cond.php", line 24, characters 16-17:
+Invalid argument (Typing[4110])
+  File "assign_in_cond.php", line 33, characters 21-23:
+  Expected `int`
+  File "assign_in_cond.php", line 22, characters 13-16:
+  But got `?int`
+ERROR: File "assign_in_cond.php", line 25, characters 16-17:
+Invalid argument (Typing[4110])
+  File "assign_in_cond.php", line 33, characters 21-23:
+  Expected `int`
+  File "assign_in_cond.php", line 22, characters 13-16:
+  But got `?int`

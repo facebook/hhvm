@@ -1172,6 +1172,7 @@ struct Attributes<'a> {
     php_std_lib: bool,
     soft: bool,
     support_dynamic_type: bool,
+    no_support_dynamic_type: bool,
     no_auto_likes: bool,
     safe_global_variable: bool,
     cross_package: Option<&'a str>,
@@ -1697,6 +1698,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             php_std_lib: false,
             soft: false,
             support_dynamic_type: false,
+            no_support_dynamic_type: false,
             no_auto_likes: false,
             safe_global_variable: false,
             cross_package: None,
@@ -1763,6 +1765,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                     }
                     "__SupportDynamicType" => {
                         attributes.support_dynamic_type = true;
+                    }
+                    "__NoSupportDynamicType" => {
+                        attributes.no_support_dynamic_type = true;
                     }
                     "__NoAutoLikes" => {
                         attributes.no_auto_likes = true;
@@ -4124,7 +4129,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     type_,
                     pos,
                     php_std_lib: parsed_attributes.php_std_lib,
-                    support_dynamic_type: self.implicit_sdt()
+                    support_dynamic_type: (self.implicit_sdt()
+                        && !parsed_attributes.no_support_dynamic_type)
                         || parsed_attributes.support_dynamic_type
                         || parsed_attributes.dynamically_callable,
                     no_auto_dynamic: self.under_no_auto_dynamic,
@@ -4723,7 +4729,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     // Annoyingly, the <<__SupportDynamicType>> annotation on a
                     // class implicitly changes the decls of every method inside
                     // it, so we have to reallocate them here.
-                    let method = if (self.implicit_sdt()
+                    let method = if ((self.implicit_sdt()
+                        && !class_attributes.no_support_dynamic_type)
                         || class_attributes.support_dynamic_type
                         || class_attributes.dynamically_referenced)
                         && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
@@ -4783,7 +4790,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let user_attributes = user_attributes.into_bump_slice();
         let extends = self.slice(extends.iter().filter_map(|&node| self.node_to_ty(node)));
         let implements = self.slice(implements.iter().filter_map(|&node| self.node_to_ty(node)));
-        let support_dynamic_type = self.implicit_sdt() || class_attributes.support_dynamic_type;
+        let support_dynamic_type = (self.implicit_sdt()
+            && !class_attributes.no_support_dynamic_type)
+            || class_attributes.support_dynamic_type;
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(tparams);
         let module = self.module;
@@ -5479,7 +5488,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let user_attributes = user_attributes.into_bump_slice();
 
         let parsed_attributes = self.to_attributes(attributes);
-        let support_dynamic_type = self.implicit_sdt() || parsed_attributes.support_dynamic_type;
+        let support_dynamic_type = (self.implicit_sdt()
+            && !parsed_attributes.no_support_dynamic_type)
+            || parsed_attributes.support_dynamic_type;
 
         let cls = self.alloc(shallow_decl_defs::ShallowClass {
             mode: self.file_mode,

@@ -45,4 +45,91 @@ namespace apache::thrift {
           sz));
 }
 
+void BinaryProtocolReader::skip(TType type, int depth) {
+  if (depth >= FLAGS_thrift_protocol_max_depth) {
+    protocol::TProtocolException::throwExceededDepthLimit();
+  }
+  size_t bytesToSkip = 0;
+  switch (type) {
+    case TType::T_BYTE:
+    case TType::T_BOOL:
+      bytesToSkip = sizeof(uint8_t);
+      break;
+    case TType::T_I16:
+      bytesToSkip = sizeof(int16_t);
+      break;
+    case TType::T_FLOAT:
+    case TType::T_I32:
+      bytesToSkip = sizeof(int32_t);
+      break;
+    case TType::T_DOUBLE:
+    case TType::T_U64:
+    case TType::T_I64:
+      bytesToSkip = sizeof(int64_t);
+      break;
+    case TType::T_UTF8:
+    case TType::T_UTF16:
+    case TType::T_STRING: {
+      int32_t size = 0;
+      auto in = getCursor();
+      readI32(size);
+      if (FOLLY_UNLIKELY(!in.canAdvance(static_cast<int32_t>(size)))) {
+        protocol::TProtocolException::throwTruncatedData();
+      }
+      bytesToSkip = size;
+      break;
+    }
+    case TType::T_STRUCT: {
+      std::string name;
+      TType ftype;
+      readStructBegin(name);
+      while (true) {
+        int8_t rawType;
+        readByte(rawType);
+        ftype = static_cast<TType>(rawType);
+        if (ftype == TType::T_STOP) {
+          readStructEnd();
+          return;
+        }
+        skipBytes(sizeof(int16_t));
+        skip(ftype, depth + 1);
+        readFieldEnd();
+      }
+    }
+    case TType::T_MAP: {
+      TType keyType;
+      TType valType;
+      uint32_t size;
+      readMapBegin(keyType, valType, size);
+      skip_n(*this, size, {keyType, valType}, depth + 1);
+      readMapEnd();
+      return;
+    }
+    case TType::T_SET: {
+      TType elemType;
+      uint32_t size;
+      readSetBegin(elemType, size);
+      skip_n(*this, size, {elemType}, depth + 1);
+      readSetEnd();
+      return;
+    }
+    case TType::T_LIST: {
+      TType elemType;
+      uint32_t size;
+      readListBegin(elemType, size);
+      skip_n(*this, size, {elemType}, depth + 1);
+      readListEnd();
+      return;
+    }
+    case TType::T_STOP:
+    case TType::T_VOID:
+    case TType::T_STREAM:
+      // Unimplemented, fallback to default
+    default: {
+      TProtocolException::throwInvalidSkipType(type);
+    }
+  }
+  skipBytes(bytesToSkip);
+}
+
 } // namespace apache::thrift

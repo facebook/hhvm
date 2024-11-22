@@ -231,18 +231,8 @@ void skip(Protocol_& prot, WireType arg_type, int depth = 0) {
     case TType::T_UTF8:
     case TType::T_UTF16:
     case TType::T_STRING: {
-      if constexpr (std::is_same_v<Protocol_, BinaryProtocolReader>) {
-        int32_t size = 0;
-        auto in = prot.getCursor();
-        prot.readI32(size);
-        if (FOLLY_UNLIKELY(!in.canAdvance(static_cast<int32_t>(size)))) {
-          protocol::TProtocolException::throwTruncatedData();
-        }
-        prot.skipBytes(size);
-      } else {
-        apache::thrift::detail::SkipNoopString str;
-        prot.readBinary(str);
-      }
+      apache::thrift::detail::SkipNoopString str;
+      prot.readBinary(str);
       return;
     }
     case TType::T_STRUCT: {

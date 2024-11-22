@@ -547,6 +547,41 @@ class MutableMapTest(unittest.TestCase):
         self.assertNotIn(65, values_view)
         self.assertNotIn(97, values_view)
 
+    def test_values_view_with_container_value(self) -> None:
+        mutable_map: MutableMap[str, MutableList[int]] = MutableMap(
+            typeinfo_string,
+            MutableListTypeInfo(typeinfo_i32),
+            {},
+        )
+
+        mutable_list_1: MutableList[int] = MutableList(typeinfo_i32, [1, 2, 3])
+        mutable_list_2: MutableList[int] = MutableList(typeinfo_i32, [4, 5, 6])
+
+        # The `values()` method returns a view of the map's values. Any modifications
+        # made to the map will be reflected in the `values_view`.
+        values_view = mutable_map.values()
+        self.assertIsInstance(values_view, MapValuesView)
+        self.assertEqual(0, len(values_view))
+
+        mutable_map["A"] = to_thrift_list([1, 2, 3])
+
+        self.assertEqual(1, len(values_view))
+        self.assertIn([1, 2, 3], values_view)
+        self.assertIn(mutable_list_1, values_view)
+        self.assertNotIn([4, 5, 6], values_view)
+        self.assertNotIn(mutable_list_2, values_view)
+
+        mutable_map["a"] = to_thrift_list([4, 5, 6])
+
+        self.assertEqual(2, len(values_view))
+        self.assertIn([1, 2, 3], values_view)
+        self.assertIn(mutable_list_1, values_view)
+        self.assertIn([4, 5, 6], values_view)
+        self.assertIn(mutable_list_2, values_view)
+
+        mutable_map.clear()
+        self.assertEqual(0, len(values_view))
+
     def test_mutation_via_values_view(self) -> None:
         internal_map = {1: [1, 2, 3], 2: [4, 5], 3: [6]}
         mutable_map: MutableMap[int, MutableList[int]] = MutableMap(

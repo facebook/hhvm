@@ -1945,18 +1945,27 @@ end = struct
       (* Otherwise, combine the errors and return invalid *)
       TL.invalid ~fail:(Typing_error.multiple_opt @@ List.filter_opt errs)
 
-  (* Construct a tuple type from the parameters in a function type.
-   * This is used for subtyping function types exactly one of which contains
-   * a splat parameter e.g. consider
-   *
-   * (function(t1',_,tm', ...T):r') <:
-   * (function(t1, _, tm, u1, _, un, optional v1, _, vk, w...):r <:
-   *
-   * (Here ...T is a splat parameter and w... is a variadic).
-   *
-   * We need to subtype t1<:t1', _, tm<:tm' and r'<:r as normal but
-   * splat parameter T is compared a tuple of the remaining parameters in the supertype
-   * i.e. T <: (u1, _, un, optional v1, _, optional vk, w...)
+  (**
+    Construct a tuple type from the parameters in a function type.
+    This is used for subtyping function types at least one of which contains
+    a splat parameter e.g. consider
+
+      (function(t1', _, tm', ...T):r') <:
+      (function(t1, _, tm, u1, _, un, optional v1, _, vk, w...):r <:
+
+    (Here ...T is a splat parameter and w... is a variadic).
+
+    We need to subtype t1<:t1', _, tm<:tm' and r'<:r as normal but
+    splat parameter T is compared a tuple of the remaining parameters in the supertype
+    i.e. (u1, _, un, optional v1, _, optional vk, w...) <: T
+
+    If there is a splat parameter on both sides, e.g.
+      (function(t1',_,tm', ...T'):r') <:
+      (function(t1, _, tm, u1, _, un, ...T):r)
+
+    then we use splat in a tuple:
+
+      (u1, _, un, ...T) <: T'
    *)
   and params_to_tuple fun_type_pos is_variadic fn_params =
     (* We construct a position that spans all the parameters that we are gathering.
@@ -1967,7 +1976,8 @@ end = struct
       | { fp_pos; fp_type; _ } :: _ ->
         Pos_or_decl.merge (get_pos fp_type) fp_pos
     in
-    let rec aux fn_params acc_pos acc_required acc_optional acc_variadic =
+    let rec aux
+        fn_params acc_pos acc_required acc_optional acc_variadic acc_splat =
       match fn_params with
       | [] ->
         mk
@@ -1976,11 +1986,14 @@ end = struct
               {
                 t_required = List.rev acc_required;
                 t_extra =
-                  Textra
-                    {
-                      t_optional = List.rev acc_optional;
-                      t_variadic = acc_variadic;
-                    };
+                  (match acc_splat with
+                  | None ->
+                    Textra
+                      {
+                        t_optional = List.rev acc_optional;
+                        t_variadic = acc_variadic;
+                      }
+                  | Some t -> Tsplat t);
               } )
       | ({ fp_type; fp_pos; _ } as fn_param) :: fn_params ->
         let acc_pos =
@@ -1989,15 +2002,17 @@ end = struct
           else
             acc_pos
         in
-        let (acc_required, acc_optional, acc_variadic) =
+        let (acc_required, acc_optional, acc_variadic, acc_splat) =
           if List.is_empty fn_params && is_variadic then
-            (acc_required, acc_optional, fp_type)
+            (acc_required, acc_optional, fp_type, acc_splat)
+          else if List.is_empty fn_params && get_fp_splat fn_param then
+            (acc_required, acc_optional, acc_variadic, Some fp_type)
           else if get_fp_is_optional fn_param then
-            (acc_required, fp_type :: acc_optional, acc_variadic)
+            (acc_required, fp_type :: acc_optional, acc_variadic, acc_splat)
           else
-            (fp_type :: acc_required, acc_optional, acc_variadic)
+            (fp_type :: acc_required, acc_optional, acc_variadic, acc_splat)
         in
-        aux fn_params acc_pos acc_required acc_optional acc_variadic
+        aux fn_params acc_pos acc_required acc_optional acc_variadic acc_splat
     in
     aux
       fn_params
@@ -2005,6 +2020,7 @@ end = struct
       []
       []
       (MakeType.nothing (Reason.witness_from_decl fun_type_pos))
+      None
 
   and simplify_subtype_params
       ~(subtype_env : Subtype_env.t)
@@ -4521,101 +4537,177 @@ end = struct
         ~lhs:{ sub_supportdyn; ty_sub }
         ~rhs:{ super_supportdyn; super_like; ty_super }
         env
-      (* -- C-Tuple-R --------------------------------------------------------- *)
-    | ( ( _,
-          Ttuple
-            {
-              t_required = t_required_sub;
-              t_extra =
-                Textra
-                  { t_optional = t_optional_sub; t_variadic = t_variadic_sub };
-            } ),
-        ( _,
-          Ttuple
-            {
-              t_required = t_required_super;
-              t_extra =
-                Textra
-                  {
-                    t_optional = t_optional_super;
-                    t_variadic = t_variadic_super;
-                  };
-            } ) ) ->
-      (* Subtype should have at least as many required elements as supertype *)
-      if List.length t_required_sub < List.length t_required_super then
-        invalid env ~fail
-      else
-        let sub_closed = is_nothing t_variadic_sub in
-        let super_closed = is_nothing t_variadic_super in
-        (* Shortcut: closed tuples with no optional elements should have the same arity *)
-        if
-          sub_closed
-          && super_closed
-          && List.is_empty t_optional_sub
-          && List.is_empty t_optional_super
-          && not
-               (Int.equal
-                  (List.length t_required_sub)
-                  (List.length t_required_super))
-        then
-          invalid env ~fail
-        else
-          let ty_subs = t_required_sub @ t_optional_sub in
-          let ty_supers = t_required_super @ t_optional_super in
-          let rec simplify_elems ty_subs ty_supers env =
-            match (ty_subs, ty_supers) with
-            (* We've run out of elements in the supertype so use the variadic *)
-            | (ty_sub :: ty_subs, []) ->
-              (* Shortcut if variadic supertype is nothing (closed) *)
-              if super_closed then
-                invalid env ~fail
-              else
-                let ty_super = Sd.liken ~super_like env t_variadic_super in
-                env
-                |> simplify
-                     ~subtype_env
-                     ~this_ty:None
-                     ~lhs:{ sub_supportdyn; ty_sub }
-                     ~rhs:
-                       {
-                         super_like = false;
-                         super_supportdyn = false;
-                         ty_super;
-                       }
-                &&& simplify_elems ty_subs ty_supers
-            (* We've run out of elements in both subtype and the supertype so just compare variadics *)
-            | ([], []) ->
-              let ty_super = Sd.liken ~super_like env t_variadic_super in
+      (* Tuple against tuple. *)
+    | ( (r_sub, Ttuple { t_required = t_req_sub; t_extra = t_extra_sub }),
+        (r_super, Ttuple { t_required = t_req_super; t_extra = t_extra_super })
+      ) ->
+      (* First test the required components of the tuples, pointwise *)
+      let rec simplify_elems_req ty_subs ty_supers env =
+        match (ty_subs, ty_supers) with
+        (* We have required elements in the supertype that can't be satisfied by the subtype *)
+        | ([], _ :: _) -> begin
+          match t_extra_sub with
+          | Tsplat t_splat_sub ->
+            let tuple_super_ty =
+              mk
+                ( r_super,
+                  Ttuple { t_required = ty_supers; t_extra = t_extra_super } )
+            in
+            let ty_super = Sd.liken ~super_like env tuple_super_ty in
+            env
+            |> simplify
+                 ~subtype_env
+                 ~this_ty:None
+                 ~lhs:{ sub_supportdyn; ty_sub = t_splat_sub }
+                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          | Textra _ -> invalid env ~fail
+        end
+        (* Pointwise compare sub and super *)
+        | (ty_sub :: ty_subs, ty_super :: ty_supers) ->
+          let ty_super = Sd.liken ~super_like env ty_super in
+          env
+          |> simplify
+               ~subtype_env
+               ~this_ty:None
+               ~lhs:{ sub_supportdyn; ty_sub }
+               ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          &&& simplify_elems_req ty_subs ty_supers
+        (* We've run out of required elements in the supertype *)
+        | (_, []) -> begin
+          match t_extra_super with
+          (* But we can match the rest of the subtype against a splat in the supertype
+           * i.e. (ty_subs, optional t_optional_sub, tvariadic_sub...) <: t_splat_super
+           *)
+          | Tsplat t_splat_super ->
+            let tuple_sub_ty =
+              mk (r_sub, Ttuple { t_required = ty_subs; t_extra = t_extra_sub })
+            in
+            let ty_super = Sd.liken ~super_like env t_splat_super in
+            env
+            |> simplify
+                 ~subtype_env
+                 ~this_ty:None
+                 ~lhs:{ sub_supportdyn; ty_sub = tuple_sub_ty }
+                 ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+          | Textra
+              { t_optional = t_optional_super; t_variadic = t_variadic_super }
+            -> begin
+            let t_optional_sub =
+              match t_extra_sub with
+              | Textra { t_optional; _ } -> t_optional
+              | Tsplat _ -> []
+            in
+            (* Shortcut so that error refers to whole tuple *)
+            if
+              List.length ty_subs + List.length t_optional_sub
+              > List.length t_optional_super
+              && is_nothing t_variadic_super
+            then
+              invalid env ~fail
+            else
+              let rec simplify_elems_opt ty_subs ty_supers env =
+                begin
+                  match (ty_subs, ty_supers) with
+                  | (ty_sub :: ty_subs, []) ->
+                    let ty_super = Sd.liken ~super_like env t_variadic_super in
+                    env
+                    |> simplify
+                         ~subtype_env
+                         ~this_ty:None
+                         ~lhs:{ sub_supportdyn; ty_sub }
+                         ~rhs:
+                           {
+                             super_like = false;
+                             super_supportdyn = false;
+                             ty_super;
+                           }
+                    &&& simplify_elems_opt ty_subs ty_supers
+                  (* We've run out of elements in the subtype *)
+                  | ([], _) -> begin
+                    match t_extra_sub with
+                    | Tsplat t_splat_sub ->
+                      let tuple_super_ty =
+                        mk
+                          ( r_super,
+                            Ttuple
+                              {
+                                t_required = [];
+                                t_extra =
+                                  Textra
+                                    {
+                                      t_optional = ty_supers;
+                                      t_variadic = t_variadic_super;
+                                    };
+                              } )
+                      in
+                      let ty_super = Sd.liken ~super_like env tuple_super_ty in
+                      env
+                      |> simplify
+                           ~subtype_env
+                           ~this_ty:None
+                           ~lhs:{ sub_supportdyn; ty_sub = t_splat_sub }
+                           ~rhs:
+                             {
+                               super_like = false;
+                               super_supportdyn = false;
+                               ty_super;
+                             }
+                    | Textra { t_optional = _; t_variadic = t_variadic_sub } ->
+                    begin
+                      match ty_supers with
+                      | [] ->
+                        let ty_super =
+                          Sd.liken ~super_like env t_variadic_super
+                        in
+                        env
+                        |> simplify
+                             ~subtype_env
+                             ~this_ty:None
+                             ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
+                             ~rhs:
+                               {
+                                 super_like = false;
+                                 super_supportdyn = false;
+                                 ty_super;
+                               }
+                      | ty_super :: ty_supers ->
+                        let ty_super = Sd.liken ~super_like env ty_super in
+                        env
+                        |> simplify
+                             ~subtype_env
+                             ~this_ty:None
+                             ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
+                             ~rhs:
+                               {
+                                 super_like = false;
+                                 super_supportdyn = false;
+                                 ty_super;
+                               }
+                        &&& simplify_elems_opt [] ty_supers
+                    end
+                  end
+                  | (ty_sub :: ty_subs, ty_super :: ty_supers) ->
+                    let ty_super = Sd.liken ~super_like env ty_super in
+                    env
+                    |> simplify
+                         ~subtype_env
+                         ~this_ty:None
+                         ~lhs:{ sub_supportdyn; ty_sub }
+                         ~rhs:
+                           {
+                             super_like = false;
+                             super_supportdyn = false;
+                             ty_super;
+                           }
+                    &&& simplify_elems_opt ty_subs ty_supers
+                end
+              in
               env
-              |> simplify
-                   ~subtype_env
-                   ~this_ty:None
-                   ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
-                   ~rhs:
-                     { super_like = false; super_supportdyn = false; ty_super }
-            (* We have a supertype and no more subtypes so compare variadic subtype *)
-            | ([], ty_super :: ty_supers) ->
-              let ty_super = Sd.liken ~super_like env ty_super in
-              env
-              |> simplify
-                   ~subtype_env
-                   ~this_ty:None
-                   ~lhs:{ sub_supportdyn; ty_sub = t_variadic_sub }
-                   ~rhs:
-                     { super_like = false; super_supportdyn = false; ty_super }
-              &&& simplify_elems ty_subs ty_supers
-            | (ty_sub :: ty_subs, ty_super :: ty_supers) ->
-              let ty_super = Sd.liken ~super_like env ty_super in
-              env
-              |> simplify
-                   ~subtype_env
-                   ~this_ty:None
-                   ~lhs:{ sub_supportdyn; ty_sub }
-                   ~rhs:
-                     { super_like = false; super_supportdyn = false; ty_super }
-              &&& simplify_elems ty_subs ty_supers
-          in
-          env |> simplify_elems ty_subs ty_supers
+              |> simplify_elems_opt (ty_subs @ t_optional_sub) t_optional_super
+          end
+        end
+      in
+      env |> simplify_elems_req t_req_sub t_req_super
     | (_, (_, Ttuple _)) ->
       default_subtype
         ~subtype_env

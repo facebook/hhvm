@@ -46,12 +46,6 @@ Invalid argument (Typing[4110])
   Expected `(optional arraykey, optional bool)` (tuple from parameters)
   File "type_splat_sub_bad.php", line 34, characters 30-52:
   But got `(int, string, bool, int)`
-ERROR: File "type_splat_sub_bad.php", line 34, characters 30-52:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 14, characters 46-49:
-  Expected `bool`
-  File "type_splat_sub_bad.php", line 34, characters 39-41:
-  But got `string`
 ERROR: File "type_splat_sub_bad.php", line 36, characters 30-42:
 Invalid argument (Typing[4110])
   File "type_splat_sub_bad.php", line 14, characters 46-49:
@@ -118,12 +112,6 @@ Invalid argument (Typing[4110])
   Expected `(optional arraykey, optional bool)` (tuple from parameters)
   File "type_splat_sub_bad.php", line 66, characters 29-51:
   But got `(int, string, bool, int)`
-ERROR: File "type_splat_sub_bad.php", line 66, characters 29-51:
-Invalid argument (Typing[4110])
-  File "type_splat_sub_bad.php", line 48, characters 46-49:
-  Expected `bool`
-  File "type_splat_sub_bad.php", line 66, characters 38-40:
-  But got `string`
 ERROR: File "type_splat_sub_bad.php", line 68, characters 29-41:
 Invalid argument (Typing[4110])
   File "type_splat_sub_bad.php", line 48, characters 46-49:

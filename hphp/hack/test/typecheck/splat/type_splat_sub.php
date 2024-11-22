@@ -13,7 +13,7 @@ function expectSplatFun<T as (mixed...)>(
 ): void {
   // Just test passing a function with a splat parameter to
   // another function that expects the same
-  expectSplatFunAux<T>($f, $tup);
+  expectSplatFunAux($f, $tup);
   //($f)(2, ...$tup);
 }
 

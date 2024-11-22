@@ -22,12 +22,6 @@ Invalid argument (Typing[4110])
   Expected `(int, optional string)`
   File "tuple_open_sub_bad.php", line 21, characters 3-41:
   But got `(int, optional arraykey, optional bool)`
-ERROR: File "tuple_open_sub_bad.php", line 23, characters 28-29:
-Invalid argument (Typing[4110])
-  File "tuple_open_sub_bad.php", line 16, characters 50-55:
-  Expected `string`
-  File "tuple_open_sub_bad.php", line 21, characters 18-25:
-  But got `arraykey`
 ERROR: File "tuple_open_sub_bad.php", line 24, characters 25-26:
 Invalid argument (Typing[4110])
   File "tuple_open_sub_bad.php", line 18, characters 32-55:

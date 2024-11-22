@@ -40,12 +40,6 @@ Invalid argument (Typing[4110])
   Expected `(optional arraykey, optional bool)` (tuple from parameters)
   File "type_splat_typing_bad.php", line 37, characters 3-45:
   But got `(int, string, bool, int)`
-ERROR: File "type_splat_typing_bad.php", line 37, characters 3-45:
-Invalid argument (Typing[4110])
-  File "type_splat_typing_bad.php", line 18, characters 46-49:
-  Expected `bool`
-  File "type_splat_typing_bad.php", line 37, characters 32-34:
-  But got `string`
 ERROR: File "type_splat_typing_bad.php", line 39, characters 3-35:
 Invalid argument (Typing[4110])
   File "type_splat_typing_bad.php", line 18, characters 46-49:

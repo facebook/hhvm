@@ -50,23 +50,7 @@ namespace module_constants {
   return "";
 }
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_547276426adfb34f_includes() {
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
-  static const ::std::array<::std::string_view, 10> includes = {
-    _fbthrift_schema_547276426adfb34f(),
-    ::apache::thrift::detail::mc::readSchema(::test::fixtures::python_capi::serialized_dep_constants::_fbthrift_schema_b748ca241bc21635),
-    ::apache::thrift::detail::mc::readSchema(::test::fixtures::python_capi::thrift_dep_constants::_fbthrift_schema_9d745e2f9f74ed17),
-    ::apache::thrift::detail::mc::readSchema(::apache::thrift::type::id_constants::_fbthrift_schema_3b24b2b27d3f87af),
-    ::apache::thrift::detail::mc::readSchemaInclude(::apache::thrift::type::schema_constants::_fbthrift_schema_4dfe54ee2dab6f9e_includes, 2),
-    ::apache::thrift::detail::mc::readSchemaInclude(::apache::thrift::type::schema_constants::_fbthrift_schema_4dfe54ee2dab6f9e_includes, 3),
-    ::apache::thrift::detail::mc::readSchema(::apache::thrift::type::schema_constants::_fbthrift_schema_4dfe54ee2dab6f9e),
-    ::apache::thrift::detail::mc::readSchemaInclude(::apache::thrift::type::schema_constants::_fbthrift_schema_4dfe54ee2dab6f9e_includes, 4),
-    ::apache::thrift::detail::mc::readSchemaInclude(::apache::thrift::type::schema_constants::_fbthrift_schema_4dfe54ee2dab6f9e_includes, 5),
-    ::apache::thrift::detail::mc::readSchemaInclude(::apache::thrift::type::schema_constants::_fbthrift_schema_4dfe54ee2dab6f9e_includes, 6),
-  };
-  return ::folly::range(includes);
-#else
   return {};
-#endif
 }
 
 } // namespace module_constants

@@ -774,6 +774,8 @@ class cpp_mstch_program : public mstch_program {
     enum class strong_bool {};
     strong_bool supports = context_.cache().get(*program, [&] {
       bool ret =
+          // If you don't have a schema const you don't need schema includes.
+          ::apache::thrift::compiler::has_schema(sm_, *program_) &&
           // Opting out of schema const should disable all of its failure modes.
           !program->find_structured_annotation_or_null(
               kDisableSchemaConstUri) &&

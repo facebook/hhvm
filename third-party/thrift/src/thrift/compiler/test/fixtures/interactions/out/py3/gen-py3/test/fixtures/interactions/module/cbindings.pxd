@@ -57,3 +57,15 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_typ
         bint operator>=(cCustomException&)
         __field_ref[string] message_ref "message_ref" ()
 
+
+    cdef cppclass cShouldBeBoxed "::cpp2::ShouldBeBoxed":
+        cShouldBeBoxed() except +
+        cShouldBeBoxed(const cShouldBeBoxed&) except +
+        bint operator==(cShouldBeBoxed&)
+        bint operator!=(cShouldBeBoxed&)
+        bint operator<(cShouldBeBoxed&)
+        bint operator>(cShouldBeBoxed&)
+        bint operator<=(cShouldBeBoxed&)
+        bint operator>=(cShouldBeBoxed&)
+        __field_ref[string] sessionId_ref "sessionId_ref" ()
+

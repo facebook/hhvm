@@ -78,3 +78,15 @@ service InteractWithShared {
   performs MyInteraction;
   performs shared.SharedInteraction;
 }
+
+struct ShouldBeBoxed {
+  1: string sessionId;
+}
+
+interaction BoxedInteraction {
+  ShouldBeBoxed getABox();
+}
+
+service BoxService {
+  BoxedInteraction, ShouldBeBoxed getABoxSession(1: ShouldBeBoxed req);
+}

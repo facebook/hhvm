@@ -74,6 +74,7 @@ from test.fixtures.interactions.module.clients_wrapper cimport cPerformClientWra
 from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedAsyncClient, cInteractWithSharedClientWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedClientWrapper_SharedInteractionInteractionWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cInteractWithSharedClientWrapper_MyInteractionInteractionWrapper
+from test.fixtures.interactions.module.clients_wrapper cimport cBoxServiceAsyncClient, cBoxServiceClientWrapper
 
 
 cdef void MyService_foo_callback(
@@ -582,6 +583,32 @@ cdef void InteractWithShared_SharedInteraction_tear_down_callback(
     else:
         try:
             pyfuture.set_result(None)
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void BoxService_getABoxSession_callback(
+    cFollyTry[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(_test_fixtures_interactions_module_types.ShouldBeBoxed._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](cmove(result.value()))))
+        except Exception as ex:
+            pyfuture.set_exception(ex.with_traceback(None))
+
+cdef void BoxService_BoxedInteraction_getABox_callback(
+    cFollyTry[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]&& result,
+    PyObject* userdata
+) noexcept:
+    client, pyfuture, options = <object> userdata  
+    if result.hasException():
+        pyfuture.set_exception(create_py_exception(result.exception(), <__RpcOptions>options))
+    else:
+        try:
+            pyfuture.set_result(_test_fixtures_interactions_module_types.ShouldBeBoxed._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](cmove(result.value()))))
         except Exception as ex:
             pyfuture.set_exception(ex.with_traceback(None))
 
@@ -1481,4 +1508,57 @@ cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+cdef object _BoxService_annotations = _py_types.MappingProxyType({
+})
+
+
+@cython.auto_pickle(False)
+cdef class BoxService(thrift.py3.client.Client):
+    annotations = _BoxService_annotations
+
+    cdef const type_info* _typeid(BoxService self):
+        return &typeid(cBoxServiceAsyncClient)
+
+    cdef bind_client(BoxService self, cRequestChannel_ptr&& channel):
+        self._client = makeClientWrapper[cBoxServiceAsyncClient, cBoxServiceClientWrapper](
+            cmove(channel)
+        )
+
+    @cython.always_allow_keywords(True)
+    def getABoxSession(
+            BoxService self,
+            _test_fixtures_interactions_module_types.ShouldBeBoxed req not None,
+            __RpcOptions rpc_options=None
+    ):
+        if rpc_options is None:
+            rpc_options = <__RpcOptions>__RpcOptions.__new__(__RpcOptions)
+        self._check_connect_future()
+        __loop = asyncio_get_event_loop()
+        __future = __loop.create_future()
+        __userdata = (self, __future, rpc_options)
+        bridgeFutureWith[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](
+            self._executor,
+            down_cast_ptr[cBoxServiceClientWrapper, cClientWrapper](self._client.get()).getABoxSession(rpc_options._cpp_obj, 
+                deref((<_test_fixtures_interactions_module_types.ShouldBeBoxed>req)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE),
+            ),
+            BoxService_getABoxSession_callback,
+            <PyObject *> __userdata
+        )
+        return asyncio_shield(__future)
+
+
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__BoxService(for_clients=True)
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftServiceMetadataResponse response
+        ServiceMetadata[_services_reflection.cBoxServiceSvIf].gen(response)
+        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.BoxService"
 

@@ -16,7 +16,7 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-from .ttypes import UTF8STRINGS, CustomException
+from .ttypes import UTF8STRINGS, CustomException, ShouldBeBoxed
 import test.fixtures.another_interactions.ttypes
 
 from thrift.Thrift import TProcessor

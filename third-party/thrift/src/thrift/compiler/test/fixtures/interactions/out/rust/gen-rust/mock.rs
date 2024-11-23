@@ -464,6 +464,59 @@ where
     }
 }
 
+pub struct BoxService<'mock> {
+    pub getABoxSession: r#impl::box_service::getABoxSession<'mock>,
+    _marker: ::std::marker::PhantomData<&'mock ()>,
+}
+
+impl crate::DynClient for dyn ::::BoxService {
+    type Mock<'mock> = BoxService<'mock>;
+    fn mock<'mock>() -> Self::Mock<'mock> {
+        BoxService {
+            getABoxSession: r#impl::box_service::getABoxSession::unimplemented(),
+            _marker: ::std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'mock> ::::BoxService for BoxService<'mock> {
+
+    fn getABoxSession(
+        &self,
+        _arg_req: &crate::types::ShouldBeBoxed,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>> {
+        unimplemented!("Mocking interactions is not yet implemented");
+    }
+}
+
+impl<'mock, T> ::::BoxServiceExt<T> for BoxService<'mock>
+where
+    T: ::fbthrift::Transport,
+{    fn getABoxSession_with_rpc_opts(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+        _rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>> {
+        <Self as ::::BoxService>::getABoxSession(
+            self,
+            arg_req,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+
+impl<'mock, T> ::fbthrift::help::GetTransport<T> for BoxService<'mock>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        unimplemented!("BoxServiceExt::transport is not implemented for mock client")
+    }
+}
+
 pub mod r#impl {
     pub mod my_service {
 
@@ -930,5 +983,52 @@ pub mod r#impl {
         }
 
 
+    }
+    pub mod box_service {
+
+        pub struct getABoxSession<'mock> {
+            pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
+                dyn ::std::ops::FnMut(crate::types::ShouldBeBoxed) -> ::std::result::Result<
+                    crate::types::ShouldBeBoxed,
+                    ::::errors::box_service::GetABoxSessionError,
+                > + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            >>,
+        }
+
+        #[allow(clippy::redundant_closure)]
+        impl<'mock> getABoxSession<'mock> {
+            pub(crate) fn unimplemented() -> Self {
+                Self {
+                    closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|_: crate::types::ShouldBeBoxed| panic!(
+                        "{}::{} is not mocked",
+                        "BoxService",
+                        "getABoxSession",
+                    ))),
+                }
+            }
+
+            pub fn ret(&self, value: crate::types::ShouldBeBoxed) {
+                self.mock(move |_: crate::types::ShouldBeBoxed| value.clone());
+            }
+
+            pub fn mock(&self, mut mock: impl ::std::ops::FnMut(crate::types::ShouldBeBoxed) -> crate::types::ShouldBeBoxed + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move |req| ::std::result::Result::Ok(mock(req)));
+            }
+
+            pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut(crate::types::ShouldBeBoxed) -> ::std::result::Result<crate::types::ShouldBeBoxed, ::::errors::box_service::GetABoxSessionError> + ::std::marker::Send + ::std::marker::Sync + 'mock) {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move |req| mock(req));
+            }
+
+            pub fn throw<E>(&self, exception: E)
+            where
+                E: ::std::convert::Into<::::errors::box_service::GetABoxSessionError>,
+                E: ::std::clone::Clone + ::std::marker::Send + ::std::marker::Sync + 'mock,
+            {
+                let mut closure = self.closure.lock().unwrap();
+                *closure = ::std::boxed::Box::new(move |_: crate::types::ShouldBeBoxed| ::std::result::Result::Err(exception.clone().into()));
+            }
+        }
     }
 }

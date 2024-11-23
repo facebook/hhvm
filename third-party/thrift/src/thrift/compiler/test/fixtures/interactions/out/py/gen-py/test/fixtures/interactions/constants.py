@@ -19,5 +19,5 @@ if sys.version_info[0] >= 3:
 import test.fixtures.another_interactions.ttypes
 
 
-from .ttypes import UTF8STRINGS, CustomException
+from .ttypes import UTF8STRINGS, CustomException, ShouldBeBoxed
 

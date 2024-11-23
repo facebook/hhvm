@@ -23,6 +23,7 @@ var _ = metadata.GoUnusedProtection__
 // Premade Thrift types
 var (
     premadeThriftType_string *metadata.ThriftType = nil
+    premadeThriftType_module_ShouldBeBoxed *metadata.ThriftType = nil
     premadeThriftType_module_CustomException *metadata.ThriftType = nil
     premadeThriftType_void *metadata.ThriftType = nil
 )
@@ -31,6 +32,10 @@ var (
 var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
     premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
         metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+    )
+    premadeThriftType_module_ShouldBeBoxed = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("module.ShouldBeBoxed"),
     )
     premadeThriftType_module_CustomException = metadata.NewThriftType().SetTStruct(
         metadata.NewThriftStructType().
@@ -56,6 +61,7 @@ var premadeThriftTypesMapOnce = sync.OnceValue(
 
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.ShouldBeBoxed", premadeThriftType_module_ShouldBeBoxed })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.CustomException", premadeThriftType_module_CustomException })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "void", premadeThriftType_void })
 
@@ -73,6 +79,18 @@ var structMetadatasOnce = sync.OnceValue(
         premadeThriftTypesInitOnce()
 
         fbthriftResults := make([]*metadata.ThriftStruct, 0)
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
+    SetName("module.ShouldBeBoxed").
+    SetIsUnion(false).
+    SetFields(
+        []*metadata.ThriftField{
+            metadata.NewThriftField().
+    SetId(1).
+    SetName("sessionId").
+    SetIsOptional(false).
+    SetType(premadeThriftType_string),
+        },
+    ))
         return fbthriftResults
     },
 )
@@ -152,6 +170,12 @@ var serviceMetadatasOnce = sync.OnceValue(
     SetName("do_some_similar_things").
     SetIsOneway(false).
     SetReturnType(shared.GetMetadataThriftType("shared.DoSomethingResult")),
+        },
+    ))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
+    SetName("module.BoxService").
+    SetFunctions(
+        []*metadata.ThriftFunction{
         },
     ))
         return fbthriftResults

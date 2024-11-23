@@ -259,3 +259,16 @@ class InteractWithShared_MyInteraction(thrift.py3.client.Client):
         rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
     ) -> _test_fixtures_interactions_module_types.ClientBufferedStream__bool: ...
 
+
+
+_BoxServiceT = _typing.TypeVar('_BoxServiceT', bound='BoxService')
+
+
+class BoxService(thrift.py3.client.Client):
+
+    async def getABoxSession(
+        self,
+        req: _test_fixtures_interactions_module_types.ShouldBeBoxed,
+        rpc_options: _typing.Optional[thrift.py3.common.RpcOptions]=None
+    ) -> _test_fixtures_interactions_module_types.ShouldBeBoxed: ...
+

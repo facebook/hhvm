@@ -169,6 +169,119 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
         py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.CustomException, self)
 
+@__cython.auto_pickle(False)
+cdef class ShouldBeBoxed(thrift.py3.types.Struct):
+    def __init__(ShouldBeBoxed self, **kwargs):
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]()
+        self._fields_setter = _fbthrift_types_fields.__ShouldBeBoxed_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        super().__init__(**kwargs)
+
+    def __call__(ShouldBeBoxed self, **kwargs):
+        if not kwargs:
+            return self
+        cdef ShouldBeBoxed __fbthrift_inst = ShouldBeBoxed.__new__(ShouldBeBoxed)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__ShouldBeBoxed_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return _fbthrift_IsSet("ShouldBeBoxed", {
+          "sessionId": deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sessionId_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] cpp_obj):
+        __fbthrift_inst = <ShouldBeBoxed>ShouldBeBoxed.__new__(ShouldBeBoxed)
+        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline sessionId_impl(self):
+        return (<bytes>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).sessionId_ref().value()).decode('UTF-8')
+
+    @property
+    def sessionId(self):
+        return self.sessionId_impl()
+
+
+    def __hash__(ShouldBeBoxed self):
+        return super().__hash__()
+
+    def __repr__(ShouldBeBoxed self):
+        return super().__repr__()
+
+    def __str__(ShouldBeBoxed self):
+        return super().__str__()
+
+
+    def __copy__(ShouldBeBoxed self):
+        cdef shared_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] cpp_obj = make_shared[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](
+            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
+        )
+        return ShouldBeBoxed._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](
+            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            (<ShouldBeBoxed>other)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__ShouldBeBoxed()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        _test_fixtures_interactions_module_cbindings.StructMetadata[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.ShouldBeBoxed"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 1
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(ShouldBeBoxed self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(ShouldBeBoxed self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]()
+        with nogil:
+            needed = serializer.cdeserialize[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
+        return needed
+
+
+    def _to_python(self):
+        return thrift.python.converter.to_python_struct(
+            _fbthrift_python_types.ShouldBeBoxed,
+            self,
+        )
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.ShouldBeBoxed, self)
+
 
 
 cdef class ClientBufferedStream__bool(ClientBufferedStream):

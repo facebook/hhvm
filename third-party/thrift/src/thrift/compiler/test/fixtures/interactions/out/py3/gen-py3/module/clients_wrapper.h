@@ -26,6 +26,11 @@
 #else
 #include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/interactions/gen-cpp2/BoxService.h>)
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/BoxService.h>
+#else
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h>
+#endif
 
 #include <folly/futures/Future.h>
 #include <folly/futures/Promise.h>
@@ -209,6 +214,16 @@ class InteractWithSharedClientWrapper : public ::thrift::py3::ClientWrapper {
     };
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createSharedInteraction();
     folly::Future<std::unique_ptr<::thrift::py3::ClientWrapper>> createMyInteraction();
+};
+
+
+class BoxServiceClientWrapper : public ::thrift::py3::ClientWrapper {
+  public:
+    using ::thrift::py3::ClientWrapper::ClientWrapper;
+
+    folly::Future<::cpp2::ShouldBeBoxed> getABoxSession(
+      apache::thrift::RpcOptions& rpcOptions,
+      ::cpp2::ShouldBeBoxed arg_req);
 };
 
 

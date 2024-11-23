@@ -57,3 +57,14 @@ cdef class __CustomException_FieldsSetter(__StructFieldsSetter):
     cdef __CustomException_FieldsSetter _fbthrift_create(_test_fixtures_interactions_module_cbindings.cCustomException* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
 
+
+ctypedef void (*__ShouldBeBoxed_FieldsSetterFunc)(__ShouldBeBoxed_FieldsSetter, object) except *
+
+cdef class __ShouldBeBoxed_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_interactions_module_cbindings.cShouldBeBoxed* _struct_cpp_obj
+    cdef cumap[__cstring_view, __ShouldBeBoxed_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __ShouldBeBoxed_FieldsSetter _fbthrift_create(_test_fixtures_interactions_module_cbindings.cShouldBeBoxed* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+

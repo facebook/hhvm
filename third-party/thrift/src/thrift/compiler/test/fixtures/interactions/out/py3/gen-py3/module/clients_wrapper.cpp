@@ -770,4 +770,28 @@ InteractWithSharedClientWrapper::MyInteractionInteractionWrapper::truthify(
   return std::move(_future).thenValue(CallbackHelper::extractResult);
 }
 
+folly::Future<::cpp2::ShouldBeBoxed>
+BoxServiceClientWrapper::getABoxSession(
+    apache::thrift::RpcOptions& rpcOptions,
+    ::cpp2::ShouldBeBoxed arg_req) {
+  auto* client = static_cast<::cpp2::BoxServiceAsyncClient*>(async_client_.get());
+  using CallbackHelper = apache::thrift::detail::FutureCallbackHelper<::cpp2::ShouldBeBoxed>;
+  folly::Promise<CallbackHelper::PromiseResult> _promise;
+  auto _future = _promise.getFuture();
+  auto callback = std::make_unique<::thrift::py3::FutureCallback<::cpp2::ShouldBeBoxed>>(
+    std::move(_promise), rpcOptions, client->recv_wrapped_getABoxSession, channel_);
+  try {
+    client->getABoxSession(
+      rpcOptions,
+      std::move(callback),
+      arg_req
+    );
+  } catch (...) {
+    return folly::makeFuture<::cpp2::ShouldBeBoxed>(folly::exception_wrapper(
+      std::current_exception()
+    ));
+  }
+  return std::move(_future).thenValue(CallbackHelper::extractResult);
+}
+
 } // namespace cpp2

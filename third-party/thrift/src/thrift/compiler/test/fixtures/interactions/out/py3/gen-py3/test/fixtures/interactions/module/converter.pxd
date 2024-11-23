@@ -13,3 +13,6 @@ cimport test.fixtures.interactions.module.cbindings as _fbthrift_cbindings
 cdef shared_ptr[_fbthrift_cbindings.cCustomException] CustomException_convert_to_cpp(object inst) except*
 cdef object CustomException_from_cpp(const shared_ptr[_fbthrift_cbindings.cCustomException]& c_struct)
 
+cdef shared_ptr[_fbthrift_cbindings.cShouldBeBoxed] ShouldBeBoxed_convert_to_cpp(object inst) except*
+cdef object ShouldBeBoxed_from_cpp(const shared_ptr[_fbthrift_cbindings.cShouldBeBoxed]& c_struct)
+

@@ -10,7 +10,12 @@
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_types.h":
     cdef cppclass cCustomException "::cpp2::CustomException":
         cCustomException()
+    cdef cppclass cShouldBeBoxed "::cpp2::ShouldBeBoxed":
+        cShouldBeBoxed()
 
 cdef cCustomException CustomException_convert_to_cpp(object inst) except*
 cdef object CustomException_from_cpp(const cCustomException& c_struct)
+
+cdef cShouldBeBoxed ShouldBeBoxed_convert_to_cpp(object inst) except*
+cdef object ShouldBeBoxed_from_cpp(const cShouldBeBoxed& c_struct)
 

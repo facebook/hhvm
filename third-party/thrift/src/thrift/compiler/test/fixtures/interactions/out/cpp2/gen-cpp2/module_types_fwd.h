@@ -9,5 +9,6 @@
 // BEGIN forward_declare
 namespace cpp2 {
 class CustomException;
+class ShouldBeBoxed;
 } // namespace cpp2
 // END forward_declare

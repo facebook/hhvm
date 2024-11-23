@@ -629,6 +629,71 @@ pub mod serial_interaction {
 #[allow(ambiguous_glob_reexports)]
 pub use self::serial_interaction::*;
 
+/// Error definitions for `BoxedInteraction`.
+pub mod boxed_interaction {
+
+    pub type GetABoxError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum GetABoxReader {}
+
+    impl ::fbthrift::help::DeserializeExn for GetABoxReader {
+        type Success = crate::types::ShouldBeBoxed;
+        type Error = GetABoxError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Struct, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "GetABoxError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "GetABoxError"),
+                )
+                .into(),
+            )
+        }
+    }
+
+}
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::boxed_interaction::*;
+
 /// Error definitions for `MyService`.
 pub mod my_service {
 
@@ -1304,4 +1369,69 @@ pub mod interact_with_shared {
 #[doc(inline)]
 #[allow(ambiguous_glob_reexports)]
 pub use self::interact_with_shared::*;
+
+/// Error definitions for `BoxService`.
+pub mod box_service {
+
+    pub type GetABoxSessionError = ::fbthrift::NonthrowingFunctionError;
+
+
+    pub(crate) enum GetABoxSessionReader {}
+
+    impl ::fbthrift::help::DeserializeExn for GetABoxSessionReader {
+        type Success = crate::types::ShouldBeBoxed;
+        type Error = GetABoxSessionError;
+
+        fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
+        where
+            P: ::fbthrift::ProtocolReader,
+        {
+            static RETURNS: &[::fbthrift::Field] = &[
+                ::fbthrift::Field::new("Success", ::fbthrift::TType::Struct, 0),
+            ];
+            let _ = p.read_struct_begin(|_| ())?;
+            let mut once = false;
+            let mut alt = ::std::option::Option::None;
+            loop {
+                let (_, fty, fid) = p.read_field_begin(|_| (), RETURNS)?;
+                match ((fty, fid as ::std::primitive::i32), once) {
+                    ((::fbthrift::TType::Stop, _), _) => {
+                        p.read_field_end()?;
+                        break;
+                    }
+                    ((::fbthrift::TType::Struct, 0i32), false) => {
+                        once = true;
+                        alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
+                    }
+                    ((ty, _id), false) => p.skip(ty)?,
+                    ((badty, badid), true) => return ::std::result::Result::Err(::std::convert::From::from(
+                        ::fbthrift::ApplicationException::new(
+                            ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                            format!(
+                                "unwanted extra union {} field ty {:?} id {}",
+                                "GetABoxSessionError",
+                                badty,
+                                badid,
+                            ),
+                        )
+                    )),
+                }
+                p.read_field_end()?;
+            }
+            p.read_struct_end()?;
+            alt.ok_or_else(||
+                ::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::MissingResult,
+                    format!("Empty union {}", "GetABoxSessionError"),
+                )
+                .into(),
+            )
+        }
+    }
+
+}
+
+#[doc(inline)]
+#[allow(ambiguous_glob_reexports)]
+pub use self::box_service::*;
 

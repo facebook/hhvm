@@ -333,4 +333,54 @@ folly::SemiFuture<folly::Unit> InteractWithSharedWrapper::semifuture_onStopReque
   );
   return std::move(future);
 }
+
+
+BoxServiceWrapper::BoxServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
+  {
+    import_test__fixtures__interactions__module__services();
+  }
+
+
+void BoxServiceWrapper::async_tm_getABoxSession(
+  apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>> callback
+    , std::unique_ptr<::cpp2::ShouldBeBoxed> req
+) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback),
+req = std::move(req)    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::cpp2::ShouldBeBoxed>>();
+        call_cy_BoxService_getABoxSession(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(req)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::cpp2::ShouldBeBoxed>>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
+std::shared_ptr<apache::thrift::ServerInterface> BoxServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<BoxServiceWrapper>(if_object, exc);
+}
+folly::SemiFuture<folly::Unit> BoxServiceWrapper::semifuture_onStartServing() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_BoxService_onStartServing(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
+folly::SemiFuture<folly::Unit> BoxServiceWrapper::semifuture_onStopRequested() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_BoxService_onStopRequested(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
 } // namespace cpp2

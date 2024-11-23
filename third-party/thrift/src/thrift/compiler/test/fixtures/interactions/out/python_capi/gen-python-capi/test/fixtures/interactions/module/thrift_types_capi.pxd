@@ -18,3 +18,8 @@ cdef api int can_extract__test__fixtures__interactions__module__CustomException(
 
 cdef api object init__test__fixtures__interactions__module__CustomException(object data)
 
+cdef api int can_extract__test__fixtures__interactions__module__ShouldBeBoxed(object) except -1
+
+
+cdef api object init__test__fixtures__interactions__module__ShouldBeBoxed(object data)
+

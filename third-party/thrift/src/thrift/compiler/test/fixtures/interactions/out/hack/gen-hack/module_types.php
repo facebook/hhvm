@@ -88,3 +88,85 @@ class CustomException extends \TException implements \IThriftSyncStruct, \IThrif
 
 }
 
+/**
+ * Original thrift struct:-
+ * ShouldBeBoxed
+ */
+class ShouldBeBoxed implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'sessionId',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'sessionId' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'sessionId' => ?string,
+  );
+
+  const int STRUCTURAL_ID = 7843423589419529766;
+  /**
+   * Original thrift field:-
+   * 1: string sessionId
+   */
+  public string $sessionId;
+
+  public function __construct(?string $sessionId = null)[] {
+    $this->sessionId = $sessionId ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'sessionId'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'ShouldBeBoxed';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.ShouldBeBoxed",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "sessionId",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

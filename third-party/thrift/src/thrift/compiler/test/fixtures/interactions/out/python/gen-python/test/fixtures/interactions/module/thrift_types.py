@@ -62,6 +62,53 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomException, self)
 
+
+class ShouldBeBoxed(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "sessionId",  # name
+            "sessionId",  # python name (from @python.Name annotation)
+            _fbthrift_python_types.typeinfo_string,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            8, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.ShouldBeBoxed"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_ShouldBeBoxed()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("test.fixtures.interactions.module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.ShouldBeBoxed, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("test.fixtures.interactions.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.ShouldBeBoxed, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.ShouldBeBoxed, self)
+
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.interactions.module.thrift_metadata
 
@@ -73,8 +120,13 @@ def _fbthrift_metadata__exception_CustomException():
     return test.fixtures.interactions.module.thrift_metadata.gen_metadata_exception_CustomException()
 
 
+def _fbthrift_metadata__struct_ShouldBeBoxed():
+    return test.fixtures.interactions.module.thrift_metadata.gen_metadata_struct_ShouldBeBoxed()
+
+
 _fbthrift_all_structs = [
     CustomException,
+    ShouldBeBoxed,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
@@ -785,6 +837,61 @@ class _fbthrift_SharedInteraction_tear_down_result(metaclass=_fbthrift_python_ty
 
 
 
+
+class _fbthrift_BoxService_getABoxSession_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "req",  # name
+            "req",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.StructTypeInfo(ShouldBeBoxed),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            11, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+
+class _fbthrift_BoxService_getABoxSession_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(ShouldBeBoxed),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+
+
+class _fbthrift_BoxedInteraction_getABox_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_BoxedInteraction_getABox_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            "success", # name
+            lambda: _fbthrift_python_types.StructTypeInfo(ShouldBeBoxed),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+        ),
+    )
+
+
+
 _fbthrift_python_types.fill_specs(
     _fbthrift_MyService_foo_args,
     _fbthrift_MyService_foo_result,
@@ -862,4 +969,8 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_SharedInteraction_do_something_result,
     _fbthrift_SharedInteraction_tear_down_args,
     _fbthrift_SharedInteraction_tear_down_result,
+    _fbthrift_BoxService_getABoxSession_args,
+    _fbthrift_BoxService_getABoxSession_result,
+    _fbthrift_BoxedInteraction_getABox_args,
+    _fbthrift_BoxedInteraction_getABox_result,
 )

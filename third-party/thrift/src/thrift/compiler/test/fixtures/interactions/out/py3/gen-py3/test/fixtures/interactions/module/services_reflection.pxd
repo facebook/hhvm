@@ -21,3 +21,7 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_han
 cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cInteractWithSharedSvIf "::cpp2::InteractWithSharedSvIf":
         pass
+
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h" namespace "::cpp2":
+    cdef cppclass cBoxServiceSvIf "::cpp2::BoxServiceSvIf":
+        pass

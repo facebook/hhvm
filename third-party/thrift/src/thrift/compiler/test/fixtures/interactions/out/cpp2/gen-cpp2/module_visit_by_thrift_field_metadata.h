@@ -25,6 +25,19 @@ struct VisitByFieldId<::cpp2::CustomException> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::cpp2::ShouldBeBoxed> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).sessionId_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::ShouldBeBoxed");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

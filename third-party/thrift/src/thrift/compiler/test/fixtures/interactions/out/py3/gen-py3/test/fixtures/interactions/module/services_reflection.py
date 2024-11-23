@@ -213,3 +213,35 @@ def get_reflection__InteractWithShared(for_clients: bool):
         )
     )
     return spec
+
+
+def get_reflection__BoxService(for_clients: bool):
+    spec: __InterfaceSpec = __InterfaceSpec(
+        name="BoxService",
+        methods=None,
+        annotations={
+        },
+    )
+    spec.add_method(
+        __MethodSpec.__new__(
+            __MethodSpec,
+            name="getABoxSession",
+            arguments=(
+                __ArgumentSpec.__new__(
+                    __ArgumentSpec,
+                    name="req",
+                    type=_test_fixtures_interactions_module_types.ShouldBeBoxed,
+                    kind=__NumberType.NOT_A_NUMBER,
+                    annotations={
+                    },
+                ),
+            ),
+            result=_test_fixtures_interactions_module_types.ShouldBeBoxed,
+            result_kind=__NumberType.NOT_A_NUMBER,
+            exceptions=(
+            ),
+            annotations={
+            },
+        )
+    )
+    return spec

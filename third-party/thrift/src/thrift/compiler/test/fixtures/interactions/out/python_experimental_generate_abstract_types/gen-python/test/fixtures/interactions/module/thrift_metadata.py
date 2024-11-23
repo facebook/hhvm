@@ -35,6 +35,30 @@ def _fbthrift_gen_metadata_exception_CustomException(metadata_struct: _fbthrift_
 def gen_metadata_exception_CustomException() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_CustomException(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_ShouldBeBoxed(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.ShouldBeBoxed"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="sessionId", is_optional=False, structured_annotations=[
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+    # sessionId
+    
+    return new_struct
+def gen_metadata_struct_ShouldBeBoxed() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_ShouldBeBoxed(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
 
 def gen_metadata_service_MyService() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_service_MyService(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -781,13 +805,80 @@ def _fbthrift_metadata_service_response_InteractWithShared() -> _fbthrift_metada
     return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
 
 
+def gen_metadata_service_BoxService() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_BoxService(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_BoxService(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.BoxService"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="getABoxSession", return_type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.ShouldBeBoxed")), arguments=[
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.ShouldBeBoxed")), name="req", is_optional=False, structured_annotations=[
+            ]),
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    new_struct = _fbthrift_gen_metadata_struct_ShouldBeBoxed(new_struct) # req
+    
+    
+    new_struct = _fbthrift_gen_metadata_struct_ShouldBeBoxed(new_struct) # return value
+    
+    
+    return new_struct
+def gen_metadata_service_BoxService_BoxedInteraction() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_BoxService_BoxedInteraction(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_BoxService_BoxedInteraction(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.BoxedInteraction"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="getABox", return_type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.ShouldBeBoxed")), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    
+    new_struct = _fbthrift_gen_metadata_struct_ShouldBeBoxed(new_struct) # return value
+    
+    
+    return new_struct
+
+def _fbthrift_metadata_service_response_BoxService() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_BoxService()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["module.BoxService"], module=_fbthrift_metadata.ThriftModuleContext(name="module"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     meta = _fbthrift_gen_metadata_exception_CustomException(meta)
+    meta = _fbthrift_gen_metadata_struct_ShouldBeBoxed(meta)
     meta = _fbthrift_gen_metadata_service_MyService(meta)
     meta = _fbthrift_gen_metadata_service_Factories(meta)
     meta = _fbthrift_gen_metadata_service_Perform(meta)
     meta = _fbthrift_gen_metadata_service_InteractWithShared(meta)
+    meta = _fbthrift_gen_metadata_service_BoxService(meta)
     return meta

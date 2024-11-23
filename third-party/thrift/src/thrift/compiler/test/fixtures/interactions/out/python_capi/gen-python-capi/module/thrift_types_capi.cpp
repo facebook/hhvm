@@ -29,6 +29,9 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__CustomException__tuple_pos[1] = {
     1
   };
+  static constexpr std::int16_t _fbthrift__ShouldBeBoxed__tuple_pos[1] = {
+    1
+  };
 } // namespace
 
 ExtractorResult<::cpp2::CustomException>
@@ -104,6 +107,85 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *fbthrift_data,
           _fbthrift__CustomException__tuple_pos[0],
           *_fbthrift__message) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::cpp2::ShouldBeBoxed>
+Extractor<::cpp2::ShouldBeBoxed>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a ShouldBeBoxed");
+      }
+      return extractorError<::cpp2::ShouldBeBoxed>(
+          "Marshal error: ShouldBeBoxed");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::cpp2::ShouldBeBoxed>>{}(*fbThriftData);
+}
+
+ExtractorResult<::cpp2::ShouldBeBoxed>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::cpp2::ShouldBeBoxed>>::operator()(PyObject* fbThriftData) {
+  ::cpp2::ShouldBeBoxed cpp;
+  std::optional<std::string_view> error;
+  Extractor<Bytes>{}.extractInto(
+      cpp.sessionId_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__ShouldBeBoxed__tuple_pos[0]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::cpp2::ShouldBeBoxed>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module test.fixtures.interactions.module import error");
+  }
+  int result =
+      can_extract__test__fixtures__interactions__module__ShouldBeBoxed(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: ShouldBeBoxed");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::cpp2::ShouldBeBoxed>::operator()(
+    const ::cpp2::ShouldBeBoxed& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::ShouldBeBoxed>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__test__fixtures__interactions__module__ShouldBeBoxed(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::ShouldBeBoxed>>::operator()(
+    [[maybe_unused]] const ::cpp2::ShouldBeBoxed& val) {
+  StrongRef fbthrift_data(createStructTuple(1));
+  StrongRef _fbthrift__sessionId(
+    Constructor<Bytes>{}
+    .constructFrom(val.sessionId_ref()));
+  if (!_fbthrift__sessionId ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__ShouldBeBoxed__tuple_pos[0],
+          *_fbthrift__sessionId) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

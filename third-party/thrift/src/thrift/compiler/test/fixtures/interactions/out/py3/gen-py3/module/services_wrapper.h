@@ -26,6 +26,11 @@
 #else
 #include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h>
 #endif
+#if __has_include(<thrift/compiler/test/fixtures/interactions/gen-cpp2/BoxService.h>)
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/BoxService.h>
+#else
+#include <thrift/compiler/test/fixtures/interactions/gen-cpp2/module_handlers.h>
+#endif
 #include <folly/python/futures.h>
 #include <Python.h>
 
@@ -105,4 +110,20 @@ folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
 };
 
 std::shared_ptr<apache::thrift::ServerInterface> InteractWithSharedInterface(PyObject *if_object, folly::Executor *exc);
+
+
+class BoxServiceWrapper : virtual public BoxServiceSvIf {
+  protected:
+    PyObject *if_object;
+    folly::Executor *executor;
+  public:
+    explicit BoxServiceWrapper(PyObject *if_object, folly::Executor *exc);
+    void async_tm_getABoxSession(apache::thrift::HandlerCallbackPtr<std::unique_ptr<::cpp2::ShouldBeBoxed>> callback
+        , std::unique_ptr<::cpp2::ShouldBeBoxed> req
+    ) override;
+folly::SemiFuture<folly::Unit> semifuture_onStartServing() override;
+folly::SemiFuture<folly::Unit> semifuture_onStopRequested() override;
+};
+
+std::shared_ptr<apache::thrift::ServerInterface> BoxServiceInterface(PyObject *if_object, folly::Executor *exc);
 } // namespace cpp2

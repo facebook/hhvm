@@ -128,3 +128,20 @@ class InteractWithSharedInterface(
     pass
 
 
+_BoxServiceInterfaceT = _typing.TypeVar('_BoxServiceInterfaceT', bound='BoxServiceInterface')
+
+
+class BoxServiceInterface(
+    ServiceInterface,
+    metaclass=ABCMeta,
+):
+
+
+    @abstractmethod
+    async def getABoxSession(
+        self,
+        req: _test_fixtures_interactions_module_types.ShouldBeBoxed
+    ) -> _test_fixtures_interactions_module_types.ShouldBeBoxed: ...
+    pass
+
+

@@ -18,3 +18,9 @@ cdef cCustomException CustomException_convert_to_cpp(object inst) except *:
 cdef object CustomException_from_cpp(const cCustomException& c_struct):
     return cpp_to_python[cCustomException](c_struct)
 
+cdef cShouldBeBoxed ShouldBeBoxed_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cShouldBeBoxed](inst))
+
+cdef object ShouldBeBoxed_from_cpp(const cShouldBeBoxed& c_struct):
+    return cpp_to_python[cShouldBeBoxed](c_struct)
+

@@ -29,8 +29,28 @@ inline void reset_field<::cpp2::CustomException>(
 }
 
 template<>
+inline void reset_field<::cpp2::ShouldBeBoxed>(
+    ::cpp2::ShouldBeBoxed& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.sessionId_ref().copy_from(default_inst<::cpp2::ShouldBeBoxed>().sessionId_ref());
+      return;
+  }
+}
+
+template<>
 inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::CustomException>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+inline const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::cpp2::ShouldBeBoxed>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

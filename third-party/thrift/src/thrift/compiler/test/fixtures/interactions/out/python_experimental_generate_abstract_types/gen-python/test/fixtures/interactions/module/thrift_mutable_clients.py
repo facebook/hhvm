@@ -1643,3 +1643,154 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_InteractWithShared_SharedInteraction()
 
+
+class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.BoxService"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.BoxService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+    
+        async def getABoxSession(
+            self,
+            req: _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _typing.Tuple[BoxService_BoxedInteraction.Async, _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed]:
+            _fbthrift_interaction = self.createBoxedInteraction()
+            _fbthrift_resp = await self._send_request(
+                "BoxService",
+                "getABoxSession",
+                _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_args(
+                    req=req,),
+                _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Factory,
+                interaction_name="BoxedInteraction",
+                created_interaction = _fbthrift_interaction,
+                uri_or_name="BoxService",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_interaction, _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        def createBoxedInteraction(
+            self #BoxService
+        ) -> BoxService_BoxedInteraction.Async:
+            return self._create_interaction("BoxedInteraction", BoxService_BoxedInteraction.Async)
+        async def async_createBoxedInteraction(
+            self #BoxService
+        ) -> BoxService_BoxedInteraction.Async:
+            return self.createBoxedInteraction()
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.BoxService"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+
+class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInteraction.Async", "BoxService_BoxedInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.BoxedInteraction"
+    
+    @staticmethod
+    def __get_thrift_uri__() -> _typing.Optional[str]:
+        return None
+    
+    @staticmethod
+    def __get_thrift_unstructured_annotations_DEPRECATED__() -> _typing.Mapping[str, str]:
+        return {
+        }
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.BoxedInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
+    
+        async def getABox(
+            self,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
+        ) -> _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed:
+            _fbthrift_resp = await self._send_request(
+                "BoxService",
+                "BoxedInteraction.getABox",
+                _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxedInteraction_getABox_args(),
+                _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxedInteraction_getABox_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="BoxedInteraction",
+                uri_or_name="BoxedInteraction",
+                rpc_options=rpc_options,
+                is_mutable_types=True,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.BoxedInteraction"
+    
+        @staticmethod
+        def __get_thrift_uri__() -> _typing.Optional[str]:
+            return None
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService_BoxedInteraction()
+

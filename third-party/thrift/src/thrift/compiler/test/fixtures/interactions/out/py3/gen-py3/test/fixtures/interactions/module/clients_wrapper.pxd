@@ -92,6 +92,13 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_cli
 cdef extern from "<utility>" namespace "std":
   cdef unique_ptr[cInteractWithSharedClientWrapper] move(unique_ptr[cInteractWithSharedClientWrapper])
 
+cdef extern from "thrift/compiler/test/fixtures/interactions/gen-cpp2/module_clients.h" namespace "::cpp2":
+  cdef cppclass cBoxServiceAsyncClient "::cpp2::BoxServiceAsyncClient":
+      pass
+
+cdef extern from "<utility>" namespace "std":
+  cdef unique_ptr[cBoxServiceClientWrapper] move(unique_ptr[cBoxServiceClientWrapper])
+
 cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::thrift":
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
@@ -199,4 +206,12 @@ cdef extern from "thrift/compiler/test/fixtures/interactions/gen-py3/module/clie
     cFollyFuture[cint32_t] frobnicate(cRpcOptions, )
     cFollyFuture[cFollyUnit] ping(cRpcOptions, )
     cFollyFuture[cClientBufferedStream[cbool]] truthify(cRpcOptions, )
+
+
+  cdef cppclass cBoxServiceClientWrapper "::cpp2::BoxServiceClientWrapper":
+    void setPersistentHeader(const string& key, const string& value)
+    void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)
+
+    cFollyFuture[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] getABoxSession(cRpcOptions, 
+      _test_fixtures_interactions_module_cbindings.cShouldBeBoxed arg_req,)
 

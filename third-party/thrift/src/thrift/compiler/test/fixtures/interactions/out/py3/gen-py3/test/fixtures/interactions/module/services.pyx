@@ -77,6 +77,7 @@ from test.fixtures.interactions.module.services_wrapper cimport cMyServiceInterf
 from test.fixtures.interactions.module.services_wrapper cimport cFactoriesInterface
 from test.fixtures.interactions.module.services_wrapper cimport cPerformInterface
 from test.fixtures.interactions.module.services_wrapper cimport cInteractWithSharedInterface
+from test.fixtures.interactions.module.services_wrapper cimport cBoxServiceInterface
 cdef class ServerPublisher_cbool(ServerPublisher):
     cdef unique_ptr[cServerStreamPublisher[cbool]] cPublisher
 
@@ -213,6 +214,22 @@ cdef class Promise_cResponseAndServerStream__cint32_t_cint32_t:
     @staticmethod
     cdef _fbthrift_create(cFollyPromise[cResponseAndServerStream[cint32_t,cint32_t]] cPromise):
         cdef Promise_cResponseAndServerStream__cint32_t_cint32_t inst = Promise_cResponseAndServerStream__cint32_t_cint32_t.__new__(Promise_cResponseAndServerStream__cint32_t_cint32_t)
+        inst.cPromise[0] = cmove(cPromise)
+        return inst
+
+@cython.auto_pickle(False)
+cdef class Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed:
+    cdef cFollyPromise[unique_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]]* cPromise
+
+    def __cinit__(self):
+        self.cPromise = new cFollyPromise[unique_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]](cFollyPromise[unique_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]].makeEmpty())
+
+    def __dealloc__(self):
+        del self.cPromise
+
+    @staticmethod
+    cdef _fbthrift_create(cFollyPromise[unique_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]] cPromise):
+        cdef Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed inst = Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed.__new__(Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed)
         inst.cPromise[0] = cmove(cPromise)
         return inst
 
@@ -473,6 +490,41 @@ cdef class InteractWithSharedInterface(
     @staticmethod
     def __get_thrift_name__():
         return "module.InteractWithShared"
+
+cdef object _BoxService_annotations = _py_types.MappingProxyType({
+})
+
+
+@cython.auto_pickle(False)
+cdef class BoxServiceInterface(
+    ServiceInterface
+):
+    annotations = _BoxService_annotations
+
+    def __cinit__(self):
+        self._cpp_obj = cBoxServiceInterface(
+            <PyObject *> self,
+            get_executor()
+        )
+
+    async def getABoxSession(
+            self,
+            req):
+        raise NotImplementedError("async def getABoxSession is not implemented")
+
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__BoxService(for_clients=False)
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftServiceMetadataResponse response
+        ServiceMetadata[_services_reflection.cBoxServiceSvIf].gen(response)
+        return __MetadataBox.box(cmove(deref(response.metadata_ref())))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.BoxService"
 
 
 
@@ -1233,6 +1285,132 @@ async def InteractWithShared_onStopRequested_coro(
         ))
     except asyncio.CancelledError as ex:
         print("Coroutine was cancelled in service handler InteractWithShared.onStopRequested:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
+
+cdef api void call_cy_BoxService_getABoxSession(
+    object self,
+    Cpp2RequestContext* ctx,
+    cFollyPromise[unique_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed]] cPromise,
+    unique_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] req
+) noexcept:
+    cdef Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed __promise = Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed._fbthrift_create(cmove(cPromise))
+    arg_req = _test_fixtures_interactions_module_types.ShouldBeBoxed._create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](req.release()))
+    __context = RequestContext._fbthrift_create(ctx)
+    __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
+    asyncio.get_event_loop().create_task(
+        BoxService_getABoxSession_coro(
+            self,
+            __promise,
+            arg_req
+        )
+    )
+    __THRIFT_REQUEST_CONTEXT.reset(__context_token)
+cdef api void call_cy_BoxService_onStartServing(
+    object self,
+    cFollyPromise[cFollyUnit] cPromise
+) noexcept:
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    asyncio.get_event_loop().create_task(
+        BoxService_onStartServing_coro(
+            self,
+            __promise
+        )
+    )
+cdef api void call_cy_BoxService_onStopRequested(
+    object self,
+    cFollyPromise[cFollyUnit] cPromise
+) noexcept:
+    cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
+    asyncio.get_event_loop().create_task(
+        BoxService_onStopRequested_coro(
+            self,
+            __promise
+        )
+    )
+async def BoxService_getABoxSession_coro(
+    object self,
+    Promise__test_fixtures_interactions_module_cbindings_cShouldBeBoxed promise,
+    req
+):
+    try:
+        result = await self.getABoxSession(
+                    req)
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler BoxService.getABoxSession:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler BoxService.getABoxSession:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(make_unique[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](deref((<_test_fixtures_interactions_module_types.ShouldBeBoxed?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+
+async def BoxService_onStartServing_coro(
+    object self,
+    Promise_cFollyUnit promise
+):
+    try:
+        result = await self.onStartServing()
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler BoxService.onStartServing:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler BoxService.onStartServing:", file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
+        ))
+    else:
+        promise.cPromise.setValue(c_unit)
+
+async def BoxService_onStopRequested_coro(
+    object self,
+    Promise_cFollyUnit promise
+):
+    try:
+        result = await self.onStopRequested()
+    except __ApplicationError as ex:
+        # If the handler raised an ApplicationError convert it to a C++ one
+        promise.cPromise.setException(cTApplicationException(
+            ex.type.value, ex.message.encode('UTF-8')
+        ))
+    except Exception as ex:
+        print(
+            "Unexpected error in service handler BoxService.onStopRequested:",
+            file=sys.stderr)
+        traceback.print_exc()
+        promise.cPromise.setException(cTApplicationException(
+            cTApplicationExceptionType__UNKNOWN, repr(ex).encode('UTF-8')
+        ))
+    except asyncio.CancelledError as ex:
+        print("Coroutine was cancelled in service handler BoxService.onStopRequested:", file=sys.stderr)
         traceback.print_exc()
         promise.cPromise.setException(cTApplicationException(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')

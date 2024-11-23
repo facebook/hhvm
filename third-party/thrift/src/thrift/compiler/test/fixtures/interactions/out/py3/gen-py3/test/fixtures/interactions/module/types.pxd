@@ -70,6 +70,16 @@ cdef class CustomException(thrift.py3.exceptions.GeneratedError):
 
 
 
+cdef class ShouldBeBoxed(thrift.py3.types.Struct):
+    cdef shared_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
+    cdef _fbthrift_types_fields.__ShouldBeBoxed_FieldsSetter _fields_setter
+    cdef inline object sessionId_impl(self)
+
+    @staticmethod
+    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed])
+
+
+
 
 cdef class ClientBufferedStream__bool(ClientBufferedStream):
     cdef unique_ptr[cClientBufferedStreamWrapper[cbool]] _gen

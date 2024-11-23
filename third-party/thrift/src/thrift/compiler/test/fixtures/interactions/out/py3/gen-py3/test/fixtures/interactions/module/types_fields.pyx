@@ -56,3 +56,30 @@ cdef class __CustomException_FieldsSetter(__StructFieldsSetter):
             raise TypeError(f'message is not a { str !r}.')
         deref(self._struct_cpp_obj).message_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
 
+
+@__cython.auto_pickle(False)
+cdef class __ShouldBeBoxed_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __ShouldBeBoxed_FieldsSetter _fbthrift_create(_test_fixtures_interactions_module_cbindings.cShouldBeBoxed* struct_cpp_obj):
+        cdef __ShouldBeBoxed_FieldsSetter __fbthrift_inst = __ShouldBeBoxed_FieldsSetter.__new__(__ShouldBeBoxed_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"sessionId")] = __ShouldBeBoxed_FieldsSetter._set_field_0
+        return __fbthrift_inst
+
+    cdef void set_field(__ShouldBeBoxed_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __ShouldBeBoxed_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field sessionId
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_interactions_module_cbindings.cShouldBeBoxed](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, str):
+            raise TypeError(f'sessionId is not a { str !r}.')
+        deref(self._struct_cpp_obj).sessionId_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
+

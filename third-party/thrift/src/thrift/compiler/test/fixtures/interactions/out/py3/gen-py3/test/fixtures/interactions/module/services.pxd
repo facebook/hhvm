@@ -35,3 +35,8 @@ cdef class InteractWithSharedInterface(ServiceInterface):
     cdef bint _for_cython_do_some_similar_things
     pass
 
+cdef class BoxServiceInterface(ServiceInterface):
+    # these are to avoid weird Cython multiple inheritance issue
+    cdef bint _for_cython_getABoxSession
+    pass
+

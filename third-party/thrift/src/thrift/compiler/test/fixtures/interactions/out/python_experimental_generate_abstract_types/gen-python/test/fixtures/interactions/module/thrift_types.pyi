@@ -35,6 +35,28 @@ class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.CustomException": ...  # type: ignore
 
 
+class _fbthrift_compatible_with_ShouldBeBoxed:
+    pass
+
+
+class ShouldBeBoxed(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ShouldBeBoxed, _fbthrift_python_abstract_types.ShouldBeBoxed):
+    sessionId: _typing.Final[str] = ...
+    def __init__(
+        self, *,
+        sessionId: _typing.Optional[str]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        sessionId: _typing.Optional[str]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
+    def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "test.fixtures.interactions.module.thrift_mutable_types.ShouldBeBoxed": ...  # type: ignore
+    def _to_py3(self) -> "test.fixtures.interactions.module.types.ShouldBeBoxed": ...  # type: ignore
+    def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.ShouldBeBoxed": ...  # type: ignore
+
+
 class _fbthrift_MyService_foo_args(_fbthrift_python_types.Struct):
 
     def __init__(
@@ -988,4 +1010,56 @@ class _fbthrift_SharedInteraction_tear_down_result(_fbthrift_python_types.Struct
         str,
         _typing.Union[
             None,
+        ]]]: ...
+
+
+class _fbthrift_BoxService_getABoxSession_args(_fbthrift_python_types.Struct):
+    req: _typing.Final[ShouldBeBoxed] = ...
+
+    def __init__(
+        self, *,
+        req: _typing.Optional[ShouldBeBoxed]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None, ShouldBeBoxed]]]: ...
+
+
+class _fbthrift_BoxService_getABoxSession_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[ShouldBeBoxed]
+
+    def __init__(
+        self, *, success: _typing.Optional[ShouldBeBoxed] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            ShouldBeBoxed,
+        ]]]: ...
+
+
+class _fbthrift_BoxedInteraction_getABox_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_BoxedInteraction_getABox_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[ShouldBeBoxed]
+
+    def __init__(
+        self, *, success: _typing.Optional[ShouldBeBoxed] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            ShouldBeBoxed,
         ]]]: ...

@@ -22,6 +22,7 @@ var _ = reflect.Ptr
 // Premade codec specs
 var (
     premadeCodecTypeSpec_string *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_module_ShouldBeBoxed *thrift.TypeSpec = nil
     premadeCodecTypeSpec_module_CustomException *thrift.TypeSpec = nil
     premadeCodecTypeSpec_void *thrift.TypeSpec = nil
 )
@@ -32,6 +33,15 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
         FullName: "string",
         CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
+},
+
+    }
+    premadeCodecTypeSpec_module_ShouldBeBoxed = &thrift.TypeSpec{
+        FullName: "module.ShouldBeBoxed",
+        CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "module.ShouldBeBoxed",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewShouldBeBoxed() },
 },
 
     }
@@ -56,6 +66,7 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 // Premade struct specs
 var (
     premadeStructSpec_CustomException *thrift.StructSpec = nil
+    premadeStructSpec_ShouldBeBoxed *thrift.StructSpec = nil
     premadeStructSpec_reqMyServiceFoo *thrift.StructSpec = nil
     premadeStructSpec_respMyServiceFoo *thrift.StructSpec = nil
     premadeStructSpec_reqFactoriesFoo *thrift.StructSpec = nil
@@ -88,6 +99,28 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     },
     FieldSpecNameToIndex: map[string]int{
         "message": 0,
+    },
+}
+    premadeStructSpec_ShouldBeBoxed = &thrift.StructSpec{
+    Name:                 "ShouldBeBoxed",
+    ScopedName:           "module.ShouldBeBoxed",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+        {
+            ID:                   1,
+            WireType:             thrift.STRING,
+            Name:                 "sessionId",
+            ReflectIndex:         0,
+            IsOptional:           false,
+            ValueTypeSpec:        premadeCodecTypeSpec_string,
+            MustBeSetToSerialize: false,
+        },    },
+    FieldSpecIDToIndex:   map[int16]int{
+        1: 0,
+    },
+    FieldSpecNameToIndex: map[string]int{
+        "sessionId": 0,
     },
 }
     premadeStructSpec_reqMyServiceFoo = &thrift.StructSpec{
@@ -205,6 +238,7 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
 
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ShouldBeBoxed.FullName] = premadeCodecTypeSpec_module_ShouldBeBoxed
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CustomException.FullName] = premadeCodecTypeSpec_module_CustomException
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
         return fbthriftTypeSpecsMap

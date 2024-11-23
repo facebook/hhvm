@@ -49,6 +49,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
   PyObject* operator()(const ::cpp2::CustomException& val);
 };
 
+template <>
+struct Extractor<::cpp2::ShouldBeBoxed>
+    : public BaseExtractor<::cpp2::ShouldBeBoxed> {
+  static const bool kUsingMarshal = true;
+  ExtractorResult<::cpp2::ShouldBeBoxed> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::ShouldBeBoxed>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::ShouldBeBoxed>> {
+  ExtractorResult<::cpp2::ShouldBeBoxed> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::cpp2::ShouldBeBoxed>
+    : public BaseConstructor<::cpp2::ShouldBeBoxed> {
+  static const bool kUsingMarshal = true;
+  PyObject* operator()(const ::cpp2::ShouldBeBoxed& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::ShouldBeBoxed>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::ShouldBeBoxed>> {
+  PyObject* operator()(const ::cpp2::ShouldBeBoxed& val);
+};
+
 } // namespace capi
 } // namespace python
 } // namespace thrift

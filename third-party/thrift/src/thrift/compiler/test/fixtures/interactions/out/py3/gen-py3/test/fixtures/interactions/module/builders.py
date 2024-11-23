@@ -24,3 +24,13 @@ class CustomException_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         yield "message", self.message
 
+_fbthrift_struct_type__ShouldBeBoxed = _test_fixtures_interactions_module_types.ShouldBeBoxed
+class ShouldBeBoxed_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _fbthrift_struct_type__ShouldBeBoxed
+
+    def __init__(self):
+        self.sessionId: _typing.Optional[str] = None
+
+    def __iter__(self):
+        yield "sessionId", self.sessionId
+

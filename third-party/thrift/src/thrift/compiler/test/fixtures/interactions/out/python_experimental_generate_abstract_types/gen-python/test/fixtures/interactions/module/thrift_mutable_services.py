@@ -277,3 +277,44 @@ class InteractWithSharedInterface(
         return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_InteractWithShared_do_some_similar_things_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 
+class BoxServiceInterface(
+    ServiceInterface,
+    metaclass=ABCMeta
+):
+
+    @staticmethod
+    def service_name() -> bytes:
+        return b"BoxService"
+
+    def getFunctionTable(self) -> _typing.Mapping[bytes, _typing.Callable[..., object]]:
+        functionTable = {
+            b"getABoxSession": (RpcKind.SINGLE_REQUEST_SINGLE_RESPONSE, self._fbthrift__handler_getABoxSession),
+        }
+        return {**super().getFunctionTable(), **functionTable}
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.BoxService"
+
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_BoxService()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return test.fixtures.interactions.module.thrift_metadata._fbthrift_metadata_service_response_BoxService()
+
+
+
+    async def getABoxSession(
+            self,
+            req: _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed
+        ) -> _fbthrift__test__fixtures__interactions__module__thrift_mutable_types.ShouldBeBoxed:
+        raise NotImplementedError("async def getABoxSession is not implemented")
+
+    async def _fbthrift__handler_getABoxSession(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
+        args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_args, args, protocol)
+        value = await self.getABoxSession(args_struct.req,)
+        return_struct = _fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_BoxService_getABoxSession_result(success=value)
+        return serialize_iobuf(return_struct, protocol)
+

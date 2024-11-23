@@ -1070,6 +1070,213 @@ pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Sen
 pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
 
 
+pub trait BoxedInteraction: ::std::marker::Send {
+    fn getABox(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ShouldBeBoxed, crate::errors::boxed_interaction::GetABoxError>>;
+}
+
+pub trait BoxedInteractionExt<T>: BoxedInteraction
+where
+    T: ::fbthrift::Transport,
+{
+    fn getABox_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ShouldBeBoxed, crate::errors::boxed_interaction::GetABoxError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> BoxedInteraction for S
+where
+    S: ::std::convert::AsRef<dyn BoxedInteraction + 'a>,
+    S: ::std::marker::Send,
+{
+    fn getABox(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ShouldBeBoxed, crate::errors::boxed_interaction::GetABoxError>> {
+        self.as_ref().getABox(
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> BoxedInteractionExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn BoxedInteraction + 'a> + ::std::convert::AsRef<dyn BoxedInteractionExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn getABox_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ShouldBeBoxed, crate::errors::boxed_interaction::GetABoxError>> {
+        <Self as ::std::convert::AsRef<dyn BoxedInteractionExt<T>>>::as_ref(self).getABox_with_rpc_opts(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+/// Client definitions for `BoxedInteraction`.
+pub struct BoxedInteractionImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    #[allow(dead_code)]
+    names: &'static BoxedInteractionNames,
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+pub struct BoxedInteractionNames {
+    pub service: &'static ::std::ffi::CStr,
+    pub method_getABox: &'static ::std::ffi::CStr,
+}
+
+impl<P, T, S> BoxedInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+        names: &'static BoxedInteractionNames,
+    ) -> Self {
+        Self {
+            names,
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+
+
+    fn _getABox_impl(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ShouldBeBoxed, crate::errors::boxed_interaction::GetABoxError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        let service_name = self.names.service;
+        let service_method_name = self.names.method_getABox;
+
+        let args = self::Args_BoxedInteraction_getABox {
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let transport = self.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("BoxedInteraction.getABox", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "BoxedInteraction.getABox"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::boxed_interaction::GetABoxReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::boxed_interaction::GetABoxError::ApplicationException(aexn))
+                }
+            };
+            res
+        }
+        .instrument(::tracing::info_span!("stream", method = "BoxedInteraction.getABox"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for BoxedInteractionImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+
+
+struct Args_BoxedInteraction_getABox<'a> {
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_BoxedInteraction_getABox<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "BoxedInteraction.getABox"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> BoxedInteraction for BoxedInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn getABox(
+        &self,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ShouldBeBoxed, crate::errors::boxed_interaction::GetABoxError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._getABox_impl(
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> BoxedInteractionExt<T> for BoxedInteractionImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn getABox_with_rpc_opts(
+        &self,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<crate::types::ShouldBeBoxed, crate::errors::boxed_interaction::GetABoxError>> {
+        self._getABox_impl(
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+pub type BoxedInteractionDynClient = dyn BoxedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
+pub type BoxedInteractionClient = ::std::sync::Arc<BoxedInteractionDynClient>;
+
+
 
 pub trait MyService: ::std::marker::Send {
     fn createMyInteraction(
@@ -3172,6 +3379,326 @@ impl ::fbthrift::ClientFactory for make_InteractWithShared {
         S: ::fbthrift::help::Spawner,
     {
         <dyn InteractWithShared>::with_spawner(protocol, transport, spawner)
+    }
+}
+
+pub trait BoxService: ::std::marker::Send {
+    fn getABoxSession(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>>;
+}
+
+pub trait BoxServiceExt<T>: BoxService
+where
+    T: ::fbthrift::Transport,
+{
+    fn getABoxSession_with_rpc_opts(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>>;
+
+    fn transport(&self) -> &T;
+}
+
+#[allow(deprecated)]
+impl<'a, S> BoxService for S
+where
+    S: ::std::convert::AsRef<dyn BoxService + 'a>,
+    S: ::std::marker::Send,
+{
+    fn getABoxSession(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>> {
+        self.as_ref().getABoxSession(
+            arg_req,
+        )
+    }
+}
+
+#[allow(deprecated)]
+impl<'a, S, T> BoxServiceExt<T> for S
+where
+    S: ::std::convert::AsRef<dyn BoxService + 'a> + ::std::convert::AsRef<dyn BoxServiceExt<T> + 'a>,
+    S: ::std::marker::Send + ::fbthrift::help::GetTransport<T>,
+    T: ::fbthrift::Transport,
+{
+    fn getABoxSession_with_rpc_opts(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>> {
+        <Self as ::std::convert::AsRef<dyn BoxServiceExt<T>>>::as_ref(self).getABoxSession_with_rpc_opts(
+            arg_req,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+}
+/// Client definitions for `BoxService`.
+pub struct BoxServiceImpl<P, T, S = ::fbthrift::NoopSpawner> {
+    transport: T,
+    _phantom: ::std::marker::PhantomData<fn() -> (P, S)>,
+}
+
+
+impl<P, T, S> BoxServiceImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    pub fn new(
+        transport: T,
+    ) -> Self {
+        Self {
+            transport,
+            _phantom: ::std::marker::PhantomData,
+        }
+    }
+
+    pub fn transport(&self) -> &T {
+        ::fbthrift::help::GetTransport::transport(self)
+    }
+
+    const NAMES_BoxedInteraction: crate::client::BoxedInteractionNames = crate::client::BoxedInteractionNames {
+        service: c"BoxService",
+        method_getABox: c"BoxService.BoxedInteraction.getABox",
+    };
+
+
+    fn _getABoxSession_impl(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>> {
+        use ::tracing::Instrument as _;
+        use ::futures::FutureExt as _;
+
+        let service_name = c"BoxService";
+        let service_method_name = c"BoxService.getABoxSession";
+
+        const INTERACTION_NAME: &::std::ffi::CStr = c"BoxedInteraction";
+        let args = self::Args_BoxService_getABoxSession {
+            req: arg_req,
+            _phantom: ::std::marker::PhantomData,
+        };
+
+        let interaction_transport = match self.transport().create_interaction(INTERACTION_NAME) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+        let interaction_impl = crate::BoxedInteractionImpl::<P, T, S>::new(interaction_transport, &Self::NAMES_BoxedInteraction);
+        let transport = interaction_impl.transport();
+
+        // need to do call setup outside of async block because T: Transport isn't Send
+        let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("getABoxSession", &args) {
+            ::std::result::Result::Ok(res) => res,
+            ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
+        };
+
+        let call = transport
+            .call(service_name, service_method_name, request_env, rpc_options)
+            .instrument(::tracing::trace_span!("call", method = "BoxService.getABoxSession"));
+
+        async move {
+            let reply_env = call.await?;
+
+            let de = P::deserializer(reply_env);
+            let res = ::fbthrift::help::async_deserialize_response_envelope::<P, crate::errors::box_service::GetABoxSessionReader, S>(de).await?;
+
+            let res = match res {
+                ::std::result::Result::Ok(res) => res,
+                ::std::result::Result::Err(aexn) => {
+                    ::std::result::Result::Err(crate::errors::box_service::GetABoxSessionError::ApplicationException(aexn))
+                }
+            };
+            let interaction_client: crate::client::BoxedInteractionClient = ::std::sync::Arc::new(interaction_impl);
+            ::std::result::Result::Ok((interaction_client, res?))
+        }
+        .instrument(::tracing::info_span!("stream", method = "BoxService.getABoxSession"))
+        .boxed()
+    }
+}
+
+impl<P, T, S> ::fbthrift::help::GetTransport<T> for BoxServiceImpl<P, T, S>
+where
+    T: ::fbthrift::Transport,
+{
+    fn transport(&self) -> &T {
+        &self.transport
+    }
+}
+
+
+
+struct Args_BoxService_getABoxSession<'a> {
+    req: &'a crate::types::ShouldBeBoxed,
+    _phantom: ::std::marker::PhantomData<&'a ()>,
+}
+
+impl<'a, P: ::fbthrift::ProtocolWriter> ::fbthrift::Serialize<P> for self::Args_BoxService_getABoxSession<'a> {
+    #[inline]
+    #[::tracing::instrument(skip_all, level = "trace", name = "serialize_args", fields(method = "BoxService.getABoxSession"))]
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("args");
+        p.write_field_begin("req", ::fbthrift::TType::Struct, 1i16);
+        ::fbthrift::Serialize::write(&self.req, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P, T, S> BoxService for BoxServiceImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn getABoxSession(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>> {
+        let rpc_options = T::RpcOptions::default();
+        self._getABoxSession_impl(
+            arg_req,
+            rpc_options,
+        )
+    }
+}
+
+impl<P, T, S> BoxServiceExt<T> for BoxServiceImpl<P, T, S>
+where
+    P: ::fbthrift::Protocol,
+    T: ::fbthrift::Transport,
+    P::Frame: ::fbthrift::Framing<DecBuf = ::fbthrift::FramingDecoded<T>>,
+    ::fbthrift::ProtocolEncoded<P>: ::fbthrift::BufMutExt<Final = ::fbthrift::FramingEncodedFinal<T>>,
+    P::Deserializer: ::std::marker::Send,
+    S: ::fbthrift::help::Spawner,
+{
+    fn getABoxSession_with_rpc_opts(
+        &self,
+        arg_req: &crate::types::ShouldBeBoxed,
+        rpc_options: T::RpcOptions,
+    ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(crate::client::BoxedInteractionClient, crate::types::ShouldBeBoxed), crate::errors::box_service::GetABoxSessionError>> {
+        self._getABoxSession_impl(
+            arg_req,
+            rpc_options,
+        )
+    }
+
+    fn transport(&self) -> &T {
+        self.transport()
+    }
+}
+
+#[derive(Clone)]
+pub struct make_BoxService;
+
+/// To be called by user directly setting up a client. Avoids
+/// needing ClientFactory trait in scope, avoids unidiomatic
+/// make_Trait name.
+///
+/// ```
+/// # const _: &str = stringify! {
+/// use bgs::client::BuckGraphService;
+///
+/// let protocol = BinaryProtocol::new();
+/// let transport = HttpClient::new();
+/// let client = <dyn BuckGraphService>::new(protocol, transport);
+/// # };
+/// ```
+impl dyn BoxService {
+    pub fn new<P, T>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl BoxService + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, T, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl BoxService + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(BoxServiceImpl::<P, T, S>::new(transport))
+    }
+}
+
+impl<T> dyn BoxServiceExt<T>
+where
+    T: ::fbthrift::Transport,
+{
+    pub fn new<P>(
+        protocol: P,
+        transport: T,
+    ) -> ::std::sync::Arc<impl BoxServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+    {
+        let spawner = ::fbthrift::help::NoopSpawner;
+        Self::with_spawner(protocol, transport, spawner)
+    }
+
+    pub fn with_spawner<P, S>(
+        protocol: P,
+        transport: T,
+        spawner: S,
+    ) -> ::std::sync::Arc<impl BoxServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        let _ = protocol;
+        let _ = spawner;
+        ::std::sync::Arc::new(BoxServiceImpl::<P, T, S>::new(transport))
+    }
+}
+
+pub type BoxServiceDynClient = <make_BoxService as ::fbthrift::ClientFactory>::Api;
+pub type BoxServiceClient = ::std::sync::Arc<BoxServiceDynClient>;
+
+/// The same thing, but to be called from generic contexts where we are
+/// working with a type parameter `C: ClientFactory` to produce clients.
+impl ::fbthrift::ClientFactory for make_BoxService {
+    type Api = dyn BoxService + ::std::marker::Send + ::std::marker::Sync + 'static;
+
+    fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
+    where
+        P: ::fbthrift::Protocol<Frame = T>,
+        T: ::fbthrift::Transport,
+        P::Deserializer: ::std::marker::Send,
+        S: ::fbthrift::help::Spawner,
+    {
+        <dyn BoxService>::with_spawner(protocol, transport, spawner)
     }
 }
 

@@ -141,6 +141,125 @@ func (x *CustomException) setDefaults() *CustomException {
 func (x *CustomException) Error() string {
     return x.String()
 }
+type ShouldBeBoxed struct {
+    SessionId string `thrift:"sessionId,1" json:"sessionId" db:"sessionId"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*ShouldBeBoxed)(nil)
+
+func NewShouldBeBoxed() *ShouldBeBoxed {
+    return (&ShouldBeBoxed{}).setDefaults()
+}
+
+func (x *ShouldBeBoxed) GetSessionId() string {
+    return x.SessionId
+}
+
+func (x *ShouldBeBoxed) SetSessionIdNonCompat(value string) *ShouldBeBoxed {
+    x.SessionId = value
+    return x
+}
+
+func (x *ShouldBeBoxed) SetSessionId(value string) *ShouldBeBoxed {
+    x.SessionId = value
+    return x
+}
+
+func (x *ShouldBeBoxed) writeField1(p thrift.Encoder) error {  // SessionId
+    if err := p.WriteFieldBegin("sessionId", thrift.STRING, 1); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field begin error: ", x), err)
+    }
+
+    item := x.SessionId
+    if err := p.WriteString(item); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *ShouldBeBoxed) readField1(p thrift.Decoder) error {  // SessionId
+    result, err := p.ReadString()
+    if err != nil {
+        return err
+    }
+
+    x.SessionId = result
+    return nil
+}
+
+
+
+func (x *ShouldBeBoxed) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("ShouldBeBoxed"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+    if err := x.writeField1(p); err != nil {
+        return err
+    }
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *ShouldBeBoxed) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        case ((id == 1 && wireType == thrift.STRING) || (id == thrift.NO_FIELD_ID && fieldName == "sessionId")):  // sessionId
+            fieldReadErr = x.readField1(p)
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *ShouldBeBoxed) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *ShouldBeBoxed) setDefaults() *ShouldBeBoxed {
+    return x.
+        SetSessionIdNonCompat("")
+}
+
 
 // Service req/resp structs (below)
 type reqMyServiceFoo struct {

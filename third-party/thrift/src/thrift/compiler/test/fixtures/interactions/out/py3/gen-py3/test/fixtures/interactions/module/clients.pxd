@@ -44,3 +44,6 @@ cdef class InteractWithShared_SharedInteraction(thrift.py3.client.Client):
 cdef class InteractWithShared_MyInteraction(thrift.py3.client.Client):
     pass
 
+cdef class BoxService(thrift.py3.client.Client):
+    pass
+

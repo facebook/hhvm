@@ -24,6 +24,9 @@ class Perform;
 namespace cpp2 {
 class InteractWithShared;
 } // namespace cpp2
+namespace cpp2 {
+class BoxService;
+} // namespace cpp2
 
 namespace apache {
 namespace thrift {
@@ -32,6 +35,11 @@ namespace md {
 
 template <>
 class StructMetadata<::cpp2::CustomException> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::cpp2::ShouldBeBoxed> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -93,6 +101,18 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::InteractWithShare
   friend class ServiceMetadata;
 
   static void gen_do_some_similar_things(ThriftMetadata& metadata, ThriftService& context);
+};
+template <>
+class ServiceMetadata<::apache::thrift::ServiceHandler<::cpp2::BoxService>> {
+ public:
+  static void gen(ThriftServiceMetadataResponse& response);
+ private:
+  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
+
+  template <typename T>
+  friend class ServiceMetadata;
+
+  static void gen_getABoxSession(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

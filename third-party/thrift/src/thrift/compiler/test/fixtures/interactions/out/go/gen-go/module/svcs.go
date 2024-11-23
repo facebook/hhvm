@@ -709,3 +709,100 @@ func (p *procFuncInteractWithSharedDoSomeSimilarThings) RunContext(ctx context.C
 }
 
 
+type BoxService interface {
+}
+
+type BoxServiceChannelClientInterface interface {
+    thrift.ClientInterface
+    BoxService
+}
+
+type BoxServiceClientInterface interface {
+    thrift.ClientInterface
+}
+
+type BoxServiceContextClientInterface interface {
+    BoxServiceClientInterface
+}
+
+type BoxServiceChannelClient struct {
+    ch thrift.RequestChannel
+}
+// Compile time interface enforcer
+var _ BoxServiceChannelClientInterface = (*BoxServiceChannelClient)(nil)
+
+func NewBoxServiceChannelClient(channel thrift.RequestChannel) *BoxServiceChannelClient {
+    return &BoxServiceChannelClient{
+        ch: channel,
+    }
+}
+
+func (c *BoxServiceChannelClient) Close() error {
+    return c.ch.Close()
+}
+
+type BoxServiceClient struct {
+    chClient *BoxServiceChannelClient
+}
+// Compile time interface enforcer
+var _ BoxServiceClientInterface = (*BoxServiceClient)(nil)
+var _ BoxServiceContextClientInterface = (*BoxServiceClient)(nil)
+
+func NewBoxServiceClient(prot thrift.Protocol) *BoxServiceClient {
+    return &BoxServiceClient{
+        chClient: NewBoxServiceChannelClient(
+            thrift.NewSerialChannel(prot),
+        ),
+    }
+}
+
+func (c *BoxServiceClient) Close() error {
+    return c.chClient.Close()
+}
+
+
+type BoxServiceProcessor struct {
+    processorFunctionMap map[string]thrift.ProcessorFunction
+    functionServiceMap   map[string]string
+    handler            BoxService
+}
+
+func NewBoxServiceProcessor(handler BoxService) *BoxServiceProcessor {
+    p := &BoxServiceProcessor{
+        handler:              handler,
+        processorFunctionMap: make(map[string]thrift.ProcessorFunction),
+        functionServiceMap:   make(map[string]string),
+    }
+
+    return p
+}
+
+func (p *BoxServiceProcessor) AddToProcessorFunctionMap(key string, processorFunction thrift.ProcessorFunction) {
+    p.processorFunctionMap[key] = processorFunction
+}
+
+func (p *BoxServiceProcessor) AddToFunctionServiceMap(key, service string) {
+    p.functionServiceMap[key] = service
+}
+
+func (p *BoxServiceProcessor) GetProcessorFunction(key string) (processor thrift.ProcessorFunction) {
+    return p.processorFunctionMap[key]
+}
+
+func (p *BoxServiceProcessor) ProcessorFunctionMap() map[string]thrift.ProcessorFunction {
+    return p.processorFunctionMap
+}
+
+func (p *BoxServiceProcessor) FunctionServiceMap() map[string]string {
+    return p.functionServiceMap
+}
+
+func (p *BoxServiceProcessor) PackageName() string {
+    return "module"
+}
+
+func (p *BoxServiceProcessor) GetThriftMetadata() *metadata.ThriftMetadata {
+    return GetThriftMetadataForService("module.BoxService")
+}
+
+

@@ -46,3 +46,24 @@ def get_reflection__CustomException() -> __StructSpec:
         ),
     )
     return spec
+def get_reflection__ShouldBeBoxed() -> __StructSpec:
+    spec: __StructSpec = __StructSpec._fbthrift_create(
+        name="ShouldBeBoxed",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="sessionId",
+            py_name="sessionId",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec

@@ -72,7 +72,6 @@ class TestMcpiper(McrouterTestCase):
             self.assertTrue(mcpiper.contains("get key_hit"))
 
     def do_set_test(self, mcrouter, raw, special_symbol):
-
         mcpiper = self.get_mcpiper(mcrouter, raw)
 
         self.assertTrue(mcrouter.set("key", "value2"))

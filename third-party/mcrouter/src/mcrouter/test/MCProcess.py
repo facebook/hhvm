@@ -686,7 +686,6 @@ def parse_parts(s, pattern):
 
 
 def sub_port(s, substitute_ports, port_map):
-
     parts = parse_parts(s, IPV6_SERVER_PAT) or parse_parts(s, SERVER_PAT)
     if parts:
         try:

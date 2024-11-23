@@ -850,7 +850,6 @@ class TestMcrouterBasicL1L2(McrouterTestCase):
 
 
 class TestMcrouterBasicL1MultipleL2SizeSplit(McrouterTestCase):
-
     config_multil2 = "./mcrouter/test/test_basic_l1_multiple_l2_sizesplit.json"
     extra_args = []
     MC_MSG_FLAG_SIZE_SPLIT = 0x20

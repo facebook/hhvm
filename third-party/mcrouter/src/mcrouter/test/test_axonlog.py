@@ -17,7 +17,6 @@ class TestAxonLogBase(McrouterTestCase):
 
 
 class TestAxonProxyFailedDelete(TestAxonLogBase):
-
     def setUp(self):
         self.mc1 = self.add_server(DeadServer(5000))
         self.mr = self.add_mcrouter(self.config, extra_args=self.extra_args)

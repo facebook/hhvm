@@ -571,7 +571,7 @@ class python_capi_mstch_struct : public mstch_struct {
 
   mstch::node marshal_capi() {
     const auto marshal_override =
-        struct_->find_structured_annotation_or_null(kUseCAPIUri);
+        struct_->find_structured_annotation_or_null(kPythonUseCAPIUri);
     auto force_serialize = [marshal_override]() {
       const auto serialize_field = marshal_override
           ? marshal_override->get_value_from_structured_annotation_or_null(

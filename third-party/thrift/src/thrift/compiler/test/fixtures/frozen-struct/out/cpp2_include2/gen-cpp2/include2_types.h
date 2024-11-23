@@ -231,6 +231,7 @@ class IncludedB final  {
   }
 
   /** Glean { "field": "i32Field" } */
+  [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
   ::std::int32_t get_i32Field() const {
     return __fbthrift_field_i32Field;
   }
@@ -243,11 +244,13 @@ class IncludedB final  {
   }
 
   /** Glean { "field": "strField" } */
+  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
   const ::std::string& get_strField() const& {
     return __fbthrift_field_strField;
   }
 
   /** Glean { "field": "strField" } */
+  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
   ::std::string get_strField() && {
     return std::move(__fbthrift_field_strField);
   }

@@ -1628,11 +1628,13 @@ class Val final  {
   }
 
   /** Glean { "field": "strVal" } */
+  [[deprecated("Use `FOO.strVal().value();` instead of `FOO.get_strVal();`")]]
   const ::std::string& get_strVal() const& {
     return __fbthrift_field_strVal;
   }
 
   /** Glean { "field": "strVal" } */
+  [[deprecated("Use `FOO.strVal().value();` instead of `FOO.get_strVal();`")]]
   ::std::string get_strVal() && {
     return std::move(__fbthrift_field_strVal);
   }
@@ -1646,6 +1648,7 @@ class Val final  {
   }
 
   /** Glean { "field": "intVal" } */
+  [[deprecated("Use `FOO.intVal().value();` instead of `FOO.get_intVal();`")]]
   ::std::int32_t get_intVal() const {
     return __fbthrift_field_intVal;
   }
@@ -1657,8 +1660,10 @@ class Val final  {
     return __fbthrift_field_intVal;
   }
   /** Glean { "field": "typedefValue" } */
+  [[deprecated("Use `FOO.typedefValue().value();` instead of `FOO.get_typedefValue();`")]]
   const ::cpp2::containerTypedef& get_typedefValue() const&;
   /** Glean { "field": "typedefValue" } */
+  [[deprecated("Use `FOO.typedefValue().value();` instead of `FOO.get_typedefValue();`")]]
   ::cpp2::containerTypedef get_typedefValue() &&;
 
   /** Glean { "field": "typedefValue" } */
@@ -2430,6 +2435,7 @@ class NonCopyableStruct final  {
   }
 
   /** Glean { "field": "num" } */
+  [[deprecated("Use `FOO.num().value();` instead of `FOO.get_num();`")]]
   ::std::int64_t get_num() const {
     return __fbthrift_field_num;
   }

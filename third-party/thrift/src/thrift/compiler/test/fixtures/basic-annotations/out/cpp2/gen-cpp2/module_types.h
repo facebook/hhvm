@@ -846,6 +846,7 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "majorVer" } */
+  [[deprecated("Use `FOO.majorVer().value();` instead of `FOO.get_majorVer();`")]]
   ::std::int64_t get_majorVer() const {
     return __fbthrift_field_majorVer;
   }
@@ -858,11 +859,13 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "abstract" } */
+  [[deprecated("Use `FOO.abstract().value();` instead of `FOO.get_abstract();`")]]
   const ::std::string& get_abstract() const& {
     return __fbthrift_field_abstract;
   }
 
   /** Glean { "field": "abstract" } */
+  [[deprecated("Use `FOO.abstract().value();` instead of `FOO.get_abstract();`")]]
   ::std::string get_abstract() && {
     return std::move(__fbthrift_field_abstract);
   }
@@ -876,11 +879,13 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "annotation_with_quote" } */
+  [[deprecated("Use `FOO.annotation_with_quote().value();` instead of `FOO.get_annotation_with_quote();`")]]
   const ::std::string& get_annotation_with_quote() const& {
     return __fbthrift_field_annotation_with_quote;
   }
 
   /** Glean { "field": "annotation_with_quote" } */
+  [[deprecated("Use `FOO.annotation_with_quote().value();` instead of `FOO.get_annotation_with_quote();`")]]
   ::std::string get_annotation_with_quote() && {
     return std::move(__fbthrift_field_annotation_with_quote);
   }
@@ -894,11 +899,13 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "class_" } */
+  [[deprecated("Use `FOO.class_().value();` instead of `FOO.get_class_();`")]]
   const ::std::string& get_class_() const& {
     return __fbthrift_field_class_;
   }
 
   /** Glean { "field": "class_" } */
+  [[deprecated("Use `FOO.class_().value();` instead of `FOO.get_class_();`")]]
   ::std::string get_class_() && {
     return std::move(__fbthrift_field_class_);
   }
@@ -912,11 +919,13 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "annotation_with_trailing_comma" } */
+  [[deprecated("Use `FOO.annotation_with_trailing_comma().value();` instead of `FOO.get_annotation_with_trailing_comma();`")]]
   const ::std::string& get_annotation_with_trailing_comma() const& {
     return __fbthrift_field_annotation_with_trailing_comma;
   }
 
   /** Glean { "field": "annotation_with_trailing_comma" } */
+  [[deprecated("Use `FOO.annotation_with_trailing_comma().value();` instead of `FOO.get_annotation_with_trailing_comma();`")]]
   ::std::string get_annotation_with_trailing_comma() && {
     return std::move(__fbthrift_field_annotation_with_trailing_comma);
   }
@@ -930,11 +939,13 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "empty_annotations" } */
+  [[deprecated("Use `FOO.empty_annotations().value();` instead of `FOO.get_empty_annotations();`")]]
   const ::std::string& get_empty_annotations() const& {
     return __fbthrift_field_empty_annotations;
   }
 
   /** Glean { "field": "empty_annotations" } */
+  [[deprecated("Use `FOO.empty_annotations().value();` instead of `FOO.get_empty_annotations();`")]]
   ::std::string get_empty_annotations() && {
     return std::move(__fbthrift_field_empty_annotations);
   }
@@ -948,6 +959,7 @@ class YourStruct final  {
   }
 
   /** Glean { "field": "my_enum" } */
+  [[deprecated("Use `FOO.my_enum().value();` instead of `FOO.get_my_enum();`")]]
   ::cpp2::YourEnum get_my_enum() const {
     return __fbthrift_field_my_enum;
   }
@@ -959,8 +971,10 @@ class YourStruct final  {
     return __fbthrift_field_my_enum;
   }
   /** Glean { "field": "cpp_type_annotation" } */
+  [[deprecated("Use `FOO.cpp_type_annotation().value();` instead of `FOO.get_cpp_type_annotation();`")]]
   const ::cpp2::list_string_6884& get_cpp_type_annotation() const&;
   /** Glean { "field": "cpp_type_annotation" } */
+  [[deprecated("Use `FOO.cpp_type_annotation().value();` instead of `FOO.get_cpp_type_annotation();`")]]
   ::cpp2::list_string_6884 get_cpp_type_annotation() &&;
 
   /** Glean { "field": "cpp_type_annotation" } */
@@ -1130,11 +1144,13 @@ class MyStructNestedAnnotation final  {
   }
 
   /** Glean { "field": "name" } */
+  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
+  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   ::std::string get_name() && {
     return std::move(__fbthrift_field_name);
   }
@@ -1462,6 +1478,7 @@ class SecretStruct final  {
   }
 
   /** Glean { "field": "id" } */
+  [[deprecated("Use `FOO.id().value();` instead of `FOO.get_id();`")]]
   ::std::int64_t get_id() const {
     return __fbthrift_field_id;
   }
@@ -1474,11 +1491,13 @@ class SecretStruct final  {
   }
 
   /** Glean { "field": "password" } */
+  [[deprecated("Use `FOO.password().value();` instead of `FOO.get_password();`")]]
   const ::std::string& get_password() const& {
     return __fbthrift_field_password;
   }
 
   /** Glean { "field": "password" } */
+  [[deprecated("Use `FOO.password().value();` instead of `FOO.get_password();`")]]
   ::std::string get_password() && {
     return std::move(__fbthrift_field_password);
   }

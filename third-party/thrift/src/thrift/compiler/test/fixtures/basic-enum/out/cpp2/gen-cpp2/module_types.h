@@ -410,6 +410,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myEnum" } */
+  [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
   ::test::fixtures::enumstrict::MyEnum get_myEnum() const {
     return __fbthrift_field_myEnum;
   }
@@ -422,6 +423,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myBigEnum" } */
+  [[deprecated("Use `FOO.myBigEnum().value();` instead of `FOO.get_myBigEnum();`")]]
   ::test::fixtures::enumstrict::MyBigEnum get_myBigEnum() const {
     return __fbthrift_field_myBigEnum;
   }

@@ -240,8 +240,10 @@ class Struct final  {
     return {static_cast<T&&>(this->__fbthrift_field_second), __isset.at(1), __isset.bit(1)};
   }
   /** Glean { "field": "first" } */
+  [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
   const ::module0::Struct& get_first() const&;
   /** Glean { "field": "first" } */
+  [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
   ::module0::Struct get_first() &&;
 
   /** Glean { "field": "first" } */
@@ -252,8 +254,10 @@ class Struct final  {
     return __fbthrift_field_first;
   }
   /** Glean { "field": "second" } */
+  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   const ::module1::Struct& get_second() const&;
   /** Glean { "field": "second" } */
+  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   ::module1::Struct get_second() &&;
 
   /** Glean { "field": "second" } */
@@ -465,8 +469,10 @@ class BigStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_id), __isset.at(1), __isset.bit(1)};
   }
   /** Glean { "field": "s" } */
+  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
   const ::module2::Struct& get_s() const&;
   /** Glean { "field": "s" } */
+  [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
   ::module2::Struct get_s() &&;
 
   /** Glean { "field": "s" } */
@@ -478,6 +484,7 @@ class BigStruct final  {
   }
 
   /** Glean { "field": "id" } */
+  [[deprecated("Use `FOO.id().value();` instead of `FOO.get_id();`")]]
   ::std::int32_t get_id() const {
     return __fbthrift_field_id;
   }

@@ -147,6 +147,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field" } */
+  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::int32_t get_field() const {
     return field;
   }

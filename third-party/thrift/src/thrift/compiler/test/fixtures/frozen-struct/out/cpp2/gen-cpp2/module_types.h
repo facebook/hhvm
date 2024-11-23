@@ -561,6 +561,7 @@ class ModuleA final  {
   }
 
   /** Glean { "field": "i32Field" } */
+  [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
   ::std::int32_t get_i32Field() const {
     return __fbthrift_field_i32Field;
   }
@@ -573,11 +574,13 @@ class ModuleA final  {
   }
 
   /** Glean { "field": "strField" } */
+  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
   const ::std::string& get_strField() const& {
     return __fbthrift_field_strField;
   }
 
   /** Glean { "field": "strField" } */
+  [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
   ::std::string get_strField() && {
     return std::move(__fbthrift_field_strField);
   }
@@ -590,8 +593,10 @@ class ModuleA final  {
     return __fbthrift_field_strField;
   }
   /** Glean { "field": "listField" } */
+  [[deprecated("Use `FOO.listField().value();` instead of `FOO.get_listField();`")]]
   const ::std::vector<::std::int16_t>& get_listField() const&;
   /** Glean { "field": "listField" } */
+  [[deprecated("Use `FOO.listField().value();` instead of `FOO.get_listField();`")]]
   ::std::vector<::std::int16_t> get_listField() &&;
 
   /** Glean { "field": "listField" } */
@@ -602,8 +607,10 @@ class ModuleA final  {
     return __fbthrift_field_listField;
   }
   /** Glean { "field": "mapField" } */
+  [[deprecated("Use `FOO.mapField().value();` instead of `FOO.get_mapField();`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_mapField() const&;
   /** Glean { "field": "mapField" } */
+  [[deprecated("Use `FOO.mapField().value();` instead of `FOO.get_mapField();`")]]
   ::std::map<::std::string, ::std::int32_t> get_mapField() &&;
 
   /** Glean { "field": "mapField" } */
@@ -614,8 +621,10 @@ class ModuleA final  {
     return __fbthrift_field_mapField;
   }
   /** Glean { "field": "inclAField" } */
+  [[deprecated("Use `FOO.inclAField().value();` instead of `FOO.get_inclAField();`")]]
   const ::some::ns::IncludedA& get_inclAField() const&;
   /** Glean { "field": "inclAField" } */
+  [[deprecated("Use `FOO.inclAField().value();` instead of `FOO.get_inclAField();`")]]
   ::some::ns::IncludedA get_inclAField() &&;
 
   /** Glean { "field": "inclAField" } */
@@ -626,8 +635,10 @@ class ModuleA final  {
     return __fbthrift_field_inclAField;
   }
   /** Glean { "field": "inclBField" } */
+  [[deprecated("Use `FOO.inclBField().value();` instead of `FOO.get_inclBField();`")]]
   const ::some::ns::IncludedB& get_inclBField() const&;
   /** Glean { "field": "inclBField" } */
+  [[deprecated("Use `FOO.inclBField().value();` instead of `FOO.get_inclBField();`")]]
   ::some::ns::IncludedB get_inclBField() &&;
 
   /** Glean { "field": "inclBField" } */
@@ -842,6 +853,7 @@ class ModuleB final  {
   }
 
   /** Glean { "field": "i32Field" } */
+  [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
   ::std::int32_t get_i32Field() const {
     return __fbthrift_field_i32Field;
   }
@@ -854,6 +866,7 @@ class ModuleB final  {
   }
 
   /** Glean { "field": "inclEnumB" } */
+  [[deprecated("Use `FOO.inclEnumB().value();` instead of `FOO.get_inclEnumB();`")]]
   ::some::ns::EnumB get_inclEnumB() const {
     return __fbthrift_field_inclEnumB;
   }
@@ -1017,6 +1030,7 @@ class DirectlyAdapted final  {
   }
 
   /** Glean { "field": "field" } */
+  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::int32_t get_field() const {
     return __fbthrift_field_field;
   }

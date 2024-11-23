@@ -305,6 +305,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t get_field1() const {
     return __fbthrift_field_field1;
   }
@@ -317,6 +318,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field2" } */
+  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t get_field2() const {
     return __fbthrift_field_field2;
   }
@@ -329,6 +331,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "field3" } */
+  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::int32_t get_field3() const {
     return __fbthrift_field_field3;
   }
@@ -597,6 +600,7 @@ class Foo2 final  {
   }
 
   /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t get_field1() const {
     return __fbthrift_field_field1;
   }
@@ -609,6 +613,7 @@ class Foo2 final  {
   }
 
   /** Glean { "field": "field2" } */
+  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t get_field2() const {
     return __fbthrift_field_field2;
   }
@@ -621,6 +626,7 @@ class Foo2 final  {
   }
 
   /** Glean { "field": "field3" } */
+  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::int32_t get_field3() const {
     return __fbthrift_field_field3;
   }

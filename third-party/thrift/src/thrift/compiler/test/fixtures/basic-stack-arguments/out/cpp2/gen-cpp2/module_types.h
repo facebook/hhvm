@@ -281,6 +281,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIntField" } */
+  [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
   ::std::int64_t get_MyIntField() const {
     return __fbthrift_field_MyIntField;
   }
@@ -293,11 +294,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   const ::std::string& get_MyStringField() const& {
     return __fbthrift_field_MyStringField;
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   ::std::string get_MyStringField() && {
     return std::move(__fbthrift_field_MyStringField);
   }

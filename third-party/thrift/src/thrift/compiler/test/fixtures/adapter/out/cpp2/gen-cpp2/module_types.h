@@ -1542,8 +1542,10 @@ class Foo final  {
     return {static_cast<T&&>(this->__fbthrift_field_adapted_list_nested), __isset.at(14), __isset.bit(14)};
   }
   /** Glean { "field": "adapted_list" } */
+  [[deprecated("Use `FOO.adapted_list().value();` instead of `FOO.get_adapted_list();`")]]
   const ::std::vector<::std::int32_t>& get_adapted_list() const&;
   /** Glean { "field": "adapted_list" } */
+  [[deprecated("Use `FOO.adapted_list().value();` instead of `FOO.get_adapted_list();`")]]
   ::std::vector<::std::int32_t> get_adapted_list() &&;
 
   /** Glean { "field": "adapted_list" } */
@@ -1554,8 +1556,10 @@ class Foo final  {
     return __fbthrift_field_adapted_list;
   }
   /** Glean { "field": "adapted_set" } */
+  [[deprecated("Use `FOO.adapted_set().value();` instead of `FOO.get_adapted_set();`")]]
   const ::std::set<::std::int32_t>& get_adapted_set() const&;
   /** Glean { "field": "adapted_set" } */
+  [[deprecated("Use `FOO.adapted_set().value();` instead of `FOO.get_adapted_set();`")]]
   ::std::set<::std::int32_t> get_adapted_set() &&;
 
   /** Glean { "field": "adapted_set" } */
@@ -1566,8 +1570,10 @@ class Foo final  {
     return __fbthrift_field_adapted_set;
   }
   /** Glean { "field": "adapted_map" } */
+  [[deprecated("Use `FOO.adapted_map().value();` instead of `FOO.get_adapted_map();`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_adapted_map() const&;
   /** Glean { "field": "adapted_map" } */
+  [[deprecated("Use `FOO.adapted_map().value();` instead of `FOO.get_adapted_map();`")]]
   ::std::map<::std::string, ::std::int32_t> get_adapted_map() &&;
 
   /** Glean { "field": "adapted_map" } */
@@ -1578,8 +1584,10 @@ class Foo final  {
     return __fbthrift_field_adapted_map;
   }
   /** Glean { "field": "adapted_list_nested" } */
+  [[deprecated("Use `FOO.adapted_list_nested().value();` instead of `FOO.get_adapted_list_nested();`")]]
   const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& get_adapted_list_nested() const&;
   /** Glean { "field": "adapted_list_nested" } */
+  [[deprecated("Use `FOO.adapted_list_nested().value();` instead of `FOO.get_adapted_list_nested();`")]]
   ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> get_adapted_list_nested() &&;
 
   /** Glean { "field": "adapted_list_nested" } */
@@ -2272,6 +2280,7 @@ class DirectlyAdapted final  {
   }
 
   /** Glean { "field": "field" } */
+  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::int32_t get_field() const {
     return __fbthrift_field_field;
   }
@@ -2757,8 +2766,10 @@ class Bar final  {
     return {static_cast<T&&>(this->__fbthrift_field_adaptedStructField), __isset.at(6), __isset.bit(6)};
   }
   /** Glean { "field": "structListField" } */
+  [[deprecated("Use `FOO.structListField().value();` instead of `FOO.get_structListField();`")]]
   const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>& get_structListField() const&;
   /** Glean { "field": "structListField" } */
+  [[deprecated("Use `FOO.structListField().value();` instead of `FOO.get_structListField();`")]]
   ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> get_structListField() &&;
 
   /** Glean { "field": "structListField" } */
@@ -2769,10 +2780,13 @@ class Bar final  {
     return __fbthrift_field_structListField;
   }
   /** Glean { "field": "optionalStructListField" } */
+  [[deprecated("Use `FOO.optionalStructListField().value();` instead of `FOO.get_optionalStructListField();`")]]
   const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* get_optionalStructListField() const&;
   /** Glean { "field": "optionalStructListField" } */
+  [[deprecated("Use `FOO.optionalStructListField().value();` instead of `FOO.get_optionalStructListField();`")]]
   ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* get_optionalStructListField() &;
   /** Glean { "field": "optionalStructListField" } */
+  [[deprecated("Use `FOO.optionalStructListField().value();` instead of `FOO.get_optionalStructListField();`")]]
   ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* get_optionalStructListField() && = delete;
 
   /** Glean { "field": "optionalStructListField" } */
@@ -3063,6 +3077,7 @@ class ThriftAdaptedStruct final  {
   }
 
   /** Glean { "field": "data" } */
+  [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
   ::std::int64_t get_data() const {
     return __fbthrift_field_data;
   }
@@ -3229,6 +3244,7 @@ class DirectlyAdaptedStruct final  {
   }
 
   /** Glean { "field": "data" } */
+  [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
   ::std::int64_t get_data() const {
     return __fbthrift_field_data;
   }
@@ -3458,11 +3474,13 @@ class MyAnnotation final  {
   }
 
   /** Glean { "field": "signature" } */
+  [[deprecated("Use `FOO.signature().value();` instead of `FOO.get_signature();`")]]
   const ::std::string& get_signature() const& {
     return __fbthrift_field_signature;
   }
 
   /** Glean { "field": "signature" } */
+  [[deprecated("Use `FOO.signature().value();` instead of `FOO.get_signature();`")]]
   ::std::string get_signature() && {
     return std::move(__fbthrift_field_signature);
   }
@@ -3476,6 +3494,7 @@ class MyAnnotation final  {
   }
 
   /** Glean { "field": "color" } */
+  [[deprecated("Use `FOO.color().value();` instead of `FOO.get_color();`")]]
   ::facebook::thrift::test::Color get_color() const {
     return __fbthrift_field_color;
   }
@@ -3640,6 +3659,7 @@ class IndependentDirectlyAdapted final  {
   }
 
   /** Glean { "field": "field" } */
+  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::int32_t get_field() const {
     return __fbthrift_field_field;
   }
@@ -4512,11 +4532,13 @@ class Config final  {
   }
 
   /** Glean { "field": "path" } */
+  [[deprecated("Use `FOO.path().value();` instead of `FOO.get_path();`")]]
   const ::std::string& get_path() const& {
     return __fbthrift_field_path;
   }
 
   /** Glean { "field": "path" } */
+  [[deprecated("Use `FOO.path().value();` instead of `FOO.get_path();`")]]
   ::std::string get_path() && {
     return std::move(__fbthrift_field_path);
   }
@@ -4733,6 +4755,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "field" } */
+  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::int32_t get_field() const {
     return __fbthrift_field_field;
   }
@@ -5364,11 +5387,13 @@ class AdaptTestStruct final  {
   }
 
   /** Glean { "field": "meta" } */
+  [[deprecated("Use `FOO.meta().value();` instead of `FOO.get_meta();`")]]
   const ::std::string& get_meta() const& {
     return __fbthrift_field_meta;
   }
 
   /** Glean { "field": "meta" } */
+  [[deprecated("Use `FOO.meta().value();` instead of `FOO.get_meta();`")]]
   ::std::string get_meta() && {
     return std::move(__fbthrift_field_meta);
   }
@@ -6773,8 +6798,10 @@ class AdaptTemplatedNestedTestStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_adaptedStruct), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "adaptedStruct" } */
+  [[deprecated("Use `FOO.adaptedStruct().value();` instead of `FOO.get_adaptedStruct();`")]]
   const ::facebook::thrift::test::AdaptTemplatedTestStruct& get_adaptedStruct() const&;
   /** Glean { "field": "adaptedStruct" } */
+  [[deprecated("Use `FOO.adaptedStruct().value();` instead of `FOO.get_adaptedStruct();`")]]
   ::facebook::thrift::test::AdaptTemplatedTestStruct get_adaptedStruct() &&;
 
   /** Glean { "field": "adaptedStruct" } */
@@ -7680,8 +7707,10 @@ class CircularAdaptee final  {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "field" } */
+  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   const ::facebook::thrift::test::CircularStruct& get_field() const&;
   /** Glean { "field": "field" } */
+  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::facebook::thrift::test::CircularStruct get_field() &&;
 
   /** Glean { "field": "field" } */
@@ -8092,6 +8121,7 @@ class UnderlyingRenamedStruct final  {
   }
 
   /** Glean { "field": "data" } */
+  [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
   ::std::int64_t get_data() const {
     return __fbthrift_field_data;
   }
@@ -8257,6 +8287,7 @@ class UnderlyingSameNamespaceStruct final  {
   }
 
   /** Glean { "field": "data" } */
+  [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
   ::std::int64_t get_data() const {
     return __fbthrift_field_data;
   }
@@ -9273,11 +9304,13 @@ class Person final  {
   }
 
   /** Glean { "field": "name" } */
+  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
+  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   ::std::string get_name() && {
     return std::move(__fbthrift_field_name);
   }
@@ -9443,11 +9476,13 @@ class Person2 final  {
   }
 
   /** Glean { "field": "name" } */
+  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   const ::std::string& get_name() const& {
     return __fbthrift_field_name;
   }
 
   /** Glean { "field": "name" } */
+  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   ::std::string get_name() && {
     return std::move(__fbthrift_field_name);
   }

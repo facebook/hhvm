@@ -174,6 +174,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "MyInt" } */
+  [[deprecated("Use `FOO.MyInt().value();` instead of `FOO.get_MyInt();`")]]
   ::std::int64_t get_MyInt() const {
     return __fbthrift_field_MyInt;
   }

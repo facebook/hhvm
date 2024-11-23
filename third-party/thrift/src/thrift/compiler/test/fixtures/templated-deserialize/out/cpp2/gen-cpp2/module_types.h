@@ -399,6 +399,7 @@ class SmallStruct final  {
   }
 
   /** Glean { "field": "small_A" } */
+  [[deprecated("Use `FOO.small_A().value();` instead of `FOO.get_small_A();`")]]
   bool get_small_A() const {
     return __fbthrift_field_small_A;
   }
@@ -411,6 +412,7 @@ class SmallStruct final  {
   }
 
   /** Glean { "field": "small_B" } */
+  [[deprecated("Use `FOO.small_B().value();` instead of `FOO.get_small_B();`")]]
   ::std::int32_t get_small_B() const {
     return __fbthrift_field_small_B;
   }
@@ -1660,6 +1662,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   bool get_fieldA() const {
     return __fbthrift_field_fieldA;
   }
@@ -1671,8 +1674,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldA;
   }
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const ::std::map<::std::string, bool>& get_fieldB() const&;
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::map<::std::string, bool> get_fieldB() &&;
 
   /** Glean { "field": "fieldB" } */
@@ -1683,8 +1688,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldB;
   }
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   const ::std::set<::std::int32_t>& get_fieldC() const&;
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   ::std::set<::std::int32_t> get_fieldC() &&;
 
   /** Glean { "field": "fieldC" } */
@@ -1696,11 +1703,13 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   const ::std::string& get_fieldD() const& {
     return __fbthrift_field_fieldD;
   }
 
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   ::std::string get_fieldD() && {
     return std::move(__fbthrift_field_fieldD);
   }
@@ -1714,11 +1723,13 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldE" } */
+  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   const ::std::string& get_fieldE() const& {
     return __fbthrift_field_fieldE;
   }
 
   /** Glean { "field": "fieldE" } */
+  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   ::std::string get_fieldE() && {
     return std::move(__fbthrift_field_fieldE);
   }
@@ -1731,8 +1742,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldE;
   }
   /** Glean { "field": "fieldF" } */
+  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   const ::std::vector<::std::vector<::std::vector<::std::int32_t>>>& get_fieldF() const&;
   /** Glean { "field": "fieldF" } */
+  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   ::std::vector<::std::vector<::std::vector<::std::int32_t>>> get_fieldF() &&;
 
   /** Glean { "field": "fieldF" } */
@@ -1743,8 +1756,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldF;
   }
   /** Glean { "field": "fieldG" } */
+  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& get_fieldG() const&;
   /** Glean { "field": "fieldG" } */
+  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> get_fieldG() &&;
 
   /** Glean { "field": "fieldG" } */
@@ -1755,8 +1770,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldG;
   }
   /** Glean { "field": "fieldH" } */
+  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   const ::std::vector<::std::set<::std::int32_t>>& get_fieldH() const&;
   /** Glean { "field": "fieldH" } */
+  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   ::std::vector<::std::set<::std::int32_t>> get_fieldH() &&;
 
   /** Glean { "field": "fieldH" } */
@@ -1768,6 +1785,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldI" } */
+  [[deprecated("Use `FOO.fieldI().value();` instead of `FOO.get_fieldI();`")]]
   bool get_fieldI() const {
     return __fbthrift_field_fieldI;
   }
@@ -1779,8 +1797,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldI;
   }
   /** Glean { "field": "fieldJ" } */
+  [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
   const ::std::map<::std::string, ::std::vector<::std::int32_t>>& get_fieldJ() const&;
   /** Glean { "field": "fieldJ" } */
+  [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
   ::std::map<::std::string, ::std::vector<::std::int32_t>> get_fieldJ() &&;
 
   /** Glean { "field": "fieldJ" } */
@@ -1791,8 +1811,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldJ;
   }
   /** Glean { "field": "fieldK" } */
+  [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
   const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& get_fieldK() const&;
   /** Glean { "field": "fieldK" } */
+  [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
   ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> get_fieldK() &&;
 
   /** Glean { "field": "fieldK" } */
@@ -1803,8 +1825,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldK;
   }
   /** Glean { "field": "fieldL" } */
+  [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
   const ::std::set<::std::set<::std::set<bool>>>& get_fieldL() const&;
   /** Glean { "field": "fieldL" } */
+  [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
   ::std::set<::std::set<::std::set<bool>>> get_fieldL() &&;
 
   /** Glean { "field": "fieldL" } */
@@ -1815,8 +1839,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldL;
   }
   /** Glean { "field": "fieldM" } */
+  [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
   const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_fieldM() const&;
   /** Glean { "field": "fieldM" } */
+  [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
   ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> get_fieldM() &&;
 
   /** Glean { "field": "fieldM" } */
@@ -1827,8 +1853,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldM;
   }
   /** Glean { "field": "fieldN" } */
+  [[deprecated("Use `FOO.fieldN().value();` instead of `FOO.get_fieldN();`")]]
   const ::std::vector<::cpp2::IndirectionA>& get_fieldN() const&;
   /** Glean { "field": "fieldN" } */
+  [[deprecated("Use `FOO.fieldN().value();` instead of `FOO.get_fieldN();`")]]
   ::std::vector<::cpp2::IndirectionA> get_fieldN() &&;
 
   /** Glean { "field": "fieldN" } */
@@ -1839,8 +1867,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldN;
   }
   /** Glean { "field": "fieldO" } */
+  [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
   const ::std::vector<::cpp2::IndirectionB>& get_fieldO() const&;
   /** Glean { "field": "fieldO" } */
+  [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
   ::std::vector<::cpp2::IndirectionB> get_fieldO() &&;
 
   /** Glean { "field": "fieldO" } */
@@ -1851,8 +1881,10 @@ class containerStruct final  {
     return __fbthrift_field_fieldO;
   }
   /** Glean { "field": "fieldP" } */
+  [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
   const ::std::vector<::cpp2::IndirectionC>& get_fieldP() const&;
   /** Glean { "field": "fieldP" } */
+  [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
   ::std::vector<::cpp2::IndirectionC> get_fieldP() &&;
 
   /** Glean { "field": "fieldP" } */
@@ -1864,6 +1896,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldQ" } */
+  [[deprecated("Use `FOO.fieldQ().value();` instead of `FOO.get_fieldQ();`")]]
   ::cpp2::MyEnumA get_fieldQ() const {
     return __fbthrift_field_fieldQ;
   }

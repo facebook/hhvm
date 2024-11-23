@@ -524,10 +524,13 @@ class TemplateLists final  {
     return {static_cast<T&&>(this->__fbthrift_field_small_vector_tensor), __isset.at(4), __isset.bit(4)};
   }
   /** Glean { "field": "std_string" } */
+  [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
   const std::vector<::std::string>* get_std_string() const&;
   /** Glean { "field": "std_string" } */
+  [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
   std::vector<::std::string>* get_std_string() &;
   /** Glean { "field": "std_string" } */
+  [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
   std::vector<::std::string>* get_std_string() && = delete;
 
   /** Glean { "field": "std_string" } */
@@ -538,8 +541,10 @@ class TemplateLists final  {
     return __fbthrift_field_std_string;
   }
   /** Glean { "field": "deque_string" } */
+  [[deprecated("Use `FOO.deque_string().value();` instead of `FOO.get_deque_string();`")]]
   const std::deque<::std::string>& get_deque_string() const&;
   /** Glean { "field": "deque_string" } */
+  [[deprecated("Use `FOO.deque_string().value();` instead of `FOO.get_deque_string();`")]]
   std::deque<::std::string> get_deque_string() &&;
 
   /** Glean { "field": "deque_string" } */
@@ -550,8 +555,10 @@ class TemplateLists final  {
     return __fbthrift_field_deque_string;
   }
   /** Glean { "field": "small_vector_iobuf" } */
+  [[deprecated("Use `FOO.small_vector_iobuf().value();` instead of `FOO.get_small_vector_iobuf();`")]]
   const ::test::fixtures::python_capi::small_vector_iobuf& get_small_vector_iobuf() const&;
   /** Glean { "field": "small_vector_iobuf" } */
+  [[deprecated("Use `FOO.small_vector_iobuf().value();` instead of `FOO.get_small_vector_iobuf();`")]]
   ::test::fixtures::python_capi::small_vector_iobuf get_small_vector_iobuf() &&;
 
   /** Glean { "field": "small_vector_iobuf" } */
@@ -562,8 +569,10 @@ class TemplateLists final  {
     return __fbthrift_field_small_vector_iobuf;
   }
   /** Glean { "field": "nested_small_vector" } */
+  [[deprecated("Use `FOO.nested_small_vector().value();` instead of `FOO.get_nested_small_vector();`")]]
   const folly::small_vector<::test::fixtures::python_capi::fbvector_string>& get_nested_small_vector() const&;
   /** Glean { "field": "nested_small_vector" } */
+  [[deprecated("Use `FOO.nested_small_vector().value();` instead of `FOO.get_nested_small_vector();`")]]
   folly::small_vector<::test::fixtures::python_capi::fbvector_string> get_nested_small_vector() &&;
 
   /** Glean { "field": "nested_small_vector" } */
@@ -574,8 +583,10 @@ class TemplateLists final  {
     return __fbthrift_field_nested_small_vector;
   }
   /** Glean { "field": "small_vector_tensor" } */
+  [[deprecated("Use `FOO.small_vector_tensor().value();` instead of `FOO.get_small_vector_tensor();`")]]
   const folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>& get_small_vector_tensor() const&;
   /** Glean { "field": "small_vector_tensor" } */
+  [[deprecated("Use `FOO.small_vector_tensor().value();` instead of `FOO.get_small_vector_tensor();`")]]
   folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string> get_small_vector_tensor() &&;
 
   /** Glean { "field": "small_vector_tensor" } */
@@ -1050,8 +1061,10 @@ class TemplateSets final  {
     return {static_cast<T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
   /** Glean { "field": "std_set" } */
+  [[deprecated("Use `FOO.std_set().value();` instead of `FOO.get_std_set();`")]]
   const std::set<::std::string>& get_std_set() const&;
   /** Glean { "field": "std_set" } */
+  [[deprecated("Use `FOO.std_set().value();` instead of `FOO.get_std_set();`")]]
   std::set<::std::string> get_std_set() &&;
 
   /** Glean { "field": "std_set" } */
@@ -1062,8 +1075,10 @@ class TemplateSets final  {
     return __fbthrift_field_std_set;
   }
   /** Glean { "field": "std_unordered" } */
+  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
   const std::unordered_set<::std::string>& get_std_unordered() const&;
   /** Glean { "field": "std_unordered" } */
+  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
   std::unordered_set<::std::string> get_std_unordered() &&;
 
   /** Glean { "field": "std_unordered" } */
@@ -1074,8 +1089,10 @@ class TemplateSets final  {
     return __fbthrift_field_std_unordered;
   }
   /** Glean { "field": "folly_fast" } */
+  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
   const folly::F14FastSet<::std::string>& get_folly_fast() const&;
   /** Glean { "field": "folly_fast" } */
+  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
   folly::F14FastSet<::std::string> get_folly_fast() &&;
 
   /** Glean { "field": "folly_fast" } */
@@ -1086,8 +1103,10 @@ class TemplateSets final  {
     return __fbthrift_field_folly_fast;
   }
   /** Glean { "field": "folly_node" } */
+  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
   const folly::F14NodeSet<::std::string>& get_folly_node() const&;
   /** Glean { "field": "folly_node" } */
+  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
   folly::F14NodeSet<::std::string> get_folly_node() &&;
 
   /** Glean { "field": "folly_node" } */
@@ -1098,8 +1117,10 @@ class TemplateSets final  {
     return __fbthrift_field_folly_node;
   }
   /** Glean { "field": "folly_value" } */
+  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
   const folly::F14ValueSet<::std::string>& get_folly_value() const&;
   /** Glean { "field": "folly_value" } */
+  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
   folly::F14ValueSet<::std::string> get_folly_value() &&;
 
   /** Glean { "field": "folly_value" } */
@@ -1110,8 +1131,10 @@ class TemplateSets final  {
     return __fbthrift_field_folly_value;
   }
   /** Glean { "field": "folly_vector" } */
+  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
   const folly::F14VectorSet<::std::string>& get_folly_vector() const&;
   /** Glean { "field": "folly_vector" } */
+  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
   folly::F14VectorSet<::std::string> get_folly_vector() &&;
 
   /** Glean { "field": "folly_vector" } */
@@ -1122,8 +1145,10 @@ class TemplateSets final  {
     return __fbthrift_field_folly_vector;
   }
   /** Glean { "field": "folly_sorted_vector" } */
+  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
   const folly::sorted_vector_set<::std::string>& get_folly_sorted_vector() const&;
   /** Glean { "field": "folly_sorted_vector" } */
+  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
   folly::sorted_vector_set<::std::string> get_folly_sorted_vector() &&;
 
   /** Glean { "field": "folly_sorted_vector" } */
@@ -1598,8 +1623,10 @@ class TemplateMaps final  {
     return {static_cast<T&&>(this->__fbthrift_field_folly_sorted_vector), __isset.at(6), __isset.bit(6)};
   }
   /** Glean { "field": "std_map" } */
+  [[deprecated("Use `FOO.std_map().value();` instead of `FOO.get_std_map();`")]]
   const std::map<::std::string, ::std::string>& get_std_map() const&;
   /** Glean { "field": "std_map" } */
+  [[deprecated("Use `FOO.std_map().value();` instead of `FOO.get_std_map();`")]]
   std::map<::std::string, ::std::string> get_std_map() &&;
 
   /** Glean { "field": "std_map" } */
@@ -1610,8 +1637,10 @@ class TemplateMaps final  {
     return __fbthrift_field_std_map;
   }
   /** Glean { "field": "std_unordered" } */
+  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
   const std::unordered_map<::std::string, ::std::string>& get_std_unordered() const&;
   /** Glean { "field": "std_unordered" } */
+  [[deprecated("Use `FOO.std_unordered().value();` instead of `FOO.get_std_unordered();`")]]
   std::unordered_map<::std::string, ::std::string> get_std_unordered() &&;
 
   /** Glean { "field": "std_unordered" } */
@@ -1622,8 +1651,10 @@ class TemplateMaps final  {
     return __fbthrift_field_std_unordered;
   }
   /** Glean { "field": "folly_fast" } */
+  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
   const folly::F14FastMap<::std::string, ::std::string>& get_folly_fast() const&;
   /** Glean { "field": "folly_fast" } */
+  [[deprecated("Use `FOO.folly_fast().value();` instead of `FOO.get_folly_fast();`")]]
   folly::F14FastMap<::std::string, ::std::string> get_folly_fast() &&;
 
   /** Glean { "field": "folly_fast" } */
@@ -1634,8 +1665,10 @@ class TemplateMaps final  {
     return __fbthrift_field_folly_fast;
   }
   /** Glean { "field": "folly_node" } */
+  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
   const folly::F14NodeMap<::std::string, ::std::string>& get_folly_node() const&;
   /** Glean { "field": "folly_node" } */
+  [[deprecated("Use `FOO.folly_node().value();` instead of `FOO.get_folly_node();`")]]
   folly::F14NodeMap<::std::string, ::std::string> get_folly_node() &&;
 
   /** Glean { "field": "folly_node" } */
@@ -1646,8 +1679,10 @@ class TemplateMaps final  {
     return __fbthrift_field_folly_node;
   }
   /** Glean { "field": "folly_value" } */
+  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
   const folly::F14ValueMap<::std::string, ::std::string>& get_folly_value() const&;
   /** Glean { "field": "folly_value" } */
+  [[deprecated("Use `FOO.folly_value().value();` instead of `FOO.get_folly_value();`")]]
   folly::F14ValueMap<::std::string, ::std::string> get_folly_value() &&;
 
   /** Glean { "field": "folly_value" } */
@@ -1658,8 +1693,10 @@ class TemplateMaps final  {
     return __fbthrift_field_folly_value;
   }
   /** Glean { "field": "folly_vector" } */
+  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
   const folly::F14VectorMap<::std::string, ::std::string>& get_folly_vector() const&;
   /** Glean { "field": "folly_vector" } */
+  [[deprecated("Use `FOO.folly_vector().value();` instead of `FOO.get_folly_vector();`")]]
   folly::F14VectorMap<::std::string, ::std::string> get_folly_vector() &&;
 
   /** Glean { "field": "folly_vector" } */
@@ -1670,8 +1707,10 @@ class TemplateMaps final  {
     return __fbthrift_field_folly_vector;
   }
   /** Glean { "field": "folly_sorted_vector" } */
+  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
   const folly::sorted_vector_map<::std::string, ::std::string>& get_folly_sorted_vector() const&;
   /** Glean { "field": "folly_sorted_vector" } */
+  [[deprecated("Use `FOO.folly_sorted_vector().value();` instead of `FOO.get_folly_sorted_vector();`")]]
   folly::sorted_vector_map<::std::string, ::std::string> get_folly_sorted_vector() &&;
 
   /** Glean { "field": "folly_sorted_vector" } */
@@ -1887,11 +1926,13 @@ class TWrapped final  {
   }
 
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   const ::std::string& get_fieldA() const& {
     return __fbthrift_field_fieldA;
   }
 
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   ::std::string get_fieldA() && {
     return std::move(__fbthrift_field_fieldA);
   }
@@ -1905,11 +1946,13 @@ class TWrapped final  {
   }
 
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const ::std::string& get_fieldB() const& {
     return __fbthrift_field_fieldB;
   }
 
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::string get_fieldB() && {
     return std::move(__fbthrift_field_fieldB);
   }
@@ -2074,8 +2117,10 @@ class IndirectionA final  {
     return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "lst" } */
+  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
   const ::test::fixtures::python_capi::ListOfWrapped& get_lst() const&;
   /** Glean { "field": "lst" } */
+  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
   ::test::fixtures::python_capi::ListOfWrapped get_lst() &&;
 
   /** Glean { "field": "lst" } */
@@ -2238,8 +2283,10 @@ class IndirectionB final  {
     return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "lst" } */
+  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
   const ::test::fixtures::python_capi::VecOfWrapped& get_lst() const&;
   /** Glean { "field": "lst" } */
+  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
   ::test::fixtures::python_capi::VecOfWrapped get_lst() &&;
 
   /** Glean { "field": "lst" } */
@@ -2402,8 +2449,10 @@ class IndirectionC final  {
     return {static_cast<T&&>(this->__fbthrift_field_lst), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "lst" } */
+  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
   const ::test::fixtures::python_capi::ListOfWrappedAlias& get_lst() const&;
   /** Glean { "field": "lst" } */
+  [[deprecated("Use `FOO.lst().value();` instead of `FOO.get_lst();`")]]
   ::test::fixtures::python_capi::ListOfWrappedAlias get_lst() &&;
 
   /** Glean { "field": "lst" } */

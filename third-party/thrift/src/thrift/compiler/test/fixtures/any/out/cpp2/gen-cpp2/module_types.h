@@ -190,11 +190,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myString" } */
+  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
   const ::std::string& get_myString() const& {
     return __fbthrift_field_myString;
   }
 
   /** Glean { "field": "myString" } */
+  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
   ::std::string get_myString() && {
     return std::move(__fbthrift_field_myString);
   }
@@ -592,11 +594,13 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "myString" } */
+  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
   const ::std::string& get_myString() const& {
     return __fbthrift_field_myString;
   }
 
   /** Glean { "field": "myString" } */
+  [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
   ::std::string get_myString() && {
     return std::move(__fbthrift_field_myString);
   }

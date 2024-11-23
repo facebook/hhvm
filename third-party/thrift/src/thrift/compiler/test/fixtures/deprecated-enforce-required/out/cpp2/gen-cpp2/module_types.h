@@ -171,6 +171,7 @@ class Foo final  {
   }
 
   /** Glean { "field": "bar" } */
+  [[deprecated("Use `FOO.bar().value();` instead of `FOO.get_bar();`")]]
   ::std::int32_t get_bar() const {
     return __fbthrift_field_bar;
   }

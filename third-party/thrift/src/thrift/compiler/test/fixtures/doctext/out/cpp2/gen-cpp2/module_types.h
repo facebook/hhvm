@@ -243,6 +243,7 @@ class A final  {
   }
 
   /** Glean { "field": "useless_field" } */
+  [[deprecated("Use `FOO.useless_field().value();` instead of `FOO.get_useless_field();`")]]
   ::std::int32_t get_useless_field() const {
     return __fbthrift_field_useless_field;
   }
@@ -701,11 +702,13 @@ class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   const ::std::string& get_message() const& {
     return __fbthrift_field_message;
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string get_message() && {
     return std::move(__fbthrift_field_message);
   }

@@ -230,11 +230,13 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   const ::std::string& get_message() const& {
     return __fbthrift_field_message;
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string get_message() && {
     return std::move(__fbthrift_field_message);
   }
@@ -410,15 +412,18 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "sonnet" } */
+  [[deprecated("Use `FOO.sonnet().value();` instead of `FOO.get_sonnet();`")]]
   const ::std::string* get_sonnet() const& {
     return sonnet_ref() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
   }
 
   /** Glean { "field": "sonnet" } */
+  [[deprecated("Use `FOO.sonnet().value();` instead of `FOO.get_sonnet();`")]]
   ::std::string* get_sonnet() & {
     return sonnet_ref() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
   }
   /** Glean { "field": "sonnet" } */
+  [[deprecated("Use `FOO.sonnet().value();` instead of `FOO.get_sonnet();`")]]
   ::std::string* get_sonnet() && = delete;
 
   /** Glean { "field": "sonnet" } */
@@ -644,11 +649,13 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
   }
 
   /** Glean { "field": "error_message" } */
+  [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
   const ::std::string& get_error_message() const& {
     return __fbthrift_field_error_message;
   }
 
   /** Glean { "field": "error_message" } */
+  [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
   ::std::string get_error_message() && {
     return std::move(__fbthrift_field_error_message);
   }
@@ -662,11 +669,13 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
   }
 
   /** Glean { "field": "internal_error_message" } */
+  [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
   const ::std::string& get_internal_error_message() const& {
     return __fbthrift_field_internal_error_message;
   }
 
   /** Glean { "field": "internal_error_message" } */
+  [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
   ::std::string get_internal_error_message() && {
     return std::move(__fbthrift_field_internal_error_message);
   }
@@ -894,11 +903,13 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
   }
 
   /** Glean { "field": "error_message" } */
+  [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
   const ::std::string& get_error_message() const& {
     return __fbthrift_field_error_message;
   }
 
   /** Glean { "field": "error_message" } */
+  [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
   ::std::string get_error_message() && {
     return std::move(__fbthrift_field_error_message);
   }
@@ -912,11 +923,13 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
   }
 
   /** Glean { "field": "internal_error_message" } */
+  [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
   const ::std::string& get_internal_error_message() const& {
     return __fbthrift_field_internal_error_message;
   }
 
   /** Glean { "field": "internal_error_message" } */
+  [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
   ::std::string get_internal_error_message() && {
     return std::move(__fbthrift_field_internal_error_message);
   }
@@ -1144,11 +1157,13 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   const ::std::string& get_message() const& {
     return __fbthrift_field_message;
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string get_message() && {
     return std::move(__fbthrift_field_message);
   }
@@ -1162,6 +1177,7 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
   }
 
   /** Glean { "field": "error_code" } */
+  [[deprecated("Use `FOO.error_code().value();` instead of `FOO.get_error_code();`")]]
   ::std::int32_t get_error_code() const {
     return __fbthrift_field_error_code;
   }
@@ -1388,11 +1404,13 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
   }
 
   /** Glean { "field": "message_field" } */
+  [[deprecated("Use `FOO.message_field().value();` instead of `FOO.get_message_field();`")]]
   const ::std::string& get_message_field() const& {
     return __fbthrift_field_message_field;
   }
 
   /** Glean { "field": "message_field" } */
+  [[deprecated("Use `FOO.message_field().value();` instead of `FOO.get_message_field();`")]]
   ::std::string get_message_field() && {
     return std::move(__fbthrift_field_message_field);
   }
@@ -1406,6 +1424,7 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
   }
 
   /** Glean { "field": "error_code" } */
+  [[deprecated("Use `FOO.error_code().value();` instead of `FOO.get_error_code();`")]]
   ::std::int32_t get_error_code() const {
     return __fbthrift_field_error_code;
   }

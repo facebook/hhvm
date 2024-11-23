@@ -371,6 +371,7 @@ class SomeStruct final  {
   }
 
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   ::std::int32_t get_fieldA() const {
     return __fbthrift_field_fieldA;
   }

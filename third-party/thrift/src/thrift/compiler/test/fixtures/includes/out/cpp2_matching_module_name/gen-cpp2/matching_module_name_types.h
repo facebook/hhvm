@@ -172,8 +172,10 @@ class MyStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_OtherStructField), __isset.at(0), __isset.bit(0)};
   }
   /** Glean { "field": "OtherStructField" } */
+  [[deprecated("Use `FOO.OtherStructField().value();` instead of `FOO.get_OtherStructField();`")]]
   const ::matching_module_name::OtherStruct& get_OtherStructField() const&;
   /** Glean { "field": "OtherStructField" } */
+  [[deprecated("Use `FOO.OtherStructField().value();` instead of `FOO.get_OtherStructField();`")]]
   ::matching_module_name::OtherStruct get_OtherStructField() &&;
 
   /** Glean { "field": "OtherStructField" } */

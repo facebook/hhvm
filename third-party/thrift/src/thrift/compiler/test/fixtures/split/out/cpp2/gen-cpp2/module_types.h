@@ -678,6 +678,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIntField" } */
+  [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
   ::std::int64_t get_MyIntField() const {
     return __fbthrift_field_MyIntField;
   }
@@ -690,11 +691,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   const ::std::string& get_MyStringField() const& {
     return __fbthrift_field_MyStringField;
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   ::std::string get_MyStringField() && {
     return std::move(__fbthrift_field_MyStringField);
   }
@@ -707,8 +710,10 @@ class MyStruct final  {
     return __fbthrift_field_MyStringField;
   }
   /** Glean { "field": "MyDataField" } */
+  [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   const ::cpp2::MyDataItem& get_MyDataField() const&;
   /** Glean { "field": "MyDataField" } */
+  [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   ::cpp2::MyDataItem get_MyDataField() &&;
 
   /** Glean { "field": "MyDataField" } */
@@ -720,6 +725,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myEnum" } */
+  [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
   ::cpp2::MyEnum get_myEnum() const {
     return __fbthrift_field_myEnum;
   }
@@ -732,6 +738,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "oneway" } */
+  [[deprecated("Use `FOO.oneway().value();` instead of `FOO.get_oneway();`")]]
   bool get_oneway() const {
     return __fbthrift_field_oneway;
   }
@@ -744,6 +751,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "readonly" } */
+  [[deprecated("Use `FOO.readonly().value();` instead of `FOO.get_readonly();`")]]
   bool get_readonly() const {
     return __fbthrift_field_readonly;
   }
@@ -756,6 +764,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "idempotent" } */
+  [[deprecated("Use `FOO.idempotent().value();` instead of `FOO.get_idempotent();`")]]
   bool get_idempotent() const {
     return __fbthrift_field_idempotent;
   }

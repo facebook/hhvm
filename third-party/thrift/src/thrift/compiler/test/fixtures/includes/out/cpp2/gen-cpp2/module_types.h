@@ -287,8 +287,10 @@ class MyStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_MyIncludedInt), __isset.at(2), __isset.bit(2)};
   }
   /** Glean { "field": "MyIncludedField" } */
+  [[deprecated("Use `FOO.MyIncludedField().value();` instead of `FOO.get_MyIncludedField();`")]]
   const ::cpp2::Included& get_MyIncludedField() const&;
   /** Glean { "field": "MyIncludedField" } */
+  [[deprecated("Use `FOO.MyIncludedField().value();` instead of `FOO.get_MyIncludedField();`")]]
   ::cpp2::Included get_MyIncludedField() &&;
 
   /** Glean { "field": "MyIncludedField" } */
@@ -299,8 +301,10 @@ class MyStruct final  {
     return __fbthrift_field_MyIncludedField;
   }
   /** Glean { "field": "MyOtherIncludedField" } */
+  [[deprecated("Use `FOO.MyOtherIncludedField().value();` instead of `FOO.get_MyOtherIncludedField();`")]]
   const ::cpp2::Included& get_MyOtherIncludedField() const&;
   /** Glean { "field": "MyOtherIncludedField" } */
+  [[deprecated("Use `FOO.MyOtherIncludedField().value();` instead of `FOO.get_MyOtherIncludedField();`")]]
   ::cpp2::Included get_MyOtherIncludedField() &&;
 
   /** Glean { "field": "MyOtherIncludedField" } */
@@ -312,6 +316,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIncludedInt" } */
+  [[deprecated("Use `FOO.MyIncludedInt().value();` instead of `FOO.get_MyIncludedInt();`")]]
   ::cpp2::IncludedInt64 get_MyIncludedInt() const {
     return __fbthrift_field_MyIncludedInt;
   }

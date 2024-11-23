@@ -505,15 +505,18 @@ class TrivialTypesStruct final  {
   }
 
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   const ::std::int32_t* get_fieldA() const& {
     return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
   }
 
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   ::std::int32_t* get_fieldA() & {
     return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
   }
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   ::std::int32_t* get_fieldA() && = delete;
 
   /** Glean { "field": "fieldA" } */
@@ -524,15 +527,18 @@ class TrivialTypesStruct final  {
   }
 
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const ::std::string* get_fieldB() const& {
     return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
   }
 
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::string* get_fieldB() & {
     return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
   }
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::string* get_fieldB() && = delete;
 
   /** Glean { "field": "fieldB" } */
@@ -544,15 +550,18 @@ class TrivialTypesStruct final  {
   }
 
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   const ::std::string* get_fieldC() const& {
     return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
   }
 
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   ::std::string* get_fieldC() & {
     return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
   }
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   ::std::string* get_fieldC() && = delete;
 
   /** Glean { "field": "fieldC" } */
@@ -564,15 +573,18 @@ class TrivialTypesStruct final  {
   }
 
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   const ::test::fixtures::tablebased::IOBufPtr* get_fieldD() const& {
     return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
   }
 
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   ::test::fixtures::tablebased::IOBufPtr* get_fieldD() & {
     return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
   }
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   ::test::fixtures::tablebased::IOBufPtr* get_fieldD() && = delete;
 
   /** Glean { "field": "fieldD" } */
@@ -584,6 +596,7 @@ class TrivialTypesStruct final  {
   }
 
   /** Glean { "field": "fieldE" } */
+  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   ::test::fixtures::tablebased::ExampleEnum get_fieldE() const {
     return __fbthrift_field_fieldE;
   }
@@ -1112,8 +1125,10 @@ class ContainerStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_fieldH), __isset.at(7), __isset.bit(7)};
   }
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   const ::std::vector<::std::int32_t>& get_fieldA() const&;
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   ::std::vector<::std::int32_t> get_fieldA() &&;
 
   /** Glean { "field": "fieldA" } */
@@ -1124,8 +1139,10 @@ class ContainerStruct final  {
     return __fbthrift_field_fieldA;
   }
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const std::list<::std::int32_t>& get_fieldB() const&;
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   std::list<::std::int32_t> get_fieldB() &&;
 
   /** Glean { "field": "fieldB" } */
@@ -1136,8 +1153,10 @@ class ContainerStruct final  {
     return __fbthrift_field_fieldB;
   }
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   const std::deque<::std::int32_t>& get_fieldC() const&;
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   std::deque<::std::int32_t> get_fieldC() &&;
 
   /** Glean { "field": "fieldC" } */
@@ -1148,8 +1167,10 @@ class ContainerStruct final  {
     return __fbthrift_field_fieldC;
   }
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   const folly::fbvector<::std::int32_t>& get_fieldD() const&;
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   folly::fbvector<::std::int32_t> get_fieldD() &&;
 
   /** Glean { "field": "fieldD" } */
@@ -1160,8 +1181,10 @@ class ContainerStruct final  {
     return __fbthrift_field_fieldD;
   }
   /** Glean { "field": "fieldE" } */
+  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   const folly::small_vector<::std::int32_t>& get_fieldE() const&;
   /** Glean { "field": "fieldE" } */
+  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   folly::small_vector<::std::int32_t> get_fieldE() &&;
 
   /** Glean { "field": "fieldE" } */
@@ -1172,8 +1195,10 @@ class ContainerStruct final  {
     return __fbthrift_field_fieldE;
   }
   /** Glean { "field": "fieldF" } */
+  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   const folly::sorted_vector_set<::std::int32_t>& get_fieldF() const&;
   /** Glean { "field": "fieldF" } */
+  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   folly::sorted_vector_set<::std::int32_t> get_fieldF() &&;
 
   /** Glean { "field": "fieldF" } */
@@ -1184,8 +1209,10 @@ class ContainerStruct final  {
     return __fbthrift_field_fieldF;
   }
   /** Glean { "field": "fieldG" } */
+  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   const folly::sorted_vector_map<::std::int32_t, ::std::string>& get_fieldG() const&;
   /** Glean { "field": "fieldG" } */
+  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   folly::sorted_vector_map<::std::int32_t, ::std::string> get_fieldG() &&;
 
   /** Glean { "field": "fieldG" } */
@@ -1196,8 +1223,10 @@ class ContainerStruct final  {
     return __fbthrift_field_fieldG;
   }
   /** Glean { "field": "fieldH" } */
+  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   const ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>& get_fieldH() const&;
   /** Glean { "field": "fieldH" } */
+  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct> get_fieldH() &&;
 
   /** Glean { "field": "fieldH" } */

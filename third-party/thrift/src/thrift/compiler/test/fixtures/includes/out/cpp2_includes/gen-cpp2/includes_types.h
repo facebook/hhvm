@@ -236,6 +236,7 @@ class Included final  {
   }
 
   /** Glean { "field": "MyIntField" } */
+  [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
   ::std::int64_t get_MyIntField() const {
     return __fbthrift_field_MyIntField;
   }
@@ -247,8 +248,10 @@ class Included final  {
     return __fbthrift_field_MyIntField;
   }
   /** Glean { "field": "MyTransitiveField" } */
+  [[deprecated("Use `FOO.MyTransitiveField().value();` instead of `FOO.get_MyTransitiveField();`")]]
   const ::cpp2::Foo& get_MyTransitiveField() const&;
   /** Glean { "field": "MyTransitiveField" } */
+  [[deprecated("Use `FOO.MyTransitiveField().value();` instead of `FOO.get_MyTransitiveField();`")]]
   ::cpp2::Foo get_MyTransitiveField() &&;
 
   /** Glean { "field": "MyTransitiveField" } */

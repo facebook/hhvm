@@ -722,6 +722,7 @@ class SomeStruct final  {
   }
 
   /** Glean { "field": "reasonable" } */
+  [[deprecated("Use `FOO.reasonable().value();` instead of `FOO.get_reasonable();`")]]
   ::test::fixtures::enums::Metasyntactic get_reasonable() const {
     return __fbthrift_field_reasonable;
   }
@@ -734,6 +735,7 @@ class SomeStruct final  {
   }
 
   /** Glean { "field": "fine" } */
+  [[deprecated("Use `FOO.fine().value();` instead of `FOO.get_fine();`")]]
   ::test::fixtures::enums::Metasyntactic get_fine() const {
     return __fbthrift_field_fine;
   }
@@ -746,6 +748,7 @@ class SomeStruct final  {
   }
 
   /** Glean { "field": "questionable" } */
+  [[deprecated("Use `FOO.questionable().value();` instead of `FOO.get_questionable();`")]]
   ::test::fixtures::enums::Metasyntactic get_questionable() const {
     return __fbthrift_field_questionable;
   }
@@ -757,8 +760,10 @@ class SomeStruct final  {
     return __fbthrift_field_questionable;
   }
   /** Glean { "field": "tags" } */
+  [[deprecated("Use `FOO.tags().value();` instead of `FOO.get_tags();`")]]
   const ::std::set<::std::int32_t>& get_tags() const&;
   /** Glean { "field": "tags" } */
+  [[deprecated("Use `FOO.tags().value();` instead of `FOO.get_tags();`")]]
   ::std::set<::std::int32_t> get_tags() &&;
 
   /** Glean { "field": "tags" } */
@@ -1080,6 +1085,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me2_3" } */
+  [[deprecated("Use `FOO.me2_3().value();` instead of `FOO.get_me2_3();`")]]
   ::test::fixtures::enums::MyEnum2 get_me2_3() const {
     return __fbthrift_field_me2_3;
   }
@@ -1092,6 +1098,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me3_n3" } */
+  [[deprecated("Use `FOO.me3_n3().value();` instead of `FOO.get_me3_n3();`")]]
   ::test::fixtures::enums::MyEnum3 get_me3_n3() const {
     return __fbthrift_field_me3_n3;
   }
@@ -1104,6 +1111,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me1_t1" } */
+  [[deprecated("Use `FOO.me1_t1().value();` instead of `FOO.get_me1_t1();`")]]
   ::test::fixtures::enums::MyEnum1 get_me1_t1() const {
     return __fbthrift_field_me1_t1;
   }
@@ -1116,6 +1124,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "me1_t2" } */
+  [[deprecated("Use `FOO.me1_t2().value();` instead of `FOO.get_me1_t2();`")]]
   ::test::fixtures::enums::MyEnum1 get_me1_t2() const {
     return __fbthrift_field_me1_t2;
   }

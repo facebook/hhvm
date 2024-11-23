@@ -507,6 +507,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIntField" } */
+  [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
   ::std::int64_t get_MyIntField() const {
     return __fbthrift_field_MyIntField;
   }
@@ -519,11 +520,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   const ::std::string& get_MyStringField() const& {
     return __fbthrift_field_MyStringField;
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   ::std::string get_MyStringField() && {
     return std::move(__fbthrift_field_MyStringField);
   }
@@ -536,8 +539,10 @@ class MyStruct final  {
     return __fbthrift_field_MyStringField;
   }
   /** Glean { "field": "MyDataField" } */
+  [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   const ::cpp2::MyDataItem& get_MyDataField() const&;
   /** Glean { "field": "MyDataField" } */
+  [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   ::cpp2::MyDataItem get_MyDataField() &&;
 
   /** Glean { "field": "MyDataField" } */
@@ -549,6 +554,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "myEnum" } */
+  [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
   ::cpp2::MyEnum get_myEnum() const {
     return __fbthrift_field_myEnum;
   }

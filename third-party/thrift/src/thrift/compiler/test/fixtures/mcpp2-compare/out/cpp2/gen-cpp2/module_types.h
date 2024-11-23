@@ -1385,6 +1385,7 @@ class ASimpleStruct final  {
   }
 
   /** Glean { "field": "boolField" } */
+  [[deprecated("Use `FOO.boolField().value();` instead of `FOO.get_boolField();`")]]
   ::std::int64_t get_boolField() const {
     return __fbthrift_field_boolField;
   }
@@ -1547,6 +1548,7 @@ class ASimpleStructNoexcept final  {
   }
 
   /** Glean { "field": "boolField" } */
+  [[deprecated("Use `FOO.boolField().value();` instead of `FOO.get_boolField();`")]]
   ::std::int64_t get_boolField() const {
     return __fbthrift_field_boolField;
   }
@@ -2229,6 +2231,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyBoolField" } */
+  [[deprecated("Use `FOO.MyBoolField().value();` instead of `FOO.get_MyBoolField();`")]]
   bool get_MyBoolField() const {
     return __fbthrift_field_MyBoolField;
   }
@@ -2241,6 +2244,7 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyIntField" } */
+  [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
   ::std::int64_t get_MyIntField() const {
     return __fbthrift_field_MyIntField;
   }
@@ -2253,11 +2257,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   const ::std::string& get_MyStringField() const& {
     return __fbthrift_field_MyStringField;
   }
 
   /** Glean { "field": "MyStringField" } */
+  [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   ::std::string get_MyStringField() && {
     return std::move(__fbthrift_field_MyStringField);
   }
@@ -2271,11 +2277,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyStringField2" } */
+  [[deprecated("Use `FOO.MyStringField2().value();` instead of `FOO.get_MyStringField2();`")]]
   const ::std::string& get_MyStringField2() const& {
     return __fbthrift_field_MyStringField2;
   }
 
   /** Glean { "field": "MyStringField2" } */
+  [[deprecated("Use `FOO.MyStringField2().value();` instead of `FOO.get_MyStringField2();`")]]
   ::std::string get_MyStringField2() && {
     return std::move(__fbthrift_field_MyStringField2);
   }
@@ -2289,11 +2297,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyBinaryField" } */
+  [[deprecated("Use `FOO.MyBinaryField().value();` instead of `FOO.get_MyBinaryField();`")]]
   const ::std::string& get_MyBinaryField() const& {
     return __fbthrift_field_MyBinaryField;
   }
 
   /** Glean { "field": "MyBinaryField" } */
+  [[deprecated("Use `FOO.MyBinaryField().value();` instead of `FOO.get_MyBinaryField();`")]]
   ::std::string get_MyBinaryField() && {
     return std::move(__fbthrift_field_MyBinaryField);
   }
@@ -2307,15 +2317,18 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyBinaryField2" } */
+  [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
   const ::std::string* get_MyBinaryField2() const& {
     return MyBinaryField2_ref() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
   }
 
   /** Glean { "field": "MyBinaryField2" } */
+  [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
   ::std::string* get_MyBinaryField2() & {
     return MyBinaryField2_ref() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
   }
   /** Glean { "field": "MyBinaryField2" } */
+  [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
   ::std::string* get_MyBinaryField2() && = delete;
 
   /** Glean { "field": "MyBinaryField2" } */
@@ -2327,11 +2340,13 @@ class MyStruct final  {
   }
 
   /** Glean { "field": "MyBinaryField3" } */
+  [[deprecated("Use `FOO.MyBinaryField3().value();` instead of `FOO.get_MyBinaryField3();`")]]
   const ::std::string& get_MyBinaryField3() const& {
     return __fbthrift_field_MyBinaryField3;
   }
 
   /** Glean { "field": "MyBinaryField3" } */
+  [[deprecated("Use `FOO.MyBinaryField3().value();` instead of `FOO.get_MyBinaryField3();`")]]
   ::std::string get_MyBinaryField3() && {
     return std::move(__fbthrift_field_MyBinaryField3);
   }
@@ -2344,8 +2359,10 @@ class MyStruct final  {
     return __fbthrift_field_MyBinaryField3;
   }
   /** Glean { "field": "MyBinaryListField4" } */
+  [[deprecated("Use `FOO.MyBinaryListField4().value();` instead of `FOO.get_MyBinaryListField4();`")]]
   const ::std::vector<::std::string>& get_MyBinaryListField4() const&;
   /** Glean { "field": "MyBinaryListField4" } */
+  [[deprecated("Use `FOO.MyBinaryListField4().value();` instead of `FOO.get_MyBinaryListField4();`")]]
   ::std::vector<::std::string> get_MyBinaryListField4() &&;
 
   /** Glean { "field": "MyBinaryListField4" } */
@@ -2356,8 +2373,10 @@ class MyStruct final  {
     return __fbthrift_field_MyBinaryListField4;
   }
   /** Glean { "field": "MyMapEnumAndInt" } */
+  [[deprecated("Use `FOO.MyMapEnumAndInt().value();` instead of `FOO.get_MyMapEnumAndInt();`")]]
   const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& get_MyMapEnumAndInt() const&;
   /** Glean { "field": "MyMapEnumAndInt" } */
+  [[deprecated("Use `FOO.MyMapEnumAndInt().value();` instead of `FOO.get_MyMapEnumAndInt();`")]]
   ::std::map<::some::valid::ns::MyEnumA, ::std::string> get_MyMapEnumAndInt() &&;
 
   /** Glean { "field": "MyMapEnumAndInt" } */
@@ -3647,6 +3666,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "code" } */
+  [[deprecated("Use `FOO.code().value();` instead of `FOO.get_code();`")]]
   ::std::int32_t get_code() const {
     return __fbthrift_field_code;
   }
@@ -3659,6 +3679,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "req_code" } */
+  [[deprecated("Use `FOO.req_code().value();` instead of `FOO.get_req_code();`")]]
   ::std::int32_t get_req_code() const {
     return __fbthrift_field_req_code;
   }
@@ -3671,11 +3692,13 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "message2" } */
+  [[deprecated("Use `FOO.message2().value();` instead of `FOO.get_message2();`")]]
   const ::std::string& get_message2() const& {
     return __fbthrift_field_message2;
   }
 
   /** Glean { "field": "message2" } */
+  [[deprecated("Use `FOO.message2().value();` instead of `FOO.get_message2();`")]]
   ::std::string get_message2() && {
     return std::move(__fbthrift_field_message2);
   }
@@ -3689,11 +3712,13 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "req_message" } */
+  [[deprecated("Use `FOO.req_message().value();` instead of `FOO.get_req_message();`")]]
   const ::std::string& get_req_message() const& {
     return __fbthrift_field_req_message;
   }
 
   /** Glean { "field": "req_message" } */
+  [[deprecated("Use `FOO.req_message().value();` instead of `FOO.get_req_message();`")]]
   ::std::string get_req_message() && {
     return std::move(__fbthrift_field_req_message);
   }
@@ -3706,8 +3731,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_req_message;
   }
   /** Glean { "field": "exception_list" } */
+  [[deprecated("Use `FOO.exception_list().value();` instead of `FOO.get_exception_list();`")]]
   const ::std::vector<::std::int32_t>& get_exception_list() const&;
   /** Glean { "field": "exception_list" } */
+  [[deprecated("Use `FOO.exception_list().value();` instead of `FOO.get_exception_list();`")]]
   ::std::vector<::std::int32_t> get_exception_list() &&;
 
   /** Glean { "field": "exception_list" } */
@@ -3718,8 +3745,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_exception_list;
   }
   /** Glean { "field": "exception_set" } */
+  [[deprecated("Use `FOO.exception_set().value();` instead of `FOO.get_exception_set();`")]]
   const ::std::set<::std::int64_t>& get_exception_set() const&;
   /** Glean { "field": "exception_set" } */
+  [[deprecated("Use `FOO.exception_set().value();` instead of `FOO.get_exception_set();`")]]
   ::std::set<::std::int64_t> get_exception_set() &&;
 
   /** Glean { "field": "exception_set" } */
@@ -3730,8 +3759,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_exception_set;
   }
   /** Glean { "field": "exception_map" } */
+  [[deprecated("Use `FOO.exception_map().value();` instead of `FOO.get_exception_map();`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_exception_map() const&;
   /** Glean { "field": "exception_map" } */
+  [[deprecated("Use `FOO.exception_map().value();` instead of `FOO.get_exception_map();`")]]
   ::std::map<::std::string, ::std::int32_t> get_exception_map() &&;
 
   /** Glean { "field": "exception_map" } */
@@ -3742,8 +3773,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_exception_map;
   }
   /** Glean { "field": "req_exception_map" } */
+  [[deprecated("Use `FOO.req_exception_map().value();` instead of `FOO.get_req_exception_map();`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_req_exception_map() const&;
   /** Glean { "field": "req_exception_map" } */
+  [[deprecated("Use `FOO.req_exception_map().value();` instead of `FOO.get_req_exception_map();`")]]
   ::std::map<::std::string, ::std::int32_t> get_req_exception_map() &&;
 
   /** Glean { "field": "req_exception_map" } */
@@ -3755,6 +3788,7 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
   }
 
   /** Glean { "field": "enum_field" } */
+  [[deprecated("Use `FOO.enum_field().value();` instead of `FOO.get_enum_field();`")]]
   ::some::valid::ns::MyEnumA get_enum_field() const {
     return __fbthrift_field_enum_field;
   }
@@ -3766,8 +3800,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_enum_field;
   }
   /** Glean { "field": "enum_container" } */
+  [[deprecated("Use `FOO.enum_container().value();` instead of `FOO.get_enum_container();`")]]
   const ::std::vector<::some::valid::ns::MyEnumA>& get_enum_container() const&;
   /** Glean { "field": "enum_container" } */
+  [[deprecated("Use `FOO.enum_container().value();` instead of `FOO.get_enum_container();`")]]
   ::std::vector<::some::valid::ns::MyEnumA> get_enum_container() &&;
 
   /** Glean { "field": "enum_container" } */
@@ -3778,8 +3814,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_enum_container;
   }
   /** Glean { "field": "a_struct" } */
+  [[deprecated("Use `FOO.a_struct().value();` instead of `FOO.get_a_struct();`")]]
   const ::some::valid::ns::MyStruct& get_a_struct() const&;
   /** Glean { "field": "a_struct" } */
+  [[deprecated("Use `FOO.a_struct().value();` instead of `FOO.get_a_struct();`")]]
   ::some::valid::ns::MyStruct get_a_struct() &&;
 
   /** Glean { "field": "a_struct" } */
@@ -3790,8 +3828,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_a_struct;
   }
   /** Glean { "field": "a_set_struct" } */
+  [[deprecated("Use `FOO.a_set_struct().value();` instead of `FOO.get_a_set_struct();`")]]
   const ::std::set<::some::valid::ns::MyStruct>& get_a_set_struct() const&;
   /** Glean { "field": "a_set_struct" } */
+  [[deprecated("Use `FOO.a_set_struct().value();` instead of `FOO.get_a_set_struct();`")]]
   ::std::set<::some::valid::ns::MyStruct> get_a_set_struct() &&;
 
   /** Glean { "field": "a_set_struct" } */
@@ -3802,8 +3842,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_a_set_struct;
   }
   /** Glean { "field": "a_union_list" } */
+  [[deprecated("Use `FOO.a_union_list().value();` instead of `FOO.get_a_union_list();`")]]
   const ::std::vector<::some::valid::ns::SimpleUnion>& get_a_union_list() const&;
   /** Glean { "field": "a_union_list" } */
+  [[deprecated("Use `FOO.a_union_list().value();` instead of `FOO.get_a_union_list();`")]]
   ::std::vector<::some::valid::ns::SimpleUnion> get_a_union_list() &&;
 
   /** Glean { "field": "a_union_list" } */
@@ -3814,8 +3856,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_a_union_list;
   }
   /** Glean { "field": "union_typedef" } */
+  [[deprecated("Use `FOO.union_typedef().value();` instead of `FOO.get_union_typedef();`")]]
   const ::some::valid::ns::unionTypeDef& get_union_typedef() const&;
   /** Glean { "field": "union_typedef" } */
+  [[deprecated("Use `FOO.union_typedef().value();` instead of `FOO.get_union_typedef();`")]]
   ::some::valid::ns::unionTypeDef get_union_typedef() &&;
 
   /** Glean { "field": "union_typedef" } */
@@ -3826,8 +3870,10 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
     return __fbthrift_field_union_typedef;
   }
   /** Glean { "field": "a_union_typedef_list" } */
+  [[deprecated("Use `FOO.a_union_typedef_list().value();` instead of `FOO.get_a_union_typedef_list();`")]]
   const ::std::vector<::some::valid::ns::unionTypeDef>& get_a_union_typedef_list() const&;
   /** Glean { "field": "a_union_typedef_list" } */
+  [[deprecated("Use `FOO.a_union_typedef_list().value();` instead of `FOO.get_a_union_typedef_list();`")]]
   ::std::vector<::some::valid::ns::unionTypeDef> get_a_union_typedef_list() &&;
 
   /** Glean { "field": "a_union_typedef_list" } */
@@ -6465,6 +6511,7 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
   }
 
   /** Glean { "field": "code" } */
+  [[deprecated("Use `FOO.code().value();` instead of `FOO.get_code();`")]]
   ::std::int32_t get_code() const {
     return __fbthrift_field_code;
   }
@@ -6477,6 +6524,7 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
   }
 
   /** Glean { "field": "req_code" } */
+  [[deprecated("Use `FOO.req_code().value();` instead of `FOO.get_req_code();`")]]
   ::std::int32_t get_req_code() const {
     return __fbthrift_field_req_code;
   }
@@ -6489,11 +6537,13 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   const ::std::string& get_message() const& {
     return __fbthrift_field_message;
   }
 
   /** Glean { "field": "message" } */
+  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string get_message() && {
     return std::move(__fbthrift_field_message);
   }
@@ -7895,6 +7945,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldA" } */
+  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   bool get_fieldA() const {
     return fieldA;
   }
@@ -7907,6 +7958,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "req_fieldA" } */
+  [[deprecated("Use `FOO.req_fieldA().value();` instead of `FOO.get_req_fieldA();`")]]
   bool get_req_fieldA() const {
     return req_fieldA;
   }
@@ -7919,15 +7971,18 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "opt_fieldA" } */
+  [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   const bool* get_opt_fieldA() const& {
     return opt_fieldA_ref() ? std::addressof(opt_fieldA) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldA" } */
+  [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   bool* get_opt_fieldA() & {
     return opt_fieldA_ref() ? std::addressof(opt_fieldA) : nullptr;
   }
   /** Glean { "field": "opt_fieldA" } */
+  [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   bool* get_opt_fieldA() && = delete;
 
   /** Glean { "field": "opt_fieldA" } */
@@ -7937,8 +7992,10 @@ class containerStruct final  {
     return opt_fieldA;
   }
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const ::std::map<::std::string, bool>& get_fieldB() const&;
   /** Glean { "field": "fieldB" } */
+  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::map<::std::string, bool> get_fieldB() &&;
 
   /** Glean { "field": "fieldB" } */
@@ -7949,8 +8006,10 @@ class containerStruct final  {
     return fieldB;
   }
   /** Glean { "field": "req_fieldB" } */
+  [[deprecated("Use `FOO.req_fieldB().value();` instead of `FOO.get_req_fieldB();`")]]
   const ::std::map<::std::string, bool>& get_req_fieldB() const&;
   /** Glean { "field": "req_fieldB" } */
+  [[deprecated("Use `FOO.req_fieldB().value();` instead of `FOO.get_req_fieldB();`")]]
   ::std::map<::std::string, bool> get_req_fieldB() &&;
 
   /** Glean { "field": "req_fieldB" } */
@@ -7961,10 +8020,13 @@ class containerStruct final  {
     return req_fieldB;
   }
   /** Glean { "field": "opt_fieldB" } */
+  [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   const ::std::map<::std::string, bool>* get_opt_fieldB() const&;
   /** Glean { "field": "opt_fieldB" } */
+  [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   ::std::map<::std::string, bool>* get_opt_fieldB() &;
   /** Glean { "field": "opt_fieldB" } */
+  [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   ::std::map<::std::string, bool>* get_opt_fieldB() && = delete;
 
   /** Glean { "field": "opt_fieldB" } */
@@ -7975,8 +8037,10 @@ class containerStruct final  {
     return opt_fieldB;
   }
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   const ::std::set<::std::int32_t>& get_fieldC() const&;
   /** Glean { "field": "fieldC" } */
+  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   ::std::set<::std::int32_t> get_fieldC() &&;
 
   /** Glean { "field": "fieldC" } */
@@ -7987,8 +8051,10 @@ class containerStruct final  {
     return fieldC;
   }
   /** Glean { "field": "req_fieldC" } */
+  [[deprecated("Use `FOO.req_fieldC().value();` instead of `FOO.get_req_fieldC();`")]]
   const ::std::set<::std::int32_t>& get_req_fieldC() const&;
   /** Glean { "field": "req_fieldC" } */
+  [[deprecated("Use `FOO.req_fieldC().value();` instead of `FOO.get_req_fieldC();`")]]
   ::std::set<::std::int32_t> get_req_fieldC() &&;
 
   /** Glean { "field": "req_fieldC" } */
@@ -7999,10 +8065,13 @@ class containerStruct final  {
     return req_fieldC;
   }
   /** Glean { "field": "opt_fieldC" } */
+  [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   const ::std::set<::std::int32_t>* get_opt_fieldC() const&;
   /** Glean { "field": "opt_fieldC" } */
+  [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   ::std::set<::std::int32_t>* get_opt_fieldC() &;
   /** Glean { "field": "opt_fieldC" } */
+  [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   ::std::set<::std::int32_t>* get_opt_fieldC() && = delete;
 
   /** Glean { "field": "opt_fieldC" } */
@@ -8014,11 +8083,13 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   const ::std::string& get_fieldD() const& {
     return fieldD;
   }
 
   /** Glean { "field": "fieldD" } */
+  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   ::std::string get_fieldD() && {
     return std::move(fieldD);
   }
@@ -8032,11 +8103,13 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldE" } */
+  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   const ::std::string& get_fieldE() const& {
     return fieldE;
   }
 
   /** Glean { "field": "fieldE" } */
+  [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   ::std::string get_fieldE() && {
     return std::move(fieldE);
   }
@@ -8050,11 +8123,13 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "req_fieldE" } */
+  [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
   const ::std::string& get_req_fieldE() const& {
     return req_fieldE;
   }
 
   /** Glean { "field": "req_fieldE" } */
+  [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
   ::std::string get_req_fieldE() && {
     return std::move(req_fieldE);
   }
@@ -8068,15 +8143,18 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "opt_fieldE" } */
+  [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   const ::std::string* get_opt_fieldE() const& {
     return opt_fieldE_ref() ? std::addressof(opt_fieldE) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldE" } */
+  [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   ::std::string* get_opt_fieldE() & {
     return opt_fieldE_ref() ? std::addressof(opt_fieldE) : nullptr;
   }
   /** Glean { "field": "opt_fieldE" } */
+  [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   ::std::string* get_opt_fieldE() && = delete;
 
   /** Glean { "field": "opt_fieldE" } */
@@ -8087,8 +8165,10 @@ class containerStruct final  {
     return opt_fieldE;
   }
   /** Glean { "field": "fieldF" } */
+  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   const ::std::vector<::std::vector<::std::int32_t>>& get_fieldF() const&;
   /** Glean { "field": "fieldF" } */
+  [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   ::std::vector<::std::vector<::std::int32_t>> get_fieldF() &&;
 
   /** Glean { "field": "fieldF" } */
@@ -8099,8 +8179,10 @@ class containerStruct final  {
     return fieldF;
   }
   /** Glean { "field": "fieldG" } */
+  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& get_fieldG() const&;
   /** Glean { "field": "fieldG" } */
+  [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> get_fieldG() &&;
 
   /** Glean { "field": "fieldG" } */
@@ -8111,8 +8193,10 @@ class containerStruct final  {
     return fieldG;
   }
   /** Glean { "field": "fieldH" } */
+  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   const ::std::vector<::std::set<::std::int32_t>>& get_fieldH() const&;
   /** Glean { "field": "fieldH" } */
+  [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   ::std::vector<::std::set<::std::int32_t>> get_fieldH() &&;
 
   /** Glean { "field": "fieldH" } */
@@ -8124,6 +8208,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldI" } */
+  [[deprecated("Use `FOO.fieldI().value();` instead of `FOO.get_fieldI();`")]]
   bool get_fieldI() const {
     return fieldI;
   }
@@ -8135,8 +8220,10 @@ class containerStruct final  {
     return fieldI;
   }
   /** Glean { "field": "fieldJ" } */
+  [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
   const ::std::map<::std::string, ::std::vector<::std::int32_t>>& get_fieldJ() const&;
   /** Glean { "field": "fieldJ" } */
+  [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
   ::std::map<::std::string, ::std::vector<::std::int32_t>> get_fieldJ() &&;
 
   /** Glean { "field": "fieldJ" } */
@@ -8147,8 +8234,10 @@ class containerStruct final  {
     return fieldJ;
   }
   /** Glean { "field": "fieldK" } */
+  [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
   const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& get_fieldK() const&;
   /** Glean { "field": "fieldK" } */
+  [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
   ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> get_fieldK() &&;
 
   /** Glean { "field": "fieldK" } */
@@ -8159,8 +8248,10 @@ class containerStruct final  {
     return fieldK;
   }
   /** Glean { "field": "fieldL" } */
+  [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
   const ::std::set<::std::set<::std::set<bool>>>& get_fieldL() const&;
   /** Glean { "field": "fieldL" } */
+  [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
   ::std::set<::std::set<::std::set<bool>>> get_fieldL() &&;
 
   /** Glean { "field": "fieldL" } */
@@ -8171,8 +8262,10 @@ class containerStruct final  {
     return fieldL;
   }
   /** Glean { "field": "fieldM" } */
+  [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
   const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_fieldM() const&;
   /** Glean { "field": "fieldM" } */
+  [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
   ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> get_fieldM() &&;
 
   /** Glean { "field": "fieldM" } */
@@ -8184,6 +8277,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldN" } */
+  [[deprecated("Use `FOO.fieldN().value();` instead of `FOO.get_fieldN();`")]]
   ::some::valid::ns::simpleTypeDef get_fieldN() const {
     return fieldN;
   }
@@ -8195,8 +8289,10 @@ class containerStruct final  {
     return fieldN;
   }
   /** Glean { "field": "fieldO" } */
+  [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
   const ::some::valid::ns::complexStructTypeDef& get_fieldO() const&;
   /** Glean { "field": "fieldO" } */
+  [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
   ::some::valid::ns::complexStructTypeDef get_fieldO() &&;
 
   /** Glean { "field": "fieldO" } */
@@ -8207,8 +8303,10 @@ class containerStruct final  {
     return fieldO;
   }
   /** Glean { "field": "fieldP" } */
+  [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
   const ::std::vector<::some::valid::ns::mostComplexTypeDef>& get_fieldP() const&;
   /** Glean { "field": "fieldP" } */
+  [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
   ::std::vector<::some::valid::ns::mostComplexTypeDef> get_fieldP() &&;
 
   /** Glean { "field": "fieldP" } */
@@ -8220,6 +8318,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldQ" } */
+  [[deprecated("Use `FOO.fieldQ().value();` instead of `FOO.get_fieldQ();`")]]
   ::some::valid::ns::MyEnumA get_fieldQ() const {
     return fieldQ;
   }
@@ -8232,6 +8331,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldR" } */
+  [[deprecated("Use `FOO.fieldR().value();` instead of `FOO.get_fieldR();`")]]
   ::some::valid::ns::MyEnumA get_fieldR() const {
     return fieldR;
   }
@@ -8244,6 +8344,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "req_fieldR" } */
+  [[deprecated("Use `FOO.req_fieldR().value();` instead of `FOO.get_req_fieldR();`")]]
   ::some::valid::ns::MyEnumA get_req_fieldR() const {
     return req_fieldR;
   }
@@ -8256,15 +8357,18 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "opt_fieldR" } */
+  [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]
   const ::some::valid::ns::MyEnumA* get_opt_fieldR() const& {
     return opt_fieldR_ref() ? std::addressof(opt_fieldR) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldR" } */
+  [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]
   ::some::valid::ns::MyEnumA* get_opt_fieldR() & {
     return opt_fieldR_ref() ? std::addressof(opt_fieldR) : nullptr;
   }
   /** Glean { "field": "opt_fieldR" } */
+  [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]
   ::some::valid::ns::MyEnumA* get_opt_fieldR() && = delete;
 
   /** Glean { "field": "opt_fieldR" } */
@@ -8275,6 +8379,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldS" } */
+  [[deprecated("Use `FOO.fieldS().value();` instead of `FOO.get_fieldS();`")]]
   ::some::valid::ns::MyEnumA get_fieldS() const {
     return fieldS;
   }
@@ -8286,8 +8391,10 @@ class containerStruct final  {
     return fieldS;
   }
   /** Glean { "field": "fieldT" } */
+  [[deprecated("Use `FOO.fieldT().value();` instead of `FOO.get_fieldT();`")]]
   const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldT() const&;
   /** Glean { "field": "fieldT" } */
+  [[deprecated("Use `FOO.fieldT().value();` instead of `FOO.get_fieldT();`")]]
   ::std::vector<::some::valid::ns::MyEnumA> get_fieldT() &&;
 
   /** Glean { "field": "fieldT" } */
@@ -8298,8 +8405,10 @@ class containerStruct final  {
     return fieldT;
   }
   /** Glean { "field": "fieldU" } */
+  [[deprecated("Use `FOO.fieldU().value();` instead of `FOO.get_fieldU();`")]]
   const ::std::vector<::some::valid::ns::MyEnumA>& get_fieldU() const&;
   /** Glean { "field": "fieldU" } */
+  [[deprecated("Use `FOO.fieldU().value();` instead of `FOO.get_fieldU();`")]]
   ::std::vector<::some::valid::ns::MyEnumA> get_fieldU() &&;
 
   /** Glean { "field": "fieldU" } */
@@ -8310,8 +8419,10 @@ class containerStruct final  {
     return fieldU;
   }
   /** Glean { "field": "fieldV" } */
+  [[deprecated("Use `FOO.fieldV().value();` instead of `FOO.get_fieldV();`")]]
   const ::some::valid::ns::MyStruct& get_fieldV() const&;
   /** Glean { "field": "fieldV" } */
+  [[deprecated("Use `FOO.fieldV().value();` instead of `FOO.get_fieldV();`")]]
   ::some::valid::ns::MyStruct get_fieldV() &&;
 
   /** Glean { "field": "fieldV" } */
@@ -8322,8 +8433,10 @@ class containerStruct final  {
     return fieldV;
   }
   /** Glean { "field": "req_fieldV" } */
+  [[deprecated("Use `FOO.req_fieldV().value();` instead of `FOO.get_req_fieldV();`")]]
   const ::some::valid::ns::MyStruct& get_req_fieldV() const&;
   /** Glean { "field": "req_fieldV" } */
+  [[deprecated("Use `FOO.req_fieldV().value();` instead of `FOO.get_req_fieldV();`")]]
   ::some::valid::ns::MyStruct get_req_fieldV() &&;
 
   /** Glean { "field": "req_fieldV" } */
@@ -8334,10 +8447,13 @@ class containerStruct final  {
     return req_fieldV;
   }
   /** Glean { "field": "opt_fieldV" } */
+  [[deprecated("Use `FOO.opt_fieldV().value();` instead of `FOO.get_opt_fieldV();`")]]
   const ::some::valid::ns::MyStruct* get_opt_fieldV() const&;
   /** Glean { "field": "opt_fieldV" } */
+  [[deprecated("Use `FOO.opt_fieldV().value();` instead of `FOO.get_opt_fieldV();`")]]
   ::some::valid::ns::MyStruct* get_opt_fieldV() &;
   /** Glean { "field": "opt_fieldV" } */
+  [[deprecated("Use `FOO.opt_fieldV().value();` instead of `FOO.get_opt_fieldV();`")]]
   ::some::valid::ns::MyStruct* get_opt_fieldV() && = delete;
 
   /** Glean { "field": "opt_fieldV" } */
@@ -8348,8 +8464,10 @@ class containerStruct final  {
     return opt_fieldV;
   }
   /** Glean { "field": "fieldW" } */
+  [[deprecated("Use `FOO.fieldW().value();` instead of `FOO.get_fieldW();`")]]
   const ::std::set<::some::valid::ns::MyStruct>& get_fieldW() const&;
   /** Glean { "field": "fieldW" } */
+  [[deprecated("Use `FOO.fieldW().value();` instead of `FOO.get_fieldW();`")]]
   ::std::set<::some::valid::ns::MyStruct> get_fieldW() &&;
 
   /** Glean { "field": "fieldW" } */
@@ -8360,8 +8478,10 @@ class containerStruct final  {
     return fieldW;
   }
   /** Glean { "field": "fieldX" } */
+  [[deprecated("Use `FOO.fieldX().value();` instead of `FOO.get_fieldX();`")]]
   const ::some::valid::ns::ComplexUnion& get_fieldX() const&;
   /** Glean { "field": "fieldX" } */
+  [[deprecated("Use `FOO.fieldX().value();` instead of `FOO.get_fieldX();`")]]
   ::some::valid::ns::ComplexUnion get_fieldX() &&;
 
   /** Glean { "field": "fieldX" } */
@@ -8372,8 +8492,10 @@ class containerStruct final  {
     return fieldX;
   }
   /** Glean { "field": "req_fieldX" } */
+  [[deprecated("Use `FOO.req_fieldX().value();` instead of `FOO.get_req_fieldX();`")]]
   const ::some::valid::ns::ComplexUnion& get_req_fieldX() const&;
   /** Glean { "field": "req_fieldX" } */
+  [[deprecated("Use `FOO.req_fieldX().value();` instead of `FOO.get_req_fieldX();`")]]
   ::some::valid::ns::ComplexUnion get_req_fieldX() &&;
 
   /** Glean { "field": "req_fieldX" } */
@@ -8384,10 +8506,13 @@ class containerStruct final  {
     return req_fieldX;
   }
   /** Glean { "field": "opt_fieldX" } */
+  [[deprecated("Use `FOO.opt_fieldX().value();` instead of `FOO.get_opt_fieldX();`")]]
   const ::some::valid::ns::ComplexUnion* get_opt_fieldX() const&;
   /** Glean { "field": "opt_fieldX" } */
+  [[deprecated("Use `FOO.opt_fieldX().value();` instead of `FOO.get_opt_fieldX();`")]]
   ::some::valid::ns::ComplexUnion* get_opt_fieldX() &;
   /** Glean { "field": "opt_fieldX" } */
+  [[deprecated("Use `FOO.opt_fieldX().value();` instead of `FOO.get_opt_fieldX();`")]]
   ::some::valid::ns::ComplexUnion* get_opt_fieldX() && = delete;
 
   /** Glean { "field": "opt_fieldX" } */
@@ -8398,8 +8523,10 @@ class containerStruct final  {
     return opt_fieldX;
   }
   /** Glean { "field": "fieldY" } */
+  [[deprecated("Use `FOO.fieldY().value();` instead of `FOO.get_fieldY();`")]]
   const ::std::vector<::some::valid::ns::ComplexUnion>& get_fieldY() const&;
   /** Glean { "field": "fieldY" } */
+  [[deprecated("Use `FOO.fieldY().value();` instead of `FOO.get_fieldY();`")]]
   ::std::vector<::some::valid::ns::ComplexUnion> get_fieldY() &&;
 
   /** Glean { "field": "fieldY" } */
@@ -8410,8 +8537,10 @@ class containerStruct final  {
     return fieldY;
   }
   /** Glean { "field": "fieldZ" } */
+  [[deprecated("Use `FOO.fieldZ().value();` instead of `FOO.get_fieldZ();`")]]
   const ::some::valid::ns::unionTypeDef& get_fieldZ() const&;
   /** Glean { "field": "fieldZ" } */
+  [[deprecated("Use `FOO.fieldZ().value();` instead of `FOO.get_fieldZ();`")]]
   ::some::valid::ns::unionTypeDef get_fieldZ() &&;
 
   /** Glean { "field": "fieldZ" } */
@@ -8422,8 +8551,10 @@ class containerStruct final  {
     return fieldZ;
   }
   /** Glean { "field": "fieldAA" } */
+  [[deprecated("Use `FOO.fieldAA().value();` instead of `FOO.get_fieldAA();`")]]
   const ::std::vector<::some::valid::ns::unionTypeDef>& get_fieldAA() const&;
   /** Glean { "field": "fieldAA" } */
+  [[deprecated("Use `FOO.fieldAA().value();` instead of `FOO.get_fieldAA();`")]]
   ::std::vector<::some::valid::ns::unionTypeDef> get_fieldAA() &&;
 
   /** Glean { "field": "fieldAA" } */
@@ -8434,8 +8565,10 @@ class containerStruct final  {
     return fieldAA;
   }
   /** Glean { "field": "fieldAB" } */
+  [[deprecated("Use `FOO.fieldAB().value();` instead of `FOO.get_fieldAB();`")]]
   const ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>& get_fieldAB() const&;
   /** Glean { "field": "fieldAB" } */
+  [[deprecated("Use `FOO.fieldAB().value();` instead of `FOO.get_fieldAB();`")]]
   ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> get_fieldAB() &&;
 
   /** Glean { "field": "fieldAB" } */
@@ -8447,6 +8580,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldAC" } */
+  [[deprecated("Use `FOO.fieldAC().value();` instead of `FOO.get_fieldAC();`")]]
   ::some::valid::ns::MyEnumB get_fieldAC() const {
     return fieldAC;
   }
@@ -8459,6 +8593,7 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldAD" } */
+  [[deprecated("Use `FOO.fieldAD().value();` instead of `FOO.get_fieldAD();`")]]
   ::a::different::ns::AnEnum get_fieldAD() const {
     return fieldAD;
   }
@@ -8470,8 +8605,10 @@ class containerStruct final  {
     return fieldAD;
   }
   /** Glean { "field": "fieldAE" } */
+  [[deprecated("Use `FOO.fieldAE().value();` instead of `FOO.get_fieldAE();`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_fieldAE() const&;
   /** Glean { "field": "fieldAE" } */
+  [[deprecated("Use `FOO.fieldAE().value();` instead of `FOO.get_fieldAE();`")]]
   ::std::map<::std::string, ::std::int32_t> get_fieldAE() &&;
 
   /** Glean { "field": "fieldAE" } */
@@ -8483,11 +8620,13 @@ class containerStruct final  {
   }
 
   /** Glean { "field": "fieldSD" } */
+  [[deprecated("Use `FOO.fieldSD().value();` instead of `FOO.get_fieldSD();`")]]
   const ::some::valid::ns::IndirectionD& get_fieldSD() const& {
     return fieldSD;
   }
 
   /** Glean { "field": "fieldSD" } */
+  [[deprecated("Use `FOO.fieldSD().value();` instead of `FOO.get_fieldSD();`")]]
   ::some::valid::ns::IndirectionD get_fieldSD() && {
     return std::move(fieldSD);
   }
@@ -8808,6 +8947,7 @@ class MyIncludedStruct final  {
   }
 
   /** Glean { "field": "MyIncludedInt" } */
+  [[deprecated("Use `FOO.MyIncludedInt().value();` instead of `FOO.get_MyIncludedInt();`")]]
   ::a::different::ns::IncludedInt64 get_MyIncludedInt() const {
     return __fbthrift_field_MyIncludedInt;
   }
@@ -8819,8 +8959,10 @@ class MyIncludedStruct final  {
     return __fbthrift_field_MyIncludedInt;
   }
   /** Glean { "field": "MyIncludedStruct" } */
+  [[deprecated("Use `FOO.MyIncludedStruct().value();` instead of `FOO.get_MyIncludedStruct();`")]]
   const ::some::valid::ns::AStruct& get_MyIncludedStruct() const&;
   /** Glean { "field": "MyIncludedStruct" } */
+  [[deprecated("Use `FOO.MyIncludedStruct().value();` instead of `FOO.get_MyIncludedStruct();`")]]
   ::some::valid::ns::AStruct get_MyIncludedStruct() &&;
 
   /** Glean { "field": "MyIncludedStruct" } */
@@ -8831,8 +8973,10 @@ class MyIncludedStruct final  {
     return __fbthrift_field_MyIncludedStruct;
   }
   /** Glean { "field": "ARequiredField" } */
+  [[deprecated("Use `FOO.ARequiredField().value();` instead of `FOO.get_ARequiredField();`")]]
   const ::some::valid::ns::AStruct& get_ARequiredField() const&;
   /** Glean { "field": "ARequiredField" } */
+  [[deprecated("Use `FOO.ARequiredField().value();` instead of `FOO.get_ARequiredField();`")]]
   ::some::valid::ns::AStruct get_ARequiredField() &&;
 
   /** Glean { "field": "ARequiredField" } */
@@ -10041,8 +10185,10 @@ class AnnotatedStruct  {
     return {static_cast<T&&>(this->struct_struct), __isset.at(21), __isset.bit(21)};
   }
   /** Glean { "field": "no_annotation" } */
+  [[deprecated("Use `FOO.no_annotation().value();` instead of `FOO.get_no_annotation();`")]]
   const ::some::valid::ns::containerStruct& get_no_annotation() const&;
   /** Glean { "field": "no_annotation" } */
+  [[deprecated("Use `FOO.no_annotation().value();` instead of `FOO.get_no_annotation();`")]]
   ::some::valid::ns::containerStruct get_no_annotation() &&;
 
   /** Glean { "field": "no_annotation" } */
@@ -10054,6 +10200,7 @@ class AnnotatedStruct  {
   }
 
   /** Glean { "field": "base_type" } */
+  [[deprecated("Use `FOO.base_type().value();` instead of `FOO.get_base_type();`")]]
   ::some::valid::ns::CppFakeI32 get_base_type() const {
     return base_type;
   }
@@ -10065,8 +10212,10 @@ class AnnotatedStruct  {
     return base_type;
   }
   /** Glean { "field": "list_type" } */
+  [[deprecated("Use `FOO.list_type().value();` instead of `FOO.get_list_type();`")]]
   const ::some::valid::ns::FollySmallVectorI64& get_list_type() const&;
   /** Glean { "field": "list_type" } */
+  [[deprecated("Use `FOO.list_type().value();` instead of `FOO.get_list_type();`")]]
   ::some::valid::ns::FollySmallVectorI64 get_list_type() &&;
 
   /** Glean { "field": "list_type" } */
@@ -10077,8 +10226,10 @@ class AnnotatedStruct  {
     return list_type;
   }
   /** Glean { "field": "set_type" } */
+  [[deprecated("Use `FOO.set_type().value();` instead of `FOO.get_set_type();`")]]
   const ::some::valid::ns::SortedVectorSetString& get_set_type() const&;
   /** Glean { "field": "set_type" } */
+  [[deprecated("Use `FOO.set_type().value();` instead of `FOO.get_set_type();`")]]
   ::some::valid::ns::SortedVectorSetString get_set_type() &&;
 
   /** Glean { "field": "set_type" } */
@@ -10089,8 +10240,10 @@ class AnnotatedStruct  {
     return set_type;
   }
   /** Glean { "field": "map_type" } */
+  [[deprecated("Use `FOO.map_type().value();` instead of `FOO.get_map_type();`")]]
   const ::some::valid::ns::FakeMap& get_map_type() const&;
   /** Glean { "field": "map_type" } */
+  [[deprecated("Use `FOO.map_type().value();` instead of `FOO.get_map_type();`")]]
   ::some::valid::ns::FakeMap get_map_type() &&;
 
   /** Glean { "field": "map_type" } */
@@ -10101,8 +10254,10 @@ class AnnotatedStruct  {
     return map_type;
   }
   /** Glean { "field": "map_struct_type" } */
+  [[deprecated("Use `FOO.map_struct_type().value();` instead of `FOO.get_map_struct_type();`")]]
   const ::some::valid::ns::UnorderedMapStruct& get_map_struct_type() const&;
   /** Glean { "field": "map_struct_type" } */
+  [[deprecated("Use `FOO.map_struct_type().value();` instead of `FOO.get_map_struct_type();`")]]
   ::some::valid::ns::UnorderedMapStruct get_map_struct_type() &&;
 
   /** Glean { "field": "map_struct_type" } */
@@ -10114,11 +10269,13 @@ class AnnotatedStruct  {
   }
 
   /** Glean { "field": "iobuf_type" } */
+  [[deprecated("Use `FOO.iobuf_type().value();` instead of `FOO.get_iobuf_type();`")]]
   const ::some::valid::ns::IOBuf& get_iobuf_type() const& {
     return iobuf_type;
   }
 
   /** Glean { "field": "iobuf_type" } */
+  [[deprecated("Use `FOO.iobuf_type().value();` instead of `FOO.get_iobuf_type();`")]]
   ::some::valid::ns::IOBuf get_iobuf_type() && {
     return std::move(iobuf_type);
   }
@@ -10132,11 +10289,13 @@ class AnnotatedStruct  {
   }
 
   /** Glean { "field": "iobuf_ptr" } */
+  [[deprecated("Use `FOO.iobuf_ptr().value();` instead of `FOO.get_iobuf_ptr();`")]]
   const ::some::valid::ns::IOBufPtr& get_iobuf_ptr() const& {
     return iobuf_ptr;
   }
 
   /** Glean { "field": "iobuf_ptr" } */
+  [[deprecated("Use `FOO.iobuf_ptr().value();` instead of `FOO.get_iobuf_ptr();`")]]
   ::some::valid::ns::IOBufPtr get_iobuf_ptr() && {
     return std::move(iobuf_ptr);
   }
@@ -10149,8 +10308,10 @@ class AnnotatedStruct  {
     return iobuf_ptr;
   }
   /** Glean { "field": "list_i32_template" } */
+  [[deprecated("Use `FOO.list_i32_template().value();` instead of `FOO.get_list_i32_template();`")]]
   const std::list<::std::int32_t>& get_list_i32_template() const&;
   /** Glean { "field": "list_i32_template" } */
+  [[deprecated("Use `FOO.list_i32_template().value();` instead of `FOO.get_list_i32_template();`")]]
   std::list<::std::int32_t> get_list_i32_template() &&;
 
   /** Glean { "field": "list_i32_template" } */
@@ -10161,8 +10322,10 @@ class AnnotatedStruct  {
     return list_i32_template;
   }
   /** Glean { "field": "list_string_template" } */
+  [[deprecated("Use `FOO.list_string_template().value();` instead of `FOO.get_list_string_template();`")]]
   const std::deque<::std::string>& get_list_string_template() const&;
   /** Glean { "field": "list_string_template" } */
+  [[deprecated("Use `FOO.list_string_template().value();` instead of `FOO.get_list_string_template();`")]]
   std::deque<::std::string> get_list_string_template() &&;
 
   /** Glean { "field": "list_string_template" } */
@@ -10173,8 +10336,10 @@ class AnnotatedStruct  {
     return list_string_template;
   }
   /** Glean { "field": "set_template" } */
+  [[deprecated("Use `FOO.set_template().value();` instead of `FOO.get_set_template();`")]]
   const folly::sorted_vector_set<::std::string>& get_set_template() const&;
   /** Glean { "field": "set_template" } */
+  [[deprecated("Use `FOO.set_template().value();` instead of `FOO.get_set_template();`")]]
   folly::sorted_vector_set<::std::string> get_set_template() &&;
 
   /** Glean { "field": "set_template" } */
@@ -10185,8 +10350,10 @@ class AnnotatedStruct  {
     return set_template;
   }
   /** Glean { "field": "map_template" } */
+  [[deprecated("Use `FOO.map_template().value();` instead of `FOO.get_map_template();`")]]
   const folly::sorted_vector_map<::std::int64_t, ::std::string>& get_map_template() const&;
   /** Glean { "field": "map_template" } */
+  [[deprecated("Use `FOO.map_template().value();` instead of `FOO.get_map_template();`")]]
   folly::sorted_vector_map<::std::int64_t, ::std::string> get_map_template() &&;
 
   /** Glean { "field": "map_template" } */
@@ -10197,8 +10364,10 @@ class AnnotatedStruct  {
     return map_template;
   }
   /** Glean { "field": "typedef_list_template" } */
+  [[deprecated("Use `FOO.typedef_list_template().value();` instead of `FOO.get_typedef_list_template();`")]]
   const ::some::valid::ns::std_list& get_typedef_list_template() const&;
   /** Glean { "field": "typedef_list_template" } */
+  [[deprecated("Use `FOO.typedef_list_template().value();` instead of `FOO.get_typedef_list_template();`")]]
   ::some::valid::ns::std_list get_typedef_list_template() &&;
 
   /** Glean { "field": "typedef_list_template" } */
@@ -10209,8 +10378,10 @@ class AnnotatedStruct  {
     return typedef_list_template;
   }
   /** Glean { "field": "typedef_deque_template" } */
+  [[deprecated("Use `FOO.typedef_deque_template().value();` instead of `FOO.get_typedef_deque_template();`")]]
   const ::some::valid::ns::std_deque& get_typedef_deque_template() const&;
   /** Glean { "field": "typedef_deque_template" } */
+  [[deprecated("Use `FOO.typedef_deque_template().value();` instead of `FOO.get_typedef_deque_template();`")]]
   ::some::valid::ns::std_deque get_typedef_deque_template() &&;
 
   /** Glean { "field": "typedef_deque_template" } */
@@ -10221,8 +10392,10 @@ class AnnotatedStruct  {
     return typedef_deque_template;
   }
   /** Glean { "field": "typedef_set_template" } */
+  [[deprecated("Use `FOO.typedef_set_template().value();` instead of `FOO.get_typedef_set_template();`")]]
   const ::some::valid::ns::folly_set& get_typedef_set_template() const&;
   /** Glean { "field": "typedef_set_template" } */
+  [[deprecated("Use `FOO.typedef_set_template().value();` instead of `FOO.get_typedef_set_template();`")]]
   ::some::valid::ns::folly_set get_typedef_set_template() &&;
 
   /** Glean { "field": "typedef_set_template" } */
@@ -10233,8 +10406,10 @@ class AnnotatedStruct  {
     return typedef_set_template;
   }
   /** Glean { "field": "typedef_map_template" } */
+  [[deprecated("Use `FOO.typedef_map_template().value();` instead of `FOO.get_typedef_map_template();`")]]
   const ::some::valid::ns::folly_map& get_typedef_map_template() const&;
   /** Glean { "field": "typedef_map_template" } */
+  [[deprecated("Use `FOO.typedef_map_template().value();` instead of `FOO.get_typedef_map_template();`")]]
   ::some::valid::ns::folly_map get_typedef_map_template() &&;
 
   /** Glean { "field": "typedef_map_template" } */
@@ -10246,6 +10421,7 @@ class AnnotatedStruct  {
   }
 
   /** Glean { "field": "indirection_a" } */
+  [[deprecated("Use `FOO.indirection_a().value();` instead of `FOO.get_indirection_a();`")]]
   ::some::valid::ns::IndirectionA get_indirection_a() const {
     return indirection_a;
   }
@@ -10257,8 +10433,10 @@ class AnnotatedStruct  {
     return indirection_a;
   }
   /** Glean { "field": "indirection_b" } */
+  [[deprecated("Use `FOO.indirection_b().value();` instead of `FOO.get_indirection_b();`")]]
   const ::std::vector<::some::valid::ns::IndirectionB>& get_indirection_b() const&;
   /** Glean { "field": "indirection_b" } */
+  [[deprecated("Use `FOO.indirection_b().value();` instead of `FOO.get_indirection_b();`")]]
   ::std::vector<::some::valid::ns::IndirectionB> get_indirection_b() &&;
 
   /** Glean { "field": "indirection_b" } */
@@ -10269,8 +10447,10 @@ class AnnotatedStruct  {
     return indirection_b;
   }
   /** Glean { "field": "indirection_c" } */
+  [[deprecated("Use `FOO.indirection_c().value();` instead of `FOO.get_indirection_c();`")]]
   const ::std::set<::some::valid::ns::IndirectionC>& get_indirection_c() const&;
   /** Glean { "field": "indirection_c" } */
+  [[deprecated("Use `FOO.indirection_c().value();` instead of `FOO.get_indirection_c();`")]]
   ::std::set<::some::valid::ns::IndirectionC> get_indirection_c() &&;
 
   /** Glean { "field": "indirection_c" } */
@@ -10282,11 +10462,13 @@ class AnnotatedStruct  {
   }
 
   /** Glean { "field": "iobuf_type_val" } */
+  [[deprecated("Use `FOO.iobuf_type_val().value();` instead of `FOO.get_iobuf_type_val();`")]]
   const ::some::valid::ns::IOBuf& get_iobuf_type_val() const& {
     return iobuf_type_val;
   }
 
   /** Glean { "field": "iobuf_type_val" } */
+  [[deprecated("Use `FOO.iobuf_type_val().value();` instead of `FOO.get_iobuf_type_val();`")]]
   ::some::valid::ns::IOBuf get_iobuf_type_val() && {
     return std::move(iobuf_type_val);
   }
@@ -10300,11 +10482,13 @@ class AnnotatedStruct  {
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
+  [[deprecated("Use `FOO.iobuf_ptr_val().value();` instead of `FOO.get_iobuf_ptr_val();`")]]
   const ::some::valid::ns::IOBufPtr& get_iobuf_ptr_val() const& {
     return iobuf_ptr_val;
   }
 
   /** Glean { "field": "iobuf_ptr_val" } */
+  [[deprecated("Use `FOO.iobuf_ptr_val().value();` instead of `FOO.get_iobuf_ptr_val();`")]]
   ::some::valid::ns::IOBufPtr get_iobuf_ptr_val() && {
     return std::move(iobuf_ptr_val);
   }
@@ -10317,8 +10501,10 @@ class AnnotatedStruct  {
     return iobuf_ptr_val;
   }
   /** Glean { "field": "struct_struct" } */
+  [[deprecated("Use `FOO.struct_struct().value();` instead of `FOO.get_struct_struct();`")]]
   const ::some::valid::ns::containerStruct& get_struct_struct() const&;
   /** Glean { "field": "struct_struct" } */
+  [[deprecated("Use `FOO.struct_struct().value();` instead of `FOO.get_struct_struct();`")]]
   ::some::valid::ns::containerStruct get_struct_struct() &&;
 
   /** Glean { "field": "struct_struct" } */
@@ -10533,8 +10719,10 @@ class ComplexContainerStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_map_of_iobuf_ptrs), __isset.at(1), __isset.bit(1)};
   }
   /** Glean { "field": "map_of_iobufs" } */
+  [[deprecated("Use `FOO.map_of_iobufs().value();` instead of `FOO.get_map_of_iobufs();`")]]
   const ::std::map<::std::string, ::some::valid::ns::IOBuf>& get_map_of_iobufs() const&;
   /** Glean { "field": "map_of_iobufs" } */
+  [[deprecated("Use `FOO.map_of_iobufs().value();` instead of `FOO.get_map_of_iobufs();`")]]
   ::std::map<::std::string, ::some::valid::ns::IOBuf> get_map_of_iobufs() &&;
 
   /** Glean { "field": "map_of_iobufs" } */
@@ -10545,8 +10733,10 @@ class ComplexContainerStruct final  {
     return __fbthrift_field_map_of_iobufs;
   }
   /** Glean { "field": "map_of_iobuf_ptrs" } */
+  [[deprecated("Use `FOO.map_of_iobuf_ptrs().value();` instead of `FOO.get_map_of_iobuf_ptrs();`")]]
   const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& get_map_of_iobuf_ptrs() const&;
   /** Glean { "field": "map_of_iobuf_ptrs" } */
+  [[deprecated("Use `FOO.map_of_iobuf_ptrs().value();` instead of `FOO.get_map_of_iobuf_ptrs();`")]]
   ::std::map<::std::string, ::some::valid::ns::IOBufPtr> get_map_of_iobuf_ptrs() &&;
 
   /** Glean { "field": "map_of_iobuf_ptrs" } */
@@ -10761,6 +10951,7 @@ class FloatStruct final  {
   }
 
   /** Glean { "field": "floatField" } */
+  [[deprecated("Use `FOO.floatField().value();` instead of `FOO.get_floatField();`")]]
   float get_floatField() const {
     return __fbthrift_field_floatField;
   }
@@ -10773,6 +10964,7 @@ class FloatStruct final  {
   }
 
   /** Glean { "field": "doubleField" } */
+  [[deprecated("Use `FOO.doubleField().value();` instead of `FOO.get_doubleField();`")]]
   double get_doubleField() const {
     return __fbthrift_field_doubleField;
   }
@@ -11200,6 +11392,7 @@ class AllRequiredNoExceptMoveCtrStruct final  {
   }
 
   /** Glean { "field": "intField" } */
+  [[deprecated("Use `FOO.intField().value();` instead of `FOO.get_intField();`")]]
   ::std::int64_t get_intField() const {
     return __fbthrift_field_intField;
   }

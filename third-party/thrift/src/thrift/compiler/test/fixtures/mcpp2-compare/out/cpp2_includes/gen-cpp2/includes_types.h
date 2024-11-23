@@ -232,6 +232,7 @@ class AStruct final  {
   }
 
   /** Glean { "field": "FieldA" } */
+  [[deprecated("Use `FOO.FieldA().value();` instead of `FOO.get_FieldA();`")]]
   ::std::int32_t get_FieldA() const {
     return __fbthrift_field_FieldA;
   }

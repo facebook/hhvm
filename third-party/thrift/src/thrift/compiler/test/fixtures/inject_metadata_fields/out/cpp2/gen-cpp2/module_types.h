@@ -217,11 +217,13 @@ class Fields final  {
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }
@@ -386,11 +388,13 @@ class FieldsInjectedToEmptyStruct final  {
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }
@@ -607,11 +611,13 @@ class FieldsInjectedToStruct final  {
   }
 
   /** Glean { "field": "string_field" } */
+  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
   /** Glean { "field": "string_field" } */
+  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   ::std::string get_string_field() && {
     return std::move(__fbthrift_field_string_field);
   }
@@ -625,11 +631,13 @@ class FieldsInjectedToStruct final  {
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }
@@ -950,11 +958,13 @@ class FieldsInjectedWithIncludedStruct final  {
   }
 
   /** Glean { "field": "string_field" } */
+  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   const ::std::string& get_string_field() const& {
     return __fbthrift_field_string_field;
   }
 
   /** Glean { "field": "string_field" } */
+  [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   ::std::string get_string_field() && {
     return std::move(__fbthrift_field_string_field);
   }
@@ -968,11 +978,13 @@ class FieldsInjectedWithIncludedStruct final  {
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   const ::std::string& get_injected_field() const& {
     return __fbthrift_field_injected_field;
   }
 
   /** Glean { "field": "injected_field" } */
+  [[deprecated("Use `FOO.injected_field().value();` instead of `FOO.get_injected_field();`")]]
   ::std::string get_injected_field() && {
     return std::move(__fbthrift_field_injected_field);
   }

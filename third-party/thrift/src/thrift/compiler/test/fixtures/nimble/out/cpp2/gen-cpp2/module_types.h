@@ -347,6 +347,7 @@ class BasicTypes final  {
   }
 
   /** Glean { "field": "first" } */
+  [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
   ::std::int32_t get_first() const {
     return __fbthrift_field_first;
   }
@@ -359,15 +360,18 @@ class BasicTypes final  {
   }
 
   /** Glean { "field": "second" } */
+  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   const ::std::int32_t* get_second() const& {
     return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
   }
 
   /** Glean { "field": "second" } */
+  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   ::std::int32_t* get_second() & {
     return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
   }
   /** Glean { "field": "second" } */
+  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   ::std::int32_t* get_second() && = delete;
 
   /** Glean { "field": "second" } */
@@ -378,15 +382,18 @@ class BasicTypes final  {
   }
 
   /** Glean { "field": "third" } */
+  [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
   const ::std::int64_t* get_third() const& {
     return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
   }
 
   /** Glean { "field": "third" } */
+  [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
   ::std::int64_t* get_third() & {
     return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
   }
   /** Glean { "field": "third" } */
+  [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
   ::std::int64_t* get_third() && = delete;
 
   /** Glean { "field": "third" } */
@@ -397,6 +404,7 @@ class BasicTypes final  {
   }
 
   /** Glean { "field": "isTrue" } */
+  [[deprecated("Use `FOO.isTrue().value();` instead of `FOO.get_isTrue();`")]]
   bool get_isTrue() const {
     return __fbthrift_field_isTrue;
   }

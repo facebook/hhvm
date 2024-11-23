@@ -362,11 +362,13 @@ class ShouldBeBoxed final  {
   }
 
   /** Glean { "field": "sessionId" } */
+  [[deprecated("Use `FOO.sessionId().value();` instead of `FOO.get_sessionId();`")]]
   const ::std::string& get_sessionId() const& {
     return __fbthrift_field_sessionId;
   }
 
   /** Glean { "field": "sessionId" } */
+  [[deprecated("Use `FOO.sessionId().value();` instead of `FOO.get_sessionId();`")]]
   ::std::string get_sessionId() && {
     return std::move(__fbthrift_field_sessionId);
   }

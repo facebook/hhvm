@@ -25,7 +25,7 @@ folly::Optional<OverloadResult> CurrentlyOverloadedChecker::checkOverload(
           (params.method == nullptr ||
            !config_.getMethodsBypassMaxRequestsLimit().contains(
                *params.method)) &&
-          isOverloaded_(params.readHeaders, params.method))) {
+          isOverloaded_(*params.readHeaders, *params.method))) {
     return OverloadResult{
         kAppOverloadedErrorCode,
         fmt::format(

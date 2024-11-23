@@ -66,8 +66,8 @@ class ServerConfigsMock : public ServerConfigs {
   }
 
   folly::Optional<OverloadResult> checkOverload(
-      const transport::THeader::StringToStringMap*,
-      const std::string*) override {
+      const transport::THeader::StringToStringMap&,
+      const std::string&) override {
     return {};
   }
 

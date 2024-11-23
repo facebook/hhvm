@@ -548,8 +548,8 @@ void Cpp2Connection::requestReceived(
     server->getGetHeaderHandler()(hreq->getHeader(), context_.getPeerAddress());
   }
 
-  if (auto overloadResult = server->checkOverload(
-          &hreq->getHeader()->getHeaders(), &methodName)) {
+  if (auto overloadResult =
+          server->checkOverload(hreq->getHeader()->getHeaders(), methodName)) {
     killRequestServerOverloaded(std::move(hreq), std::move(*overloadResult));
     return;
   }

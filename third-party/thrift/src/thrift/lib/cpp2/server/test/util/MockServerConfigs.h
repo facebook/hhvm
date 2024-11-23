@@ -69,8 +69,8 @@ class MockServerConfigs : public apache::thrift::server::ServerConfigs {
   MOCK_METHOD(
       folly::Optional<OverloadResult>,
       checkOverload,
-      (const apache::thrift::transport::THeader::StringToStringMap*,
-       const std::string* method),
+      (const apache::thrift::transport::THeader::StringToStringMap&,
+       const std::string& method),
       (override));
   MOCK_METHOD(
       apache::thrift::PreprocessResult,

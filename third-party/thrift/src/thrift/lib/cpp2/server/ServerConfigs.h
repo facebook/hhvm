@@ -99,8 +99,8 @@ class ServerConfigs {
 
   // @see ThriftServer::checkOverload function.
   virtual folly::Optional<OverloadResult> checkOverload(
-      const transport::THeader::StringToStringMap* readHeaders,
-      const std::string* method) = 0;
+      const transport::THeader::StringToStringMap& readHeaders,
+      const std::string& method) = 0;
 
   // @see ThriftServer::preprocess function.
   virtual PreprocessResult preprocess(const PreprocessParams& params) const = 0;

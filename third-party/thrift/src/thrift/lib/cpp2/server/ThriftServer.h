@@ -197,7 +197,7 @@ class ThriftServerStopController final {
 };
 
 using IsOverloadedFunc = folly::Function<bool(
-    const transport::THeader::StringToStringMap*, const std::string*) const>;
+    const transport::THeader::StringToStringMap&, const std::string&) const>;
 
 typedef std::function<void(
     folly::EventBase*,
@@ -2243,8 +2243,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   // if overloaded, returns applicable overloaded exception code.
   folly::Optional<OverloadResult> checkOverload(
-      const transport::THeader::StringToStringMap* readHeaders = nullptr,
-      const std::string* = nullptr) final;
+      const transport::THeader::StringToStringMap& readHeaders,
+      const std::string& method) final;
 
   // returns descriptive error if application is unable to process request
   PreprocessResult preprocess(

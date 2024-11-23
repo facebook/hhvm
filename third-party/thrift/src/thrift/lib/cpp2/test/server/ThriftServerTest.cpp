@@ -469,8 +469,8 @@ void doLoadHeaderTest(bool isRocket) {
         });
 
         server.setIsOverloaded(
-            [&nCalls](const auto*, const std::string* method) {
-              EXPECT_EQ("voidResponse", *method);
+            [&nCalls](const auto&, const std::string& method) {
+              EXPECT_EQ("voidResponse", method);
               return ++nCalls == 4;
             });
       });
@@ -2046,9 +2046,9 @@ TEST_P(OverloadTest, DISABLED_Test) {
   auto client = makeClient(runner, &base);
 
   runner.getThriftServer().setIsOverloaded(
-      [&](const auto*, const string* method) {
+      [&](const auto&, const string& method) {
         if (errorType == ErrorType::AppOverload) {
-          EXPECT_EQ("voidResponse", *method);
+          EXPECT_EQ("voidResponse", method);
           return true;
         }
         return false;

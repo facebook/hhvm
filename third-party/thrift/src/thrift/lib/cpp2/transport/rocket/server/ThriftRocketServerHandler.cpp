@@ -609,7 +609,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   const auto& headers = request->getTHeader().getHeaders();
   const auto& name = request->getMethodName();
 
-  auto overloadResult = serverConfigs_->checkOverload(&headers, &name);
+  auto overloadResult = serverConfigs_->checkOverload(headers, name);
   serverConfigs_->incActiveRequests();
   if (UNLIKELY(overloadResult.has_value())) {
     handleRequestOverloadedServer(

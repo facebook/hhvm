@@ -700,7 +700,7 @@ void TransportCompatibilityTest::TestRequestResponse_Saturation() {
 void TransportCompatibilityTest::TestRequestResponse_IsOverloaded() {
   // make sure server is overloaded
   server_->getServer()->setIsOverloaded(
-      [](const transport::THeader::StringToStringMap*, const std::string*) {
+      [](const transport::THeader::StringToStringMap&, const std::string&) {
         return true;
       });
   connectToServer([this](std::unique_ptr<TestServiceAsyncClient> client) {

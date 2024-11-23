@@ -384,7 +384,7 @@ void TSocket::local_open() {
 void TSocket::close() {
   if (socket_ >= 0) {
     shutdown(socket_, SHUT_RDWR);
-    ::close(socket_);
+    folly::fileops::close(socket_);
   }
   socket_ = -1;
   peerHost_.clear();

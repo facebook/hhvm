@@ -33,7 +33,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@bd26c982ee2b6c0f9744591c74c527e8a669f72f
+        uses: docker/metadata-action@115662203e5f4c9b240a57397f721baaab82a488
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 

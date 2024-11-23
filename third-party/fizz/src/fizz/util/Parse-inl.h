@@ -65,6 +65,8 @@ inline NamedGroup parse(folly::StringPiece s) {
        NamedGroup::x25519_kyber768_experimental},
       {"x25519_kyber512_experimental",
        NamedGroup::x25519_kyber512_experimental},
+      {"X25519MLKEM512_FB", NamedGroup::X25519MLKEM512_FB},
+      {"X25519MLKEM768", NamedGroup::X25519MLKEM768},
       {"secp256r1_kyber768_draft00", NamedGroup::secp256r1_kyber768_draft00},
       {"secp384r1_kyber768", NamedGroup::secp384r1_kyber768}};
 

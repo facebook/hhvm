@@ -131,6 +131,8 @@ struct X25519 {};
 // KEMs
 struct Kyber512 {};
 struct Kyber768 {};
+struct MLKEM512 {};
+struct MLKEM768 {};
 
 constexpr size_t kEcMaxPublicKeyshareLength =
     256; // The max possible size of a buffer storing an EC keyshare. Please

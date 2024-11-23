@@ -39,6 +39,14 @@ std::unique_ptr<KeyExchange> MultiBackendFactory::makeKeyExchange(
       return std::make_unique<HybridKeyExchange>(
           fizz::libsodium::makeKeyExchange<fizz::X25519>(),
           fizz::liboqs::makeKeyExchange<Kyber512>(role));
+    case NamedGroup::X25519MLKEM768:
+      return std::make_unique<HybridKeyExchange>(
+          fizz::liboqs::makeKeyExchange<MLKEM768>(role),
+          fizz::libsodium::makeKeyExchange<fizz::X25519>());
+    case NamedGroup::X25519MLKEM512_FB:
+      return std::make_unique<HybridKeyExchange>(
+          fizz::liboqs::makeKeyExchange<MLKEM512>(role),
+          fizz::libsodium::makeKeyExchange<fizz::X25519>());
     case NamedGroup::secp256r1_kyber512:
       return std::make_unique<HybridKeyExchange>(
           fizz::openssl::makeKeyExchange<fizz::P256>(),

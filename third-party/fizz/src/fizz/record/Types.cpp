@@ -251,6 +251,8 @@ std::string toString(NamedGroup group) {
       return "x25519";
     case NamedGroup::SecP256r1MLKEM768:
       return "SecP256r1MLKEM768";
+    case fizz::NamedGroup::X25519MLKEM512_FB:
+      return "X25519MLKEM512_FB";
     case NamedGroup::X25519MLKEM768:
       return "X25519MLKEM768";
     case NamedGroup::secp521r1_x25519:

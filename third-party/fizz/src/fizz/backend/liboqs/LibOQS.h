@@ -26,6 +26,16 @@ struct Properties<fizz::Kyber768> {
   static constexpr const char* id = OQS_KEM_alg_kyber_768;
 };
 
+template <>
+struct Properties<fizz::MLKEM512> {
+  static constexpr const char* id = OQS_KEM_alg_ml_kem_512;
+};
+
+template <>
+struct Properties<fizz::MLKEM768> {
+  static constexpr const char* id = OQS_KEM_alg_ml_kem_768;
+};
+
 template <class T>
 std::unique_ptr<fizz::KeyExchange> makeKeyExchange(KeyExchangeRole role) {
   return OQSKeyExchange::createOQSKeyExchange(role, Properties<T>::id);

@@ -346,6 +346,7 @@ enum class NamedGroup : uint16_t {
   secp521r1 = 25,
   x25519 = 29,
   SecP256r1MLKEM768 = 4587,
+  X25519MLKEM512_FB = 65026,
   X25519MLKEM768 = 4588,
 
   /**

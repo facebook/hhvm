@@ -301,7 +301,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
 
   /// Inserts entries. Ignore entries that already exist.
   template <typename C = T>
-  void add(C&& entries) {
+  void tryPutMulti(C&& entries) {
     assignOr(*data_.add()).insert(entries.begin(), entries.end());
     for (const auto& entry : entries) {
       if (data_.remove()->erase(entry.first)) {
@@ -311,6 +311,10 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
         added = {};
       }
     }
+  }
+  template <typename C = T>
+  [[deprecated("Use tryPutMulti(...) method instead.")]] void add(C&& entries) {
+    tryPutMulti(std::forward<C>(entries));
   }
 
   /// Removes keys.

@@ -278,10 +278,12 @@ fn make_memoize_function_with_params_code<'a, 'd>(
         emit_memoize_helpers::with_possible_ic(
             e.label_gen_mut(),
             ic_stash_local,
-            instr::f_call_func_d(fcall_args, renamed_id),
+            InstrSeq::gather(vec![
+                instr::f_call_func_d(fcall_args, renamed_id),
+                instr::memo_set(local_range),
+            ]),
             should_make_ic_inaccessible,
         ),
-        instr::memo_set(local_range),
         if is_async {
             InstrSeq::gather(vec![
                 instr::ret_c_suspended(),
@@ -342,10 +344,12 @@ fn make_memoize_function_no_params_code<'a, 'd>(
         emit_memoize_helpers::with_possible_ic(
             e.label_gen_mut(),
             ic_stash_local,
-            instr::f_call_func_d(fcall_args, renamed_id),
+            InstrSeq::gather(vec![
+                instr::f_call_func_d(fcall_args, renamed_id),
+                instr::memo_set(LocalRange::EMPTY),
+            ]),
             should_make_ic_inaccessible,
         ),
-        instr::memo_set(LocalRange::EMPTY),
         if is_async {
             InstrSeq::gather(vec![
                 instr::ret_c_suspended(),

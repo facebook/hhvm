@@ -84,15 +84,14 @@ fn ic_set(local: Local) -> InstrSeq {
     InstrSeq::gather(vec![
         instr::get_memo_agnostic_implicit_context(),
         instr::set_implicit_context_by_value(),
-        instr::set_l(local),
-        instr::pop_c(),
+        instr::pop_l(local),
     ])
 }
 
 pub fn ic_restore(local: Local, should_make_ic_inaccessible: bool) -> InstrSeq {
     if should_make_ic_inaccessible {
         InstrSeq::gather(vec![
-            instr::c_get_l(local),
+            instr::push_l(local),
             instr::set_implicit_context_by_value(),
             instr::pop_c(),
         ])

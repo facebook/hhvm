@@ -404,18 +404,20 @@ fn make_memoize_method_with_params_code<'a, 'd>(
         emit_memoize_helpers::with_possible_ic(
             emitter.label_gen_mut(),
             ic_stash_local,
-            if args.method.static_ {
-                call_cls_method(fcall_args, args)
-            } else {
-                let renamed_method_id = hhbc::MethodName::add_suffix(
-                    args.method_id,
-                    emit_memoize_helpers::MEMOIZE_SUFFIX,
-                );
-                instr::f_call_obj_method_d(fcall_args, renamed_method_id)
-            },
+            InstrSeq::gather(vec![
+                if args.method.static_ {
+                    call_cls_method(fcall_args, args)
+                } else {
+                    let renamed_method_id = hhbc::MethodName::add_suffix(
+                        args.method_id,
+                        emit_memoize_helpers::MEMOIZE_SUFFIX,
+                    );
+                    instr::f_call_obj_method_d(fcall_args, renamed_method_id)
+                },
+                instr::memo_set(local_range),
+            ]),
             should_make_ic_inaccessible,
         ),
-        instr::memo_set(local_range),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::ret_c_suspended(),
@@ -490,18 +492,20 @@ fn make_memoize_method_no_params_code<'a, 'd>(
         emit_memoize_helpers::with_possible_ic(
             emitter.label_gen_mut(),
             ic_stash_local,
-            if args.method.static_ {
-                call_cls_method(fcall_args, args)
-            } else {
-                let renamed_method_id = hhbc::MethodName::add_suffix(
-                    args.method_id,
-                    emit_memoize_helpers::MEMOIZE_SUFFIX,
-                );
-                instr::f_call_obj_method_d(fcall_args, renamed_method_id)
-            },
+            InstrSeq::gather(vec![
+                if args.method.static_ {
+                    call_cls_method(fcall_args, args)
+                } else {
+                    let renamed_method_id = hhbc::MethodName::add_suffix(
+                        args.method_id,
+                        emit_memoize_helpers::MEMOIZE_SUFFIX,
+                    );
+                    instr::f_call_obj_method_d(fcall_args, renamed_method_id)
+                },
+                instr::memo_set(LocalRange::EMPTY),
+            ]),
             should_make_ic_inaccessible,
         ),
-        instr::memo_set(LocalRange::EMPTY),
         if args.flags.contains(Flags::IS_ASYNC) {
             InstrSeq::gather(vec![
                 instr::ret_c_suspended(),

@@ -243,7 +243,7 @@ struct Accessor {
   virtual SSATmp* getPos(IRGS& env, SSATmp* arr, SSATmp* idx) const = 0;
 
   // Given a pos and a constant offset, this method returns an updated pos.
-  virtual SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const = 0;
+  virtual SSATmp* advancePos(IRGS& env, SSATmp* pos) const = 0;
 
   // Given a base and a pos value, this method returns an "elm value" that we
   // can use to share arithmetic between key and val. (For example, for dict
@@ -296,10 +296,10 @@ struct VecAccessor : public Accessor {
     always_assert(false);
   }
 
-  SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
+  SSATmp* advancePos(IRGS& env, SSATmp* pos) const override {
     return isPtrIter()
-      ? gen(env, AdvanceVecPtrIter, IterOffsetData{offset}, pos)
-      : gen(env, AddInt, cns(env, offset), pos);
+      ? gen(env, AdvanceVecPtrIter, IterOffsetData{1}, pos)
+      : gen(env, AddInt, cns(env, 1), pos);
   }
 };
 
@@ -342,10 +342,10 @@ struct DictAccessor : public Accessor {
     gen(env, CheckPtrIterTombstone, taken, arr, elm);
   }
 
-  SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
+  SSATmp* advancePos(IRGS& env, SSATmp* pos) const override {
     return isPtrIter()
-      ? gen(env, AdvanceDictPtrIter, IterOffsetData{offset}, pos)
-      : gen(env, AddInt, cns(env, offset), pos);
+      ? gen(env, AdvanceDictPtrIter, IterOffsetData{1}, pos)
+      : gen(env, AddInt, cns(env, 1), pos);
   }
 
 private:
@@ -385,10 +385,10 @@ struct KeysetAccessor : public Accessor {
     gen(env, CheckPtrIterTombstone, taken, arr, elm);
   }
 
-  SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
+  SSATmp* advancePos(IRGS& env, SSATmp* pos) const override {
     return isPtrIter()
-      ? gen(env, AdvanceKeysetPtrIter, IterOffsetData{offset}, pos)
-      : gen(env, AddInt, cns(env, offset), pos);
+      ? gen(env, AdvanceKeysetPtrIter, IterOffsetData{1}, pos)
+      : gen(env, AddInt, cns(env, 1), pos);
   }
 };
 
@@ -438,8 +438,8 @@ struct BespokeAccessor : public Accessor {
     always_assert(false);
   }
 
-  SSATmp* advancePos(IRGS& env, SSATmp* pos, int16_t offset) const override {
-    return gen(env, AddInt, pos, cns(env, offset));
+  SSATmp* advancePos(IRGS& env, SSATmp* pos) const override {
+    return gen(env, AddInt, pos, cns(env, 1));
   }
 };
 
@@ -497,34 +497,6 @@ SSATmp* posAsInt(IRGS& env, const Accessor& accessor, SSATmp* pos) {
   return gen(env, PtrToElemAsInt, pos);
 }
 
-// It's important that we dec-ref the old values before the surprise check;
-// refcount-opts may fail to pair incs and decs separated by this check.
-//
-// However, if we do that, then when we interpret IterNext in surprise cases,
-// we'll dec-ref the values again. We solve this issue by storing nulls to the
-// output locals here, making the dec-refs in the surprise cases a no-op.
-//
-// Likewise, we really want the old position to be dead at this point so that
-// register allocation can update the position in place. However, if we don't
-// do anything here, store-elim is liable to push StIterPos into the exit path
-// and vasm-copy is liable to realize that it can re-use the old position tmp
-// instead of recomputing it. We want to increment the position register in
-// place in the main flow, so we recompute the tmp here instead.
-void iterSurpriseCheck(IRGS& env, const Accessor& accessor,
-                       const IterArgs& data, SSATmp* pos) {
-  iterIfThen(env,
-    [&](Block* taken) {
-      gen(env, CheckSurpriseFlags, taken, anyStackRegister(env));
-    },
-    [&]{
-      auto const old = accessor.advancePos(env, pos, -1);
-      gen(env, StIterPos, IterId(data.iterId), fp(env),
-          posAsInt(env, accessor, old));
-      gen(env, Jmp, makeExitSlow(env));
-    }
-  );
-}
-
 // Create a phi for iteration position at the start of the current block.
 SSATmp* phiIterPos(IRGS& env, const Accessor& accessor) {
   auto block = env.irb->curBlock();
@@ -569,7 +541,7 @@ void emitSpecializedInit(IRGS& env, const Accessor& accessor,
       env,
       [&](Block* taken) { accessor.checkTombstone(env, arr, elm, taken); },
       [&] {
-        auto const nextPos = accessor.advancePos(env, pos, 1);
+        auto const nextPos = accessor.advancePos(env, pos);
         gen(env, Jmp, next, nextPos);
       }
     );
@@ -608,7 +580,7 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
 
     env.irb->appendBlock(next);
     auto const phi = phiIterPos(env, accessor);
-    auto const cur = accessor.advancePos(env, phi, 1);
+    auto const cur = accessor.advancePos(env, phi);
     checkDone(cur);
 
     auto const elm = accessor.getElm(env, base, cur);
@@ -618,17 +590,16 @@ void emitSpecializedNext(IRGS& env, const Accessor& accessor,
       [&] { gen(env, Jmp, next, cur); }
     );
 
-    iterSurpriseCheck(env, accessor, data, cur);
     gen(env, StIterPos, IterId(data.iterId), fp(env),
         posAsInt(env, accessor, cur));
   } else {
-    auto const cur = accessor.advancePos(env, old, 1);
+    auto const cur = accessor.advancePos(env, old);
     checkDone(cur);
-    iterSurpriseCheck(env, accessor, data, cur);
     gen(env, StIterPos, IterId(data.iterId), fp(env),
         posAsInt(env, accessor, cur));
   }
 
+  surpriseCheckWithTarget(env, bodySk.offset());
   gen(env, Jmp, getBlock(env, bodySk));
 
   env.irb->appendBlock(done);

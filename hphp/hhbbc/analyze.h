@@ -95,6 +95,15 @@ struct FuncAnalysisResult {
   bool effectFree{false};
 
   /*
+   * Flag to indicate whether the analysis should be repeated after the
+   * function's bytecode was updated. The analysis must have made progress
+   * irreversibly reducing the bytecode.
+   *
+   * Used to infer the effectFree flag after reduction of MemoGet to a constant.
+   */
+  bool reanalyzeOnUpdate{false};
+
+  /*
    * Flag to indicate that an iterator's base was unchanged on at least one path
    * to that iterator's release. If this is false, we can skip doing the more
    * expensive Iter local optimization pass (because it will never succeed).

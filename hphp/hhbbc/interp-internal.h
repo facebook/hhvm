@@ -196,6 +196,11 @@ void effect_free(ISS& env) {
   env.flags.effectFree = true;
 }
 
+void reanalyze_on_update(ISS& env) {
+  FTRACE(2, "    reanalyze_on_update\n");
+  env.collect.reanalyzeOnUpdate = true;
+}
+
 /*
  * Mark the current block as unconditionally jumping to target. The
  * caller must arrange for env.state to reflect the state that needs

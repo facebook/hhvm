@@ -5787,6 +5787,17 @@ void memoGetImpl(ISS& env,
           return std::nullopt;
         }();
         if (v) {
+          // If we are here, we have already processed the block with MemoSet,
+          // which is not effect free, so the whole analysis pass is already
+          // marked as non effect free.
+          //
+          // The propagation of information from MemoSet to MemoGet violates
+          // monotonicity (one block suddenly becomes unreachable and another
+          // becomes reachable).
+          //
+          // Force reanalaysis of this function once MemoGet gets replaced
+          // with a constant to properly infer the function became effect free.
+          reanalyze_on_update(env);
           reduce(env, gen_constant(*v));
           return;
         }

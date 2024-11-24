@@ -496,6 +496,7 @@ FuncAnalysis do_analyze_collect(const IIndex& index,
 
   ai.closureUseTypes = std::move(collect.closureUseTypes);
   ai.effectFree = collect.effectFree;
+  ai.reanalyzeOnUpdate = collect.reanalyzeOnUpdate;
   ai.hasInvariantIterBase = collect.hasInvariantIterBase;
   ai.unfoldableFuncs = collect.unfoldableFuncs;
   ai.publicSPropMutations = std::move(collect.publicSPropMutations);

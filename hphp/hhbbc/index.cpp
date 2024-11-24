@@ -19956,6 +19956,11 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
       }
     }
   }
+
+  if (fa.reanalyzeOnUpdate) {
+    // Insert the dependency on itself to redo analysis.
+    deps.emplace(dep_context(*m_data, fa.ctx));
+  }
 }
 
 bool Index::refine_closure_use_vars(const php::Class* cls,

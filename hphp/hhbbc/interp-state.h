@@ -614,6 +614,7 @@ struct CollectedInfo {
   ClsConstantWork* clsCns;
   hphp_fast_set<CallContext, CallContextHasher> unfoldableFuncs;
   bool effectFree{true};
+  bool reanalyzeOnUpdate{false};
   bool hasInvariantIterBase{false};
   CollectionOpts opts{};
 

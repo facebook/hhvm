@@ -355,7 +355,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   /// Ensures that key exists and patches the entry.
   template <typename K = typename T::key_type>
   FOLLY_NODISCARD VP& ensureAndPatchByKey(K&& key) {
-    add({{key, {}}});
+    tryPutMulti({{key, {}}});
     return patchByKey(key);
   }
 

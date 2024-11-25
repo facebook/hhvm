@@ -95,6 +95,18 @@
   (modules hh_single_common)
   (libraries server_files))
 
+; for rapid iteration only: in prod we use hh_client
+(executable
+ (name hack_notebook_convert)
+ (modules hack_notebook_convert)
+ (modes exe byte_complete)
+ (link_flags
+  (:standard
+   (:include dune_config/ld-opts.sexp)))
+ (libraries
+  default_injector_config
+  notebook_convert))
+
 (executable
  (name hh_server)
  (modules hh_server)

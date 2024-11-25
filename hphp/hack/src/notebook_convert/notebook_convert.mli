@@ -17,6 +17,10 @@
  * - placing the `header` between the <?hh and cell contents
  * - Markdown cells converted to comments
  * - Moving top-level statements into a function body.
+ *
+ * NOTE: for fast local experimentation (not prod nor tests),
+ * you can use the standalone binary hack/src:hack_notebook_convert
+ *
  *)
 val notebook_to_hack : notebook_number:string -> header:string -> Exit_status.t
 

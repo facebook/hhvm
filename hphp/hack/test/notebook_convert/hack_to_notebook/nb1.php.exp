@@ -11,6 +11,7 @@
         "    echo \"hello\";",
         "  }",
         "}",
+        "$m = new MyClass();",
         "echo \"hi1\";"
       ]
     },
@@ -26,7 +27,7 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":["$m->hello();"]
+      "source":["echo \"hi2\";","$m->hello();"]
     }
   ],
   "metadata":{

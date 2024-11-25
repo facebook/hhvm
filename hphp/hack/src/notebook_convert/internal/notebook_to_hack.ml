@@ -51,8 +51,16 @@ let chunks_of_hack_exn
               Notebook_chunk.Top_level
           in
           match acc with
-          | Notebook_chunk.{ chunk_kind; contents = prev_contents; _ } :: tl
-            when Notebook_chunk.equal_chunk_kind chunk_kind kind ->
+          | Notebook_chunk.
+              {
+                chunk_kind;
+                contents = prev_contents;
+                id = prev_id;
+                cell_bento_metadata = _;
+              }
+            :: tl
+            when Notebook_chunk.equal_chunk_kind chunk_kind kind
+                 && Notebook_chunk.Id.compare id prev_id = 0 ->
             (* We merge chunks to avoid redundant comments identifying chunk positions *)
             Notebook_chunk.
               {

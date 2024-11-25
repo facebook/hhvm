@@ -25,7 +25,7 @@ type t = {
 }
 
 let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
-  let fold_cells_json_exn (acc : cell list) cell_json : cell list =
+  let cell_of_json_exn (cell_json : Hh_json.json) : cell =
     let find_exn = List.Assoc.find_exn ~equal:String.equal in
     let obj = Hh_json.get_object_exn cell_json in
     let source_json = find_exn obj "source" in
@@ -38,9 +38,9 @@ let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
     in
     match Hh_json.get_string_exn type_json with
     | "code" when String.is_prefix contents ~prefix:"%%" ->
-      Non_hack { cell_type = "unknown"; contents; cell_bento_metadata } :: acc
-    | "code" -> Hack { contents; cell_bento_metadata } :: acc
-    | cell_type -> Non_hack { cell_type; contents; cell_bento_metadata } :: acc
+      Non_hack { cell_type = "unknown"; contents; cell_bento_metadata }
+    | "code" -> Hack { contents; cell_bento_metadata }
+    | cell_type -> Non_hack { cell_type; contents; cell_bento_metadata }
   in
   try
     let find_exn = List.Assoc.find_exn ~equal:String.equal in
@@ -49,7 +49,7 @@ let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
     let metadata = Hh_json.get_object_exn @@ find_exn obj "metadata" in
     let kernelspec = find_exn metadata "kernelspec" in
     let cells_jsons = Hh_json.get_array_exn cells_json in
-    let cells = cells_jsons |> List.fold ~init:[] ~f:fold_cells_json_exn in
+    let cells = cells_jsons |> List.map ~f:cell_of_json_exn in
     Ok { cells; kernelspec }
   with
   | e -> Error (Exn.to_string e)

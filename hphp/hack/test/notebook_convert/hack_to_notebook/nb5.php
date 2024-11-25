@@ -1,5 +1,5 @@
 <?hh
-// (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
+// copyright: the company
 //@bento-notebook:{"notebook_number":"N1234","kernelspec":{"display_name":"hack","language":"hack","name":"bento_kernel_hack"}}
 //@bento-cell:{"id": 1, "cell_type": "markdown"}
 /*

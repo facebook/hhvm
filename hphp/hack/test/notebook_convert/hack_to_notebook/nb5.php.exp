@@ -12,7 +12,7 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":[]
+      "source":["$a = 10;"]
     },
     {
       "cell_type":"markdown",
@@ -26,7 +26,7 @@
       "execution_count":null,
       "metadata":{},
       "outputs":[],
-      "source":[]
+      "source":["$vc = await gen_myvc();"]
     }
   ],
   "metadata":{

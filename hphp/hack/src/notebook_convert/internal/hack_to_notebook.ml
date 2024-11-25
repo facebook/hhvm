@@ -119,6 +119,7 @@ let hack_to_notebook_exn
     body_parts
     |> Syn.children
     |> List.map ~f:Syn.full_text
+    |> List.bind ~f:String.split_lines
     |> split_by_chunk_comments ~is_from_toplevel_statements:true
   in
   let other_chunks =

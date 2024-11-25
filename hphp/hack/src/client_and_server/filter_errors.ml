@@ -8,6 +8,7 @@
 
 open Hh_prelude
 module Code = Error_codes.Warning
+module Hashtbl = Stdlib.Hashtbl
 
 type switch =
   | WAll
@@ -72,10 +73,16 @@ end = struct
     codes: Warning_set.t;
     ignore_files: Str.regexp list;
     generated_files: Str.regexp list;
+    filter_out_generated_files: bool;
   }
 
   let empty =
-    { codes = Warning_set.empty; ignore_files = []; generated_files = [] }
+    {
+      codes = Warning_set.empty;
+      ignore_files = [];
+      generated_files = [];
+      filter_out_generated_files = true;
+    }
 
   let add_code code filter =
     { filter with codes = Warning_set.add code filter.codes }
@@ -97,7 +104,8 @@ end = struct
     | Code_on code -> add_code code filter
     | Code_off code -> remove_code code filter
     | Ignored_files re -> add_ignored_files re filter
-    | Generated_files_on -> { filter with generated_files = [] }
+    | Generated_files_on ->
+      { filter with generated_files = []; filter_out_generated_files = false }
 
   let make ~default_all ~generated_files switches =
     let switches =
@@ -128,12 +136,55 @@ end = struct
   let pass_path ignore_files file_path =
     not (List.exists ignore_files ~f:(match_regexp file_path))
 
-  let pass { codes; ignore_files; generated_files } (code, file_path) =
-    match Code.of_enum code with
+  module IsNonGenerated = struct
+    let is_generated_cache : (path, bool) Hashtbl.t = Hashtbl.create 1000
+
+    let at_generated =
+      Re.str
+        ((* Writing like this to prevent CI from thinking this that file is generated...*)
+         "@"
+        ^ "generated")
+      |> Re.compile
+
+    let max_lines = 50
+
+    let is_generated path =
+      try
+        Stdlib.In_channel.with_open_text path @@ fun ic ->
+        let rec go i =
+          if i >= max_lines then
+            false
+          else
+            match Stdlib.In_channel.input_line ic with
+            | None -> false
+            | Some line -> Re.execp at_generated line || go (i + 1)
+        in
+        go 0
+      with
+      | Sys_error _ ->
+        (* File not found. This could be the case for some tests. *) false
+
+    let pass ~skip path =
+      if skip then
+        true
+      else
+        match Hashtbl.find_opt is_generated_cache path with
+        | Some is_generated -> not is_generated
+        | None ->
+          let is_generated = is_generated path in
+          Hashtbl.add is_generated_cache path is_generated;
+          not is_generated
+  end
+
+  let pass
+      { codes; ignore_files; generated_files; filter_out_generated_files }
+      (code, file_path) =
+    match Error_codes.Warning.of_enum code with
     | None -> (* This is not a warning, so don't filter out *) true
     | Some code ->
       pass_code codes code
       && pass_path (ignore_files @ generated_files) file_path
+      && IsNonGenerated.pass ~skip:(not filter_out_generated_files) file_path
 end
 
 let filter filter (error_list : Errors.finalized_error list) =

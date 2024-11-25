@@ -241,6 +241,7 @@
  (libraries
   error_codes
   errors
+  re
   user_error
   utils_core))
 

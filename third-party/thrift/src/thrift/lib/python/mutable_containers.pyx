@@ -15,12 +15,15 @@
 cimport cython
 
 from collections.abc import (
+    ItemsView,
     Iterable,
     Mapping,
     MutableMapping,
     MutableSequence,
     MutableSet as pyMutableSet,
-    Set
+    KeysView,
+    Set,
+    ValuesView,
 )
 from cpython.object cimport Py_LT, Py_EQ, PyCallable_Check
 import copy
@@ -712,6 +715,9 @@ cdef class MapKeysView:
         return ValueIterator(self._key_typeinfo, self._dict_keys)
 
 
+KeysView.register(MapKeysView)
+
+
 cdef class MapItemsView:
     def __cinit__(self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict_items):
         self._key_typeinfo = key_typeinfo
@@ -742,6 +748,9 @@ cdef class MapItemsView:
         return MapItemIterator(self._key_typeinfo, self._val_typeinfo, self._dict_items)
 
 
+ItemsView.register(MapItemsView)
+
+
 cdef class MapItemIterator:
     def __cinit__(self, TypeInfoBase key_typeinfo, TypeInfoBase value_typeinfo, dict_items):
         self._key_typeinfo = key_typeinfo
@@ -767,3 +776,6 @@ cdef class MapValuesView:
 
     def __iter__(self):
         return ValueIterator(self._val_typeinfo, self._dict_values)
+
+
+ValuesView.register(MapValuesView)

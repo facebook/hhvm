@@ -434,6 +434,7 @@ class MutableMapTest(unittest.TestCase):
         mutable_map = _create_MutableMap_str_i32({})
 
         self.assertIsInstance(mutable_map.keys(), MapKeysView)
+        self.assertIsInstance(mutable_map.keys(), collections.abc.KeysView)
         self.assertEqual(0, len(mutable_map.keys()))
 
         mutable_map["A"] = 65
@@ -463,6 +464,7 @@ class MutableMapTest(unittest.TestCase):
         # made to the map will be reflected in the `keys_view`.
         keys_view = mutable_map.keys()
         self.assertIsInstance(keys_view, MapKeysView)
+        self.assertIsInstance(keys_view, collections.abc.KeysView)
         self.assertEqual(0, len(keys_view))
 
         mutable_map["A"] = 65
@@ -487,6 +489,7 @@ class MutableMapTest(unittest.TestCase):
         mutable_map = _create_MutableMap_str_i32({})
 
         self.assertIsInstance(mutable_map.items(), MapItemsView)
+        self.assertIsInstance(mutable_map.items(), collections.abc.ItemsView)
         self.assertEqual(0, len(mutable_map.items()))
 
         mutable_map["A"] = 65
@@ -519,6 +522,7 @@ class MutableMapTest(unittest.TestCase):
         # made to the map will be reflected in the `items_view`.
         items_view = mutable_map.items()
         self.assertIsInstance(items_view, MapItemsView)
+        self.assertIsInstance(items_view, collections.abc.ItemsView)
         self.assertEqual(0, len(items_view))
 
         mutable_map["A"] = 65
@@ -550,6 +554,7 @@ class MutableMapTest(unittest.TestCase):
         # made to the map will be reflected in the `items_view`.
         items_view = mutable_map.items()
         self.assertIsInstance(items_view, MapItemsView)
+        self.assertIsInstance(items_view, collections.abc.ItemsView)
         self.assertEqual(0, len(items_view))
 
         mutable_map["A"] = to_thrift_list([1, 2, 3])
@@ -576,6 +581,7 @@ class MutableMapTest(unittest.TestCase):
         mutable_map = _create_MutableMap_str_i32({})
 
         self.assertIsInstance(mutable_map.values(), MapValuesView)
+        self.assertIsInstance(mutable_map.values(), collections.abc.ValuesView)
         self.assertEqual(0, len(mutable_map.values()))
 
         mutable_map["A"] = 65
@@ -608,6 +614,7 @@ class MutableMapTest(unittest.TestCase):
         # made to the map will be reflected in the `values_view`.
         values_view = mutable_map.values()
         self.assertIsInstance(values_view, MapValuesView)
+        self.assertIsInstance(values_view, collections.abc.ValuesView)
         self.assertEqual(0, len(values_view))
 
         mutable_map["A"] = 65
@@ -646,6 +653,7 @@ class MutableMapTest(unittest.TestCase):
         # made to the map will be reflected in the `values_view`.
         values_view = mutable_map.values()
         self.assertIsInstance(values_view, MapValuesView)
+        self.assertIsInstance(values_view, collections.abc.ValuesView)
         self.assertEqual(0, len(values_view))
 
         mutable_map["A"] = to_thrift_list([1, 2, 3])

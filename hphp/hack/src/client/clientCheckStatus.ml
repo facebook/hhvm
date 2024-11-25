@@ -630,9 +630,12 @@ let rec keep_trying_to_open
       match since_result with
       | Error e ->
         Hh_logger.log "Errors-file: watchman failure:\n%s\n" e;
-        progress_callback None;
-        Printf.eprintf "Watchman failure.\n%s\n%!" e;
-        raise Exit_status.(Exit_with Exit_status.Watchman_failed)
+        (* The errors file is present, was started at clock `clock` but the watchman query failed.
+           We'll assume there has not been any file change since that clock.,
+           If there has, hh_server will ultimately tell us with a restart sentinel, and we'll
+           ask the user to re-run hh. This is sub-optimal UX, but still better UX than
+           loudly failing now. *)
+        Lwt.return (pid, fd)
       | Ok relative_raw_updates ->
         let raw_updates =
           relative_raw_updates

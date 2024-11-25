@@ -378,6 +378,53 @@ void handleCallReturn(IRGS& env, const Func* callee, SSATmp* retVal,
 
 //////////////////////////////////////////////////////////////////////
 
+template<class TKnown, class TUnknown>
+void speculateTargetFunction(IRGS& env, SSATmp* callee,
+                             TKnown callKnown, TUnknown callUnknown,
+                             const jit::vector<CallTargetProfile::Choice> &choices,
+                             size_t attempts, const size_t maxAttempts) {
+  auto indirectCall = [&] {
+    auto const unlikely = !choices.empty() && choices[0].probability * 100 >=
+      Cfg::Jit::PGOCalledFuncExitThreshold;
+    if (unlikely) {
+      hint(env, Block::Hint::Unlikely);
+      IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
+      callUnknown(true);
+    } else {
+      callUnknown(false);
+    }
+  };
+
+  if (attempts >= choices.size() || attempts == maxAttempts) {
+    return indirectCall();
+  }
+  auto remainingProb = 1.0;
+  for (auto i = 0; i < attempts; i++) {
+    remainingProb -= choices[i].probability;
+  }
+  const Func* profiledFunc = choices[attempts].func;
+  double probability = choices[attempts].probability / remainingProb;
+  // Don't emit the check if the probability of it succeeding is below the
+  // threshold.  
+  if (probability * 100 < Cfg::Jit::PGOCalledFuncCheckThreshold) {
+    return indirectCall();
+  }
+
+  ifThenElse(
+    env,
+    [&] (Block* taken) {
+      auto const equal = gen(env, EqFunc, callee, cns(env, profiledFunc));
+      gen(env, JmpZero, taken, equal);
+    },
+    [&] {
+      callKnown(profiledFunc);
+    },
+    [&] {
+      speculateTargetFunction(env, callee, callKnown, callUnknown, choices,
+                              attempts + 1, maxAttempts);
+    }
+  );
+}
 /*
  * In PGO mode, we use profiling to try to determine the most likely target
  * function at each call site. In profiling translations, this function profiles
@@ -401,14 +448,6 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
   if (!profile.optimizing()) return callUnknown(false);
 
   auto const data = profile.data();
-  auto const choices = data.choose();
-  const Func* profiledFunc = nullptr;
-  double probability = 0;
-  if (choices.size() > 0) {
-    profiledFunc = choices[0].func;
-    probability = choices[0].probability;
-  }
-
   // Dump annotations if requested.
   if (Cfg::Eval::DumpCallTargets) {
     auto const fnName = curFunc(env)->fullName()->data();
@@ -418,62 +457,8 @@ void callProfiledFunc(IRGS& env, SSATmp* callee,
     );
   }
 
-  // Don't emit the check if the probability of it succeeding is below the
-  // threshold.
-  if (profiledFunc == nullptr ||
-      probability * 100 < Cfg::Jit::PGOCalledFuncCheckThreshold) {
-    return callUnknown(false);
-  }
-
-  ifThenElse(
-    env,
-    [&] (Block* taken) {
-      auto const equal = gen(env, EqFunc, callee, cns(env, profiledFunc));
-      gen(env, JmpZero, taken, equal);
-    },
-    [&] {
-      callKnown(profiledFunc);
-    },
-    [&] {
-      auto indirectCall = [&] {
-        auto const unlikely = probability * 100 >=
-          Cfg::Jit::PGOCalledFuncExitThreshold;
-        if (unlikely) {
-          hint(env, Block::Hint::Unlikely);
-          IRUnit::Hinter h(env.irb->unit(), Block::Hint::Unlikely);
-          callUnknown(true);
-        } else {
-          callUnknown(false);
-        }
-      };
-      // If we have a 2nd hottest call target, consider adding a check + direct
-      // call to it too.
-      if (choices.size() > 1) {
-        profiledFunc = choices[1].func;
-        auto const remainingProb = 1 - choices[0].probability;
-        always_assert(remainingProb > 0);
-        probability = choices[1].probability / remainingProb;
-        if (probability * 100 >= Cfg::Jit::PGOCalledFuncCheckThreshold) {
-          ifThenElse(
-            env,
-            [&] (Block* taken2) {
-              auto const equal = gen(env, EqFunc, callee,
-                                     cns(env, profiledFunc));
-              gen(env, JmpZero, taken2, equal);
-            },
-            [&] {
-              callKnown(profiledFunc);
-            },
-            [&] {
-              indirectCall();
-            }
-          );
-          return;
-        }
-      }
-      indirectCall();
-    }
-  );
+  speculateTargetFunction(env, callee, callKnown, callUnknown, data.choose(), 
+                          0, Cfg::Jit::PGOCalledFuncCheckNumSpeculations);
 }
 
 //////////////////////////////////////////////////////////////////////

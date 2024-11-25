@@ -23,6 +23,7 @@ import typing as _typing
 
 from common.thrift.patch.detail.dynamic_patch import (
     BaseStructPatch,
+    BaseUnionPatch,
     ListPatch,
     SetPatch,
     MapPatch,
@@ -40,6 +41,7 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
     StringPatch,
     BinaryPatch,
     StructPatch as DynamicStructPatch,
+    UnionPatch as DynamicUnionPatch,
 )
 
 import thrift.python.types as _fbthrift_python_types
@@ -59,7 +61,7 @@ import {{included_module_path}}.thrift_patch
 {{#program:structs}}
 
 class {{struct:py_name}}Patch(
-    BaseStructPatch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
+    Base{{#if struct:union?}}Union{{else}}Struct{{/if}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
 ):
     pass
 
@@ -83,7 +85,8 @@ class {{struct:py_name}}Patch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.{{struct:name}}SafePatch) -> {{struct:py_name}}Patch:
         patch = {{struct:py_name}}Patch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = Dynamic{{#if struct:union?}}Union{{else}}Struct{{/if}}Patch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 

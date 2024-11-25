@@ -6,6 +6,7 @@ import typing as _typing
 
 from common.thrift.patch.detail.dynamic_patch import (
     BaseStructPatch,
+    BaseUnionPatch,
     ListPatch,
     SetPatch,
     MapPatch,
@@ -23,6 +24,7 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
     StringPatch,
     BinaryPatch,
     StructPatch as DynamicStructPatch,
+    UnionPatch as DynamicUnionPatch,
 )
 
 import thrift.python.types as _fbthrift_python_types
@@ -57,7 +59,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -80,7 +83,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -103,7 +107,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -126,7 +131,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -149,7 +155,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -172,7 +179,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -195,7 +203,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -218,7 +227,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -241,7 +251,8 @@ class MyStructPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyStructSafePatch) -> MyStructPatch:
         patch = MyStructPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -270,7 +281,8 @@ class ContainersPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.ContainersSafePatch) -> ContainersPatch:
         patch = ContainersPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -293,7 +305,8 @@ class ContainersPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.ContainersSafePatch) -> ContainersPatch:
         patch = ContainersPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -316,7 +329,8 @@ class ContainersPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.ContainersSafePatch) -> ContainersPatch:
         patch = ContainersPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -328,7 +342,7 @@ class MyDataItemPatch(
 
 
 class MyUnionPatch(
-    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyUnion]
+    BaseUnionPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyUnion]
 ):
     pass
 
@@ -351,7 +365,8 @@ class MyUnionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyUnionSafePatch) -> MyUnionPatch:
         patch = MyUnionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicUnionPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -374,7 +389,8 @@ class MyUnionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyUnionSafePatch) -> MyUnionPatch:
         patch = MyUnionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicUnionPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -397,7 +413,8 @@ class MyUnionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyUnionSafePatch) -> MyUnionPatch:
         patch = MyUnionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicUnionPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -420,7 +437,8 @@ class MyUnionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyUnionSafePatch) -> MyUnionPatch:
         patch = MyUnionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicUnionPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -449,7 +467,8 @@ class MyExceptionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionSafePatch) -> MyExceptionPatch:
         patch = MyExceptionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -472,7 +491,8 @@ class MyExceptionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionSafePatch) -> MyExceptionPatch:
         patch = MyExceptionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -495,7 +515,8 @@ class MyExceptionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionSafePatch) -> MyExceptionPatch:
         patch = MyExceptionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -518,7 +539,8 @@ class MyExceptionPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionSafePatch) -> MyExceptionPatch:
         patch = MyExceptionPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -547,7 +569,8 @@ class MyExceptionWithMessagePatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionWithMessageSafePatch) -> MyExceptionWithMessagePatch:
         patch = MyExceptionWithMessagePatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -570,7 +593,8 @@ class MyExceptionWithMessagePatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionWithMessageSafePatch) -> MyExceptionWithMessagePatch:
         patch = MyExceptionWithMessagePatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -593,7 +617,8 @@ class MyExceptionWithMessagePatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionWithMessageSafePatch) -> MyExceptionWithMessagePatch:
         patch = MyExceptionWithMessagePatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -616,7 +641,8 @@ class MyExceptionWithMessagePatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.MyExceptionWithMessageSafePatch) -> MyExceptionWithMessagePatch:
         patch = MyExceptionWithMessagePatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
@@ -645,13 +671,14 @@ class ReservedKeywordPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.ReservedKeywordSafePatch) -> ReservedKeywordPatch:
         patch = ReservedKeywordPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicStructPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 
 
 class UnionToBeRenamedPatch(
-    BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.UnionToBeRenamed]
+    BaseUnionPatch[_fbthrift__test__fixtures__basic__module__thrift_types.UnionToBeRenamed]
 ):
     pass
 
@@ -674,7 +701,8 @@ class UnionToBeRenamedPatch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.UnionToBeRenamedSafePatch) -> UnionToBeRenamedPatch:
         patch = UnionToBeRenamedPatch()
-        patch._patch = DynamicStructPatch.deserialize_from_compact_protocol(safe_patch.data)
+        DynamicPatch = DynamicUnionPatch
+        patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
 
 

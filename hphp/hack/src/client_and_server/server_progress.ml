@@ -271,14 +271,35 @@ module ErrorsFile = struct
         log_message: string;
       }
 
+  let max_payload_size = 20_000_000
+
+  let assert_payload_size_ok size direction =
+    if size >= max_payload_size then (
+      let msg =
+        Printf.sprintf
+          "%s error payload with size %d, which is too big."
+          (match direction with
+          | `Read -> "Reading"
+          | `Write -> "Writing")
+          size
+      in
+      HackEventLogger.invariant_violation_bug msg;
+      failwith msg
+    )
+
   (** This helper acquires an exclusive lock on the file, appends the message, then releases the lock.
      It does not do any state validation - that's left to its caller. *)
   let write_message (fd : Unix.file_descr) (message : message) : unit =
     let payload = Marshal.to_bytes message [] in
-    let preamble = Marshal_tools.make_preamble (Bytes.length payload) in
+    let size = Bytes.length payload in
+    (* Since we do this assertion when reading (to avoid creating buffers that are too big),
+       we also do the same assertion when writing, just in case we ever write very big
+       messages by mistake. *)
+    assert_payload_size_ok size `Write;
+    let preamble = Marshal_tools.make_preamble size in
     Sys_utils.with_lock fd Unix.F_LOCK ~f:(fun () ->
         Sys_utils.write_non_intr fd preamble 0 (Bytes.length preamble);
-        Sys_utils.write_non_intr fd payload 0 (Bytes.length payload))
+        Sys_utils.write_non_intr fd payload 0 size)
 
   let read_message (fd : Unix.file_descr) :
       (message option, errors_file_read_error) result =
@@ -292,7 +313,7 @@ module ErrorsFile = struct
           let size = Marshal_tools.parse_preamble preamble in
           (* This assert is in case the file is garbled, and we read a crazy-big size,
              to avoid allocating say a 20gb bytes array and having the machine get stuck. *)
-          assert (size < 20_000_000);
+          assert_payload_size_ok size `Read;
           (match Sys_utils.read_non_intr fd size with
           | None -> Error Malformed
           | Some payload ->

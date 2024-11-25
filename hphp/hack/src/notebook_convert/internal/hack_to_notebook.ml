@@ -9,7 +9,7 @@ open Hh_prelude
 module Syn = Full_fidelity_positioned_syntax
 
 let split_by_chunk_comments
-    (hack : string) ~(is_from_toplevel_statements : bool) :
+    (hack_lines : string list) ~(is_from_toplevel_statements : bool) :
     Notebook_chunk.t list =
   let append_to_previous (item : 'a) : 'a list list -> 'a list list = function
     | h :: t -> (item :: h) :: t
@@ -17,8 +17,7 @@ let split_by_chunk_comments
     (* ignore anything before the first chunk start comment.
        In practice this is the <?hh header *)
   in
-  hack
-  |> String.split_lines
+  hack_lines
   |> List.fold ~init:[] ~f:(fun acc line ->
          if Notebook_chunk.is_chunk_start_comment line then
            [line] :: acc
@@ -62,7 +61,8 @@ let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
   in
   Notebook_chunk.{ chunk with contents }
 
-let hack_to_notebook_exn (syntax : Full_fidelity_positioned_syntax.t) :
+let hack_to_notebook_exn
+    (hack : string) (syntax : Full_fidelity_positioned_syntax.t) :
     (Hh_json.json, Notebook_convert_error.t) result =
   let script_children =
     match syntax with
@@ -114,7 +114,6 @@ let hack_to_notebook_exn (syntax : Full_fidelity_positioned_syntax.t) :
         (body_parts
         |> Syn.children
         |> List.map ~f:Syn.full_text
-        |> String.concat ~sep:"\n"
         |> split_by_chunk_comments ~is_from_toplevel_statements:true)
     | _ ->
       Error
@@ -122,19 +121,28 @@ let hack_to_notebook_exn (syntax : Full_fidelity_positioned_syntax.t) :
            "Must be exactly one function with prefix notebook_main")
   in
   let other_chunks =
-    other
-    |> List.map ~f:Syn.full_text
-    |> String.concat ~sep:"\n"
-    |> split_by_chunk_comments ~is_from_toplevel_statements:false
+    let hack_lines =
+      other |> List.map ~f:Syn.full_text |> List.bind ~f:String.split_lines
+    in
+    split_by_chunk_comments hack_lines ~is_from_toplevel_statements:false
+  in
+  let* Notebook_level_metadata.{ notebook_number = _; kernelspec } =
+    List.take (String.split_lines hack) 50
+    |> List.find_map ~f:Notebook_level_metadata.of_comment
+    |> Result.of_option
+         ~error:
+           (Notebook_convert_error.Invalid_input
+              {|Could not find notebook-level metadata. Expected a valid comment like: //@bento-notebook:{"notebook_number": "notebook_number", kernelspec: $THE_KERNEL_SPEC_SEE_IPYNB_SPEC}|})
   in
   let+ ipynb =
     other_chunks @ top_level_statements_chunks
     |> List.map ~f:format_chunk
-    |> Ipynb.ipynb_of_chunks
+    |> Ipynb.ipynb_of_chunks ~kernelspec
   in
   Ipynb.ipynb_to_json ipynb
 
-let hack_to_notebook (syntax : Full_fidelity_positioned_syntax.t) :
+let hack_to_notebook
+    (hack : string) (syntax : Full_fidelity_positioned_syntax.t) :
     (Hh_json.json, Notebook_convert_error.t) result =
-  try hack_to_notebook_exn syntax with
+  try hack_to_notebook_exn hack syntax with
   | e -> Error (Notebook_convert_error.Internal e)

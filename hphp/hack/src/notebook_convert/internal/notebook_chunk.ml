@@ -21,6 +21,13 @@ type chunk_kind =
   | Non_hack of { cell_type: string }
 [@@deriving eq, ord]
 
+module Hh_json = struct
+  include Hh_json
+
+  (** don't include JSON fields when sorting below *)
+  let compare_json _ _ = -1
+end
+
 (** A chunk has the information we need to map between
 * some Hack code and a cell for ipynb notebook format
 *)
@@ -28,6 +35,7 @@ type t = {
   id: Id.t;
   chunk_kind: chunk_kind;
   contents: string;
+  cell_bento_metadata: Hh_json.json option;
 }
 [@@deriving ord]
 
@@ -39,7 +47,7 @@ let is_chunk_start_comment s = Str.string_match metadata_regexp s 0
 
 let wrap_in_comment = Printf.sprintf "/*\n%s\n*/"
 
-let to_hack { chunk_kind; id; contents } : string =
+let to_hack { chunk_kind; id; contents; cell_bento_metadata } : string =
   let (cell_type, body) =
     match chunk_kind with
     | Top_level
@@ -47,15 +55,28 @@ let to_hack { chunk_kind; id; contents } : string =
       ("code", contents)
     | Non_hack { cell_type } -> (cell_type, wrap_in_comment contents)
   in
-  Printf.sprintf
-    "//@bento-cell:{\"id\": %d, \"cell_type\": \"%s\"}\n%s\n"
-    id
-    cell_type
-    body
+  let cell_bento_metadata_list =
+    match cell_bento_metadata with
+    | Some cell_bento_metadata -> [("cell_bento_metadata", cell_bento_metadata)]
+    | None -> []
+  in
+  let json_string =
+    Hh_json.json_to_string
+      ~sort_keys:true
+      Hh_json.(
+        JSON_Object
+          (cell_bento_metadata_list
+          @ [
+              ("id", JSON_Number (string_of_int id));
+              ("cell_type", JSON_String cell_type);
+            ]))
+  in
+  Printf.sprintf "//@bento-cell:%s\n%s\n" json_string body
 
 type metadata = {
   metadata_id: Id.t;
   metadata_cell_type: string;
+  cell_bento_metadata: Hh_json.json option;
 }
 
 (** Assumes `comment` has already been checked against [is_chunk_start_comment] *)
@@ -76,7 +97,10 @@ let metadata_of_comment_exn (comment : string) : metadata =
   let find_exn = List.Assoc.find_exn ~equal:String.equal in
   let metadata_id = Hh_json.get_number_int_exn (find_exn obj "id") in
   let metadata_cell_type = Hh_json.get_string_exn (find_exn obj "cell_type") in
-  { metadata_id; metadata_cell_type }
+  let cell_bento_metadata =
+    List.Assoc.find obj "cell_bento_metadata" ~equal:String.equal
+  in
+  { metadata_id; metadata_cell_type; cell_bento_metadata }
 
 let strip_comment_wrapper (hack : string) : string =
   let stripped = String.strip hack in
@@ -88,16 +112,17 @@ let strip_comment_wrapper (hack : string) : string =
 let of_hack_exn
     ~(comment : string) ~(is_from_toplevel_statements : bool) (hack : string) :
     t =
-  let { metadata_id = id; metadata_cell_type } =
+  let { metadata_id = id; metadata_cell_type; cell_bento_metadata } =
     metadata_of_comment_exn comment
   in
   if is_from_toplevel_statements then
-    { id; chunk_kind = Stmt; contents = hack }
+    { id; chunk_kind = Stmt; contents = hack; cell_bento_metadata }
   else if String.equal "code" metadata_cell_type then
-    { id; chunk_kind = Top_level; contents = hack }
+    { id; chunk_kind = Top_level; contents = hack; cell_bento_metadata }
   else
     {
       id;
       chunk_kind = Non_hack { cell_type = metadata_cell_type };
       contents = strip_comment_wrapper hack;
+      cell_bento_metadata;
     }

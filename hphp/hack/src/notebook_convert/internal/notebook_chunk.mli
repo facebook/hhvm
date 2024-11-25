@@ -25,6 +25,8 @@ type t = {
   id: Id.t;
   chunk_kind: chunk_kind;
   contents: string;
+  cell_bento_metadata: Hh_json.json option;
+      (** Corresponds to the cell-level "metadata" field in ipynb format.  *)
 }
 [@@deriving ord]
 

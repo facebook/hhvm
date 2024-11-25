@@ -76,7 +76,7 @@ let hack_to_notebook () : Exit_status.t =
     in
     Exit_status.Input_error
   else
-    match Hack_to_notebook.hack_to_notebook tree with
+    match Hack_to_notebook.hack_to_notebook hack tree with
     | Ok ipynb_json ->
       let () = validate_hack_to_notebook_exn ipynb_json in
       let ipynb_json_string =

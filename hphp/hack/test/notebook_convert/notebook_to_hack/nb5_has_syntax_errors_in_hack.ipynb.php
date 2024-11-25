@@ -1,12 +1,12 @@
 <?hh
 // copyright header here
-//@bento-notebook:{"notebook_number": "N1234"}
-//@bento-cell:{"id": 2, "cell_type": "code"}
+//@bento-notebook:{"notebook_number":"N1234","kernelspec":{"display_name":"hack","language":"hack","name":"bento_kernel_hack"}}
+//@bento-cell:{"cell_bento_metadata":{"collapsed":true},"cell_type":"code","id":2}
 class MyClass {}
 
 
 function notebook_main_N1234(): void {
-    //@bento-cell:{"id": 1, "cell_type": "code"}
+    //@bento-cell:{"cell_bento_metadata":{},"cell_type":"code","id":1}
     $x = new MyClass();
     // The next line is not valid Hack:
     =$x;

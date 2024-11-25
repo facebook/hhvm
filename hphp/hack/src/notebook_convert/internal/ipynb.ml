@@ -11,14 +11,21 @@ type cell =
   | Non_hack of {
       cell_type: string;
       contents: string;
+      cell_bento_metadata: Hh_json.json option;
     }
-  | Hack of string
+  | Hack of {
+      contents: string;
+      cell_bento_metadata: Hh_json.json option;
+    }
 [@@deriving show]
 
-type t = cell list
+type t = {
+  cells: cell list;
+  kernelspec: Hh_json.json;
+}
 
 let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
-  let fold_cells_json_exn (acc : t) cell_json : t =
+  let fold_cells_json_exn (acc : cell list) cell_json : cell list =
     let find_exn = List.Assoc.find_exn ~equal:String.equal in
     let obj = Hh_json.get_object_exn cell_json in
     let source_json = find_exn obj "source" in
@@ -26,22 +33,31 @@ let ipynb_of_json (ipynb_json : Hh_json.json) : (t, string) Result.t =
     let source_lines = List.map source_lines_json ~f:Hh_json.get_string_exn in
     let type_json = find_exn obj "cell_type" in
     let contents = String.concat ~sep:"" source_lines in
+    let cell_bento_metadata =
+      List.Assoc.find obj "metadata" ~equal:String.equal
+    in
     match Hh_json.get_string_exn type_json with
     | "code" when String.is_prefix contents ~prefix:"%%" ->
-      Non_hack { cell_type = "unknown"; contents } :: acc
-    | "code" -> Hack contents :: acc
-    | cell_type -> Non_hack { cell_type; contents } :: acc
+      Non_hack { cell_type = "unknown"; contents; cell_bento_metadata } :: acc
+    | "code" -> Hack { contents; cell_bento_metadata } :: acc
+    | cell_type -> Non_hack { cell_type; contents; cell_bento_metadata } :: acc
   in
   try
     let find_exn = List.Assoc.find_exn ~equal:String.equal in
     let obj = Hh_json.get_object_exn ipynb_json in
     let cells_json = find_exn obj "cells" in
+    let metadata = Hh_json.get_object_exn @@ find_exn obj "metadata" in
+    let kernelspec = find_exn metadata "kernelspec" in
     let cells_jsons = Hh_json.get_array_exn cells_json in
-    Ok (cells_jsons |> List.fold ~init:[] ~f:fold_cells_json_exn)
+    let cells = cells_jsons |> List.fold ~init:[] ~f:fold_cells_json_exn in
+    Ok { cells; kernelspec }
   with
   | e -> Error (Exn.to_string e)
 
-let make_ipynb_cell ~(cell_type : string) ~(source : string list) =
+let make_ipynb_cell
+    ~(cell_type : string)
+    ~(source : string list)
+    ~(cell_bento_metadata : Hh_json.json option) =
   Hh_json.(
     JSON_Object
       [
@@ -49,48 +65,94 @@ let make_ipynb_cell ~(cell_type : string) ~(source : string list) =
         ("source", JSON_Array (List.map source ~f:Hh_json.string_));
         ("outputs", JSON_Array []);
         ("execution_count", JSON_Null);
-        ("metadata", JSON_Object []);
+        ( "metadata",
+          match cell_bento_metadata with
+          | Some cell_bento_metadata -> cell_bento_metadata
+          | None -> JSON_Object [] );
       ])
 
-let ipynb_to_json (cells : t) : Hh_json.json =
+let ipynb_to_json ({ cells; kernelspec } : t) : Hh_json.json =
   let json_cells =
     List.map cells ~f:(function
-        | Non_hack { cell_type; contents } ->
-          make_ipynb_cell ~cell_type ~source:(String.split_lines contents)
-        | Hack hack ->
-          make_ipynb_cell ~cell_type:"code" ~source:(String.split_lines hack))
+        | Non_hack { cell_type; contents; cell_bento_metadata } ->
+          make_ipynb_cell
+            ~cell_type
+            ~source:(String.split_lines contents)
+            ~cell_bento_metadata
+        | Hack { contents; cell_bento_metadata } ->
+          make_ipynb_cell
+            ~cell_type:"code"
+            ~source:(String.split_lines contents)
+            ~cell_bento_metadata)
   in
   Hh_json.(
+    let nb_format = JSON_Number "4" in
     JSON_Object
       [
         ("cells", JSON_Array json_cells);
         ( "metadata",
-          JSON_Object
-            [
-              ( "kernelspec",
-                JSON_Object
-                  [
-                    ("display_name", JSON_String "hack");
-                    ("language", JSON_String "hack");
-                    ("name", JSON_String "bento_kernel_hack");
-                  ] );
-              ("orig_nbformat", JSON_Number "4");
-            ] );
+          JSON_Object [("kernelspec", kernelspec); ("orig_nbformat", nb_format)]
+        );
+        ("nbformat", nb_format);
       ])
 
-let cell_of_chunk Notebook_chunk.{ id = _; chunk_kind; contents } : cell =
+let cell_of_chunk
+    Notebook_chunk.{ id = _; chunk_kind; contents; cell_bento_metadata } : cell
+    =
   match chunk_kind with
-  | Notebook_chunk.(Top_level | Stmt) -> Hack contents
-  | Notebook_chunk.(Non_hack { cell_type }) -> Non_hack { cell_type; contents }
+  | Notebook_chunk.(Top_level | Stmt) -> Hack { contents; cell_bento_metadata }
+  | Notebook_chunk.(Non_hack { cell_type }) ->
+    Non_hack { cell_type; contents; cell_bento_metadata }
+
+let combine_bento_cell_metadata_exn
+    (md1 : Hh_json.json option) (md2 : Hh_json.json option) :
+    Hh_json.json option =
+  let json_equal a b =
+    String.equal
+      (Hh_json.json_to_string ~sort_keys:true a)
+      (Hh_json.json_to_string ~sort_keys:true b)
+  in
+  match (md1, md2) with
+  | (Some md1, Some md2) when not @@ json_equal md1 md2 ->
+    failwith
+      "Inconsistent cell metadata: two cells with the same id had different metadata"
+  | _ -> Option.first_some md1 md2
 
 (** Partial function: can only combine cells with the same cell type *)
 let combine_cells_exn (cell1 : cell) (cell2 : cell) : cell =
   match (cell1, cell2) with
-  | (Hack contents1, Hack contents2) -> Hack (contents1 ^ contents2)
-  | ( Non_hack { cell_type = cell_type1; contents = contents1 },
-      Non_hack { cell_type = cell_type2; contents = contents2 } )
+  | ( Hack { contents = contents1; cell_bento_metadata = cell_bento_metadata1 },
+      Hack { contents = contents2; cell_bento_metadata = cell_bento_metadata2 }
+    ) ->
+    (* A Hack cell could be split between declarations and top-level statements.
+       The metadata will likely be equal anyway.
+    *)
+    let cell_bento_metadata =
+      combine_bento_cell_metadata_exn cell_bento_metadata1 cell_bento_metadata2
+    in
+    Hack { contents = contents1 ^ contents2; cell_bento_metadata }
+  | ( Non_hack
+        {
+          cell_type = cell_type1;
+          contents = contents1;
+          cell_bento_metadata = cell_bento_metadata1;
+        },
+      Non_hack
+        {
+          cell_type = cell_type2;
+          contents = contents2;
+          cell_bento_metadata = cell_bento_metadata2;
+        } )
     when String.equal cell_type1 cell_type2 ->
-    Non_hack { cell_type = cell_type1; contents = contents1 ^ contents2 }
+    let cell_bento_metadata =
+      combine_bento_cell_metadata_exn cell_bento_metadata1 cell_bento_metadata2
+    in
+    Non_hack
+      {
+        cell_type = cell_type1;
+        contents = contents1 ^ contents2;
+        cell_bento_metadata;
+      }
   | _ ->
     failwith
       (Printf.sprintf
@@ -98,7 +160,8 @@ let combine_cells_exn (cell1 : cell) (cell2 : cell) : cell =
          (show_cell cell1)
          (show_cell cell2))
 
-let ipynb_of_chunks (chunks : Notebook_chunk.t list) :
+let ipynb_of_chunks
+    (chunks : Notebook_chunk.t list) ~(kernelspec : Hh_json.json) :
     (t, Notebook_convert_error.t) result =
   try
     let chunks_grouped_by_id =
@@ -109,14 +172,14 @@ let ipynb_of_chunks (chunks : Notebook_chunk.t list) :
                    Notebook_chunk.{ id = id2; _ }
                  -> Notebook_chunk.Id.compare id1 id2)
     in
-    let ipynb =
+    let cells =
       List.map chunks_grouped_by_id ~f:(fun chunks ->
           chunks
           |> List.map ~f:cell_of_chunk
           (* reduce_exn is safe because groups created by sort_and_group are non-empty *)
           |> List.reduce_exn ~f:combine_cells_exn)
     in
-    Ok ipynb
+    Ok { cells; kernelspec }
   with
   | e ->
     (* blame the user: failure during parsing is almost certainly their fault,

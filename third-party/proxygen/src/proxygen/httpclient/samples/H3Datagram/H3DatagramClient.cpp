@@ -147,8 +147,8 @@ class DatagramClient
 int main(int argc, char* argv[]) {
 #if FOLLY_HAVE_LIBGFLAGS
   // Enable glog logging to stderr by default.
-  gflags::SetCommandLineOptionWithMode(
-      "logtostderr", "1", gflags::SET_FLAGS_DEFAULT);
+  folly::gflags::SetCommandLineOptionWithMode(
+      "logtostderr", "1", folly::gflags::SET_FLAGS_DEFAULT);
 #endif
   folly::init(&argc, &argv, false);
 

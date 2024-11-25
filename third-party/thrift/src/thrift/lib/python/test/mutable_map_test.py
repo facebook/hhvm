@@ -19,7 +19,7 @@ import pickle
 import string
 import unittest
 
-from typing import cast, Optional
+from typing import cast, KeysView, Optional
 
 from thrift.python.mutable_containers import (
     MapItemsView,
@@ -125,6 +125,19 @@ class MutableMapTypeHints(unittest.TestCase):
 
             # to silence F841: not used variable
             _ = (v6, v7, v8, v9, v10)
+
+            ###################################################################
+
+            ### keys() ####
+
+            v11: MapKeysView[str] = mutable_map.keys()
+            v12: KeysView[str] = mutable_map.keys()
+
+            # pyre-ignore[9]: v13 is type `MapKeysView[int]` but is used as type `MapKeysView[str]`
+            v13: MapKeysView[int] = mutable_map.keys()
+
+            # to silence F841: not used variable
+            _ = (v11, v12, v13)
 
         except Exception:
             pass

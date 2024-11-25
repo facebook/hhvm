@@ -28,6 +28,7 @@ from common.thrift.patch.detail.dynamic_patch import (
     SetPatch,
     MapPatch,
     OptionalFieldPatch,
+    UnqualifiedFieldPatch,
 )
 
 from common.thrift.patch.detail.py_bindings.DynamicPatch import (
@@ -67,11 +68,11 @@ class {{struct:py_name}}Patch(
 
 {{#struct:fields_ordered_by_id}}
     @property
-    def {{field:py_name}}(self) -> OptionalFieldPatch[
+    def {{field:py_name}}(self) -> {{> types/field_patch_type}}[
             {{#field:type}}{{> ../python/types/unadapted_pep484_type}}{{/field:type}},
             {{#field:type}}{{> ../python/types/unadapted_pep484_patch_type}}{{/field:type}}]:
 
-        return OptionalFieldPatch(
+        return {{> types/field_patch_type}}(
             {{#field:type}}{{> ../python/common/thrift_patch_callback}}{{/field:type}},
             self._patch,
             {{field:key}},

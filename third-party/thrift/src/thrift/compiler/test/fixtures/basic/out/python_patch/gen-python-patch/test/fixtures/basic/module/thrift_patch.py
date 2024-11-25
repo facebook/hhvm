@@ -11,6 +11,7 @@ from common.thrift.patch.detail.dynamic_patch import (
     SetPatch,
     MapPatch,
     OptionalFieldPatch,
+    UnqualifiedFieldPatch,
 )
 
 from common.thrift.patch.detail.py_bindings.DynamicPatch import (
@@ -41,11 +42,11 @@ class MyStructPatch(
     pass
 
     @property
-    def MyIntField(self) -> OptionalFieldPatch[
+    def MyIntField(self) -> UnqualifiedFieldPatch[
             int,
             I64Patch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_i64_patch(),
             self._patch,
             1,
@@ -65,11 +66,11 @@ class MyStructPatch(
 
 
     @property
-    def MyStringField(self) -> OptionalFieldPatch[
+    def MyStringField(self) -> UnqualifiedFieldPatch[
             str,
             StringPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_string_patch(),
             self._patch,
             2,
@@ -89,11 +90,11 @@ class MyStructPatch(
 
 
     @property
-    def MyDataField(self) -> OptionalFieldPatch[
+    def MyDataField(self) -> UnqualifiedFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyDataItem,
             MyDataItemPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: MyDataItemPatch(patch),
             self._patch,
             3,
@@ -113,11 +114,11 @@ class MyStructPatch(
 
 
     @property
-    def myEnum(self) -> OptionalFieldPatch[
+    def myEnum(self) -> UnqualifiedFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum,
             _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_enum_patch(),
             self._patch,
             4,
@@ -137,11 +138,11 @@ class MyStructPatch(
 
 
     @property
-    def oneway(self) -> OptionalFieldPatch[
+    def oneway(self) -> UnqualifiedFieldPatch[
             bool,
             BoolPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_bool_patch(),
             self._patch,
             5,
@@ -161,11 +162,11 @@ class MyStructPatch(
 
 
     @property
-    def readonly(self) -> OptionalFieldPatch[
+    def readonly(self) -> UnqualifiedFieldPatch[
             bool,
             BoolPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_bool_patch(),
             self._patch,
             6,
@@ -185,11 +186,11 @@ class MyStructPatch(
 
 
     @property
-    def idempotent(self) -> OptionalFieldPatch[
+    def idempotent(self) -> UnqualifiedFieldPatch[
             bool,
             BoolPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_bool_patch(),
             self._patch,
             7,
@@ -209,11 +210,11 @@ class MyStructPatch(
 
 
     @property
-    def floatSet(self) -> OptionalFieldPatch[
+    def floatSet(self) -> UnqualifiedFieldPatch[
             _typing.AbstractSet[float],
             SetPatch[float]]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: SetPatch(patch.as_set_patch(), type_info),
             self._patch,
             8,
@@ -233,11 +234,11 @@ class MyStructPatch(
 
 
     @property
-    def no_hack_codegen_field(self) -> OptionalFieldPatch[
+    def no_hack_codegen_field(self) -> UnqualifiedFieldPatch[
             str,
             StringPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_string_patch(),
             self._patch,
             9,
@@ -263,11 +264,11 @@ class ContainersPatch(
     pass
 
     @property
-    def I32List(self) -> OptionalFieldPatch[
+    def I32List(self) -> UnqualifiedFieldPatch[
             _typing.Sequence[int],
             ListPatch[int]]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: ListPatch(patch.as_list_patch(), type_info),
             self._patch,
             1,
@@ -287,11 +288,11 @@ class ContainersPatch(
 
 
     @property
-    def StringSet(self) -> OptionalFieldPatch[
+    def StringSet(self) -> UnqualifiedFieldPatch[
             _typing.AbstractSet[str],
             SetPatch[str]]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: SetPatch(patch.as_set_patch(), type_info),
             self._patch,
             2,
@@ -311,11 +312,11 @@ class ContainersPatch(
 
 
     @property
-    def StringToI64Map(self) -> OptionalFieldPatch[
+    def StringToI64Map(self) -> UnqualifiedFieldPatch[
             _typing.Mapping[str, int],
             MapPatch[str, I64Patch]]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: MapPatch(lambda patch, type_info: patch.as_i64_patch(), patch.as_map_patch(), type_info),
             self._patch,
             3,
@@ -449,11 +450,11 @@ class MyExceptionPatch(
     pass
 
     @property
-    def MyIntField(self) -> OptionalFieldPatch[
+    def MyIntField(self) -> UnqualifiedFieldPatch[
             int,
             I64Patch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_i64_patch(),
             self._patch,
             1,
@@ -473,11 +474,11 @@ class MyExceptionPatch(
 
 
     @property
-    def MyStringField(self) -> OptionalFieldPatch[
+    def MyStringField(self) -> UnqualifiedFieldPatch[
             str,
             StringPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_string_patch(),
             self._patch,
             2,
@@ -497,11 +498,11 @@ class MyExceptionPatch(
 
 
     @property
-    def myStruct(self) -> OptionalFieldPatch[
+    def myStruct(self) -> UnqualifiedFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyStruct,
             MyStructPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             3,
@@ -521,11 +522,11 @@ class MyExceptionPatch(
 
 
     @property
-    def myUnion(self) -> OptionalFieldPatch[
+    def myUnion(self) -> UnqualifiedFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyUnion,
             MyUnionPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: MyUnionPatch(patch),
             self._patch,
             4,
@@ -551,11 +552,11 @@ class MyExceptionWithMessagePatch(
     pass
 
     @property
-    def MyIntField(self) -> OptionalFieldPatch[
+    def MyIntField(self) -> UnqualifiedFieldPatch[
             int,
             I64Patch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_i64_patch(),
             self._patch,
             1,
@@ -575,11 +576,11 @@ class MyExceptionWithMessagePatch(
 
 
     @property
-    def MyStringField(self) -> OptionalFieldPatch[
+    def MyStringField(self) -> UnqualifiedFieldPatch[
             str,
             StringPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_string_patch(),
             self._patch,
             2,
@@ -599,11 +600,11 @@ class MyExceptionWithMessagePatch(
 
 
     @property
-    def myStruct(self) -> OptionalFieldPatch[
+    def myStruct(self) -> UnqualifiedFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyStruct,
             MyStructPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: MyStructPatch(patch),
             self._patch,
             3,
@@ -623,11 +624,11 @@ class MyExceptionWithMessagePatch(
 
 
     @property
-    def myUnion(self) -> OptionalFieldPatch[
+    def myUnion(self) -> UnqualifiedFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyUnion,
             MyUnionPatch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: MyUnionPatch(patch),
             self._patch,
             4,
@@ -653,11 +654,11 @@ class ReservedKeywordPatch(
     pass
 
     @property
-    def reserved_field(self) -> OptionalFieldPatch[
+    def reserved_field(self) -> UnqualifiedFieldPatch[
             int,
             I32Patch]:
 
-        return OptionalFieldPatch(
+        return UnqualifiedFieldPatch(
             lambda patch, type_info: patch.as_i32_patch(),
             self._patch,
             1,

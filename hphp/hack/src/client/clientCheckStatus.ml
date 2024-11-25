@@ -405,7 +405,14 @@ let watchman_get_raw_updates_since
     match files with
     | Error e ->
       let msg = Exception.to_string e in
-      Hh_logger.log "watchman parse failure: %s\nRESPONSE:%s\n" msg stdout;
+      let msg =
+        Printf.sprintf
+          "ClientCheckStatus: watchman parse failure. Expected field `files`.\n%s\nRESPONSE:%s\n"
+          msg
+          stdout
+      in
+      Hh_logger.log "%s" msg;
+      HackEventLogger.invariant_violation_bug msg;
       Lwt.return_error msg
     | Ok (json, files) ->
       let has_changed = ref false in

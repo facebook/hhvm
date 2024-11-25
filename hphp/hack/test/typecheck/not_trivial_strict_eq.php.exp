@@ -1,8 +1,11 @@
-WARN: File "not_trivial_strict_eq.php", line 37, characters 10-18:
+WARN: File "not_trivial_strict_eq.php", line 41, characters 10-18:
 This expression is likely always `false` (Warn[12001])
-  File "not_trivial_strict_eq.php", line 35, characters 13-15:
+  File "not_trivial_strict_eq.php", line 39, characters 13-15:
   This is an int
-  File "not_trivial_strict_eq.php", line 35, characters 22-27:
+  File "not_trivial_strict_eq.php", line 39, characters 22-27:
   This is a string
+WARN: File "not_trivial_strict_eq.php", line 49, characters 10-27:
+Invalid comparison: This expression will always return `false`.
+A value of type `(int, string)` can never be equal to a value of type `int` (Warn[12007])
 ERROR: File "not_trivial_strict_eq.php", line 12, characters 10-10:
 Was expecting a return type hint (Typing[4030])

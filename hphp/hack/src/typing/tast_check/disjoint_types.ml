@@ -41,26 +41,12 @@ let add_warning env p name ty1 ty2 ~dynamic ~as_lint =
       } )
 
 let check_non_disjoint ~is_dynamic_call ~as_lint env p name ty1 ty2 =
-  let tenv = Tast_env.tast_env_as_typing_env env in
-  if
-    (not is_dynamic_call)
-    && Typing_utils.(
-         (not (is_nothing tenv ty1))
-         && (not (is_nothing tenv ty2))
-         && is_type_disjoint tenv ty1 ty2)
-  then
-    add_warning env p name ty1 ty2 ~dynamic:false ~as_lint
-  else
-    let ty1 = Tast_env.strip_dynamic env ty1 in
-    let ty2 = Tast_env.strip_dynamic env ty2 in
-    (* We don't flag ~null because typically this is a false positive *)
-    if
-      Typing_utils.(
-        (not (is_nothing tenv ty1 || is_null tenv ty1))
-        && (not (is_nothing tenv ty2 || is_null tenv ty2))
-        && is_type_disjoint tenv ty1 ty2)
-    then
-      add_warning env p name ty1 ty2 ~dynamic:true ~as_lint
+  match Env.is_disjoint ~is_dynamic_call env ty1 ty2 with
+  | Env.NonDisjoint -> ()
+  | Env.DisjointIgnoringDynamic (ty1, ty2) ->
+    add_warning env p name ty1 ty2 ~dynamic:true ~as_lint
+  | Env.Disjoint ->
+    add_warning env p name ty1 ty2 ~dynamic:is_dynamic_call ~as_lint
 
 let rec check_non_disjoint_tyl ~is_dynamic_call ~as_lint env p name tyl =
   match tyl with

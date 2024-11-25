@@ -96,6 +96,34 @@ let expand_type = Typing_env.expand_type
 
 let strip_dynamic env ty = snd (Typing_dynamic_utils.strip_dynamic env ty)
 
+type is_disjoint_result =
+  | NonDisjoint
+  | Disjoint
+  | DisjointIgnoringDynamic of Typing_defs.locl_ty * Typing_defs.locl_ty
+
+let is_disjoint ~is_dynamic_call env ty1 ty2 =
+  if
+    (not is_dynamic_call)
+    && Typing_utils.(
+         (not (is_nothing env ty1))
+         && (not (is_nothing env ty2))
+         && is_type_disjoint env ty1 ty2)
+  then
+    Disjoint
+  else
+    let ty1 = strip_dynamic env ty1 in
+    let ty2 = strip_dynamic env ty2 in
+    (* We don't flag ~null because typically this is a false positive *)
+    if
+      Typing_utils.(
+        (not (is_nothing env ty1 || is_null env ty1))
+        && (not (is_nothing env ty2 || is_null env ty2))
+        && is_type_disjoint env ty1 ty2)
+    then
+      DisjointIgnoringDynamic (ty1, ty2)
+    else
+      NonDisjoint
+
 let strip_supportdyn env ty =
   let (sd, _, ty) = Typing_utils.strip_supportdyn env ty in
   (sd, ty)

@@ -9,9 +9,13 @@
  *
  */
 
-function f() /* : TAny */ { return 42; }
+function f() /* : TAny */ {
+  return 42;
+}
 
-function getArr(): varray<int> { return vec[]; }
+function getArr(): varray<int> {
+  return vec[];
+}
 
 function g(): void {
   $a = getArr();
@@ -35,4 +39,12 @@ function g(): void {
 function h(?int $a, ?string $b): bool {
   // Not a trivial comparison since both $a and $b can be null
   return $a === $b;
+}
+
+function make_tuple(): (int, string) {
+  return tuple(3, 'a');
+}
+
+function test2(): bool {
+  return make_tuple() === 2;
 }

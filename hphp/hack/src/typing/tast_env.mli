@@ -109,6 +109,18 @@ val fully_expand : env -> Tast.ty -> Tast.ty
 (** Strip ~ from type *)
 val strip_dynamic : env -> Tast.ty -> Tast.ty
 
+type is_disjoint_result =
+  | NonDisjoint  (** Types are possibly overlapping *)
+  | Disjoint  (** Types are definitely non-overlapping *)
+  | DisjointIgnoringDynamic of Tast.ty * Tast.ty
+      (** Types overlap in dynamic, but as like-stripped types are disjoint *)
+
+(** Are types disjoint? If is_dynamic_call is true, then
+    we are checking a dynamic call through a like type, so
+    result cannot be precise (i.e. won't return Disjoint) *)
+val is_disjoint :
+  is_dynamic_call:bool -> env -> Tast.ty -> Tast.ty -> is_disjoint_result
+
 (** Strip supportdyn from type, return whether it was there or not *)
 val strip_supportdyn : env -> Tast.ty -> bool * Tast.ty
 

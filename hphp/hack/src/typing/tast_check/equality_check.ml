@@ -14,7 +14,6 @@ open Ast_defs
 open Typing_defs
 module Cls = Folded_class
 module Env = Tast_env
-module MakeType = Typing_make_type
 module SN = Naming_special_names
 
 let warning_kind = Typing_warning.Equality_check
@@ -57,10 +56,6 @@ let opaque_enum_expander =
       | _ -> super#on_tnewtype env r cid tyl cstr
   end
 
-let is_nothing env ty =
-  let nothing = MakeType.nothing Reason.none in
-  Tast_env.is_sub_type env ty nothing
-
 let add_warning env ~as_lint pos kind ty1 ty2 =
   Typing_warning_utils.add_for_migration
     (Env.get_tcopt env)
@@ -78,15 +73,17 @@ let error_if_inequatable env ty1 ty2 err =
   let expand_enum = opaque_enum_expander#on_type in
   (* Break all type abstractions *)
   let expand env ty =
+    let env = Env.tast_env_as_typing_env env in
     let (env, ty) = expand_enum env ty in
-    expand_tydef env ty
+    let ((env, _), ty, _) = expand_tydef env ty in
+    (Tast_env.typing_env_as_tast_env env, ty)
   in
-  let typing_env = Env.tast_env_as_typing_env env in
-  let ((typing_env, _), ety1, _) = expand typing_env ty1 in
-  let ((typing_env, _), ety2, _) = expand typing_env ty2 in
-  if is_nothing env ety1 || is_nothing env ety2 then
-    ()
-  else if Typing_subtype.is_type_disjoint typing_env ety1 ety2 then
+  let (env, ety1) = expand env ty1 in
+  let (env, ety2) = expand env ty2 in
+  match Env.is_disjoint ~is_dynamic_call:false env ety1 ety2 with
+  | Env.NonDisjoint -> ()
+  | Env.Disjoint -> err (Env.print_ty env ty1) (Env.print_ty env ty2)
+  | Env.DisjointIgnoringDynamic (ty1, ty2) ->
     err (Env.print_ty env ty1) (Env.print_ty env ty2)
 
 let ensure_valid_equality_check env ~as_lint p bop e1 e2 =

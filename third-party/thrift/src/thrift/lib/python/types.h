@@ -838,6 +838,45 @@ inline const PyObject* getListObjectItemBase(const void* pyList) {
   return reinterpret_cast<PyObject*>(&PyList_GET_ITEM(pyList, 0));
 }
 
+/**
+ * Returns the appropriate standard immutable default value for the given
+ * `typeInfo`.
+ *
+ * The standard default values are as follows:
+ *   * `0L` for integral numbers.
+ *   * `0d` for floating-point numbers.
+ *   * `false` for booleans.
+ *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
+ *      empty `IOBuf` if applicable).
+ *   * An empty `tuple` for lists and maps.
+ *   * An empty `frozenset` for sets.
+ *   * A recursively default-initialized instance for structs and unions.
+ *
+ * @throws if there is no standard default value
+ */
+PyObject* getStandardImmutableDefaultValuePtrForType(
+    const detail::TypeInfo& typeInfo);
+
+/**
+ * Returns the appropriate standard mutable default value for the given
+ * `typeInfo`.
+ *
+ * The standard default values are as follows:
+ *   * `0L` for integral numbers.
+ *   * `0d` for floating-point numbers.
+ *   * `false` for booleans.
+ *   * `""` (i.e., the empty string) for strings and `binary` fields (or an
+ *      empty `IOBuf` if applicable).
+ *   * An empty `list` for lists.
+ *   * An empty `dict` for maps.
+ *   * An empty `set` for sets.
+ *   * A recursively default-initialized instance for structs and unions.
+ *
+ * @throws if there is no standard default value
+ */
+PyObject* getStandardMutableDefaultValuePtrForType(
+    const detail::TypeInfo& typeInfo);
+
 } // namespace apache::thrift::python
 
 namespace apache::thrift::python::capi {

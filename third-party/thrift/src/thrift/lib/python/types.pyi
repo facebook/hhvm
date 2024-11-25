@@ -16,6 +16,9 @@
 
 import enum
 import typing
+from typing import Never
+
+from folly.iobuf import IOBuf
 
 from thrift.python.adapter import Adapter
 from thrift.python.exceptions import GeneratedError
@@ -196,6 +199,26 @@ def isset(struct: StructOrError) -> typing.Mapping[str, bool]: ...
 def update_nested_field(
     obj: sT, path_to_values: typing.Mapping[str, typing.Any]
 ) -> sT: ...
+
+_DefaultFieldValue = typing.Union[
+    bool,
+    int,
+    float,
+    str,
+    bytes,
+    IOBuf,
+    Enum,
+    Struct,
+    Union,
+    GeneratedError,
+    typing.Sequence[Never],
+    typing.AbstractSet[Never],
+    typing.Mapping[Never, Never],
+]
+
+def get_standard_immutable_default_value_for_type(
+    type_info: AnyTypeInfo,
+) -> _DefaultFieldValue: ...
 
 class _fbthrift_ResponseStreamResult(Struct, typing.Generic[TChunk]):
     success: typing.Final[TChunk]

@@ -2539,3 +2539,7 @@ cdef class ServiceInterface:
 
     async def onStopRequested(self):
         pass
+
+
+def get_standard_immutable_default_value_for_type(TypeInfoBase typeinfo):
+    return typeinfo.to_python_value(getStandardImmutableDefaultValuePtrForType(typeinfo.get_cTypeInfo()[0]))

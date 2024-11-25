@@ -30,6 +30,7 @@ from thrift.python.test.typeinfo_test import TypeInfoTests as CTests
 from thrift.python.types import (
     AdaptedTypeInfo,
     EnumTypeInfo,
+    get_standard_immutable_default_value_for_type,
     IntegerTypeInfo,
     IOBufTypeInfo,
     ListTypeInfo,
@@ -38,6 +39,15 @@ from thrift.python.types import (
     StringTypeInfo,
     StructTypeInfo,
     TypeInfo,
+    typeinfo_binary,
+    typeinfo_bool,
+    typeinfo_byte,
+    typeinfo_double,
+    typeinfo_float,
+    typeinfo_i16,
+    typeinfo_i32,
+    typeinfo_i64,
+    typeinfo_string,
 )
 
 # This python file serves as a boilerplate code for executing tests written
@@ -125,3 +135,43 @@ class TypeInfoTests(unittest.TestCase):
 
     def test_MutableStructTypeInfo(self) -> None:
         CTests(self).test_MutableStructTypeInfo()
+
+    def test_StandardDefaultValue(self) -> None:
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(typeinfo_bool), False
+        )
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(typeinfo_byte), 0
+        )
+        self.assertEqual(get_standard_immutable_default_value_for_type(typeinfo_i16), 0)
+        self.assertEqual(get_standard_immutable_default_value_for_type(typeinfo_i32), 0)
+        self.assertEqual(get_standard_immutable_default_value_for_type(typeinfo_i64), 0)
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(typeinfo_float), 0.0
+        )
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(typeinfo_double), 0.0
+        )
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(typeinfo_string), ""
+        )
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(typeinfo_binary), b""
+        )
+
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(
+                ListTypeInfo(typeinfo_string)
+            ),
+            [],
+        )
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(SetTypeInfo(typeinfo_string)),
+            set(),
+        )
+        self.assertEqual(
+            get_standard_immutable_default_value_for_type(
+                MapTypeInfo(typeinfo_string, typeinfo_string)
+            ),
+            {},
+        )

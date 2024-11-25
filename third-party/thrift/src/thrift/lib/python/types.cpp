@@ -1692,6 +1692,16 @@ const detail::TypeInfo iobufTypeInfo{
     /* .typeExt */ &ioBufFieldType,
 };
 
+PyObject* getStandardImmutableDefaultValuePtrForType(
+    const detail::TypeInfo& typeInfo) {
+  auto ret = getStandardImmutableDefaultValueForType(typeInfo);
+  return std::get<0>(ret).release();
+}
+PyObject* getStandardMutableDefaultValuePtrForType(
+    const detail::TypeInfo& typeInfo) {
+  auto ret = getStandardMutableDefaultValueForType(typeInfo);
+  return std::get<0>(ret).release();
+}
 } // namespace apache::thrift::python
 
 namespace apache::thrift::python::capi {

@@ -82,6 +82,9 @@ cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::pyth
         const cDynamicStructInfo& structInfo
     ) except+
     cdef void setStructIsset(object, int index, bint set) except+
+    cdef object getStandardImmutableDefaultValuePtrForType(
+        const cTypeInfo& typeInfo
+    ) except+
 
     cdef const cTypeInfo& boolTypeInfo
     cdef const cTypeInfo& byteTypeInfo

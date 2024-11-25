@@ -339,7 +339,7 @@ void DynamicMapPatch::erase(detail::Badge, Value k) {
   undoChanges(k);
   remove_.insert(std::move(k));
 }
-void DynamicMapPatch::add(detail::Badge, detail::ValueMap map) {
+void DynamicMapPatch::tryPutMulti(detail::Badge, detail::ValueMap map) {
   ensurePatchable();
   for (const auto& [k, v] : map) {
     if (put_.contains(k)) {
@@ -385,13 +385,13 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
         p.apply(badge, *ptr);
       }
     }
-    void remove(detail::Badge, const detail::ValueSet& v) {
+    void removeMulti(detail::Badge, const detail::ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.erase(i);
       }
     }
-    void add(detail::Badge, const detail::ValueMap& map) {
+    void tryPutMulti(detail::Badge, const detail::ValueMap& map) {
       for (const auto& kv : map) {
         auto k = kv.first;
         auto v = kv.second;
@@ -400,7 +400,7 @@ void DynamicMapPatch::apply(detail::Badge, detail::ValueMap& v) const {
         value.emplace(std::move(k), std::move(v));
       }
     }
-    void put(detail::Badge, const detail::ValueMap& map) {
+    void putMulti(detail::Badge, const detail::ValueMap& map) {
       for (const auto& kv : map) {
         auto k = kv.first;
         auto v = kv.second;
@@ -1090,13 +1090,13 @@ void DynamicSetPatch::apply(detail::Badge, detail::ValueSet& v) const {
       value = std::move(v);
     }
     void clear(detail::Badge) { value.clear(); }
-    void add(detail::Badge, const detail::ValueSet& v) {
+    void addMulti(detail::Badge, const detail::ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.insert(std::move(i));
       }
     }
-    void remove(detail::Badge, const detail::ValueSet& v) {
+    void removeMulti(detail::Badge, const detail::ValueSet& v) {
       for (auto i : v) {
         detail::convertStringToBinary(i);
         value.erase(i);

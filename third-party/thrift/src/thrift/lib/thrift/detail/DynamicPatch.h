@@ -297,13 +297,13 @@ class DynamicSetPatch : public DynamicPatchBase {
     get(op::PatchOp::Remove).ensure_set().insert(std::move(v));
   }
 
-  void add(detail::Badge badge, const detail::ValueSet& add) {
+  void addMulti(detail::Badge badge, const detail::ValueSet& add) {
     for (auto&& i : add) {
       insert(badge, i);
     }
   }
 
-  void remove(detail::Badge badge, const detail::ValueSet& remove) {
+  void removeMulti(detail::Badge badge, const detail::ValueSet& remove) {
     for (auto&& i : remove) {
       erase(badge, i);
     }
@@ -324,12 +324,12 @@ class DynamicSetPatch : public DynamicPatchBase {
     }
 
     if (auto remove = self.get_ptr(op::PatchOp::Remove)) {
-      std::forward<Visitor>(v).remove(
+      std::forward<Visitor>(v).removeMulti(
           badge, folly::forward_like<Self>(remove->as_set()));
     }
 
     if (auto add = self.get_ptr(op::PatchOp::Add)) {
-      std::forward<Visitor>(v).add(
+      std::forward<Visitor>(v).addMulti(
           badge, folly::forward_like<Self>(add->as_set()));
     }
   }
@@ -362,13 +362,13 @@ class DynamicMapPatch {
   void insert_or_assign(detail::Badge, Value k, Value v);
   void erase(detail::Badge, Value k);
 
-  void add(detail::Badge, detail::ValueMap v);
-  void remove(detail::Badge badge, const detail::ValueSet& v) {
+  void tryPutMulti(detail::Badge, detail::ValueMap v);
+  void removeMulti(detail::Badge badge, const detail::ValueSet& v) {
     for (auto&& k : v) {
       erase(badge, k);
     }
   }
-  void put(detail::Badge badge, const detail::ValueMap& m) {
+  void putMulti(detail::Badge badge, const detail::ValueMap& m) {
     for (auto&& [k, v] : m) {
       insert_or_assign(badge, k, v);
     }
@@ -683,9 +683,9 @@ void DynamicMapPatch::customVisitImpl(
     std::forward<Visitor>(v).patchByKey(badge, k, folly::forward_like<Self>(p));
   }
 
-  std::forward<Visitor>(v).add(badge, std::forward<Self>(self).add_);
-  std::forward<Visitor>(v).remove(badge, std::forward<Self>(self).remove_);
-  std::forward<Visitor>(v).put(badge, std::forward<Self>(self).put_);
+  std::forward<Visitor>(v).tryPutMulti(badge, std::forward<Self>(self).add_);
+  std::forward<Visitor>(v).removeMulti(badge, std::forward<Self>(self).remove_);
+  std::forward<Visitor>(v).putMulti(badge, std::forward<Self>(self).put_);
 
   for (auto& [k, p] : self.patchAfter_) {
     std::forward<Visitor>(v).patchByKey(badge, k, folly::forward_like<Self>(p));

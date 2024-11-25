@@ -624,7 +624,7 @@ TEST(DynamicPatch, Map) {
   add[asValueStruct<type::i32_t>(3)] = asValueStruct<type::i32_t>(300);
   {
     DynamicMapPatch patch;
-    patch.add(badge, add);
+    patch.tryPutMulti(badge, add);
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 2);
     EXPECT_EQ(
@@ -634,7 +634,7 @@ TEST(DynamicPatch, Map) {
   }
   {
     DynamicMapPatch patch;
-    patch.put(badge, add);
+    patch.putMulti(badge, add);
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 2);
     EXPECT_EQ(
@@ -648,7 +648,7 @@ TEST(DynamicPatch, Map) {
     remove.insert(asValueStruct<type::i32_t>(4));
 
     DynamicMapPatch patch;
-    patch.remove(badge, remove);
+    patch.removeMulti(badge, remove);
     patch.apply(badge, m);
     EXPECT_EQ(m.size(), 1);
     EXPECT_EQ(
@@ -916,8 +916,11 @@ struct CheckAssign {
   void push_back(auto&&...) {}
   void clear(auto&&...) {}
   void remove(auto&&...) {}
+  void removeMulti(auto&&...) {}
   void add(auto&&...) {}
-  void put(auto&&...) {}
+  void tryPutMulti(auto&&...) {}
+  void addMulti(auto&&...) {}
+  void putMulti(auto&&...) {}
   void patchIfSet(auto&&...) {}
   void patchByKey(auto&&...) {}
   void patchIfTypeIs(auto&&...) {}

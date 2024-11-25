@@ -12,7 +12,7 @@ class MyClass {}
 I am a *markdown* **cell**
 */
 
-function notebook_main_N1234(): void {
+async function gen_notebook_main_N1234(): Awaitable<void> {
   //@bento-cell:{"cell_bento_metadata":{"collapsed":true,"output":{"id":1247934846418027,"loadingStatus":"loaded"}},"cell_type":"code","id":1}
   echo "hi from cell 1";
   //@bento-cell:{"cell_bento_metadata":{"collapsed":true,"output":{"id":1247934846418027,"loadingStatus":"loaded"}},"cell_type":"code","id":1}
@@ -25,4 +25,5 @@ function notebook_main_N1234(): void {
   echo "end of cell 2";
   //@bento-cell:{"cell_bento_metadata":{},"cell_type":"code","id":4}
   echo "this is cell 4";
+  await (async () ==> {})();
 }

@@ -101,7 +101,8 @@ let hack_to_notebook_exn
                   };
               _;
             }
-          when String.is_prefix ~prefix:"notebook_main"
+          when String.is_prefix
+                 ~prefix:Notebook_convert_constants.main_function_prefix
                @@ String.strip
                @@ Syn.text function_name ->
           Either.First (Syn.leading_text header, compound_statements)

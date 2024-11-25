@@ -11,7 +11,7 @@ test another markdown
 test this is markdown
 */
 
-function notebook_main_N6203962(): void {
+async function gen_notebook_main_N6203962(): Awaitable<void> {
   //@bento-cell:{"id": 2, "cell_type": "code"}
   $a = 10;
   //@bento-cell:{"id": 4, "cell_type": "code"}

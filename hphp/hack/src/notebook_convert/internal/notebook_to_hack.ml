@@ -125,7 +125,8 @@ let hack_of_ipynb_exn
            block |> String.split_lines |> List.map ~f:(Printf.sprintf "    %s"))
     |> String.concat ~sep:"\n"
     |> Printf.sprintf
-         "function notebook_main_%s(): void {\n%s\n}"
+         "async function %s%s(): Awaitable<void> {\n%s\n}"
+         Notebook_convert_constants.main_function_prefix
          notebook_number
   in
   let unformatted =

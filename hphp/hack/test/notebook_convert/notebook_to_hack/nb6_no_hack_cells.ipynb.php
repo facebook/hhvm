@@ -8,6 +8,6 @@
 I am a *markdown* **cell**
 */
 
-function notebook_main_N1234(): void {
+async function gen_notebook_main_N1234(): Awaitable<void> {
 
 }

@@ -5,7 +5,7 @@
 class MyClass {}
 
 
-function notebook_main_N1234(): void {
+async function gen_notebook_main_N1234(): Awaitable<void> {
     //@bento-cell:{"cell_bento_metadata":{},"cell_type":"code","id":2}
     $x = new MyClass();
     // The next line is not valid Hack:

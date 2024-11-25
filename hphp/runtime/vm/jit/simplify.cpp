@@ -57,6 +57,8 @@
 #include "hphp/util/overflow.h"
 #include "hphp/util/trace.h"
 
+#include "hphp/util/text-util.h"
+
 #include <limits>
 #include <sstream>
 #include <type_traits>
@@ -2440,6 +2442,29 @@ SSATmp* simplifyConvTVToStr(State& env, const IRInstruction* inst) {
     auto const message = cns(env, s_msgClsMethToStr.get());
     gen(env, ThrowInvalidOperation, catchTrace, message);
     return cns(env, TBottom);
+  }
+
+  auto classConversionNotice = [&] () {
+    if (Cfg::Eval::RaiseClassConversionNoticeSampleRate > 0) {
+      std::string msg;
+      string_printf(msg, Strings::CLASS_TO_STRING_IMPLICIT, "string conversion");
+      gen(env,
+        RaiseNotice,
+        SampleRateData { Cfg::Eval::RaiseClassConversionNoticeSampleRate },
+        catchTrace,
+        cns(env, makeStaticString(msg)));
+    };
+  };
+
+  if (srcType <= TCls) {
+    auto const tmp = gen(env, LdClsName, src);
+    classConversionNotice();
+    return tmp;
+  }
+  if (srcType <= TLazyCls) {
+    auto const tmp = gen(env, LdLazyClsName, src);
+    classConversionNotice();
+    return tmp;
   }
 
   return nullptr;

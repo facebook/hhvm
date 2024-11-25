@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence, Set
+from collections.abc import Mapping, Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -69,6 +69,8 @@ class List__c_C(thrift.py3.types.List):
 Sequence.register(List__c_C)
 
 __all__.append('List__c_C')
+
+
 class List__List__c_C(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -113,3 +115,5 @@ class List__List__c_C(thrift.py3.types.List):
 Sequence.register(List__List__c_C)
 
 __all__.append('List__List__c_C')
+
+

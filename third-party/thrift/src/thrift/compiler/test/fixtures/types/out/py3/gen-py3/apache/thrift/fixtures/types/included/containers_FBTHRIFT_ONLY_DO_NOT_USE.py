@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence, Set
+from collections.abc import Mapping, Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -26,6 +26,58 @@ def get_types_reflection():
     )
 
 __all__ = []
+
+class std_unordered_map__Map__i32_string(thrift.py3.types.MapNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    _FBTHRIFT_USE_SORTED_REPR = False
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
+            _py_obj = items
+        elif isinstance(items, std_unordered_map__Map__i32_string):
+            _py_obj = dict(items)
+        elif items is None:
+            _py_obj = dict()
+        else:
+            check_key = std_unordered_map__Map__i32_string._check_key_type_or_raise
+            check_val = std_unordered_map__Map__i32_string._check_val_type_or_raise
+            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
+
+        super().__init__(_py_obj, std_unordered_map__Map__i32_string)
+
+    @staticmethod
+    def _check_key_type_or_raise(key):
+        if not (
+            isinstance(key, int)
+        ):
+            raise TypeError(f"{key!r} is not of type int")
+        return key
+
+    @staticmethod
+    def _check_key_type_or_none(key):
+        if key is None:
+            return None
+        if isinstance(key, int):
+            return key
+
+    @staticmethod
+    def _check_val_type_or_raise(item):
+        if not (
+            isinstance(item, str)
+        ):
+            raise TypeError(f"{item!r} is not of type str")
+        return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__std_unordered_map__Map__i32_string()
+
+
+Mapping.register(std_unordered_map__Map__i32_string)
+__all__.append('std_unordered_map__Map__i32_string')
+
 
 class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
@@ -71,3 +123,5 @@ class List__std_unordered_map__Map__i32_string(thrift.py3.types.List):
 Sequence.register(List__std_unordered_map__Map__i32_string)
 
 __all__.append('List__std_unordered_map__Map__i32_string')
+
+

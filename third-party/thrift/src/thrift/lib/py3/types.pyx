@@ -579,6 +579,106 @@ cdef class Map(Container):
         except KeyError:
             return default
 
+
+cdef class _MapPrivateCtorToken:
+    pass
+
+_fbthrift_map_private_ctor = _MapPrivateCtorToken()
+
+@cython.auto_pickle(False)
+cdef class MapNew(Container):
+    """
+    Base class for pure python thrift maps
+    """
+    def __init__(self, dict py_obj not None, child_cls not None):
+        self._py_obj = py_obj
+        self._child_cls = child_cls
+
+    def __len__(MapNew self):
+        return len(self._py_obj)
+
+    def __eq__(MapNew self, other):
+        if not isinstance(other, Mapping):
+            return False
+        if len(self._py_obj) != len(other):
+            return False
+
+        for key in self._py_obj:
+            if key not in other:
+                return False
+            if other[key] != self._py_obj[key]:
+                return False
+
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        if not self._fbthrift_hash:
+            self._fbthrift_hash = hash(tuple(self.items()))
+        return self._fbthrift_hash
+
+    def __repr__(self):
+        if not self:
+            return 'i{}'
+        # print in sorted order for backward compatibility
+        if self._child_cls._FBTHRIFT_USE_SORTED_REPR:
+            key_val = sorted(self.items(), key=lambda x: x[0])
+        else:
+            key_val = self.items()
+        return f'i{{{", ".join(map(lambda i: f"{repr(i[0])}: {repr(i[1])}", key_val))}}}'
+
+    def __reduce__(self):
+        return (type(self), (dict(self._py_obj), ))
+
+    def __copy__(self):
+        return self._child_cls(
+            dict(self._py_obj),
+            private_ctor_token=_fbthrift_map_private_ctor
+        )
+
+    def __contains__(self, key):
+        key = self._child_cls._check_key_type_or_none(key)
+        if not self or key is None:
+            return False
+        return key in self._py_obj
+
+    def __getitem__(self, key):
+        err = KeyError(f'{key}')
+        key = self._child_cls._check_key_type_or_none(key)
+        if key is None:
+            raise err
+        item = self._py_obj.get(key)
+        if item is None:
+            raise err
+        return item
+
+    def get(self, key, default=None):
+        try:
+            return self._py_obj[key]
+        except KeyError:
+            return default
+
+    def __iter__(self):
+        if not self:
+            return
+        yield from self._py_obj
+
+    def keys(self):
+        return self.__iter__()
+
+    def values(self):
+        if not self:
+            return
+        yield from self._py_obj.values()
+
+    def items(self):
+        if not self:
+            return
+        yield from self._py_obj.items()
+
+
 CompiledEnum = _fbthrift_python_Enum
 Enum = _fbthrift_python_Enum
 # I wanted to call the base class Enum, but there is a cython bug

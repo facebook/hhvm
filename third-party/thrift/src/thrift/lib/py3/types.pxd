@@ -123,6 +123,9 @@ cdef class Set(Container):
 cdef class Map(Container):
     pass
 
+cdef class MapNew(Container):
+    cdef dict _py_obj
+    cdef object _child_cls
 
 cdef class StructFieldsSetter:
     cdef void set_field(StructFieldsSetter self, const char* name, object value) except *

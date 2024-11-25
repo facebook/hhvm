@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence, Set
+from collections.abc import Mapping, Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -69,3 +69,5 @@ class std_deque_std_string__List__string(thrift.py3.types.List):
 Sequence.register(std_deque_std_string__List__string)
 
 __all__.append('std_deque_std_string__List__string')
+
+

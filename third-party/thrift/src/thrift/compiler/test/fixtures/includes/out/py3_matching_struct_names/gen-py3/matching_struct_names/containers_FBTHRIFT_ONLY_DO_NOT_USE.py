@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence, Set
+from collections.abc import Mapping, Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -68,6 +68,8 @@ class List__MyStruct(thrift.py3.types.List):
 Sequence.register(List__MyStruct)
 
 __all__.append('List__MyStruct')
+
+
 class List__List__MyStruct(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -112,6 +114,8 @@ class List__List__MyStruct(thrift.py3.types.List):
 Sequence.register(List__List__MyStruct)
 
 __all__.append('List__List__MyStruct')
+
+
 class List__module_MyStruct(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -152,6 +156,8 @@ class List__module_MyStruct(thrift.py3.types.List):
 Sequence.register(List__module_MyStruct)
 
 __all__.append('List__module_MyStruct')
+
+
 class List__List__module_MyStruct(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -196,3 +202,5 @@ class List__List__module_MyStruct(thrift.py3.types.List):
 Sequence.register(List__List__module_MyStruct)
 
 __all__.append('List__List__module_MyStruct')
+
+

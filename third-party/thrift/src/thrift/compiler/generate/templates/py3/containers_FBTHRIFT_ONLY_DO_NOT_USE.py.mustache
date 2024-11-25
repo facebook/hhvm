@@ -36,7 +36,7 @@ want to include.
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence, Set
+from collections.abc import Mapping, Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -203,7 +203,99 @@ class {{type:flat_name}}(thrift.py3.types.Set):
 
 
 Set.register({{type:flat_name}})
-{{/type:set?}}{{^type:map?}}
-__all__.append('{{type:flat_name}}')
+
+{{/type:set?}}{{#type:map?}}
+class {{type:flat_name}}(thrift.py3.types.MapNew):
+    {{! make the type appear to originate from .types module }}
+    __module__ = _fbthrift__module_name__
+    {{! __slots__ prevents accidental treatment as py-deprecated }}
+    __slots__ = ()
+
+    _FBTHRIFT_USE_SORTED_REPR = {{!
+        }}{{#type:defaultTemplate?}}True{{/type:defaultTemplate?}}{{!
+        }}{{^type:defaultTemplate?}}False{{/type:defaultTemplate?}}
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
+            {{!
+                For internal use only, when items dict has been created internally
+                and each item has been converted from cpp so we can trust the type.
+                Do not use with user-exposed `dict` to avoid accidental mutability.
+            }}
+            _py_obj = items
+        elif isinstance(items, {{type:flat_name}}):
+            _py_obj = dict(items)
+        elif items is None:
+            _py_obj = dict()
+        else:
+            check_key = {{type:flat_name}}._check_key_type_or_raise
+            check_val = {{type:flat_name}}._check_val_type_or_raise
+            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
+
+        super().__init__(_py_obj, {{type:flat_name}})
+
+    @staticmethod
+    def _check_key_type_or_raise(key):
+    {{#type:key_type}}
+    {{#type:container?}}
+        if key is None:
+            raise TypeError("None is not of the type {{> types/pep484_type}}")
+        if not isinstance(key, {{> types/python_type}}):
+            key = {{> types/python_type}}(key)
+    {{/type:container?}}
+    {{^type:container?}}
+        if not (
+            isinstance(key, {{> types/python_is_instance_type}}){{#type:enum?}} or
+            isinstance(key, thrift.py3.types.BadEnum){{/type:enum?}}
+        ):
+            raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
+    {{/type:container?}}
+    {{/type:key_type}}
+        return key
+
+    {{! __contains__ doesn't raise TypeError; __getitem__ uses KeyError }}
+    @staticmethod
+    def _check_key_type_or_none(key):
+        if key is None:
+            return None
+        {{#type:key_type}}
+        if isinstance(key, {{> types/python_type}}):
+            return key
+        {{#type:container?}}
+        try:
+            return {{> types/python_type}}(key)
+        except:
+            return None
+        {{/type:container?}}
+        {{/type:key_type}}
+
+    @staticmethod
+    def _check_val_type_or_raise(item):
+    {{#type:value_type}}
+    {{#type:container?}}
+        if item is None:
+            raise TypeError("None is not of the type {{> types/pep484_type}}")
+        if not isinstance(item, {{> types/python_type}}):
+            item = {{> types/python_type}}(item)
+    {{/type:container?}}
+    {{^type:container?}}
+        if not (
+            isinstance(item, {{> types/python_is_instance_type}}){{#type:enum?}} or
+            isinstance(item, thrift.py3.types.BadEnum){{/type:enum?}}
+        ):
+            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+    {{/type:container?}}
+    {{/type:value_type}}
+        return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__{{type:flat_name}}()
+
+
+Mapping.register({{type:flat_name}})
 {{/type:map?}}
+__all__.append('{{type:flat_name}}')
+
+
 {{/program:containerTypes}}

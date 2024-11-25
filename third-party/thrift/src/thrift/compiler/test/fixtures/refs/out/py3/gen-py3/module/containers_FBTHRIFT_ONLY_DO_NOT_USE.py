@@ -7,7 +7,7 @@
 
 import thrift.py3.types
 import importlib
-from collections.abc import Sequence, Set
+from collections.abc import Mapping, Sequence, Set
 
 """
     This is a helper module to define py3 container types.
@@ -67,6 +67,8 @@ class List__RecursiveStruct(thrift.py3.types.List):
 Sequence.register(List__RecursiveStruct)
 
 __all__.append('List__RecursiveStruct')
+
+
 class List__i32(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -107,6 +109,8 @@ class List__i32(thrift.py3.types.List):
 Sequence.register(List__i32)
 
 __all__.append('List__i32')
+
+
 class Set__i32(thrift.py3.types.Set):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -145,7 +149,62 @@ class Set__i32(thrift.py3.types.Set):
 
 
 Set.register(Set__i32)
+
 __all__.append('Set__i32')
+
+
+class Map__i32_i32(thrift.py3.types.MapNew):
+    __module__ = _fbthrift__module_name__
+    __slots__ = ()
+
+    _FBTHRIFT_USE_SORTED_REPR = True
+
+    def __init__(self, items=None, private_ctor_token=None) -> None:
+        if private_ctor_token is thrift.py3.types._fbthrift_map_private_ctor:
+            _py_obj = items
+        elif isinstance(items, Map__i32_i32):
+            _py_obj = dict(items)
+        elif items is None:
+            _py_obj = dict()
+        else:
+            check_key = Map__i32_i32._check_key_type_or_raise
+            check_val = Map__i32_i32._check_val_type_or_raise
+            _py_obj = {check_key(k) : check_val(v) for k, v in items.items()}
+
+        super().__init__(_py_obj, Map__i32_i32)
+
+    @staticmethod
+    def _check_key_type_or_raise(key):
+        if not (
+            isinstance(key, int)
+        ):
+            raise TypeError(f"{key!r} is not of type int")
+        return key
+
+    @staticmethod
+    def _check_key_type_or_none(key):
+        if key is None:
+            return None
+        if isinstance(key, int):
+            return key
+
+    @staticmethod
+    def _check_val_type_or_raise(item):
+        if not (
+            isinstance(item, int)
+        ):
+            raise TypeError(f"{item!r} is not of type int")
+        return item
+
+    @staticmethod
+    def __get_reflection__():
+        return get_types_reflection().get_reflection__Map__i32_i32()
+
+
+Mapping.register(Map__i32_i32)
+__all__.append('Map__i32_i32')
+
+
 class List__i64(thrift.py3.types.List):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
@@ -186,3 +245,5 @@ class List__i64(thrift.py3.types.List):
 Sequence.register(List__i64)
 
 __all__.append('List__i64')
+
+

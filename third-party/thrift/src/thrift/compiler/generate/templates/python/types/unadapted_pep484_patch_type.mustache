@@ -39,6 +39,7 @@ This is for pep 484 typing for thrift patch types
 }}]{{/type:set?}}{{!
 }}{{#type:map?}}MapPatch[{{!
     }}{{#type:key_type}}{{> types/unadapted_pep484_type}}{{/type:key_type}}, {{!
+    }}{{#type:value_type}}{{> types/unadapted_pep484_type}}{{/type:value_type}}, {{!
     }}{{#type:value_type}}{{> types/unadapted_pep484_patch_type}}{{/type:value_type}}{{!
 }}]{{/type:map?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!

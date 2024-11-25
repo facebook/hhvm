@@ -314,7 +314,7 @@ class ContainersPatch(
     @property
     def StringToI64Map(self) -> UnqualifiedFieldPatch[
             _typing.Mapping[str, int],
-            MapPatch[str, I64Patch]]:
+            MapPatch[str, int, I64Patch]]:
 
         return UnqualifiedFieldPatch(
             lambda patch, type_info: MapPatch(lambda patch, type_info: patch.as_i64_patch(), patch.as_map_patch(), type_info),

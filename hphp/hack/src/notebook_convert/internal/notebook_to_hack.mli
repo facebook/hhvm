@@ -6,7 +6,7 @@
  *
  *)
 val notebook_to_hack :
-  notebook_name:string ->
+  notebook_number:string ->
   header:string ->
   Hh_json.json ->
   (string, string) Result.t

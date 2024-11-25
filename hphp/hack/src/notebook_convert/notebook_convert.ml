@@ -7,11 +7,13 @@
  *)
 open Hh_prelude
 
-let notebook_to_hack ~(notebook_name : string) ~(header : string) :
+let notebook_to_hack ~(notebook_number : string) ~(header : string) :
     Exit_status.t =
   let source = Sys_utils.read_stdin_to_string () in
   let ipynb_json = Hh_json.json_of_string source in
-  match Notebook_to_hack.notebook_to_hack ~notebook_name ~header ipynb_json with
+  match
+    Notebook_to_hack.notebook_to_hack ~notebook_number ~header ipynb_json
+  with
   | Ok hack ->
     let () = Printf.printf "%s" hack in
     Exit_status.No_error
@@ -37,7 +39,7 @@ let string_of_syntax_errors (syntax_errors : Full_fidelity_syntax_error.t list)
 let validate_hack_to_notebook_exn ipynb_json : unit =
   match
     Notebook_to_hack.notebook_to_hack
-      ~notebook_name:"N12345"
+      ~notebook_number:"N12345"
       ~header:"// the_header"
       ipynb_json
   with

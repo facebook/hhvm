@@ -45,7 +45,7 @@ type client_mode =
   | MODE_METHOD_JUMP_ANCESTORS_BATCH of string list * string
   | MODE_METHOD_JUMP_CHILDREN of string
   | MODE_NOTEBOOK_TO_HACK of {
-      notebook_name: string;
+      notebook_number: string;
       notebook_header: string;
     }
   | MODE_OUTLINE

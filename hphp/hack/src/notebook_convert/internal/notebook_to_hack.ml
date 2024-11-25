@@ -87,7 +87,7 @@ let chunks_of_cells_exn (cells : Ipynb.cell list) : Notebook_chunk.t list =
 * - We convert top-level statements into a single top-level function
 *)
 let hack_of_cells_exn
-    ~(notebook_name : string) ~(header : string) (cells : Ipynb.cell list) :
+    ~(notebook_number : string) ~(header : string) (cells : Ipynb.cell list) :
     string =
   let (non_stmts, stmts) =
     cells
@@ -106,27 +106,31 @@ let hack_of_cells_exn
     |> List.bind ~f:(fun block ->
            block |> String.split_lines |> List.map ~f:(Printf.sprintf "    %s"))
     |> String.concat ~sep:"\n"
-    |> Printf.sprintf "function notebook_main_%s(): void {\n%s\n}" notebook_name
+    |> Printf.sprintf
+         "function notebook_main_%s(): void {\n%s\n}"
+         notebook_number
   in
   let unformatted =
-    let notebook_name_comment =
-      Printf.sprintf {|//@bento-notebook:{name: "%s"}|} notebook_name
+    let notebook_number_comment =
+      Printf.sprintf
+        {|//@bento-notebook:{"notebook_number": "%s"}|}
+        notebook_number
     in
     Printf.sprintf
       "<?hh\n%s\n%s\n%s\n\n%s\n"
       header
-      notebook_name_comment
+      notebook_number_comment
       non_stmts_code
       main_fn_code
   in
   Notebook_convert_util.hackfmt unformatted
 
 let notebook_to_hack
-    ~(notebook_name : string) ~(header : string) (ipynb_json : Hh_json.json) :
+    ~(notebook_number : string) ~(header : string) (ipynb_json : Hh_json.json) :
     (string, string) Result.t =
   try
     ipynb_json
     |> Ipynb.ipynb_of_json
-    |> Result.map ~f:(hack_of_cells_exn ~notebook_name ~header)
+    |> Result.map ~f:(hack_of_cells_exn ~notebook_number ~header)
   with
   | e -> Error (Exn.to_string e)

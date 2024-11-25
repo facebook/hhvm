@@ -798,9 +798,9 @@ let main_internal
     in
     ClientMethodJumps.go results false args.ClientEnv.output_json;
     Lwt.return (Exit_status.No_error, telemetry)
-  | ClientEnv.MODE_NOTEBOOK_TO_HACK { notebook_name; notebook_header } ->
+  | ClientEnv.MODE_NOTEBOOK_TO_HACK { notebook_number; notebook_header } ->
     let exit_status =
-      Notebook_convert.notebook_to_hack ~notebook_name ~header:notebook_header
+      Notebook_convert.notebook_to_hack ~notebook_number ~header:notebook_header
     in
     Lwt.return (exit_status, Telemetry.create ())
   | ClientEnv.MODE_IN_MEMORY_DEP_TABLE_SIZE ->

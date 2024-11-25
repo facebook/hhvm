@@ -106,8 +106,8 @@ let strip_comment_wrapper (hack : string) : string =
   let stripped = String.strip hack in
   String.sub
     stripped
-    ~pos:2
-    ~len:(String.length stripped - 4 (* length of "/*" + "*/"  *))
+    ~pos:3 (* length of "\n/*" *)
+    ~len:(String.length stripped - 5 (* length of "\n/*" + length of "*/"  *))
 
 let of_hack_exn
     ~(comment : string) ~(is_from_toplevel_statements : bool) (hack : string) :

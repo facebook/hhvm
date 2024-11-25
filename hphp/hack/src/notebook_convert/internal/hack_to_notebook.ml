@@ -64,6 +64,7 @@ let format_chunk (chunk : Notebook_chunk.t) : Notebook_chunk.t =
 let hack_to_notebook_exn
     (hack : string) (syntax : Full_fidelity_positioned_syntax.t) :
     (Hh_json.json, Notebook_convert_error.t) result =
+  let open Result.Let_syntax in
   let script_children =
     match syntax with
     | Syn.{ syntax = Script { script_declarations }; _ } ->
@@ -79,7 +80,7 @@ let hack_to_notebook_exn
       failwith
         "Internal error: expected <?hh at the top of a Hack file. This should be unreachable since we validate inputs are well-formed Hack."
   in
-  let (main_function_bodies, other) =
+  let (main_fn_infos, other) =
     List.partition_map decls ~f:(function
         | Syn.
             {
@@ -90,7 +91,7 @@ let hack_to_notebook_exn
                       {
                         syntax = FunctionDeclarationHeader { function_name; _ };
                         _;
-                      };
+                      } as header;
                     function_body =
                       {
                         syntax = CompoundStatement { compound_statements; _ };
@@ -103,26 +104,30 @@ let hack_to_notebook_exn
           when String.is_prefix ~prefix:"notebook_main"
                @@ String.strip
                @@ Syn.text function_name ->
-          Either.First compound_statements
+          Either.First (Syn.leading_text header, compound_statements)
         | other -> Either.Second other)
   in
-  let open Result.Let_syntax in
-  let* top_level_statements_chunks =
-    match main_function_bodies with
-    | body_parts :: [] ->
-      Ok
-        (body_parts
-        |> Syn.children
-        |> List.map ~f:Syn.full_text
-        |> split_by_chunk_comments ~is_from_toplevel_statements:true)
+  let* (main_fn_leading_text, body_parts) =
+    match main_fn_infos with
+    | (leading_text, body_parts) :: [] -> Ok (leading_text, body_parts)
     | _ ->
       Error
         (Notebook_convert_error.Invalid_input
            "Must be exactly one function with prefix notebook_main")
   in
+  let top_level_statements_chunks =
+    body_parts
+    |> Syn.children
+    |> List.map ~f:Syn.full_text
+    |> split_by_chunk_comments ~is_from_toplevel_statements:true
+  in
   let other_chunks =
     let hack_lines =
-      other |> List.map ~f:Syn.full_text |> List.bind ~f:String.split_lines
+      let lines_from_other =
+        other |> List.map ~f:Syn.full_text |> List.bind ~f:String.split_lines
+      in
+      let lines_from_leading = String.split_lines main_fn_leading_text in
+      lines_from_other @ lines_from_leading
     in
     split_by_chunk_comments hack_lines ~is_from_toplevel_statements:false
   in

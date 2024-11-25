@@ -48,6 +48,14 @@ class Animal(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, Animal):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with Animal"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 

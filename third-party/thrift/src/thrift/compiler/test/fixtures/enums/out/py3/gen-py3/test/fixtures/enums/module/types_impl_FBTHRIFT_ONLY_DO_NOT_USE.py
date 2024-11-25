@@ -49,6 +49,14 @@ class Metasyntactic(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, Metasyntactic):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with Metasyntactic"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -92,6 +100,14 @@ class MyEnum1(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, MyEnum1):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with MyEnum1"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -131,6 +147,14 @@ class MyEnum2(thrift.py3.types.CompiledEnum):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    def __lt__(self, other):
+        if isinstance(other, MyEnum2):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with MyEnum2"
+        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -175,6 +199,14 @@ class MyEnum3(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, MyEnum3):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with MyEnum3"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -216,6 +248,14 @@ class MyEnum4(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, MyEnum4):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with MyEnum4"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -256,6 +296,14 @@ class MyBitmaskEnum1(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, MyBitmaskEnum1):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with MyBitmaskEnum1"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -295,6 +343,14 @@ class MyBitmaskEnum2(thrift.py3.types.CompiledEnum):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    def __lt__(self, other):
+        if isinstance(other, MyBitmaskEnum2):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with MyBitmaskEnum2"
+        )
 
     def __int__(self):
         return self._fbthrift_value_

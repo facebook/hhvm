@@ -50,6 +50,14 @@ class has_bitwise_ops(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, has_bitwise_ops):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with has_bitwise_ops"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -89,6 +97,14 @@ class is_unscoped(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, is_unscoped):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with is_unscoped"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -127,6 +143,14 @@ class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    def __lt__(self, other):
+        if isinstance(other, MyForwardRefEnum):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with MyForwardRefEnum"
+        )
 
     def __int__(self):
         return self._fbthrift_value_

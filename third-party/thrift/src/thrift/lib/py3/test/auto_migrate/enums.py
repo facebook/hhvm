@@ -301,6 +301,28 @@ class EnumMetaTests(unittest.TestCase):
         self.assertIn("__members__", attrs)
         self.assertIn("__module__", attrs)
 
+    def test_sortable(self) -> None:
+        colors = [Color(i) for i in range(2, -1, -1)]
+        sorted_colors = [Color(i) for i in range(3)]
+        # pyre-ignore[6]: Color is not SuppertsDunderLT
+        # this will be resolved by making Color an int subclass
+        self.assertEqual(sorted(colors), sorted_colors)
+
+        colors.append(Color(0))
+        # pyre-ignore[6]: Color is not SuppertsDunderLT
+        # this will be resolved by making Color an int subclass
+        self.assertEqual(sorted(colors), [Color(0)] + sorted_colors)
+
+    # won't implement this in auto-migrate
+    @brokenInAutoMigrate()
+    def test_sortable_error(self) -> None:
+        with self.assertRaisesRegex(
+            NotImplementedError, "'<' only implemented for comparisons with Color"
+        ):
+            # pyre-ignore[6]: Color is not SuppertsDunderLT
+            # this will be resolved by making Color an int subclass
+            sorted([1, Color(2), Color(0)])
+
 
 class FlagTests(unittest.TestCase):
     @brokenInAutoMigrate()

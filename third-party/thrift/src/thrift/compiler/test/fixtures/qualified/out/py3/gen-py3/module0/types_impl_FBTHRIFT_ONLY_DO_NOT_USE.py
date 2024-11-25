@@ -48,6 +48,14 @@ class Enum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, Enum):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with Enum"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 

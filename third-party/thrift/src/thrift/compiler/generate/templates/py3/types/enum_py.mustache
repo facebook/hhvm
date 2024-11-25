@@ -56,7 +56,16 @@ class {{enum:name}}(thrift.py3.types.{{!
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
-    {{! will move these to python.types.Enum base class when it's no longer int }}
+    {{! won't be needed when this is made `int` base class }}
+    def __lt__(self, other):
+        if isinstance(other, {{enum:name}}):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with {{enum:name}}"
+        )
+
+    {{! will move these to python.types.Flag base class when it's no longer int }}
     def __int__(self):
         return self._fbthrift_value_
 

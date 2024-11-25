@@ -50,6 +50,14 @@ class AnEnum(thrift.py3.types.CompiledEnum):
     def _to_py_deprecated(self):
         return self._fbthrift_value_
 
+    def __lt__(self, other):
+        if isinstance(other, AnEnum):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with AnEnum"
+        )
+
     def __int__(self):
         return self._fbthrift_value_
 
@@ -89,6 +97,14 @@ class AnEnumRenamed(thrift.py3.types.CompiledEnum):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    def __lt__(self, other):
+        if isinstance(other, AnEnumRenamed):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with AnEnumRenamed"
+        )
 
     def __int__(self):
         return self._fbthrift_value_
@@ -130,6 +146,14 @@ class Flags(thrift.py3.types.Flag):
 
     def _to_py_deprecated(self):
         return self._fbthrift_value_
+
+    def __lt__(self, other):
+        if isinstance(other, Flags):
+            return self._fbthrift_value_ < other._fbthrift_value_
+
+        raise NotImplementedError(
+            "'<' only implemented for comparisons with Flags"
+        )
 
     def __int__(self):
         return self._fbthrift_value_

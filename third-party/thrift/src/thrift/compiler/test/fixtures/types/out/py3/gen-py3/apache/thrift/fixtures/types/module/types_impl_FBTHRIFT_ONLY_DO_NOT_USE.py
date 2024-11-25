@@ -8,10 +8,7 @@
 import enum
 import thrift.py3.types
 import apache.thrift.fixtures.types.module.thrift_metadata as _fbthrift_python_metadata
-try:
-    import apache.thrift.fixtures.types.module.thrift_types as _fbthrift_python_types
-except Exception: # TODO(T205494848): fix thrift-python import failures
-    _fbthrift_python_types = None
+import apache.thrift.fixtures.types.module.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "apache.thrift.fixtures.types.module.types"
 
@@ -36,12 +33,6 @@ class has_bitwise_ops(thrift.py3.types.CompiledEnum):
         return "module.has_bitwise_ops"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum has_bitwise_ops doesn't define `_to_python` because couldn't import "
-                "apache.thrift.fixtures.types.module.thrift_types"
-            )
-
         return _fbthrift_python_types.has_bitwise_ops(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -83,12 +74,6 @@ class is_unscoped(thrift.py3.types.CompiledEnum):
         return "module.is_unscoped"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum is_unscoped doesn't define `_to_python` because couldn't import "
-                "apache.thrift.fixtures.types.module.thrift_types"
-            )
-
         return _fbthrift_python_types.is_unscoped(self._fbthrift_value_)
 
     def _to_py3(self):
@@ -130,12 +115,6 @@ class MyForwardRefEnum(thrift.py3.types.CompiledEnum):
         return "module.MyForwardRefEnum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum MyForwardRefEnum doesn't define `_to_python` because couldn't import "
-                "apache.thrift.fixtures.types.module.thrift_types"
-            )
-
         return _fbthrift_python_types.MyForwardRefEnum(self._fbthrift_value_)
 
     def _to_py3(self):

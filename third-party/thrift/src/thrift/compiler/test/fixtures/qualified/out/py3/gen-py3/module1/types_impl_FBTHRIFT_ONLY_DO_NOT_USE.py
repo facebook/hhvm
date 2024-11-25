@@ -8,10 +8,7 @@
 import enum
 import thrift.py3.types
 import module1.thrift_metadata as _fbthrift_python_metadata
-try:
-    import module1.thrift_types as _fbthrift_python_types
-except Exception: # TODO(T205494848): fix thrift-python import failures
-    _fbthrift_python_types = None
+import module1.thrift_types as _fbthrift_python_types
 
 _fbthrift__module_name__ = "module1.types"
 
@@ -34,12 +31,6 @@ class Enum(thrift.py3.types.CompiledEnum):
         return "module1.Enum"
 
     def _to_python(self):
-        if _fbthrift_python_types is None:
-            raise AttributeError(
-                "Enum Enum doesn't define `_to_python` because couldn't import "
-                "module1.thrift_types"
-            )
-
         return _fbthrift_python_types.Enum(self._fbthrift_value_)
 
     def _to_py3(self):

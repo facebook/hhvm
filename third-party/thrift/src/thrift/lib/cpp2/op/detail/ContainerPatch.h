@@ -366,21 +366,21 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   ///     struct Visitor {
   ///       void assign(const Map&);
   ///       void clear();
-  ///       void tryPutMulti(const Map&);
-  ///       void putMulti(const Map&);
-  ///       void removeMulti(const std::unordered_set<Key>&);
+  ///       void add(const Map&);
+  ///       void put(const Map&);
+  ///       void remove(const std::unordered_set<Key>&);
   ///       void patchIfSet(const std::unordered_map<Key, ValuePatch>&);
   ///     }
   ///
   /// For example:
   ///
   ///     MapPatch<MapI32StringPatch> patch;
-  ///     patch.tryPutMulti({{10, "10"}});
+  ///     patch.add({{10, "10"}});
   ///     patch.ensureAndPatchByKey(20).append("_");
   ///
   /// `patch.customVisit(v)` will invoke the following methods
   ///
-  ///     v.tryPutMulti({{10, "10"}, {20, ""}});
+  ///     v.add({{10, "10"}, {20, ""}});
   ///     v.patchIfSet({{20, StringPatch::createAppend("_")}});
   template <class Visitor>
   void customVisit(Visitor&& v) const {
@@ -389,7 +389,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       v.assign(T{});
       v.clear();
       v.patchIfSet(P{});
-      v.tryPutMulti(T{});
+      v.add(T{});
       v.putMulti(T{});
       v.removeMulti(std::unordered_set<typename T::key_type>{});
     }
@@ -399,7 +399,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
     }
 
     v.patchIfSet(*data_.patchPrior());
-    v.tryPutMulti(*data_.add());
+    v.add(*data_.add());
     v.removeMulti(*data_.remove());
     v.putMulti(*data_.put());
     v.patchIfSet(*data_.patch());
@@ -421,7 +421,7 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       void removeMulti(const std::unordered_set<typename T::key_type>& keys) {
         erase_all(v, keys);
       }
-      void tryPutMulti(const T& t) { v.insert(t.begin(), t.end()); }
+      void add(const T& t) { v.insert(t.begin(), t.end()); }
       void putMulti(const T& t) {
         for (const auto& entry : t) {
           v.insert_or_assign(entry.first, entry.second);

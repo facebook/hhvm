@@ -1382,7 +1382,7 @@ cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = cval
-    return Map__string_i32(py_items)
+    return Map__string_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[cmap[string,cint32_t]] List__Map__string_i32__make_instance(object items) except *:
@@ -1506,7 +1506,7 @@ cdef object Map__string_string__from_cpp(const cmap[string,string]& c_map) excep
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = __init_unicode_from_cpp(cval)
-    return Map__string_string(py_items)
+    return Map__string_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[_module_cbindings.cCompany] List__Company__make_instance(object items) except *:
@@ -1724,7 +1724,7 @@ cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except 
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = cval
-    return Map__i32_i32(py_items)
+    return Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1830,7 +1830,7 @@ cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]& c_map) except
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = __init_unicode_from_cpp(cval)
-    return Map__i32_string(py_items)
+    return Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1936,7 +1936,7 @@ cdef object Map__i32_bool__from_cpp(const cmap[cint32_t,cbool]& c_map) except *:
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = cval
-    return Map__i32_bool(py_items)
+    return Map__i32_bool(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 myInt = 1337

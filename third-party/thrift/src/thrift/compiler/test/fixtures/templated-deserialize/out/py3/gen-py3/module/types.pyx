@@ -627,7 +627,7 @@ cdef object Map__string_bool__from_cpp(const cmap[string,cbool]& c_map) except *
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = cval
-    return Map__string_bool(py_items)
+    return Map__string_bool(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *:
@@ -809,7 +809,7 @@ cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]& c_map) except
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = cval
-    return Map__string_i32(py_items)
+    return Map__string_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -916,7 +916,7 @@ cdef object Map__string_Map__string_i32__from_cpp(const cmap[string,cmap[string,
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
-    return Map__string_Map__string_i32(py_items)
+    return Map__string_Map__string_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1023,7 +1023,7 @@ cdef object Map__string_Map__string_Map__string_i32__from_cpp(const cmap[string,
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = Map__string_Map__string_i32._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
-    return Map__string_Map__string_Map__string_i32(py_items)
+    return Map__string_Map__string_Map__string_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[cset[cint32_t]] List__Set__i32__make_instance(object items) except *:
@@ -1149,7 +1149,7 @@ cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]&
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = List__i32__from_cpp(cval)
-    return Map__string_List__i32(py_items)
+    return Map__string_List__i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[vector[vector[vector[cint32_t]]]] List__List__List__List__i32__make_instance(object items) except *:
@@ -1401,7 +1401,7 @@ cdef object Map__List__Set__string_string__from_cpp(const cmap[vector[cset[strin
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[List__Set__string__from_cpp(ckey)] = __init_unicode_from_cpp(cval)
-    return Map__List__Set__string_string(py_items)
+    return Map__List__Set__string_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1514,7 +1514,7 @@ cdef object Map__Set__List__i32_Map__List__Set__string_string__from_cpp(const cm
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[Set__List__i32__from_cpp(ckey)] = Map__List__Set__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cval))
-    return Map__Set__List__i32_Map__List__Set__string_string(py_items)
+    return Map__Set__List__i32_Map__List__Set__string_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[_module_cbindings.Foo] List__Foo__i64__make_instance(object items) except *:

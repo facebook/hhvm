@@ -770,7 +770,7 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ma
         }}{{/type:key_type}}] = {{#type:value_type}}{{!
             }}{{> types/map_val_cpp_to_python }}{{!
         }}{{/type:value_type}}
-    return {{type:flat_name}}(py_items)
+    return {{type:flat_name}}(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 {{/type:map?}}
 
 {{/program:containerTypes}}

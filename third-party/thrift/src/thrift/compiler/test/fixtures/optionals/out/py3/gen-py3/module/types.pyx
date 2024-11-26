@@ -692,7 +692,7 @@ cdef object Map__Animal_string__from_cpp(const cmap[_module_cbindings.cAnimal,st
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[translate_cpp_enum_to_python(Animal, <int> ckey)] = __init_unicode_from_cpp(cval)
-    return Map__Animal_string(py_items)
+    return Map__Animal_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[_module_cbindings.cVehicle] List__Vehicle__make_instance(object items) except *:

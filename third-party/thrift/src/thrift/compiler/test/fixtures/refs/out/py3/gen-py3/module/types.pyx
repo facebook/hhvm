@@ -3011,7 +3011,7 @@ cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except 
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = cval
-    return Map__i32_i32(py_items)
+    return Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[cint64_t] List__i64__make_instance(object items) except *:

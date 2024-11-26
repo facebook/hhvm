@@ -1404,7 +1404,7 @@ cdef object Map__i16_string__from_cpp(const cmap[cint16_t,string]& c_map) except
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = __init_unicode_from_cpp(cval)
-    return Map__i16_string(py_items)
+    return Map__i16_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 containerTypedef = Map__i16_string

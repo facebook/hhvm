@@ -1356,7 +1356,7 @@ cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]& c_map) except
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = cval
-    return Map__string_i64(py_items)
+    return Map__string_i64(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 @__cython.auto_pickle(False)
 @__cython.final
@@ -1463,7 +1463,7 @@ cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]&
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[__init_unicode_from_cpp(ckey)] = List__i32__from_cpp(cval)
-    return Map__string_List__i32(py_items)
+    return Map__string_List__i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 FLAG = True

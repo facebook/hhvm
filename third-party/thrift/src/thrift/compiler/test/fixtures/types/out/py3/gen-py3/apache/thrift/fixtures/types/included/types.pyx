@@ -168,7 +168,7 @@ cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fi
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = __init_unicode_from_cpp(cval)
-    return std_unordered_map__Map__i32_string(py_items)
+    return std_unordered_map__Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 cdef vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:

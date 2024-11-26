@@ -189,7 +189,7 @@ cdef object Map__i64_List__string__from_cpp(const cmap[cint64_t,vector[string]]&
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = List__string__from_cpp(cval)
-    return Map__i64_List__string(py_items)
+    return Map__i64_List__string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 TEST_MAP = Map__i64_List__string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_module_cbindings.cTEST_MAP()))

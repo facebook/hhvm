@@ -295,7 +295,7 @@ cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_mo
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[translate_cpp_enum_to_python(MyEnum, <int> ckey)] = __init_unicode_from_cpp(cval)
-    return Map__MyEnum_string(py_items)
+    return Map__MyEnum_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
 kOne = MyEnum(<int> (_test_fixtures_enumstrict_module_cbindings.ckOne()))

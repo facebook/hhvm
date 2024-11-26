@@ -19,7 +19,7 @@ import pickle
 import string
 import unittest
 
-from typing import cast, KeysView, Optional
+from typing import cast, ItemsView, Iterator, KeysView, Optional
 
 from thrift.python.mutable_containers import (
     MapItemsView,
@@ -133,11 +133,38 @@ class MutableMapTypeHints(unittest.TestCase):
             v11: MapKeysView[str] = mutable_map.keys()
             v12: KeysView[str] = mutable_map.keys()
 
-            # pyre-ignore[9]: v13 is type `MapKeysView[int]` but is used as type `MapKeysView[str]`
+            # pyre-ignore[9]: v13 is type `MapKeysView[int]` but is used as type
+            #  `MapKeysView[str]`
             v13: MapKeysView[int] = mutable_map.keys()
 
+            keys_iter_1: Iterator[str] = iter(v11)
+
+            # pyre-ignore[9]: keys_iter_2 is type `Iterator[int]` but is used as
+            #  type `Iterator[str]`
+            keys_iter_2: Iterator[int] = iter(v11)
+
             # to silence F841: not used variable
-            _ = (v11, v12, v13)
+            _ = (v11, v12, v13, keys_iter_1, keys_iter_2)
+
+            ###################################################################
+
+            ### items() ####
+
+            v14: MapItemsView[str, int] = mutable_map.items()
+            v15: ItemsView[str, int] = mutable_map.items()
+
+            # pyre-ignore[9]: v16 is type `MapItemsView[str, str]` but is used
+            #  as type `MapItemsView[str, int]`
+            v16: MapItemsView[str, str] = mutable_map.items()
+
+            items_iter_1: Iterator[tuple[str, int]] = iter(v14)
+
+            # pyre-ignore[9]: items_iter_2 is type `Iterator[Tuple[str, str]]`
+            #  but is used as type `Iterator[Tuple[str, int]]`
+            items_iter_2: Iterator[tuple[str, str]] = iter(v14)
+
+            # to silence F841: not used variable
+            _ = (v14, v15, v16, items_iter_1, items_iter_2)
 
         except Exception:
             pass

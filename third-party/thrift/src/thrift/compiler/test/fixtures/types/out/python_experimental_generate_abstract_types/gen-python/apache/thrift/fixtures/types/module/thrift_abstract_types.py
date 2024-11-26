@@ -18,6 +18,7 @@ _fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
+import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import apache.thrift.fixtures.types.included.thrift_abstract_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_abstract_types
 
 class has_bitwise_ops:

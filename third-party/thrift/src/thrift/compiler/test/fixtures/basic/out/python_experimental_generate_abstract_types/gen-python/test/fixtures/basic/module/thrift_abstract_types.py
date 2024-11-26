@@ -20,6 +20,7 @@ import enum as _enum
 
 
 import folly.iobuf as _fbthrift_iobuf
+import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class MyEnum:
     pass
@@ -135,52 +136,34 @@ class MyUnion(_abc.ABC):
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
 
 
-class MyException(_abc.ABC):
+class MyException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def MyIntField(self) -> int: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def MyStringField(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def myStruct(self) -> MyStruct: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def myUnion(self) -> MyUnion: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyException": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyException": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyException": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
 
-class MyExceptionWithMessage(_abc.ABC):
+class MyExceptionWithMessage(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def MyIntField(self) -> int: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def MyStringField(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def myStruct(self) -> MyStruct: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def myUnion(self) -> MyUnion: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, MyStruct, MyUnion]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyExceptionWithMessage": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyExceptionWithMessage": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
 
 class ReservedKeyword(_abc.ABC):

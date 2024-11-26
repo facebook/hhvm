@@ -23,6 +23,10 @@ import thrift.test.thrift_python.included.thrift_abstract_types
 from folly import iobuf
 
 from parameterized import parameterized
+from thrift.python.abstract_types import AbstractGeneratedError
+
+from thrift.python.exceptions import Error, GeneratedError
+from thrift.python.mutable_exceptions import MutableGeneratedError
 
 from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesAbstract,
@@ -45,10 +49,12 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
 )
 
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
+    TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestStruct as TestStructMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
+    TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesImmutable,
     TestStruct as TestStructImmutable,
 )
 
@@ -183,6 +189,64 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
     def test_issubclass_with_read_only_abstract_base_class_with_mutable(self) -> None:
         """ """
         self.assertTrue(issubclass(TestStructMutable, TestStructAbstract))
+
+    @parameterized.expand(
+        [
+            (
+                "raise_immutable_catch_abstract",
+                TestExceptionAllThriftPrimitiveTypesImmutable,
+                TestExceptionAllThriftPrimitiveTypesAbstract,
+            ),
+            (
+                "raise_immutable_catch_abstract_generated_error",
+                TestExceptionAllThriftPrimitiveTypesImmutable,
+                AbstractGeneratedError,
+            ),
+            (
+                "raise_immutable_catch_generated_error",
+                TestExceptionAllThriftPrimitiveTypesImmutable,
+                GeneratedError,
+            ),
+            (
+                "raise_immutable_catch_error",
+                TestExceptionAllThriftPrimitiveTypesImmutable,
+                Error,
+            ),
+            (
+                "raise_mutable_catch_abstract",
+                TestExceptionAllThriftPrimitiveTypesMutable,
+                TestExceptionAllThriftPrimitiveTypesAbstract,
+            ),
+            (
+                "raise_mutable_catch_abstract_generated_error",
+                TestExceptionAllThriftPrimitiveTypesMutable,
+                AbstractGeneratedError,
+            ),
+            (
+                "raise_mutable_catch_generated_error",
+                TestExceptionAllThriftPrimitiveTypesMutable,
+                MutableGeneratedError,
+            ),
+            (
+                "raise_mutable_catch_error",
+                TestExceptionAllThriftPrimitiveTypesMutable,
+                Error,
+            ),
+        ]
+    )
+    def test_exception(
+        self,
+        test_name: str,
+        exception_to_raise: typing.Type[TestExceptionAllThriftPrimitiveTypesAbstract],
+        exception_to_catch: typing.Type[Error],
+    ) -> None:
+        try:
+            raise exception_to_raise
+        except exception_to_catch as ex:
+            self.assertEqual(
+                len(ex.args),
+                16,
+            )
 
     @parameterized.expand(
         [

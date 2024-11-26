@@ -365,7 +365,6 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
 
 
-@_fbthrift_abstract_types.MyException.register
 class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -414,6 +413,9 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyException
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyException"
@@ -452,7 +454,6 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyException, self)
 
 
-@_fbthrift_abstract_types.MyExceptionWithMessage.register
 class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -500,6 +501,9 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
             11, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyExceptionWithMessage
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

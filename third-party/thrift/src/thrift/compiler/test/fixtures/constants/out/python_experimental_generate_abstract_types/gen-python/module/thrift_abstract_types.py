@@ -20,6 +20,7 @@ import enum as _enum
 
 
 import folly.iobuf as _fbthrift_iobuf
+import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class EmptyEnum:
     pass

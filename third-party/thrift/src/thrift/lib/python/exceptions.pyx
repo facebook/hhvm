@@ -266,7 +266,10 @@ class GeneratedErrorMeta(type):
         dct["_fbthrift_struct_info"] = StructInfo(name, fields)
         for i, f in enumerate(fields):
             dct[f.py_name] = make_fget_error(i)
-        return super().__new__(cls, name, (GeneratedError,), dct)
+        bases = (GeneratedError, )
+        if "_fbthrift_abstract_base_class" in dct:
+            bases += (dct.pop("_fbthrift_abstract_base_class"),)
+        return super().__new__(cls, name, bases, dct)
 
     def _fbthrift_fill_spec(cls):
         (<StructInfo>cls._fbthrift_struct_info)._fill_struct_info()

@@ -39,6 +39,7 @@ import enum as _enum
 {{/program:unions?}}
 
 import folly.iobuf as _fbthrift_iobuf
+import {{program:base_library_package}}.abstract_types as _fbthrift_python_abstract_types
 {{#program:include_namespaces}}
 {{#has_types?}}
 import {{included_module_path}}.thrift_abstract_types as {{included_module_mangle}}__thrift_abstract_types
@@ -56,28 +57,33 @@ class {{enum:name}}:
 {{#program:structs}}
 
 class {{> structs/unadapted_name}}({{!
-        }}_abc.ABC):
+        }}{{^struct:exception?}}_abc.ABC{{/struct:exception?}}{{!
+        }}{{#struct:exception?}}_fbthrift_python_abstract_types.AbstractGeneratedError{{/struct:exception?}}):
     {{#struct:fields_ordered_by_id}}
     @_fbthrift_property
-    @_abc.abstractmethod
+{{!
+    This (mis-)alignment is necessary to ensure that the abstract method annotation aligns with the def on the next line
+    and produces no output in the cases where it should not exist (currently for exceptions).
+}}
+{{> fields/maybe_abstract_method_annotation}}
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
     {{/struct:fields_ordered_by_id}}
     {{^struct:union?}}
-    @_abc.abstractmethod
+{{> fields/maybe_abstract_method_annotation}}
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
         }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{> fields/adapted_type}}{{!
         }}{{/struct:fields_ordered_by_id}}]]]: ...
     {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{#program:generate_to_mutable_python_conversion_methods?}}
-    @_abc.abstractmethod
+{{> fields/maybe_abstract_method_annotation}}
     def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{> structs/unadapted_name}}": ...  # type: ignore
 {{/program:generate_to_mutable_python_conversion_methods?}}
-    @_abc.abstractmethod
+{{> fields/maybe_abstract_method_annotation}}
     def _to_python(self) -> "{{program:module_path}}.thrift_types.{{> structs/unadapted_name}}": ...  # type: ignore
-    @_abc.abstractmethod
+{{> fields/maybe_abstract_method_annotation}}
     def _to_py3(self) -> "{{program:module_path}}.types.{{> structs/unadapted_name}}": ...  # type: ignore
-    @_abc.abstractmethod
+{{> fields/maybe_abstract_method_annotation}}
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{> structs/unadapted_name}}": ...  # type: ignore
     {{/struct:legacy_api?}}
     {{#struct:union?}}

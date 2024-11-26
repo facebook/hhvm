@@ -20,6 +20,7 @@ import enum as _enum
 
 
 import folly.iobuf as _fbthrift_iobuf
+import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import apache.thrift.type.id.thrift_abstract_types as _fbthrift__apache__thrift__type__id__thrift_abstract_types
 import apache.thrift.type.schema.thrift_abstract_types as _fbthrift__apache__thrift__type__schema__thrift_abstract_types
 import test.fixtures.python_capi.serialized_dep.thrift_abstract_types as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_abstract_types

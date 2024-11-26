@@ -18,118 +18,74 @@ _fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
+import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 
-class Fiery(_abc.ABC):
+class Fiery(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def message(self) -> str: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Fiery": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Fiery": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Fiery": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
 
-class Serious(_abc.ABC):
+class Serious(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def not_sonnet(self) -> _typing.Optional[str]: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Serious": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Serious": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Serious": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
 
-class ComplexFieldNames(_abc.ABC):
+class ComplexFieldNames(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def error_message(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def internal_error_message(self) -> str: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexFieldNames": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.ComplexFieldNames": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.ComplexFieldNames": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
 
-class CustomFieldNames(_abc.ABC):
+class CustomFieldNames(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def error_message(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def internal_error_message(self) -> str: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomFieldNames": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.CustomFieldNames": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.CustomFieldNames": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
 
-class ExceptionWithPrimitiveField(_abc.ABC):
+class ExceptionWithPrimitiveField(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def message(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def error_code(self) -> int: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithPrimitiveField": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.ExceptionWithPrimitiveField": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.ExceptionWithPrimitiveField": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
 
-class ExceptionWithStructuredAnnotation(_abc.ABC):
+class ExceptionWithStructuredAnnotation(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def message_field(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def error_code(self) -> int: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ExceptionWithStructuredAnnotation": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.ExceptionWithStructuredAnnotation": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.ExceptionWithStructuredAnnotation": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
 
-class Banal(_abc.ABC):
-    @_abc.abstractmethod
+class Banal(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Banal": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Banal": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Banal": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Banal": ...  # type: ignore

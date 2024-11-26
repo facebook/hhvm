@@ -1599,10 +1599,12 @@ class TypeRemapped(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.TypeRemapped, self)
 
 
-@_fbthrift_abstract_types.emptyXcep.register
 class emptyXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.emptyXcep
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -1643,7 +1645,6 @@ class emptyXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedEr
             return thrift.util.converter.to_py_struct(py_asyncio_types.emptyXcep, self)
 
 
-@_fbthrift_abstract_types.reqXcep.register
 class reqXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1669,6 +1670,9 @@ class reqXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
             4, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.reqXcep
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -1709,7 +1713,6 @@ class reqXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
             return thrift.util.converter.to_py_struct(py_asyncio_types.reqXcep, self)
 
 
-@_fbthrift_abstract_types.optXcep.register
 class optXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1735,6 +1738,9 @@ class optXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
             4, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.optXcep
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -1775,7 +1781,6 @@ class optXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErro
             return thrift.util.converter.to_py_struct(py_asyncio_types.optXcep, self)
 
 
-@_fbthrift_abstract_types.complexException.register
 class complexException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1845,6 +1850,9 @@ class complexException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
             16, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.complexException
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

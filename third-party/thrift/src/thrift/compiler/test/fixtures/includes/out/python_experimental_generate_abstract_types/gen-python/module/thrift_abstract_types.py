@@ -18,6 +18,7 @@ _fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
+import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import includes.thrift_abstract_types as _fbthrift__includes__thrift_abstract_types
 
 

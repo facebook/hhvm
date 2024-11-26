@@ -14,7 +14,6 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
-@_fbthrift_abstract_types.Fiery.register
 class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -29,6 +28,9 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.Fiery
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -75,7 +77,6 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Fiery, self)
 
 
-@_fbthrift_abstract_types.Serious.register
 class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -90,6 +91,9 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.Serious
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -136,7 +140,6 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Serious, self)
 
 
-@_fbthrift_abstract_types.ComplexFieldNames.register
 class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -162,6 +165,9 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ComplexFieldNames
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -208,7 +214,6 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexFieldNames, self)
 
 
-@_fbthrift_abstract_types.CustomFieldNames.register
 class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -234,6 +239,9 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.CustomFieldNames
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -280,7 +288,6 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomFieldNames, self)
 
 
-@_fbthrift_abstract_types.ExceptionWithPrimitiveField.register
 class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -306,6 +313,9 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
             4, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ExceptionWithPrimitiveField
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -352,7 +362,6 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
             return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithPrimitiveField, self)
 
 
-@_fbthrift_abstract_types.ExceptionWithStructuredAnnotation.register
 class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -378,6 +387,9 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
             4, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ExceptionWithStructuredAnnotation
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -424,10 +436,12 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
             return thrift.util.converter.to_py_struct(py_asyncio_types.ExceptionWithStructuredAnnotation, self)
 
 
-@_fbthrift_abstract_types.Banal.register
 class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.Banal
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

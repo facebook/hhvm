@@ -20,6 +20,7 @@ import enum as _enum
 
 
 import folly.iobuf as _fbthrift_iobuf
+import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 class MyEnum:
     pass
@@ -478,82 +479,52 @@ class TypeRemapped(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.TypeRemapped": ...  # type: ignore
 
-class emptyXcep(_abc.ABC):
-    @_abc.abstractmethod
+class emptyXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.emptyXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.emptyXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.emptyXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.emptyXcep": ...  # type: ignore
 
-class reqXcep(_abc.ABC):
+class reqXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def message(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def errorCode(self) -> int: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.reqXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.reqXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.reqXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.reqXcep": ...  # type: ignore
 
-class optXcep(_abc.ABC):
+class optXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def message(self) -> _typing.Optional[str]: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def errorCode(self) -> _typing.Optional[int]: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.optXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.optXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.optXcep": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.optXcep": ...  # type: ignore
 
-class complexException(_abc.ABC):
+class complexException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
-    @_abc.abstractmethod
     def message(self) -> str: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def listStrings(self) -> _typing.Sequence[str]: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def errorEnum(self) -> MyEnum: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def unionError(self) -> _typing.Optional[MyUnion]: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def structError(self) -> MyStruct: ...
     @_fbthrift_property
-    @_abc.abstractmethod
     def lsMap(self) -> _typing.Mapping[int, str]: ...
-    @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _typing.Sequence[str], MyEnum, MyUnion, MyStruct, _typing.Mapping[int, str]]]]: ...
-    @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.complexException": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.complexException": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py3(self) -> "module.types.complexException": ...  # type: ignore
-    @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.complexException": ...  # type: ignore
 
 stringTypedef = str

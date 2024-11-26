@@ -674,6 +674,8 @@ cdef object _mutable_struct_meta_new(cls, cls_name, bases, dct):
                                     field_info.idl_type))
 
     dct["__slots__"] = slots
+    if "_fbthrift_abstract_base_class" in dct:
+        bases += (dct.pop("_fbthrift_abstract_base_class"),)
     klass = type.__new__(cls, cls_name, bases, dct)
 
     for field_index, field_name, field_qualifier, *_ in primitive_types:

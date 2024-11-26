@@ -23,7 +23,6 @@ import test.fixtures.another_interactions.shared.thrift_mutable_types
 import test.fixtures.another_interactions.shared.thrift_mutable_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types
 
 
-@_fbthrift_abstract_types.CustomException.register
 class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -38,6 +37,9 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.CustomException
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

@@ -20,10 +20,12 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-@_fbthrift_abstract_types.FooStreamEx.register
 class FooStreamEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.FooStreamEx
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -64,10 +66,12 @@ class FooStreamEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerated
             return thrift.util.converter.to_py_struct(py_asyncio_types.FooStreamEx, self)
 
 
-@_fbthrift_abstract_types.FooEx.register
 class FooEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.FooEx
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -108,10 +112,12 @@ class FooEx(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
             return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx, self)
 
 
-@_fbthrift_abstract_types.FooEx2.register
 class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.FooEx2
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

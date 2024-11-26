@@ -13,6 +13,12 @@
 # limitations under the License.
 
 try:
+    # pyre-fixme[21]: Could not find module `thrift.python.abstract_types`.
+    import thrift.python.abstract_types as abstract_types  # noqa: 401
+except ModuleNotFoundError:
+    pass
+
+try:
     # pyre-fixme[21]: Could not find module `thrift.python.types`.
     import thrift.python.types as types  # noqa: 401
 except ModuleNotFoundError:

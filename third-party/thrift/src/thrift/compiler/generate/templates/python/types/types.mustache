@@ -47,14 +47,16 @@ import {{module_path}}
 
 
 {{#program:enable_abstract_types?}}{{!
+TODO(T208096866)
 If the class uses the abstract class as a direct baseclass, it results in the error below.
        TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict)
        subclass of the metaclasses of all its bases
 
 Until we resolve the above error, register the class as virtual subclass of the abstract class.
-}}
+}}{{^struct:exception?}}
 @_fbthrift_abstract_types.{{> structs/unadapted_name}}.register
-{{/program:enable_abstract_types?}}{{!
+{{/struct:exception?}}{{!
+}}{{/program:enable_abstract_types?}}{{!
 }}class {{> structs/unadapted_name}}{{!
 }}(metaclass={{!
         }}{{#struct:union?}}{{> types/union_metaclass}}{{/struct:union?}}{{!
@@ -80,12 +82,12 @@ Until we resolve the above error, register the class as virtual subclass of the 
         {{/struct:fields_ordered_by_id}}
     ){{!
     }}{{#program:enable_abstract_types?}}{{!
-    }}{{#struct:union?}}{{!
+    }}{{^struct:plain?}}{{!
     }}
 
     _fbthrift_abstract_base_class = _fbthrift_abstract_types.{{struct:py_name}}
     {{!
-    }}{{/struct:union?}}{{!
+    }}{{/struct:plain?}}{{!
     }}{{/program:enable_abstract_types?}}
 
 

@@ -157,10 +157,14 @@ folly::Try<apache::thrift::RpcResponseComplete<{{ > types/return_type_client}}>>
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      {{#if type:void?}}
-      return recv_wrapped_{{function:cpp_name}}(returnState);
-      {{else}}
+      {{#if function:stream?}}
       return recv_wrapped_{{function:cpp_name}}(tryResponse->response.value(), returnState);
+      {{else}}
+        {{#if type:void?}}
+      return recv_wrapped_{{function:cpp_name}}(returnState);
+        {{else}}
+      return recv_wrapped_{{function:cpp_name}}(tryResponse->response.value(), returnState);
+        {{/if}}
       {{/if}}
     });
     if (ew) {

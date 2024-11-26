@@ -281,7 +281,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_returnstre
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_returnstream(returnState);
+      return recv_wrapped_returnstream(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));
@@ -515,7 +515,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_streamthro
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_streamthrows(returnState);
+      return recv_wrapped_streamthrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));
@@ -749,7 +749,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_servicethr
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_servicethrows(returnState);
+      return recv_wrapped_servicethrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));
@@ -983,7 +983,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_servicethr
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_servicethrows2(returnState);
+      return recv_wrapped_servicethrows2(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));
@@ -1217,7 +1217,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_boththrows
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_boththrows(returnState);
+      return recv_wrapped_boththrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));
@@ -1451,7 +1451,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_responseandstreamstreamthrows(returnState);
+      return recv_wrapped_responseandstreamstreamthrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));
@@ -1685,7 +1685,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_responseandstreamservicethrows(returnState);
+      return recv_wrapped_responseandstreamservicethrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));
@@ -1919,7 +1919,7 @@ apache::thrift::Client<::cpp2::PubSubStreamingService>::sync_complete_responsean
     }
     tryResponse->response.emplace();
     auto ew = folly::fibers::runInMainContext([&] {
-      return recv_wrapped_responseandstreamboththrows(returnState);
+      return recv_wrapped_responseandstreamboththrows(tryResponse->response.value(), returnState);
     });
     if (ew) {
       tryResponse->response.emplaceException(std::move(ew));

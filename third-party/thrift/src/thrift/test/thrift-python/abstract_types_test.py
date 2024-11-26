@@ -87,7 +87,9 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         # Disable maximum printed diff length.
         self.maxDiff = None
 
-    def test_fn_call_with_read_only_abstract_base_class_with_immutable(self) -> None:
+    def test_fn_call_with_read_only_abstract_base_class_with_immutable_struct(
+        self,
+    ) -> None:
         """
         type-check will fail with the error below if
         TestStructImmutable does not inherit from TestStructAbstract.
@@ -98,48 +100,15 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         # GIVEN
         def library_fn(ts: TestStructAbstract) -> None:
             # THEN
-            self.assertEqual(ts.unqualified_string, "hello")
-            self.assertIsNone(ts.optional_string)
+            self.assertIsInstance(ts, TestStructAbstract)
 
         # WHEN
         library_fn(TestStructImmutable(unqualified_string="hello"))
-
-    def test_type_hint_with_read_only_abstract_base_class_with_immutable(self) -> None:
-        """
-        type-check will fail with the error below if
-        TestStructImmutable does not inherit from TestStructAbstract.
-
-        Incompatible variable type [9]: ts is declared to have type `TestStructAbstract` but is used as type `TestStructImmutable`.
-        """
-        # GIVEN
-        # TestStructAbstract
-        # TestStructImmutable
-
-        # WHEN
-        ts: TestStructAbstract = TestStructImmutable(unqualified_string="hello")
-
-        # THEN
-        self.assertEqual(ts.unqualified_string, "hello")
-        self.assertIsNone(ts.optional_string)
-
-    def test_isinstance_with_read_only_abstract_base_class_with_immutable(self) -> None:
-        """ """
-        # GIVEN
-        # TestStructAbstract
-        # TestStructImmutable
-
-        # WHEN
-        # This assignment is here to validate type-checking.
-        ts: TestStructAbstract = TestStructImmutable(unqualified_string="hello")
-
-        # THEN
-        self.assertIsInstance(ts, TestStructAbstract)
-
-    def test_issubclass_with_read_only_abstract_base_class_with_immutable(self) -> None:
-        """ """
         self.assertTrue(issubclass(TestStructImmutable, TestStructAbstract))
 
-    def test_fn_call_with_read_only_abstract_base_class_with_mutable(self) -> None:
+    def test_fn_call_with_read_only_abstract_base_class_with_mutable_struct(
+        self,
+    ) -> None:
         """
         type-check will fail with the error below if
         TestStructMutable does not inherit from TestStructAbstract.
@@ -150,45 +119,49 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         # GIVEN
         def library_fn(ts: TestStructAbstract) -> None:
             # THEN
-            self.assertEqual(ts.unqualified_string, "hello")
-            self.assertIsNone(ts.optional_string)
+            self.assertIsInstance(ts, TestStructAbstract)
 
         # WHEN
         library_fn(TestStructMutable(unqualified_string="hello"))
+        self.assertTrue(issubclass(TestStructMutable, TestStructAbstract))
 
-    def test_type_hint_with_read_only_abstract_base_class_with_mutable(self) -> None:
+    def test_fn_call_with_read_only_abstract_base_class_with_immutable_union(
+        self,
+    ) -> None:
         """
         type-check will fail with the error below if
-        TestStructMutable does not inherit from TestStructAbstract.
+        TestUnionImmutable does not inherit from TestUnionAbstract.
 
-        Incompatible variable type [9]: ts is declared to have type `TestStructAbstract` but is used as type `TestStructMutable`.
+        Incompatible parameter type [6]: In call `ThriftPythonAbstractTypesTest.test_fn_call_with_read_only_abstract_base_class_with_immutable.library_fn`, for 1st positional argument, expected `TestUnionAbstract` but got `TestUnionImmutable`.
         """
+
         # GIVEN
-        # TestStructAbstract
-        # TestStructMutable
+        def library_fn(ts: TestUnionAbstract) -> None:
+            # THEN
+            self.assertIsInstance(ts, TestUnionAbstract)
 
         # WHEN
-        ts: TestStructAbstract = TestStructMutable(unqualified_string="hello")
+        library_fn(TestUnionImmutable(string_field="hello"))
+        self.assertTrue(issubclass(TestUnionImmutable, TestUnionAbstract))
 
-        # THEN
-        self.assertEqual(ts.unqualified_string, "hello")
-        self.assertIsNone(ts.optional_string)
+    def test_fn_call_with_read_only_abstract_base_class_with_mutable_union(
+        self,
+    ) -> None:
+        """
+        type-check will fail with the error below if
+        TestUnionMutable does not inherit from TestUnionAbstract.
 
-    def test_isinstance_with_read_only_abstract_base_class_with_mutable(self) -> None:
-        """ """
+        Incompatible parameter type [6]: In call `ThriftPythonAbstractTypesTest.test_fn_call_with_read_only_abstract_base_class_with_mutable.library_fn`, for 1st positional argument, expected `TestUnionAbstract` but got `TestUnionMutable`.
+        """
+
         # GIVEN
-        # TestStructAbstract
-        # TestStructMutable
+        def library_fn(ts: TestUnionAbstract) -> None:
+            # THEN
+            self.assertIsInstance(ts, TestUnionAbstract)
 
         # WHEN
-        ts: TestStructAbstract = TestStructMutable(unqualified_string="hello")
-
-        # THEN
-        self.assertIsInstance(ts, TestStructAbstract)
-
-    def test_issubclass_with_read_only_abstract_base_class_with_mutable(self) -> None:
-        """ """
-        self.assertTrue(issubclass(TestStructMutable, TestStructAbstract))
+        library_fn(TestUnionMutable(string_field="hello"))
+        self.assertTrue(issubclass(TestUnionMutable, TestUnionAbstract))
 
     @parameterized.expand(
         [

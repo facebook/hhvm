@@ -35,12 +35,15 @@
 #include "hphp/util/concurrent-scalable-cache.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/struct-log.h"
+#include "hphp/runtime/base/req-hash-set.h"
 
 #include <folly/small_vector.h>
 
 namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
+
+constexpr size_t kVisitedWHsSize = 256;
 
 const StaticString
   s_file("file"),
@@ -159,29 +162,27 @@ ObjectData* BTFrame::getThis() const {
 ///////////////////////////////////////////////////////////////////////////////
 
 namespace {
-
+NEVER_INLINE 
 c_WaitableWaitHandle* getParentWH(
   c_WaitableWaitHandle* wh,
   context_idx_t contextIdx,
-  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+  req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 ) {
   assertx(!wh->isFinished());
   auto p = wh->getParentChain().firstInContext(contextIdx);
-  if (p == nullptr ||
-      UNLIKELY(std::find(visitedWHs.begin(), visitedWHs.end(), p)
-               != visitedWHs.end())) {
-    // If the parent exists in our backtrace, it means we have detected a
-    // cycle. We well fall back to savedFP in that case.
+  if (p == nullptr) return p;
+  auto ret = visitedWHs.emplace(p);
+  if (ret.second) { // emplace succeeded
+    return p;
+  } else {
     return nullptr;
   }
-  visitedWHs.push_back(p);
-  return p;
 }
 
 BTFrame getARFromWHImpl(
   c_WaitableWaitHandle* currentWaitHandle,
   context_idx_t contextIdx,
-  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+  req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 ) {
   while (currentWaitHandle != nullptr) {
     assertx(!currentWaitHandle->isFinished());
@@ -207,7 +208,7 @@ BTFrame getARFromWHImpl(
 
 BTFrame getARFromWH(
   c_WaitableWaitHandle* currentWaitHandle,
-  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+  req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 ) {
   if (currentWaitHandle->isFinished()) return BTFrame::none();
 
@@ -241,7 +242,7 @@ BTFrame initBTFrameAt(jit::CTCA ip, BTFrame frm) {
 
 BTFrame getPrevActRec(
   BTFrame frm,
-  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+  req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 ) {
   if (!frm) return BTFrame::none();
   auto const fp = frm.fpInternal();
@@ -345,7 +346,8 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
   static auto const s_runtimeStruct = runtimeStructForBacktraceFrame();
 
   auto bt = Array::CreateVec();
-  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  req::fast_set<c_WaitableWaitHandle*> visitedWHs;
+  visitedWHs.reserve(kVisitedWHsSize);
 
   if (g_context->m_parserFrame) {
     StructDictInit frame(s_runtimeStruct, 2);
@@ -539,7 +541,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 }
 
 Array createCrashBacktrace(BTFrame frame, jit::CTCA addr) {
-  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  req::fast_set<c_WaitableWaitHandle*> visitedWHs;
 
   CompactTraceData trace;
   walkStackFrom([&] (const BTFrame& frm) {
@@ -649,7 +651,7 @@ req::ptr<CompactTrace> createCompactBacktrace(bool skipTop) {
 
 std::pair<const Func*, Offset> getCurrentFuncAndOffset() {
   VMRegAnchor _;
-  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  req::fast_set<c_WaitableWaitHandle*> visitedWHs;
 
   auto const fp = vmfp();
   auto frm = BTFrame::regular(fp, kInvalidOffset);

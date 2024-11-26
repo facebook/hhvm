@@ -40,7 +40,7 @@ namespace backtrace_detail {
 
 BTFrame getPrevActRec(
   BTFrame frm,
-  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+  req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 );
 
 /*
@@ -58,7 +58,7 @@ BTFrame initBTFrameAt(jit::CTCA ip, BTFrame frm);
 template<class L>
 void walkStackFrom(
     L func, BTFrame initFrm, jit::CTCA ip, bool skipTop,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs) {
+    req::fast_set<c_WaitableWaitHandle*>& visitedWHs) {
   auto frm = backtrace_detail::initBTFrameAt(ip, initFrm);
 
   if (skipTop) frm = backtrace_detail::getPrevActRec(frm, visitedWHs);
@@ -74,7 +74,7 @@ void walkStack(L func, c_WaitableWaitHandle* wh, bool skipTop) {
 
   VMRegAnchor _;
 
-  folly::small_vector<c_WaitableWaitHandle*, 64> visitedWHs;
+  req::fast_set<c_WaitableWaitHandle*> visitedWHs;
 
   auto frm = wh != nullptr
     ? getARFromWH(wh, visitedWHs)

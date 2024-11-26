@@ -411,7 +411,7 @@ std::pair<const Func*, Offset> getCurrentFuncAndOffset();
  */
 BTFrame getARFromWH(
   c_WaitableWaitHandle* currentWaitHandle,
-  folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs
+  req::fast_set<c_WaitableWaitHandle*>& visitedWHs
 );
 
 /*
@@ -432,7 +432,7 @@ void walkStack(L func, bool skipTop = false);
 template<class L>
 void walkStackFrom(
     L func, BTFrame initFrm, jit::CTCA ip, bool skipTop,
-    folly::small_vector<c_WaitableWaitHandle*, 64>& visitedWHs);
+    req::fast_set<c_WaitableWaitHandle*>& visitedWHs);
 
 namespace backtrace_detail {
 

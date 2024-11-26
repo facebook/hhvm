@@ -19,13 +19,13 @@
 namespace apache::thrift::detail::mc {
 
 ::std::string_view readSchema(::std::string_view (*access)()) {
-  return access == nullptr ? ::std::string_view() : access();
+  return access();
 }
 
 ::std::string_view readSchemaInclude(
     ::folly::Range<const ::std::string_view*> (*access)(),
     ::std::size_t index) {
-  return access == nullptr ? ::std::string_view() : access()[index];
+  return access()[index];
 }
 
 } // namespace apache::thrift::detail::mc

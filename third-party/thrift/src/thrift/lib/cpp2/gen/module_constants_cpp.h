@@ -28,10 +28,6 @@
 FOLLY_GNU_DISABLE_WARNING("-Woverlength-strings")
 FOLLY_GNU_DISABLE_WARNING("-Wtrigraphs")
 
-// Schema constant depends on weak symbols to work around legacy include
-// resolution behavior.
-#define FBTHRIFT_CAN_POPULATE_SCHEMA_LIST FOLLY_HAVE_WEAK_SYMBOLS
-
 namespace apache::thrift::detail::mc {
 
 ::std::string_view readSchema(::std::string_view (*access)());

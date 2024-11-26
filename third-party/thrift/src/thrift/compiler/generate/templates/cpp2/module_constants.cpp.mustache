@@ -62,16 +62,12 @@ namespace {{program:name}}_constants {
 {{/program:has_schema?}}
 ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes() {
 {{#if program:schema_includes_const?}}
-#if FBTHRIFT_CAN_POPULATE_SCHEMA_LIST
   static const ::std::array<::std::string_view, {{program:num_transitive_thrift_includes}}> includes = {
     {{#program:transitive_schema_initializers}}
     {{ . }},
     {{/program:transitive_schema_initializers}}
   };
   return ::folly::range(includes);
-#else
-  return {};
-#endif
 {{else}}
   return {};
 {{/if}}

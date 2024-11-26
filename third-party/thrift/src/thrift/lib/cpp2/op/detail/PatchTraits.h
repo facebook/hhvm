@@ -133,6 +133,8 @@ class MinSafePatchVersionVisitor {
   template <typename T>
   void putMulti(const T&) {}
   template <typename T>
+  void tryPutMulti(const T&) {}
+  template <typename T>
   void remove(const T&) {}
   template <typename T>
   void removeMulti(const T&) {}

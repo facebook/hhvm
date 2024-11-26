@@ -10,8 +10,6 @@ ERROR: File "empty_types1.php", line 5, characters 11-11:
 This recursive case type is not supported. `B` should not be at the top-level. (Typing[4485])
 ERROR: File "empty_types1.php", line 7, characters 11-11:
 This recursive case type is not supported. `C` should not be at the top-level. (Typing[4485])
-ERROR: File "empty_types1.php", line 8, characters 11-11:
-This recursive case type is not supported. `D` should not be at the top-level. (Typing[4485])
 ERROR: File "empty_types1.php", line 10, characters 11-11:
 This recursive case type is not supported. `E` should not be at the top-level. (Typing[4485])
 ERROR: File "empty_types1.php", line 11, characters 11-11:
@@ -64,3 +62,5 @@ Invalid case type declaration. More than one variant of `Acces` could contain va
     resulting from expanding the type constant `Claz::T`
   File "empty_types1.php", line 29, characters 29-31:
   It overlaps with `int`, which also includes **ints**
+ERROR: File "empty_types1.php", line 30, characters 11-15:
+This recursive case type is not supported. `Accez` should not be at the top-level. (Typing[4485])

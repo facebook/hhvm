@@ -102,60 +102,73 @@ let check_overlapping env (t_pos, t_name) hints =
   let err = data_types |> pairwise_check [] |> Typing_error.multiple_opt in
   (env, err)
 
-(** Forbid recursive type aliases like `A = A` and `A = ?A`.
-  Note that recursive types like `A = A | int` are already forbidden
-  by `check_overlapping`. *)
+(** Forbid recursive type aliases like `A = A` and `A = ?A`
+  (modulo indirection via other type aliases),
+  something defined as contractiveness in Pierce's Types and Programming Languages.
+  Note that we'd also want to forbid any recursion under union like `A = A | int`,
+  but these are already forbidden by `check_overlapping`, so left to check
+  are A = A and A = ?A. *)
 let check_invalid_recursive_case_type
-    (env : Typing_env_types.env) ((pos, name) : sid) (types : decl_ty list) =
-  let rec is_invalid_single_type (ty : decl_ty) =
+    (env : Typing_env_types.env) ((pos, name) : sid) (hints : _ list) =
+  let rec is_invalid_single_type (ty : Typing_defs.locl_ty) =
     let open Typing_defs in
-    match (get_node ty : _ ty_) with
-    | Tapply ((_p, id), _targs) ->
-      if String.equal name id then
-        true
-      else (
-        match Typing_env.get_typedef env id |> Decl_entry.to_option with
-        | None -> false
-        | Some
-            ({ td_type_assignment : typedef_type_assignment; _ } : typedef_type)
-          ->
-          (match td_type_assignment with
-          | SimpleTypeDef (_, ty)
-          | CaseType (((ty, _) : typedef_case_type_variant), []) ->
-            is_invalid_single_type ty
-          | CaseType _ -> false)
-      )
-    | Tlike ty
-    | Toption ty ->
-      is_invalid_single_type ty
+    match (get_node ty : locl_phase ty_) with
+    | Tnewtype (id, _targs, _bound) -> String.equal name id
+    | Toption ty -> is_invalid_single_type ty
+    | Taccess _
+    | Tgeneric _
     | Tprim _
     | Tfun _
     | Ttuple _
     | Tclass_ptr _
     | Tshape _
-    | Taccess _
-    | Tmixed
-    | Twildcard
-    | Trefinement _
-    | Tgeneric _
     | Tnonnull
     | Tvec_or_dict _
-    | Tthis
     | Tdynamic
-    | Tany _
-    | Tunion _
-    | Tintersection _ ->
+    | Tvar _
+    | Tclass _
+    | Tunapplied_alias _
+    | Tany _ ->
       false
+    | Tunion tyl
+    | Tintersection tyl ->
+      List.exists tyl ~f:is_invalid_single_type
+    | Tdependent _ ->
+      failwith "Unexpected type Tdependent out of localizing a hint"
+    | Tneg _ -> failwith "Unexpected type Tneg out of localizing a hint"
+    | Tlabel _ -> failwith "Unexpected type Tlabel out of localizing a hint"
   in
-  match types with
-  | [ty] ->
-    if is_invalid_single_type ty then
-      Some
-        (Typing_error.casetype
-           (Typing_error.Primary.CaseType.Invalid_recursive { pos; name }))
-    else
-      None
-  | _ -> None
+  match hints with
+  | [hint] ->
+    let ty = Decl_hint.hint env.Typing_env_types.decl_env hint in
+    let ((env, _err), ty) =
+      Typing_phase.localize
+        env
+        ~ety_env:
+          Typing_defs.
+            {
+              empty_expand_env with
+              visibility_behavior = Always_expand_newtype;
+              type_expansions =
+                Type_expansions.empty_w_cycle_report
+                  ~report_cycle:
+                    (Some (pos, Type_expansions.Expandable.Type_alias name));
+            }
+        ty
+    in
+    let err =
+      if is_invalid_single_type ty then
+        Some
+          (Typing_error.casetype
+             (Typing_error.Primary.CaseType.Invalid_recursive { pos; name }))
+      else
+        None
+    in
+    (env, err)
+  | _ ->
+    (* Recursive types like `A = A | int` are already forbidden
+       by `check_overlapping`, so we skip the check. *)
+    (env, None)
 
 (** Checks that variants of a case type are disjoint, and rule out other invalid recursive case types *)
 let casetype_def env typedef =
@@ -187,10 +200,7 @@ let casetype_def env typedef =
   | CaseType (variant, variants) ->
     let hints = List.map (variant :: variants) ~f:(fun v -> v.tctv_hint) in
     let (env, err1) = check_overlapping env t_name hints in
-    let types =
-      List.map hints ~f:(Decl_hint.hint env.Typing_env_types.decl_env)
-    in
-    let err2 = check_invalid_recursive_case_type env t_name types in
+    let (env, err2) = check_invalid_recursive_case_type env t_name hints in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err1;
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2;
     env

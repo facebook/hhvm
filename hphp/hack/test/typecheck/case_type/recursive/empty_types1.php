@@ -5,7 +5,7 @@ case type A = A;
 case type B = ?B;
 
 case type C = D;
-case type D = C;
+type D = C;
 
 case type E = F;
 case type F = G;
@@ -35,3 +35,5 @@ class Claz {
 class Clazz {
   const type T = Accez;
 }
+
+case type AA = A;

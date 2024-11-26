@@ -80,7 +80,11 @@ let expand_typedef_decl
   It will not expand opaque type aliases (`newtype`) unless they're visible (in the current file)
   or [force_expand] is true.
   *)
-let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
+let expand_typedef_ ~force_expand ety_env env r (x : string) argl :
+    (Typing_env_types.env
+    * Typing_error.t option
+    * Type_expansions.cycle_reporter list)
+    * (expand_env * locl_ty) =
   let td = unsafe_opt @@ Decl_entry.to_option (Env.get_typedef env x) in
   let { td_pos; td_as_constraint; _ } = td in
   match
@@ -93,8 +97,8 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
       }
   with
   | Error cycle ->
-    let (env, ty) =
-      let r = Typing_reason.illegal_recursive_type (Reason.to_pos r) x in
+    let r = Typing_reason.illegal_recursive_type (Reason.to_pos r) x in
+    let (env, mixed) =
       match td_as_constraint with
       | Some ty ->
         (match get_node ty with
@@ -103,6 +107,17 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
           Typing_utils.make_supportdyn r env (MakeType.mixed r)
         | _ -> (env, MakeType.mixed r))
       | _ -> (env, MakeType.mixed r)
+    in
+    let ty =
+      (* For regular typechecking, we localize to mixed to prevent various unsoundness,
+         when localizing recursive bounds. Other cycle-related wellformedness checks
+         using Always_expand_newtype require to localize as an the opaque newtype to be
+         able to make proper conclusions about the cycle. *)
+      match ety_env.visibility_behavior with
+      | Always_expand_newtype -> mk (r, Tnewtype (x, argl, mixed))
+      | Never_expand_newtype
+      | Expand_visible_newtype_only ->
+        mixed
     in
     ((env, None, [cycle]), (ety_env, ty))
   | Ok ety_env ->

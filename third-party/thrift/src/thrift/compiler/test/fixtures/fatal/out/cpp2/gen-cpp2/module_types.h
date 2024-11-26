@@ -929,6 +929,11 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum1> {
     return "enum1";
   }
 
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -955,6 +960,11 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum2> {
   template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "enum2";
+  }
+
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
   }
 
   static char const* findName(type value) noexcept {
@@ -985,6 +995,11 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum3> {
     return "enum3";
   }
 
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -1011,6 +1026,11 @@ template <> struct TEnumTraits<::test_cpp2::cpp_reflection::enum_with_special_na
   template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "enum_with_special_names";
+  }
+
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
   }
 
   static char const* findName(type value) noexcept {
@@ -1090,6 +1110,10 @@ class union1 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::ui,
     ::apache::thrift::ident::ud,
@@ -1513,6 +1537,10 @@ class union2 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::ui_2,
     ::apache::thrift::ident::ud_2,
@@ -1936,6 +1964,10 @@ class union3 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::ui_3,
     ::apache::thrift::ident::ud_3,
@@ -2359,6 +2391,10 @@ class structA final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::a,
     ::apache::thrift::ident::b
@@ -2595,6 +2631,10 @@ class unionA final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::i,
     ::apache::thrift::ident::d,
@@ -3103,6 +3143,10 @@ class structB final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::c,
     ::apache::thrift::ident::d
@@ -3332,6 +3376,10 @@ class structC final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::a,
     ::apache::thrift::ident::b,
@@ -5412,6 +5460,10 @@ class struct1 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field0,
     ::apache::thrift::ident::field1,
@@ -5916,6 +5968,10 @@ class struct2 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::fieldB,
@@ -6480,6 +6536,10 @@ class struct3 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::fieldA,
     ::apache::thrift::ident::fieldB,
@@ -7757,6 +7817,10 @@ class struct4 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field0,
     ::apache::thrift::ident::field1,
@@ -8111,6 +8175,10 @@ class struct5 final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field0,
     ::apache::thrift::ident::field1,
@@ -8547,6 +8615,10 @@ class struct_binary final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::bi
   >;
@@ -8718,6 +8790,10 @@ class dep_A_struct final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::b,
     ::apache::thrift::ident::c,
@@ -9013,6 +9089,10 @@ class dep_B_struct final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::b,
     ::apache::thrift::ident::c,
@@ -9308,6 +9388,10 @@ class annotated final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::a
   >;
@@ -9471,6 +9555,10 @@ class union_with_special_names final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::get,
     ::apache::thrift::ident::getter,
@@ -11480,6 +11568,10 @@ class struct_with_special_names final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::get,
     ::apache::thrift::ident::getter,
@@ -13426,6 +13518,10 @@ class struct_with_indirections final  {
   static const char* __fbthrift_thrift_uri();
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::real,
     ::apache::thrift::ident::fake,
@@ -13857,6 +13953,10 @@ class StructWithFieldAdapter final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field
   >;
@@ -14006,6 +14106,10 @@ class UnionWithTypedefFieldAdapter final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::field
   >;

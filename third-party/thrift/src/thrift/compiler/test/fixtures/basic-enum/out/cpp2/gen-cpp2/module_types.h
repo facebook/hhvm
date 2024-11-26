@@ -115,6 +115,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::EmptyEnum> {
     return "EmptyEnum";
   }
 
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -139,6 +144,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyEnum> {
   template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyEnum";
+  }
+
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
   }
 
   static char const* findName(type value) noexcept {
@@ -169,6 +179,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyUseIntrinsicDefau
     return "MyUseIntrinsicDefaultEnum";
   }
 
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);
@@ -195,6 +210,11 @@ template <> struct TEnumTraits<::test::fixtures::enumstrict::MyBigEnum> {
   template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyBigEnum";
+  }
+
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "module";
   }
 
   static char const* findName(type value) noexcept {
@@ -242,6 +262,10 @@ class MyStruct final  {
   static constexpr bool __fbthrift_cpp2_is_runtime_annotation = false;
   static std::string_view __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
   static std::string_view __fbthrift_get_class_name();
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
+    return "module";
+  }
   using __fbthrift_reflection_ident_list = folly::tag_t<
     ::apache::thrift::ident::myEnum,
     ::apache::thrift::ident::myBigEnum

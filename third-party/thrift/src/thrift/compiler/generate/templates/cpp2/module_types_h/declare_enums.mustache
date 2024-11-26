@@ -65,6 +65,11 @@ template <> struct TEnumTraits<{{ > common/namespace_cpp2}}{{enum:cpp_name}}> {
     return "{{enum:name}}";
   }
 
+  template <class ...>
+  FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
+    return "{{program:name}}";
+  }
+
   static char const* findName(type value) noexcept {
     std::string_view ret;
     (void)findName(value, &ret);

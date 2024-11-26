@@ -156,6 +156,11 @@ struct struct_private_access {
 
   template <typename T>
   static constexpr auto __fbthrift_field_size_v = T::__fbthrift_field_size_v;
+
+  template <typename T, typename... Args>
+  static constexpr std::string_view __fbthrift_get_module_name() {
+    return T::template __fbthrift_get_module_name<Args...>();
+  }
 };
 //  TODO(dokwon): Remove all usage of struct_private_access and standardize on
 //  private_access.

@@ -1052,10 +1052,12 @@ To string conversions:
   Lookup a class constant. May raise errors if either the class or constant are
   not defined.
 
-| LookupClsCtxCns, D(Int), S(Cls) S(Str), NF
+| LookupClsCtxCns, D(Int), S(Cls) S(Str) S(Bool), NF
 
   Lookup a class context constant. May raise errors if the context constant
-  is not defined, is abstract or is a type/value constant.
+  is not defined, is abstract or is a type/value constant. Last arg is a
+  bool indicating whether the caller guarantees if an object of this class exists,
+  which enables slot optimizations even without type refinements on the Cls.
 
 | LdClsCtxCns<slot>, D(Int), S(Cls), NF
 

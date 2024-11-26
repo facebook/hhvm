@@ -94,7 +94,7 @@ SSATmp* emitCCParam(IRGS& env, const Func* f, uint32_t numArgsInclUnpack,
     [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
     [&] (SSATmp* obj) {
       auto const cls  = gen(env, LdObjClass, obj);
-      return gen(env, LookupClsCtxCns, cls, cns(env, name));
+      return gen(env, LookupClsCtxCns, cls, cns(env, name), cns(env, true));
     },
     [&] (Block* taken) { return gen(env, CheckType, TNull, taken, tv); },
     [&] (SSATmp*) { return cns(env, RuntimeCoeffects::none().value()); },
@@ -119,7 +119,7 @@ SSATmp* emitCCThis(IRGS& env, const Func* f,
   auto const ctxCls =
     f->isStatic() ? prologueCtx : gen(env, LdObjClass, prologueCtx);
   auto const cls = resolveTypeConstantChain(env, f, ctxCls, types);
-  return gen(env, LookupClsCtxCns, cls, cns(env, name));
+  return gen(env, LookupClsCtxCns, cls, cns(env, name), cns(env, !f->isStatic()));
 }
 
 const StaticString s_classname("classname");
@@ -174,7 +174,7 @@ SSATmp* emitCCReified(IRGS& env, const Func* f,
   auto const ctx = isClass ? cns(env, f->cls()) : cns(env, nullptr);
   auto const ctxCls = gen(env, LdCls, LdClsFallbackData::Fatal(), classname, ctx);
   auto const cls = resolveTypeConstantChain(env, f, ctxCls, types);
-  return gen(env, LookupClsCtxCns, cls, cns(env, name));
+  return gen(env, LookupClsCtxCns, cls, cns(env, name), cns(env, !f->isStatic()));
 }
 
 void annotCoeffectFunParamProfile(

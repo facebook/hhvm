@@ -81,79 +81,68 @@ constexpr bool bundle_annotations() {
  * Display the usage message.
  */
 void usage() {
-  fprintf(stderr, "Usage: thrift [options] file\n");
-  fprintf(stderr, "Options:\n");
-  fprintf(
-      stderr,
-      "  -o dir      Set the output directory for gen-* packages\n"
-      "              (default: current directory).\n"
-      "              At most one of this option (-o) or -out (see below) can\n"
-      "              be specified.\n");
-  fprintf(
-      stderr,
-      "  -out dir    Set the output location for generated files\n"
-      "              (no gen-* folder will be created).\n"
-      "              At most one of this option (-out) or -o (see above) can\n"
-      "              be specified.\n");
-  fprintf(
-      stderr,
-      "  -I dir      Add a directory to the list of directories\n"
-      "              searched for include directives\n");
-  fprintf(stderr, "  -nowarn     Suppress all compiler warnings (BAD!)\n");
-  fprintf(
-      stderr,
-      "  -legacy-strict     Strict compiler warnings on (DEPRECATED)\n");
-  fprintf(stderr, "  -v[erbose]  Verbose mode\n");
-  fprintf(stderr, "  -r[ecurse]  Also generate included files\n");
-  fprintf(stderr, "  -debug      Parse debug trace to stdout\n");
-  fprintf(
-      stderr,
-      "  --allow-neg-keys  Allow negative field keys (Used to preserve protocol\n"
-      "                    compatibility with older .thrift files)\n");
-  fprintf(
-      stderr,
-      "  --allow-neg-enum-vals Allow negative enum vals (DEPRECATED)\n");
-  fprintf(
-      stderr,
-      "  --allow-64bit-consts  Do not print warnings about using 64-bit constants\n");
-  fprintf(
-      stderr,
-      "  --gen STR   Generate code with a dynamically-registered generator.\n"
-      "              STR has the form language[:key1=val1[,key2,[key3=val3]]].\n"
-      "              Keys and values are options passed to the generator.\n"
-      "              Many options will not require values.\n"
-      "              If --skip-gen (see below) is specified, then --gen\n"
-      "              cannot be used. Otherwise (i.e., --skip-gen is NOT\n"
-      "              specified), then --gen must be specified at least once,\n"
-      "              and may be specified multiple times (eg. to generate\n"
-      "              multiple languages).");
-  fprintf(
-      stderr,
-      "  --skip-gen  Skip code generation. This is useful, for example, to\n"
-      "              parse and validate Thrift IDL without generating code\n"
-      "              for any particular language.\n"
-      "              If --skip-gen is specified, no --gen argument may be\n"
-      "              given (see above).\n");
-  fprintf(
-      stderr,
-      "  --record-genfiles FILE\n"
-      "              Save the list of generated files to FILE,\n");
-  fprintf(
-      stderr,
-      "  --inject-schema-const  Inject generated schema constant (must use thrift2ast)\n");
-  fprintf(
-      stderr,
-      "  --extra-validation  Comma-separated list of opt-in validators to run\n");
-  fprintf(stderr, "\n");
-  fprintf(stderr, "Available generators (and options):\n");
+  fprintf(stderr, R"(Usage: thrift [options] file
 
+Options:
+  -o dir      Set the output directory for gen-* packages (default: current
+              directory).
+              At most one of this option (-o) or -out (see below) can be
+              specified.
+  -out dir    Set the output location for generated files (no gen-* folder will
+              be created).
+              At most one of this option (-out) or -o (see above) can be
+              specified.
+  -I dir      Add a directory to the list of directories searched for include
+              directives
+
+  -nowarn     Suppress all compiler warnings (BAD!)
+  -legacy-strict
+              Strict compiler warnings on (DEPRECATED)
+  -v[erbose]  Verbose mode
+  -r[ecurse]  Also generate included files
+  -debug      Parse debug trace to stdout
+  --allow-neg-keys
+              Allow negative field keys (Used to preserve protocol compatibility
+              with older .thrift files).
+  --allow-neg-enum-vals
+              Allow negative enum vals (DEPRECATED)
+  --allow-64bit-consts
+              Do not print warnings about using 64-bit constants
+
+  --gen STR   Generate code with a dynamically-registered generator.
+              STR has the form language[:key1=val1[,key2,[key3=val3]]].
+              Keys and values are options passed to the generator.
+              Many options will not require values.
+              If --skip-gen (see below) is specified, then --gen
+              cannot be used. Otherwise (i.e., --skip-gen is NOT
+              specified), then --gen must be specified at least once,
+              and may be specified multiple times (eg. to generate
+              multiple languages).
+  --skip-gen  Skip code generation. This is useful, for example, to
+              parse and validate Thrift IDL without generating code
+              for any particular language.
+              If --skip-gen is specified, no --gen argument may be
+              given (see above).
+  --record-genfiles FILE
+              Save the list of generated files to FILE,
+  --inject-schema-const
+              Inject generated schema constant (must use thrift2ast)
+  --extra-validation
+              Comma-separated list of opt-in validators to run. Recognized
+              values include:
+                implicit_field_ids
+                unstructured_annotations_on_field_type
+
+Available generators (and options):
+)");
   for (const auto& gen : generator_registry::get_generators()) {
+    const generator_factory& generator_factory = *gen.second;
     fmt::print(
         stderr,
         "  {} ({}):\n{}",
-        gen.second->name(),
-        gen.second->long_name(),
-        gen.second->documentation());
+        generator_factory.name(),
+        generator_factory.long_name(),
+        generator_factory.documentation());
   }
 }
 

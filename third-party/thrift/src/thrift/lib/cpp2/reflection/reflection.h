@@ -1299,68 +1299,6 @@ template <typename T>
 using is_reflectable_struct = std::
     integral_constant<bool, !std::is_same_v<try_reflect_struct<T, void>, void>>;
 
-//////////////////////////////
-// SECTION: ENUMERATION API //
-//////////////////////////////
-
-/**
- * Holds reflection metadata for a given enumeration.
- *
- * NOTE: this class template is only intended to be instantiated by Thrift.
- * Users should ignore the template parameters taken by it and focus simply on
- * the members provided.
- *
- * For the examples below, consider code generated for this Thrift file:
- *
- *  /////////////////////
- *  // MyModule.thrift //
- *  /////////////////////
- *  namespace cpp2 My.Namespace
- *
- *  enum MyEnum {
- *    a, b, c
- *  } (
- *    some.annotation = "some value",
- *    another.annotation = "another value",
- *  )
- *
- * @author: Marcelo Juchem <marcelo@fb.com>
- */
-template <typename T>
-struct reflected_enum {};
-
-/**
- * Retrieves reflection metadata (as a `reflected_enum`) associated with the
- * given enumeration.
- *
- * If the given type is not a Thrift enumeration, or if there's no reflection
- * metadata available for it, compilation will fail.
- *
- * See the documentation on `reflected_enum` (above) for more information on
- * the returned type.
- *
- * Example:
- *
- *  /////////////////////
- *  // MyModule.thrift //
- *  /////////////////////
- *  namespace cpp2 My.Namespace
- *
- *  enum MyEnum { a, b, c }
- *
- *  //////////////////
- *  // whatever.cpp //
- *  //////////////////
- *  using info = reflect_enum<My::Namespace::MyEnum>;
- *
- *  // yields `MyEnum`
- *  auto result = info::type;
- *
- * @author: Marcelo Juchem <marcelo@fb.com>
- */
-template <typename T>
-using reflect_enum = reflected_enum<T>;
-
 //////////////////////////////////
 // SECTION: VARIANT (UNION) API //
 //////////////////////////////////

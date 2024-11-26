@@ -28,6 +28,7 @@ var (
     premadeThriftType_python_Adapter *metadata.ThriftType = nil
     premadeThriftType_bool *metadata.ThriftType = nil
     premadeThriftType_python_UseCAPI *metadata.ThriftType = nil
+    premadeThriftType_python_Py3EnableCppAdapter *metadata.ThriftType = nil
 )
 
 // Premade Thrift type initializer
@@ -62,6 +63,10 @@ var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
         metadata.NewThriftStructType().
             SetName("python.UseCAPI"),
     )
+    premadeThriftType_python_Py3EnableCppAdapter = metadata.NewThriftType().SetTStruct(
+        metadata.NewThriftStructType().
+            SetName("python.Py3EnableCppAdapter"),
+    )
 })
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -86,6 +91,7 @@ var premadeThriftTypesMapOnce = sync.OnceValue(
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Adapter", premadeThriftType_python_Adapter })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.UseCAPI", premadeThriftType_python_UseCAPI })
+        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "python.Py3EnableCppAdapter", premadeThriftType_python_Py3EnableCppAdapter })
 
         fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
         for _, value := range thriftTypesWithFullName {
@@ -160,6 +166,9 @@ var structMetadatasOnce = sync.OnceValue(
     SetType(premadeThriftType_bool),
         },
     ))
+        fbthriftResults = append(fbthriftResults, metadata.NewThriftStruct().
+    SetName("python.Py3EnableCppAdapter").
+    SetIsUnion(false))
         return fbthriftResults
     },
 )

@@ -1331,6 +1331,15 @@ void validate_cursor_serialization_adapter_in_container(
   }
 }
 
+void validate_py3_enable_cpp_adapter(sema_context& ctx, const t_typedef& node) {
+  if (node.find_structured_annotation_or_null(kPythonPy3EnableCppAdapterUri)) {
+    if (!node.find_structured_annotation_or_null(kCppAdapterUri)) {
+      ctx.error(
+          "The @py3.EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.");
+    }
+  }
+}
+
 // TODO (T191018859): forbid as field type too
 void forbid_exception_as_method_type(
     sema_context& ctx, const t_function& node) {
@@ -1410,6 +1419,7 @@ ast_validator standard_validator() {
   validator.add_named_visitor(&deprecate_annotations);
 
   validator.add_typedef_visitor(&validate_cpp_type_annotation<t_typedef>);
+  validator.add_typedef_visitor(&validate_py3_enable_cpp_adapter);
 
   validator.add_container_visitor(ValidateAnnotationPositions());
   validator.add_enum_visitor(&validate_cpp_enum_type);

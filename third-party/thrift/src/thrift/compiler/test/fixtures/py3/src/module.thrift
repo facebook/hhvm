@@ -241,22 +241,31 @@ typedef map<i32, i32> CustomMap
 typedef SimpleStruct CustomStruct
 
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef bool AdaptedBool
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef i64 AdaptedInteger
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef double AdaptedDouble
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef string AdaptedString
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef binary AdaptedBinary
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef list<i32> AdaptedList
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef set<i32> AdaptedSet
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef map<i32, i32> AdaptedMap
 @cpp.Adapter{name = "::MyAdapter"}
+@python.Py3EnableCppAdapter
 typedef SimpleStruct AdaptedStruct
 
 struct CustomFields {

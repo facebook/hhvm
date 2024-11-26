@@ -99,3 +99,17 @@ TEST(StandardValidatorTest, ValidateExceptionMessage) {
         
   )");
 }
+
+TEST(StandardValidatorTest, ValidatePy3EnableCppAdapter) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/python.thrift"
+
+    @python.Py3EnableCppAdapter
+    @cpp.Adapter{name = "MyAdapter"}
+    typedef i32 MyInt
+
+    @python.Py3EnableCppAdapter # expected-error: The @py3.EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.
+    typedef i32 MyInt2
+  )");
+}

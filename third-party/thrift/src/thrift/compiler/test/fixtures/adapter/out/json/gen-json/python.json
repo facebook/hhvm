@@ -186,6 +186,24 @@
           "column" : 2
         }
       }
+    },
+    "Py3EnableCppAdapter" : {
+      "lineno" : 100,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 100,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 101,
+          "column" : 30
+        }
+      }
     }
   }
 }

@@ -684,6 +684,78 @@ func (x *UseCAPI) setDefaults() *UseCAPI {
         SetSerializeNonCompat(false)
 }
 
+type Py3EnableCppAdapter struct {
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*Py3EnableCppAdapter)(nil)
+
+func NewPy3EnableCppAdapter() *Py3EnableCppAdapter {
+    return (&Py3EnableCppAdapter{}).setDefaults()
+}
+
+
+
+func (x *Py3EnableCppAdapter) Write(p thrift.Encoder) error {
+    if err := p.WriteStructBegin("Py3EnableCppAdapter"); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", x), err)
+    }
+
+
+    if err := p.WriteFieldStop(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write field stop error: ", x), err)
+    }
+
+    if err := p.WriteStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T write struct end error: ", x), err)
+    }
+    return nil
+}
+
+func (x *Py3EnableCppAdapter) Read(p thrift.Decoder) error {
+    if _, err := p.ReadStructBegin(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read error: ", x), err)
+    }
+
+    for {
+        fieldName, wireType, id, err := p.ReadFieldBegin()
+        if err != nil {
+            return thrift.PrependError(fmt.Sprintf("%T field %d ('%s') read error: ", x, id, fieldName), err)
+        }
+
+        if wireType == thrift.STOP {
+            break;
+        }
+
+        var fieldReadErr error
+        switch {
+        default:
+            fieldReadErr = p.Skip(wireType)
+        }
+
+        if fieldReadErr != nil {
+            return fieldReadErr
+        }
+
+        if err := p.ReadFieldEnd(); err != nil {
+            return err
+        }
+    }
+
+    if err := p.ReadStructEnd(); err != nil {
+        return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", x), err)
+    }
+
+    return nil
+}
+
+func (x *Py3EnableCppAdapter) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *Py3EnableCppAdapter) setDefaults() *Py3EnableCppAdapter {
+    return x
+}
+
 
 
 // RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
@@ -696,5 +768,6 @@ func RegisterTypes(registry interface {
     registry.RegisterType("facebook.com/thrift/annotation/python/Name", func() any { return NewName() })
     registry.RegisterType("facebook.com/thrift/annotation/python/Adapter", func() any { return NewAdapter() })
     registry.RegisterType("facebook.com/thrift/annotation/python/UseCAPI", func() any { return NewUseCAPI() })
+    registry.RegisterType("facebook.com/thrift/annotation/python/Py3EnableCppAdapter", func() any { return NewPy3EnableCppAdapter() })
 
 }

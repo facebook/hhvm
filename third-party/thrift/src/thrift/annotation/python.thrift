@@ -95,3 +95,7 @@ struct Adapter {
 struct UseCAPI {
   1: bool serialize = false;
 }
+
+/// Enables C++ Adapter for thrift-py3. It treats C++ Adapter on typedef as cpp.Type.
+@scope.Typedef
+struct Py3EnableCppAdapter {}

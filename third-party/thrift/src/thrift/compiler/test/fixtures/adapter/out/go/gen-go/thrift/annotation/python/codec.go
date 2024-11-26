@@ -27,6 +27,7 @@ var (
     premadeCodecTypeSpec_python_Adapter *thrift.TypeSpec = nil
     premadeCodecTypeSpec_bool *thrift.TypeSpec = nil
     premadeCodecTypeSpec_python_UseCAPI *thrift.TypeSpec = nil
+    premadeCodecTypeSpec_python_Py3EnableCppAdapter *thrift.TypeSpec = nil
 )
 
 // Premade codec specs initializer
@@ -99,6 +100,15 @@ var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
 },
 
     }
+    premadeCodecTypeSpec_python_Py3EnableCppAdapter = &thrift.TypeSpec{
+        FullName: "python.Py3EnableCppAdapter",
+        CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "python.Py3EnableCppAdapter",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewPy3EnableCppAdapter() },
+},
+
+    }
 })
 
 // Premade struct specs
@@ -109,6 +119,7 @@ var (
     premadeStructSpec_Name *thrift.StructSpec = nil
     premadeStructSpec_Adapter *thrift.StructSpec = nil
     premadeStructSpec_UseCAPI *thrift.StructSpec = nil
+    premadeStructSpec_Py3EnableCppAdapter *thrift.StructSpec = nil
 )
 
 // Premade struct specs initializer
@@ -235,6 +246,18 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "serialize": 0,
     },
 }
+    premadeStructSpec_Py3EnableCppAdapter = &thrift.StructSpec{
+    Name:                 "Py3EnableCppAdapter",
+    ScopedName:           "python.Py3EnableCppAdapter",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
 })
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
@@ -251,6 +274,7 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Adapter.FullName] = premadeCodecTypeSpec_python_Adapter
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_UseCAPI.FullName] = premadeCodecTypeSpec_python_UseCAPI
+        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3EnableCppAdapter.FullName] = premadeCodecTypeSpec_python_Py3EnableCppAdapter
         return fbthriftTypeSpecsMap
     },
 )

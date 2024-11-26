@@ -141,10 +141,13 @@ TCRegionInfo OfflineCode::getRegionInfo(FILE* file,
       callAddr |= (frontier-8)->InstructionBits();
       callAddr = callAddr + (int64_t)ip;
       callAddr = callAddr + (int64_t)kInstructionSize;
+
+    } else if (frontier->Mask(UnconditionalBranchMask) == BL) {
+      callAddr = int64_t(frontier->ImmPCOffsetTarget((Instruction*)ip));
     }
 
     std::string callDest="";
-    if ((insn & BLR_x18) == BLR_x18) {
+    if ((insn & BLR_x18) == BLR_x18 || frontier->Mask(UnconditionalBranchMask) == BL) {
       callDest = getSymbolName((TCA)callAddr);
       callAddr = 0;
     }

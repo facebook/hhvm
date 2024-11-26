@@ -20,6 +20,7 @@ tany_sentinel::TanySentinel
 tast::CheckStatus
 tast::FunTastInfo
 typing_cont_key::TypingContKey
+typing_defs::VisibilityBehavior
 typing_defs_core::CollectionStyle
 typing_defs_core::ConsistentKind
 typing_defs_core::DependentType

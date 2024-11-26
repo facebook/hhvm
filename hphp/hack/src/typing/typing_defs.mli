@@ -185,14 +185,22 @@ type wildcard_action =
   | Wildcard_require_explicit of decl_tparam
   | Wildcard_illegal
 
+type visibility_behavior =
+  | Always_expand_newtype
+  | Expand_visible_newtype_only
+  | Never_expand_newtype
+[@@deriving show]
+
+val is_default_visibility_behaviour : visibility_behavior -> bool
+
+val default_visibility_behaviour : visibility_behavior
+
 (** Tracks information about how a type was expanded *)
 type expand_env = {
   type_expansions: Type_expansions.t;
   make_internal_opaque: bool;
       (** Localize internal classes outside their module as if newtypes i.e. opaque *)
-  expand_visible_newtype: bool;
-      (** Allow to expand visible `newtype`, i.e. opaque types defined in the current file.
-          True by default. *)
+  visibility_behavior: visibility_behavior;
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
   on_error: Typing_error.Reasons_callback.t option;

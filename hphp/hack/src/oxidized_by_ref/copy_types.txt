@@ -179,6 +179,7 @@ tast::ValKind
 t_shape_map::TShapeMap
 tast::CheckStatus
 typing_cont_key::TypingContKey
+typing_defs::VisibilityBehavior
 typing_defs_core::Capability
 typing_defs_core::CeVisibility
 typing_defs_core::ClassRefinement

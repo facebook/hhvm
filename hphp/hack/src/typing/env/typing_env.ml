@@ -735,26 +735,43 @@ let is_typedef env x =
     | Some Naming_types.TTypedef -> true
     | _ -> false
 
-let is_typedef_visible env ?(expand_visible_newtype = true) ~name td =
+let should_expand_type_alias env ~visibility_behavior ~name td =
   match td.td_type_assignment with
-  | CaseType _ -> false
+  | CaseType _ ->
+    (match visibility_behavior with
+    | Always_expand_newtype -> true
+    | Expand_visible_newtype_only
+    | Never_expand_newtype ->
+      false)
   | SimpleTypeDef (td_vis, _td_type) ->
     let td_module = td.td_module in
     (match td_vis with
     | Aast.Opaque ->
-      expand_visible_newtype
-      &&
-      let td_path = Naming_provider.get_typedef_path (get_ctx env) name in
-      (match td_path with
-      | Some s -> Relative_path.equal s (get_file env)
-      | None -> (* Not the right place to raise an error *) false)
+      (match visibility_behavior with
+      | Always_expand_newtype -> true
+      | Never_expand_newtype -> false
+      | Expand_visible_newtype_only ->
+        let td_path = Naming_provider.get_typedef_path (get_ctx env) name in
+        (match td_path with
+        | Some s -> Relative_path.equal s (get_file env)
+        | None -> (* Not the right place to raise an error *) false))
     | Aast.OpaqueModule ->
-      expand_visible_newtype
-      && Option.equal
-           String.equal
-           (get_current_module env)
-           (Option.map td_module ~f:snd)
+      (match visibility_behavior with
+      | Always_expand_newtype -> true
+      | Never_expand_newtype -> false
+      | Expand_visible_newtype_only ->
+        Option.equal
+          String.equal
+          (get_current_module env)
+          (Option.map td_module ~f:snd))
     | Aast.Transparent -> true)
+
+let is_typedef_visible env ~name td =
+  should_expand_type_alias
+    env
+    ~visibility_behavior:default_visibility_behaviour
+    ~name
+    td
 
 let get_class (env : env) (name : Decl_provider.type_key) : Cls.t Decl_entry.t =
   let res =
@@ -1986,7 +2003,7 @@ module Log = struct
       {
         Typing_defs.type_expansions;
         make_internal_opaque;
-        expand_visible_newtype;
+        visibility_behavior;
         substs = _;
         this_ty;
         on_error = _;
@@ -1997,7 +2014,7 @@ module Log = struct
       []
     else
       [
-        ("expand_visible_newtype", Bool.to_string expand_visible_newtype);
+        ("visibility_behavior", show_visibility_behavior visibility_behavior);
         ("this_ty", Typing_print.debug env this_ty);
         ("type_expansions", Type_expansions.to_log_string type_expansions);
         ("make_internal_opaque", Bool.to_string make_internal_opaque);

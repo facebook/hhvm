@@ -322,12 +322,7 @@ val get_enum :
 
 val is_typedef : env -> Decl_provider.type_key -> bool
 
-val is_typedef_visible :
-  env ->
-  ?expand_visible_newtype:bool ->
-  name:string ->
-  Typing_defs.typedef_type ->
-  bool
+val is_typedef_visible : env -> name:string -> Typing_defs.typedef_type -> bool
 
 val get_typedef :
   env -> Decl_provider.type_key -> Decl_provider.typedef_decl Decl_entry.t

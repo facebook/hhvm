@@ -266,14 +266,24 @@ type wildcard_action =
   | Wildcard_require_explicit of decl_tparam
   | Wildcard_illegal
 
+type visibility_behavior =
+  | Always_expand_newtype
+  | Expand_visible_newtype_only
+  | Never_expand_newtype
+[@@deriving show { with_path = false }]
+
+let is_default_visibility_behaviour = function
+  | Expand_visible_newtype_only -> true
+  | _ -> false
+
+let default_visibility_behaviour = Expand_visible_newtype_only
+
 (** Tracks information about how a type was expanded *)
 type expand_env = {
   type_expansions: Type_expansions.t;
   make_internal_opaque: bool;
       (** Localize internal classes outside their module as if newtypes i.e. opaque *)
-  expand_visible_newtype: bool;
-      (** Allow to expand visible `newtype`, i.e. opaque types defined in the current file.
-          True by default. *)
+  visibility_behavior: visibility_behavior;
   substs: locl_ty SMap.t;
   this_ty: locl_ty;
       (** The type that is substituted for `this` in signatures. It should be
@@ -290,7 +300,7 @@ type expand_env = {
 let empty_expand_env =
   {
     type_expansions = Type_expansions.empty;
-    expand_visible_newtype = true;
+    visibility_behavior = default_visibility_behaviour;
     make_internal_opaque = true;
     substs = SMap.empty;
     this_ty =

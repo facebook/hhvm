@@ -288,7 +288,7 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
       in
       (not (Typing_defs.cyclic_expansion ety_env))
       && Option.is_none ty_err_opt
-      && ety_env.expand_visible_newtype
+      && is_default_visibility_behaviour ety_env.visibility_behavior
       && ety_env.make_internal_opaque
       && no_new_global_type_params
     in
@@ -388,7 +388,11 @@ and localize_ ~(ety_env : expand_env) env (dty : decl_ty) :
         begin
           match
             ( localize_targs_by_kind
-                ~ety_env:{ ety_env with expand_visible_newtype = true }
+                ~ety_env:
+                  {
+                    ety_env with
+                    visibility_behavior = default_visibility_behaviour;
+                  }
                 env
                 targs
                 arg_kinds,
@@ -855,7 +859,13 @@ and localize_class_instantiation
       list_map_env_err_cycles
         env
         tyargs
-        ~f:(localize ~ety_env:{ ety_env with expand_visible_newtype = true })
+        ~f:
+          (localize
+             ~ety_env:
+               {
+                 ety_env with
+                 visibility_behavior = default_visibility_behaviour;
+               })
         ~combine_ty_errs:Typing_error.multiple_opt
     in
     ((env, err, cycles), mk (r, Tclass (sid, nonexact, tyl)))
@@ -910,7 +920,8 @@ and localize_class_instantiation
       let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
       let ((env, err, cycles), tyl) =
         localize_targs_by_kind
-          ~ety_env:{ ety_env with expand_visible_newtype = true }
+          ~ety_env:
+            { ety_env with visibility_behavior = default_visibility_behaviour }
           env
           tyargs
           nkinds
@@ -951,7 +962,8 @@ and localize_typedef_instantiation
     let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
     let ((env, e1, cycles_tyargs), tyargs) =
       localize_targs_by_kind
-        ~ety_env:{ ety_env with expand_visible_newtype = true }
+        ~ety_env:
+          { ety_env with visibility_behavior = default_visibility_behaviour }
         env
         tyargs
         nkinds

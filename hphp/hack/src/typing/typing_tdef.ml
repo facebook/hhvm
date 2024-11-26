@@ -27,13 +27,13 @@ type expand_result = {
   expansion: expansion;
 }
 
-(** [expand_typedef_decl ~force_expand ~expand_visible_newtype env r name ty_args] looks up the type
+(** [expand_typedef_decl ~force_expand ~visibility_behavior env r name ty_args] looks up the type
   alias [name].
   It will not expand opaque type aliases (`newtype`) unless they're visible (in the current file)
   or [force_expand] is true.
   *)
 let expand_typedef_decl
-    ~force_expand ~expand_visible_newtype env (x : string) (td : typedef_type) :
+    ~force_expand ~visibility_behavior env (x : string) (td : typedef_type) :
     expand_result =
   let {
     td_pos;
@@ -52,7 +52,7 @@ let expand_typedef_decl
   in
   let should_expand =
     force_expand
-    || Env.is_typedef_visible env ~expand_visible_newtype ~name:x td
+    || Env.should_expand_type_alias ~visibility_behavior env ~name:x td
   in
   let expansion =
     if should_expand then
@@ -109,7 +109,7 @@ let expand_typedef_ ~force_expand ety_env env r (x : string) argl =
     let { tparams; expansion } =
       expand_typedef_decl
         ~force_expand
-        ~expand_visible_newtype:ety_env.expand_visible_newtype
+        ~visibility_behavior:ety_env.visibility_behavior
         env
         x
         td

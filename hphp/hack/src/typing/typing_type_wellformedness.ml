@@ -53,7 +53,7 @@ let loclty_of_hint unchecked_tparams env h =
     else
       empty_expand_env
   in
-  let ety_env = { ety_env with expand_visible_newtype = false } in
+  let ety_env = { ety_env with visibility_behavior = Never_expand_newtype } in
   let ((env, ty_err_opt), locl_ty) = Phase.localize env ~ety_env decl_ty in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
   (env, hint_pos, locl_ty)

@@ -15,6 +15,8 @@
 */
 
 #include "hphp/runtime/base/init-fini-node.h"
+#include "hphp/runtime/vm/jit/prof-data-sb.h"
+#include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/srckey.h"
@@ -52,13 +54,15 @@ struct AsyncRegionTranslationContext {
 };
 
 struct AsyncPrologueContext {
-  AsyncPrologueContext(FuncId funcId, int nPassed)
+  AsyncPrologueContext(FuncId funcId, int nPassed, bool forJumpstart)
     : funcId(funcId)
     , nPassed(nPassed)
+    , forJumpstart(forJumpstart)
   {}
 
   FuncId funcId;
   int nPassed;
+  bool forJumpstart;
 };
 
 namespace {
@@ -119,6 +123,8 @@ InitFiniNode s_logJitStats([]{
 using AsyncTranslationContext =
   std::variant<AsyncRegionTranslationContext, AsyncPrologueContext>;
 
+constexpr int kIgnoreNumTrans = -1;
+
 struct AsyncTranslationWorker
   : JobQueueWorker<AsyncTranslationContext, void*, true, true> {
 
@@ -132,8 +138,10 @@ struct AsyncTranslationWorker
 
     s_activeTrans++;
     SCOPE_EXIT {
-      s_enqueuedSKs.assign(ctx.sk, false);
       s_activeTrans--;
+      if (rctx.currNumTranslations != kIgnoreNumTrans) {
+        s_enqueuedSKs.assign(ctx.sk, false);
+      }
     };
 
     ProfileNonVMThread nonVM;
@@ -157,9 +165,12 @@ struct AsyncTranslationWorker
       return;
     }
     auto const numTrans = srcRec->numTrans();
+    auto const ctxNumTrans = rctx.currNumTranslations;
     // If new translations were created since this request was enqueued,
     // let the next execution run through the retranslation chain.
-    if (rctx.currNumTranslations != numTrans) {
+    // ctxNumTrans < 0 indicates that the request was enqueued during jumpstart
+    // and therefore should be processed regardless.
+    if (ctxNumTrans >= 0 && ctxNumTrans != numTrans) {
       FTRACE(2, "New translation found for sk {}\n", show(ctx.sk));
       return;
     }
@@ -167,8 +178,9 @@ struct AsyncTranslationWorker
     tc::RegionTranslator translator(ctx.sk, TransKind::Live);
     translator.spOff = ctx.spOffset;
     translator.liveTypes = ctx.liveTypes;
-
-    if (auto const s = translator.shouldTranslate();
+    auto const noThreshold = ctxNumTrans == kIgnoreNumTrans;
+    if (auto const s = translator.shouldTranslate(noThreshold,
+                                                  false /*noSizeLimit*/);
       s != TranslationResult::Scope::Success) {
       s_rejectTrans++;
       FTRACE(2, "shouldTranslate failed for sk {}\n", show(ctx.sk));
@@ -195,6 +207,10 @@ struct AsyncTranslationWorker
       }
       if (translator.kind == TransKind::Interp) s_interpTrans++;
       FTRACE(2, "Successfully generated translation for sk {}\n", show(ctx.sk));
+
+      if (Cfg::Eval::EnableSBProfSerialize) {
+        addToSBProfile(rctx.ctx);
+      }
     } else {
       FTRACE(2, "Background jitting failed for sk {}\n", show(ctx.sk));
       s_failTrans++;
@@ -214,7 +230,9 @@ struct AsyncTranslationWorker
     auto const func = const_cast<Func*>(Func::fromFuncId(ctx.funcId));
 
     SCOPE_EXIT {
-      func->atomicFlags().unset(Func::Flags::LockedForPrologueGen);
+      if (!ctx.forJumpstart) {
+        func->atomicFlags().unset(Func::Flags::LockedForPrologueGen);
+      }
       s_activePrologue--;
     };
 
@@ -234,7 +252,9 @@ struct AsyncTranslationWorker
       return;
     }
 
- 		if (auto const s = translator.shouldTranslate();
+ 		if (auto const s =
+        translator.shouldTranslate(ctx.forJumpstart /*noThreshold */,
+                                   false /*noSizeLimit*/);
         s != TranslationResult::Scope::Success) {
       FTRACE(2, "shouldTranslate failed for func prologue {}\n",
              func->name());
@@ -257,6 +277,10 @@ struct AsyncTranslationWorker
       FTRACE(2, "Successfully generated prologue for func {}\n",
              func->name());
       s_successPrologue++;
+
+      if (Cfg::Eval::EnableSBProfSerialize) {
+        addToSBProfile(func, ctx.nPassed);
+      }
     } else {
       FTRACE(2, "Background prologue generation failed for func {}\n",
              func->name());
@@ -298,6 +322,7 @@ AsyncTranslationDispatcher& dispatcher() {
     d->start();
     return d;
   }();
+  always_assert(dispatcher);
   return *dispatcher;
 }
 
@@ -306,6 +331,11 @@ void joinAsyncTranslationWorkerThreads() {
   dispatcher().waitEmpty(true);
   // Clearing the ConcurrentHashMap here avoids a crash in the destructor.
   s_enqueuedSKs.clear();
+}
+
+void enqueueAsyncTranslateRequestForJumpstart(const RegionContext& ctx) {
+  dispatcher().enqueue(AsyncRegionTranslationContext {ctx, kIgnoreNumTrans});
+  FTRACE(2, "Enqueued sk {} for jitting in jumpstart\n", show(ctx.sk));
 }
 
 void enqueueAsyncTranslateRequest(const RegionContext& ctx,
@@ -324,9 +354,13 @@ void enqueueAsyncTranslateRequest(const RegionContext& ctx,
   }
 }
 
-void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
-  if (!func->atomicFlags().set(Func::Flags::LockedForPrologueGen)) {
-    dispatcher().enqueue(AsyncPrologueContext {func->getFuncId(), nPassed});
+namespace {
+template<bool forJumpstart>
+void enqueueAsyncPrologueRequestImpl(Func* func, int nPassed) {
+  if (forJumpstart ||
+      !func->atomicFlags().set(Func::Flags::LockedForPrologueGen)) {
+    dispatcher().enqueue(
+      AsyncPrologueContext {func->getFuncId(), nPassed, forJumpstart});
     FTRACE(2, "Enqueued func {} for prologue generation\n", func->name());
   } else {
     FTRACE(2,
@@ -335,5 +369,13 @@ void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
     );
   }
 }
+}
 
+void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
+  enqueueAsyncPrologueRequestImpl<false>(func, nPassed);
+}
+
+void enqueueAsyncPrologueRequestForJumpstart(Func* func, int nPassed) {
+  enqueueAsyncPrologueRequestImpl<true>(func, nPassed);
+}
 }

@@ -236,7 +236,7 @@ void AdminRequestHandler::logToAccessLog(Transport* transport) {
 void AdminRequestHandler::setupRequest(Transport* transport) {
   auto const cmd = transport->getCommand();
 
-  if (strncmp(cmd.c_str(), "dump-apc", 8) == 0) {
+  if (strncmp(cmd.c_str(), "dump-apc", 8) == 0 || cmd == "sb-prof-deser") {
     hphp_session_init(Treadmill::SessionKind::AdminPort);
   } else {
     g_context.getCheck();
@@ -263,7 +263,7 @@ void AdminRequestHandler::teardownRequest(Transport* transport) noexcept {
   SCOPE_EXIT {
     auto const cmd = transport->getCommand();
 
-    if (strncmp(cmd.c_str(), "dump-apc", 8) == 0) {
+    if (strncmp(cmd.c_str(), "dump-apc", 8) == 0 || cmd == "sb-prof-deser") {
       hphp_context_exit();
       hphp_session_exit();
     } else {
@@ -409,6 +409,13 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    random        optional, default false, relocate random subset\n"
         "       all        optional, default false, relocate all translations\n"
         "      time        optional, default 20 (seconds)\n"
+
+        "/sb-prof-deser:   deserialize sandbox profiles\n"
+        "    root          path of sandbox root\n"
+        "    path          absolute path of profile data\n"
+        "/sb-prof-ser:     serialize sandbox profiles\n"
+        "    root          path of sandbox root\n"
+        "    path          absolute path of profile data\n"
 #ifdef HPHP_TRACE
         "/trace-request:   write trace for next request(s) to "
         + RuntimeOption::getTraceOutputFile() + "\n"
@@ -705,6 +712,20 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       transport->sendString(folly::sformat(
           "Server threads currently set to to {}\n",
           HttpServer::Server->getPageServer()->getMaxThreadCount()));
+      break;
+    }
+    if (cmd == "sb-prof-deser") {
+      auto const sbRoot = transport->getParam("root");
+      auto const profPath = transport->getParam("path");
+      auto const status = jit::deserializeSBProfData(sbRoot, profPath);
+      transport->sendString(status);
+      break;
+    }
+    if (cmd == "sb-prof-ser") {
+      auto const sbRoot = transport->getParam("root");
+      auto const profPath = transport->getParam("path");
+      auto const status = jit::serializeSBProfData(sbRoot, profPath);
+      transport->sendString(status);
       break;
     }
     if (strncmp(cmd.c_str(), "check", 5) == 0 &&

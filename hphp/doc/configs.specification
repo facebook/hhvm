@@ -559,6 +559,9 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - int Eval.AsyncJitWorkerThreads = 4, UNKNOWN
 
+- bool Eval.EnableSBProfSerialize = false, arnabde
+- bool Eval.EnableSBProfDeserialize = false, arnabde
+
 - uint32_t Eval.VMInitialGlobalTableSize = 512, UNKNOWN
 
   Initial space reserved for the global variable environment (in

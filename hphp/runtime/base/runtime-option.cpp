@@ -622,6 +622,8 @@ int RuntimeOption::ProfDataTTLHours = 24;
 std::string RuntimeOption::ProfDataTag;
 std::string RuntimeOption::EvalJitSerdesFile;
 
+std::string RuntimeOption::EvalSBSerdesFile;
+
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
   {Logger::DEFAULT, ErrorLogFileData()},
 };
@@ -1580,6 +1582,9 @@ void RuntimeOption::Load(
                  "Eval.ProfDataTTLHours", ProfDataTTLHours);
     Config::Bind(ProfDataTag, ini, config, "Eval.ProfDataTag", ProfDataTag);
     Config::Bind(KeepProfData, ini, config, "Eval.KeepProfData", KeepProfData);
+
+    Config::Bind(EvalSBSerdesFile, ini, config,
+                 "Eval.SBSerdesFile", EvalSBSerdesFile);
 
     Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
     Config::Bind(TrustAutoloaderPath, ini, config,

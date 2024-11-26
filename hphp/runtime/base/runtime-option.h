@@ -392,6 +392,8 @@ struct RuntimeOption {
   static bool DumpPreciseProfData;
   static bool KeepProfData;
 
+  static std::string EvalSBSerdesFile;
+
   static std::string WatchmanRootSocket;
   static std::string WatchmanDefaultSocket;
 

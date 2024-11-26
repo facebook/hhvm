@@ -1282,14 +1282,6 @@ std::string show(const PostConditions& pconds) {
   return ret;
 }
 
-std::string show(RegionContext::LiveType ta) {
-  return folly::format(
-    "{} :: {}",
-    show(ta.location),
-    ta.type.toString()
-  ).str();
-}
-
 std::string show(const RegionContext& ctx) {
   std::string ret;
   folly::toAppend(show(ctx.sk), "\n", &ret);

@@ -146,7 +146,8 @@ bool canTranslate() {
 
 static RDS_LOCAL_NO_CHECK(bool, s_jittingTimeLimitExceeded);
 
-TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
+TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
+                                                    bool noTheshold) {
   // If we've hit Eval.JitGlobalTranslationLimit, then we stop translating.
   if (!canTranslate()) return TranslationResult::Scope::Process;
 
@@ -212,7 +213,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
                       kind == TransKind::LivePrologue;
   auto const isProf = kind == TransKind::Profile ||
                       kind == TransKind::ProfPrologue;
-  if (isLive || isProf) {
+  if (!noTheshold && (isLive || isProf)) {
     auto const funcThreshold = isLive ? Cfg::Jit::LiveThreshold
                                       : Cfg::Jit::ProfileThreshold;
     if (func->incJitReqCount() < funcThreshold) {
@@ -226,7 +227,8 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind) {
 static std::atomic_flag s_did_log = ATOMIC_FLAG_INIT;
 static std::atomic<bool> s_TCisFull{false};
 
-TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
+TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
+                                         bool noThreshold) {
   if (s_TCisFull.load(std::memory_order_acquire)) {
     return TranslationResult::Scope::Process;
   }
@@ -243,7 +245,7 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind) {
   auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
 
   if (!reachedMaxLiveMainLimit && main_under && cold_under && froz_under) {
-    return shouldTranslateNoSizeLimit(sk, kind);
+    return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
 
   // Set a flag so we quickly bail from trying to generate new
@@ -522,7 +524,8 @@ Translator::acquireLeaseAndRequisitePaperwork() {
     return TranslationResult::failTransiently();
   }
 
-  if (auto const s = shouldTranslate();
+  if (auto const s = shouldTranslate(false /*noTheshold*/,
+                                     false /*noSizeLimit*/);
       s != TranslationResult::Scope::Success) {
     if (s == TranslationResult::Scope::Process) setCachedForProcessFail();
     return TranslationResult{s};
@@ -537,12 +540,13 @@ Translator::acquireLeaseAndRequisitePaperwork() {
   return getCached();
 }
 
-TranslationResult::Scope Translator::shouldTranslate(bool noSizeLimit) {
+TranslationResult::Scope Translator::shouldTranslate(bool noThreshold,
+                                                     bool noSizeLimit) {
   if (kind == TransKind::Invalid) computeKind();
   if (noSizeLimit) {
-    return shouldTranslateNoSizeLimit(sk, kind);
+    return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
   }
-  return ::HPHP::jit::tc::shouldTranslate(sk, kind);
+  return ::HPHP::jit::tc::shouldTranslate(sk, kind, noThreshold);
 }
 
 Optional<TranslationResult>

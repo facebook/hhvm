@@ -168,7 +168,7 @@ bool instructionEndsRegion(const Env& env) {
   return false;
 }
 
-Type getLiveType(const jit::vector<RegionContext::LiveType>& liveTypes,
+Type getLiveType(const jit::vector<RegionDesc::TypedLocation>& liveTypes,
                  const Location& loc) {
   for (auto const& lt : liveTypes) {
     if (lt.location == loc) return lt.type;

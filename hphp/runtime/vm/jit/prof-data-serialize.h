@@ -256,6 +256,10 @@ FuncId read_func_id(ProfDataDeserializer& des);
 // of failure otherwise.
 std::string serializeProfData(const std::string& filename);
 std::string serializeOptProfData(const std::string& filename);
+
+std::string serializeSBProfData(const std::string& root,
+                                const std::string& filename);
+
 // If loadRDS is true, only the RDS ordering information will be
 // loaded.
 std::string deserializeProfData(const std::string& filename,
@@ -265,6 +269,9 @@ std::string deserializeProfData(const std::string& filename,
 bool tryDeserializePartialProfData(const std::string& filename,
                                    int numWorkers,
                                    bool loadRDS);
+
+std::string deserializeSBProfData(const std::string& root,
+                                  const std::string& filename);
 
 // Return whether or not serialization of profile data for optimized code is
 // enabled.

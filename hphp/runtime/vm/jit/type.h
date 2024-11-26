@@ -45,6 +45,7 @@ namespace jit {
 struct GuardConstraint;
 struct ProfDataSerializer;
 struct ProfDataDeserializer;
+struct SBProfType;
 
 /*
  * The PtrLocation enum is a lattice that represents what kind of
@@ -316,9 +317,9 @@ private:
   static constexpr size_t kRuntime = 27;
   static constexpr size_t kNumRuntime = 10;
   static constexpr size_t kNumPtr = 2;
-  using bits_t = BitSet<kRuntime + kNumRuntime + kNumPtr>;
 
 public:
+  using bits_t = BitSet<kRuntime + kNumRuntime + kNumPtr>;
   static constexpr bits_t kBottom{};
   static constexpr bits_t kTop = ~kBottom;
 
@@ -377,6 +378,8 @@ public:
    */
   void serialize(ProfDataSerializer&) const;
   static Type deserialize(ProfDataDeserializer&);
+
+  bits_t rawBits() const;
 
   /////////////////////////////////////////////////////////////////////////////
   // DataType.
@@ -797,6 +800,8 @@ private:
     ClassSpec m_clsSpec;
     ArraySpec m_arrSpec;
   };
+
+  friend Type typeFromSBProfType(const SBProfType&);
 };
 
 using OptType = Optional<Type>;
@@ -819,6 +824,7 @@ Type typeFromPropTC(const HPHP::TypeConstraint& tc,
                     bool isSProp);
 Type typeFromFuncParam(const Func* func, uint32_t paramId);
 Type typeFromFuncReturn(const Func* func);
+Type typeFromSBProfType(const SBProfType&);
 
 ///////////////////////////////////////////////////////////////////////////////
 

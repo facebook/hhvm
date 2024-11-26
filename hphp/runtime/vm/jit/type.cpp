@@ -23,6 +23,7 @@
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
 #include "hphp/runtime/vm/jit/print.h"
+#include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/translator.h"
@@ -507,6 +508,10 @@ size_t Type::stableHash() const {
     key,
     extra
   );
+}
+
+Type::bits_t Type::rawBits() const {
+  return m_bits;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1157,6 +1162,25 @@ Type typeFromFuncReturn(const Func* func) {
     return TInitNull;
   }
   return rt;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Type typeFromSBProfType(const SBProfType& ty) {
+  Type t{ty.m_bits, PtrLocation::Bottom};
+  if (ty.m_spec == SBProfTypeSpec::None) {
+    return t;
+  }
+  auto const cls = Class::load(ty.m_clsName);
+  if (!cls) {
+    throw Exception("Class %s not found", ty.m_clsName->data());
+  }
+  if (ty.m_spec == SBProfTypeSpec::Sub) {
+    t.m_clsSpec = ClassSpec{cls, ClassSpec::SubTag{}};
+  } else {
+    t.m_clsSpec = ClassSpec{cls, ClassSpec::ExactTag{}};
+  }
+  return t;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -379,22 +379,12 @@ private:
  * the region selected will necessarily be specialized for those types.
  */
 struct RegionContext {
-  struct LiveType;
-
   RegionContext(SrcKey sk, SBInvOffset spOff)
     : sk(sk), spOffset(spOff) {}
 
   SrcKey sk;
-  jit::vector<LiveType> liveTypes;
+  jit::vector<RegionDesc::TypedLocation> liveTypes;
   SBInvOffset spOffset;
-};
-
-/*
- * Live information about the type of a local or stack slot.
- */
-struct RegionContext::LiveType {
-  Location location;
-  Type type;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -572,7 +562,6 @@ std::string show(RegionDesc::TypedLocation);
 std::string show(const RegionDesc::GuardedLocation&);
 std::string show(const GuardedLocations&);
 std::string show(const PostConditions&);
-std::string show(RegionContext::LiveType);
 std::string show(const RegionContext&);
 std::string show(const RegionDesc::Block&);
 std::string show(const RegionDesc&);

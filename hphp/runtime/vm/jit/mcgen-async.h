@@ -20,6 +20,8 @@ namespace HPHP::jit::mcgen {
 void enqueueAsyncTranslateRequest(
   const RegionContext& ctx, int currNumTranslations);
 void enqueueAsyncPrologueRequest(Func* func, int nPassed);
+void enqueueAsyncTranslateRequestForJumpstart(const RegionContext& ctx);
+void enqueueAsyncPrologueRequestForJumpstart(Func* func, int nPassed);
 void joinAsyncTranslationWorkerThreads();
 
 }

@@ -105,7 +105,8 @@ void regeneratePrologue(TransID prologueTransId, tc::FuncMetaInfo& info) {
     return;
   }
 
-  if (translator.shouldTranslate(true) != TranslationResult::Scope::Success) {
+  if (translator.shouldTranslate(false /*noThresold*/, true /*noSizeLimit*/) !=
+      TranslationResult::Scope::Success) {
     return;
   }
 

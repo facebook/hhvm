@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 
+#include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/string-data.h"
@@ -44,8 +45,10 @@
 #include "hphp/runtime/vm/jit/func-order.h"
 #include "hphp/runtime/vm/jit/incref-profile.h"
 #include "hphp/runtime/vm/jit/inlining-decider.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/meth-profile.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
+#include "hphp/runtime/vm/jit/prof-data-sb.h"
 #include "hphp/runtime/vm/jit/region-selection.h"
 #include "hphp/runtime/vm/jit/switch-profile.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
@@ -65,6 +68,7 @@
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/logger.h"
@@ -218,19 +222,28 @@ struct UnitPreloader : JobQueueWorker<StringData*, void*> {
     hphp_session_exit();
   }
   virtual void doJob(StringData* path) override {
-    DEBUG_ONLY auto unit = lookupUnit(path, "", nullptr, nullptr, false);
-    FTRACE(2, "Preloaded unit with path {}\n", path->data());
-    assertx(unit->origFilepath() == path);  // both static
+    auto const unit = lookupUnit(path, "", nullptr, nullptr, false);
+    if (unit) {
+      FTRACE(2, "Preloaded unit with path {}\n", path->data());
+      assertx(unit->origFilepath() == path);  // both static
+    }
   }
 };
 using UnitPreloadDispatcher = JobQueueDispatcher<UnitPreloader>;
 UnitPreloadDispatcher* s_preload_dispatcher;
 
-void read_unit_preload(ProfDataDeserializer& ser) {
-  auto const path =
-    read_raw_string(ser, /* skip = */ !Cfg::Jit::DesUnitPreload);
+void read_unit_preload(ProfDataDeserializer& ser, const std::string& root) {
+  auto const skip =
+    !Cfg::Jit::DesUnitPreload && !Cfg::Eval::EnableSBProfDeserialize;
+  auto const path = [&] {
+    if (root.empty()) {
+      return read_raw_string(ser, skip);
+    }
+    auto const relPath = read_cpp_string(ser);
+    return makeStaticString(root + '/' + relPath);
+  }();
   // path may be nullptr when JitDesUnitPreload isn't set.
-  if (Cfg::Jit::DesUnitPreload) {
+  if (!skip) {
     assertx(path);
     s_preload_dispatcher->enqueue(path);
   }
@@ -264,7 +277,7 @@ void write_units_preload(ProfDataSerializer& ser) {
   write_container(ser, units, write_unit_preload);
 }
 
-void read_units_preload(ProfDataDeserializer& ser) {
+void read_units_preload(ProfDataDeserializer& ser, const std::string& root) {
   BootStats::Block timer("DES_read_units_preload",
                          RuntimeOption::ServerExecutionMode());
   if (Cfg::Jit::DesUnitPreload) {
@@ -276,7 +289,7 @@ void read_units_preload(ProfDataDeserializer& ser) {
     );
     s_preload_dispatcher->start();
   }
-  read_container(ser, [&] { read_unit_preload(ser); });
+  read_container(ser, [&] { read_unit_preload(ser, root); });
 }
 
 void write_type(ProfDataSerializer& ser, Type t) {
@@ -285,6 +298,20 @@ void write_type(ProfDataSerializer& ser, Type t) {
 
 Type read_type(ProfDataDeserializer& ser) {
   return Type::deserialize(ser);
+}
+
+void write_sb_prof_type(ProfDataSerializer& ser, const SBProfType& type) {
+  write_raw(ser, type.m_bits);
+  write_raw(ser, type.m_spec);
+  if (type.m_spec != SBProfTypeSpec::None) {
+    write_raw_string(ser, type.m_clsName);
+  }
+}
+
+void write_sb_prof_typed_location(ProfDataSerializer& ser,
+                                  const SBProfTypedLocation& lt) {
+  write_raw(ser, lt.location);
+  write_sb_prof_type(ser, lt.type);
 }
 
 void write_typed_location(ProfDataSerializer& ser,
@@ -298,6 +325,21 @@ void write_guarded_location(ProfDataSerializer& ser,
   write_raw(ser, loc.location);
   write_type(ser, loc.type);
   write_raw(ser, loc.category);
+}
+
+
+SBProfType read_sb_prof_type(ProfDataDeserializer& ser) {
+  SBProfType t;
+  read_raw(ser, t.m_bits);
+  read_raw(ser, t.m_spec);
+  if (t.m_spec != SBProfTypeSpec::None) t.m_clsName = read_raw_string(ser);
+  return t;
+}
+
+SBProfTypedLocation read_sb_prof_typed_location(ProfDataDeserializer& ser) {
+  auto const location = read_raw<Location>(ser);
+  auto const type = read_sb_prof_type(ser);
+  return { location, type };
 }
 
 RegionDesc::TypedLocation read_typed_location(ProfDataDeserializer& ser) {
@@ -995,6 +1037,228 @@ void merge_loaded_units(int numWorkers) {
   }
 }
 
+void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
+  BootStats::Block timer("DES_merge_and_enqueue_for_jit",
+                         RuntimeOption::ServerExecutionMode());
+
+  auto const& pds = getSBDeserProfData();
+
+  std::vector<VMWorker> workers;
+  // numBatches is taken from merge_loaded_units. See the comment there.
+  // TODO: tune numBatches.
+  constexpr size_t numBatches = 16;
+  auto const batchSize =
+    std::max(pds.size() / numWorkers / numBatches, size_t(1));
+  std::atomic<size_t> index{0};
+  std::atomic<uint32_t> curr_node{0};
+  for (auto worker = 0; worker < numWorkers; ++worker) {
+    WorkerSpec spec;
+    spec.numaNode = next_numa_node(curr_node);
+    workers.emplace_back(
+      VMWorker(
+        spec,
+        [&] {
+          ProfileNonVMThread nonVM;
+#if USE_JEMALLOC_EXTENT_HOOKS
+          if (auto arena = next_extra_arena(spec.numaNode)) {
+            arena->bindCurrentThread();
+          }
+#endif
+          hphp_session_init(Treadmill::SessionKind::PreloadRepo);
+
+          auto const opts = RepoOptions::forFile(root + '/');
+          g_context->onLoadWithOptions("", opts);
+          auto const map = AutoloadHandler::s_instance->getAutoloadMap();
+          always_assert(map);
+
+          while (true) {
+            auto begin = index.fetch_add(batchSize);
+            auto end = std::min(begin + batchSize, pds.size());
+            if (begin >= end) break;
+            auto pdCount = end - begin;
+            for (auto i = size_t{0}; i < pdCount; ++i) {
+              try {
+                auto const pd = pds[begin + i].get();
+                auto unit = pd->m_unit;
+                always_assert(unit);
+                unit->merge();
+                auto const func = [&]() -> Func* {
+                  if (pd->m_clsName) {
+                    auto const cls = Class::lookup(pd->m_clsName);
+                    if (!cls) {
+                      if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
+                        Trace::ftraceRelease("Failed to load class {}\n",
+                                             pd->m_clsName->data());
+                      }
+                      return nullptr;
+                    }
+                    auto const meth = cls->lookupMethod(pd->m_funcName);
+                    if (!meth) {
+                      if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
+                        Trace::ftraceRelease("Failed to load meth {}::{}\n",
+                                             pd->m_clsName->data(),
+                                             pd->m_funcName->data());
+                      }
+                      return nullptr;
+                    }
+                    always_assert(meth->cls() == cls);
+                    return meth;
+                  } else {
+                    auto const f = Func::lookup(pd->m_funcName);
+                    if (!f) {
+                      if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
+                        Trace::ftraceRelease("Failed to load func {}\n",
+                                             pd->m_funcName->data());
+                      }
+                    }
+                    return f;
+                  }
+                }();
+                if (!func) continue;
+                if (Cfg::Debugger::EnableVSDebugger &&
+                    Cfg::Eval::EmitDebuggerIntrCheck) {
+                  func->ensureDebuggerIntrSetLinkBound();
+                }
+                if (pd->m_kind == ProfDataSBKind::Prologue) {
+                  auto pdp = static_cast<ProfDataSBPrologueDeser*>(pd);
+                  auto const nPassed = pdp->m_nPassed;
+                  // There is only one prologue per function. If a prologue
+                  // translation request fails to enqueue because there is
+                  // already an ongoing prologue traslation request for the same
+                  // function, no need to retry it.
+                  mcgen::enqueueAsyncPrologueRequestForJumpstart(func, nPassed);
+                } else {
+                  auto pdr = static_cast<ProfDataSBRegionDeser*>(pd);
+                  auto const funcId = func->getFuncId();
+                  SrcKey::AtomicInt a =
+                    static_cast<uint64_t>(pdr->m_offsetAndMode) << 32 |
+                    static_cast<uint64_t>(funcId.toInt());
+                  auto const sk = SrcKey::fromAtomicInt(a);
+                  RegionContext ctx(sk, pdr->m_spOffset);
+                  for (auto const& pt : pdr->m_liveProfTypes) {
+                    auto const t = typeFromSBProfType(pt.type);
+                    ctx.liveTypes.emplace_back(pt.location, t);
+                  }
+                  mcgen::enqueueAsyncTranslateRequestForJumpstart(ctx);
+                }
+              } catch (const Exception& e) {
+                if (Trace::moduleEnabledRelease(Trace::prof_sb, 1)) {
+                  Trace::ftraceRelease("Merging and jitting failed {}\n",
+                    e.what());
+                }
+                // silently ignore this profile data
+              }
+            }
+          }
+
+          hphp_context_exit();
+          hphp_session_exit();
+        }
+      )
+    );
+  }
+  for (auto& worker : workers) {
+    worker.start();
+  }
+  for (auto& worker : workers) {
+    worker.waitForEnd();
+  }
+}
+
+std::string relativePath(const std::string& root, const StringData* absPath) {
+  auto const fullPath = absPath->toCppString();
+  auto const p = std::mismatch(root.begin(), root.end(), fullPath.begin());
+  if (p.first == root.end()) return std::string{p.second, fullPath.end()};
+  return "";
+}
+
+void write_sb_prof_data(ProfDataSerializer& ser,
+                        const ProfDataSBSer* pd,
+                        const std::string& root) {
+  write_raw(ser, pd->m_kind);
+  auto const relUnitPath = relativePath(root, pd->m_unitPath);
+  if (relUnitPath.empty()) return; // this profile is from a different sandbox
+  write_string(ser, relUnitPath);
+  if (pd->m_bcUnitPath != pd->m_unitPath) {
+    write_raw(ser, 1);
+    always_assert(pd->m_bcUnitPath);
+    auto const relBcUnitPath = relativePath(root, pd->m_bcUnitPath);
+    always_assert_flog(!relBcUnitPath.empty(), "BC path {}", pd->m_bcUnitPath->data());
+    write_string(ser, relBcUnitPath);
+  } else {
+    write_raw(ser, 0);
+  }
+  write_raw(ser, pd->m_bcUnitSha1);
+  write_raw_string(ser, pd->m_funcName);
+  if (pd->m_clsName) {
+    write_raw(ser, 1);
+    write_raw_string(ser, pd->m_clsName);
+  } else {
+    write_raw(ser, 0);
+  }
+  if (pd->m_kind == ProfDataSBKind::Prologue) {
+    auto const pdp = static_cast<const ProfDataSBPrologueSer*>(pd);
+    write_raw(ser, pdp->m_nPassed);
+  } else {
+    auto const pdr = static_cast<const ProfDataSBRegionSer*>(pd);
+    write_raw(ser, pdr->m_offsetAndMode);
+    write_container(ser, pdr->m_liveProfTypes, write_sb_prof_typed_location);
+    write_raw(ser, pdr->m_spOffset);
+  }
+}
+
+void read_sb_prof_data(ProfDataDeserializer& des,
+                       std::vector<std::unique_ptr<ProfDataSBDeser>>& pds,
+                       const std::string& root) {
+  auto const kind = read_raw<ProfDataSBKind>(des);
+  auto const relPath = read_cpp_string(des);
+  auto const filepath = makeStaticString(root + '/' + relPath);
+  // TODO: handle systemlib here
+  auto const unit = lookupUnit(filepath, "", nullptr, nullptr, false);
+
+  // We need to deserialize all parts of ProfDataSB even if the sha does not
+  // match -- otherwise deserialization of the next ProfDataSB will fail.
+  auto const bcUnit = [&] {
+    auto const hasBcFilePath = read_raw<int>(des);
+    if (hasBcFilePath) {
+      auto const relBcPath = read_cpp_string(des);
+      auto const bcFilePath = makeStaticString(root + '/' + relBcPath);
+      return lookupUnit(bcFilePath, "", nullptr, nullptr, false);
+    }
+    return unit;
+  }();
+  auto const sha1 = read_raw<SHA1>(des);
+
+  auto const shouldDeser = unit && bcUnit && bcUnit->sha1() == sha1;
+
+  auto const funcName = read_raw_string(des);
+  auto const hasClsName = read_raw<int>(des);
+  auto const clsName = hasClsName ? read_raw_string(des) : nullptr;
+
+  if (kind == ProfDataSBKind::Prologue) {
+    auto nPassed = read_raw<int>(des);
+    if (shouldDeser) {
+      auto pd =
+        std::make_unique<ProfDataSBPrologueDeser>(unit, funcName, clsName, nPassed);
+      pds.push_back(std::move(pd));
+    }
+  } else {
+    auto offsetAndMode = read_raw<uint32_t>(des);
+    std::vector<SBProfTypedLocation> typedLocations;
+    read_container(des,
+                   [&] {
+                     typedLocations.push_back(read_sb_prof_typed_location(des));
+                   });
+    auto spOffset = read_raw<SBInvOffset>(des);
+    if (shouldDeser) {
+      auto pd = std::make_unique<ProfDataSBRegionDeser>(
+        unit, funcName, clsName, offsetAndMode, typedLocations,spOffset
+      );
+      pds.push_back(std::move(pd));
+    }
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 void renameFile(const std::string& src, const std::string& dst) {
@@ -1065,7 +1329,9 @@ void ProfDataSerializer::finalize() {
   // additional profile data, rename it to another (different)
   // temporary name (to mark the base data has been written). If not,
   // rename it to its file name (signifying completion).
-  if (fileMode == FileMode::Create && serializeOptProfEnabled()) {
+  if (fileMode == FileMode::Create &&
+      !Cfg::Eval::EnableSBProfSerialize &&
+      serializeOptProfEnabled()) {
     // Don't rename the file to it's final name yet as we're still going to
     // append the profile data collected for the optimized code to it.
     FTRACE(1, "Finished serializing base profile data to {}\n", fileName);
@@ -1866,6 +2132,56 @@ std::string serializeOptProfData(const std::string& filename) {
   }
 }
 
+namespace {
+std::atomic_flag s_sbSerDone = ATOMIC_FLAG_INIT;
+}
+
+std::string serializeSBProfData(const std::string& root,
+                                const std::string& filename) {
+  if (!Cfg::Eval::EnableSBProfSerialize ||
+      !Cfg::Eval::EnableAsyncJIT) {
+    return "Serialization failed: options not enabled\n";
+  }
+  if (s_sbSerDone.test_and_set()) {
+    return "Serialization failed: already attempted serialization\n";
+  }
+
+  auto const profFileName = !filename.empty() ?
+    filename : RuntimeOption::EvalSBSerdesFile;
+
+  try {
+    ProfDataSerializer ser{profFileName, ProfDataSerializer::FileMode::Create};
+
+    write_raw(ser, kMagic);
+    // TODO: repo-schema
+    auto const sbProfData = getSBSerProfDataCopy();
+    // TODO: do not serialize unit paths for preloading here --
+    // offline processing should add these paths.
+    std::vector<const ProfDataSBSer*> filteredProfData;
+    hphp_fast_set<std::string> relPaths;
+    for (auto const& pd : sbProfData) {
+      auto unitRelPath = relativePath(root, pd->m_unitPath);
+      if (!unitRelPath.empty()) {
+        filteredProfData.push_back(pd);
+        relPaths.insert(unitRelPath);
+        relPaths.insert(relativePath(root, pd->m_bcUnitPath));
+      }
+    }
+    write_container(ser, relPaths,
+                    [&](const std::string& path) {
+                      write_string(ser, path);
+                    });
+    write_container(ser, filteredProfData,
+                    [&](const ProfDataSBSer* pd) {
+                      write_sb_prof_data(ser, pd, root);
+                    });
+    ser.finalize();
+    return "Serialization of profile data successful\n";
+  } catch (std::runtime_error& err) {
+    return folly::sformat("Serialization failed: {}", err.what());
+  }
+}
+
 std::string deserializeProfData(const std::string& filename,
                                 int numWorkers,
                                 bool rds) {
@@ -1927,7 +2243,7 @@ std::string deserializeProfData(const std::string& filename,
       return "";
     }
 
-    read_units_preload(ser);
+    read_units_preload(ser, "");
     ExtensionRegistry::deserialize(ser);
     PropertyProfile::deserialize(ser);
     InstanceBits::deserialize(ser);
@@ -2032,6 +2348,61 @@ bool serializeOptProfEnabled() {
 
 Optional<std::string> getFilenameDeserialized() {
   return s_deserializedFile;
+}
+
+namespace {
+std::atomic_flag s_sbDeserDone = ATOMIC_FLAG_INIT;
+}
+
+std::string deserializeSBProfData(const std::string& root,
+                                  const std::string& filename) {
+  if (!Cfg::Eval::EnableSBProfDeserialize ||
+      !Cfg::Eval::EnableAsyncJIT) {
+    return "Deser failed: options not enabled\n";
+  }
+  if (s_sbDeserDone.test_and_set()) {
+    return "Deser failed: already attempted deserialization\n";
+  }
+  auto const numWorkers = Cfg::Jit::WorkerThreadsForSerdes ?
+    Cfg::Jit::WorkerThreadsForSerdes : Process::GetCPUCount();
+  auto const profFileName = !filename.empty() ?
+    filename : RuntimeOption::EvalSBSerdesFile;
+
+#if USE_JEMALLOC_EXTENT_HOOKS
+  // TODO: add additional param like WorkerArenas
+  setup_extra_arenas(numWorkers);
+#endif
+
+  try {
+    ProfDataDeserializer des{profFileName};
+    if (read_raw<decltype(kMagic)>(des) != kMagic) {
+      throw std::runtime_error("Not a profile-data dump");
+    }
+    // TODO: repo-schema
+    read_units_preload(des, root);
+    auto& sbProfData = getSBDeserProfData();
+    {
+      BootStats::Block timer("DES_read_sb_prof_data",
+                             RuntimeOption::ServerExecutionMode());
+      read_container(des, [&] {read_sb_prof_data(des, sbProfData, root);});
+    }
+
+    always_assert(des.done());
+
+    if (s_preload_dispatcher) {
+      BootStats::Block timer("DES_wait_for_units_preload",
+                             RuntimeOption::ServerExecutionMode());
+      s_preload_dispatcher->waitEmpty(true);
+      delete s_preload_dispatcher;
+      s_preload_dispatcher = nullptr;
+    }
+
+    merge_and_enqueue_for_jit(root, numWorkers);
+
+    return "Deserialization of profile data successful\n";
+  } catch (std::runtime_error& err) {
+    return folly::sformat("Deser failed {}: {}\n", profFileName, err.what());
+  }
 }
 
 //////////////////////////////////////////////////////////////////////

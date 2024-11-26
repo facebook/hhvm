@@ -184,6 +184,7 @@ namespace Trace {
       TM(prof_branch)   \
       TM(prof_array)    \
       TM(prof_prop)     \
+      TM(prof_sb)       \
       TM(rat)           \
       TM(refcount)      \
       TM(regalloc)      \

@@ -231,3 +231,5 @@ let get_param_default param =
   | Param_variadic -> None
   | Param_required -> None
   | Param_optional e -> e
+
+let get_expr_pos (_, p, _) = p

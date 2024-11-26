@@ -6342,13 +6342,7 @@ end = struct
               | None -> (-1, (true, None, paraml)))
           in
           let check_arg
-              env
-              param_kind
-              ((_, pos, arg) as e)
-              opt_param
-              ~arg_idx
-              ~param_idx
-              ~is_variadic =
+              env param_kind e opt_param ~arg_idx ~param_idx ~is_variadic =
             match opt_param with
             | Some param ->
               let ety = param.fp_type in
@@ -6357,8 +6351,7 @@ end = struct
                 Typing_class_pointers.check_string_coercion_point
                   env
                   ~flag:"param"
-                  pos
-                  arg
+                  e
                   ety
               in
               let (env, te, ty) =
@@ -6374,7 +6367,7 @@ end = struct
                 let expected =
                   ExpectedTy.make_and_allow_coercion_opt
                     env
-                    pos
+                    (Aast_utils.get_expr_pos e)
                     Reason.URparam
                     pess_type
                 in
@@ -6454,10 +6447,22 @@ end = struct
               in
               (env, Some (te, ty), false)
           in
+          let open struct
+            type arg_with_result =
+              int
+              * (Ast_defs.param_kind * Nast.expr)
+              * (Tast.expr * locl_ty) option
+          end in
           (* For a given pass number, check arguments from left-to-right that correspond
            * to this pass. If any arguments remain unprocessed, bump the pass number
            * and repeat. *)
-          let rec check_args pass env args_with_result paraml used_dynamic acc =
+          let rec check_args
+              pass
+              env
+              (args_with_result : arg_with_result list)
+              paraml
+              used_dynamic
+              acc =
             match args_with_result with
             (* We've got an argument *)
             | (arg_idx, (param_kind, e), opt_result) :: args_with_result ->
@@ -6506,12 +6511,11 @@ end = struct
                        non_variadic_ft_params)
                     used_dynamic
                     []
-                | (_, (param_kind, _), Some (((_, pos, _) as te), ty))
-                  :: reversed_res ->
+                | (_, (param_kind, _), Some (te, ty)) :: reversed_res ->
                   collect_results
                     reversed_res
                     ((param_kind, te) :: tel)
-                    ((pos, ty) :: argtys)
+                    ((Aast_utils.get_expr_pos te, ty) :: argtys)
               in
               collect_results acc [] []
           in
@@ -7415,7 +7419,6 @@ end = struct
       (env, Aast.Return None)
     | Return (Some e) ->
       let env = Typing_return.check_inout_return pos env in
-      let (_, expr_pos, expr_) = e in
       let Typing_env_return_info.{ return_type; return_disposable } =
         Env.get_return env
       in
@@ -7425,13 +7428,12 @@ end = struct
       Typing_class_pointers.check_string_coercion_point
         env
         ~flag:"return"
-        expr_pos
-        expr_
+        e
         return_type;
       let expected =
         Some
           (ExpectedTy.make_and_allow_coercion
-             expr_pos
+             (Aast_utils.get_expr_pos e)
              Reason.URreturn
              return_type)
       in
@@ -7466,7 +7468,7 @@ end = struct
        * statement is the problem, not the return type itself. *)
       let (env, ty_err_opt) =
         Typing_coercion.coerce_type
-          expr_pos
+          (Aast_utils.get_expr_pos e)
           Reason.URreturn
           env
           rty
@@ -10035,7 +10037,6 @@ end = struct
           env
         | _ -> might_throw ~join_pos:p env
       in
-      let (_, p1, e1_) = e1 in
       let p2 =
         match e2 with
         | Either.First (_, p, _)
@@ -10047,21 +10048,28 @@ end = struct
         Typing_class_pointers.check_string_coercion_point
           env
           ~flag:"concat"
-          p1
-          e1_
+          e1
           (MakeType.string Reason.none);
         (match e2 with
-        | Either.First (_, p2, e2_) ->
+        | Either.First e2 ->
           Typing_class_pointers.check_string_coercion_point
             env
             ~flag:"concat"
-            p2
-            e2_
+            e2
             (MakeType.string Reason.none)
         | Either.Second _ -> ())
       | _ -> ());
       let (env, te3, ty) =
-        Typing_arithmetic.binop p env bop p1 te1 ty1 p2 te2 ty2
+        Typing_arithmetic.binop
+          p
+          env
+          bop
+          (Aast_utils.get_expr_pos e1)
+          te1
+          ty1
+          p2
+          te2
+          ty2
       in
       (env, te3, ty)
 end
@@ -10608,12 +10616,11 @@ end = struct
         in
         Option.iter ty_err_opt ~f:(Typing_error_utils.add_typing_error ~env);
         Option.iter
-          ~f:(fun (_, e2_pos, e2) ->
+          ~f:(fun e ->
             Typing_class_pointers.check_string_coercion_point
               env
               ~flag:"prop"
-              e2_pos
-              e2
+              e
               declared_ty)
           expr_for_string_check;
         let (env, inner_te) =

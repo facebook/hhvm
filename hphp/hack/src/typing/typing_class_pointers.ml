@@ -26,14 +26,14 @@ let string_of_class_id_ = function
   | CIexpr _ -> "" (* <expr>::class is banned *)
   | CI (_, name) -> name
 
-let check_string_coercion_point env ~flag pos expr ty =
+let check_string_coercion_point env ~flag expr ty =
   if env.Typing_env_types.emit_string_coercion_error then
     let level =
       TypecheckerOptions.class_pointer_level (Typing_env.get_tcopt env) flag
     in
     if level > 0 then
       match expr with
-      | Class_const ((_, _, cid_), (_, cls))
+      | (_, pos, Class_const ((_, _, cid_), (_, cls)))
         when cls = Naming_special_names.Members.mClass -> begin
         match cid_ with
         | CI (_, name) when Typing_env.get_reified env name = Reified ->

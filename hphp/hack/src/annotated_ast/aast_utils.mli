@@ -55,3 +55,5 @@ val is_param_optional : ('a, 'b) Aast_defs.fun_param -> bool
 
 val get_param_default :
   ('a, 'b) Aast_defs.fun_param -> ('a, 'b) Aast_defs.expr option
+
+val get_expr_pos : ('a, 'b) Aast_defs.expr -> Pos.t

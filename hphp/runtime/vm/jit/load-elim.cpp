@@ -1472,16 +1472,20 @@ void optimize_block(Local& env, Global& genv, Block* blk, bool createPhis) {
     return;
   }
 
+  // If we are allowed to create phis, we can't perform CFG optimizations that
+  // may move jumps through blocks defining these phis.
+  //
+  // Do this before the optimize_inst() loop, as optimize_inst() might change
+  // the last instruction's meaning of next() and taken(), invalidating the
+  // stateOutNext and stateOutTaken from the analysis pass.
+  if (!createPhis) optimize_edges(genv, blk);
+
   for (auto& inst : *blk) {
     // simplifyInPlace may perform CFG changes incompatible with phi creation.
     if (!createPhis) simplifyInPlace(genv.unit, &inst);
     auto const flags = analyze_inst(env, inst);
     optimize_inst(genv, inst, flags, createPhis);
   }
-
-  // If we are allowed to create phis, we can't perform CFG optimizations that
-  // may move jumps through blocks defining these phis.
-  if (!createPhis) optimize_edges(genv, blk);
 }
 
 void optimize(Global& genv, bool createPhis) {

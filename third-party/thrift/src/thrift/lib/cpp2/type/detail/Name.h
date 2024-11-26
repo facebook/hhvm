@@ -36,43 +36,41 @@ struct GetName {
   }
 };
 
-// Helper for any 'named' types.
-template <typename T, typename Module, typename Name>
-struct GetNameNamed {
+template <typename T>
+struct GetNameStructured {
   FOLLY_EXPORT const std::string& operator()() const {
     static const auto* kName = new std::string([]() {
       // TODO(afuller): Return thrift.uri if available.
-      using info = reflect_module<Module>;
+      using pa = ::apache::thrift::detail::st::private_access;
       return fmt::format(
-          "{}.{}", fatal::z_data<typename info::name>(), fatal::z_data<Name>());
+          "{}.{}",
+          pa::__fbthrift_get_module_name<T>(),
+          pa::__fbthrift_get_class_name<T>());
     }());
     return *kName;
   }
 };
 
 template <typename T>
-struct GetName<enum_t<T>> : GetNameNamed<
-                                T,
-                                typename reflect_enum<T>::module,
-                                typename reflect_enum<T>::traits::name> {};
+struct GetName<enum_t<T>> {
+  FOLLY_EXPORT const std::string& operator()() const {
+    static const auto* kName = new std::string([]() {
+      // TODO(afuller): Return thrift.uri if available.
+      using traits = TEnumTraits<T>;
+      return fmt::format("{}.{}", traits::moduleName(), traits::typeName());
+    }());
+    return *kName;
+  }
+};
 
 template <typename T>
-struct GetName<union_t<T>> : GetNameNamed<
-                                 T,
-                                 typename reflect_variant<T>::module,
-                                 typename reflect_variant<T>::traits::name> {};
+struct GetName<union_t<T>> : GetNameStructured<T> {};
 
 template <typename T>
-struct GetName<struct_t<T>> : GetNameNamed<
-                                  T,
-                                  typename reflect_struct<T>::module,
-                                  typename reflect_struct<T>::name> {};
+struct GetName<struct_t<T>> : GetNameStructured<T> {};
 
 template <typename T>
-struct GetName<exception_t<T>> : GetNameNamed<
-                                     T,
-                                     typename reflect_struct<T>::module,
-                                     typename reflect_struct<T>::name> {};
+struct GetName<exception_t<T>> : GetNameStructured<T> {};
 
 template <typename CTag, typename... Tags>
 struct GetNameParamed;

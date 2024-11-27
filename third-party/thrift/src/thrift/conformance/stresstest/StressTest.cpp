@@ -47,23 +47,6 @@ int main(int argc, char* argv[]) {
 
   // create a test runner instance
   auto clientCfg = ClientConfig::createFromFlags();
-  if (clientCfg.enableChecksum) {
-    LOG(INFO) << "Initializing checksum payload serializer" << std::endl;
-    PayloadSerializer::initialize(
-        ChecksumPayloadSerializerStrategy<LegacyPayloadSerializerStrategy>(
-            ChecksumPayloadSerializerStrategyOptions{
-                .recordChecksumFailure =
-                    [] { LOG(FATAL) << "Checksum failure detected"; },
-                .recordChecksumSuccess =
-                    [] {
-                      LOG_EVERY_N(INFO, 1'000'000)
-                          << "Checksum success detected";
-                    },
-                .recordChecksumCalculated =
-                    [] {
-                      LOG_EVERY_N(INFO, 1'000'000) << "Checksum calculated";
-                    }}));
-  }
 
   TestRunner testRunner(std::move(clientCfg));
   testRunner.runTests();

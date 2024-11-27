@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+#include <folly/synchronization/CallOnce.h>
 #include <thrift/conformance/stresstest/client/StressTestClient.h>
+#include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializer.h>
 
 #include <folly/coro/Sleep.h>
 
@@ -50,6 +52,27 @@ folly::coro::Task<std::string> ThriftStressTestClient::co_echo(
   co_await timedExecute([&]() -> folly::coro::Task<void> {
     RpcOptions rpcOptions;
     if (enableChecksum_) {
+      static folly::once_flag flag;
+
+      folly::call_once(flag, [] {
+        LOG(INFO) << "Initializing checksum payload serializer" << std::endl;
+        rocket::PayloadSerializer::initialize(
+            rocket::ChecksumPayloadSerializerStrategy<
+                rocket::LegacyPayloadSerializerStrategy>(
+                rocket::ChecksumPayloadSerializerStrategyOptions{
+                    .recordChecksumFailure =
+                        [] { LOG(FATAL) << "Checksum failure detected"; },
+                    .recordChecksumSuccess =
+                        [] {
+                          LOG_EVERY_N(INFO, 1'000)
+                              << "Checksum success detected";
+                        },
+                    .recordChecksumCalculated =
+                        [] {
+                          LOG_EVERY_N(INFO, 1'000) << "Checksum calculated";
+                        }}));
+      });
+
       rpcOptions.setChecksum(RpcOptions::Checksum::XXH3_64);
     }
     ret = co_await client_->co_echo(rpcOptions, x);
@@ -61,7 +84,32 @@ folly::coro::Task<std::string> ThriftStressTestClient::co_echoEb(
     const std::string& x) {
   std::string ret;
   co_await timedExecute([&]() -> folly::coro::Task<void> {
-    ret = co_await client_->co_echoEb(x);
+    RpcOptions rpcOptions;
+    if (enableChecksum_) {
+      static folly::once_flag flag;
+
+      folly::call_once(flag, [] {
+        LOG(INFO) << "Initializing checksum payload serializer" << std::endl;
+        rocket::PayloadSerializer::initialize(
+            rocket::ChecksumPayloadSerializerStrategy<
+                rocket::LegacyPayloadSerializerStrategy>(
+                rocket::ChecksumPayloadSerializerStrategyOptions{
+                    .recordChecksumFailure =
+                        [] { LOG(FATAL) << "Checksum failure detected"; },
+                    .recordChecksumSuccess =
+                        [] {
+                          LOG_EVERY_N(INFO, 1'000)
+                              << "Checksum success detected";
+                        },
+                    .recordChecksumCalculated =
+                        [] {
+                          LOG_EVERY_N(INFO, 1'000) << "Checksum calculated";
+                        }}));
+      });
+
+      rpcOptions.setChecksum(RpcOptions::Checksum::XXH3_64);
+    }
+    ret = co_await client_->co_echoEb(rpcOptions, x);
   });
   co_return ret;
 }

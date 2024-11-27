@@ -17,6 +17,8 @@
 #pragma once
 
 #include <folly/Function.h>
+#include <folly/logging/xlog.h>
+#include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp2/transport/rocket/ChecksumGenerator.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/PayloadSerializerStrategy.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
@@ -57,7 +59,7 @@ class ChecksumPayloadSerializerStrategy final
   template <class T>
   FOLLY_ERASE folly::Try<T> unpackAsCompressed(
       Payload&& payload, bool decodeMetadataUsingBinary) {
-    return unpackImpl<T, /*VerifyChecksum=*/false>(
+    return unpackImpl<T>(
         std::move(payload),
         [this, decodeMetadataUsingBinary](Payload&& payload) -> folly::Try<T> {
           return delegate_.template unpackAsCompressed<T>(
@@ -68,7 +70,7 @@ class ChecksumPayloadSerializerStrategy final
   template <typename T>
   FOLLY_ERASE folly::Try<T> unpack(
       Payload&& payload, bool decodeMetadataUsingBinary) {
-    return unpackImpl<T, /*VerifyChecksum=*/true>(
+    return unpackImpl<T>(
         std::move(payload),
         [this, decodeMetadataUsingBinary](Payload&& payload) -> folly::Try<T> {
           return delegate_.template unpack<T>(
@@ -79,6 +81,13 @@ class ChecksumPayloadSerializerStrategy final
   template <typename T>
   FOLLY_ERASE std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
     return delegate_.packCompact(std::forward<T>(data));
+  }
+
+  template <typename Metadata>
+  bool isDataCompressed(Metadata* metadata) {
+    return metadata->compression().has_value() &&
+        metadata->compression().value() !=
+        apache::thrift::CompressionAlgorithm::NONE;
   }
 
   template <typename Metadata>
@@ -215,17 +224,38 @@ class ChecksumPayloadSerializerStrategy final
   folly::Function<void()> recordChecksumSuccess_;
   folly::Function<void()> recordChecksumCalculated_;
 
-  template <typename T, bool VerifyChecksum, typename DelegateFunc>
+  /**
+   * Helper function that makes checks to make sure that the checksum wasn't
+   * invalid because of incorrect setup vs an actual checksum failure.
+   */
+  void validateInvalidChecksum(const Checksum& c) {
+    auto value = c.checksum().value();
+    auto salt = c.salt().value();
+
+    if (salt == 0 && value == 0) {
+      XLOG_EVERY_MS(ERR, 1'000)
+          << "Received a request to checksum the payload but received a checksum and salt that are zero. "
+          << "Please make sure that the ChecksumPayloadSerializerStrategy is enabled on both the client and server.";
+    }
+  }
+
+  template <typename T, typename DelegateFunc>
   FOLLY_ERASE folly::Try<T> unpackImpl(Payload&& payload, DelegateFunc func) {
     if (payload.hasNonemptyMetadata()) {
       folly::Try<T> t = func(std::move(payload));
+      bool compressed = isDataCompressed(&t.value().metadata);
       folly::IOBuf& buf = *t->payload.get();
-      if (t.hasException() || !VerifyChecksum) {
+      if (t.hasException() || compressed) {
         return t;
       } else if (validateChecksum(buf, t->metadata.checksum())) {
         return t;
       } else {
-        return folly::Try<T>(std::runtime_error("Checksum mismatch"));
+        if (FOLLY_LIKELY(t->metadata.checksum().has_value())) {
+          validateInvalidChecksum(t->metadata.checksum().value());
+        }
+        return folly::Try<T>(
+            folly::make_exception_wrapper<TApplicationException>(
+                TApplicationException::CHECKSUM_MISMATCH, "Checksum mismatch"));
       }
     } else {
       return func(std::move(payload));

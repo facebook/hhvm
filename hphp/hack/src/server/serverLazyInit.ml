@@ -1266,7 +1266,11 @@ let post_saved_state_initialization
     end else
       Option.iter
         saved_state_revs_info.ServerEnv.mergebase_globalrev
-        ~f:ServerRevisionTracker.initialize;
+        ~f:ServerRevisionTracker.initialize
+  else
+    Option.iter
+      ~f:HackEventLogger.set_mergebase_globalrev
+      saved_state_revs_info.ServerEnv.mergebase_globalrev;
   let env =
     {
       env with

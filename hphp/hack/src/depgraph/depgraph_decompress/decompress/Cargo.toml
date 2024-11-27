@@ -11,7 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-bytemuck = { version = "1.19", features = ["derive", "min_const_generics", "nightly_portable_simd", "nightly_stdsimd"] }
+bytemuck = { version = "1.19", features = ["const_zeroed", "derive", "min_const_generics", "nightly_portable_simd", "nightly_stdsimd"] }
 depgraph_reader = { version = "0.0.0", path = "../../cargo/depgraph_reader" }
 memmap2 = "0.5.10"
 rayon = "1.9.0"

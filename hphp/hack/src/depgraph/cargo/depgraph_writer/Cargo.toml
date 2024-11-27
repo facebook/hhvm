@@ -12,7 +12,7 @@ path = "../../depgraph_writer/writer.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-bytemuck = { version = "1.19", features = ["derive", "min_const_generics", "nightly_portable_simd", "nightly_stdsimd"] }
+bytemuck = { version = "1.19", features = ["const_zeroed", "derive", "min_const_generics", "nightly_portable_simd", "nightly_stdsimd"] }
 dep = { version = "0.0.0", path = "../dep" }
 log = { version = "0.4.22", features = ["kv_unstable"] }
 newtype = { version = "0.0.0", path = "../../../utils/newtype" }

@@ -19,7 +19,7 @@ import pickle
 import string
 import unittest
 
-from typing import cast, ItemsView, Iterator, KeysView, Optional
+from typing import cast, ItemsView, Iterator, KeysView, Optional, ValuesView
 
 from thrift.python.mutable_containers import (
     MapItemsView,
@@ -61,19 +61,16 @@ class MutableMapTypeHints(unittest.TestCase):
         mutable_map = cast(MutableMap[str, int], object())
         try:
             ### get() ###
-            v1: Optional[int] = mutable_map.get("key")
+            v1: Optional[int] = mutable_map.get("key")  # noqa
 
             # pyre-ignore[9]: v2 is type `int` but is used as type `Optional[int]`
-            v2: int = mutable_map.get("key")
+            v2: int = mutable_map.get("key")  # noqa
 
-            v3: int = mutable_map.get("key", 42)
-            v4: int | str = mutable_map.get("key", "value")
+            v3: int = mutable_map.get("key", 42)  # noqa
+            v4: int | str = mutable_map.get("key", "value")  # noqa
 
             # pyre-ignore[6]: 1st positional argument, expected `str` but got `int`
-            v5: int = mutable_map.get(999, 42)
-
-            # to silence F841: not used variable
-            _ = (v1, v2, v3, v4, v5)
+            v5: int = mutable_map.get(999, 42)  # noqa
 
             ###################################################################
 
@@ -113,58 +110,66 @@ class MutableMapTypeHints(unittest.TestCase):
             ###################################################################
 
             ### pop() ####
-            v6: int = mutable_map.pop("key")
+            v6: int = mutable_map.pop("key")  # noqa
 
             # pyre-ignore[6]: expected `str` but got `bytes`
-            v7: int = mutable_map.pop(b"key")
+            v7: int = mutable_map.pop(b"key")  # noqa
             # pyre-ignore[9]: v8 type `str` but is used as type `int`
-            v8: str = mutable_map.pop("key")
+            v8: str = mutable_map.pop("key")  # noqa
 
-            v9: int = mutable_map.pop("key", 42)
-            v10: int | float = mutable_map.pop("key", 42.0)
-
-            # to silence F841: not used variable
-            _ = (v6, v7, v8, v9, v10)
+            v9: int = mutable_map.pop("key", 42)  # noqa
+            v10: int | float = mutable_map.pop("key", 42.0)  # noqa
 
             ###################################################################
 
             ### keys() ####
 
             v11: MapKeysView[str] = mutable_map.keys()
-            v12: KeysView[str] = mutable_map.keys()
+            v12: KeysView[str] = mutable_map.keys()  # noqa
 
             # pyre-ignore[9]: v13 is type `MapKeysView[int]` but is used as type
             #  `MapKeysView[str]`
-            v13: MapKeysView[int] = mutable_map.keys()
+            v13: MapKeysView[int] = mutable_map.keys()  # noqa
 
-            keys_iter_1: Iterator[str] = iter(v11)
+            keys_iter_1: Iterator[str] = iter(v11)  # noqa
 
             # pyre-ignore[9]: keys_iter_2 is type `Iterator[int]` but is used as
             #  type `Iterator[str]`
-            keys_iter_2: Iterator[int] = iter(v11)
-
-            # to silence F841: not used variable
-            _ = (v11, v12, v13, keys_iter_1, keys_iter_2)
+            keys_iter_2: Iterator[int] = iter(v11)  # noqa
 
             ###################################################################
 
             ### items() ####
 
             v14: MapItemsView[str, int] = mutable_map.items()
-            v15: ItemsView[str, int] = mutable_map.items()
+            v15: ItemsView[str, int] = mutable_map.items()  # noqa
 
             # pyre-ignore[9]: v16 is type `MapItemsView[str, str]` but is used
             #  as type `MapItemsView[str, int]`
-            v16: MapItemsView[str, str] = mutable_map.items()
+            v16: MapItemsView[str, str] = mutable_map.items()  # noqa
 
-            items_iter_1: Iterator[tuple[str, int]] = iter(v14)
+            items_iter_1: Iterator[tuple[str, int]] = iter(v14)  # noqa
 
             # pyre-ignore[9]: items_iter_2 is type `Iterator[Tuple[str, str]]`
             #  but is used as type `Iterator[Tuple[str, int]]`
-            items_iter_2: Iterator[tuple[str, str]] = iter(v14)
+            items_iter_2: Iterator[tuple[str, str]] = iter(v14)  # noqa
 
-            # to silence F841: not used variable
-            _ = (v14, v15, v16, items_iter_1, items_iter_2)
+            ###################################################################
+
+            ### values() ####
+
+            v17: MapValuesView[int] = mutable_map.values()
+            v18: ValuesView[int] = mutable_map.values()  # noqa
+
+            # pyre-ignore[9]: v19 is type `MapValuesView[str]` but is used as
+            #  type `MapValuesView[int]`
+            v19: MapValuesView[str] = mutable_map.values()  # noqa
+
+            values_iter_1: Iterator[int] = iter(v17)  # noqa
+
+            # pyre-ignore[9]: values_iter_2 is type `Iterator[str]` but is used
+            #  as type `Iterator[int]`
+            values_iter_2: Iterator[str] = iter(v17)  # noqa
 
         except Exception:
             pass
@@ -173,24 +178,21 @@ class MutableMapTypeHints(unittest.TestCase):
         mutable_map = cast(MutableMap[str, MutableList[int]], object())
         try:
             ### get() ###
-            v1: Optional[MutableList[int]] = mutable_map.get("key")
+            v1: Optional[MutableList[int]] = mutable_map.get("key")  # noqa
 
             # pyre-ignore[9]: v2 is type `MutableList[int]` but is used as type `Optional[MutableList[int]]`.
-            v2: MutableList[int] = mutable_map.get("key")
+            v2: MutableList[int] = mutable_map.get("key")  # noqa
 
             default_value_1 = cast(MutableList[int], object())
-            v3: MutableList[int] = mutable_map.get("key", default_value_1)
+            v3: MutableList[int] = mutable_map.get("key", default_value_1)  # noqa
 
             default_value_2 = cast(MutableList[str], object())
-            v4: MutableList[int] | MutableList[str] = mutable_map.get(
+            v4: MutableList[int] | MutableList[str] = mutable_map.get(  # noqa
                 "key", default_value_2
             )
 
             # pyre-ignore[6]: 1st positional argument, expected `str` but got `int`
             v5: MutableList[int] = mutable_map.get(999, default_value_1)
-
-            # to silence F841: not used variable
-            _ = (v1, v2, v3, v4, v5)
 
             ###################################################################
 
@@ -235,23 +237,20 @@ class MutableMapTypeHints(unittest.TestCase):
             ###################################################################
 
             ### pop() ####
-            v6: MutableList[int] = mutable_map.pop("key")
+            v6: MutableList[int] = mutable_map.pop("key")  # noqa
 
             # pyre-ignore[6]: expected `str` but got `bytes`
-            v7: MutableList[int] = mutable_map.pop(b"key")
+            v7: MutableList[int] = mutable_map.pop(b"key")  # noqa
             # pyre-ignore[9]: type `MutableList[str]` but is used as type `MutableList[int]`
-            v8: MutableList[str] = mutable_map.pop("key")
+            v8: MutableList[str] = mutable_map.pop("key")  # noqa
 
             mutable_list_int = cast(MutableList[int], object())
-            v9: MutableList[int] = mutable_map.pop("key", mutable_list_int)
+            v9: MutableList[int] = mutable_map.pop("key", mutable_list_int)  # noqa
 
             mutable_list_str = cast(MutableList[str], object())
-            v10: MutableList[int] | MutableList[str] = mutable_map.pop(
+            v10: MutableList[int] | MutableList[str] = mutable_map.pop(  # noqa
                 "key", mutable_list_str
             )
-
-            # to silence F841: not used variable
-            _ = (v6, v7, v8, v9, v10)
 
         except Exception:
             pass

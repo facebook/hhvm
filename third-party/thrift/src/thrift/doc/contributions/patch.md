@@ -260,3 +260,12 @@ Note that this API needs to work with dynamic patch, thus both input and output 
 ```
 O(size of patch1 + size of patch2)
 ```
+
+## SafePatch
+
+When Thrift Patch is serialized (i.e. sent over the wire or stored), Thrift SafePatch must be used. It provides safe means to transport Thrift Patch over the wire and guarantees that, for any combination of producer and consumer, any serialized instance will either be correctly applied or will fail clearly and deterministically. Thrift SafePatch provides backward compatiblity as well as protection from invalid forward consumption. Thrift SafePatch encodes the minimum Thrift SafePatch version that is required to safely and successfully process the patch. For example, Thrift AnyPatch is available from V2. Even if AnyPatch is available for the binary, if only V1 operations (i.e. `assign`), Thrift SafePatch will encode V1 instead of V2.
+
+## Thrift Patch Changelog
+### V2
+#### Added
+* Support for AnyPatch

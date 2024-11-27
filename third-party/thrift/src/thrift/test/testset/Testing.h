@@ -16,129 +16,270 @@
 
 #pragma once
 
-#include <thrift/test/testset/gen-cpp2/testset_fatal_types.h>
+#include <thrift/test/testset/gen-cpp2/testset_types.h>
 
 namespace apache::thrift::test::testset {
-namespace testing_detail {
 
-using testset_info = reflect_module<testset::testset_tags::module>;
-
-template <typename Ts>
-struct to_gtest_types;
-template <typename... Ts>
-struct to_gtest_types<fatal::list<Ts...>> {
-  using type = testing::Types<fatal::first<Ts>...>;
-};
-template <typename T, T A, T E>
-struct StaticEquals;
-template <typename T, T V>
-struct StaticEquals<T, V, V> : std::true_type {};
-
-// Unfortuantely, the version of testing::Types we are using only supports up to
-// 50 types, so we have to batch.
-constexpr size_t kBatchSize = 50;
-template <typename Ts>
-using to_gtest_types_t = typename to_gtest_types<Ts>::type;
-
-} // namespace testing_detail
-
-// TODO(afuller): Remove batching once gtest is updated to support arbitrary
-// long variadic types.
-#define _THRIFT_TESTSET_NS ::apache::thrift::test::testset::testing_detail
-#define _THRIFT_INST_TESTSET_BATCH(Test, Type, Batch)     \
-  using testset_##Test##Type##Batch =                     \
-      _THRIFT_TESTSET_NS::to_gtest_types_t<fatal::slice<  \
-          _THRIFT_TESTSET_NS::testset_info::Type,         \
-          Batch * _THRIFT_TESTSET_NS::kBatchSize,         \
-          (Batch + 1) * _THRIFT_TESTSET_NS::kBatchSize>>; \
-  INSTANTIATE_TYPED_TEST_CASE_P(Type##Batch, Test, testset_##Test##Type##Batch)
-#define _THRIFT_INST_TESTSET_LAST(Test, Type, Batch)    \
-  using testset_##Test##Type##Batch =                   \
-      _THRIFT_TESTSET_NS::to_gtest_types_t<fatal::tail< \
-          _THRIFT_TESTSET_NS::testset_info::Type,       \
-          Batch * _THRIFT_TESTSET_NS::kBatchSize>>;     \
-  INSTANTIATE_TYPED_TEST_CASE_P(Type##Batch, Test, testset_##Test##Type##Batch)
-
-#define _THRIFT_CHECK_TESTSET_BATCHES(Type, Batches)                   \
-  static_assert(                                                       \
-      _THRIFT_TESTSET_NS::StaticEquals<                                \
-          size_t,                                                      \
-          fatal::size<_THRIFT_TESTSET_NS::testset_info::Type>::value / \
-                  _THRIFT_TESTSET_NS::kBatchSize +                     \
-              1,                                                       \
-          Batches>(),                                                  \
-      "# of " #Type " batches mismatch")
-
-#define THRIFT_INST_TESTSET_STRUCTS(Test)        \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 0);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 1);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 2);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 3);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 4);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 5);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 6);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 7);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 8);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 9);  \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 10); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 11); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 12); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 13); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 14); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 15); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 16); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 17); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 18); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 19); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 20); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 21); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 22); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 23); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 24); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 25); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 26); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 27); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 28); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 29); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 30); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 31); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 32); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 33); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 34); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 35); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 36); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 37); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 38); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 39); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 40); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 41); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 42); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 43); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 44); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 45); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 46); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 47); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 48); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 49); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 50); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 51); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 52); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 53); \
-  _THRIFT_INST_TESTSET_BATCH(Test, structs, 54); \
-  _THRIFT_INST_TESTSET_LAST(Test, structs, 55)
-_THRIFT_CHECK_TESTSET_BATCHES(structs, 56);
-
-#define THRIFT_INST_TESTSET_UNIONS(Test)       \
-  _THRIFT_INST_TESTSET_BATCH(Test, unions, 0); \
-  _THRIFT_INST_TESTSET_BATCH(Test, unions, 1); \
-  _THRIFT_INST_TESTSET_BATCH(Test, unions, 2); \
-  _THRIFT_INST_TESTSET_BATCH(Test, unions, 3); \
-  _THRIFT_INST_TESTSET_BATCH(Test, unions, 4); \
-  _THRIFT_INST_TESTSET_LAST(Test, unions, 5)
-_THRIFT_CHECK_TESTSET_BATCHES(unions, 6);
+using Types = testing::Types<
+    struct_adapted_binary,
+    struct_adapted_bool,
+    struct_adapted_byte_op_encoded,
+    struct_adapted_i32,
+    struct_adapted_list_byte,
+    struct_adapted_map_i64_bool,
+    struct_adapted_map_i64_byte_op_encoded,
+    struct_adapted_map_i64_float_op_encoded,
+    struct_adapted_map_i64_i64_op_encoded,
+    struct_adapted_map_i64_set_string,
+    struct_adapted_map_i64_set_string_op_encoded,
+    struct_adapted_map_i64_string_op_encoded,
+    struct_adapted_map_string_binary,
+    struct_adapted_map_string_string_op_encoded,
+    struct_adapted_set_adapted_typedef_i64,
+    struct_adapted_set_adapted_typedef_string,
+    struct_adapted_set_i64,
+    struct_adapted_set_string,
+    struct_adapted_typedef_bool_alternative_custom_default,
+    struct_adapted_typedef_bool_custom_default,
+    struct_adapted_typedef_float_alternative_custom_default,
+    struct_adapted_typedef_i16_custom_default,
+    struct_double,
+    struct_double_alternative_custom_default,
+    struct_double_alternative_custom_default_op_encoded,
+    struct_double_custom_default,
+    struct_double_op_encoded,
+    struct_empty,
+    struct_empty_op_encoded,
+    struct_field_adapted_adapted_typedef_byte,
+    struct_field_adapted_adapted_typedef_i16,
+    struct_field_adapted_adapted_typedef_i32,
+    struct_field_adapted_binary_op_encoded,
+    struct_field_adapted_bool_op_encoded,
+    struct_field_adapted_i16_op_encoded,
+    struct_field_adapted_i32_op_encoded,
+    struct_field_adapted_i64,
+    struct_field_adapted_list_adapted_typedef_string,
+    struct_field_adapted_list_binary_op_encoded,
+    struct_field_adapted_list_float_op_encoded,
+    struct_field_adapted_list_i64,
+    struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_byte,
+    struct_field_adapted_map_adapted_typedef_i64_adapted_typedef_i32,
+    struct_field_adapted_map_adapted_typedef_string_adapted_typedef_double,
+    struct_field_adapted_map_string_bool,
+    struct_field_adapted_map_string_float_op_encoded,
+    struct_field_adapted_map_string_i64,
+    struct_field_adapted_set_i64_op_encoded,
+    struct_field_adapted_set_string,
+    struct_float,
+    struct_float_custom_default,
+    struct_i16_alternative_custom_default,
+    struct_i32,
+    struct_i64_op_encoded,
+    struct_list_adapted_typedef_double,
+    struct_list_bool_cpp_ref,
+    struct_list_bool_shared_cpp_ref_op_encoded,
+    struct_list_byte_cpp_ref_op_encoded,
+    struct_list_double,
+    struct_list_i32_cpp_ref,
+    struct_list_i32_cpp_ref_op_encoded,
+    struct_list_i64_cpp_ref_op_encoded,
+    struct_map_adapted_typedef_string_adapted_typedef_byte,
+    struct_map_adapted_typedef_string_adapted_typedef_i32,
+    struct_map_i64_byte_cpp_ref_op_encoded,
+    struct_map_i64_double_cpp_ref_op_encoded,
+    struct_map_i64_double_lazy,
+    struct_map_i64_double_shared_cpp_ref,
+    struct_map_i64_i16_cpp_ref,
+    struct_map_i64_i16_op_encoded,
+    struct_map_i64_i16_shared_cpp_ref,
+    struct_map_i64_i16_shared_cpp_ref_op_encoded,
+    struct_map_i64_set_string_lazy,
+    struct_map_string_binary_lazy_op_encoded,
+    struct_map_string_binary_shared_cpp_ref,
+    struct_map_string_bool_op_encoded,
+    struct_map_string_i16_op_encoded,
+    struct_map_string_i32_cpp_ref,
+    struct_map_string_i32_cpp_ref_op_encoded,
+    struct_map_string_i32_lazy,
+    struct_map_string_i32_shared_cpp_ref_op_encoded,
+    struct_map_string_i64,
+    struct_map_string_i64_shared_cpp_ref_op_encoded,
+    struct_map_string_set_i64_cpp_ref,
+    struct_map_string_set_i64_lazy_op_encoded,
+    struct_map_string_set_i64_shared_cpp_ref,
+    struct_map_string_set_string_shared_cpp_ref_op_encoded,
+    struct_map_string_string_lazy_op_encoded,
+    struct_map_string_string_shared_cpp_ref_op_encoded,
+    struct_optional_binary_custom_default_op_encoded,
+    struct_optional_bool_alternative_custom_default,
+    struct_optional_i64_alternative_custom_default,
+    struct_optional_list_binary_shared_cpp_ref_op_encoded,
+    struct_optional_list_bool_box,
+    struct_optional_list_bool_cpp_ref,
+    struct_optional_list_bool_cpp_ref_op_encoded,
+    struct_optional_list_byte,
+    struct_optional_list_float_box,
+    struct_optional_list_float_box_op_encoded,
+    struct_optional_list_float_cpp_ref_op_encoded,
+    struct_optional_list_i16,
+    struct_optional_list_i32_cpp_ref,
+    struct_optional_list_i32_cpp_ref_op_encoded,
+    struct_optional_list_string_cpp_ref_op_encoded,
+    struct_optional_list_string_shared_cpp_ref_op_encoded,
+    struct_optional_map_i64_bool_box_op_encoded,
+    struct_optional_map_i64_bool_shared_cpp_ref_op_encoded,
+    struct_optional_map_i64_byte_op_encoded,
+    struct_optional_map_i64_byte_shared_cpp_ref,
+    struct_optional_map_i64_double,
+    struct_optional_map_i64_float_shared_cpp_ref,
+    struct_optional_map_i64_i16_shared_cpp_ref_op_encoded,
+    struct_optional_map_i64_i32_shared_cpp_ref,
+    struct_optional_map_i64_i64_op_encoded,
+    struct_optional_map_i64_i64_shared_cpp_ref,
+    struct_optional_map_i64_set_i64_shared_cpp_ref_op_encoded,
+    struct_optional_map_i64_string,
+    struct_optional_map_i64_string_box_op_encoded,
+    struct_optional_map_string_binary_shared_cpp_ref_op_encoded,
+    struct_optional_map_string_bool_cpp_ref_op_encoded,
+    struct_optional_map_string_double_cpp_ref_op_encoded,
+    struct_optional_map_string_double_shared_cpp_ref_op_encoded,
+    struct_optional_map_string_float_cpp_ref_op_encoded,
+    struct_optional_map_string_i16_shared_cpp_ref,
+    struct_optional_map_string_i64_box,
+    struct_optional_map_string_i64_op_encoded,
+    struct_optional_map_string_set_i64_op_encoded,
+    struct_optional_map_string_set_i64_shared_cpp_ref,
+    struct_optional_map_string_set_string_box,
+    struct_optional_set_i64_box,
+    struct_optional_set_i64_box_op_encoded,
+    struct_optional_set_i64_shared_cpp_ref_op_encoded,
+    struct_optional_set_string_box,
+    struct_optional_set_string_shared_cpp_ref_op_encoded,
+    struct_optional_string_custom_default,
+    struct_required_binary_alternative_custom_default,
+    struct_required_bool,
+    struct_required_bool_op_encoded,
+    struct_required_byte_custom_default_op_encoded,
+    struct_required_double,
+    struct_required_float_alternative_custom_default_op_encoded,
+    struct_required_i16_custom_default,
+    struct_required_i64,
+    struct_required_i64_alternative_custom_default_op_encoded,
+    struct_required_i64_custom_default,
+    struct_required_i64_op_encoded,
+    struct_required_list_binary_op_encoded,
+    struct_required_list_binary_shared_cpp_ref,
+    struct_required_list_binary_shared_cpp_ref_op_encoded,
+    struct_required_list_byte,
+    struct_required_list_float,
+    struct_required_list_i16_cpp_ref_op_encoded,
+    struct_required_list_i16_shared_cpp_ref,
+    struct_required_list_i32_op_encoded,
+    struct_required_list_i32_shared_cpp_ref_op_encoded,
+    struct_required_list_string,
+    struct_required_map_i64_binary_cpp_ref_op_encoded,
+    struct_required_map_i64_binary_shared_cpp_ref_op_encoded,
+    struct_required_map_i64_bool,
+    struct_required_map_i64_byte_cpp_ref_op_encoded,
+    struct_required_map_i64_double,
+    struct_required_map_i64_float_shared_cpp_ref,
+    struct_required_map_i64_float_shared_cpp_ref_op_encoded,
+    struct_required_map_i64_i16_shared_cpp_ref,
+    struct_required_map_i64_i32_shared_cpp_ref,
+    struct_required_map_i64_i64,
+    struct_required_map_i64_i64_cpp_ref_op_encoded,
+    struct_required_map_i64_set_i64_op_encoded,
+    struct_required_map_i64_set_string_cpp_ref,
+    struct_required_map_i64_string_cpp_ref_op_encoded,
+    struct_required_map_string_binary_shared_cpp_ref_op_encoded,
+    struct_required_map_string_bool_shared_cpp_ref_op_encoded,
+    struct_required_map_string_byte_cpp_ref,
+    struct_required_map_string_double_op_encoded,
+    struct_required_map_string_double_shared_cpp_ref_op_encoded,
+    struct_required_map_string_float_op_encoded,
+    struct_required_map_string_i16_cpp_ref,
+    struct_required_map_string_i16_shared_cpp_ref,
+    struct_required_map_string_i32,
+    struct_required_map_string_i32_shared_cpp_ref_op_encoded,
+    struct_required_map_string_set_string_shared_cpp_ref_op_encoded,
+    struct_required_set_string_shared_cpp_ref_op_encoded,
+    struct_required_string,
+    struct_set_adapted_typedef_i64,
+    struct_set_i64,
+    struct_set_i64_cpp_ref_op_encoded,
+    struct_set_string,
+    struct_terse_byte_custom_default,
+    struct_terse_byte_op_encoded,
+    struct_terse_double,
+    struct_terse_double_alternative_custom_default,
+    struct_terse_i32,
+    struct_terse_i64_custom_default,
+    struct_terse_list_binary_op_encoded,
+    struct_terse_list_binary_shared_cpp_ref,
+    struct_terse_list_byte_cpp_ref,
+    struct_terse_list_byte_shared_cpp_ref_op_encoded,
+    struct_terse_list_double,
+    struct_terse_list_float_cpp_ref,
+    struct_terse_list_i16,
+    struct_terse_list_i16_cpp_ref,
+    struct_terse_list_i32_cpp_ref_op_encoded,
+    struct_terse_list_i64_cpp_ref,
+    struct_terse_list_string_shared_cpp_ref,
+    struct_terse_map_i64_binary,
+    struct_terse_map_i64_bool,
+    struct_terse_map_i64_bool_cpp_ref_op_encoded,
+    struct_terse_map_i64_byte_shared_cpp_ref_op_encoded,
+    struct_terse_map_i64_i64_shared_cpp_ref_op_encoded,
+    struct_terse_map_i64_set_string_op_encoded,
+    struct_terse_map_string_binary_cpp_ref_op_encoded,
+    struct_terse_map_string_double_cpp_ref,
+    struct_terse_map_string_double_shared_cpp_ref_op_encoded,
+    struct_terse_map_string_float_op_encoded,
+    struct_terse_map_string_i16_cpp_ref,
+    struct_terse_map_string_i16_cpp_ref_op_encoded,
+    struct_terse_map_string_i16_shared_cpp_ref_op_encoded,
+    struct_terse_map_string_i32_cpp_ref,
+    struct_terse_map_string_i32_shared_cpp_ref,
+    struct_terse_map_string_i64_cpp_ref_op_encoded,
+    struct_terse_map_string_set_string_cpp_ref,
+    struct_terse_map_string_string_cpp_ref,
+    struct_terse_set_i64_cpp_ref_op_encoded,
+    struct_terse_set_i64_op_encoded,
+    struct_terse_set_string,
+    struct_terse_set_string_cpp_ref,
+    struct_terse_string_alternative_custom_default,
+    union_adapted_typedef_bool,
+    union_list_adapted_typedef_byte,
+    union_list_adapted_typedef_string,
+    union_list_bool_shared_cpp_ref_op_encoded,
+    union_list_double_cpp_ref,
+    union_list_double_op_encoded,
+    union_list_string,
+    union_map_adapted_typedef_string_adapted_typedef_binary,
+    union_map_i64_bool_cpp_ref_op_encoded,
+    union_map_i64_byte_shared_cpp_ref_op_encoded,
+    union_map_i64_float_cpp_ref,
+    union_map_i64_float_shared_cpp_ref,
+    union_map_i64_i16_shared_cpp_ref,
+    union_map_i64_i32_cpp_ref,
+    union_map_i64_i64,
+    union_map_i64_i64_shared_cpp_ref_op_encoded,
+    union_map_string_bool_shared_cpp_ref,
+    union_map_string_byte_op_encoded,
+    union_map_string_i32,
+    union_map_string_i32_shared_cpp_ref_op_encoded,
+    union_map_string_i64,
+    union_map_string_set_i64,
+    union_map_string_set_i64_op_encoded,
+    union_map_string_set_i64_shared_cpp_ref,
+    union_map_string_string_cpp_ref_op_encoded,
+    union_map_string_string_op_encoded,
+    union_set_adapted_typedef_string,
+    union_set_i64_shared_cpp_ref_op_encoded,
+    union_set_string_shared_cpp_ref>;
 
 #define THRIFT_INST_TESTSET_ALL(Test) \
-  THRIFT_INST_TESTSET_STRUCTS(Test);  \
-  THRIFT_INST_TESTSET_UNIONS(Test)
+  INSTANTIATE_TYPED_TEST_CASE_P(      \
+      types, Test, apache::thrift::test::testset::Types)
 
 } // namespace apache::thrift::test::testset

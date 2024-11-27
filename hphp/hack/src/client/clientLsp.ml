@@ -705,9 +705,9 @@ let get_uris_with_unsaved_changes (state : state) : UriSet.t =
 
 (** This cancellable async function will block indefinitely until a notification is
 available from ide_service, and return. *)
-let pop_from_ide_service (ide_service : ClientIdeService.t ref) : event Lwt.t =
+let pop_from_ide_service (ide_service : ClientIdeService.t) : event Lwt.t =
   let%lwt notification_opt =
-    Lwt_message_queue.pop (ClientIdeService.get_notifications !ide_service)
+    Lwt_message_queue.pop (ClientIdeService.get_notifications ide_service)
   in
   match notification_opt with
   | None -> Lwt.task () |> fst (* a never-fulfilled, cancellable promise *)
@@ -735,7 +735,7 @@ we've yet received an initialize message, or from
 clientIdeDaemon, or whether neither is ready within 1s. *)
 let get_client_message_source
     (client : Jsonrpc.t option)
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (errors_q_opt :
       ( Server_progress.ErrorsRead.read_result,
         Server_progress_lwt.watch_error )
@@ -799,14 +799,13 @@ let get_client_message_source
 (** Pick up the next available message from the JsonRPC client.
 At the first character of a message, block until that message is completely received. *)
 let get_next_event
-    (state : state ref)
-    (client : Jsonrpc.t)
-    (ide_service : ClientIdeService.t ref) : event Lwt.t =
+    (state : state ref) (client : Jsonrpc.t) (ide_service : ClientIdeService.t)
+    : event Lwt.t =
   let can_use_client =
     match !initialize_params_ref with
     | Some { Initialize.initializationOptions; _ }
       when initializationOptions.Initialize.delayUntilDoneInit -> begin
-      match ClientIdeService.get_status !ide_service with
+      match ClientIdeService.get_status ide_service with
       | ClientIdeService.Status.(Initializing | Rpc _) -> false
       | ClientIdeService.Status.(Ready | Stopped _) -> true
     end
@@ -4938,7 +4937,7 @@ let main
        before it completes i.e. before we continue this [process_next_event] loop. *)
     assert_workers_are_not_stopped ();
     try%lwt
-      let%lwt event = get_next_event state client ide_service in
+      let%lwt event = get_next_event state client !ide_service in
       if not (is_tick event) then
         log_debug "next event: %s" (event_to_string event);
       ref_event := Some event;

@@ -54,6 +54,6 @@ struct StructWithUnion {
 
 struct NegativeFieldId {
   -1: i32 anInteger;
-  0: string aString;
+  0: string aString (cpp.deprecated_allow_zero_as_field_id);
   5: double aDouble;
 }

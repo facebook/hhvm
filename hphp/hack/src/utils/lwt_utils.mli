@@ -97,6 +97,9 @@ val with_lock :
   f:(unit -> 'a Lwt.t) ->
   'a Lwt.t
 
+val with_timeout :
+  timeout_sec:float -> (unit -> 'a Lwt.t) -> [ `Done of 'a | `Timeout ] Lwt.t
+
 (** Asynchronous version of [Utils.with_context]. Call [enter], then run and
 wait for [do_] to complete, and finally call [exit], even if [f] raises an exception. *)
 val with_context :

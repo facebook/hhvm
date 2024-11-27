@@ -310,6 +310,14 @@ let with_lock
       let%lwt () = with_pos0 ~f:(fun () -> Lwt_unix.lockf fd Unix.F_ULOCK 0) in
       Lwt.return_unit)
 
+let with_timeout ~(timeout_sec : float) f =
+  let open Lwt.Infix in
+  Lwt.pick
+    [
+      (f () >|= fun v -> `Done v);
+      (Lwt_unix.sleep timeout_sec >|= fun () -> `Timeout);
+    ]
+
 let with_context
     ~(enter : unit -> unit Lwt.t)
     ~(exit : unit -> unit Lwt.t)

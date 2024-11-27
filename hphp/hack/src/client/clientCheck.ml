@@ -317,13 +317,18 @@ let main_internal
       in
       (* TODO @catg The following is only temporary to validate correctness of error streaming.
          To delete when correctness is validated, or to put behind a flag. *)
-      let%lwt ({ ServerCommandTypes.Server_status.error_list; _ }, _telemetry) =
-        rpc
-          args
-          (ServerCommandTypes.STATUS
-             { max_errors = args.ClientEnv.max_errors; error_filter })
+      let%lwt res =
+        Lwt_utils.with_timeout ~timeout_sec:2. (fun () ->
+            rpc
+              args
+              (ServerCommandTypes.STATUS
+                 { max_errors = args.ClientEnv.max_errors; error_filter }))
       in
-      validate_streamed_errors error_list streamed_errors;
+      (match res with
+      | `Timeout -> ()
+      | `Done ({ ServerCommandTypes.Server_status.error_list; _ }, _telemetry)
+        ->
+        validate_streamed_errors error_list streamed_errors);
       Lwt.return (exit_status, telemetry)
     ) else
       let%lwt (status, telemetry) =

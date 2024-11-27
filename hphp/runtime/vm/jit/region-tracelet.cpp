@@ -647,6 +647,7 @@ RegionDescPtr selectTracelet(const RegionContext& ctx, TransKind kind,
   }
 
   assertx(region->blocks().back()->length() > 0);
+  region->initRpoIds();
 
   tracing::annotateBlock(
     [&] {

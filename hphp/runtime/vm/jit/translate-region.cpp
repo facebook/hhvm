@@ -149,24 +149,6 @@ Block* setSuccIRBlocks(irgen::IRGS& irgs,
   return nullptr;
 }
 
-bool blockHasUnprocessedPred(
-  const RegionDesc&             region,
-  RegionDesc::BlockId           blockId,
-  const RegionDesc::BlockIdSet& processedBlocks)
-{
-  for (auto predId : region.preds(blockId)) {
-    if (processedBlocks.count(predId) == 0) {
-      return true;
-    }
-  }
-  if (auto prevRetrans = region.prevRetrans(blockId)) {
-    if (processedBlocks.count(prevRetrans.value()) == 0) {
-      return true;
-    }
-  }
-  return false;
-}
-
 /*
  * If this region's entry block is at an entry point for a function (DV init or
  * main entry), we can assert that all non-parameter locals are Uninit under
@@ -298,32 +280,104 @@ void emitGuards(irgen::IRGS& irgs,
   }
 }
 
-/*
- * Returns the id of the next region block in workQ whose
- * corresponding IR block is currently reachable from the IR unit's
- * entry, or std::nullopt if no such block exists.  Furthermore, any
- * unreachable blocks appearing before the first reachable block are
- * moved to the end of workQ.
- */
-Optional<RegionDesc::BlockId> nextReachableBlock(
-  jit::queue<RegionDesc::BlockId>& workQ,
-  const irgen::IRBuilder& irb,
-  const BlockIdToIRBlockMap& blockIdToIRBlock
-) {
-  auto const size = workQ.size();
-  for (size_t i = 0; i < size; i++) {
-    auto const regionBlockId = workQ.front();
-    workQ.pop();
-    auto it = blockIdToIRBlock.find(regionBlockId);
-    assertx(it != blockIdToIRBlock.end());
-    auto irBlock = it->second;
-    if (irb.canStartBlock(irBlock)) return regionBlockId;
-    // Put the block back at the end of workQ, since it may become
-    // reachable after processing some of the other blocks.
-    workQ.push(regionBlockId);
+struct BlockWorkQueue {
+  explicit BlockWorkQueue(const RegionDesc& region)
+    : m_region(region)
+    , m_numUnprocPreds(jit::vector<int>(region.blocks().size()))
+  {
+    for (auto rpoId = 0; rpoId < m_region.blocks().size(); ++rpoId) {
+      auto const& bid = m_region.blocks()[rpoId]->id();
+      m_numUnprocPreds[rpoId] =
+        m_region.preds(bid).size() + (m_region.prevRetrans(bid) ? 1 : 0);
+      if (m_numUnprocPreds[rpoId] == 0) m_queue.push(rpoId);
+    }
   }
-  return std::nullopt;
-}
+
+  /*
+   * Returns the id of the next reachable region block to process and a flag
+   * indicating whether this block has any still potentially reachable
+   * unprocessed predecessors, or std::nullopt if no such block exists.
+   */
+  Optional<std::pair<RegionDesc::BlockId, bool>> nextReachable(
+    const irgen::IRBuilder& irb,
+    const BlockIdToIRBlockMap& blockIdToIRBlock
+  ) {
+    // Process block's successor edges. Decrements the number of unprocessed
+    // predecessors of each successor and enqueues them if there are none left.
+    auto const processSuccs = [&](RegionDesc::BlockId bid) {
+      auto const handleSucc = [&](RegionDesc::BlockId succId) {
+        auto const succRpoId = m_region.rpoId(succId);
+        if (--m_numUnprocPreds[succRpoId] == 0) {
+          m_queue.push(succRpoId);
+        }
+      };
+
+      for (auto succId : m_region.succs(bid)) handleSucc(succId);
+      if (auto succId = m_region.nextRetrans(bid)) handleSucc(*succId);
+    };
+
+    // Check if the IR block corresponding to the region block is reachable.
+    auto const reachable = [&](RegionDesc::BlockId bid) {
+      auto const it = blockIdToIRBlock.find(bid);
+      assertx(it != blockIdToIRBlock.end());
+      auto irBlock = it->second;
+      return irb.canStartBlock(irBlock);
+    };
+
+    // Check if the dominator of the block was already processed.
+    DEBUG_ONLY auto const processedDominator = [&](RegionDesc::BlockId bid) {
+      auto const idom = m_region.idom(bid);
+      if (!idom) return true;
+
+      auto const idomRpoId = m_region.rpoId(*idom);
+      return m_numUnprocPreds[idomRpoId] <= 0;
+    };
+
+    // Find any block with no pending unprocessed predecessors and process it.
+    // If this block is unreachable, it can't possibly get reachable again.
+    // We still need to process its successors to unblock their processing.
+    while (!m_queue.empty()) {
+      auto const rpoId = m_queue.front();
+      m_queue.pop();
+
+      auto const bid = m_region.blocks()[rpoId]->id();
+      processSuccs(bid);
+      if (reachable(bid)) return std::make_pair(bid, false);
+    }
+
+    // If we are here, all remaining blocks are either unreachable, or depend
+    // on a loop. Find the first reachable block in RPO order and process it.
+    // This is a good heuristics to reduce the number of blocks processed
+    // with unprocessed predecessors. Loops are rare, so use a linear scan.
+    for (auto rpoId = 0; rpoId < m_region.blocks().size(); ++rpoId) {
+      // Skip already processed blocks.
+      if (m_numUnprocPreds[rpoId] <= 0) continue;
+
+      auto const bid = m_region.blocks()[rpoId]->id();
+
+      // Skip unreachable blocks.
+      if (!reachable(bid)) continue;
+
+      // Dominator block must have been processed, otherwise `bid' would not
+      // be reachable. We assert it here and assume it at recoverLocalState().
+      assertx(processedDominator(bid));
+
+      // Clear the number of unprocessed preds so that we don't get processed
+      // again.
+      m_numUnprocPreds[rpoId] = 0;
+      processSuccs(bid);
+      return std::make_pair(bid, true);
+    }
+
+    // No reachable blocks found. The end.
+    return std::nullopt;
+  }
+
+private:
+  const RegionDesc& m_region;
+  jit::vector<int> m_numUnprocPreds;
+  jit::queue<int> m_queue;
+};
 
 /*
  * Returns whether or not block `bid' is in the retranslation chain
@@ -508,15 +562,13 @@ boost::dynamic_bitset<> findModifiedLocals(
 void recoverLocalState(
   irgen::IRGS& env,
   RegionDesc::BlockId bid,
-  const BlockIdToIRBlockMap& blockIdToIRBlock,
-  const RegionDesc::BlockIdSet& processedBlocks
+  const BlockIdToIRBlockMap& blockIdToIRBlock
 ) {
   auto const idom = env.region->idom(bid);
   if (!idom) return;
 
   // Dominator block must have been processed, otherwise `bid' would not
-  // be reachable.
-  assertx(processedBlocks.contains(*idom));
+  // be reachable. This is asserted by BlockWorkQueue::nextReachable().
   auto const modifiedLocals = findModifiedLocals(*env.region, *idom, bid);
 
   std::vector<Block*> idomSuccs;
@@ -601,15 +653,10 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     irgen::endBlock(irgs, region.start());
   }
 
-  RegionDesc::BlockIdSet processedBlocks;
+  auto workQ = BlockWorkQueue(region);
 
-  auto& blocks = region.blocks();
-
-  jit::queue<RegionDesc::BlockId> workQ;
-  for (auto& block : blocks) workQ.push(block->id());
-
-  while (auto optBlockId = nextReachableBlock(workQ, irb, blockIdToIRBlock)) {
-    auto const blockId = optBlockId.value();
+  while (auto optBlockId = workQ.nextReachable(irb, blockIdToIRBlock)) {
+    auto const [blockId, hasUnprocPred] = *optBlockId;
     auto const& block  = *region.block(blockId);
     auto sk            = block.start();
     bool emitedSurpriseCheck = false;
@@ -631,8 +678,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     // region block, and it also sets the map from BC offsets to IR
     // blocks for the successors of this block in the region.
     auto const irBlock = blockIdToIRBlock[blockId];
-    const bool hasUnprocPred = blockHasUnprocessedPred(region, blockId,
-                                                       processedBlocks);
     // Note: a block can have an unprocessed predecessor even if the
     // region is acyclic, e.g. if the IR was able to prove a path was
     // unfeasible due to incompatible types.
@@ -645,7 +690,7 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
     }
     // If we cleared local state due to unprocessed preds, try to restore it
     // from its immediate dominator's output state.
-    if (hasUnprocPred) recoverLocalState(irgs, blockId, blockIdToIRBlock, processedBlocks);
+    if (hasUnprocPred) recoverLocalState(irgs, blockId, blockIdToIRBlock);
 
     auto const guardFailBlock =
       setSuccIRBlocks(irgs, region, blockId, blockIdToIRBlock);
@@ -659,7 +704,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
 
     if (irb.inUnreachableState()) {
       FTRACE(1, "translateRegion: skipping unreachable block: {}\n", blockId);
-      processedBlocks.insert(blockId);
       continue;
     }
 
@@ -721,8 +765,6 @@ TranslateResult irGenRegionImpl(irgen::IRGS& irgs,
         }
       }
     }
-
-    processedBlocks.insert(blockId);
   }
 
   if (!inlining) {

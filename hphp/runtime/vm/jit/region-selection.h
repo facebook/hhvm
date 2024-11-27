@@ -106,6 +106,11 @@ struct RegionDesc {
   void sortBlocks();
 
   /*
+   * Initialize reverse post order indices.
+   */
+  void initRpoIds();
+
+  /*
    * Compute a dominating block for each block and save this information into
    * this RegionDesc.
    *
@@ -145,6 +150,7 @@ struct RegionDesc {
   void              removeArc(BlockId src, BlockId dst);
   void              addMerged(BlockId fromId, BlockId intoId);
   Optional<BlockId> idom(BlockId id) const;
+  uint32_t          rpoId(BlockId id) const;
   Optional<BlockId> prevRetrans(BlockId id) const;
   Optional<BlockId> nextRetrans(BlockId id) const;
   void              clearPrevRetrans(BlockId id);

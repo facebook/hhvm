@@ -276,6 +276,11 @@ Optional<RegionDesc::BlockId> RegionDesc::idom(BlockId id) const {
   return idom;
 }
 
+uint32_t RegionDesc::rpoId(BlockId id) const {
+  assertx(data(id).rpoId != std::numeric_limits<uint32_t>::max());
+  return data(id).rpoId;
+}
+
 Optional<RegionDesc::BlockId> RegionDesc::prevRetrans(BlockId id) const {
   auto const prev = data(id).prevRetransId;
   if (prev == kInvalidTransID) return std::nullopt;
@@ -454,6 +459,12 @@ void RegionDesc::sortBlocks() {
     "sortBlocks() changed region entry: entryId ({}) != entry()->id() ({})",
     entryId, entry()->id()
   );
+}
+
+void RegionDesc::initRpoIds() {
+  for (size_t i = 0; i < m_blocks.size(); ++i) {
+    data(m_blocks[i]->id()).rpoId = i;
+  }
 }
 
 void RegionDesc::findDominators() {

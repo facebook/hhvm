@@ -122,7 +122,7 @@ class GoodServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcess
   using InteractionConstructorMap = GeneratedAsyncProcessorBase::InteractionConstructorMap<InteractionConstructor>;
   static const GoodServiceAsyncProcessor::ProcessMap& getOwnProcessMap();
   static const GoodServiceAsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
-  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name) override;
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name, int16_t) override;
  private:
   static const GoodServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
   static const GoodServiceAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;

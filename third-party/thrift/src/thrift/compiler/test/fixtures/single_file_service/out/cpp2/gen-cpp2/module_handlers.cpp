@@ -313,7 +313,7 @@ const AAsyncProcessor::InteractionConstructorMap AAsyncProcessor::interactionCon
   {"I", &AAsyncProcessor::createI},
 };
 
-std::unique_ptr<apache::thrift::Tile> AAsyncProcessor::createInteractionImpl(const std::string& name) {
+std::unique_ptr<apache::thrift::Tile> AAsyncProcessor::createInteractionImpl(const std::string& name, int16_t) {
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2
@@ -922,7 +922,7 @@ const CAsyncProcessor::InteractionConstructorMap CAsyncProcessor::interactionCon
   {"I", &CAsyncProcessor::createI},
 };
 
-std::unique_ptr<apache::thrift::Tile> CAsyncProcessor::createInteractionImpl(const std::string& name) {
+std::unique_ptr<apache::thrift::Tile> CAsyncProcessor::createInteractionImpl(const std::string& name, int16_t) {
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2

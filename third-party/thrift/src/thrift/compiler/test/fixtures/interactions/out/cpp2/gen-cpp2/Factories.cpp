@@ -1164,7 +1164,7 @@ const FactoriesAsyncProcessor::InteractionConstructorMap& FactoriesAsyncProcesso
 const FactoriesAsyncProcessor::InteractionConstructorMap FactoriesAsyncProcessor::interactionConstructorMap_ {
 };
 
-std::unique_ptr<apache::thrift::Tile> FactoriesAsyncProcessor::createInteractionImpl(const std::string& name) {
+std::unique_ptr<apache::thrift::Tile> FactoriesAsyncProcessor::createInteractionImpl(const std::string& name, int16_t) {
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2

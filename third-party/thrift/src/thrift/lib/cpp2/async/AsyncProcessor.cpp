@@ -191,19 +191,21 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
     }
     return tile;
   };
-  auto& conn = *req.requestContext()->getConnectionContext();
+  auto* reqCtx = req.requestContext();
+  auto& conn = *reqCtx->getConnectionContext();
   bool isFactoryFunction = req.methodMetadata()->createsInteraction;
-  auto interactionCreate = req.requestContext()->getInteractionCreate();
+  auto interactionCreate = reqCtx->getInteractionCreate();
   auto isEbMethod =
       req.methodMetadata()->executorType == MethodMetadata::ExecutorType::EVB;
-  auto id = req.requestContext()->getInteractionId();
+  auto id = reqCtx->getInteractionId();
 
   // In the eb model with old-style constructor we create the interaction
   // inline.
   if (isEbMethod && !isFactoryFunction) {
     auto tile = folly::makeTryWith([&] {
       return nullthrows(createInteractionImpl(
-          std::move(*interactionCreate->interactionName_ref()).str()));
+          std::move(*interactionCreate->interactionName_ref()).str(),
+          reqCtx->getHeader()->getProtocolId()));
     });
     if (tile.hasException()) {
       req.request()->sendErrorWrapped(
@@ -235,11 +237,13 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
          interactionCreate,
          promisePtr,
          executor,
-         id] {
+         id,
+         reqCtx] {
           std::exception_ptr ex;
           try {
             auto tilePtr = nullthrows(createInteractionImpl(
-                std::move(*interactionCreate->interactionName_ref()).str()));
+                std::move(*interactionCreate->interactionName_ref()).str(),
+                reqCtx->getHeader()->getProtocolId()));
             eb.add([=, &conn, &eb, t = std::move(tilePtr)]() mutable {
               TilePtr tile{t.release(), &eb};
               promisePtr->fulfill(*tile, executor, eb);
@@ -290,8 +294,10 @@ bool GeneratedAsyncProcessorBase::createInteraction(
   if (!tm && !isFactoryFunction) {
     si->setEventBase(&eb);
     si->setRequestContext(&ctx);
-    auto tile = folly::makeTryWith(
-        [&] { return nullthrows(createInteractionImpl(name)); });
+    auto tile = folly::makeTryWith([&] {
+      return nullthrows(
+          createInteractionImpl(name, ctx.getHeader()->getProtocolId()));
+    });
     if (tile.hasException()) {
       req->sendErrorWrapped(
           folly::make_exception_wrapper<TApplicationException>(
@@ -328,7 +334,8 @@ bool GeneratedAsyncProcessorBase::createInteraction(
 
       std::exception_ptr ex;
       try {
-        auto tilePtr = nullthrows(createInteractionImpl(name));
+        auto tilePtr = nullthrows(
+            createInteractionImpl(name, ctx.getHeader()->getProtocolId()));
         eb.add([=, &conn, &eb, t = std::move(tilePtr)]() mutable {
           TilePtr tile{t.release(), &eb};
           promisePtr->fulfill(*tile, tm, eb);
@@ -356,7 +363,7 @@ bool GeneratedAsyncProcessorBase::createInteraction(
 }
 
 std::unique_ptr<Tile> GeneratedAsyncProcessorBase::createInteractionImpl(
-    const std::string&) {
+    const std::string&, int16_t) {
   return nullptr;
 }
 

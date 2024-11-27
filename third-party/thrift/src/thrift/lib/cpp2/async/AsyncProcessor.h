@@ -789,7 +789,11 @@ class GeneratedAsyncProcessorBase : public AsyncProcessor {
   bool createInteraction(ServerRequest& req);
 
  protected:
-  virtual std::unique_ptr<Tile> createInteractionImpl(const std::string& name);
+  virtual std::unique_ptr<Tile> createInteractionImpl(
+      const std::string& name,
+      // This is only used by Rust, since Rust implementations of interaction is
+      // not fully compatible with standard interaction contract.
+      int16_t protocol);
 
  public:
   void terminateInteraction(

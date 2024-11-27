@@ -970,7 +970,7 @@ const InteractWithSharedAsyncProcessor::InteractionConstructorMap InteractWithSh
   {"SharedInteraction", &InteractWithSharedAsyncProcessor::createshared.SharedInteraction},
 };
 
-std::unique_ptr<apache::thrift::Tile> InteractWithSharedAsyncProcessor::createInteractionImpl(const std::string& name) {
+std::unique_ptr<apache::thrift::Tile> InteractWithSharedAsyncProcessor::createInteractionImpl(const std::string& name, int16_t) {
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }} // namespace cpp2

@@ -235,7 +235,7 @@ class MyServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   using InteractionConstructorMap = GeneratedAsyncProcessorBase::InteractionConstructorMap<InteractionConstructor>;
   static const MyServiceAsyncProcessor::ProcessMap& getOwnProcessMap();
   static const MyServiceAsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
-  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name) override;
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name, int16_t) override;
  private:
   static const MyServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
   static const MyServiceAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;

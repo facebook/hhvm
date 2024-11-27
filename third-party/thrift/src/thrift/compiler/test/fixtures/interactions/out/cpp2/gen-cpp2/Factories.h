@@ -229,7 +229,7 @@ class FactoriesAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcessor
   using InteractionConstructorMap = GeneratedAsyncProcessorBase::InteractionConstructorMap<InteractionConstructor>;
   static const FactoriesAsyncProcessor::ProcessMap& getOwnProcessMap();
   static const FactoriesAsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
-  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name) override;
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name, int16_t) override;
  private:
   static const FactoriesAsyncProcessor::ProcessMap kOwnProcessMap_;
   static const FactoriesAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;

@@ -120,7 +120,7 @@ class BoxServiceAsyncProcessor : public ::apache::thrift::GeneratedAsyncProcesso
   using InteractionConstructorMap = GeneratedAsyncProcessorBase::InteractionConstructorMap<InteractionConstructor>;
   static const BoxServiceAsyncProcessor::ProcessMap& getOwnProcessMap();
   static const BoxServiceAsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
-  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name) override;
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name, int16_t) override;
  private:
   static const BoxServiceAsyncProcessor::ProcessMap kOwnProcessMap_;
   static const BoxServiceAsyncProcessor::InteractionConstructorMap interactionConstructorMap_;

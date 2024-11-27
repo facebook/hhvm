@@ -39,7 +39,7 @@
   static const {{service:cpp_name}}AsyncProcessor::ProcessMap& getOwnProcessMap();
 {{#service:interactions?}}
   static const {{service:cpp_name}}AsyncProcessor::InteractionConstructorMap& getInteractionConstructorMap();
-  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name) override;
+  std::unique_ptr<apache::thrift::Tile> createInteractionImpl(const std::string& name, int16_t) override;
 {{/service:interactions?}}
  private:
   static const {{service:cpp_name}}AsyncProcessor::ProcessMap kOwnProcessMap_;

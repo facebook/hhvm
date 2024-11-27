@@ -24,7 +24,7 @@ const {{service:cpp_name}}AsyncProcessor::InteractionConstructorMap {{service:cp
 {{/function:starts_interaction?}}{{/function:return_type}}{{/service:functions}}
 };
 
-std::unique_ptr<apache::thrift::Tile> {{service:cpp_name}}AsyncProcessor::createInteractionImpl(const std::string& name) {
+std::unique_ptr<apache::thrift::Tile> {{service:cpp_name}}AsyncProcessor::createInteractionImpl(const std::string& name, int16_t) {
   auto fn = getInteractionConstructorMap().at(name);
   return (this->*fn)();
 }

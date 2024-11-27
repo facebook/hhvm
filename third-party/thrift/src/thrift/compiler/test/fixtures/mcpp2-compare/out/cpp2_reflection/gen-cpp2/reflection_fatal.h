@@ -72,6 +72,4 @@ class reflection_tags {
   using services = __fbthrift_services;
 };
 
-THRIFT_REGISTER_REFLECTION_METADATA(reflection_tags::module, __fbthrift_refl::reflection_module_traits);
-
 } // namespace cpp2

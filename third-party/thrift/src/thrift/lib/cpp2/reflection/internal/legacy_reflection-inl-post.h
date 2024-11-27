@@ -230,7 +230,6 @@ struct impl_structure_util {
 template <typename T>
 struct impl<T, type_class::structure> {
   using meta = reflect_struct<T>;
-  using module_meta = reflect_module<typename meta::module>;
   struct visitor {
     template <typename MemberInfo, size_t Index>
     void operator()(
@@ -261,7 +260,11 @@ struct impl<T, type_class::structure> {
     }
   };
   static std::string rname() {
-    return "struct "_fs + fs<module_meta>() + "." + fs<meta>();
+    using pa = ::apache::thrift::detail::st::private_access;
+    return fmt::format(
+        "struct {}.{}",
+        pa::__fbthrift_get_module_name<T>(),
+        pa::__fbthrift_get_class_name<T>());
   }
   static id_t rid() {
     static const auto storage = get_type_id(type_t::TYPE_STRUCT, rname());
@@ -278,8 +281,6 @@ struct impl<T, type_class::structure> {
 template <typename T>
 struct impl<T, type_class::variant> {
   using meta = reflect_variant<T>;
-  using meta_traits = typename meta::traits;
-  using module_meta = reflect_module<typename meta::module>;
   struct visitor {
     template <typename MemberInfo, size_t Index>
     void operator()(
@@ -298,7 +299,11 @@ struct impl<T, type_class::variant> {
     }
   };
   static std::string rname() {
-    return "struct "_fs + fs<module_meta>() + "." + fs<meta_traits>();
+    using pa = ::apache::thrift::detail::st::private_access;
+    return fmt::format(
+        "struct {}.{}",
+        pa::__fbthrift_get_module_name<T>(),
+        pa::__fbthrift_get_class_name<T>());
   }
   static id_t rid() {
     static const auto storage = get_type_id(type_t::TYPE_STRUCT, rname());

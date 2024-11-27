@@ -236,7 +236,6 @@ class containerStruct2_struct_traits {
   >;
   using members_annotations = __fbthrift_annotations::members;
   using metadata = ::apache::thrift::detail::type_common_metadata_impl<
-      extra_services_tags::module,
       ::apache::thrift::reflected_annotations<__fbthrift_annotations>,
       static_cast<::apache::thrift::legacy_type_id_t>(6698051510995854220ull)
   >;

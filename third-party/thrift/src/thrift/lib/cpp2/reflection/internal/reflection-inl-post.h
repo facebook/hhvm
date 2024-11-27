@@ -41,9 +41,8 @@ using reflected_no_annotations = reflected_annotations<no_annotations>;
 
 } // namespace reflection_impl
 
-template <typename Module, typename Annotations, legacy_type_id_t LegacyTypeId>
+template <typename Annotations, legacy_type_id_t LegacyTypeId>
 struct type_common_metadata_impl {
-  using module = Module;
   using annotations = Annotations;
   using legacy_id = std::integral_constant<legacy_type_id_t, LegacyTypeId>;
 };

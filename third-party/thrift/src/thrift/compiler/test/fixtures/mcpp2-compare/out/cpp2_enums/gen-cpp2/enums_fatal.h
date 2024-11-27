@@ -116,6 +116,4 @@ class enums_tags {
   using services = __fbthrift_services;
 };
 
-THRIFT_REGISTER_REFLECTION_METADATA(enums_tags::module, __fbthrift_refl::enums_module_traits);
-
 } // namespace facebook::ns::qwerty

@@ -74,7 +74,6 @@ TEST(fatal_struct, struct1_sanity_check) {
 
   EXPECT_SAME<struct1, traits::type>();
   EXPECT_SAME<struct1s, traits::name>();
-  EXPECT_SAME<reflection_tags::module, traits::module>();
 
   EXPECT_SAME<traits, apache::thrift::try_reflect_struct<struct1, void>>();
   EXPECT_SAME<void, apache::thrift::try_reflect_struct<int, void>>();

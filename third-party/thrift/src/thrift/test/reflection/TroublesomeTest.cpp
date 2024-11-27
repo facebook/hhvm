@@ -23,8 +23,6 @@ namespace apache::thrift::test::reflection {
 namespace {
 
 TEST(TroublesomeTest, FatalReflection) {
-  using module = reflect_module<troublesome_tags::module>;
-  EXPECT_STREQ(fatal::z_data<module::name>(), "troublesome");
   EXPECT_STREQ(fatal::z_data<troublesome_tags::strings::strings>(), "strings");
   EXPECT_STREQ(fatal::z_data<troublesome_tags::structs::structs>(), "structs");
   EXPECT_STREQ(fatal::z_data<troublesome_tags::enums::enums>(), "enums");

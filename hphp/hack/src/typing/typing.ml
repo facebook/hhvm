@@ -2296,12 +2296,6 @@ module rec Expr : sig
     * locl_ty
     * bool
 
-  val inout_write_back :
-    env ->
-    locl_ty Typing_defs_core.fun_param ->
-    Ast_defs.param_kind * Nast.expr ->
-    env
-
   val update_array_type :
     lhs_of_null_coalesce:bool ->
     pos ->
@@ -8568,9 +8562,7 @@ end = struct
 
   (* Make a type-checking function for an anonymous function or lambda. *)
   (* Here ret_ty should include Awaitable wrapper *)
-  (* TODO: ?el is never set; so we need to fix variadic use of lambda *)
   let closure_make
-      ?el
       ?ret_ty
       ~supportdyn
       ~closure_class_name
@@ -8789,21 +8781,6 @@ end = struct
         ~f:closure_bind_param
         ~init:(env, [], non_variadic_params)
         (List.map non_variadic_ft_params ~f:(fun x -> x.fp_type))
-    in
-    let env =
-      match el with
-      | None -> env
-      | Some x ->
-        let rec iter l1 l2 =
-          match (l1, l2) with
-          | (_, []) -> ()
-          | ([], _) -> ()
-          | (x1 :: rl1, (pkx_2, x2) :: rl2) ->
-            param_modes ~env x1 x2 pkx_2;
-            iter rl1 rl2
-        in
-        iter non_variadic_ft_params x;
-        wfold_left2 Expr.inout_write_back env non_variadic_ft_params x
     in
     let env = Env.set_fn_kind env f.f_fun_kind in
     let decl_ty =

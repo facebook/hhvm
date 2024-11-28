@@ -309,6 +309,9 @@ fn hint_to_type_constant_list(
             };
             r
         }
+        Hint_::HclassPtr(_, _) => {
+            vec![encode_kind(TypeStructureKind::T_class_ptr)]
+        }
         Hint_::Hwildcard => {
             let (classname, _s_res) = resolve_classname(&[], "_".to_owned());
             let mut r = vec![];
@@ -453,7 +456,6 @@ fn hint_to_type_constant_list(
             }
         }
         Hint_::Habstr(_, _)
-        | Hint_::HclassPtr(_, _)
         | Hint_::Hdynamic
         | Hint_::HfunContext(_)
         | Hint_::Hmixed

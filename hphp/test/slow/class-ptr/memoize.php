@@ -1,5 +1,7 @@
 <?hh
 
+<<file:__EnableUnstableFeatures('class_type')>>
+
 class C {}
 
 function p($c): void {
@@ -12,6 +14,13 @@ function a(classname<C> $c): mixed { echo "** Called a\n"; return $c; }
 function b(classname<C> $c): mixed { echo "** Called b\n"; return $c; }
 <<__Memoize>>
 function c(classname<C> $c): mixed { echo "** Called c\n"; return $c; }
+
+<<__Memoize>>
+function x(class<C> $c):     mixed { echo "** Called x\n"; return $c; }
+<<__Memoize>>
+function y(class<C> $c):     mixed { echo "** Called y\n"; return $c; }
+<<__Memoize>>
+function z(class<C> $c):     mixed { echo "** Called z\n"; return $c; }
 
 <<__EntryPoint>>
 function main(): void {
@@ -34,4 +43,20 @@ function main(): void {
   p(c($s));
   p(c($l));
   p(c($c));
+
+  echo "===== class<C> =====\n";
+  p(x($s));
+  p(x($s));
+  p(x($l));
+  p(x($c));
+
+  p(y($l));
+  p(y($s));
+  p(y($l));
+  p(y($c));
+
+  p(z($c));
+  p(z($s));
+  p(z($l));
+  p(z($c));
 }

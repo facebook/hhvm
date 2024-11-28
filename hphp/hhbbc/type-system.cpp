@@ -4455,6 +4455,10 @@ Optional<Type> type_of_type_structure(const IIndex& index,
       case TypeStructure::Kind::T_trait:
       case TypeStructure::Kind::T_reifiedtype:
         return std::nullopt;
+      case TypeStructure::Kind::T_class_ptr:
+        // Don't try to model T_string (classname<T>); just bail
+        return std::nullopt;
+
     }
     not_reached();
   }();
@@ -4621,6 +4625,12 @@ Type from_hni_constraint(SString s) {
   if (!tstrcmp(p, annotTypeName(AnnotType::Classname))) {
     if (!Cfg::Eval::ClassPassesClassname) {
       return union_of(ret, TStr);
+    }
+    return union_of(ret, union_of(TStr, union_of(TCls, TLazyCls)));
+  }
+  if (!tstrcmp(p, annotTypeName(AnnotType::Class))) {
+    if (Cfg::Eval::ClassTypeLevel > 0) {
+      return union_of(ret, union_of(TCls, TLazyCls));
     }
     return union_of(ret, union_of(TStr, union_of(TCls, TLazyCls)));
   }

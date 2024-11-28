@@ -1959,6 +1959,12 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
         return TStr;
       }
       return TStr | TCls | TLazyCls;
+    case AnnotMetaType::Class:
+      // TODO(T199611023) add more levels
+      if (Cfg::Eval::ClassTypeLevel > 0) {
+        return TCls | TLazyCls;
+      }
+      return TStr | TCls | TLazyCls;
     case AnnotMetaType::Nonnull:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nothing:

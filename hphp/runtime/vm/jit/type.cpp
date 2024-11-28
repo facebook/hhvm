@@ -1022,6 +1022,11 @@ Type typeFromTCImpl(const HPHP::TypeConstraint& tc,
           return TStr;
         }
         return TStr | TCls | TLazyCls;
+      case A::Class:
+        if (Cfg::Eval::ClassTypeLevel > 0) {
+          return TCls | TLazyCls;
+        }
+        return TStr | TCls | TLazyCls;
       case A::This:       return getThisType();
       case A::Nothing:
       case A::NoReturn:   return TBottom;

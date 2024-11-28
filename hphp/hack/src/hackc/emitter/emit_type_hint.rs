@@ -17,6 +17,7 @@ use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::typehints;
+use oxidized::aast_defs::ClassPtrKind;
 use oxidized::aast_defs::Hint;
 use oxidized::aast_defs::Hint_;
 use oxidized::aast_defs::Hint_::*;
@@ -74,6 +75,13 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
             } else {
                 format!("{}<{}>", name, fmt_hints(tparams, args)?)
             }
+        }
+        HclassPtr(kind, hint) => {
+            let k = match kind {
+                ClassPtrKind::CKclass => "class",
+                ClassPtrKind::CKenum => "enum",
+            };
+            format!("{}<{}>", k, fmt_hint(tparams, false, hint)?)
         }
         Hwildcard => "_".into(),
         Hfun(hf) => {
@@ -149,8 +157,7 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
         Htuple(TupleInfo { required, .. }) => format!("({})", fmt_hints(tparams, required)?),
         Hlike(t) => format!("~{}", fmt_hint(tparams, false, t)?),
         Hsoft(t) => format!("@{}", fmt_hint(tparams, false, t)?),
-        HclassPtr(_, _)
-        | HfunContext(_)
+        HfunContext(_)
         | Hdynamic
         | Hintersection(_)
         | Hmixed
@@ -310,6 +317,9 @@ fn hint_to_type_constraint(
             };
             type_application_helper(tparams, kind, s)?
         }
+        HclassPtr(_, _) => {
+            Constraint::intern(hhbc::BUILTIN_NAME_CLASS, TypeConstraintFlags::NoFlags)
+        }
         Habstr(s, _hs) => type_application_helper(tparams, kind, s)?,
         Hrefinement(hint, _) => {
             // NOTE: refinements are already banned in type structures
@@ -317,14 +327,9 @@ fn hint_to_type_constraint(
             hint_to_type_constraint(kind, tparams, skipawaitable, hint)?
         }
         // TODO: should probably just return Result::Err for some of these
-        HclassPtr(_, _)
-        | HfunContext(_)
-        | Hnonnull
-        | Hnothing
-        | Hprim(_)
-        | Hthis
-        | Hvar(_)
-        | HvecOrDict(_, _) => type_application_helper(tparams, kind, hint_to_string(hint))?,
+        HfunContext(_) | Hnonnull | Hnothing | Hprim(_) | Hthis | Hvar(_) | HvecOrDict(_, _) => {
+            type_application_helper(tparams, kind, hint_to_string(hint))?
+        }
     })
 }
 

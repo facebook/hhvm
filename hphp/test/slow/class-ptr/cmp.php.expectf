@@ -1298,4 +1298,3 @@ keyset [
 keyset [
   'foo',
 ] gte foo::class = Cannot compare HH\keyset and class using a relational operator
-

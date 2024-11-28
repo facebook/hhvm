@@ -239,6 +239,11 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
       m_preciseTypeMask |= kUnionTypeClassname;
       break;
     }
+    case AnnotType::Class: {
+      // TODO(T199611023) when we enforce the inner class, share the SubObject bit
+      m_preciseTypeMask |= kUnionTypeClass;
+      break;
+    }
     case AnnotType::SubObject: {
       assertx(tc.typeName());
       m_classes.m_list.emplace_back(tc.m_u.single.class_);
@@ -736,6 +741,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
         case AnnotType::ArrayLike: str = "AnyArray"; break;
         case AnnotType::Nonnull:  str = "nonnull"; break;
         case AnnotType::Classname: str = "classname"; break;
+        case AnnotType::Class:    str = "class"; break;
         case AnnotType::SubObject: str = clsName()->data(); break;
         case AnnotType::This:
         case AnnotType::Mixed:
@@ -780,6 +786,7 @@ std::string showUnionTypeMask(UnionTypeMask mask) {
   bitName(res, mask, TypeConstraint::kUnionTypeVec, "vec");
   bitName(res, mask, TypeConstraint::kUnionTypeSubObject, "subObject");
   bitName(res, mask, TypeConstraint::kUnionTypeClassname, "classname");
+  bitName(res, mask, TypeConstraint::kUnionTypeClass, "class");
   assertx(mask == 0);
   return res;
 };
@@ -827,6 +834,7 @@ std::string show(AnnotType t) {
     case AnnotType::NoReturn: return "NoReturn";
     case AnnotType::Nothing: return "Nothing";
     case AnnotType::Classname: return "Classname";
+    case AnnotType::Class: return "Class";
     case AnnotType::Unresolved: return "Unresolved";
   }
   not_reached();
@@ -1097,6 +1105,7 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
       case MetaType::VecOrDict:
       case MetaType::ArrayLike:
       case MetaType::Classname:
+      case MetaType::Class:
       case MetaType::Precise:
       case MetaType::SubObject:
         return { tc.type(), tc.clsName(), tc.isNullable() };
@@ -1163,6 +1172,13 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val,
             if (Assert) return true;
             fallback = fallback ? std::min(*fallback, result) : result;
             continue;
+          case AnnotAction::WarnClass:
+            assertx(isStringType(val.type()));
+            assertx(Cfg::Eval::ClassTypeLevel == 0);
+            assertx(Cfg::Eval::ClassNoticesSampleRate > 0);
+            if (Assert) return true;
+            fallback = fallback ? std::min(*fallback, result) : result;
+            continue;
           case AnnotAction::ObjectCheck:
           case AnnotAction::Fallback:
           case AnnotAction::FallbackCoerce:
@@ -1180,6 +1196,11 @@ bool TypeConstraint::checkNamedTypeNonObj(tv_rval val,
         case AnnotAction::WarnClassname:
           if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate)) {
             raise_notice(Strings::CLASS_TO_CLASSNAME);
+          }
+          return true;
+        case AnnotAction::WarnClass:
+          if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate)) {
+            raise_notice(Strings::STRING_TO_CLASS);
           }
           return true;
         default:
@@ -1238,6 +1259,7 @@ bool TypeConstraint::checkTypeAliasImpl(const ClassConstraint& oc, const Class* 
       case AnnotMetaType::VecOrDict:
       case AnnotMetaType::ArrayLike:
       case AnnotMetaType::Classname:  // TODO: T83332251
+      case AnnotMetaType::Class:
         continue;
       case AnnotMetaType::SubObject:
         if (klass && cls->classof(klass)) return true;
@@ -1333,6 +1355,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       case MetaType::VecOrDict:
       case MetaType::ArrayLike:
       case MetaType::Classname:
+      case MetaType::Class:
         return false;
       case MetaType::Nonnull:
         return true;
@@ -1383,6 +1406,15 @@ bool TypeConstraint::checkImpl(tv_rval val,
           fallback = fallback ? std::min(*fallback, result) : result;
         }
         break;
+      case AnnotAction::WarnClass:
+        if (!isPasses) {
+          assertx(isStringType(val.type()));
+          assertx(Cfg::Eval::ClassTypeLevel == 0);
+          assertx(Cfg::Eval::ClassNoticesSampleRate > 0);
+          if (isAssert) return true;
+          fallback = fallback ? std::min(*fallback, result) : result;
+        }
+        break;
       case AnnotAction::ObjectCheck:
         not_reached();
     }
@@ -1398,6 +1430,11 @@ bool TypeConstraint::checkImpl(tv_rval val,
     case AnnotAction::WarnClassname:
       if (folly::Random::oneIn(Cfg::Eval::ClassnameNoticesSampleRate)) {
         raise_notice(Strings::CLASS_TO_CLASSNAME);
+      }
+      return true;
+    case AnnotAction::WarnClass:
+      if (folly::Random::oneIn(Cfg::Eval::ClassNoticesSampleRate)) {
+        raise_notice(Strings::STRING_TO_CLASS);
       }
       return true;
     default:
@@ -1451,6 +1488,7 @@ bool TypeConstraint::alwaysPasses(const StringData* checkedClsName) const {
     case MetaType::VecOrDict:
     case MetaType::ArrayLike:
     case MetaType::Classname:
+    case MetaType::Class:
       return false;
     case MetaType::Nonnull:
       return true;
@@ -1492,6 +1530,7 @@ bool TypeConstraint::alwaysPasses(DataType dt) const {
     case AnnotAction::WarnLazyClassToString:
     case AnnotAction::ConvertLazyClassToString:
     case AnnotAction::WarnClassname:
+    case AnnotAction::WarnClass:
       return false;
   }
   not_reached();
@@ -1954,6 +1993,8 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
       return tc.isNullable() ? MK::None : MK::IntOrStr;
     case AnnotMetaType::Classname:
       return tc.isNullable() ? MK::StrOrNull : MK::Str;
+    case AnnotMetaType::Class:
+      return tc.isNullable() ? MK::StrOrNull : MK::Str;
     case AnnotMetaType::SubObject:
       return tc.isNullable() ? MK::ObjectOrNull : MK::Object;
     case AnnotMetaType::Mixed:
@@ -2063,6 +2104,10 @@ void TcUnionPieceIterator::buildUnionTypeConstraint() {
     }
     case TypeConstraint::kUnionTypeClassname: {
       m_outTc = TypeConstraint{ AnnotType::Classname, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Classname))} };
+      break;
+    }
+    case TypeConstraint::kUnionTypeClass: {
+      m_outTc = TypeConstraint{ AnnotType::Class, flags, CC{LAZY_STATIC_STRING(annotTypeName(AnnotType::Class))} };
       break;
     }
 

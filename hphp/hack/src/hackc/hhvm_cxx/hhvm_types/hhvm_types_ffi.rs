@@ -136,6 +136,8 @@ pub mod ffi {
         T_union = 31,
         T_recursiveUnion = 32,
 
+        T_class_ptr = 33,
+
         // The following kinds needs class/alias resolution, and
         // are generally not exposed to the users.
         // Unfortunately this is a bit leaky, and a few of these are needed by tooling.

@@ -1,0 +1,36 @@
+string(1) "C"
+=> parameter
+
+Warning: Argument 1 to param_class() must be of type @HH\class, string given in %s/class-ptr/class-hint-nostring.php on line 17
+=> return
+
+Warning: Value returned from function ret_class() must be of type @HH\class, string given in %s/class-ptr/class-hint-nostring.php on line 7
+=> prop
+
+Warning: Static property 'C::c' declared as type @?HH\class, string assigned in %s/class-ptr/class-hint-nostring.php on line 23
+lazyclass(C)
+=> parameter
+=> return
+=> prop
+class(C)
+=> parameter
+=> return
+=> prop
+Laundering string(1) "C"
+=> parameter
+
+Warning: Argument 1 to param_class() must be of type @HH\class, string given in %s/class-ptr/class-hint-nostring.php on line 17
+=> return
+
+Warning: Value returned from function ret_class() must be of type @HH\class, string given in %s/class-ptr/class-hint-nostring.php on line 7
+=> prop
+
+Warning: Static property 'C::c' declared as type @?HH\class, string assigned in %s/class-ptr/class-hint-nostring.php on line 23
+Laundering lazyclass(C)
+=> parameter
+=> return
+=> prop
+Laundering class(C)
+=> parameter
+=> return
+=> prop

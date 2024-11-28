@@ -142,6 +142,7 @@ const std::string
   s_hh_keyset(annotTypeName(AnnotType::Keyset)),
   s_hh_vec_or_dict(annotTypeName(AnnotType::VecOrDict)),
   s_hh_any_array(annotTypeName(AnnotType::ArrayLike)),
+  s_hh_class(annotTypeName(AnnotType::Class)),
   s_hh("HH\\")
 ;
 
@@ -454,6 +455,9 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       assertx(arr.exists(s_classname));
       name += arr[s_classname].asCStrRef().toCppString();
       genericTypeName(arr, name, type);
+      break;
+    case TypeStructure::Kind::T_class_ptr:
+      name += s_hh_class;
       break;
   }
 
@@ -944,6 +948,11 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       newarr.set(s_union_types, Variant(resolveUnion(env, ctx, arr)));
       break;
 
+    case TypeStructure::Kind::T_class_ptr:
+      // TODO(T199611023) Resolve generics here when we're ready to allow this
+      env.invalidType = true;
+      break;
+
     case TypeStructure::Kind::T_xhp:
     case TypeStructure::Kind::T_void:
     case TypeStructure::Kind::T_int:
@@ -1195,7 +1204,9 @@ bool coerceToTypeStructure(Array& arr) {
     case TypeStructure::Kind::T_mixed:
     case TypeStructure::Kind::T_dynamic:
     case TypeStructure::Kind::T_nonnull:
-    case TypeStructure::Kind::T_recursiveUnion: {
+    case TypeStructure::Kind::T_recursiveUnion:
+    // TODO(T199611023) This must change when we enforce the inner class type
+    case TypeStructure::Kind::T_class_ptr: {
       return true;
     }
     case TypeStructure::Kind::T_fun: {

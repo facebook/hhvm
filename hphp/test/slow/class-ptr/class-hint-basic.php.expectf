@@ -1,0 +1,60 @@
+string(1) "C"
+=> parameter
+
+Notice: String passed to class type-hint in %s/class-ptr/class-hint-basic.php on line 22
+=> return
+
+Notice: String passed to class type-hint in %s/class-ptr/class-hint-basic.php on line 8
+=> prop
+
+Notice: String passed to class type-hint in %s/class-ptr/class-hint-basic.php on line 30
+lazyclass(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 31
+class(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 31
+Laundering string(1) "C"
+=> parameter
+
+Notice: String passed to class type-hint in %s/class-ptr/class-hint-basic.php on line 22
+=> return
+
+Notice: String passed to class type-hint in %s/class-ptr/class-hint-basic.php on line 8
+=> prop
+
+Notice: String passed to class type-hint in %s/class-ptr/class-hint-basic.php on line 30
+Laundering lazyclass(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 31
+Laundering class(C)
+=> parameter
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 23
+=> return
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 11
+=> prop
+
+Notice: Class passed to classname type-hint in %s/class-ptr/class-hint-basic.php on line 31

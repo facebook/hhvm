@@ -270,7 +270,8 @@ bool typeStructureIsType(
     case TypeStructure::Kind::T_darray:
     case TypeStructure::Kind::T_varray:
     case TypeStructure::Kind::T_varray_or_darray:
-    case TypeStructure::Kind::T_any_array: {
+    case TypeStructure::Kind::T_any_array:
+    case TypeStructure::Kind::T_class_ptr: {
       if (is_ts_nullable(type)) {
         auto const inputT = get_ts_kind(input);
         return inputT == tsKind || inputT == TypeStructure::Kind::T_null;
@@ -654,6 +655,11 @@ bool checkTypeStructureMatchesTVImpl(
         return true;
       }
       return isStringType(type);
+
+    case TypeStructure::Kind::T_class_ptr:
+      // TODO(T199611023) When we enforce inner class types, this can be relaxed
+      raise_warning("Using TypeStructure to check class type");
+      return isClassType(type) || isLazyClassType(type);
 
     case TypeStructure::Kind::T_resource:
       return isResourceType(type) &&
@@ -1046,6 +1052,10 @@ bool errorOnIsAsExpressionInvalidTypes(const Array& ts, bool dryrun,
       return errorOnIsAsExpressionInvalidTypesList(tsFields, dryrun,
                                                    allowWildcard);
     }
+    case TypeStructure::Kind::T_class_ptr:
+      // classname<T> is not a valid type for is/as or reification so let's
+      // preserve this restriction for class<T> initially
+      return err("a class type");
   }
   not_reached();
 }
@@ -1072,6 +1082,7 @@ bool typeStructureCouldBeNonStatic(const ArrayData* ts) {
     case TypeStructure::Kind::T_any_array:
     case TypeStructure::Kind::T_typeaccess:
     case TypeStructure::Kind::T_reifiedtype:
+    case TypeStructure::Kind::T_class_ptr:
       return true;
     case TypeStructure::Kind::T_unresolved: {
       if (get_ts_classname(ts)->tsame(s_hh_this.get())) return true;

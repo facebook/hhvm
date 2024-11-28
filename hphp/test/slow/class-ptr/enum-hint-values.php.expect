@@ -1,0 +1,24 @@
+dict(2) {
+  ["A"]=>
+  int(1)
+  ["B"]=>
+  int(2)
+}
+dict(2) {
+  ["A"]=>
+  int(1)
+  ["B"]=>
+  int(2)
+}
+dict(2) {
+  ["S"]=>
+  string(1) "s"
+  ["T"]=>
+  string(1) "t"
+}
+dict(2) {
+  ["S"]=>
+  string(1) "s"
+  ["T"]=>
+  string(1) "t"
+}

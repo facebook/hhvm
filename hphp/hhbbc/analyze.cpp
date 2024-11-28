@@ -1705,6 +1705,9 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
           union_of(TArrKey, TCls, TLazyCls),
           TriBool::Yes
         };
+      // NB: when we're logging, only string has no side effects going through
+      // classname<T>, and only class pointers have no side effects going
+      // through class<T>
       case AnnotMetaType::Classname:
         if (!Cfg::Eval::ClassPassesClassname) {
           return exact(TStr);
@@ -1712,6 +1715,16 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
         return C{
           Cfg::Eval::ClassnameNoticesSampleRate > 0 ?
             TStr : union_of(TStr, TCls, TLazyCls),
+          union_of(TStr, TCls, TLazyCls)
+        };
+      case AnnotMetaType::Class:
+        // TODO(T199611023) do similar checks to SubObject for inner class type
+        if (Cfg::Eval::ClassTypeLevel > 0) {
+          return exact(union_of(TCls, TLazyCls));
+        }
+        return C{
+          Cfg::Eval::ClassNoticesSampleRate > 0 ?
+            union_of(TCls, TLazyCls) : union_of(TStr, TCls, TLazyCls),
           union_of(TStr, TCls, TLazyCls)
         };
     }

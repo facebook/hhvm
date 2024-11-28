@@ -160,6 +160,7 @@ const fn strip_slash(name: &str) -> &str {
 pub static BUILTIN_NAME_ANY_ARRAY: &str = strip_slash(naming_special_names::collections::ANY_ARRAY);
 pub static BUILTIN_NAME_ARRAYKEY: &str = strip_slash(naming_special_names::typehints::HH_ARRAYKEY);
 pub static BUILTIN_NAME_BOOL: &str = strip_slash(naming_special_names::typehints::HH_BOOL);
+pub static BUILTIN_NAME_CLASS: &str = strip_slash(naming_special_names::typehints::HH_CLASS);
 pub static BUILTIN_NAME_CLASSNAME: &str = strip_slash(naming_special_names::classes::CLASS_NAME);
 pub static BUILTIN_NAME_DARRAY: &str = strip_slash(naming_special_names::typehints::HH_DARRAY);
 pub static BUILTIN_NAME_DICT: &str = strip_slash(naming_special_names::collections::DICT);

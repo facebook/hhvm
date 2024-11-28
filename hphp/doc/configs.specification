@@ -393,9 +393,12 @@ The format can be found in hphp/tools/configs/generate_configs.rs
   Raise a notice if a Class type is passed to function that expects a
   string
 
-- bool Eval.StringPassesClass = true, UNKNOWN, globaldata|unitcacheflag
+- uint32_t Eval.ClassTypeLevel = 0, vmladenov, globaldata
 
-  When this options is on, class type-hints accept strings
+  The level at which we enforce the class<C> type.
+  0 = string, lazy class, and class is admitted, optional notice on string
+  1 = lazy class and class are admitted
+  TODO: T199611023 add more levels
 
 - bool Eval.ClassPassesClassname = true, UNKNOWN, globaldata|unitcacheflag
 
@@ -1332,7 +1335,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool Hack.Lang.AllowUnstableFeatures = false, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.EnableXHPClassModifier = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
 - bool Hack.Lang.DisableXHPElementMangling = true, UNKNOWN, repooptionsflag(Parser)|hackc(parser)
-- bool Hack.Lang.EnableClassPointerHint = false, vmladenov, repooptionsflag(Parser)|hackc(parser)
+- bool Hack.Lang.EnableClassPointerHint = true, vmladenov, repooptionsflag(Parser)|hackc(parser)
 
   Killswitch for the class<T> type. When false, lowerer and direct decl parser
   erase it to classname<T>.

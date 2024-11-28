@@ -49,7 +49,8 @@ namespace {
 const StaticString
   s_StringishObject("StringishObject"),
   s_Awaitable("HH\\Awaitable"),
-  s_CLASS_TO_CLASSNAME(Strings::CLASS_TO_CLASSNAME);
+  s_CLASS_TO_CLASSNAME(Strings::CLASS_TO_CLASSNAME),
+  s_STRING_TO_CLASS(Strings::STRING_TO_CLASS);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -266,6 +267,13 @@ SSATmp* verifyTypeImpl(IRGS& env,
             SampleRateData { Cfg::Eval::ClassnameNoticesSampleRate },
             cns(env, s_CLASS_TO_CLASSNAME.get()));
         return val;
+      case AnnotAction::WarnClass:
+        assertx(val->type() <= TStr);
+        gen(env,
+            RaiseNotice,
+            SampleRateData { Cfg::Eval::ClassNoticesSampleRate },
+            cns(env, s_STRING_TO_CLASS.get()));
+        return val;
     }
     assertx(result == AnnotAction::ObjectCheck);
     assertx(val->type() <= TObj);
@@ -421,6 +429,7 @@ SSATmp* verifyTypeImpl(IRGS& env,
           case AnnotAction::ObjectCheck:
           case AnnotAction::WarnClassToString:
           case AnnotAction::WarnClassname:
+          case AnnotAction::WarnClass:
           case AnnotAction::WarnLazyClassToString:
             if (fallbackAction == AnnotAction::Fail) {
               fallbackAction = action;
@@ -480,6 +489,7 @@ SSATmp* verifyTypeImpl(IRGS& env,
         case AnnotAction::Pass:
         case AnnotAction::WarnClassToString:
         case AnnotAction::WarnClassname:
+        case AnnotAction::WarnClass:
         case AnnotAction::WarnLazyClassToString:
           result.emplace_back(dt, action);
           break;
@@ -1192,6 +1202,9 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_reifiedtype:
     case TypeStructure::Kind::T_recursiveUnion:
       // TODO(T28423611): Implement these
+      return false;
+    case TypeStructure::Kind::T_class_ptr:
+      // TODO(T199610905) Do nothing until we're ready to enforce inner type
       return false;
   }
   not_reached();

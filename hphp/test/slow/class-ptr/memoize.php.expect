@@ -14,3 +14,19 @@ class(C)
 class(C)
 class(C)
 class(C)
+===== class<C> =====
+** Called x
+string(1) "C"
+string(1) "C"
+string(1) "C"
+string(1) "C"
+** Called y
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+lazyclass(C)
+** Called z
+class(C)
+class(C)
+class(C)
+class(C)

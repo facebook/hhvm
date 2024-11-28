@@ -114,6 +114,8 @@ struct TypeConstraint {
   constexpr static UnionTypeMask kUnionTypeKeyset    = 1 << 9;
   constexpr static UnionTypeMask kUnionTypeDict      = 1 << 10;
   constexpr static UnionTypeMask kUnionTypeClassname = 1 << 11;
+  // TODO(T199611023) when we enforce the inner class, share the SubObject bit
+  constexpr static UnionTypeMask kUnionTypeClass     = 1 << 12;
   // SubObject should be the last flag because it indicates a list of classnames
   // in the repr which we want to handle last and repeat until we're out of
   // classes.
@@ -227,6 +229,7 @@ struct TypeConstraint {
       case AnnotType::NoReturn:
       case AnnotType::Nothing:
       case AnnotType::Classname:
+      case AnnotType::Class:
         return true;
       case AnnotType::SubObject:
       case AnnotType::Unresolved:
@@ -354,6 +357,7 @@ struct TypeConstraint {
   bool isArrayLike() const { return !isUnion() && m_u.single.type == Type::ArrayLike; }
   bool isVecOrDict() const { return !isUnion() && m_u.single.type == Type::VecOrDict; }
   bool isClassname() const { return !isUnion() && m_u.single.type == Type::Classname; }
+  bool isClass()     const { return !isUnion() && m_u.single.type == Type::Class; }
 
   bool isUnresolved() const {
     return isUnion()

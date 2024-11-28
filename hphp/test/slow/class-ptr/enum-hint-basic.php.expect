@@ -1,0 +1,12 @@
+string(1) "E"
+=> parameter
+lazyclass(E)
+=> parameter
+class(E)
+=> parameter
+Laundering string(1) "E"
+=> parameter
+Laundering lazyclass(E)
+=> parameter
+Laundering class(E)
+=> parameter

@@ -81,6 +81,8 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { annotTypeName(AnnotType::VecOrDict), AnnotType::VecOrDict },
       { annotTypeName(AnnotType::ArrayLike), AnnotType::ArrayLike },
       { annotTypeName(AnnotType::Classname), AnnotType::Classname },
+      // TODO(T199611023) revisit when we enforce the inner type
+      { annotTypeName(AnnotType::Class),     AnnotType::Class },
     };
     for (unsigned i = 0; i < pairs.size(); ++i) {
       mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
@@ -165,6 +167,7 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::Nothing:
     case AnnotType::NoReturn:
     case AnnotType::Classname:
+    case AnnotType::Class:
     case AnnotType::Null:     return make_tv<KindOfNull>();
     case AnnotType::Nonnull:
     case AnnotType::Number:
@@ -239,6 +242,17 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         }
         return Cfg::Eval::ClassnameNoticesSampleRate > 0 ?
           AnnotAction::WarnClassname : AnnotAction::Pass;
+      }
+      return AnnotAction::Fail;
+    case AnnotMetaType::Class:
+      // TODO(T199611023) add more levels
+      if (isClassType(dt) || isLazyClassType(dt)) return AnnotAction::Pass;
+      if (isStringType(dt)) {
+        if (Cfg::Eval::ClassTypeLevel > 0) {
+          return AnnotAction::Fail;
+        }
+        return Cfg::Eval::ClassNoticesSampleRate > 0 ?
+          AnnotAction::WarnClass : AnnotAction::Pass;
       }
       return AnnotAction::Fail;
     case AnnotMetaType::Nothing:
@@ -347,6 +361,7 @@ const char* annotName(AnnotType at) {
     case AnnotType::Nothing:    return "nothing";
     case AnnotType::NoReturn:   return "noreturn";
     case AnnotType::Classname:  return "classname";
+    case AnnotType::Class:      return "class";
     case AnnotType::Null:       return "null";
     case AnnotType::Nonnull:    return "nonnull";
     case AnnotType::Number:     return "number";

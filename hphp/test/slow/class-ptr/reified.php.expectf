@@ -1,0 +1,4 @@
+
+Warning: Using TypeStructure to check class type in %s/class-ptr/reified.php on line 5
+
+Catchable fatal error: Argument 1 passed to f() must be an instance of HH\class, string given in %s/class-ptr/reified.php on line 9

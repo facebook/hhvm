@@ -643,6 +643,8 @@ pub mod typehints {
 
     pub const POISON_MARKER: &str = "\\HH\\FIXME\\POISON_MARKER";
 
+    pub const HH_CLASS: &str = "\\HH\\class";
+
     pub const WILDCARD: &str = "_";
 
     lazy_static! {

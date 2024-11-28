@@ -47,7 +47,7 @@ from thrift.python.types import (
     StructOrUnion as ImmutableStructOrUnion,
 )
 
-from thrift.test.thrift_python.struct_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:struct_test_thrift-python-types
+from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     bool_constant,
     byte_constant,
     double_constant,

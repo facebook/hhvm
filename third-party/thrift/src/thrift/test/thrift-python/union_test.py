@@ -27,7 +27,7 @@ from thrift.python.mutable_types import MutableStructOrUnion
 
 from thrift.python.types import StructOrUnion as ImmutableStructOrUnion
 
-from thrift.test.thrift_python.union_test.thrift_mutable_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
+from thrift.test.thrift_python.union_test.thrift_mutable_types import (
     TestUnion as TestUnionMutable,
     TestUnionAdaptedTypes as TestUnionAdaptedTypesMutable,
 )

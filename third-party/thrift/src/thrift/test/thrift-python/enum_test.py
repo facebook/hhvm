@@ -19,7 +19,7 @@ import unittest
 
 import thrift.test.thrift_python.enum_test.thrift_enums as enums
 
-import thrift.test.thrift_python.enum_test.thrift_mutable_types as mutable_types  # @manual=//thrift/test/thrift-python:enum_test_thrift-python-types
+import thrift.test.thrift_python.enum_test.thrift_mutable_types as mutable_types
 import thrift.test.thrift_python.enum_test.thrift_types as immutable_types
 
 from parameterized import parameterized

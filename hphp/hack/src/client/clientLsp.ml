@@ -1681,14 +1681,14 @@ let merge_statuses_standalone
     telemetry = None;
   }
 
-let refresh_status ~(ide_service : ClientIdeService.t ref) : unit =
+let refresh_status ~(ide_service : ClientIdeService.t) : unit =
   match !initialize_params_ref with
   | Some initialize_params ->
     let status =
       merge_statuses_standalone
         !latest_hh_server_progress
         !latest_hh_server_errors
-        !ide_service
+        ide_service
     in
     request_showStatusFB status ~initialize_params
   | None ->
@@ -1699,7 +1699,7 @@ let refresh_status ~(ide_service : ClientIdeService.t ref) : unit =
 (** This kicks off a permanent process which, once a second, reads progress.json
   and calls [refresh_status]. Because it's an Lwt process, it's able to update
   status even when we're stuck waiting for RPC. *)
-let background_status_refresher (ide_service : ClientIdeService.t ref) : unit =
+let background_status_refresher (ide_service : ClientIdeService.t) : unit =
   let rec loop () =
     latest_hh_server_progress := Server_progress.read ();
     refresh_status ~ide_service;
@@ -1711,13 +1711,13 @@ let background_status_refresher (ide_service : ClientIdeService.t ref) : unit =
 
 (** A thin wrapper around ClientIdeMessage which turns errors into exceptions. *)
 let ide_rpc
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     ~(tracking_id : string)
     ~(ref_unblocked_time : float ref)
     (message : 'a ClientIdeMessage.t) : 'a Lwt.t =
   let%lwt result =
     ClientIdeService.rpc
-      !ide_service
+      ide_service
       ~tracking_id
       ~ref_unblocked_time
       ~progress:(fun () -> refresh_status ~ide_service)
@@ -2141,14 +2141,13 @@ let cancel_shellout_if_applicable (state : state) (id : lsp_id) : unit =
 (************************************************************************)
 
 let do_shutdown
-    (state : state)
-    (ide_service : ClientIdeService.t ref)
-    (tracking_id : string) : state Lwt.t =
+    (state : state) (ide_service : ClientIdeService.t) (tracking_id : string) :
+    state Lwt.t =
   log "Received shutdown request";
   let _state = dismiss_diagnostics state in
   let%lwt () =
     stop_ide_service
-      !ide_service
+      ide_service
       ~tracking_id
       ~stop_reason:ClientIdeService.Stop_reason.Editor_exited
   in
@@ -2238,7 +2237,7 @@ let do_hover_common (infos : HoverService.hover_info list) : Hover.result =
     Some { Hover.contents; range }
 
 let do_hover
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2254,7 +2253,7 @@ let do_hover
   Lwt.return (do_hover_common infos)
 
 let do_typeDefinition
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2277,7 +2276,7 @@ let do_typeDefinition
   Lwt.return results
 
 let do_definition
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2413,7 +2412,7 @@ let make_ide_completion_response
     }
 
 let do_completion
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2481,7 +2480,7 @@ let resolve_ranking_source
  * hh_server.
  *)
 let do_resolve
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (params : CompletionItemResolve.params) : CompletionItemResolve.result Lwt.t
@@ -2593,7 +2592,7 @@ let hack_symbol_to_lsp (symbol : SearchUtils.symbol) =
   }
 
 let do_workspaceSymbol
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (params : WorkspaceSymbol.params) : WorkspaceSymbol.result Lwt.t =
@@ -2659,7 +2658,7 @@ let rec hack_symbol_tree_to_lsp
     hack_symbol_tree_to_lsp ~filename ~accu ~container_name defs
 
 let do_documentSymbol
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2682,7 +2681,7 @@ let do_documentSymbol
 
 let do_findReferences
     (state : state)
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (metadata : incoming_metadata)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -2903,7 +2902,7 @@ let do_findReferences2 ~shellout_standard_response ~hh_locations :
 
 let do_goToImplementation
     (state : state)
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (metadata : incoming_metadata)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
@@ -2975,7 +2974,7 @@ let hack_range_to_lsp_highlight range =
   { DocumentHighlight.range = ide_range_to_lsp range; kind = None }
 
 let do_highlight
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3135,7 +3134,7 @@ let location_of_code_action_request
   (document, range, file_path)
 
 let do_codeAction
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3154,7 +3153,7 @@ let do_codeAction
   Lwt.return (actions, file_path, errors_opt)
 
 let do_codeAction_resolve
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3175,7 +3174,7 @@ let do_codeAction_resolve
   Lwt.return result
 
 let do_signatureHelp
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3237,7 +3236,7 @@ let patches_to_workspace_edit (patches : ServerRenameTypes.patch list) :
 
 let do_documentRename
     (state : state)
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (metadata : incoming_metadata)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -3322,7 +3321,7 @@ let do_documentRename2 ~ide_calculated_patches ~hh_edits : Lsp.lsp_result * int
   (RenameResult { WorkspaceEdit.changes }, result_count)
 
 let do_autoclose
-    (ide_service : ClientIdeService.t ref)
+    (ide_service : ClientIdeService.t)
     (tracking_id : string)
     (ref_unblocked_time : float ref)
     (editor_open_files : Lsp.TextDocumentItem.t UriMap.t)
@@ -4140,7 +4139,7 @@ let send_file_to_ide_and_defer_check
 (** send DidOpen/Close/Change/Save ide_service as needed *)
 let handle_editor_buffer_message
     ~(state : state ref)
-    ~(ide_service : ClientIdeService.t ref)
+    ~(ide_service : ClientIdeService.t)
     ~(metadata : incoming_metadata)
     ~(ref_unblocked_time : float ref)
     ~(message : lsp_message) : unit Lwt.t =
@@ -4212,9 +4211,8 @@ let handle_editor_buffer_message
     Lwt.return_unit
 
 let set_verbose_to_file
-    ~(ide_service : ClientIdeService.t ref)
-    ~(tracking_id : string)
-    (value : bool) : unit Lwt.t =
+    ~(ide_service : ClientIdeService.t) ~(tracking_id : string) (value : bool) :
+    unit Lwt.t =
   verbose_to_file := value;
   if !verbose_to_file then
     Hh_logger.Level.set_min_level_file Hh_logger.Level.Debug
@@ -4235,7 +4233,7 @@ let set_verbose_to_file
 let handle_client_message
     ~(state : state ref)
     ~(client : Jsonrpc.t)
-    ~(ide_service : ClientIdeService.t ref)
+    ~(ide_service : ClientIdeService.t)
     ~(metadata : incoming_metadata)
     ~(message : lsp_message)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
@@ -4297,7 +4295,7 @@ let handle_client_message
     | (_, RequestMessage (id, HackTestShutdownServerlessRequestFB)) ->
       let%lwt () =
         stop_ide_service
-          !ide_service
+          ide_service
           ~tracking_id
           ~stop_reason:ClientIdeService.Stop_reason.Testing
       in
@@ -4348,7 +4346,7 @@ let handle_client_message
       respond_jsonrpc ~powered_by:Language_server id (InitializeResult result);
 
       let (promise : unit Lwt.t) =
-        run_ide_service !ide_service initialize_params None
+        run_ide_service ide_service initialize_params None
       in
       ignore_promise_but_handle_failure
         promise
@@ -4748,7 +4746,7 @@ let handle_client_message
 (** Process and respond to a notification from clientIdeDaemon, and update [state] accordingly. *)
 let handle_daemon_notification
     ~(state : state ref)
-    ~(ide_service : ClientIdeService.t ref)
+    ~(ide_service : ClientIdeService.t)
     ~(notification : ClientIdeMessage.notification)
     ~(ref_unblocked_time : float ref) : result_telemetry option Lwt.t =
   (* In response to ide_service notifications we have these goals:
@@ -4793,7 +4791,7 @@ let handle_daemon_notification
 
 let handle_deferred_check
     ~(state : state ref)
-    ~(ide_service : ClientIdeService.t ref)
+    ~(ide_service : ClientIdeService.t)
     ~(ref_unblocked_time : float ref)
     (uri : DocumentUri.t)
     (trigger : errors_trigger) : result_telemetry option Lwt.t =
@@ -4911,16 +4909,15 @@ let main
       []
   in
   let ide_service =
-    ref
-      (ClientIdeService.make
-         {
-           ClientIdeMessage.init_id;
-           verbose_to_stderr = args.verbose;
-           verbose_to_file = args.verbose;
-           shm_handle;
-           client_lsp_log_fn = log_filename;
-           error_filter;
-         })
+    ClientIdeService.make
+      {
+        ClientIdeMessage.init_id;
+        verbose_to_stderr = args.verbose;
+        verbose_to_file = args.verbose;
+        shm_handle;
+        client_lsp_log_fn = log_filename;
+        error_filter;
+      }
   in
   background_status_refresher ide_service;
 
@@ -4937,7 +4934,7 @@ let main
        before it completes i.e. before we continue this [process_next_event] loop. *)
     assert_workers_are_not_stopped ();
     try%lwt
-      let%lwt event = get_next_event state client !ide_service in
+      let%lwt event = get_next_event state client ide_service in
       if not (is_tick event) then
         log_debug "next event: %s" (event_to_string event);
       ref_event := Some event;

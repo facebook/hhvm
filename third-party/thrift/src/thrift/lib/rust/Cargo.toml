@@ -22,7 +22,7 @@ num-traits = { version = "0.2.18", default-features = false }
 ordered-float = { version = "3.7", features = ["serde"] }
 panic-message = "0.3"
 serde_json = { version = "1.0.132", features = ["float_roundtrip", "unbounded_depth"] }
-thiserror = "1.0.64"
+thiserror = "2"
 
 [dev-dependencies]
 quickcheck = "1.0"

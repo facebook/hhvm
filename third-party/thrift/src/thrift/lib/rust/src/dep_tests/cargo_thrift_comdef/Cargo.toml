@@ -22,7 +22,7 @@ fbthrift = { version = "0.0.1+unstable", path = "../../.." }
 futures = { version = "0.3.30", features = ["async-await", "compat"] }
 once_cell = "1.12"
 ref-cast = "1.0.18"
-thiserror = "1.0.64"
+thiserror = "2"
 
 [build-dependencies]
 thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

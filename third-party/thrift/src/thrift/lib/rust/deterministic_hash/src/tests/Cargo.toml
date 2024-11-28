@@ -32,7 +32,7 @@ indexmap = { version = "2.2.6", features = ["arbitrary", "rayon", "serde"] }
 once_cell = "1.12"
 ref-cast = "1.0.18"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
-thiserror = "1.0.64"
+thiserror = "2"
 
 [dev-dependencies]
 fbthrift_deterministic_hash = { version = "0.0.1+unstable", path = "../.." }

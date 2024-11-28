@@ -22,5 +22,5 @@ oxidized = { version = "0.0.0", path = "../../../../oxidized" }
 pos = { version = "0.0.0", path = "../../../pos/cargo/pos" }
 shallow_decl_provider = { version = "0.0.0", path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 special_names = { version = "0.0.0", path = "../../../special_names/cargo/special_names" }
-thiserror = "1.0.64"
+thiserror = "2"
 ty = { version = "0.0.0", path = "../../../ty/cargo/ty" }

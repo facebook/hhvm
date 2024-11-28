@@ -23,7 +23,7 @@ futures = { version = "0.3.30", features = ["async-await", "compat"] }
 once_cell = "1.12"
 ref-cast = "1.0.18"
 scope = { version = "0.0.1+unstable", path = "../scope" }
-thiserror = "1.0.64"
+thiserror = "2"
 thrift = { version = "0.0.1+unstable", path = "../thrift" }
 
 [build-dependencies]

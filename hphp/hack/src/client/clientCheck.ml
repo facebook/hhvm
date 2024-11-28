@@ -308,7 +308,8 @@ let main_internal
       && not (EventLogger.is_sandcastle ())
     in
     if use_streaming then (
-      let%lwt (exit_status, streamed_errors, telemetry) =
+      let%lwt (exit_status, streamed_errors, watchman_clock_streaming, telemetry)
+          =
         ClientCheckStatus.go_streaming
           args
           error_filter
@@ -326,9 +327,16 @@ let main_internal
       in
       (match res with
       | `Timeout -> ()
-      | `Done ({ ServerCommandTypes.Server_status.error_list; _ }, _telemetry)
-        ->
-        validate_streamed_errors error_list streamed_errors);
+      | `Done
+          ( { ServerCommandTypes.Server_status.error_list; watchman_clock; _ },
+            _telemetry ) ->
+        if
+          Option.equal
+            Watchman.equal_clock
+            watchman_clock
+            watchman_clock_streaming
+        then
+          validate_streamed_errors error_list streamed_errors);
       Lwt.return (exit_status, telemetry)
     ) else
       let%lwt (status, telemetry) =
@@ -401,6 +409,7 @@ let main_internal
         ServerCommandTypes.Server_status.liveness =
           ServerCommandTypes.Live_status;
         last_recheck_stats = None;
+        watchman_clock = None;
       }
     in
     let exit_status =

@@ -41,8 +41,13 @@ let is_stale_msg liveness =
   | Live_status -> None
 
 let go status error_format ~is_interactive ~output_json ~max_errors =
-  let { Server_status.liveness; error_list; dropped_count; last_recheck_stats }
-      =
+  let {
+    Server_status.liveness;
+    error_list;
+    dropped_count;
+    last_recheck_stats;
+    watchman_clock = _;
+  } =
     status
   in
   let stale_msg = is_stale_msg liveness in
@@ -505,7 +510,7 @@ let rec keep_trying_to_open
     ~(already_checked_clock : Watchman.clock option)
     ~(progress_callback : string option -> unit)
     ~(deadline : float option)
-    ~(root : Path.t) : (int * Unix.file_descr) Lwt.t =
+    ~(root : Path.t) : (int * Unix.file_descr * Watchman.clock option) Lwt.t =
   Option.iter deadline ~f:(fun deadline ->
       if Float.(Unix.gettimeofday () > deadline) then begin
         progress_callback None;
@@ -597,7 +602,7 @@ let rec keep_trying_to_open
       Hh_logger.log
         "Errors-file: %s is present, without watchman, so just going with it."
         (Sys_utils.show_inode fd);
-      Lwt.return (pid, fd)
+      Lwt.return (pid, fd, None)
     | Ok { Server_progress.ErrorsRead.clock = Some clock; _ }
       when Option.equal String.equal (Some clock) already_checked_clock ->
       (* we've already checked this clock! so just wait a short time, then re-open the file
@@ -635,7 +640,7 @@ let rec keep_trying_to_open
            If there has, hh_server will ultimately tell us with a restart sentinel, and we'll
            ask the user to re-run hh. This is sub-optimal UX, but still better UX than
            loudly failing now. *)
-        Lwt.return (pid, fd)
+        Lwt.return (pid, fd, Some clock)
       | Ok relative_raw_updates ->
         let raw_updates =
           relative_raw_updates
@@ -655,7 +660,7 @@ let rec keep_trying_to_open
             "Errors-file: %s is present, was started at clock %s and watchman reports no updates since then, so using it!"
             (Sys_utils.show_inode fd)
             clock;
-          Lwt.return (pid, fd)
+          Lwt.return (pid, fd, Some clock)
         end else begin
           (* But if files have changed since the errors.bin, then we will keep spinning
              under trust that hh_server will eventually recognize those changes and create
@@ -689,7 +694,11 @@ let go_streaming
     (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
-    (Exit_status.t * Errors.FinalizedErrorSet.t * Telemetry.t) Lwt.t =
+    (Exit_status.t
+    * Errors.FinalizedErrorSet.t
+    * Watchman.clock option
+    * Telemetry.t)
+    Lwt.t =
   let ClientEnv.{ root; show_spinner; deadline; _ } = args in
   let progress_callback : string option -> unit =
     ClientSpinner.report ~to_stderr:show_spinner ~angery_reaccs_only:false
@@ -699,7 +708,7 @@ let go_streaming
     progress_callback None;
     connect_then_close ()
   in
-  let%lwt (pid, fd) =
+  let%lwt (pid, fd, clock) =
     keep_trying_to_open
       ~has_already_attempted_connect:false
       ~already_checked_clock:None
@@ -717,4 +726,4 @@ let go_streaming
       ~partial_telemetry_ref
       ~progress_callback
   in
-  Lwt.return (exit_status, errors, telemetry)
+  Lwt.return (exit_status, errors, clock, telemetry)

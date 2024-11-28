@@ -40,7 +40,7 @@ module Types = struct
   }
 
   (** The message's clock. *)
-  type clock = string [@@deriving show]
+  type clock = string [@@deriving eq, show]
 
   type pushed_changes =
     (*

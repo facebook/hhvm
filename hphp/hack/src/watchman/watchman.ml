@@ -401,7 +401,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
   (* JSON methods. *)
   (****************************************************************************)
 
-  let clock root = J.strlist ["clock"; root]
+  let clock (root : clock) = J.strlist ["clock"; root]
 
   type watch_command =
     | Subscribe

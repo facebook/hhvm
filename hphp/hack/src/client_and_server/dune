@@ -280,7 +280,8 @@
   typing_deps
   utils_lint
   version
-  warnings_saved_state)
+  warnings_saved_state
+  watchman)
  (preprocess
   (pps lwt_ppx ppx_deriving.std ppx_deriving.show ppx_deriving.enum)))
 

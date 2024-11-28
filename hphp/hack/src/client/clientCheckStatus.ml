@@ -435,6 +435,27 @@ let watchman_get_raw_updates_since
       Lwt.return_ok files
   end
 
+module FileId : sig
+  (** Identifier for a file, based on inode and ctime *)
+  type t [@@deriving eq]
+
+  val of_fd : Unix.file_descr -> t
+end = struct
+  type t = {
+    inode: int;
+    ctime: float;
+        (** The ctime field, a.k.a. change time,
+            meaning the time of the latest metadata change.
+            This is the creation time if there has been
+            no other metadata changes, which is likely the case here. *)
+  }
+  [@@deriving eq]
+
+  let of_fd fd =
+    let stats = Unix.fstat fd in
+    { inode = stats.Unix.st_ino; ctime = stats.Unix.st_ctime }
+end
+
 (** [keep_trying_to_open] tries to open the errors.bin file.
   There is a whole load of ceremony to do with what happens when you want to open errors.bin,
   e.g. start the server if necessary, check for version mismatch, report failures to the user.
@@ -507,7 +528,7 @@ let watchman_get_raw_updates_since
 let rec keep_trying_to_open
     ~(has_already_attempted_connect : bool)
     ~(connect_then_close : unit -> unit Lwt.t)
-    ~(already_checked_clock : Watchman.clock option)
+    ~(already_checked_file : FileId.t option)
     ~(progress_callback : string option -> unit)
     ~(deadline : float option)
     ~(root : Path.t) : (int * Unix.file_descr * Watchman.clock option) Lwt.t =
@@ -548,143 +569,146 @@ let rec keep_trying_to_open
     keep_trying_to_open
       ~has_already_attempted_connect:true
       ~connect_then_close
-      ~already_checked_clock
+      ~already_checked_file:None
       ~progress_callback
       ~deadline
       ~root
   | Some fd -> begin
-    match Server_progress.ErrorsRead.openfile fd with
-    | Error (open_error, log_message) when not has_already_attempted_connect ->
-      Hh_logger.log
-        "Errors-file: on %s, read sentinel %s [%s], so connecting then trying again"
-        (Sys_utils.show_inode fd)
-        (Server_progress.ErrorsRead.show_open_error open_error)
-        log_message;
-      (* If there was an existing file but it was bad -- e.g. came from a dead server,
-         or binary mismatch, then we will connect as before. In the case of binary mismatch,
-         we rely on the standard codepaths in clientConnect and monitorConnect: namely, it will
-         either succeed in starting and connecting to a new server of the correct binary, or
-         (e.g. without autostart) it will raise Exit_status.(Exit_with Exit_status.Build_id_mismatch).
-         The exception will bubble up to our caller; here we need only handle success. *)
-      Unix.close fd;
-      let%lwt () = connect_then_close () in
-      keep_trying_to_open
-        ~has_already_attempted_connect:true
-        ~connect_then_close
-        ~already_checked_clock
-        ~progress_callback
-        ~deadline
-        ~root
-    | Error (open_error, log_message) -> begin
-      (* But if there was an existing file that's still bad even after our connection
-         attempt, there's not much we can do *)
-      Hh_logger.log
-        "Errors-file: on %s, read sentinel %s [%s], and already connected once, so giving up."
-        (Sys_utils.show_inode fd)
-        (Server_progress.ErrorsRead.show_open_error open_error)
-        log_message;
-      progress_callback None;
-      match open_error with
-      | Server_progress.ErrorsRead.OBuild_id_mismatch ->
-        raise (Exit_status.Exit_with Exit_status.Build_id_mismatch)
-      | Server_progress.(ErrorsRead.ORead_error Malformed) ->
-        raise
-          (Exit_status.Exit_with (Exit_status.Server_hung_up_should_abort None))
-      | Server_progress.ErrorsRead.OKilled finale_data ->
-        raise
-          (Exit_status.Exit_with
-             (Exit_status.Server_hung_up_should_abort finale_data))
-    end
-    | Ok { Server_progress.ErrorsRead.pid; clock = None; _ } ->
-      (* If there's an existing file, but it's not using watchman, then we cannot offer
-         consistency guarantees. We'll just go with it. This happens for instance
-         if the server was started using dfind instead of watchman. *)
-      Hh_logger.log
-        "Errors-file: %s is present, without watchman, so just going with it."
-        (Sys_utils.show_inode fd);
-      Lwt.return (pid, fd, None)
-    | Ok { Server_progress.ErrorsRead.clock = Some clock; _ }
-      when Option.equal String.equal (Some clock) already_checked_clock ->
-      (* we've already checked this clock! so just wait a short time, then re-open the file
-         so we soon discover when it has a new clock. *)
+    let file_id = FileId.of_fd fd in
+    if Option.equal FileId.equal (Some file_id) already_checked_file then
+      (* we've already checked this file! so just wait a short time, then retry *)
       let%lwt () = Lwt_unix.sleep 0.1 in
       keep_trying_to_open
         ~has_already_attempted_connect
         ~connect_then_close
-        ~already_checked_clock:(Some clock)
+        ~already_checked_file
         ~progress_callback
         ~deadline
         ~root
-    | Ok { Server_progress.ErrorsRead.pid; clock = Some clock; _ } -> begin
-      Hh_logger.log
-        "Errors-file: %s is present, was started at clock %s, so querying watchman..."
-        (Sys_utils.show_inode fd)
-        clock;
-      (* Watchman doesn't support "what files have changed from error.bin's clock until
-         hh-invocation clock?". We'll instead use the (less permissive, still correct) query
-         "what files have changed from error.bin's clock until now?". *)
-      progress_callback (Some "watchman sync");
-      let%lwt since_result =
-        watchman_get_raw_updates_since
+    else
+      let already_checked_file = Some file_id in
+      match Server_progress.ErrorsRead.openfile fd with
+      | Error (open_error, log_message) when not has_already_attempted_connect
+        ->
+        Hh_logger.log
+          "Errors-file: on %s, read sentinel %s [%s], so connecting then trying again"
+          (Sys_utils.show_inode fd)
+          (Server_progress.ErrorsRead.show_open_error open_error)
+          log_message;
+        (* If there was an existing file but it was bad -- e.g. came from a dead server,
+           or binary mismatch, then we will connect as before. In the case of binary mismatch,
+           we rely on the standard codepaths in clientConnect and monitorConnect: namely, it will
+           either succeed in starting and connecting to a new server of the correct binary, or
+           (e.g. without autostart) it will raise Exit_status.(Exit_with Exit_status.Build_id_mismatch).
+           The exception will bubble up to our caller; here we need only handle success. *)
+        Unix.close fd;
+        let%lwt () = connect_then_close () in
+        keep_trying_to_open
+          ~has_already_attempted_connect:true
+          ~connect_then_close
+          ~already_checked_file
+          ~progress_callback
+          ~deadline
           ~root
-          ~clock
-          ~fail_on_new_instance:false
-          ~fail_during_state:false
-      in
-      progress_callback (Some "hh_server sync");
-      match since_result with
-      | Error e ->
-        Hh_logger.log "Errors-file: watchman failure:\n%s\n" e;
-        (* The errors file is present, was started at clock `clock` but the watchman query failed.
-           We'll assume there has not been any file change since that clock.,
-           If there has, hh_server will ultimately tell us with a restart sentinel, and we'll
-           ask the user to re-run hh. This is sub-optimal UX, but still better UX than
-           loudly failing now. *)
-        Lwt.return (pid, fd, Some clock)
-      | Ok relative_raw_updates ->
-        let raw_updates =
-          relative_raw_updates
-          |> List.map ~f:(fun file ->
-                 Filename.concat (Path.to_string root) file)
-          |> SSet.of_list
-        in
-        let updates =
-          FindUtils.post_watchman_filter_from_fully_qualified_raw_updates
+      | Error (open_error, log_message) -> begin
+        (* But if there was an existing file that's still bad even after our connection
+           attempt, there's not much we can do *)
+        Hh_logger.log
+          "Errors-file: on %s, read sentinel %s [%s], and already connected once, so giving up."
+          (Sys_utils.show_inode fd)
+          (Server_progress.ErrorsRead.show_open_error open_error)
+          log_message;
+        progress_callback None;
+        match open_error with
+        | Server_progress.ErrorsRead.OBuild_id_mismatch ->
+          raise (Exit_status.Exit_with Exit_status.Build_id_mismatch)
+        | Server_progress.(ErrorsRead.ORead_error Malformed) ->
+          raise
+            (Exit_status.Exit_with
+               (Exit_status.Server_hung_up_should_abort None))
+        | Server_progress.ErrorsRead.OKilled finale_data ->
+          raise
+            (Exit_status.Exit_with
+               (Exit_status.Server_hung_up_should_abort finale_data))
+      end
+      | Ok { Server_progress.ErrorsRead.pid; clock = None; _ } ->
+        (* If there's an existing file, but it's not using watchman, then we cannot offer
+           consistency guarantees. We'll just go with it. This happens for instance
+           if the server was started using dfind instead of watchman. *)
+        Hh_logger.log
+          "Errors-file: %s is present, without watchman, so just going with it."
+          (Sys_utils.show_inode fd);
+        Lwt.return (pid, fd, None)
+      | Ok { Server_progress.ErrorsRead.pid; clock = Some clock; _ } -> begin
+        Hh_logger.log
+          "Errors-file: %s is present, was started at clock %s, so querying watchman..."
+          (Sys_utils.show_inode fd)
+          clock;
+        (* Watchman doesn't support "what files have changed from error.bin's clock until
+           hh-invocation clock?". We'll instead use the (less permissive, still correct) query
+           "what files have changed from error.bin's clock until now?". *)
+        progress_callback (Some "watchman sync");
+        let%lwt since_result =
+          watchman_get_raw_updates_since
             ~root
-            ~raw_updates
+            ~clock
+            ~fail_on_new_instance:false
+            ~fail_during_state:false
         in
-        if Relative_path.Set.is_empty updates then begin
-          (* If there was an existing errors.bin, and no files have changed since then,
-             then use it! *)
-          Hh_logger.log
-            "Errors-file: %s is present, was started at clock %s and watchman reports no updates since then, so using it!"
-            (Sys_utils.show_inode fd)
-            clock;
+        progress_callback (Some "hh_server sync");
+        match since_result with
+        | Error e ->
+          Hh_logger.log "Errors-file: watchman failure:\n%s\n" e;
+          (* The errors file is present, was started at clock `clock` but the watchman query failed.
+             We'll assume there has not been any file change since that clock.,
+             If there has, hh_server will ultimately tell us with a restart sentinel, and we'll
+             ask the user to re-run hh. This is sub-optimal UX, but still better UX than
+             loudly failing now. *)
           Lwt.return (pid, fd, Some clock)
-        end else begin
-          (* But if files have changed since the errors.bin, then we will keep spinning
-             under trust that hh_server will eventually recognize those changes and create
-             a new errors.bin file, which we'll then pick up on another iteration.
-             CARE! This only works if hh_server's test for "are there new files" is at least
-             as strict as our own.
-             They're identical, in fact, because they both use the same watchman filter
-             [FilesToIgnore.watchman_server_expression_terms] and the same [FindUtils.post_watchman_filter]. *)
-          Hh_logger.log
-            "Errors-file: %s is present, was started at clock %s, but watchman reports updates since then, so trying again. %d updates, for example %s"
-            (Sys_utils.show_inode fd)
-            clock
-            (Relative_path.Set.cardinal updates)
-            (Relative_path.Set.choose updates |> Relative_path.suffix);
-          let%lwt () = Lwt_unix.sleep 0.1 in
-          keep_trying_to_open
-            ~has_already_attempted_connect
-            ~connect_then_close
-            ~already_checked_clock:(Some clock)
-            ~progress_callback
-            ~deadline
-            ~root
-        end
-    end
+        | Ok relative_raw_updates ->
+          let raw_updates =
+            relative_raw_updates
+            |> List.map ~f:(fun file ->
+                   Filename.concat (Path.to_string root) file)
+            |> SSet.of_list
+          in
+          let updates =
+            FindUtils.post_watchman_filter_from_fully_qualified_raw_updates
+              ~root
+              ~raw_updates
+          in
+          if Relative_path.Set.is_empty updates then begin
+            (* If there was an existing errors.bin, and no files have changed since then,
+               then use it! *)
+            Hh_logger.log
+              "Errors-file: %s is present, was started at clock %s and watchman reports no updates since then, so using it!"
+              (Sys_utils.show_inode fd)
+              clock;
+            Lwt.return (pid, fd, Some clock)
+          end else begin
+            (* But if files have changed since the errors.bin, then we will keep spinning
+               under trust that hh_server will eventually recognize those changes and create
+               a new errors.bin file, which we'll then pick up on another iteration.
+               CARE! This only works if hh_server's test for "are there new files" is at least
+               as strict as our own.
+               They're identical, in fact, because they both use the same watchman filter
+               [FilesToIgnore.watchman_server_expression_terms] and the same [FindUtils.post_watchman_filter]. *)
+            Hh_logger.log
+              "Errors-file: %s is present, was started at clock %s, but watchman reports updates since then, so trying again. %d updates, for example %s"
+              (Sys_utils.show_inode fd)
+              clock
+              (Relative_path.Set.cardinal updates)
+              (Relative_path.Set.choose updates |> Relative_path.suffix);
+            let%lwt () = Lwt_unix.sleep 0.1 in
+            keep_trying_to_open
+              ~has_already_attempted_connect
+              ~connect_then_close
+              ~already_checked_file
+              ~progress_callback
+              ~deadline
+              ~root
+          end
+      end
   end
 
 (** Provides typechecker errors by displaying them to stdout.
@@ -711,7 +735,7 @@ let go_streaming
   let%lwt (pid, fd, clock) =
     keep_trying_to_open
       ~has_already_attempted_connect:false
-      ~already_checked_clock:None
+      ~already_checked_file:None
       ~connect_then_close
       ~progress_callback
       ~deadline

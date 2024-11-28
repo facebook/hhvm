@@ -1206,6 +1206,9 @@ bool emitIsTypeStructWithoutResolvingIfPossible(
     case TypeStructure::Kind::T_class_ptr:
       // TODO(T199610905) Do nothing until we're ready to enforce inner type
       return false;
+    case TypeStructure::Kind::T_class_or_classname:
+      // Banned by typechecker as with above case, no plans to support
+      return false;
   }
   not_reached();
 }

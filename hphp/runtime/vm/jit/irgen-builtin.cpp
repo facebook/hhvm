@@ -1965,6 +1965,8 @@ Type builtinOutType(const Func* builtin, uint32_t i) {
         return TCls | TLazyCls;
       }
       return TStr | TCls | TLazyCls;
+    case AnnotMetaType::ClassOrClassname:
+      return TStr | TCls | TLazyCls;
     case AnnotMetaType::Nonnull:
     case AnnotMetaType::NoReturn:
     case AnnotMetaType::Nothing:

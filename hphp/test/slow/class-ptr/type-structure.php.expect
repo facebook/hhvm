@@ -12,6 +12,12 @@ dict(3) {
   ["alias"]=>
   string(1) "U"
 }
+dict(2) {
+  ["kind"]=>
+  int(34)
+  ["alias"]=>
+  string(1) "V"
+}
 dict(1) {
   ["kind"]=>
   int(33)
@@ -23,4 +29,8 @@ dict(3) {
   bool(true)
   ["alias"]=>
   string(12) "HH\classname"
+}
+dict(1) {
+  ["kind"]=>
+  int(34)
 }

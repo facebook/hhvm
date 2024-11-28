@@ -143,6 +143,7 @@ const std::string
   s_hh_vec_or_dict(annotTypeName(AnnotType::VecOrDict)),
   s_hh_any_array(annotTypeName(AnnotType::ArrayLike)),
   s_hh_class(annotTypeName(AnnotType::Class)),
+  s_hh_class_or_classname(annotTypeName(AnnotType::ClassOrClassname)),
   s_hh("HH\\")
 ;
 
@@ -458,6 +459,9 @@ std::string fullName(const Array& arr, TypeStructure::TSDisplayType type) {
       break;
     case TypeStructure::Kind::T_class_ptr:
       name += s_hh_class;
+      break;
+    case TypeStructure::Kind::T_class_or_classname:
+      name += s_hh_class_or_classname;
       break;
   }
 
@@ -949,6 +953,7 @@ Array resolveTSImpl(TSEnv& env, const TSCtx& ctx, const Array& arr) {
       break;
 
     case TypeStructure::Kind::T_class_ptr:
+    case TypeStructure::Kind::T_class_or_classname:
       // TODO(T199611023) Resolve generics here when we're ready to allow this
       env.invalidType = true;
       break;
@@ -1206,7 +1211,8 @@ bool coerceToTypeStructure(Array& arr) {
     case TypeStructure::Kind::T_nonnull:
     case TypeStructure::Kind::T_recursiveUnion:
     // TODO(T199611023) This must change when we enforce the inner class type
-    case TypeStructure::Kind::T_class_ptr: {
+    case TypeStructure::Kind::T_class_ptr:
+    case TypeStructure::Kind::T_class_or_classname: {
       return true;
     }
     case TypeStructure::Kind::T_fun: {

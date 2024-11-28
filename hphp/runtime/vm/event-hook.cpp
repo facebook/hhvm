@@ -233,6 +233,7 @@ Array getReifiedClasses(const ActRec* ar) {
     case K::T_nothing:
     case K::T_dynamic:
     case K::T_class_ptr:
+    case K::T_class_or_classname:
       clist.append(init_null());
       break;
 

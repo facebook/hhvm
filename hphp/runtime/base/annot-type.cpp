@@ -83,6 +83,8 @@ static const std::pair<HhvmStrToTypeMap, StdStrToTypeMap>& getAnnotTypeMaps() {
       { annotTypeName(AnnotType::Classname), AnnotType::Classname },
       // TODO(T199611023) revisit when we enforce the inner type
       { annotTypeName(AnnotType::Class),     AnnotType::Class },
+      { annotTypeName(AnnotType::ClassOrClassname),
+                                             AnnotType::ClassOrClassname },
     };
     for (unsigned i = 0; i < pairs.size(); ++i) {
       mappedPairs.first[makeStaticString(pairs[i].name)] = pairs[i].type;
@@ -168,6 +170,7 @@ TypedValue annotDefaultValue(AnnotType at) {
     case AnnotType::NoReturn:
     case AnnotType::Classname:
     case AnnotType::Class:
+    case AnnotType::ClassOrClassname:
     case AnnotType::Null:     return make_tv<KindOfNull>();
     case AnnotType::Nonnull:
     case AnnotType::Number:
@@ -254,6 +257,10 @@ annotCompat(DataType dt, AnnotType at, const StringData* annotClsName) {
         return Cfg::Eval::ClassNoticesSampleRate > 0 ?
           AnnotAction::WarnClass : AnnotAction::Pass;
       }
+      return AnnotAction::Fail;
+    case AnnotMetaType::ClassOrClassname:
+      if (isStringType(dt)|| isLazyClassType(dt) || isClassType(dt))
+        return AnnotAction::Pass;
       return AnnotAction::Fail;
     case AnnotMetaType::Nothing:
     case AnnotMetaType::NoReturn:
@@ -362,6 +369,7 @@ const char* annotName(AnnotType at) {
     case AnnotType::NoReturn:   return "noreturn";
     case AnnotType::Classname:  return "classname";
     case AnnotType::Class:      return "class";
+    case AnnotType::ClassOrClassname: return "class_or_classname";
     case AnnotType::Null:       return "null";
     case AnnotType::Nonnull:    return "nonnull";
     case AnnotType::Number:     return "number";

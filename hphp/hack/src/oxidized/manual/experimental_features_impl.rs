@@ -39,7 +39,7 @@ impl FeatureName {
             PipeAwait => OngoingRelease,
             MatchStatements => Unstable,
             StrictSwitch => Unstable,
-            ClassType => Unstable,
+            ClassType => OngoingRelease,
             FunctionReferences => Unstable,
             FunctionTypeOptionalParams => OngoingRelease,
             ExpressionTreeNest => OngoingRelease,

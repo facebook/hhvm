@@ -230,6 +230,7 @@ struct TypeConstraint {
       case AnnotType::Nothing:
       case AnnotType::Classname:
       case AnnotType::Class:
+      case AnnotType::ClassOrClassname:
         return true;
       case AnnotType::SubObject:
       case AnnotType::Unresolved:
@@ -358,6 +359,7 @@ struct TypeConstraint {
   bool isVecOrDict() const { return !isUnion() && m_u.single.type == Type::VecOrDict; }
   bool isClassname() const { return !isUnion() && m_u.single.type == Type::Classname; }
   bool isClass()     const { return !isUnion() && m_u.single.type == Type::Class; }
+  bool isClassOrClassname() const { return !isUnion() && m_u.single.type == Type::ClassOrClassname; }
 
   bool isUnresolved() const {
     return isUnion()

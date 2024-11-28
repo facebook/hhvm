@@ -244,6 +244,13 @@ Optional<TypeConstraint> TypeConstraint::UnionBuilder::recordConstraint(const Ty
       m_preciseTypeMask |= kUnionTypeClass;
       break;
     }
+    case AnnotType::ClassOrClassname: {
+      // This type won't be supported by case types, nor will class<T> or classname<T>
+      // until configs ClassPassesClassname and StringPassesClass are both false
+      m_preciseTypeMask |= kUnionTypeClassname;
+      m_preciseTypeMask |= kUnionTypeClass;
+      break;
+    }
     case AnnotType::SubObject: {
       assertx(tc.typeName());
       m_classes.m_list.emplace_back(tc.m_u.single.class_);
@@ -742,6 +749,7 @@ std::string TypeConstraint::displayName(const Class* context /*= nullptr*/,
         case AnnotType::Nonnull:  str = "nonnull"; break;
         case AnnotType::Classname: str = "classname"; break;
         case AnnotType::Class:    str = "class"; break;
+        case AnnotType::ClassOrClassname: str = "class_or_classname"; break;
         case AnnotType::SubObject: str = clsName()->data(); break;
         case AnnotType::This:
         case AnnotType::Mixed:
@@ -835,6 +843,7 @@ std::string show(AnnotType t) {
     case AnnotType::Nothing: return "Nothing";
     case AnnotType::Classname: return "Classname";
     case AnnotType::Class: return "Class";
+    case AnnotType::ClassOrClassname: return "ClassOrClassname";
     case AnnotType::Unresolved: return "Unresolved";
   }
   not_reached();
@@ -1106,6 +1115,7 @@ bool TypeConstraint::equivalentForProp(const TypeConstraint& other) const {
       case MetaType::ArrayLike:
       case MetaType::Classname:
       case MetaType::Class:
+      case MetaType::ClassOrClassname:
       case MetaType::Precise:
       case MetaType::SubObject:
         return { tc.type(), tc.clsName(), tc.isNullable() };
@@ -1260,6 +1270,7 @@ bool TypeConstraint::checkTypeAliasImpl(const ClassConstraint& oc, const Class* 
       case AnnotMetaType::ArrayLike:
       case AnnotMetaType::Classname:  // TODO: T83332251
       case AnnotMetaType::Class:
+      case AnnotMetaType::ClassOrClassname:
         continue;
       case AnnotMetaType::SubObject:
         if (klass && cls->classof(klass)) return true;
@@ -1356,6 +1367,7 @@ bool TypeConstraint::checkImpl(tv_rval val,
       case MetaType::ArrayLike:
       case MetaType::Classname:
       case MetaType::Class:
+      case MetaType::ClassOrClassname:
         return false;
       case MetaType::Nonnull:
         return true;
@@ -1489,6 +1501,7 @@ bool TypeConstraint::alwaysPasses(const StringData* checkedClsName) const {
     case MetaType::ArrayLike:
     case MetaType::Classname:
     case MetaType::Class:
+    case MetaType::ClassOrClassname:
       return false;
     case MetaType::Nonnull:
       return true;
@@ -1994,6 +2007,8 @@ MemoKeyConstraint memoKeyConstraintFromTC(const TypeConstraint& tc) {
     case AnnotMetaType::Classname:
       return tc.isNullable() ? MK::StrOrNull : MK::Str;
     case AnnotMetaType::Class:
+      return tc.isNullable() ? MK::StrOrNull : MK::Str;
+    case AnnotMetaType::ClassOrClassname:
       return tc.isNullable() ? MK::StrOrNull : MK::Str;
     case AnnotMetaType::SubObject:
       return tc.isNullable() ? MK::ObjectOrNull : MK::Object;

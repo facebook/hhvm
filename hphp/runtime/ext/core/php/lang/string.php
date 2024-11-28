@@ -41,4 +41,11 @@ newtype typename<+T> as string = string;
  */
 newtype classname<+T> as typename<T> = typename<T>;
 
+/**
+ * A type representing the runtime union of strings, lazy classes, and class
+ * pointers without any logging. The value of this type is overwritten
+ * internally. Either a nameof C or a C::class should be able to flow into this
+ * type without logging or type errors.
+ */
+type class_or_classname<+T> = classname<T>;
 } // namespace HH

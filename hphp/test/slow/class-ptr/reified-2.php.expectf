@@ -11,3 +11,12 @@ lazyclass(C)
 
 Notice: Class used in is_string in %s/class-ptr/reified-2.php on line 8
 class(C)
+
+Warning: Using TypeStructure to check class_or_classname type in %s/class-ptr/reified-2.php on line 8
+string(1) "C"
+
+Warning: Using TypeStructure to check class_or_classname type in %s/class-ptr/reified-2.php on line 8
+lazyclass(C)
+
+Warning: Using TypeStructure to check class_or_classname type in %s/class-ptr/reified-2.php on line 8
+class(C)

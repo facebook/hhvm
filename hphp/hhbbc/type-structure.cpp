@@ -82,6 +82,7 @@ bool kind_is_resolved(TS::Kind kind) {
     case TS::Kind::T_keyset:
     case TS::Kind::T_vec_or_dict:
     case TS::Kind::T_class_ptr:
+    case TS::Kind::T_class_or_classname:
     case TS::Kind::T_any_array:
     case TS::Kind::T_tuple:
     case TS::Kind::T_shape:
@@ -1019,6 +1020,7 @@ Resolution resolve_impl(ResolveCtx& ctx, TS::Kind kind, SArray ts) {
     case TS::Kind::T_union:
       return resolve_union(ctx, ts);
     case TS::Kind::T_class_ptr:
+    case TS::Kind::T_class_or_classname:
       // TODO(T199611023) Resolve generics here when we're ready to allow this
       return Resolution { dict_val(ts), true };
     case TS::Kind::T_int:
@@ -1196,6 +1198,7 @@ SString type_structure_name(SArray ts) {
     case TS::Kind::T_xhp:
     case TS::Kind::T_recursiveUnion:
     case TS::Kind::T_class_ptr:
+    case TS::Kind::T_class_or_classname:
       return nullptr;
   }
 }

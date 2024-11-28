@@ -1727,6 +1727,11 @@ ConstraintType type_from_constraint_impl(const TypeConstraint& tc,
             union_of(TCls, TLazyCls) : union_of(TStr, TCls, TLazyCls),
           union_of(TStr, TCls, TLazyCls)
         };
+      case AnnotMetaType::ClassOrClassname:
+        return C{
+          union_of(TStr, TCls, TLazyCls),
+          union_of(TStr, TCls, TLazyCls)
+        };
     }
 
     always_assert(false);

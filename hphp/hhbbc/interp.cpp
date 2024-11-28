@@ -3009,6 +3009,8 @@ void isTypeStructImpl(ISS& env, SArray inputTS) {
     case TypeStructure::Kind::T_class_ptr:
       // TODO(T199611023) Do nothing until we're ready to enforce the inner type
       return result(TBool);
+    case TypeStructure::Kind::T_class_or_classname:
+      return result(TBool);
   }
 
   not_reached();

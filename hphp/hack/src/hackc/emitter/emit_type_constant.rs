@@ -61,6 +61,7 @@ fn ts_kind(tparams: &[&str], p: &str) -> TypeStructureKind {
             "hh\\null" => TypeStructureKind::T_null,
             "hh\\nothing" => TypeStructureKind::T_nothing,
             "hh\\dynamic" => TypeStructureKind::T_dynamic,
+            "hh\\class_or_classname" => TypeStructureKind::T_class_or_classname,
             "unresolved" => TypeStructureKind::T_unresolved,
             "$$internal$$typeaccess" => TypeStructureKind::T_typeaccess,
             "$$internal$$reifiedtype" => TypeStructureKind::T_reifiedtype,
@@ -97,6 +98,7 @@ fn is_prim_or_resolved_classname(kind: TypeStructureKind) -> bool {
             | TypeStructureKind::T_keyset
             | TypeStructureKind::T_vec_or_dict
             | TypeStructureKind::T_any_array
+            | TypeStructureKind::T_class_or_classname
     )
 }
 
@@ -297,7 +299,8 @@ fn hint_to_type_constant_list(
                 r.push(c);
             }
             if !(name.eq_ignore_ascii_case(classes::CLASS_NAME)
-                || name.eq_ignore_ascii_case(classes::TYPE_NAME))
+                || name.eq_ignore_ascii_case(classes::TYPE_NAME)
+                || name.eq_ignore_ascii_case(classes::CLASS_OR_CLASSNAME))
             {
                 r.append(&mut get_generic_types(
                     opts,

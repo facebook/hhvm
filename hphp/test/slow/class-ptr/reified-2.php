@@ -15,4 +15,8 @@ function main(): void {
   f<classname<C>>(nameof C); // banned by hack
   f<classname<C>>(C::class); // banned by hack
   f<classname<C>>(HH\classname_to_class(C::class)); // banned by hack
+
+  f<class_or_classname<C>>(nameof C); // banned by hack
+  f<class_or_classname<C>>(C::class); // banned by hack
+  f<class_or_classname<C>>(HH\classname_to_class(C::class)); // banned by hack
 }

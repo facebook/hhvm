@@ -4458,6 +4458,8 @@ Optional<Type> type_of_type_structure(const IIndex& index,
       case TypeStructure::Kind::T_class_ptr:
         // Don't try to model T_string (classname<T>); just bail
         return std::nullopt;
+      case TypeStructure::Kind::T_class_or_classname:
+        return std::nullopt;
 
     }
     not_reached();

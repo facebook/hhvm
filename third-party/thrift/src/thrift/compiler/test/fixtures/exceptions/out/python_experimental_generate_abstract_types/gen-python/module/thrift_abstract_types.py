@@ -21,6 +21,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 
+from module.thrift_enums import *
 class Fiery(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def message(self) -> str: ...

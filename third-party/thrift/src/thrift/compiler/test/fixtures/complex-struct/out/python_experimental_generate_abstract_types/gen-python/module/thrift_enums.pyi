@@ -8,13 +8,12 @@
 from __future__ import annotations
 
 import thrift.python.types as _fbthrift_python_types
-import module.thrift_abstract_types
 
 class _fbthrift_compatible_with_MyEnum:
     pass
 
 
-class MyEnum(_fbthrift_python_types.Enum, int, module.thrift_abstract_types.MyEnum, _fbthrift_compatible_with_MyEnum):
+class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
     MyValue3: MyEnum = ...

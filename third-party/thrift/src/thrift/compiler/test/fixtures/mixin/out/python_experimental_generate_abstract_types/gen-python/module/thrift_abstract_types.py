@@ -21,6 +21,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 
+from module.thrift_enums import *
 class Mixin1(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

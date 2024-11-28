@@ -8,4 +8,3 @@
 from __future__ import annotations
 
 import thrift.python.types as _fbthrift_python_types
-import module.thrift_abstract_types

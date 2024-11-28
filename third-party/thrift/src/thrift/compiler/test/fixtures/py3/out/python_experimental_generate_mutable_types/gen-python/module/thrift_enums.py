@@ -12,7 +12,11 @@ import __static__
 import fbcode.thrift.python.types as _fbthrift_python_types
 import module.thrift_metadata
 
-class AnEnum(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_AnEnum:
+    pass
+
+
+class AnEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnum):
     NOTSET = 0
     ONE = 1
     TWO = 2
@@ -41,7 +45,11 @@ class AnEnum(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
-class AnEnumRenamed(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_AnEnumRenamed:
+    pass
+
+
+class AnEnumRenamed(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnumRenamed):
     name_ = 0
     value_ = 1
     renamed_ = 2
@@ -68,7 +76,11 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
-class Flags(_fbthrift_python_types.Flag):
+class _fbthrift_compatible_with_Flags:
+    pass
+
+
+class Flags(_fbthrift_python_types.Flag, _fbthrift_compatible_with_Flags):
     flag_A = 1
     flag_B = 2
     flag_C = 4

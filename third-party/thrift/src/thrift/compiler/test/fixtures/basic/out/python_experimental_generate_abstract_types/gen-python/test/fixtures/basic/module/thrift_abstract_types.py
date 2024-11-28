@@ -22,13 +22,10 @@ import enum as _enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
-class MyEnum:
-    pass
+from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_HackEnum
 
-class HackEnum:
-    pass
-
-
+from test.fixtures.basic.module.thrift_enums import *
 class MyStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

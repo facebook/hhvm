@@ -22,6 +22,7 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import includes.thrift_abstract_types as _fbthrift__includes__thrift_abstract_types
 
 
+from module.thrift_enums import *
 class MyStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

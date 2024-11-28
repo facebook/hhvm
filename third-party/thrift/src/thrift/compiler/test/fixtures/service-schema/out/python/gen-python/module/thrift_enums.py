@@ -10,7 +10,11 @@ from __future__ import annotations
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_metadata
 
-class Result(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_Result:
+    pass
+
+
+class Result(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Result):
     OK = 0
     SO_SO = 1
     GOOD = 2

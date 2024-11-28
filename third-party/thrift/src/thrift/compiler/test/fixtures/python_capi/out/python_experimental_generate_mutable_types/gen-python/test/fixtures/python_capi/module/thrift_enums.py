@@ -10,7 +10,11 @@ from __future__ import annotations
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.python_capi.module.thrift_metadata
 
-class MyEnum(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_MyEnum:
+    pass
+
+
+class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
     MyValue1 = 0
     MyValue2 = 1
     @staticmethod
@@ -36,7 +40,11 @@ class MyEnum(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
-class AnnoyingEnum(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_AnnoyingEnum:
+    pass
+
+
+class AnnoyingEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnnoyingEnum):
     FOO = 1
     BAR = 2
     @staticmethod

@@ -8,13 +8,12 @@
 from __future__ import annotations
 
 import thrift.python.types as _fbthrift_python_types
-import apache.thrift.fixtures.types.module.thrift_abstract_types
 
 class _fbthrift_compatible_with_has_bitwise_ops:
     pass
 
 
-class has_bitwise_ops(_fbthrift_python_types.Enum, int, apache.thrift.fixtures.types.module.thrift_abstract_types.has_bitwise_ops, _fbthrift_compatible_with_has_bitwise_ops):
+class has_bitwise_ops(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_has_bitwise_ops):
     none: has_bitwise_ops = ...
     zero: has_bitwise_ops = ...
     one: has_bitwise_ops = ...
@@ -28,7 +27,7 @@ class _fbthrift_compatible_with_is_unscoped:
     pass
 
 
-class is_unscoped(_fbthrift_python_types.Enum, int, apache.thrift.fixtures.types.module.thrift_abstract_types.is_unscoped, _fbthrift_compatible_with_is_unscoped):
+class is_unscoped(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_is_unscoped):
     hello: is_unscoped = ...
     world: is_unscoped = ...
     def _to_python(self) -> is_unscoped: ...
@@ -39,7 +38,7 @@ class _fbthrift_compatible_with_MyForwardRefEnum:
     pass
 
 
-class MyForwardRefEnum(_fbthrift_python_types.Enum, int, apache.thrift.fixtures.types.module.thrift_abstract_types.MyForwardRefEnum, _fbthrift_compatible_with_MyForwardRefEnum):
+class MyForwardRefEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyForwardRefEnum):
     ZERO: MyForwardRefEnum = ...
     NONZERO: MyForwardRefEnum = ...
     def _to_python(self) -> MyForwardRefEnum: ...

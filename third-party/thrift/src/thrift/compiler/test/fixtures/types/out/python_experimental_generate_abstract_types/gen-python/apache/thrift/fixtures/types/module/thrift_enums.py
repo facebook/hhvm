@@ -10,7 +10,11 @@ from __future__ import annotations
 import thrift.python.types as _fbthrift_python_types
 import apache.thrift.fixtures.types.module.thrift_metadata
 
-class has_bitwise_ops(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_has_bitwise_ops:
+    pass
+
+
+class has_bitwise_ops(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_has_bitwise_ops):
     none = 0
     zero = 1
     one = 2
@@ -39,7 +43,11 @@ class has_bitwise_ops(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
-class is_unscoped(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_is_unscoped:
+    pass
+
+
+class is_unscoped(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_is_unscoped):
     hello = 0
     world = 1
     @staticmethod
@@ -65,7 +73,11 @@ class is_unscoped(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
-class MyForwardRefEnum(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_MyForwardRefEnum:
+    pass
+
+
+class MyForwardRefEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyForwardRefEnum):
     ZERO = 0
     NONZERO = 12
     @staticmethod

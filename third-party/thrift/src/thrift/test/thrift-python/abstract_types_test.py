@@ -18,6 +18,10 @@ import datetime
 import typing
 import unittest
 
+import thrift.test.thrift_python.enum_test.thrift_abstract_types as enum_test_abstract_types
+
+import thrift.test.thrift_python.enum_test.thrift_enums as enum_test_enums
+
 import thrift.test.thrift_python.included.thrift_abstract_types
 
 from folly import iobuf
@@ -841,3 +845,14 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             AttributeError,
         ):
             string_field_union.int_field
+
+    def test_enum_identity(self) -> None:
+        self.assertIs(
+            enum_test_enums.PositiveNumber, enum_test_abstract_types.PositiveNumber
+        )
+
+    def test_enum_value(self) -> None:
+        self.assertEqual(
+            enum_test_enums.PositiveNumber.THREE,
+            enum_test_abstract_types.PositiveNumber.THREE,
+        )

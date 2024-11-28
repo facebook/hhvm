@@ -10,7 +10,11 @@ from __future__ import annotations
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_metadata
 
-class EmptyEnum(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_EmptyEnum:
+    pass
+
+
+class EmptyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_EmptyEnum):
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.EmptyEnum"
@@ -34,7 +38,11 @@ class EmptyEnum(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
-class City(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_City:
+    pass
+
+
+class City(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_City):
     NYC = 0
     MPK = 1
     SEA = 2
@@ -62,7 +70,11 @@ class City(_fbthrift_python_types.Enum, int):
     def _to_py_deprecated(self):
         return self.value
 
-class Company(_fbthrift_python_types.Enum, int):
+class _fbthrift_compatible_with_Company:
+    pass
+
+
+class Company(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Company):
     FACEBOOK = 0
     WHATSAPP = 1
     OCULUS = 2

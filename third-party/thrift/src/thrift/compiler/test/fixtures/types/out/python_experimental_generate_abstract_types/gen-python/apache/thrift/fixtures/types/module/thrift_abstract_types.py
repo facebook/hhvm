@@ -21,16 +21,11 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import apache.thrift.fixtures.types.included.thrift_abstract_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_abstract_types
 
-class has_bitwise_ops:
-    pass
+from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_has_bitwise_ops
+from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_is_unscoped
+from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_MyForwardRefEnum
 
-class is_unscoped:
-    pass
-
-class MyForwardRefEnum:
-    pass
-
-
+from apache.thrift.fixtures.types.module.thrift_enums import *
 class empty_struct(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...

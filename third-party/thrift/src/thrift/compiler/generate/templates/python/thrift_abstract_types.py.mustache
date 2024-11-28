@@ -49,11 +49,7 @@ import {{included_module_path}}.thrift_abstract_types as {{included_module_mangl
 import {{module_path}}
 {{/program:adapter_type_hint_modules}}
 
-{{#program:enums}}
-class {{enum:name}}:
-    pass
-
-{{/program:enums}}
+{{> types/import_enums}}
 {{#program:structs}}
 
 class {{> structs/unadapted_name}}({{!

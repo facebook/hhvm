@@ -8,13 +8,12 @@
 from __future__ import annotations
 
 import thrift.python.types as _fbthrift_python_types
-import test.fixtures.basic.module.thrift_abstract_types
 
 class _fbthrift_compatible_with_MyEnum:
     pass
 
 
-class MyEnum(_fbthrift_python_types.Enum, int, test.fixtures.basic.module.thrift_abstract_types.MyEnum, _fbthrift_compatible_with_MyEnum):
+class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
     def _to_python(self) -> MyEnum: ...
@@ -25,7 +24,7 @@ class _fbthrift_compatible_with_HackEnum:
     pass
 
 
-class HackEnum(_fbthrift_python_types.Enum, int, test.fixtures.basic.module.thrift_abstract_types.HackEnum, _fbthrift_compatible_with_HackEnum):
+class HackEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_HackEnum):
     Value1: HackEnum = ...
     Value2: HackEnum = ...
     def _to_python(self) -> HackEnum: ...

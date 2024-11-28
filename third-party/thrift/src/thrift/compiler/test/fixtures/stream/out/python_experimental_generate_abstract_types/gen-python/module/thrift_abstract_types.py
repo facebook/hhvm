@@ -21,6 +21,7 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
 
+from module.thrift_enums import *
 class FooStreamEx(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.FooStreamEx": ...  # type: ignore

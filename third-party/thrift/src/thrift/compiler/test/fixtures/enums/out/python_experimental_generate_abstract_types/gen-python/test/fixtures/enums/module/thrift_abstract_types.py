@@ -20,28 +20,15 @@ _fbthrift_property = property
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
-class Metasyntactic:
-    pass
+from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_Metasyntactic
+from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_MyEnum1
+from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_MyEnum2
+from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_MyEnum3
+from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_MyEnum4
+from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_MyBitmaskEnum1
+from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_MyBitmaskEnum2
 
-class MyEnum1:
-    pass
-
-class MyEnum2:
-    pass
-
-class MyEnum3:
-    pass
-
-class MyEnum4:
-    pass
-
-class MyBitmaskEnum1:
-    pass
-
-class MyBitmaskEnum2:
-    pass
-
-
+from test.fixtures.enums.module.thrift_enums import *
 class SomeStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

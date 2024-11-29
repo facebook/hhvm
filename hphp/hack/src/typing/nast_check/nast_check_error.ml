@@ -284,11 +284,8 @@ let not_abstract_without_typeconst pos =
     []
 
 let typeconst_depends_on_external_tparam pos ext_pos ext_name =
-  let claim =
-    ( pos,
-      "A type constant can only use type parameters declared in its own"
-      ^ " type parameter list" )
-  and reasons =
+  let claim = (pos, "A type constant cannot use type parameters") in
+  let reasons =
     [
       ( Pos_or_decl.of_raw_pos ext_pos,
         Format.sprintf

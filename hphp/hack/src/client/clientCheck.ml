@@ -307,7 +307,7 @@ let main_internal
       && prechecked
       && not (EventLogger.is_sandcastle ())
     in
-    if use_streaming then (
+    if use_streaming then
       let%lwt (exit_status, streamed_errors, watchman_clock_streaming, telemetry)
           =
         ClientCheckStatus.go_streaming
@@ -318,27 +318,37 @@ let main_internal
       in
       (* TODO @catg The following is only temporary to validate correctness of error streaming.
          To delete when correctness is validated, or to put behind a flag. *)
-      let%lwt res =
-        Lwt_utils.with_timeout ~timeout_sec:2. (fun () ->
-            rpc
-              args
-              (ServerCommandTypes.STATUS
-                 { max_errors = args.ClientEnv.max_errors; error_filter }))
+      let%lwt () =
+        if Option.is_none args.ClientEnv.max_errors then (
+          let%lwt res =
+            Lwt_utils.with_timeout ~timeout_sec:2. (fun () ->
+                rpc
+                  args
+                  (ServerCommandTypes.STATUS
+                     { max_errors = args.ClientEnv.max_errors; error_filter }))
+          in
+          (match res with
+          | `Timeout -> ()
+          | `Done
+              ( {
+                  ServerCommandTypes.Server_status.error_list;
+                  watchman_clock;
+                  _;
+                },
+                _telemetry ) ->
+            if
+              Option.equal
+                Watchman.equal_clock
+                watchman_clock
+                watchman_clock_streaming
+            then
+              validate_streamed_errors error_list streamed_errors);
+          Lwt.return_unit
+        ) else
+          Lwt.return_unit
       in
-      (match res with
-      | `Timeout -> ()
-      | `Done
-          ( { ServerCommandTypes.Server_status.error_list; watchman_clock; _ },
-            _telemetry ) ->
-        if
-          Option.equal
-            Watchman.equal_clock
-            watchman_clock
-            watchman_clock_streaming
-        then
-          validate_streamed_errors error_list streamed_errors);
       Lwt.return (exit_status, telemetry)
-    ) else
+    else
       let%lwt (status, telemetry) =
         rpc
           args

@@ -94,11 +94,9 @@ let go status error_format ~is_interactive ~output_json ~max_errors =
 type end_sentinel =
   | Completed of Server_progress.completion_reason
   | Watch_error of Server_progress_lwt.watch_error
-  | Max_errors of (Telemetry.t[@opaque])
 [@@deriving show]
 
 let end_sentinel_short_string = function
-  | Max_errors _ -> "Max_errors"
   | Watch_error _ -> "Killed"
   | Completed c -> Server_progress.show_completion_reason c
 
@@ -127,7 +125,7 @@ module ErrorsInfo = struct
         files_with_errors;
         files_reported_twice;
       }
-      (errors : _ Relative_path.Map.t) =
+      (errors : Errors.finalized_error list Relative_path.Map.t) =
     let errors_acc =
       Relative_path.Map.fold errors ~init:errors_acc ~f:(fun _path errors acc ->
           Errors.FinalizedErrorSet.add_seq (errors |> Stdlib.List.to_seq) acc)
@@ -176,6 +174,81 @@ let validate_files_reported_twice files =
     Hh_logger.log "%s" msg;
     HackEventLogger.invariant_violation_bug msg
   )
+
+module ErrorPrinter : sig
+  type t
+
+  val init : max_errors:int option -> t
+
+  val print_error_if_below_limit :
+    t -> Errors.finalized_error -> error_format:Errors.format -> t
+
+  val print_extra_errors_if_any : t -> t
+
+  val has_printed_counts : t -> bool
+end = struct
+  type t = {
+    max_errors: int;
+    printed_count: int;
+    extra_error_count: int;
+    extra_warning_count: int;
+    has_already_printed_extra: bool;
+  }
+
+  let init ~max_errors =
+    {
+      max_errors = Option.value max_errors ~default:Int.max_value;
+      printed_count = 0;
+      extra_error_count = 0;
+      extra_warning_count = 0;
+      has_already_printed_extra = false;
+    }
+
+  let print_error_if_below_limit state error ~error_format : t =
+    if state.printed_count < state.max_errors then (
+      print_error ~error_format error;
+      { state with printed_count = state.printed_count + 1 }
+    ) else
+      match error.User_error.severity with
+      | User_error.Err ->
+        { state with extra_error_count = state.extra_error_count + 1 }
+      | User_error.Warning ->
+        { state with extra_warning_count = state.extra_warning_count + 1 }
+
+  let print_extra_errors_if_any
+      ({
+         max_errors;
+         extra_error_count;
+         extra_warning_count;
+         has_already_printed_extra;
+         printed_count = _;
+       } as state) : t =
+    if extra_error_count + extra_warning_count = 0 then
+      state
+    else (
+      if has_already_printed_extra then
+        (* \x1b[1A  = move cursor up once.
+                      We do this because the last printed line is the status,
+                      which we don't want to touch
+           \r       = move cursor to beginning of line
+           \x1b[0K  = erase until end of line *)
+        Printf.printf "\x1b[1A\r\x1b[0K%!";
+      let explanation =
+        Printf.sprintf "(not showing all due to --max-errors %d)\n" max_errors
+      in
+      (match (extra_error_count, extra_warning_count) with
+      | (n, 0) -> Printf.printf "%d errors found %s" n explanation
+      | (0, m) -> Printf.printf "%d warnings found %s" m explanation
+      | (n, m) ->
+        Printf.printf "%d errors, %d warnings found %s" n m explanation);
+      (* \x1b[1B = move cursor down once, to go back to the last line *)
+      Printf.printf "\x1b[1B%!";
+      { state with has_already_printed_extra = true }
+    )
+
+  let has_printed_counts { has_already_printed_extra; _ } =
+    has_already_printed_extra
+end
 
 (** This function produces streaming errors: it reads the errors.bin opened
   as [fd], displays errors as they come using the [args.error_format] over stdout, and
@@ -233,11 +306,12 @@ let go_streaming_on_fd
     show_progress ()
   in
 
+  let error_format = Errors.format_or_default error_format in
   (* this lwt process consumes errors from the errors.bin file by polling
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
-  let rec consume (errors_info : ErrorsInfo.t) :
-      (ErrorsInfo.t * end_sentinel) Lwt.t =
+  let rec consume (errors_info : ErrorsInfo.t) (printer : ErrorPrinter.t) :
+      (ErrorsInfo.t * end_sentinel * ErrorPrinter.t) Lwt.t =
     let%lwt errors = Lwt_stream.get errors_stream in
     match errors with
     | None ->
@@ -246,31 +320,40 @@ let go_streaming_on_fd
          stream is closed and hence subsequent [Lwt_stream.get] return [None].
          If we're here, it means that contract has been violated. *)
       failwith "Expected end_sentinel before end of stream"
-    | Some (Error error) -> Lwt.return (errors_info, Watch_error error)
+    | Some (Error error) -> Lwt.return (errors_info, Watch_error error, printer)
     | Some (Ok (Server_progress.ErrorsRead.RCompleted (x, _))) ->
-      Lwt.return (errors_info, Completed x)
+      Lwt.return (errors_info, Completed x, printer)
     | Some (Ok (Server_progress.ErrorsRead.RItem item)) ->
       (match item with
       | Server_progress.Telemetry telemetry_item ->
         errors_file_telemetry :=
           Telemetry.merge !errors_file_telemetry telemetry_item;
         update_partial_telemetry (ErrorsInfo.total_count errors_info);
-        consume errors_info
+        consume errors_info printer
       | Server_progress.Errors { errors; timestamp = _ } ->
         first_error_time :=
           Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
         (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
         progress_callback None;
-        let error_format = Errors.format_or_default error_format in
         let errors =
           Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
         in
         let errors_info = ErrorsInfo.accumulate errors_info errors in
-        begin
+        let printer =
           try
-            Relative_path.Map.iter errors ~f:(fun _path ->
-                List.iter ~f:(print_error ~error_format));
-            Printf.printf "%!"
+            let printer =
+              Relative_path.Map.fold
+                errors
+                ~init:printer
+                ~f:(fun _path errors_in_file acc ->
+                  List.fold
+                    errors_in_file
+                    ~init:acc
+                    ~f:(ErrorPrinter.print_error_if_below_limit ~error_format))
+            in
+            let printer = ErrorPrinter.print_extra_errors_if_any printer in
+            Printf.printf "%!";
+            printer
           with
           | Sys_error msg when String.equal msg "Broken pipe" ->
             (* We catch this error very locally, as small as we can around [printf],
@@ -280,16 +363,11 @@ let go_streaming_on_fd
             Stdlib.Printexc.raise_with_backtrace
               Exit_status.(Exit_with Client_broken_pipe)
               backtrace
-        end;
+        in
         progress_callback !latest_progress;
-        update_partial_telemetry (ErrorsInfo.total_count errors_info);
-        if
-          ErrorsInfo.total_count errors_info
-          >= Option.value max_errors ~default:Int.max_value
-        then
-          Lwt.return (errors_info, Max_errors (Telemetry.create ()))
-        else
-          consume errors_info)
+        let error_count = ErrorsInfo.total_count errors_info in
+        update_partial_telemetry error_count;
+        consume errors_info printer)
   in
 
   (* We will show progress indefinitely until "consume" finishes,
@@ -300,8 +378,13 @@ let go_streaming_on_fd
               files_with_errors = _;
               files_reported_twice;
             },
-            end_sentinel ) =
-    Lwt.pick [consume ErrorsInfo.empty; show_progress ()]
+            end_sentinel,
+            printer ) =
+    Lwt.pick
+      [
+        consume ErrorsInfo.empty (ErrorPrinter.init ~max_errors);
+        show_progress ();
+      ]
   in
   (* Clear the spinner *)
   progress_callback None;
@@ -309,18 +392,17 @@ let go_streaming_on_fd
 
   let (exit_status, telemetry) =
     match end_sentinel with
-    | Max_errors telemetry
     | Completed (Server_progress.Complete telemetry) ->
       (* complete either because the server completed, or we truncated early *)
-      let error_format = Errors.format_or_default error_format in
-      Option.iter
-        (Errors.format_summary
-           error_format
-           ~error_count
-           ~warning_count
-           ~dropped_count:None
-           ~max_errors)
-        ~f:(fun msg -> Printf.printf "%s" msg);
+      if not @@ ErrorPrinter.has_printed_counts printer then
+        Option.iter
+          (Errors.format_summary
+             error_format
+             ~error_count
+             ~warning_count
+             ~dropped_count:None
+             ~max_errors)
+          ~f:(fun msg -> Printf.printf "%s" msg);
       let telemetry =
         Telemetry.merge
           (telemetry_so_far (error_count + warning_count))

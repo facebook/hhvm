@@ -102,57 +102,68 @@ let end_sentinel_short_string = function
   | Watch_error _ -> "Killed"
   | Completed c -> Server_progress.show_completion_reason c
 
-type errors_info = {
-  errors: Errors.FinalizedErrorSet.t;
-  errors_count: int * int;
-  files_with_errors: Relative_path.Set.t;
-  files_reported_twice: Relative_path.t list;
-}
-
-let empty_errors_info =
-  {
-    errors = Errors.FinalizedErrorSet.empty;
-    errors_count = (0, 0);
-    files_with_errors = Relative_path.Set.empty;
-    files_reported_twice = [];
+module ErrorsInfo = struct
+  type t = {
+    errors: Errors.FinalizedErrorSet.t;
+    errors_count: int * int;
+    files_with_errors: Relative_path.Set.t;
+    files_reported_twice: Relative_path.t list;
   }
 
-let add_tuples (i, j) (k, l) = (i + k, j + l)
+  let empty =
+    {
+      errors = Errors.FinalizedErrorSet.empty;
+      errors_count = (0, 0);
+      files_with_errors = Relative_path.Set.empty;
+      files_reported_twice = [];
+    }
 
-let acc_errors_info
+  let add_tuples (i, j) (k, l) = (i + k, j + l)
+
+  let accumulate
+      {
+        errors = errors_acc;
+        errors_count;
+        files_with_errors;
+        files_reported_twice;
+      }
+      (errors : _ Relative_path.Map.t) =
+    let errors_acc =
+      Relative_path.Map.fold errors ~init:errors_acc ~f:(fun _path errors acc ->
+          Errors.FinalizedErrorSet.add_seq (errors |> Stdlib.List.to_seq) acc)
+    in
+    let files_reported_twice =
+      Relative_path.Map.fold
+        errors
+        ~init:files_reported_twice
+        ~f:(fun path _ acc ->
+          if Relative_path.Set.mem files_with_errors path then
+            path :: acc
+          else
+            acc)
+    in
+    let files_with_errors =
+      Relative_path.Map.fold
+        errors
+        ~init:files_with_errors
+        ~f:(fun path _ acc -> Relative_path.Set.add acc path)
+    in
+    let errors_count =
+      Relative_path.Map.fold
+        errors
+        ~init:errors_count
+        ~f:(fun _ errors error_counts ->
+          Errors.count_errors_and_warnings errors |> add_tuples error_counts)
+    in
     {
       errors = errors_acc;
       errors_count;
       files_with_errors;
       files_reported_twice;
     }
-    (errors : _ Relative_path.Map.t) =
-  let errors_acc =
-    Relative_path.Map.fold errors ~init:errors_acc ~f:(fun _path errors acc ->
-        Errors.FinalizedErrorSet.add_seq (errors |> Stdlib.List.to_seq) acc)
-  in
-  let files_reported_twice =
-    Relative_path.Map.fold
-      errors
-      ~init:files_reported_twice
-      ~f:(fun path _ acc ->
-        if Relative_path.Set.mem files_with_errors path then
-          path :: acc
-        else
-          acc)
-  in
-  let files_with_errors =
-    Relative_path.Map.fold errors ~init:files_with_errors ~f:(fun path _ acc ->
-        Relative_path.Set.add acc path)
-  in
-  let errors_count =
-    Relative_path.Map.fold
-      errors
-      ~init:errors_count
-      ~f:(fun _ errors error_counts ->
-        Errors.count_errors_and_warnings errors |> add_tuples error_counts)
-  in
-  { errors = errors_acc; errors_count; files_with_errors; files_reported_twice }
+
+  let total_count { errors_count = (e, w); _ } = e + w
+end
 
 let validate_files_reported_twice files =
   (* TODO @catg when we're happy with this validation, delete this or put behind a flag *)
@@ -225,9 +236,8 @@ let go_streaming_on_fd
   (* this lwt process consumes errors from the errors.bin file by polling
      every 0.2s, and displays them. It terminates once the errors.bin file has an "end"
      sentinel written to it, or the process that was writing errors.bin terminates. *)
-  let rec consume (errors_info : errors_info) :
-      (errors_info * end_sentinel) Lwt.t =
-    let total_errors (i, j) = i + j in
+  let rec consume (errors_info : ErrorsInfo.t) :
+      (ErrorsInfo.t * end_sentinel) Lwt.t =
     let%lwt errors = Lwt_stream.get errors_stream in
     match errors with
     | None ->
@@ -244,7 +254,7 @@ let go_streaming_on_fd
       | Server_progress.Telemetry telemetry_item ->
         errors_file_telemetry :=
           Telemetry.merge !errors_file_telemetry telemetry_item;
-        update_partial_telemetry (total_errors errors_info.errors_count);
+        update_partial_telemetry (ErrorsInfo.total_count errors_info);
         consume errors_info
       | Server_progress.Errors { errors; timestamp = _ } ->
         first_error_time :=
@@ -256,7 +266,7 @@ let go_streaming_on_fd
         let errors =
           Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
         in
-        let errors_info = acc_errors_info errors_info errors in
+        let errors_info = ErrorsInfo.accumulate errors_info errors in
         begin
           try
             Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
@@ -275,9 +285,9 @@ let go_streaming_on_fd
               backtrace
         end;
         progress_callback !latest_progress;
-        update_partial_telemetry (total_errors errors_info.errors_count);
+        update_partial_telemetry (ErrorsInfo.total_count errors_info);
         if
-          total_errors errors_info.errors_count
+          ErrorsInfo.total_count errors_info
           >= Option.value max_errors ~default:Int.max_value
         then
           Lwt.return (errors_info, Max_errors (Telemetry.create ()))
@@ -288,13 +298,13 @@ let go_streaming_on_fd
   (* We will show progress indefinitely until "consume" finishes,
      at which Lwt.pick will cancel show_progress. *)
   let%lwt ( {
-              errors;
+              ErrorsInfo.errors;
               errors_count = (error_count, warning_count);
               files_with_errors = _;
               files_reported_twice;
             },
             end_sentinel ) =
-    Lwt.pick [consume empty_errors_info; show_progress ()]
+    Lwt.pick [consume ErrorsInfo.empty; show_progress ()]
   in
   (* Clear the spinner *)
   progress_callback None;

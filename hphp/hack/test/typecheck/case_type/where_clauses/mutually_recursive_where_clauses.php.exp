@@ -1,14 +1,1 @@
-ERROR: File "mutually_recursive_where_clauses.php", line 16, characters 3-25:
-hh_expect type mismatch (Typing[4453])
-  File "mutually_recursive_where_clauses.php", line 16, characters 13-21:
-  Expected `A<string>`
-  File "mutually_recursive_where_clauses.php", line 16, characters 24-24:
-  But got `int`
-ERROR: File "mutually_recursive_where_clauses.php", line 16, characters 24-24:
-Invalid argument (Typing[4110])
-  File "mutually_recursive_where_clauses.php", line 16, characters 13-21:
-  Expected `A<string>`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "mutually_recursive_where_clauses.php", line 16, characters 24-24:
-  But got `int`
+No errors

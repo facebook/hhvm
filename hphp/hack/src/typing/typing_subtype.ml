@@ -5048,7 +5048,13 @@ end = struct
             subtype_env
             { Subtype_recursion_tracker.Subtype_op.ty_sub; ty_super }
         with
-        | Error _ -> invalid env ~fail
+        | Error _ ->
+          (* We've essentially proven by recursion that this subypting relationship holds.
+             For details, see Figure 21-4 p. 395 of Pierce's Types and Programming Languages.
+             The subtyping relationship would only fail to hold if the recursive types are not
+             contractive.
+             We're checking for contractiveness in check_invalid_recursive_case_type *)
+          valid env
         | Ok subtype_env ->
           let localize td_tparams hint env =
             let ((env, _err), ty) =

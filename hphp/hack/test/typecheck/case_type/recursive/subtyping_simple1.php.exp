@@ -6,9 +6,3 @@ Invalid argument (Typing[4110])
   Expected `string`
   File "subtyping_simple1.php", line 4, characters 11-11:
   But got `mixed` arising from an implicit `as ?nonnull` constraint on this type
-ERROR: File "subtyping_simple1.php", line 12, characters 12-13:
-Invalid argument (Typing[4110])
-  File "subtyping_simple1.php", line 6, characters 19-19:
-  Expected `A`
-  File "subtyping_simple1.php", line 9, characters 20-25:
-  But got `string`

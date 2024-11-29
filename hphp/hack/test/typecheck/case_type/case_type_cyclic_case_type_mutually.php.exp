@@ -18,17 +18,3 @@ Invalid case type declaration. More than one variant of `B` could contain values
     via this variant of the case type `B`
   File "case_type_cyclic_case_type_mutually.php", line 6, characters 19-24:
   It overlaps with `string`, which also includes **strings**
-ERROR: File "case_type_cyclic_case_type_mutually.php", line 13, characters 5-22:
-hh_expect type mismatch (Typing[4453])
-  File "case_type_cyclic_case_type_mutually.php", line 13, characters 15-15:
-  Expected `A`
-  File "case_type_cyclic_case_type_mutually.php", line 13, characters 18-21:
-  But got `bool`
-ERROR: File "case_type_cyclic_case_type_mutually.php", line 13, characters 18-21:
-Invalid argument (Typing[4110])
-  File "case_type_cyclic_case_type_mutually.php", line 13, characters 15-15:
-  Expected `A`
-  File "hh_single_type_check_magic.hhi", line 4, characters 97-97:
-    via this generic `T`
-  File "case_type_cyclic_case_type_mutually.php", line 13, characters 18-21:
-  But got `bool`

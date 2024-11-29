@@ -261,7 +261,6 @@ let go_streaming_on_fd
           Option.first_some !first_error_time (Some (Unix.gettimeofday ()));
         (* We'll clear the spinner, print errs to stdout, flush stdout, and restore the spinner *)
         progress_callback None;
-        let found_new = ref 0 in
         let error_format = Errors.format_or_default error_format in
         let errors =
           Relative_path.Map.map errors ~f:(Filter_errors.filter error_filter)
@@ -269,10 +268,8 @@ let go_streaming_on_fd
         let errors_info = ErrorsInfo.accumulate errors_info errors in
         begin
           try
-            Relative_path.Map.iter errors ~f:(fun _path errors_in_file ->
-                List.iter errors_in_file ~f:(fun error ->
-                    incr found_new;
-                    print_error ~error_format error));
+            Relative_path.Map.iter errors ~f:(fun _path ->
+                List.iter ~f:(print_error ~error_format));
             Printf.printf "%!"
           with
           | Sys_error msg when String.equal msg "Broken pipe" ->

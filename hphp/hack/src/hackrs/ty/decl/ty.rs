@@ -589,6 +589,7 @@ pub struct FunType<R: Reason, TY> {
     pub ret: TY,
     pub flags: typing_defs_flags::FunTypeFlags,
     pub cross_package: Option<Symbol>,
+    pub instantiated: bool,
 }
 
 walkable!(impl<R: Reason, TY> for FunType<R, TY> => [

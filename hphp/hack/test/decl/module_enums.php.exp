@@ -68,7 +68,7 @@ File root|module_enums.php--X.php
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [12:19-21]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -98,7 +98,7 @@ File root|module_enums.php--X.php
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [15:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -118,7 +118,7 @@ File root|module_enums.php--X.php
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [18:19-21]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -138,7 +138,7 @@ File root|module_enums.php--X.php
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [23:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))
@@ -171,7 +171,7 @@ File root|module_enums.php--Y.php
                is_function_pointer = false; returns_readonly = false;
                readonly_this = false; support_dynamic_type = false;
                is_memoized = false; variadic = false };
-             ft_cross_package = None }));
+             ft_cross_package = None; ft_instantiated = false }));
        fe_pos = [6:10-12]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
        fe_no_auto_likes = false }));
@@ -191,7 +191,7 @@ File root|module_enums.php--Y.php
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [10:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))
@@ -224,7 +224,7 @@ File root|module_enums.php--no-module.php
                is_function_pointer = false; returns_readonly = false;
                readonly_this = false; support_dynamic_type = false;
                is_memoized = false; variadic = false };
-             ft_cross_package = None }));
+             ft_cross_package = None; ft_instantiated = false }));
        fe_pos = [3:10-12]; fe_php_std_lib = false;
        fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
        fe_no_auto_likes = false }));
@@ -244,7 +244,7 @@ File root|module_enums.php--no-module.php
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [5:10-12]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

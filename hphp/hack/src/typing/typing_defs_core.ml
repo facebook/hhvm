@@ -229,6 +229,7 @@ type 'ty fun_type = {
   ft_ret: 'ty;  (** Carries through the sync/async information from the aast *)
   ft_flags: Typing_defs_flags.Fun.t;
   ft_cross_package: cross_package_decl;
+  ft_instantiated: bool;
 }
 [@@deriving eq, hash, show { with_path = false }]
 
@@ -1156,6 +1157,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_tparams = tparams1;
       ft_where_constraints = where_constraints1;
       ft_cross_package = cross_package1;
+      ft_instantiated = inst1;
     } =
       fty1
     in
@@ -1167,6 +1169,7 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
       ft_tparams = tparams2;
       ft_where_constraints = where_constraints2;
       ft_cross_package = cross_package2;
+      ft_instantiated = inst2;
     } =
       fty2
     in
@@ -1186,7 +1189,12 @@ let rec ty__compare : type a. ?normalize_lists:bool -> a ty_ -> a ty_ -> int =
               let { capability = capability2 } = implicit_params2 in
               begin
                 match capability_compare capability1 capability2 with
-                | 0 -> compare_cross_package_decl cross_package1 cross_package2
+                | 0 ->
+                  (match
+                     compare_cross_package_decl cross_package1 cross_package2
+                   with
+                  | 0 -> Bool.compare inst1 inst2
+                  | n -> n)
                 | n -> n
               end
             | n -> n

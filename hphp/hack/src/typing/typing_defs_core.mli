@@ -239,6 +239,7 @@ type 'ty fun_type = {
   ft_ret: 'ty;
   ft_flags: Typing_defs_flags.Fun.t;
   ft_cross_package: cross_package_decl;
+  ft_instantiated: bool;
 }
 [@@deriving hash, show]
 

@@ -290,6 +290,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R, Ty<R>> {
             ret: self.ret.to_oxidized(arena),
             flags: self.flags,
             cross_package: self.cross_package.to_oxidized(arena),
+            instantiated: self.instantiated,
         })
     }
 }

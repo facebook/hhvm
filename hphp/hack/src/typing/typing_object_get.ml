@@ -901,6 +901,7 @@ and obj_get_concrete_class_without_member_info
         ft_ret = MakeType.void Reason.none;
         ft_flags = Typing_defs_flags.Fun.default;
         ft_cross_package = None;
+        ft_instantiated = true;
       }
     in
     ( env,

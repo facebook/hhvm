@@ -1074,6 +1074,7 @@ and localize_ft
     ~def_pos
     env
     (ft : decl_ty fun_type) =
+  assert (not ft.ft_instantiated);
   let ((env, arity_ty_err_opt), substs) =
     match instantiation with
     | Some { explicit_targs; use_name = _; use_pos } ->
@@ -1252,6 +1253,7 @@ and localize_ft
       ft_ret = ret;
       ft_tparams = tparams;
       ft_where_constraints = where_constraints;
+      ft_instantiated = true;
     } )
 
 (* Given a list of generic parameters [tparams] and a substitution

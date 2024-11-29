@@ -211,6 +211,7 @@ and hint_ p env = function
             ~variadic;
         (* TODO *)
         ft_cross_package = None;
+        ft_instantiated = false;
       }
   | Happly (id, argl) ->
     let id = Decl_env.make_decl_posed env id in

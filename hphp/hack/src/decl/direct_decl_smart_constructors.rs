@@ -2021,6 +2021,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
             ret: type_,
             flags,
             cross_package,
+            instantiated: false,
         });
 
         let ty = self.alloc(Ty(
@@ -6161,6 +6162,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             ret: pess_return_type,
             flags,
             cross_package: None,
+            instantiated: false,
         }));
 
         if self.implicit_sdt() {

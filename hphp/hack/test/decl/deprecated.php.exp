@@ -24,7 +24,7 @@
                   is_function_pointer = false; returns_readonly = false;
                   readonly_this = false; support_dynamic_type = false;
                   is_memoized = false; variadic = false };
-                ft_cross_package = None }));
+                ft_cross_package = None; ft_instantiated = false }));
           sm_visibility = Public;
           sm_deprecated =
           (Some "The method foo is deprecated: use bar() instead");
@@ -47,7 +47,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None }));
+                 ft_cross_package = None; ft_instantiated = false }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -68,7 +68,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None }));
+                 ft_cross_package = None; ft_instantiated = false }));
            sm_visibility = Public; sm_deprecated = None;
            sm_flags =
            { Shallow_decl_defs.MethodFlags.abstract = false; final = false;
@@ -89,7 +89,7 @@
                    is_function_pointer = false; returns_readonly = false;
                    readonly_this = false; support_dynamic_type = false;
                    is_memoized = false; variadic = false };
-                 ft_cross_package = None }));
+                 ft_cross_package = None; ft_instantiated = false }));
            sm_visibility = Public;
            sm_deprecated =
            (Some "The method foo2 is deprecated: use bar2() instead");
@@ -118,7 +118,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [18:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -138,7 +138,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [21:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -158,7 +158,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [24:10-13]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -179,7 +179,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None }));
+              ft_cross_package = None; ft_instantiated = false }));
         fe_pos = [27:10-14]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

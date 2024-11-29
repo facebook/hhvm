@@ -284,6 +284,7 @@ module Full = struct
       ft_ret;
       ft_flags;
       ft_cross_package = _;
+      ft_instantiated = _;
     } =
       ft
     in
@@ -2333,6 +2334,8 @@ module Json = struct
           >>= fun readonly_this ->
           aux_get_bool_with_default "readonly_return" false json ~keytrace
           >>= fun readonly_return ->
+          aux_get_bool_with_default "instantiated" true json ~keytrace
+          >>= fun ft_instantiated ->
           let funty =
             {
               ft_params;
@@ -2343,6 +2346,7 @@ module Json = struct
               ft_where_constraints = [];
               ft_flags = Typing_defs_flags.Fun.default;
               ft_cross_package = None;
+              ft_instantiated;
             }
           in
           let funty = set_ft_returns_readonly funty readonly_return in

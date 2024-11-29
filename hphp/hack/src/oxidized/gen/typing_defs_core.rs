@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<1143a8585158d3004427b41789b13018>>
+// @generated SignedSource<<ccf7bd079161a60edb3090f73504c667>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -476,6 +476,7 @@ pub struct FunType {
     pub ret: Ty,
     pub flags: typing_defs_flags::fun::Fun,
     pub cross_package: CrossPackageDecl,
+    pub instantiated: bool,
 }
 
 #[derive(

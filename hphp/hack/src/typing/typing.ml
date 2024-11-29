@@ -2431,6 +2431,7 @@ end = struct
               ft_ret;
               ft_flags;
               ft_cross_package = None;
+              ft_instantiated = true;
             } ) )
 
   let coerce_nonlike_and_like
@@ -3357,6 +3358,7 @@ end = struct
               ft_ret = fty.ft_ret;
               ft_flags = fty.ft_flags;
               ft_cross_package = fty.ft_cross_package;
+              ft_instantiated = fty.ft_instantiated;
             }
           in
           let ty =
@@ -5853,6 +5855,7 @@ end = struct
               ~variadic:false;
           ft_ret = MakeType.void r;
           ft_cross_package = None;
+          ft_instantiated = true;
         }
       in
       let ty = mk (r, Tfun ft) in

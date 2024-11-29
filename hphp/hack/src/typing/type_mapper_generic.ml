@@ -267,6 +267,7 @@ class ['env] deep_type_mapper =
         ft_ret;
         ft_flags;
         ft_cross_package;
+        ft_instantiated;
       } =
         ft
       in
@@ -288,6 +289,7 @@ class ['env] deep_type_mapper =
           ft_ret;
           ft_flags;
           ft_cross_package;
+          ft_instantiated;
         }
       in
       (env, mk (r, Tfun ft))

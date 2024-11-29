@@ -1717,6 +1717,7 @@ let default_constructor_ce class_ =
       ft_ret = MakeType.void r;
       ft_flags = Typing_defs_flags.Fun.default;
       ft_cross_package = None;
+      ft_instantiated = false;
     }
   in
   {

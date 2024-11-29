@@ -365,8 +365,7 @@ let go_streaming_on_fd
               backtrace
         in
         progress_callback !latest_progress;
-        let error_count = ErrorsInfo.total_count errors_info in
-        update_partial_telemetry error_count;
+        update_partial_telemetry (ErrorsInfo.total_count errors_info);
         consume errors_info printer)
   in
 
@@ -545,6 +544,14 @@ end = struct
     { inode = stats.Unix.st_ino; ctime = stats.Unix.st_ctime }
 end
 
+let show_progress_and_sleep progress_callback =
+  let message =
+    try Some (Server_progress.read ()).Server_progress.message with
+    | _ -> None
+  in
+  Option.iter message ~f:(fun msg -> progress_callback (Some msg));
+  Lwt_unix.sleep 1.0
+
 (** [keep_trying_to_open] tries to open the errors.bin file.
   There is a whole load of ceremony to do with what happens when you want to open errors.bin,
   e.g. start the server if necessary, check for version mismatch, report failures to the user.
@@ -626,7 +633,6 @@ let rec keep_trying_to_open
         progress_callback None;
         raise (Exit_status.Exit_with Exit_status.Out_of_time)
       end);
-  progress_callback (Some "hh_server sync");
   let fd_opt =
     try
       Some
@@ -651,7 +657,7 @@ let rec keep_trying_to_open
         Lwt.return_unit
       end else begin
         (* Retry opening errors file every 0.1 second from now on. *)
-        let%lwt () = Lwt_unix.sleep 0.1 in
+        let%lwt () = show_progress_and_sleep progress_callback in
         Lwt.return_unit
       end
     in
@@ -666,7 +672,7 @@ let rec keep_trying_to_open
     let file_id = FileId.of_fd fd in
     if Option.equal FileId.equal (Some file_id) already_checked_file then
       (* we've already checked this file! so just wait a short time, then retry *)
-      let%lwt () = Lwt_unix.sleep 0.1 in
+      let%lwt () = show_progress_and_sleep progress_callback in
       keep_trying_to_open
         ~has_already_attempted_connect
         ~connect_then_close
@@ -736,7 +742,6 @@ let rec keep_trying_to_open
         (* Watchman doesn't support "what files have changed from error.bin's clock until
            hh-invocation clock?". We'll instead use the (less permissive, still correct) query
            "what files have changed from error.bin's clock until now?". *)
-        progress_callback (Some "watchman sync");
         let%lwt since_result =
           watchman_get_raw_updates_since
             ~root
@@ -744,7 +749,6 @@ let rec keep_trying_to_open
             ~fail_on_new_instance:false
             ~fail_during_state:false
         in
-        progress_callback (Some "hh_server sync");
         match since_result with
         | Error e ->
           Hh_logger.log "Errors-file: watchman failure:\n%s\n" e;
@@ -788,7 +792,6 @@ let rec keep_trying_to_open
               clock
               (Relative_path.Set.cardinal updates)
               (Relative_path.Set.choose updates |> Relative_path.suffix);
-            let%lwt () = Lwt_unix.sleep 0.1 in
             keep_trying_to_open
               ~has_already_attempted_connect
               ~connect_then_close

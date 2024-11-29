@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<47c99ac218c37f51b8f1f0f8b3a1004b>>
+// @generated SignedSource<<9b7a9ca695fda3215d2cc0201adb66cb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2727,6 +2727,62 @@ impl<Ex, En> FunParamInfo<Ex, En> {
     pub fn as_param_optional_into(self) -> Option<Option<Expr<Ex, En>>> {
         match self {
             FunParamInfo::ParamOptional(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl<Ex, En> Argument<Ex, En> {
+    pub fn mk_ainout(p0: Pos, p1: Expr<Ex, En>) -> Self {
+        Argument::Ainout(p0, p1)
+    }
+    pub fn mk_anormal(p0: Expr<Ex, En>) -> Self {
+        Argument::Anormal(p0)
+    }
+    pub fn is_ainout(&self) -> bool {
+        match self {
+            Argument::Ainout(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_anormal(&self) -> bool {
+        match self {
+            Argument::Anormal(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_ainout(&self) -> Option<(&Pos, &Expr<Ex, En>)> {
+        match self {
+            Argument::Ainout(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_anormal(&self) -> Option<&Expr<Ex, En>> {
+        match self {
+            Argument::Anormal(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_ainout_mut(&mut self) -> Option<(&mut Pos, &mut Expr<Ex, En>)> {
+        match self {
+            Argument::Ainout(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_anormal_mut(&mut self) -> Option<&mut Expr<Ex, En>> {
+        match self {
+            Argument::Anormal(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_ainout_into(self) -> Option<(Pos, Expr<Ex, En>)> {
+        match self {
+            Argument::Ainout(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_anormal_into(self) -> Option<Expr<Ex, En>> {
+        match self {
+            Argument::Anormal(p0) => Some(p0),
             _ => None,
         }
     }

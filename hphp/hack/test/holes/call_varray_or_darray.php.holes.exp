@@ -72,9 +72,9 @@
                     { func = (((function(vec_or_dict<arraykey, int> $d): void)), [13:3-4], (Id ([13:3-4], "\\d"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((vec_or_dict<arraykey, float>), [13:5-7],
-                         (Hole (((vec_or_dict<arraykey, float>), [13:5-7], (Lvar ([13:5-7], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing))))
+                      [(Anormal
+                          ((vec_or_dict<arraykey, float>), [13:5-7],
+                           (Hole (((vec_or_dict<arraykey, float>), [13:5-7], (Lvar ([13:5-7], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing))))
                         ];
                       unpacked_arg = None }))));
              ([15:3-35],
@@ -94,9 +94,9 @@
                            ((function(vec_or_dict<arraykey, int> $d): void)), [18:9-10], (Id ([18:9-10], "d"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((vec_or_dict<arraykey, float>), [18:11-13],
-                          (Hole (((vec_or_dict<arraykey, float>), [18:11-13], (Lvar ([18:11-13], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing))))
+                       [(Anormal
+                           ((vec_or_dict<arraykey, float>), [18:11-13],
+                            (Hole (((vec_or_dict<arraykey, float>), [18:11-13], (Lvar ([18:11-13], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>), Typing))))
                          ];
                        unpacked_arg = None }))))
              ]
@@ -130,10 +130,10 @@
                     { func = (((function(vec_or_dict<arraykey, int> $d): void)), [25:3-4], (Id ([25:3-4], "\\d"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~vec_or_dict<arraykey, int>), [25:5-77],
-                         (Hole (((vec_or_dict<arraykey, float>), [25:74-76], (Lvar ([25:74-76], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
-                            (UnsafeCast [([25:27-50], (Hvec_or_dict (None, ([25:44-49], (Hprim Tfloat))))); ([25:51-72], (Hvec_or_dict (None, ([25:68-71], (Hprim Tint)))))])))))
+                      [(Anormal
+                          ((~vec_or_dict<arraykey, int>), [25:5-77],
+                           (Hole (((vec_or_dict<arraykey, float>), [25:74-76], (Lvar ([25:74-76], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
+                              (UnsafeCast [([25:27-50], (Hvec_or_dict (None, ([25:44-49], (Hprim Tfloat))))); ([25:51-72], (Hvec_or_dict (None, ([25:68-71], (Hprim Tint)))))])))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-35],
@@ -153,10 +153,10 @@
                            ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~vec_or_dict<arraykey, int>), [30:11-83],
-                          (Hole (((vec_or_dict<arraykey, float>), [30:80-82], (Lvar ([30:80-82], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
-                             (UnsafeCast [([30:33-56], (Hvec_or_dict (None, ([30:50-55], (Hprim Tfloat))))); ([30:57-78], (Hvec_or_dict (None, ([30:74-77], (Hprim Tint)))))])))))
+                       [(Anormal
+                           ((~vec_or_dict<arraykey, int>), [30:11-83],
+                            (Hole (((vec_or_dict<arraykey, float>), [30:80-82], (Lvar ([30:80-82], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
+                               (UnsafeCast [([30:33-56], (Hvec_or_dict (None, ([30:50-55], (Hprim Tfloat))))); ([30:57-78], (Hvec_or_dict (None, ([30:74-77], (Hprim Tint)))))])))))
                          ];
                        unpacked_arg = None }))))
              ]
@@ -239,10 +239,10 @@
                     { func = (((function(vec_or_dict<arraykey, int> $d): void)), [25:3-4], (Id ([25:3-4], "\\d"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~vec_or_dict<arraykey, int>), [25:5-77],
-                         (Hole (((dynamic), [25:74-76], (Lvar ([25:74-76], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
-                            (UnsafeCast [([25:27-50], (Hvec_or_dict (None, ([25:44-49], (Hprim Tfloat))))); ([25:51-72], (Hvec_or_dict (None, ([25:68-71], (Hprim Tint)))))])))))
+                      [(Anormal
+                          ((~vec_or_dict<arraykey, int>), [25:5-77],
+                           (Hole (((dynamic), [25:74-76], (Lvar ([25:74-76], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
+                              (UnsafeCast [([25:27-50], (Hvec_or_dict (None, ([25:44-49], (Hprim Tfloat))))); ([25:51-72], (Hvec_or_dict (None, ([25:68-71], (Hprim Tint)))))])))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-35],
@@ -262,10 +262,10 @@
                            ((function(vec_or_dict<arraykey, int> $d): void)), [30:9-10], (Id ([30:9-10], "d"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~vec_or_dict<arraykey, int>), [30:11-83],
-                          (Hole (((dynamic), [30:80-82], (Lvar ([30:80-82], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
-                             (UnsafeCast [([30:33-56], (Hvec_or_dict (None, ([30:50-55], (Hprim Tfloat))))); ([30:57-78], (Hvec_or_dict (None, ([30:74-77], (Hprim Tint)))))])))))
+                       [(Anormal
+                           ((~vec_or_dict<arraykey, int>), [30:11-83],
+                            (Hole (((dynamic), [30:80-82], (Lvar ([30:80-82], $d))), (vec_or_dict<arraykey, float>), (vec_or_dict<arraykey, int>),
+                               (UnsafeCast [([30:33-56], (Hvec_or_dict (None, ([30:50-55], (Hprim Tfloat))))); ([30:57-78], (Hvec_or_dict (None, ([30:74-77], (Hprim Tint)))))])))))
                          ];
                        unpacked_arg = None }))))
              ]

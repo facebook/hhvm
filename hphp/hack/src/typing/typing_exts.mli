@@ -26,5 +26,5 @@
 val retype_magic_func :
   Typing_env_types.env ->
   Typing_defs.locl_fun_type ->
-  (Ast_defs.param_kind * Nast.expr) list ->
+  Nast.argument list ->
   Typing_env_types.env * Typing_defs.locl_fun_type

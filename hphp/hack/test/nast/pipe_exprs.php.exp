@@ -41,7 +41,7 @@
                 ((), [6:3-25],
                  (Pipe (([6:3-25], $$), ((), [6:3-5], (Lvar ([6:3-5], $x))),
                     ((), [6:9-25],
-                     (Call { func = ((), [6:9-21], (Id ([6:9-21], "\\takes_an_int"))); targs = []; args = [(Pnormal, ((), [6:22-24], (Dollardollar ([6:22-24], $$))))]; unpacked_arg = None }))
+                     (Call { func = ((), [6:9-21], (Id ([6:9-21], "\\takes_an_int"))); targs = []; args = [(Anormal ((), [6:22-24], (Dollardollar ([6:22-24], $$))))]; unpacked_arg = None }))
                     )))))
              ]
            };
@@ -67,7 +67,7 @@
                  ((), [11:3-25],
                   (Pipe (([11:3-25], $$), ((), [11:3-5], (Lvar ([11:3-5], $x))),
                      ((), [11:9-25],
-                      (Call { func = ((), [11:9-21], (Id ([11:9-21], "\\takes_an_int"))); targs = []; args = [(Pnormal, ((), [11:22-24], (Dollardollar ([11:22-24], $$))))]; unpacked_arg = None }))
+                      (Call { func = ((), [11:9-21], (Id ([11:9-21], "\\takes_an_int"))); targs = []; args = [(Anormal ((), [11:22-24], (Dollardollar ([11:22-24], $$))))]; unpacked_arg = None }))
                      )))))
              ]
            };
@@ -143,7 +143,7 @@
                      (Call
                         { func = ((), [24:11-23], (Id ([24:11-23], "\\takes_an_int"))); 
                           targs = [];
-                          args = [(Pnormal, ((), [24:24-34], (Class_get (((), [24:24-26], (CIexpr ((), [24:24-26], (Dollardollar ([24:24-26], $$))))), (CGstring ([24:28-34], "$myInt")), Is_prop))))];
+                          args = [(Anormal ((), [24:24-34], (Class_get (((), [24:24-26], (CIexpr ((), [24:24-26], (Dollardollar ([24:24-26], $$))))), (CGstring ([24:28-34], "$myInt")), Is_prop))))];
                           unpacked_arg = None }))
                     )))))
              ]

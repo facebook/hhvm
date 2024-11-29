@@ -39,7 +39,7 @@
                        ((void), [10:5-12],
                         (Call
                            { func = (((function(int $x): void)), [10:5-8], (Id ([10:5-8], "\\foo"))); 
-                             targs = []; args = [(Pnormal, ((string), [10:9-11], (Hole (((string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing))))]; 
+                             targs = []; args = [(Anormal ((string), [10:9-11], (Hole (((string), [10:9-11], (Lvar ([10:9-11], $x))), (string), (int), Typing))))]; 
                              unpacked_arg = None }))))
                    ],
                  [([12:5-19], (Expr ((string), [12:5-18], (Binop { bop = (Eq None); lhs = ((string), [12:5-7], (Lvar ([12:5-7], $x))); rhs = ((string), [12:10-18], (String "string")) }))));
@@ -48,7 +48,7 @@
                        ((void), [13:5-12],
                         (Call
                            { func = (((function(int $x): void)), [13:5-8], (Id ([13:5-8], "\\foo"))); 
-                             targs = []; args = [(Pnormal, ((nothing), [13:9-11], (Lvar ([13:9-11], $x))))]; 
+                             targs = []; args = [(Anormal ((nothing), [13:9-11], (Lvar ([13:9-11], $x))))]; 
                              unpacked_arg = None }))))
                    ]
                  )))
@@ -81,8 +81,9 @@
                            { func = (((function(int $x): void)), [22:5-8], (Id ([22:5-8], "\\foo"))); 
                              targs = [];
                              args =
-                             [(Pnormal,
-                               ((~int), [22:9-46], (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), (UnsafeCast [([22:31-37], (Hprim Tstring)); ([22:38-41], (Hprim Tint))])))))
+                             [(Anormal
+                                 ((~int), [22:9-46],
+                                  (Hole (((string), [22:43-45], (Lvar ([22:43-45], $x))), (string), (int), (UnsafeCast [([22:31-37], (Hprim Tstring)); ([22:38-41], (Hprim Tint))])))))
                                ];
                              unpacked_arg = None }))))
                    ],
@@ -92,7 +93,7 @@
                        ((void), [25:5-12],
                         (Call
                            { func = (((function(int $x): void)), [25:5-8], (Id ([25:5-8], "\\foo"))); 
-                             targs = []; args = [(Pnormal, ((nothing), [25:9-11], (Lvar ([25:9-11], $x))))]; 
+                             targs = []; args = [(Anormal ((nothing), [25:9-11], (Lvar ([25:9-11], $x))))]; 
                              unpacked_arg = None }))))
                    ]
                  )))

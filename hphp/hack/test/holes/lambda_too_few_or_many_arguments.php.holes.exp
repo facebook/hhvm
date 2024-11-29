@@ -141,8 +141,9 @@ Errors:
                     { func = (((function((function(int): ~string) $_): void)), [10:3-12], (Id ([10:3-12], "\\expectFun"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        (((function(): ~string)), [10:13-15], (Hole ((((function(): ~string)), [10:13-15], (Lvar ([10:13-15], $f))), ((function(): ~string)), ((function(int): ~string)), Typing))))];
+                      [(Anormal
+                          (((function(): ~string)), [10:13-15], (Hole ((((function(): ~string)), [10:13-15], (Lvar ([10:13-15], $f))), ((function(): ~string)), ((function(int): ~string)), Typing))))
+                        ];
                       unpacked_arg = None }))));
              ([11:3-17],
               (Expr
@@ -151,9 +152,9 @@ Errors:
                      { func = (((function((function(int): ~string) $_): void)), [11:3-12], (Id ([11:3-12], "\\expectFun"))); 
                        targs = [];
                        args =
-                       [(Pnormal,
-                         (((function(int, bool): ~string)), [11:13-15],
-                          (Hole ((((function(int, bool): ~string)), [11:13-15], (Lvar ([11:13-15], $g))), ((function(int, bool): ~string)), ((function(int): ~string)), Typing))))
+                       [(Anormal
+                           (((function(int, bool): ~string)), [11:13-15],
+                            (Hole ((((function(int, bool): ~string)), [11:13-15], (Lvar ([11:13-15], $g))), ((function(int, bool): ~string)), ((function(int): ~string)), Typing))))
                          ];
                        unpacked_arg = None }))));
              ([12:3-25],
@@ -163,20 +164,20 @@ Errors:
                      { func = (((function((function(int): ~string) $_): void)), [12:3-12], (Id ([12:3-12], "\\expectFun"))); 
                        targs = [];
                        args =
-                       [(Pnormal,
-                         (((function(): nothing)), [12:13-23],
-                          (Hole (
-                             (((function(int): ~string)), [12:13-23],
-                              (Lfun (
-                                 { f_span = [12:13-23]; f_readonly_this = None; 
-                                   f_annotation = (); f_readonly_ret = None; 
-                                   f_ret = ((~string), None); f_params = []; 
-                                   f_ctxs = None; f_unsafe_ctxs = None; 
-                                   f_body = { fb_ast = [([12:20-23], (Return (Some ((string), [12:20-23], (String "A")))))] }; 
-                                   f_fun_kind = FSync; f_user_attributes = []; 
-                                   f_external = false; f_doc_comment = None },
-                                 []))),
-                             ((function(): nothing)), ((function(int): ~string)), Typing))))
+                       [(Anormal
+                           (((function(): nothing)), [12:13-23],
+                            (Hole (
+                               (((function(int): ~string)), [12:13-23],
+                                (Lfun (
+                                   { f_span = [12:13-23]; f_readonly_this = None; 
+                                     f_annotation = (); f_readonly_ret = None; 
+                                     f_ret = ((~string), None); f_params = []; 
+                                     f_ctxs = None; f_unsafe_ctxs = None; 
+                                     f_body = { fb_ast = [([12:20-23], (Return (Some ((string), [12:20-23], (String "A")))))] }; 
+                                     f_fun_kind = FSync; f_user_attributes = []; 
+                                     f_external = false; f_doc_comment = None },
+                                   []))),
+                               ((function(): nothing)), ((function(int): ~string)), Typing))))
                          ];
                        unpacked_arg = None }))));
              ([13:3-16:6],
@@ -186,49 +187,51 @@ Errors:
                      { func = (((function((function(int): ~string) $_): void)), [13:3-12], (Id ([13:3-12], "\\expectFun"))); 
                        targs = [];
                        args =
-                       [(Pnormal,
-                         (((function(int $x, bool $b): ~string)), [13:13-16:4],
-                          (Hole (
-                             (((function(nothing $x, bool $b): nothing)), [13:13-16:4],
-                              (Hole (
-                                 (((function(int $x, bool $b): ~string)), [13:13-16:4],
-                                  (Lfun (
-                                     { f_span = [13:13-16:4]; f_readonly_this = None; 
-                                       f_annotation = (); f_readonly_ret = None; 
-                                       f_ret = ((~string), None);
-                                       f_params =
-                                       [{ param_annotation = (int); param_type_hint = ((int), None); 
-                                          param_pos = [13:14-16]; param_name = "$x"; 
-                                          param_info = Param_required; 
-                                          param_readonly = None; param_splat = None; 
-                                          param_callconv = Pnormal; param_user_attributes = []; 
-                                          param_visibility = None };
-                                         { param_annotation = (bool); 
-                                           param_type_hint = ((bool), (Some ([13:18-22], (Hprim Tbool)))); 
-                                           param_pos = [13:23-25]; param_name = "$b"; 
-                                           param_info = Param_required; 
-                                           param_readonly = None; param_splat = None; 
-                                           param_callconv = Pnormal; 
-                                           param_user_attributes = []; 
-                                           param_visibility = None }
-                                         ];
-                                       f_ctxs = None; f_unsafe_ctxs = None;
-                                       f_body =
-                                       { fb_ast =
-                                         [([14:5-19],
-                                           (Expr
-                                              ((void), [14:5-18],
-                                               (Call
-                                                  { func = (((function(int $_): void)), [14:5-14], (Id ([14:5-14], "\\expectInt"))); 
-                                                    targs = []; args = [(Pnormal, ((int), [14:15-17], (Lvar ([14:15-17], $x))))]; 
-                                                    unpacked_arg = None }))));
-                                           ([15:5-16], (Return (Some ((string), [15:12-15], (String "B")))))]
-                                         };
-                                       f_fun_kind = FSync; f_user_attributes = []; 
-                                       f_external = false; f_doc_comment = None },
-                                     []))),
-                                 ((function(nothing $x, bool $b): nothing)), ((function(int): ~string)), Typing))),
-                             ((function(int $x, bool $b): ~string)), ((function(int): ~string)), Typing))))
+                       [(Anormal
+                           (((function(int $x, bool $b): ~string)), [13:13-16:4],
+                            (Hole (
+                               (((function(nothing $x, bool $b): nothing)), [13:13-16:4],
+                                (Hole (
+                                   (((function(int $x, bool $b): ~string)), [13:13-16:4],
+                                    (Lfun (
+                                       { f_span = [13:13-16:4]; f_readonly_this = None; 
+                                         f_annotation = (); f_readonly_ret = None; 
+                                         f_ret = ((~string), None);
+                                         f_params =
+                                         [{ param_annotation = (int); 
+                                            param_type_hint = ((int), None); 
+                                            param_pos = [13:14-16]; param_name = "$x"; 
+                                            param_info = Param_required; 
+                                            param_readonly = None; param_splat = None; 
+                                            param_callconv = Pnormal; 
+                                            param_user_attributes = []; 
+                                            param_visibility = None };
+                                           { param_annotation = (bool); 
+                                             param_type_hint = ((bool), (Some ([13:18-22], (Hprim Tbool)))); 
+                                             param_pos = [13:23-25]; 
+                                             param_name = "$b"; param_info = Param_required; 
+                                             param_readonly = None; param_splat = None; 
+                                             param_callconv = Pnormal; 
+                                             param_user_attributes = []; 
+                                             param_visibility = None }
+                                           ];
+                                         f_ctxs = None; f_unsafe_ctxs = None;
+                                         f_body =
+                                         { fb_ast =
+                                           [([14:5-19],
+                                             (Expr
+                                                ((void), [14:5-18],
+                                                 (Call
+                                                    { func = (((function(int $_): void)), [14:5-14], (Id ([14:5-14], "\\expectInt"))); 
+                                                      targs = []; args = [(Anormal ((int), [14:15-17], (Lvar ([14:15-17], $x))))]; 
+                                                      unpacked_arg = None }))));
+                                             ([15:5-16], (Return (Some ((string), [15:12-15], (String "B")))))]
+                                           };
+                                         f_fun_kind = FSync; f_user_attributes = []; 
+                                         f_external = false; f_doc_comment = None },
+                                       []))),
+                                   ((function(nothing $x, bool $b): nothing)), ((function(int): ~string)), Typing))),
+                               ((function(int $x, bool $b): ~string)), ((function(int): ~string)), Typing))))
                          ];
                        unpacked_arg = None }))))
              ]

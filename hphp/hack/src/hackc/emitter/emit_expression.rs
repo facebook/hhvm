@@ -79,7 +79,6 @@ use oxidized::aast_visitor::Visitor;
 use oxidized::aast_visitor::VisitorMut;
 use oxidized::ast;
 use oxidized::ast_defs;
-use oxidized::ast_defs::ParamKind;
 use oxidized::local_id;
 use oxidized::pos::Pos;
 use oxidized_by_ref::typing_defs;
@@ -140,7 +139,6 @@ mod inout_locals {
     use super::Emitter;
     use super::Env;
     use super::Local;
-    use super::ParamKind;
 
     pub(super) struct AliasInfo {
         first_inout: isize,
@@ -227,28 +225,45 @@ mod inout_locals {
 
     pub(super) fn collect_written_variables<'ast>(
         env: &Env<'ast>,
-        args: &'ast [(ParamKind, ast::Expr)],
+        args: &'ast [ast::Argument],
     ) -> AliasInfoMap<'ast> {
         let mut acc = HashMap::default();
         args.iter()
             .enumerate()
-            .for_each(|(i, (pk, arg))| handle_arg(env, true, i, pk, arg, &mut acc));
+            .for_each(|(i, arg)| handle_arg(env, true, i, arg, &mut acc));
         acc
+    }
+
+    fn handle_arg_expr<'ast>(
+        env: &Env<'ast>,
+        i: usize,
+        e: &'ast ast::Expr,
+        acc: &mut AliasInfoMap<'ast>,
+    ) {
+        // $v
+        if let Some(Lid(_, (_, id))) = e.2.as_lvar() {
+            return add_use(id.as_str(), acc);
+        }
+        // dive into argument value
+        aast_visitor::visit(
+            &mut Visitor(PhantomData),
+            &mut Ctx { state: acc, env, i },
+            e,
+        )
+        .unwrap();
     }
 
     fn handle_arg<'ast>(
         env: &Env<'ast>,
         is_top: bool,
         i: usize,
-        pk: &ParamKind,
-        arg: &'ast ast::Expr,
+        arg: &'ast ast::Argument,
         acc: &mut AliasInfoMap<'ast>,
     ) {
         use ast::Expr;
         use ast::Expr_;
-        let Expr(_, _, e) = arg;
         // inout $v
-        if let (ParamKind::Pinout(_), Expr_::Lvar(lid)) = (pk, e) {
+        if let ast::Argument::Ainout(_, Expr(_, _, Expr_::Lvar(lid))) = arg {
             let Lid(_, lid) = &**lid;
             if !super::is_local_this(env, lid) {
                 add_use(&lid.1, acc);
@@ -260,16 +275,7 @@ mod inout_locals {
             }
         }
         // $v
-        if let Some(Lid(_, (_, id))) = e.as_lvar() {
-            return add_use(id.as_str(), acc);
-        }
-        // dive into argument value
-        aast_visitor::visit(
-            &mut Visitor(PhantomData),
-            &mut Ctx { state: acc, env, i },
-            arg,
-        )
-        .unwrap();
+        handle_arg_expr(env, i, arg.to_expr_ref(), acc)
     }
 
     struct Visitor<'r>(PhantomData<&'r ()>);
@@ -294,9 +300,9 @@ mod inout_locals {
                     args, unpacked_arg, ..
                 } = &**expr;
                 args.iter()
-                    .for_each(|(pk, arg)| handle_arg(c.env, false, c.i, pk, arg, c.state));
+                    .for_each(|arg| handle_arg(c.env, false, c.i, arg, c.state));
                 if let Some(arg) = unpacked_arg.as_ref() {
-                    handle_arg(c.env, false, c.i, &ParamKind::Pnormal, arg, c.state)
+                    handle_arg_expr(c.env, c.i, arg, c.state)
                 }
                 Ok(())
             } else {
@@ -553,7 +559,7 @@ pub fn emit_expr<'a, 'd>(
 fn emit_exprs_and_error_on_inout<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
-    exprs: &[(ParamKind, ast::Expr)],
+    exprs: &[ast::Argument],
     fn_name: &str,
 ) -> Result<InstrSeq> {
     if exprs.is_empty() {
@@ -562,9 +568,9 @@ fn emit_exprs_and_error_on_inout<'a, 'd>(
         Ok(InstrSeq::gather(
             exprs
                 .iter()
-                .map(|(pk, expr)| match pk {
-                    ParamKind::Pnormal => emit_expr(e, env, expr),
-                    ParamKind::Pinout(p) => Err(Error::fatal_parse(
+                .map(|arg| match arg {
+                    ast::Argument::Anormal(expr) => emit_expr(e, env, expr),
+                    ast::Argument::Ainout(p, expr) => Err(Error::fatal_parse(
                         &Pos::merge(p, expr.pos()).map_err(Error::unrecoverable)?,
                         format!(
                             "Unexpected `inout` argument on pseudofunction: `{}`",
@@ -1649,15 +1655,15 @@ fn emit_call_isset_expr<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
     outer_pos: &Pos,
-    pk: &ParamKind,
-    expr: &ast::Expr,
+    arg: &ast::Argument,
 ) -> Result<InstrSeq> {
-    if pk.is_pinout() {
+    if arg.is_inout() {
         return Err(Error::fatal_parse(
             outer_pos,
             "`isset` cannot take an argument by `inout`",
         ));
     }
+    let expr = arg.to_expr_ref();
     let pos = &expr.1;
     if let Some((base_expr, opt_elem_expr)) = expr.2.as_array_get() {
         return Ok(emit_array_get(
@@ -1717,14 +1723,14 @@ fn emit_call_isset_exprs<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
-    exprs: &[(ParamKind, ast::Expr)],
+    exprs: &[ast::Argument],
 ) -> Result<InstrSeq> {
     match exprs {
         [] => Err(Error::fatal_parse(
             pos,
             "Cannot use isset() without any arguments",
         )),
-        [(pk, expr)] => emit_call_isset_expr(e, env, pos, pk, expr),
+        [arg] => emit_call_isset_expr(e, env, pos, arg),
         _ => {
             let its_done = e.label_gen_mut().next_regular();
             Ok(InstrSeq::gather(vec![
@@ -1732,9 +1738,9 @@ fn emit_call_isset_exprs<'a, 'd>(
                     exprs
                         .iter()
                         .enumerate()
-                        .map(|(i, (pk, expr))| {
+                        .map(|(i, arg)| {
                             Ok(InstrSeq::gather(vec![
-                                emit_call_isset_expr(e, env, pos, pk, expr)?,
+                                emit_call_isset_expr(e, env, pos, arg)?,
                                 if i < exprs.len() - 1 {
                                     InstrSeq::gather(vec![
                                         instr::dup(),
@@ -1758,7 +1764,7 @@ fn emit_tag_provenance_here<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
-    es: &[(ParamKind, ast::Expr)],
+    es: &[ast::Argument],
 ) -> Result<InstrSeq> {
     let pop = if es.len() == 1 {
         instr::empty()
@@ -1776,7 +1782,7 @@ fn emit_array_mark_legacy<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
-    es: &[(ParamKind, ast::Expr)],
+    es: &[ast::Argument],
     legacy: bool,
 ) -> Result<InstrSeq> {
     let default = if es.len() == 1 {
@@ -1801,7 +1807,7 @@ fn emit_idx<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
     pos: &Pos,
-    es: &[(ParamKind, ast::Expr)],
+    es: &[ast::Argument],
 ) -> Result<InstrSeq> {
     let default = if es.len() == 2 {
         instr::null()
@@ -1822,7 +1828,7 @@ fn emit_call<'a, 'd>(
     pos: &Pos,
     expr: &ast::Expr,
     targs: &[ast::Targ],
-    args: &[(ParamKind, ast::Expr)],
+    args: &[ast::Argument],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
     readonly_return: bool,
@@ -1864,7 +1870,7 @@ fn emit_call_default<'a, 'd>(
     pos: &Pos,
     expr: &ast::Expr,
     targs: &[ast::Targ],
-    args: &[(ParamKind, ast::Expr)],
+    args: &[ast::Argument],
     uarg: Option<&ast::Expr>,
     fcall_args: FCallArgs,
 ) -> Result<InstrSeq> {
@@ -2372,7 +2378,7 @@ fn get_reified_var_cexpr<'a>(
 fn emit_args_inout_setters<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &Env<'a>,
-    args: &[(ParamKind, ast::Expr)],
+    args: &[ast::Argument],
 ) -> Result<(InstrSeq, InstrSeq)> {
     let aliases = if has_inout_arg(args) {
         inout_locals::collect_written_variables(env, args)
@@ -2383,15 +2389,14 @@ fn emit_args_inout_setters<'a, 'd>(
         e: &mut Emitter<'d>,
         env: &Env<'a>,
         i: usize,
-        pk: &ParamKind,
-        arg: &ast::Expr,
+        arg: &ast::Argument,
         aliases: &inout_locals::AliasInfoMap<'_>,
     ) -> Result<(InstrSeq, InstrSeq)> {
         use ast::Expr_;
 
-        match (pk, &arg.2) {
+        match arg {
             // inout $var
-            (ParamKind::Pinout(_), Expr_::Lvar(l)) => {
+            ast::Argument::Ainout(_, ast::Expr(_, _, Expr_::Lvar(l))) => {
                 let local = get_local(e, env, &l.0, local_id::get_name(&l.1))?;
                 let move_instrs = if !env.flags.contains(env::Flags::IN_TRY)
                     && inout_locals::should_move_local_value(e, local, aliases)
@@ -2406,11 +2411,11 @@ fn emit_args_inout_setters<'a, 'd>(
                 ))
             }
             // inout $arr[...][...]
-            (ParamKind::Pinout(_), Expr_::ArrayGet(ag)) => {
+            ast::Argument::Ainout(_, ast::Expr(_, pos, Expr_::ArrayGet(ag))) => {
                 let array_get_result = emit_array_get_(
                     e,
                     env,
-                    &arg.1,
+                    pos,
                     None,
                     QueryMOp::InOut,
                     &ag.0,
@@ -2425,7 +2430,7 @@ fn emit_args_inout_setters<'a, 'd>(
                         let setter_base = emit_array_get(
                             e,
                             env,
-                            &arg.1,
+                            pos,
                             Some(MOpMode::Define),
                             QueryMOp::InOut,
                             &ag.0,
@@ -2464,16 +2469,16 @@ fn emit_args_inout_setters<'a, 'd>(
                     }
                 })
             }
-            (ParamKind::Pinout(_), _) => Err(Error::unrecoverable(
+            ast::Argument::Ainout(_, _) => Err(Error::unrecoverable(
                 "emit_arg_and_inout_setter: Unexpected inout expression type",
             )),
-            _ => Ok((emit_expr(e, env, arg)?, instr::empty())),
+            ast::Argument::Anormal(exp) => Ok((emit_expr(e, env, exp)?, instr::empty())),
         }
     }
     let (instr_args, instr_setters): (Vec<InstrSeq>, Vec<InstrSeq>) = args
         .iter()
         .enumerate()
-        .map(|(i, (pk, arg))| emit_arg_and_inout_setter(e, env, i, pk, arg, &aliases))
+        .map(|(i, arg)| emit_arg_and_inout_setter(e, env, i, arg, &aliases))
         .collect::<Result<Vec<_>>>()?
         .into_iter()
         .unzip();
@@ -2557,7 +2562,7 @@ fn get_fcall_args_no_inout(
 }
 
 fn get_fcall_args(
-    args: &[(ParamKind, ast::Expr)],
+    args: &[ast::Argument],
     uarg: Option<&ast::Expr>,
     async_eager_label: Option<Label>,
     context: Option<StringId>,
@@ -2573,8 +2578,8 @@ fn get_fcall_args(
         lock_while_unwinding,
         readonly_return,
         readonly_this,
-        |(_, expr): &(ParamKind, ast::Expr)| is_readonly_expr(expr),
-        |(pk, _): &(ParamKind, ast::Expr)| pk.is_pinout(),
+        |arg: &ast::Argument| is_readonly_expr(arg.to_expr_ref()),
+        |arg: &ast::Argument| arg.is_inout(),
     )
 }
 
@@ -2585,8 +2590,8 @@ fn is_readonly_expr(e: &ast::Expr) -> bool {
     }
 }
 
-fn has_inout_arg(es: &[(ParamKind, ast::Expr)]) -> bool {
-    es.iter().any(|(pk, _)| pk.is_pinout())
+fn has_inout_arg(es: &[ast::Argument]) -> bool {
+    es.iter().any(|arg| arg.is_inout())
 }
 
 fn emit_special_function<'a, 'd>(
@@ -2594,7 +2599,7 @@ fn emit_special_function<'a, 'd>(
     env: &Env<'a>,
     pos: &Pos,
     targs: &[ast::Targ],
-    args: &[(ParamKind, ast::Expr)],
+    args: &[ast::Argument],
     uarg: Option<&ast::Expr>,
     lower_fq_name: &str,
 ) -> Result<Option<InstrSeq>> {
@@ -2632,7 +2637,12 @@ fn emit_special_function<'a, 'd>(
             let call = ast::Expr(
                 (),
                 pos.clone(),
-                ast::Expr_::mk_call(ast::CallExpr { func: expr_id, targs: vec![], args: args[1..].to_owned(), unpacked_arg: uarg.cloned() }),
+                ast::Expr_::mk_call(ast::CallExpr {
+                    func: expr_id,
+                    targs: vec![],
+                    args: args[1..].to_owned(),
+                    unpacked_arg: uarg.cloned(),
+                }),
             );
             let ignored_expr = emit_ignored_expr(e, env, &Pos::NONE, &call)?;
             Ok(Some(InstrSeq::gather(vec![
@@ -2684,24 +2694,28 @@ fn emit_special_function<'a, 'd>(
                     format!("fun() expects exactly 1 parameter, {} given", nargs),
                 ));
             }
-            match args {
-                // `inout` is dropped here, but it should be impossible to have an expression
-                // like: `foo(inout "literal")`
-                [(_, Expr(_, _, Expr_::String(ref func_name)))] => {
+            // `inout` is dropped here, but it should be impossible to have an expression
+            // like: `foo(inout "literal")`
+            match args[0].to_expr_ref() {
+                Expr(_, _, Expr_::String(ref func_name)) => {
                     match std::str::from_utf8(func_name) {
-                        Ok(func_name) => {
-                            Ok(Some(instr::resolve_meth_caller(hhbc::FunctionName::intern(
-                                string_utils::strip_global_ns(func_name)
-                            ))))
-                        }
+                        Ok(func_name) => Ok(Some(instr::resolve_meth_caller(
+                            hhbc::FunctionName::intern(string_utils::strip_global_ns(func_name)),
+                        ))),
                         Err(_) => {
                             // func_name string literal is not utf8 so it cannot be a valid
                             // function name.
-                            Err(Error::fatal_runtime(pos, "Constant string expected in fun()"))
+                            Err(Error::fatal_runtime(
+                                pos,
+                                "Constant string expected in fun()",
+                            ))
                         }
                     }
                 }
-                _ => Err(Error::fatal_runtime(pos, "Constant string expected in fun()")),
+                _ => Err(Error::fatal_runtime(
+                    pos,
+                    "Constant string expected in fun()",
+                )),
             }
         }
         ("__SystemLib\\__debugger_is_uninit", _) => {
@@ -2714,10 +2728,10 @@ fn emit_special_function<'a, 'd>(
                     ),
                 ))
             } else {
-                match args {
-                    // Calling convention is dropped here, but given this is meant for the debugger
-                    // I don't think it particularly matters.
-                    [(_, Expr(_, _, Expr_::Lvar(id)))] => {
+                // Calling convention is dropped here, but given this is meant for the debugger
+                // I don't think it particularly matters.
+                match args[0].to_expr_ref() {
+                    Expr(_, _, Expr_::Lvar(id)) => {
                         Ok(Some(instr::is_unset_l(get_local(e, env, pos, id.name())?)))
                     }
                     _ => Err(Error::fatal_runtime(
@@ -2729,10 +2743,13 @@ fn emit_special_function<'a, 'd>(
         }
         ("__SystemLib\\get_enum_member_by_label", _) if e.systemlib() => {
             let local = match args {
-                [(pk, Expr(_, _, Expr_::Lvar(id)))] => {
-                    error::ensure_normal_paramkind(pk)?;
-                    get_local(e, env, pos, id.name())
-                }
+                [arg] => match error::expect_normal_paramkind(arg)? {
+                    Expr(_, _, Expr_::Lvar(id)) => get_local(e, env, pos, id.name()),
+                    _ => Err(Error::fatal_runtime(
+                        pos,
+                        "Argument must be the label argument",
+                    )),
+                },
                 _ => Err(Error::fatal_runtime(
                     pos,
                     "Argument must be the label argument",
@@ -2743,18 +2760,24 @@ fn emit_special_function<'a, 'd>(
                 instr::cls_cns_l(local),
             ])))
         }
-        ("__SystemLib\\unwrap_opaque_value", _) if e.options().hhbc.emit_native_enum_class_labels => match *args {
-            [_, ref val] =>
-            Ok(Some(InstrSeq::gather(vec![
-                 emit_expr(e, env, error::expect_normal_paramkind(val)?)?,
-                 emit_pos(pos),
-                 instr::enum_class_label_name(),
-            ]))),
-            _ => Err(Error::fatal_runtime(
-                pos,
-                format!("__SystemLib\\unwrap_opaque_value() expects exactly 2 parameters, {} given", nargs),
-            )),
-        },
+        ("__SystemLib\\unwrap_opaque_value", _)
+            if e.options().hhbc.emit_native_enum_class_labels =>
+        {
+            match *args {
+                [_, ref val] => Ok(Some(InstrSeq::gather(vec![
+                    emit_expr(e, env, error::expect_normal_paramkind(val)?)?,
+                    emit_pos(pos),
+                    instr::enum_class_label_name(),
+                ]))),
+                _ => Err(Error::fatal_runtime(
+                    pos,
+                    format!(
+                        "__SystemLib\\unwrap_opaque_value() expects exactly 2 parameters, {} given",
+                        nargs
+                    ),
+                )),
+            }
+        }
         ("HH\\classname_to_class", _) => match *args {
             [ref cname] => Ok(Some(InstrSeq::gather(vec![
                 emit_expr(e, env, error::expect_normal_paramkind(cname)?)?,
@@ -2762,7 +2785,10 @@ fn emit_special_function<'a, 'd>(
             ]))),
             _ => Err(Error::fatal_runtime(
                 pos,
-                format!("classname_to_class() expects exactly 1 parameter, {} given", nargs),
+                format!(
+                    "classname_to_class() expects exactly 1 parameter, {} given",
+                    nargs
+                ),
             )),
         },
         ("HH\\global_set", _) => match *args {
@@ -2794,14 +2820,17 @@ fn emit_special_function<'a, 'd>(
                 ),
             )),
         },
-        ("__hhvm_internal_whresult", &[(ref pk, Expr(_, _, Expr_::Lvar(ref param)))])
-            if e.systemlib() =>
-        {
-            error::ensure_normal_paramkind(pk)?;
-            Ok(Some(InstrSeq::gather(vec![
-                instr::c_get_l(e.named_local(local_id::get_name(&param.1))),
-                instr::wh_result(),
-            ])))
+        ("__hhvm_internal_whresult", [arg]) if e.systemlib() && arg.is_lvar() => {
+            match error::expect_normal_paramkind(arg)? {
+                Expr(_, _, Expr_::Lvar(param)) => Ok(Some(InstrSeq::gather(vec![
+                    instr::c_get_l(e.named_local(local_id::get_name(&param.1))),
+                    instr::wh_result(),
+                ]))),
+                _ => Err(Error::fatal_runtime(
+                    pos,
+                    "__hhvm_internal_whresult() internal error",
+                )),
+            }
         }
         ("HH\\array_mark_legacy", _) if args.len() == 1 || args.len() == 2 => {
             Ok(Some(emit_array_mark_legacy(e, env, pos, args, true)?))
@@ -2812,20 +2841,20 @@ fn emit_special_function<'a, 'd>(
         ("HH\\tag_provenance_here", _) if args.len() == 1 || args.len() == 2 => {
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
         }
+        // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
+        // a non-production environment?" `embed_type_decl` is *not* fit for production use.
+        // The typechecker doesn't understand it anyhow.
         ("__hhvm_intrinsics\\static_analysis_error", _)
-            // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
-            // a non-production environment?" `embed_type_decl` is *not* fit for production use.
-            // The typechecker doesn't understand it anyhow.
             if e.options().hhbc.enable_intrinsics_extension
                 && args.is_empty()
                 && targs.is_empty() =>
         {
             Ok(Some(instr::static_analysis_error()))
         }
+        // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
+        // a non-production environment?" `embed_type_decl` is *not* fit for production use.
+        // The typechecker doesn't understand it anyhow.
         ("HH\\embed_type_decl", _)
-            // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
-            // a non-production environment?" `embed_type_decl` is *not* fit for production use.
-            // The typechecker doesn't understand it anyhow.
             if e.options().hhbc.enable_intrinsics_extension
                 && args.is_empty()
                 && targs.len() == 1
@@ -2874,14 +2903,20 @@ fn emit_special_function<'a, 'd>(
             if !args.is_empty() {
                 return Err(Error::fatal_runtime(
                     pos,
-                    format!("get_class_from_type() expects exactly 0 parameters, {} given", args.len()),
+                    format!(
+                        "get_class_from_type() expects exactly 0 parameters, {} given",
+                        args.len()
+                    ),
                 ));
             }
             let ntargs = targs.len();
             if ntargs != 1 {
                 return Err(Error::fatal_runtime(
                     pos,
-                    format!("get_class_from_type() expects exactly 1 type parameter, {} given", ntargs),
+                    format!(
+                        "get_class_from_type() expects exactly 1 type parameter, {} given",
+                        ntargs
+                    ),
                 ));
             }
             Ok(Some(InstrSeq::gather(vec![
@@ -2899,22 +2934,18 @@ fn emit_special_function<'a, 'd>(
                         is_expr,
                     ]))
                 }
-                (&[(ref pk, Expr(_, _, Expr_::Lvar(ref arg_id)))], Some(i), _)
-                    if !is_local_this(env, &arg_id.1) =>
-                {
-                    error::ensure_normal_paramkind(pk)?;
-                    Some(instr::is_type_l(
-                        get_local(e, env, &arg_id.0, &(arg_id.1).1)?,
-                        i,
-                    ))
-                }
-                (&[(ref pk, ref arg_expr)], Some(i), _) => {
-                    error::ensure_normal_paramkind(pk)?;
-                    Some(InstrSeq::gather(vec![
-                        emit_expr(e, env, arg_expr)?,
-                        emit_pos(pos),
-                        instr::is_type_c(i),
-                    ]))
+                ([arg], Some(i), _) => {
+                    let arg_expr = error::expect_normal_paramkind(arg)?;
+                    match arg_expr {
+                        Expr(_, _, Expr_::Lvar(arg_id)) if !is_local_this(env, &arg_id.1) => Some(
+                            instr::is_type_l(get_local(e, env, &arg_id.0, &(arg_id.1).1)?, i),
+                        ),
+                        _ => Some(InstrSeq::gather(vec![
+                            emit_expr(e, env, arg_expr)?,
+                            emit_pos(pos),
+                            instr::is_type_c(i),
+                        ])),
+                    }
                 }
                 _ => match get_call_builtin_func_info(e, lower_fq_name) {
                     Some((nargs, i)) if nargs == args.len() => Some(InstrSeq::gather(vec![
@@ -3395,8 +3426,8 @@ fn emit_label<'a, 'd>(
             func: create_opaque_value,
             targs: vec![],
             args: vec![
-                (ParamKind::Pnormal, enum_class_label_index),
-                (ParamKind::Pnormal, label),
+                (ast::Argument::Anormal(enum_class_label_index)),
+                (ast::Argument::Anormal(label)),
             ],
             unpacked_arg: None,
         };
@@ -3430,14 +3461,12 @@ fn emit_call_expr(
         {
             emit_idx(e, env, pos, args)
         }
-        (Expr_::Id(id), [(pk, arg1)], None) if id.1 == emitter_special_functions::EVAL => {
-            error::ensure_normal_paramkind(pk)?;
+        (Expr_::Id(id), [arg], None) if id.1 == emitter_special_functions::EVAL => {
+            let arg1 = error::expect_normal_paramkind(arg)?;
             emit_eval(e, env, pos, arg1)
         }
-        (Expr_::Id(id), [(pk, arg1)], None)
-            if id.1 == emitter_special_functions::SET_FRAME_METADATA =>
-        {
-            error::ensure_normal_paramkind(pk)?;
+        (Expr_::Id(id), [arg], None) if id.1 == emitter_special_functions::SET_FRAME_METADATA => {
+            let arg1 = error::expect_normal_paramkind(arg)?;
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
@@ -3445,11 +3474,11 @@ fn emit_call_expr(
                 instr::null(),
             ]))
         }
-        (Expr_::Id(id), [(pk, arg1)], None)
+        (Expr_::Id(id), [arg], None)
             if id.1 == emitter_special_functions::SET_PRODUCT_ATTRIBUTION_ID
                 || id.1 == emitter_special_functions::SET_PRODUCT_ATTRIBUTION_ID_DEFERRED =>
         {
-            error::ensure_normal_paramkind(pk)?;
+            let arg1 = error::expect_normal_paramkind(arg)?;
             Ok(InstrSeq::gather(vec![
                 emit_expr(e, env, arg1)?,
                 emit_pos(pos),
@@ -3461,8 +3490,8 @@ fn emit_call_expr(
             let exit = emit_exit(e, env, None)?;
             Ok(emit_pos_then(pos, exit))
         }
-        (Expr_::Id(id), [(pk, arg1)], None) if id.1 == pseudo_functions::EXIT => {
-            error::ensure_normal_paramkind(pk)?;
+        (Expr_::Id(id), [arg], None) if id.1 == pseudo_functions::EXIT => {
+            let arg1 = error::expect_normal_paramkind(arg)?;
             let exit = emit_exit(e, env, Some(arg1))?;
             Ok(emit_pos_then(pos, exit))
         }
@@ -4088,14 +4117,11 @@ fn emit_xhp_obj_get<'a, 'd>(
         ),
     );
     #[allow(clippy::useless_vec)]
-    let args = vec![(
-        ParamKind::Pnormal,
-        Expr(
-            (),
-            pos.clone(),
-            Expr_::mk_string(string_utils::clean(s).into()),
-        ),
-    )];
+    let args = vec![ast::Argument::Anormal(Expr(
+        (),
+        pos.clone(),
+        Expr_::mk_string(string_utils::clean(s).into()),
+    ))];
     emit_call(e, env, pos, &f, &[], &args[..], None, None, false)
 }
 
@@ -5186,20 +5212,21 @@ pub fn emit_set_range_expr<'a, 'd>(
     pos: &Pos,
     name: &str,
     kind: SetRange,
-    args: &[(ParamKind, ast::Expr)],
+    args: &[ast::Argument],
 ) -> Result<InstrSeq> {
     let raise_fatal = |msg: &str| Err(Error::fatal_parse(pos, format!("{} {}", name, msg)));
 
-    // TODO(hgoldstein) Weirdly enough, we *ignore* when the first argument is `inout`
-    // unconditionally. We probably want to either _always_ require it or never require it.
-    let ((_, base), (pk_offset, offset), (pk_src, src), args) = if args.len() >= 3 {
+    let (base_arg, offset_arg, src_arg, args) = if args.len() >= 3 {
         (&args[0], &args[1], &args[2], &args[3..])
     } else {
         return raise_fatal("expects at least 3 arguments");
     };
 
-    error::ensure_normal_paramkind(pk_offset)?;
-    error::ensure_normal_paramkind(pk_src)?;
+    // TODO(hgoldstein) Weirdly enough, we *ignore* when the first argument is `inout`
+    // unconditionally. We probably want to either _always_ require it or never require it.
+    let base = base_arg.to_expr_ref();
+    let offset = error::expect_normal_paramkind(offset_arg)?;
+    let src = error::expect_normal_paramkind(src_arg)?;
 
     let count_instrs = match (args, kind.vec) {
         ([c], true) => emit_expr(e, env, error::expect_normal_paramkind(c)?)?,

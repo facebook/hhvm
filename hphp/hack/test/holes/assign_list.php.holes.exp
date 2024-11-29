@@ -79,7 +79,7 @@ Errors:
                       ((~(int, int, int)), [12:22-42],
                        (Call
                           { func = (((function(bool $x): ~(int, int, int))), [12:22-38], (Id ([12:22-38], "\\__return_3_tuple"))); 
-                            targs = []; args = [(Pnormal, ((bool), [12:39-41], (Lvar ([12:39-41], $x))))]; 
+                            targs = []; args = [(Anormal ((bool), [12:39-41], (Lvar ([12:39-41], $x))))]; 
                             unpacked_arg = None }))
                       }))))
              ]
@@ -120,7 +120,7 @@ Errors:
                           ((~(int, int)), [17:22-42],
                            (Call
                               { func = (((function(bool $x): ~(int, int))), [17:22-38], (Id ([17:22-38], "\\__return_2_tuple"))); 
-                                targs = []; args = [(Pnormal, ((bool), [17:39-41], (Lvar ([17:39-41], $x))))]; 
+                                targs = []; args = [(Anormal ((bool), [17:39-41], (Lvar ([17:39-41], $x))))]; 
                                 unpacked_arg = None })),
                           (~(int, int)), (nothing), Typing)))
                       }))))

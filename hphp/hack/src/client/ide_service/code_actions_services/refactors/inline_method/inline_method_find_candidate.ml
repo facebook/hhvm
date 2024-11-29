@@ -110,8 +110,7 @@ let find_candidate ~(cursor : Pos.t) ~entry ctx : T.candidate option =
                   1 + Option.value count_opt ~default:0);
             if Pos.contains call_id_pos cursor then
               let call_arg_positions =
-                List.map param_kind_arg_pairs ~f:(fun (_, (_, arg_pos, _)) ->
-                    arg_pos)
+                List.map param_kind_arg_pairs ~f:Aast_utils.get_argument_pos
               in
               call_info :=
                 Some

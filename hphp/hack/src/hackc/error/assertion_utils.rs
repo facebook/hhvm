@@ -4,23 +4,28 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use oxidized::ast;
-use oxidized::ast_defs::ParamKind;
 
 use crate::Error;
 use crate::Result;
 
-pub fn expect_normal_paramkind(arg: &(ParamKind, ast::Expr)) -> Result<&ast::Expr> {
+pub fn expect_normal_paramkind(arg: &ast::Argument) -> Result<&ast::Expr> {
     match arg {
-        (ParamKind::Pnormal, e) => Ok(e),
-        (ParamKind::Pinout(pk_pos), _) => {
+        ast::Argument::Anormal(e) => Ok(e),
+        ast::Argument::Ainout(pk_pos, _) => {
             Err(Error::fatal_parse(pk_pos, "Unexpected `inout` annotation"))
         }
     }
 }
 
-pub fn ensure_normal_paramkind(pk: &ParamKind) -> Result<()> {
-    match pk {
-        ParamKind::Pnormal => Ok(()),
-        ParamKind::Pinout(p) => Err(Error::fatal_parse(p, "Unexpected `inout` annotation")),
+pub fn expect_normal_paramkind_mut(arg: &mut ast::Argument) -> Result<&mut ast::Expr> {
+    match arg {
+        ast::Argument::Anormal(e) => Ok(e),
+        ast::Argument::Ainout(pk_pos, _) => {
+            Err(Error::fatal_parse(pk_pos, "Unexpected `inout` annotation"))
+        }
     }
+}
+
+pub fn ensure_normal_paramkind(arg: &ast::Argument) -> Result<()> {
+    expect_normal_paramkind(arg).map(|_| ())
 }

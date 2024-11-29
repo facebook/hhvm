@@ -67,7 +67,7 @@
                                ((Awaitable<~void>), [11:16-23],
                                 (Call
                                    { func = (((function(string $x): Awaitable<~void>)), [11:16-19], (Id ([11:16-19], "\\err"))); 
-                                     targs = []; args = [(Pnormal, ((string), [11:20-22], (Lvar ([11:20-22], $x))))]; 
+                                     targs = []; args = [(Anormal ((string), [11:20-22], (Lvar ([11:20-22], $x))))]; 
                                      unpacked_arg = None })))),
                            (~void), (~int), Typing))))))
              ]

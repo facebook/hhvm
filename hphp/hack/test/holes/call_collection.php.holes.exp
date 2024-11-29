@@ -71,7 +71,7 @@
                  (Call
                     { func = (((function(Collection<int> $l): void)), [13:3-4], (Id ([13:3-4], "\\l"))); 
                       targs = [];
-                      args = [(Pnormal, ((Collection<string>), [13:5-7], (Hole (((Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (Collection<string>), (Collection<int>), Typing))))];
+                      args = [(Anormal ((Collection<string>), [13:5-7], (Hole (((Collection<string>), [13:5-7], (Lvar ([13:5-7], $l))), (Collection<string>), (Collection<int>), Typing))))];
                       unpacked_arg = None }))));
              ([15:3-31],
               (Expr
@@ -87,7 +87,7 @@
                        (((function(Collection<int> $l): void)), [18:3-10],
                         (Obj_get (((exact TestCollection), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(Collection<int> $l): void)), [18:9-10], (Id ([18:9-10], "l"))), OG_nullthrows, Is_method)));
                        targs = [];
-                       args = [(Pnormal, ((Collection<string>), [18:11-13], (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (Collection<string>), (Collection<int>), Typing))))];
+                       args = [(Anormal ((Collection<string>), [18:11-13], (Hole (((Collection<string>), [18:11-13], (Lvar ([18:11-13], $l))), (Collection<string>), (Collection<int>), Typing))))];
                        unpacked_arg = None }))))
              ]
            };
@@ -120,13 +120,13 @@
                     { func = (((function(Collection<int> $l): void)), [25:3-4], (Id ([25:3-4], "\\l"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~Collection<int>), [25:5-66],
-                         (Hole (((Collection<string>), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>),
-                            (UnsafeCast
-                               [([25:27-45], (Happly (([25:27-37], "\\HH\\Collection"), [([25:38-44], (Hprim Tstring))])));
-                                 ([25:46-61], (Happly (([25:46-56], "\\HH\\Collection"), [([25:57-60], (Hprim Tint))])))])
-                            ))))
+                      [(Anormal
+                          ((~Collection<int>), [25:5-66],
+                           (Hole (((Collection<string>), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>),
+                              (UnsafeCast
+                                 [([25:27-45], (Happly (([25:27-37], "\\HH\\Collection"), [([25:38-44], (Hprim Tstring))])));
+                                   ([25:46-61], (Happly (([25:46-56], "\\HH\\Collection"), [([25:57-60], (Hprim Tint))])))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-31],
@@ -144,13 +144,13 @@
                         (Obj_get (((exact TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~Collection<int>), [30:11-72],
-                          (Hole (((Collection<string>), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>),
-                             (UnsafeCast
-                                [([30:33-51], (Happly (([30:33-43], "\\HH\\Collection"), [([30:44-50], (Hprim Tstring))])));
-                                  ([30:52-67], (Happly (([30:52-62], "\\HH\\Collection"), [([30:63-66], (Hprim Tint))])))])
-                             ))))
+                       [(Anormal
+                           ((~Collection<int>), [30:11-72],
+                            (Hole (((Collection<string>), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>),
+                               (UnsafeCast
+                                  [([30:33-51], (Happly (([30:33-43], "\\HH\\Collection"), [([30:44-50], (Hprim Tstring))])));
+                                    ([30:52-67], (Happly (([30:52-62], "\\HH\\Collection"), [([30:63-66], (Hprim Tint))])))])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]
@@ -233,13 +233,13 @@
                     { func = (((function(Collection<int> $l): void)), [25:3-4], (Id ([25:3-4], "\\l"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~Collection<int>), [25:5-66],
-                         (Hole (((dynamic), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>),
-                            (UnsafeCast
-                               [([25:27-45], (Happly (([25:27-37], "\\HH\\Collection"), [([25:38-44], (Hprim Tstring))])));
-                                 ([25:46-61], (Happly (([25:46-56], "\\HH\\Collection"), [([25:57-60], (Hprim Tint))])))])
-                            ))))
+                      [(Anormal
+                          ((~Collection<int>), [25:5-66],
+                           (Hole (((dynamic), [25:63-65], (Lvar ([25:63-65], $l))), (Collection<string>), (Collection<int>),
+                              (UnsafeCast
+                                 [([25:27-45], (Happly (([25:27-37], "\\HH\\Collection"), [([25:38-44], (Hprim Tstring))])));
+                                   ([25:46-61], (Happly (([25:46-56], "\\HH\\Collection"), [([25:57-60], (Hprim Tint))])))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-31],
@@ -257,13 +257,13 @@
                         (Obj_get (((exact TestCollection), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(Collection<int> $l): void)), [30:9-10], (Id ([30:9-10], "l"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~Collection<int>), [30:11-72],
-                          (Hole (((dynamic), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>),
-                             (UnsafeCast
-                                [([30:33-51], (Happly (([30:33-43], "\\HH\\Collection"), [([30:44-50], (Hprim Tstring))])));
-                                  ([30:52-67], (Happly (([30:52-62], "\\HH\\Collection"), [([30:63-66], (Hprim Tint))])))])
-                             ))))
+                       [(Anormal
+                           ((~Collection<int>), [30:11-72],
+                            (Hole (((dynamic), [30:69-71], (Lvar ([30:69-71], $l))), (Collection<string>), (Collection<int>),
+                               (UnsafeCast
+                                  [([30:33-51], (Happly (([30:33-43], "\\HH\\Collection"), [([30:44-50], (Hprim Tstring))])));
+                                    ([30:52-67], (Happly (([30:52-62], "\\HH\\Collection"), [([30:63-66], (Hprim Tint))])))])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]

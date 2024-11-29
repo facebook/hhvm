@@ -35,7 +35,7 @@
                 ((void), [6:3-24],
                  (Call
                     { func = (((function(string $s): void)), [6:3-15], (Id ([6:3-15], "\\takes_string"))); 
-                      targs = []; args = [(Pnormal, ((string), [6:16-23], (String "hello")))]; 
+                      targs = []; args = [(Anormal ((string), [6:16-23], (String "hello")))]; 
                       unpacked_arg = None }))))
              ]
            };

@@ -51,7 +51,7 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
             @@ Naming_error.Too_few_arguments fn_expr_pos
           in
           (Error fn_expr_pos, args_err :: errs)
-        | [(Ast_defs.Pnormal, e1); (Ast_defs.Pnormal, e2)] -> begin
+        | [Aast_defs.Anormal e1; Aast_defs.Anormal e2] -> begin
           match (e1, e2) with
           | Aast.
               ( (_, _, Class_const ((_, _, CI cl), (_, mem))),
@@ -64,8 +64,8 @@ let on_expr on_error ((annot, pos, expr_) as expr) ~ctx =
             in
             (Error p, meth_err :: errs)
         end
-        | [(Ast_defs.Pinout _, _); _]
-        | [_; (Ast_defs.Pinout _, _)] ->
+        | [Aast_defs.Ainout _; _]
+        | [_; Aast_defs.Ainout _] ->
           let meth_err =
             Naming_phase_error.naming
             @@ Naming_error.Illegal_meth_caller fn_expr_pos

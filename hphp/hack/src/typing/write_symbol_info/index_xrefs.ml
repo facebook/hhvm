@@ -16,7 +16,8 @@ let call_handler ~path fa_ref (pos_map : Xrefs.pos_map) =
 
     method! at_Call _env call =
       let Aast.{ func = (_, callee_pos, callee_exp); args; _ } = call in
-      let f (_, (_, arg_pos, exp)) =
+      let f arg =
+        let (_, arg_pos, exp) = Aast_utils.arg_to_expr arg in
         let arg =
           match exp with
           | Aast.String s

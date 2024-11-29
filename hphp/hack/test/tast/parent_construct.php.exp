@@ -51,7 +51,7 @@
                  ((void), [8:5-28],
                   (Call
                      { func = (((function(num $x): void)), [8:5-24], (Class_const (((B), [8:5-11], CIparent), ([8:13-24], "__construct")))); 
-                       targs = []; args = [(Pnormal, ((int), [8:25-27], (Lvar ([8:25-27], $x))))]; 
+                       targs = []; args = [(Anormal ((int), [8:25-27], (Lvar ([8:25-27], $x))))]; 
                        unpacked_arg = None }))))
               ]
             };

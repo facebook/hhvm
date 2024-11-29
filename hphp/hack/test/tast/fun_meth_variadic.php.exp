@@ -46,7 +46,7 @@ Errors:
                      ((void), [7:5-23],
                       (Call
                          { func = (((function(string $s): void)), [7:5-17], (Id ([7:5-17], "\\takes_string"))); 
-                           targs = []; args = [(Pnormal, ((string), [7:18-22], (Lvar ([7:18-22], $arg))))]; 
+                           targs = []; args = [(Anormal ((string), [7:18-22], (Lvar ([7:18-22], $arg))))]; 
                            unpacked_arg = None }))))
                   ]
                 )))

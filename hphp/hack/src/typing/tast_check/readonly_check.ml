@@ -447,8 +447,9 @@ let method_call env caller =
 
 let check_special_function env caller args =
   match (caller, args) with
-  | ((_, _, Id (pos, x)), [(_, arg)])
+  | ((_, _, Id (pos, x)), [arg])
     when String.equal (Utils.strip_ns x) (Utils.strip_ns SN.Readonly.as_mut) ->
+    let arg = Aast_utils.arg_to_expr arg in
     let arg_ty = Tast.get_type arg in
     if not (is_safe_mut_ty env SSet.empty arg_ty) then
       Typing_error_utils.add_typing_error
@@ -468,7 +469,7 @@ let call
     (pos : Pos.t)
     (caller_ty : Tast.ty)
     (caller_rty : rty)
-    (args : (Ast_defs.param_kind * Tast.expr) list)
+    (args : Tast.argument list)
     (unpacked_arg : Tast.expr option) =
   let open Typing_defs in
   let (env, caller_ty) = Tast_env.expand_type env caller_ty in
@@ -499,7 +500,8 @@ let call
     | _ -> ()
   in
   (* Checks a single arg against a parameter *)
-  let check_arg env param (_, arg) =
+  let check_arg env param arg =
+    let arg = Aast_utils.arg_to_expr arg in
     let param_rty = param_to_rty param in
     let arg_rty = ty_expr env arg in
     if not (subtype_rty arg_rty param_rty) then
@@ -542,7 +544,7 @@ let call
       in
       let unpacked_rty =
         unpacked_arg
-        |> Option.map ~f:(fun e -> (Ast_defs.Pnormal, e))
+        |> Option.map ~f:(fun e -> Aast_defs.Anormal e)
         |> Option.to_list
       in
       let args = args @ unpacked_rty in
@@ -629,7 +631,7 @@ let check =
           pos
           constructor_fty
           Mut
-          (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) args)
+          (List.map ~f:(fun e -> Aast_defs.Anormal e) args)
           unpacked_arg;
         super#on_expr env e
       | (_, _, Obj_get _)

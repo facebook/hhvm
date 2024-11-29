@@ -40,7 +40,7 @@
                        (Call
                           { func = (((function(int $_): bool)), [8:18-32], (Id ([8:18-32], "\\some_condition"))); 
                             targs = [];
-                            args = [(Pnormal, ((~int), [8:33-71], (Hole (((bool), [8:65-70], False), (bool), (int), (UnsafeCast [([8:54-58], (Hprim Tbool)); ([8:60-63], (Hprim Tint))])))))];
+                            args = [(Anormal ((~int), [8:33-71], (Hole (((bool), [8:65-70], False), (bool), (int), (UnsafeCast [([8:54-58], (Hprim Tbool)); ([8:60-63], (Hprim Tint))])))))];
                             unpacked_arg = None }))
                       })),
                 [], [([Pos.none], Noop)])))

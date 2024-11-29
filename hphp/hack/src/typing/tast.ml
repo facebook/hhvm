@@ -76,6 +76,8 @@ type expr = (ty, saved_env) Aast.expr
 
 type expr_ = (ty, saved_env) Aast.expr_
 
+type argument = (ty, saved_env) Aast.argument
+
 type stmt = (ty, saved_env) Aast.stmt
 
 type stmt_ = (ty, saved_env) Aast.stmt_
@@ -296,7 +298,7 @@ let nast_converter =
           List.map ~f:(fun hint -> ((), super#on_hint () hint)) hints
         in
         let func = ((), pos, Aast.Id (pos, name)) in
-        let args = [(Ast_defs.Pnormal, ex)] in
+        let args = [Aast.Anormal ex] in
         Aast.Call { func; targs; args; unpacked_arg = None }
       in
       match src with

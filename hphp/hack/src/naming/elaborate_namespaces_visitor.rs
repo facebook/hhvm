@@ -89,9 +89,10 @@ impl Env {
                 && args.len() == 2
                 && id.1 == sn::autoimported_functions::METH_CALLER
             {
-                if let Expr(_, p, Expr_::String(fn_name)) = &args[0].1 {
+                if let Expr(_, p, Expr_::String(fn_name)) = &args[0].to_expr_ref() {
                     let fn_name = core_utils::add_ns_bstr(fn_name);
-                    args[0].1 = Expr((), p.clone(), Expr_::String(fn_name.into_owned().into()));
+                    *args[0].to_expr_mut() =
+                        Expr((), p.clone(), Expr_::String(fn_name.into_owned().into()));
                 }
             }
         }

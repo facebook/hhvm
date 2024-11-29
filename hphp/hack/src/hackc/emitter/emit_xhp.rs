@@ -10,6 +10,7 @@ use hack_macros::hack_expr;
 use hack_macros::hack_stmts;
 use hhbc::Method;
 use hhbc_string_utils as string_utils;
+use oxidized::ast;
 use oxidized::ast::*;
 use oxidized::ast_defs;
 use oxidized::pos::Pos;
@@ -51,17 +52,16 @@ pub fn from_attribute_declaration<'a, 'd>(
     xal: &[XhpAttribute<'_>],
     xual: &[Hint],
 ) -> Result<Method> {
-    let mut args = vec![(
-        ParamKind::Pnormal,
-        hack_expr!("parent::__xhpAttributeDeclaration()"),
-    )];
+    let mut args = vec![ast::Argument::Anormal(hack_expr!(
+        "parent::__xhpAttributeDeclaration()"
+    ))];
 
     for xua in xual.iter() {
         match xua.1.as_happly() {
             Some((ast_defs::Id(_, s), hints)) if hints.is_empty() => {
                 let s = string_utils::mangle(string_utils::strip_global_ns(s).into());
                 let arg = hack_expr!("#{id(s)}::__xhpAttributeDeclaration()");
-                args.push((ParamKind::Pnormal, arg));
+                args.push(ast::Argument::Anormal(arg));
             }
             _ => {
                 return Err(Error::unrecoverable(
@@ -70,8 +70,7 @@ pub fn from_attribute_declaration<'a, 'd>(
             }
         }
     }
-    args.push((ParamKind::Pnormal, emit_xhp_attribute_array(xal)?));
-
+    args.push(ast::Argument::Anormal(emit_xhp_attribute_array(xal)?));
     let body = Block(hack_stmts!(
         r#"
             $r = self::$__xhpAttributeDeclarationCache;

@@ -430,8 +430,7 @@ and pp_expr_ ppf = function
       @@ pair ~sep:nop pp_targs pp_arg_exprs)
       ppf
       ( class_id,
-        (targs, (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) exprs, expr_opt))
-      )
+        (targs, (List.map ~f:(fun e -> Aast_defs.Anormal e) exprs, expr_opt)) )
   | Aast.Lplaceholder _ -> Fmt.string ppf "$_"
   | Aast.Pair (targs_opt, fst, snd) ->
     Fmt.(
@@ -478,10 +477,11 @@ and pp_arg_exprs ppf (exprs, expr_opt) =
       ppf
       (exprs, expr_opt)
 
-and pp_arg ppf (pk, e) =
-  match pk with
-  | Ast_defs.Pnormal -> pp_expr ppf e
-  | Ast_defs.Pinout _ -> Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (pk, e)
+and pp_arg ppf arg =
+  match arg with
+  | Aast_defs.Anormal e -> pp_expr ppf e
+  | Aast_defs.Ainout (pos, e) ->
+    Fmt.(pair ~sep:sp pp_paramkind pp_expr) ppf (Ast_defs.Pinout pos, e)
 
 and pp_afield ppf = function
   | Aast.AFvalue expr -> pp_expr ppf expr

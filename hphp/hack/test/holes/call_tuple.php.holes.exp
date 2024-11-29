@@ -82,14 +82,14 @@
                 ((void), [14:3-9],
                  (Call
                     { func = (((function((int, int) $a): void)), [14:3-4], (Id ([14:3-4], "\\a"))); 
-                      targs = []; args = [(Pnormal, (((int, bool)), [14:5-8], (Hole ((((int, bool)), [14:5-8], (Lvar ([14:5-8], $a1))), ((int, bool)), ((int, int)), Typing))))]; 
+                      targs = []; args = [(Anormal (((int, bool)), [14:5-8], (Hole ((((int, bool)), [14:5-8], (Lvar ([14:5-8], $a1))), ((int, bool)), ((int, int)), Typing))))]; 
                       unpacked_arg = None }))));
              ([16:3-10],
               (Expr
                  ((void), [16:3-9],
                   (Call
                      { func = (((function((int, int) $a): void)), [16:3-4], (Id ([16:3-4], "\\a"))); 
-                       targs = []; args = [(Pnormal, (((bool, int)), [16:5-8], (Hole ((((bool, int)), [16:5-8], (Lvar ([16:5-8], $a2))), ((bool, int)), ((int, int)), Typing))))]; 
+                       targs = []; args = [(Anormal (((bool, int)), [16:5-8], (Hole ((((bool, int)), [16:5-8], (Lvar ([16:5-8], $a2))), ((bool, int)), ((int, int)), Typing))))]; 
                        unpacked_arg = None }))));
              ([18:3-26],
               (Expr
@@ -104,7 +104,7 @@
                      { func =
                        (((function((int, int) $a): void)), [21:3-10],
                         (Obj_get (((exact TestTuple), [21:3-7], (Lvar ([21:3-7], $foo))), (((function((int, int) $a): void)), [21:9-10], (Id ([21:9-10], "a"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Pnormal, (((int, bool)), [21:11-14], (Hole ((((int, bool)), [21:11-14], (Lvar ([21:11-14], $a1))), ((int, bool)), ((int, int)), Typing))))];
+                       targs = []; args = [(Anormal (((int, bool)), [21:11-14], (Hole ((((int, bool)), [21:11-14], (Lvar ([21:11-14], $a1))), ((int, bool)), ((int, int)), Typing))))];
                        unpacked_arg = None }))));
              ([23:3-16],
               (Expr
@@ -113,7 +113,7 @@
                      { func =
                        (((function((int, int) $a): void)), [23:3-10],
                         (Obj_get (((exact TestTuple), [23:3-7], (Lvar ([23:3-7], $foo))), (((function((int, int) $a): void)), [23:9-10], (Id ([23:9-10], "a"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Pnormal, (((bool, int)), [23:11-14], (Hole ((((bool, int)), [23:11-14], (Lvar ([23:11-14], $a2))), ((bool, int)), ((int, int)), Typing))))];
+                       targs = []; args = [(Anormal (((bool, int)), [23:11-14], (Hole ((((bool, int)), [23:11-14], (Lvar ([23:11-14], $a2))), ((bool, int)), ((int, int)), Typing))))];
                        unpacked_arg = None }))))
              ]
            };
@@ -154,13 +154,13 @@
                     { func = (((function((int, int) $a): void)), [31:3-4], (Id ([31:3-4], "\\a"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~(int, int)), [31:5-53],
-                         (Hole ((((int, bool)), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)),
-                            (UnsafeCast
-                               [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                 ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                            ))))
+                      [(Anormal
+                          ((~(int, int)), [31:5-53],
+                           (Hole ((((int, bool)), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)),
+                              (UnsafeCast
+                                 [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                   ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([33:3-55],
@@ -170,13 +170,14 @@
                      { func = (((function((int, int) $a): void)), [33:3-4], (Id ([33:3-4], "\\a"))); 
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~(int, int)), [33:5-53],
-                          (Hole ((((bool, int)), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)),
-                             (UnsafeCast
-                                [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                  ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                             ))))
+                       [(Anormal
+                           ((~(int, int)), [33:5-53],
+                            (Hole ((((bool, int)), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)),
+                               (UnsafeCast
+                                  [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                    ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                                    ])
+                               ))))
                          ];
                        unpacked_arg = None }))));
              ([35:3-26],
@@ -194,13 +195,14 @@
                         (Obj_get (((exact TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~(int, int)), [38:11-59],
-                          (Hole ((((int, bool)), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)),
-                             (UnsafeCast
-                                [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                  ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                             ))))
+                       [(Anormal
+                           ((~(int, int)), [38:11-59],
+                            (Hole ((((int, bool)), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)),
+                               (UnsafeCast
+                                  [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                    ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                                    ])
+                               ))))
                          ];
                        unpacked_arg = None }))));
              ([40:3-61],
@@ -212,13 +214,14 @@
                         (Obj_get (((exact TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~(int, int)), [40:11-59],
-                          (Hole ((((bool, int)), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)),
-                             (UnsafeCast
-                                [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                  ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                             ))))
+                       [(Anormal
+                           ((~(int, int)), [40:11-59],
+                            (Hole ((((bool, int)), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)),
+                               (UnsafeCast
+                                  [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                    ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                                    ])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]
@@ -313,13 +316,13 @@
                     { func = (((function((int, int) $a): void)), [31:3-4], (Id ([31:3-4], "\\a"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~(int, int)), [31:5-53],
-                         (Hole (((dynamic), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)),
-                            (UnsafeCast
-                               [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                 ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                            ))))
+                      [(Anormal
+                          ((~(int, int)), [31:5-53],
+                           (Hole (((dynamic), [31:49-52], (Lvar ([31:49-52], $a1))), ((int, bool)), ((int, int)),
+                              (UnsafeCast
+                                 [([31:27-37], (Htuple { tup_required = [([31:28-31], (Hprim Tint)); ([31:32-36], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                   ([31:38-47], (Htuple { tup_required = [([31:39-42], (Hprim Tint)); ([31:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([33:3-55],
@@ -329,13 +332,14 @@
                      { func = (((function((int, int) $a): void)), [33:3-4], (Id ([33:3-4], "\\a"))); 
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~(int, int)), [33:5-53],
-                          (Hole (((dynamic), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)),
-                             (UnsafeCast
-                                [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                  ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                             ))))
+                       [(Anormal
+                           ((~(int, int)), [33:5-53],
+                            (Hole (((dynamic), [33:49-52], (Lvar ([33:49-52], $a2))), ((bool, int)), ((int, int)),
+                               (UnsafeCast
+                                  [([33:27-37], (Htuple { tup_required = [([33:28-32], (Hprim Tbool)); ([33:33-36], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                    ([33:38-47], (Htuple { tup_required = [([33:39-42], (Hprim Tint)); ([33:43-46], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                                    ])
+                               ))))
                          ];
                        unpacked_arg = None }))));
              ([35:3-26],
@@ -353,13 +357,14 @@
                         (Obj_get (((exact TestTuple), [38:3-7], (Lvar ([38:3-7], $foo))), (((function((int, int) $a): void)), [38:9-10], (Id ([38:9-10], "a"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~(int, int)), [38:11-59],
-                          (Hole (((dynamic), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)),
-                             (UnsafeCast
-                                [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                  ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                             ))))
+                       [(Anormal
+                           ((~(int, int)), [38:11-59],
+                            (Hole (((dynamic), [38:55-58], (Lvar ([38:55-58], $a1))), ((int, bool)), ((int, int)),
+                               (UnsafeCast
+                                  [([38:33-43], (Htuple { tup_required = [([38:34-37], (Hprim Tint)); ([38:38-42], (Hprim Tbool))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                    ([38:44-53], (Htuple { tup_required = [([38:45-48], (Hprim Tint)); ([38:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                                    ])
+                               ))))
                          ];
                        unpacked_arg = None }))));
              ([40:3-61],
@@ -371,13 +376,14 @@
                         (Obj_get (((exact TestTuple), [40:3-7], (Lvar ([40:3-7], $foo))), (((function((int, int) $a): void)), [40:9-10], (Id ([40:9-10], "a"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~(int, int)), [40:11-59],
-                          (Hole (((dynamic), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)),
-                             (UnsafeCast
-                                [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
-                                  ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))])
-                             ))))
+                       [(Anormal
+                           ((~(int, int)), [40:11-59],
+                            (Hole (((dynamic), [40:55-58], (Lvar ([40:55-58], $a2))), ((bool, int)), ((int, int)),
+                               (UnsafeCast
+                                  [([40:33-43], (Htuple { tup_required = [([40:34-38], (Hprim Tbool)); ([40:39-42], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }));
+                                    ([40:44-53], (Htuple { tup_required = [([40:45-48], (Hprim Tint)); ([40:49-52], (Hprim Tint))]; tup_extra = (Hextra { tup_optional = []; tup_variadic = None }) }))
+                                    ])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]

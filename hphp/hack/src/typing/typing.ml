@@ -870,9 +870,9 @@ let do_hh_time el =
       end
     | _ -> ()
   in
-  match el with
-  | [(_, (_, _, command))] -> go command "_"
-  | [(_, (_, _, command)); (_, (_, _, Aast.String tag))] -> go command tag
+  match List.map ~f:Aast_utils.arg_to_expr (List.take el 2) with
+  | [(_, _, command)] -> go command "_"
+  | [(_, _, command); (_, _, Aast.String tag)] -> go command tag
   | _ -> ()
 
 let is_parameter env x = Local_id.Map.mem x (Env.get_params env)
@@ -2264,13 +2264,9 @@ module rec Expr : sig
     recv_pos:pos ->
     env ->
     locl_ty ->
-    (Ast_defs.param_kind * Nast.expr) list ->
+    Nast.argument list ->
     Nast.expr option ->
-    env
-    * ((Ast_defs.param_kind * Tast.expr) list
-      * Tast.expr option
-      * locl_ty
-      * bool)
+    env * (Tast.argument list * Tast.expr option * locl_ty * bool)
 
   (** Typechecks a `new` expression.
       If `is_attribute` is true, it's used for checking an attribute instantiation
@@ -2285,12 +2281,12 @@ module rec Expr : sig
     env ->
     unit * pos * (unit, unit) class_id_ ->
     Nast.targ list ->
-    (Ast_defs.param_kind * Nast.expr) list ->
+    Nast.argument list ->
     Nast.expr option ->
     env
     * Tast.class_id
     * Tast.targ list
-    * (Ast_defs.param_kind * Tast.expr) list
+    * Tast.argument list
     * Tast.expr option
     * locl_ty
     * locl_ty
@@ -2353,8 +2349,7 @@ end = struct
      given args. Where the type of the argument isn't obvious (without actual
      type checking, just use a fresh tyvar *)
   let lambda_expected p env fun_ args =
-    let get_arg_params env ((pk : Ast_defs.param_kind), (exp : (_, _) Aast.expr))
-        : env * locl_ty fun_param =
+    let get_arg_params env arg : env * locl_ty fun_param =
       let fresh env p =
         Env.fresh_type_reason
           ~variance:Ast_defs.Contravariant
@@ -2363,14 +2358,14 @@ end = struct
           (Reason.type_variable p)
       in
       let (env, fp_type) =
-        match pk with
-        | Ast_defs.Pinout _ ->
+        match arg with
+        | Aast_defs.Ainout (_, _) ->
           Env.fresh_type_reason
             ~variance:Ast_defs.Invariant
             env
             p
             (Reason.type_variable p)
-        | _ ->
+        | Aast_defs.Anormal exp ->
           let ((), p, exp_) = exp in
           (match exp_ with
           | Null -> (env, MakeType.null (Reason.witness p))
@@ -2616,12 +2611,21 @@ end = struct
     | (el, []) -> infer_exprs el ~ctxt:Context.default ~env
 
   and argument_list_exprs expr_cb env el =
+    let argument env a =
+      match a with
+      | Anormal e ->
+        let (env, te, ty) = expr_cb env e in
+        (env, Anormal te, ty)
+      | Ainout (pos, e) ->
+        let (env, te, ty) = expr_cb env e in
+        (env, Ainout (pos, te), ty)
+    in
     match el with
     | [] -> (env, [], [])
-    | (pk, e) :: el ->
-      let (env, te, ty) = expr_cb env e in
+    | e :: el ->
+      let (env, te, ty) = argument env e in
       let (env, tel, tyl) = argument_list_exprs expr_cb env el in
-      (env, (pk, te) :: tel, ty :: tyl)
+      (env, te :: tel, ty :: tyl)
 
   and expr_ ~expected ~ctxt env ((_, p, e) as outer) =
     let env = Env.open_tyvars env p in
@@ -3658,8 +3662,8 @@ end = struct
         ) else if String.equal s SN.PseudoFunctions.hh_log_level then
           match args with
           | [
-           (Ast_defs.Pnormal, (_, _, Aast.String key_str));
-           (Ast_defs.Pnormal, (_, _, Aast.Int level_str));
+           Aast_defs.Anormal (_, _, Aast.String key_str);
+           Aast_defs.Anormal (_, _, Aast.Int level_str);
           ] ->
             Env.set_log_level env key_str (int_of_string level_str)
           | _ -> env
@@ -4220,7 +4224,7 @@ end = struct
           env
           cid
           explicit_targs
-          (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) el)
+          (List.map ~f:(fun e -> Anormal e) el)
           unpacked_element
       in
       let env =
@@ -4232,7 +4236,12 @@ end = struct
       make_result
         env
         p
-        (Aast.New (tc, tal, List.map ~f:snd tel, typed_unpack_element, ctor_fty))
+        (Aast.New
+           ( tc,
+             tal,
+             List.map ~f:Aast_utils.arg_to_expr tel,
+             typed_unpack_element,
+             ctor_fty ))
         ty
     | Cast (hint, e) ->
       let (env, te, ty2) =
@@ -4778,8 +4787,16 @@ end = struct
       env
       ((_, _, cid_) as cid)
       explicit_targs
-      el
-      unpacked_element =
+      (el : Nast.argument list)
+      unpacked_element :
+      env
+      * Tast.class_id
+      * Tast.targ list
+      * Tast.argument list
+      * Tast.expr option
+      * locl_ty
+      * locl_ty
+      * bool =
     (* Obtain class info from the cid expression. We get multiple
      * results with a CIexpr that has a union type, e.g. in
 
@@ -5359,7 +5376,7 @@ end = struct
         ->
         let result =
           match el with
-          | [(Ast_defs.Pnormal, original_expr)]
+          | [Aast_defs.Anormal original_expr]
             when TCO.ignore_unsafe_cast (Env.get_tcopt env) ->
             expr ~expected:None ~ctxt:Context.default env original_expr
           | _ ->
@@ -5382,7 +5399,7 @@ end = struct
             let (env, dflt_ty) = Env.fresh_type_invariant env p in
             let el =
               match tel with
-              | (_, e) :: _ -> e
+              | arg :: _ -> Aast_utils.arg_to_expr arg
               | [] -> Tast.make_typed_expr fpos dflt_ty Aast.Null
             and (ty_from, ty_to) =
               match tal with
@@ -5453,7 +5470,7 @@ end = struct
         let env = Typing_local_ops.check_unset_target env tel in
         let (env, ty_err_opt) =
           match (el, unpacked_element) with
-          | ([(Ast_defs.Pnormal, (_, _, Array_get (ea, Some _)))], None) ->
+          | ([Aast_defs.Anormal (_, _, Array_get (ea, Some _))], None) ->
             let (env, _te, ty) =
               expr ~expected:None ~ctxt:Context.default env ea
             in
@@ -5491,12 +5508,15 @@ end = struct
         let should_forget_fakes = false in
         let result =
           match el with
-          | [(_, (_, p, Obj_get (_, _, OG_nullsafe, _)))] ->
-            (Typing_error_utils.add_typing_error ~env
-            @@ Typing_error.(
-                 primary @@ Primary.Nullsafe_property_write_context p));
-            let (env, ty) = Env.fresh_type_error env p in
-            make_call_special_from_def env id tel (fun _ -> ty)
+          | [arg] ->
+            (match Aast_utils.arg_to_expr arg with
+            | (_, p, Obj_get (_, _, OG_nullsafe, _)) ->
+              (Typing_error_utils.add_typing_error ~env
+              @@ Typing_error.(
+                   primary @@ Primary.Nullsafe_property_write_context p));
+              let (env, ty) = Env.fresh_type_error env p in
+              make_call_special_from_def env id tel (fun _ -> ty)
+            | _ -> make_call_special_from_def env id tel MakeType.void)
           | _ -> make_call_special_from_def env id tel MakeType.void
         in
         (result, should_forget_fakes)
@@ -5507,17 +5527,18 @@ end = struct
         let should_forget_fakes = false in
         (match el with
         | [e1; e2] ->
-          (match e2 with
-          | (_, (_, p, String cst)) ->
+          (match Aast_utils.arg_to_expr e2 with
+          | (_, p, String cst) ->
             (* find the class constant implicitly defined by the typeconst *)
+            let e1 = Aast_utils.arg_to_expr e1 in
             let cid =
               match e1 with
-              | (_, (_, _, Class_const (cid, (_, x))))
-              | (_, (_, _, Class_get (cid, CGstring (_, x), _)))
+              | (_, _, Class_const (cid, (_, x)))
+              | (_, _, Class_get (cid, CGstring (_, x), _))
                 when String.equal x SN.Members.mClass ->
                 cid
               | _ ->
-                let (_, ((_, p1, _) as e1_)) = e1 in
+                let ((_, p1, _) as e1_) = e1 in
                 ((), p1, CIexpr e1_)
             in
             let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
@@ -5562,8 +5583,11 @@ end = struct
         let transform_fty =
           (* We expect the second argument to at, idx and keyExists to be a literal field name *)
           match el with
-          | _ :: (_, field) :: _ ->
-            Typing_shapes.do_with_field_expr env field ~with_error:None
+          | _ :: field :: _ ->
+            Typing_shapes.do_with_field_expr
+              env
+              (Aast_utils.arg_to_expr field)
+              ~with_error:None
             @@ fun field_name ->
             Some
               (fun fty ->
@@ -5586,7 +5610,7 @@ end = struct
           unpacked_element
           (fun env _ res el _tel ->
             match el with
-            | [(Ast_defs.Pinout _, shape); (_, field)] -> begin
+            | [Aast_defs.Ainout (_, shape); field] -> begin
               match shape with
               | (_, _, Lvar (_, lvar))
               | (_, _, Hole ((_, _, Lvar (_, lvar)), _, _, _)) ->
@@ -5600,7 +5624,11 @@ end = struct
                   expr ~expected:None ~ctxt:Context.default env shape
                 in
                 let (env, shape_ty) =
-                  Typing_shapes.remove_key p env shape_ty field
+                  Typing_shapes.remove_key
+                    p
+                    env
+                    shape_ty
+                    (Aast_utils.arg_to_expr field)
                 in
                 let env =
                   set_valid_rvalue ~is_defined:true p env lvar None shape_ty
@@ -5627,7 +5655,8 @@ end = struct
           unpacked_element
           (fun env _ res _el tel ->
             match tel with
-            | [(_, (shape_ty, _, _))] ->
+            | [arg] ->
+              let (shape_ty, _, _) = Aast_utils.arg_to_expr arg in
               Typing_shapes.to_dict env p shape_ty res
             | _ -> (env, res))
       | _ -> dispatch_class_const env class_id method_id
@@ -5762,7 +5791,10 @@ end = struct
             default with
             immediately_called_lambda =
               Option.is_some fun_opt
-              && List.for_all ~f:(fun (_, e) -> Aast_utils.is_const_expr e) el;
+              && List.for_all
+                   ~f:(fun e ->
+                     Aast_utils.is_const_expr (Aast_utils.arg_to_expr e))
+                   el;
           }
       in
       let env = Env.open_tyvars env p in
@@ -5955,9 +5987,9 @@ end = struct
       in
       (env, tel, typed_unpack_element, m, should_forget_fakes)
 
-  and inout_write_back env { fp_type; _ } (pk, ((_, pos, _) as e)) =
-    match pk with
-    | Ast_defs.Pinout _ ->
+  and inout_write_back env { fp_type; _ } arg =
+    match arg with
+    | Aast_defs.Ainout (_, e) ->
       (* Translate the write-back semantics of inout parameters.
        *
        * This matters because we want to:
@@ -5966,11 +5998,12 @@ end = struct
        * (2) allow for growing of locals / Tunions (type side effect)
        *     but otherwise unify the argument type with the parameter hint
        *)
+      let pos = Aast_utils.get_expr_pos e in
       let (env, _te, _ty) =
         Assign.assign_ pos Reason.URparam_inout env e pos fp_type
       in
       env
-    | _ -> env
+    | Aast_defs.Anormal _ -> env
 
   and call
       ~(expected : ExpectedTy.t option)
@@ -5981,13 +6014,9 @@ end = struct
       ~(recv_pos : Pos.t)
       env
       fty
-      (el : (Ast_defs.param_kind * Nast.expr) list)
+      (el : Nast.argument list)
       (unpacked_element : Nast.expr option) :
-      env
-      * ((Ast_defs.param_kind * Tast.expr) list
-        * Tast.expr option
-        * locl_ty
-        * bool) =
+      env * (Tast.argument list * Tast.expr option * locl_ty * bool) =
     Typing_log.(
       log_with_level env "typing" ~level:1 (fun () ->
           log_types
@@ -6073,7 +6102,7 @@ end = struct
              * We don't need to unpack and check each type because a tuple is
              * coercible iff it's constituent types are. *)
             Option.value_map
-              ~f:(fun u -> el @ [(Ast_defs.Pnormal, u)])
+              ~f:(fun u -> el @ [Aast_defs.Anormal u])
               ~default:el
               unpacked_element
           in
@@ -6089,23 +6118,31 @@ end = struct
               env
               el
               ~combine_ty_errs:Typing_error.multiple_opt
-              ~f:(fun env (pk, elt) ->
-                let (env, te, e_ty) =
-                  expr
-                    ~expected:(Some expected_arg_ty)
-                    ~ctxt:Context.default
-                    env
-                    elt
-                in
-                let env =
-                  match pk with
-                  | Ast_defs.Pinout _ ->
+              ~f:(fun env arg ->
+                let (env, f, te, e_ty) =
+                  match arg with
+                  | Aast_defs.Anormal elt ->
+                    let (env, te, ty) =
+                      expr
+                        ~expected:(Some expected_arg_ty)
+                        ~ctxt:Context.default
+                        env
+                        elt
+                    in
+                    (env, (fun e -> Aast_defs.Anormal e), te, ty)
+                  | Aast_defs.Ainout (iopos, elt) ->
+                    let (env, te, ty) =
+                      expr
+                        ~expected:(Some expected_arg_ty)
+                        ~ctxt:Context.default
+                        env
+                        elt
+                    in
                     let (_, pos, _) = elt in
                     let (env, _te, _ty) =
                       Assign.assign_ pos Reason.URparam_inout env elt pos efty
                     in
-                    env
-                  | Ast_defs.Pnormal -> env
+                    (env, (fun e -> Aast_defs.Ainout (iopos, e)), te, ty)
                 in
                 let (env, ty_err_opt) =
                   SubType.sub_type
@@ -6117,8 +6154,7 @@ end = struct
                        (Typing_error.Reasons_callback.unify_error_at expr_pos)
                 in
                 let ty_mismatch_opt = mk_ty_mismatch_opt e_ty ty ty_err_opt in
-                ( (env, ty_err_opt),
-                  (pk, hole_on_ty_mismatch ~ty_mismatch_opt te) ))
+                ((env, ty_err_opt), f (hole_on_ty_mismatch ~ty_mismatch_opt te)))
           in
           let (env, e2) =
             call_untyped_unpack env (Reason.to_pos r) unpacked_element
@@ -6134,26 +6170,30 @@ end = struct
                | _ -> true ->
           let el =
             Option.value_map
-              ~f:(fun u -> el @ [(Ast_defs.Pnormal, u)])
+              ~f:(fun u -> el @ [Aast_defs.Anormal u])
               ~default:el
               unpacked_element
           in
           let (env, tel) =
-            List.map_env env el ~f:(fun env (pk, elt) ->
+            List.map_env env el ~f:(fun env arg ->
                 let (env, te, _ty) =
-                  expr ~expected:None ~ctxt:Context.default env elt
-                in
-                let env =
-                  match pk with
-                  | Ast_defs.Pinout _ ->
+                  match arg with
+                  | Aast_defs.Anormal elt ->
+                    let (env, te, ty) =
+                      expr ~expected:None ~ctxt:Context.default env elt
+                    in
+                    (env, Aast_defs.Anormal te, ty)
+                  | Aast_defs.Ainout (iopos, elt) ->
+                    let (env, te, ty) =
+                      expr ~expected:None ~ctxt:Context.default env elt
+                    in
                     let (_, pos, _) = elt in
                     let (env, _te, _ty) =
                       Assign.assign_ pos Reason.URparam_inout env elt pos efty
                     in
-                    env
-                  | Ast_defs.Pnormal -> env
+                    (env, Aast_defs.Ainout (iopos, te), ty)
                 in
-                (env, (pk, te)))
+                (env, te))
           in
           let (env, ty_err_opt) =
             call_untyped_unpack env (Reason.to_pos r) unpacked_element
@@ -6289,8 +6329,10 @@ end = struct
               let splat_args = List.drop el (n - 1) in
               non_splat_args
               @ [
-                  Ast_defs.
-                    (Pnormal, ((), expr_pos, Tuple (List.map splat_args ~f:snd)));
+                  Anormal
+                    ( (),
+                      expr_pos,
+                      Tuple (List.map splat_args ~f:Aast_utils.arg_to_expr) );
                 ]
             | _ -> el
           in
@@ -6309,18 +6351,17 @@ end = struct
            *
            * Pass 2. Finally, we check the remaining lambda arguments.
            *)
-          let check_pass_and_set_tyvar_variance pass env (_, _, e) opt_param =
-            match e with
+          let check_pass_and_set_tyvar_variance pass env arg opt_param =
+            match arg with
             (* We first check lambdas that have fully explicit parameters *)
-            | Efun { ef_fun = { f_params; _ }; _ }
-            | Lfun ({ f_params; _ }, _)
+            | Aast_defs.Anormal (_, _, Efun { ef_fun = { f_params; _ }; _ })
+            | Aast_defs.Anormal (_, _, Lfun ({ f_params; _ }, _))
               when List.for_all f_params ~f:(fun param ->
                        Option.is_some (hint_of_type_hint param.param_type_hint))
               ->
               (env, pass = 0)
             (* Lastly we check lambdas that have some parameters whose types must be inferred *)
-            | Efun _
-            | Lfun _ ->
+            | Aast_defs.Anormal (_, _, (Efun _ | Lfun _)) ->
               (* On the first pass we need to set the type variable variance *)
               if pass = 0 then
                 (set_tyvar_variance_from_lambda_param env opt_param, false)
@@ -6338,8 +6379,12 @@ end = struct
               | Some (idx, param) -> (idx, (true, Some param, paraml))
               | None -> (-1, (true, None, paraml)))
           in
-          let check_arg
-              env param_kind e opt_param ~arg_idx ~param_idx ~is_variadic =
+          let check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic =
+            let (param_kind, e) =
+              match arg with
+              | Aast_defs.Anormal e -> (Ast_defs.Pnormal, e)
+              | Aast_defs.Ainout (pos, e) -> (Ast_defs.Pinout pos, e)
+            in
             match opt_param with
             | Some param ->
               let ety = param.fp_type in
@@ -6413,7 +6458,11 @@ end = struct
                   ~is_variadic
               in
               ( env,
-                Some (hole_on_ty_mismatch ~ty_mismatch_opt te, ty),
+                Some
+                  ( Aast_utils.expr_to_arg
+                      param_kind
+                      (hole_on_ty_mismatch ~ty_mismatch_opt te),
+                    ty ),
                 used_dynamic )
             | None ->
               let (env, te, ty) =
@@ -6442,13 +6491,11 @@ end = struct
                 let ty = Typing_env.update_reason env ty ~f:update_reason in
                 (ty, pos, e)
               in
-              (env, Some (te, ty), false)
+              (env, Some (Aast_utils.expr_to_arg param_kind te, ty), false)
           in
           let open struct
             type arg_with_result =
-              int
-              * (Ast_defs.param_kind * Nast.expr)
-              * (Tast.expr * locl_ty) option
+              int * Nast.argument * (Tast.argument * locl_ty) option
           end in
           (* For a given pass number, check arguments from left-to-right that correspond
            * to this pass. If any arguments remain unprocessed, bump the pass number
@@ -6462,7 +6509,7 @@ end = struct
               acc =
             match args_with_result with
             (* We've got an argument *)
-            | (arg_idx, (param_kind, e), opt_result) :: args_with_result ->
+            | (arg_idx, arg, opt_result) :: args_with_result ->
               (* Pick up next parameter type info *)
               let (param_idx, (is_variadic, opt_param, paraml)) =
                 get_next_param_info paraml
@@ -6472,17 +6519,10 @@ end = struct
                  * expression, then check it
                  *)
                 let (env, check_on_this_pass) =
-                  check_pass_and_set_tyvar_variance pass env e opt_param
+                  check_pass_and_set_tyvar_variance pass env arg opt_param
                 in
                 if check_on_this_pass then
-                  check_arg
-                    env
-                    param_kind
-                    e
-                    opt_param
-                    ~arg_idx
-                    ~param_idx
-                    ~is_variadic
+                  check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic
                 else
                   (env, opt_result, false)
               in
@@ -6492,9 +6532,10 @@ end = struct
                 args_with_result
                 paraml
                 (used_dynamic || used_dynamic')
-                ((arg_idx, (param_kind, e), one_result) :: acc)
+                ((arg_idx, arg, one_result) :: acc)
             | [] ->
-              let rec collect_results reversed_res tel argtys =
+              let rec collect_results
+                  (reversed_res : arg_with_result list) tel argtys =
                 match reversed_res with
                 | [] -> (env, tel, argtys, used_dynamic, paraml)
                 (* We've still not finished, so bump pass and iterate *)
@@ -6508,11 +6549,11 @@ end = struct
                        non_variadic_ft_params)
                     used_dynamic
                     []
-                | (_, (param_kind, _), Some (te, ty)) :: reversed_res ->
+                | (_, _, Some (te, ty)) :: reversed_res ->
                   collect_results
                     reversed_res
-                    ((param_kind, te) :: tel)
-                    ((Aast_utils.get_expr_pos te, ty) :: argtys)
+                    (te :: tel)
+                    ((Aast_utils.get_argument_pos te, ty) :: argtys)
               in
               collect_results acc [] []
           in
@@ -6928,7 +6969,7 @@ end = struct
                   ( _,
                     _,
                     Aast.Class_const ((_, _, Aast.CI (_, shapes)), (_, idx)) );
-                args = [(Ast_defs.Pnormal, shape); (Ast_defs.Pnormal, field)];
+                args = [Aast_defs.Anormal shape; Aast_defs.Anormal field];
                 _;
               } ) )
         when String.equal shapes SN.Shapes.cShapes
@@ -7106,19 +7147,14 @@ end = struct
         (not tparamet)
         (ty, p, Aast.Binop { bop = op; lhs = e1; rhs = e2 })
     | Aast.Call
-        {
-          func = (_, p, Aast.Id (_, f));
-          args = [(_, lv)];
-          unpacked_arg = None;
-          _;
-        }
+        { func = (_, p, Aast.Id (_, f)); args = [lv]; unpacked_arg = None; _ }
       when String.equal f SN.StdlibFunctions.is_any_array ->
       let env =
         refine_for_is
           ~hint_first:true
           env
           tparamet
-          lv
+          (Aast_utils.arg_to_expr lv)
           (Reason.predicated (p, f))
           (p, Happly ((p, "\\HH\\AnyArray"), [(p, Hwildcard); (p, Hwildcard)]))
       in
@@ -7130,7 +7166,7 @@ end = struct
               _,
               Aast.Class_const
                 ((_, _, Aast.CI (_, class_name)), (_, method_name)) );
-          args = [(_, shape); (_, field)];
+          args = [Aast.Anormal shape; Aast.Anormal field];
           unpacked_arg = None;
           _;
         }
@@ -9255,7 +9291,7 @@ end = struct
           env
           ((), attr_pos, Aast.CI (attr_pos, cid_))
           []
-          (List.map ~f:(fun e -> (Ast_defs.Pnormal, e)) params)
+          params
           (* list of attr parameter literals *)
           None
         (* no variadic arguments *)

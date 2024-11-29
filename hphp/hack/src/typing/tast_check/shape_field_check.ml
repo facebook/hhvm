@@ -117,6 +117,11 @@ let shape_access_with_non_existent_field pos1 env shape field_name =
   | (`Unknown, _) ->
     ()
 
+let dest_args arg1 arg2 =
+  match (Aast_utils.arg_to_expr arg1, Aast_utils.arg_to_expr arg2) with
+  | ((ty, _, _), (_, pos, String field_name)) -> Some (ty, pos, field_name)
+  | _ -> None
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -131,20 +136,23 @@ let handler =
                 ( _,
                   _,
                   Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
-              args = [(_, (ty, _, _)); (_, (_, pos, String field_name))];
+              args = [arg1; arg2];
               unpacked_arg = None;
               _;
             } )
         when String.equal class_name SN.Shapes.cShapes
              && String.equal method_name SN.Shapes.keyExists ->
-        let (env, tyl) =
-          Tast_env.get_concrete_supertypes env ty ~abstract_enum:false
-        in
-        let field = (Pos_or_decl.of_raw_pos pos, field_name) in
-        let trivial_shapes_key_exists_check ty =
-          trivial_shapes_key_exists_check p env ty field
-        in
-        List.iter tyl ~f:trivial_shapes_key_exists_check
+        (match dest_args arg1 arg2 with
+        | Some (ty, pos, field_name) ->
+          let (env, tyl) =
+            Tast_env.get_concrete_supertypes env ty ~abstract_enum:false
+          in
+          let field = (Pos_or_decl.of_raw_pos pos, field_name) in
+          let trivial_shapes_key_exists_check ty =
+            trivial_shapes_key_exists_check p env ty field
+          in
+          List.iter tyl ~f:trivial_shapes_key_exists_check
+        | None -> ())
       | ( _,
           _,
           Call
@@ -153,7 +161,7 @@ let handler =
                 ( _,
                   _,
                   Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
-              args = [(_, (ty, _, _)); (_, (_, pos, String field_name)); _];
+              args = [arg1; arg2; _];
               unpacked_arg = None;
               _;
             } )
@@ -165,26 +173,29 @@ let handler =
                 ( _,
                   _,
                   Class_const ((_, _, CI (_, class_name)), (_, method_name)) );
-              args = [(_, (ty, _, _)); (_, (_, pos, String field_name))];
+              args = [arg1; arg2];
               unpacked_arg = None;
               _;
             } )
         when String.equal class_name SN.Shapes.cShapes
              && (String.equal method_name SN.Shapes.idx
                 || String.equal method_name SN.Shapes.at) ->
-        let (env, tyl) =
-          Tast_env.get_concrete_supertypes env ty ~abstract_enum:false
-        in
-        let field = (Pos_or_decl.of_raw_pos pos, field_name) in
-        let shapes_method_access_with_non_existent_field ty =
-          shapes_method_access_with_non_existent_field
-            pos
-            env
-            method_name
-            ty
-            field
-        in
-        List.iter tyl ~f:shapes_method_access_with_non_existent_field
+        (match dest_args arg1 arg2 with
+        | Some (ty, pos, field_name) ->
+          let (env, tyl) =
+            Tast_env.get_concrete_supertypes env ty ~abstract_enum:false
+          in
+          let field = (Pos_or_decl.of_raw_pos pos, field_name) in
+          let shapes_method_access_with_non_existent_field ty =
+            shapes_method_access_with_non_existent_field
+              pos
+              env
+              method_name
+              ty
+              field
+          in
+          List.iter tyl ~f:shapes_method_access_with_non_existent_field
+        | None -> ())
       | (_, p, Binop { bop = Ast_defs.QuestionQuestion; lhs = exp; _ }) ->
         let rec check_nested_accesses = function
           | (_, _, Array_get (((ty, _, _) as exp), Some indexing_expr)) ->

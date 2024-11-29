@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<7203202959e16b93cba85b61420c6432>>
+// @generated SignedSource<<7959bcf9e40af5b739e1f2fa8b4c5407>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -57,6 +57,28 @@ impl<P: Params> NodeMut<P> for Afield<P::Ex, P::En> {
                 a0.accept(c, v)?;
                 a1.accept(c, v)
             }
+        }
+    }
+}
+impl<P: Params> NodeMut<P> for Argument<P::Ex, P::En> {
+    fn accept<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_argument(c, self)
+    }
+    fn recurse<'node>(
+        &'node mut self,
+        c: &mut P::Context,
+        v: &mut dyn VisitorMut<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            Argument::Ainout(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
+            Argument::Anormal(a0) => a0.accept(c, v),
         }
     }
 }

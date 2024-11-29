@@ -33,13 +33,13 @@ type Result<T = AstValue, E = AstError> = std::result::Result<T, E>;
 /// We use Serialize to drive the conversion. This causes a couple of oddities:
 ///
 ///    1. Box<T> is transparent to serde - `F(Box<T>)` is serialized as `F(T)`
-///    so we need to synthetically add `Box` where we know it's needed.
+///       so we need to synthetically add `Box` where we know it's needed.
 ///
 ///    2. We can't "look down" at a tree during serialization (we only know
-///    something is a 'T' and can't downcast_ref it). So if a node is a possible
-///    substitution ref we need to keep it in a form that preserves that
-///    information and pass it up until we determine that it is or isn't
-///    actually part of a substitution.
+///       something is a 'T' and can't downcast_ref it). So if a node is a possible
+///       substitution ref we need to keep it in a form that preserves that
+///       information and pass it up until we determine that it is or isn't
+///       actually part of a substitution.
 pub(crate) fn write_ast<T: Serialize + fmt::Debug>(
     exports: syn::Path,
     span: Span,
@@ -228,7 +228,7 @@ enum ReplaceState {
     /// "(_, Str)
     Tuple(Replacement),
     /// (_, Expr)
-    Tuple2(Box<(AstValue, Replacement)>),
+    Argument(Replacement),
 }
 
 impl AstValue {
@@ -291,7 +291,7 @@ impl AstValue {
                 }
                 Replacement::Str { .. } => todo!(),
             },
-            AstValue::Replace(ReplaceState::Tuple2(_)) => todo!(),
+            AstValue::Replace(ReplaceState::Argument(_)) => todo!(),
         })
     }
 }
@@ -496,6 +496,13 @@ impl ser::Serializer for AstWriter {
             }
             ("Stmt_", "Expr", AstValue::Replace(ReplaceState::Expr(repl))) => {
                 return Ok(AstValue::Replace(ReplaceState::ExprStmt(repl)));
+            }
+            (
+                "Argument",
+                "Anormal",
+                AstValue::Replace(ReplaceState::Expr(repl @ Replacement::Repeat { .. })),
+            ) => {
+                return Ok(AstValue::Replace(ReplaceState::Argument(repl)));
             }
             (_, _, inner) => inner,
         };
@@ -759,9 +766,7 @@ impl ser::SerializeSeq for SerializeSeq {
         let inner = value.serialize(AstWriter::new(self.state.clone()))?;
         let has_repeat = match &inner {
             AstValue::Replace(
-                ReplaceState::Expr(repl)
-                | ReplaceState::Stmt(repl)
-                | ReplaceState::Tuple2(box (_, repl)),
+                ReplaceState::Expr(repl) | ReplaceState::Stmt(repl) | ReplaceState::Argument(repl),
             ) => {
                 matches!(repl, Replacement::Repeat { .. })
             }
@@ -809,10 +814,10 @@ impl ser::SerializeSeq for SerializeSeq {
                             ReplaceState::Expr(Replacement::Repeat { pat, .. })
                             | ReplaceState::Stmt(Replacement::Repeat { pat, .. }),
                         )
-                        | AstValue::Replace(ReplaceState::Tuple2(box (
-                            _,
-                            Replacement::Repeat { pat, .. },
-                        ))) => {
+                        | AstValue::Replace(ReplaceState::Argument(Replacement::Repeat {
+                            pat,
+                            ..
+                        })) => {
                             flush(&mut outer, &mut cur);
                             outer.extend(quote!(.chain(#pat.into_iter())));
                         }
@@ -847,9 +852,9 @@ impl ser::SerializeTuple for SerializeTuple {
     fn end(self) -> Result {
         Ok(match &self.fields[..] {
             [
-                v0,
+                _,
                 AstValue::Replace(ReplaceState::Expr(repl @ Replacement::Repeat { .. })),
-            ] => AstValue::Replace(ReplaceState::Tuple2(Box::new((v0.clone(), repl.clone())))),
+            ] => AstValue::Replace(ReplaceState::Argument(repl.clone())),
             [_, AstValue::Replace(ReplaceState::Str(repl))] => {
                 AstValue::Replace(ReplaceState::Tuple(repl.clone()))
             }

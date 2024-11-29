@@ -88,13 +88,13 @@ let handle_meth_caller env call =
   | Call
       ({
          func = (_, _, Id (_, cn));
-         args = [(pk, (ty, p1, String cl)); meth];
+         args = [Anormal (ty, p1, String cl); meth];
          _;
        } as call_expr)
     when String.equal cn SN.AutoimportedFunctions.meth_caller
          && (not @@ in_codegen env) ->
     let cl = Utils.add_ns cl in
-    Call { call_expr with args = [(pk, (ty, p1, String cl)); meth] }
+    Call { call_expr with args = [Anormal (ty, p1, String cl); meth] }
   | _ -> call
 
 let contexts_ns =
@@ -292,8 +292,10 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     (* The function that actually rewrites names *)
     method! on_expr_ env expr =
-      let map_arg env_ (pk, e) =
-        (self#on_param_kind env_ pk, self#on_expr env_ e)
+      let map_arg env_ arg =
+        match arg with
+        | Anormal e -> Anormal (self#on_expr env_ e)
+        | Ainout (p, e) -> Ainout (p, self#on_expr env_ e)
       in
       match expr with
       | Collection (id, c_targ_opt, flds) ->

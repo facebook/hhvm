@@ -1531,27 +1531,21 @@ fn p_expr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Expr> {
     p_expr_with_loc(ExprLocation::TopLevel, node, env, None)
 }
 
-fn p_expr_for_function_call_arguments<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<(ast::ParamKind, ast::Expr)> {
+fn p_expr_for_function_call_arguments<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Argument> {
     match &node.children {
         DecoratedExpression(DecoratedExpressionChildren {
             decorator,
             expression,
-        }) if token_kind(decorator) == Some(TK::Inout) => Ok((
-            ast::ParamKind::Pinout(p_pos(decorator, env)),
+        }) if token_kind(decorator) == Some(TK::Inout) => Ok(aast::Argument::Ainout(
+            p_pos(decorator, env),
             p_expr(expression, env)?,
         )),
-        _ => Ok((ast::ParamKind::Pnormal, p_expr(node, env)?)),
+        _ => Ok(aast::Argument::Anormal(p_expr(node, env)?)),
     }
 }
 
-fn p_expr_for_normal_argument<'a>(
-    node: S<'a>,
-    env: &mut Env<'a>,
-) -> Result<(ast::ParamKind, ast::Expr)> {
-    Ok((ast::ParamKind::Pnormal, p_expr(node, env)?))
+fn p_expr_for_normal_argument<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Argument> {
+    Ok(ast::Argument::Anormal(p_expr(node, env)?))
 }
 
 fn p_expr_with_loc<'a>(
@@ -1699,7 +1693,7 @@ fn p_expr_recurse<'a>(
 fn split_args_vararg<'a>(
     arg_list_node: S<'a>,
     e: &mut Env<'a>,
-) -> Result<(Vec<(ast::ParamKind, ast::Expr)>, Option<ast::Expr>)> {
+) -> Result<(Vec<ast::Argument>, Option<ast::Expr>)> {
     let mut arg_list: Vec<_> = arg_list_node.syntax_node_to_list_skip_separator().collect();
     if let Some(last_arg) = arg_list.last() {
         if let DecoratedExpression(c) = &last_arg.children {
@@ -2161,7 +2155,7 @@ fn p_pre_post_unary_decorated_expr<'a>(node: S<'a>, env: &mut Env<'a>, pos: Pos)
                     Expr_::mk_id(ast::Id(pos, special_functions::ECHO.into())),
                 ),
                 targs: vec![],
-                args: vec![(ast::ParamKind::Pnormal, expr)],
+                args: vec![aast::Argument::Anormal(expr)],
                 unpacked_arg: None,
             })),
             Some(TK::Dollar) => {
@@ -2499,7 +2493,7 @@ fn p_constructor_call<'a>(
     Ok(Expr_::mk_new(
         ast::ClassId((), pos, ast::ClassId_::CIexpr(e)),
         hl,
-        args.into_iter().map(|(_, e)| e).collect(),
+        args.into_iter().map(ast::Argument::to_expr).collect(),
         varargs,
         (),
     ))

@@ -12,9 +12,9 @@ use nast::Expr_;
 use nast::Fun_;
 use nast::Id;
 use nast::Method_;
-use nast::ParamKind;
 use nast::Stmt;
 use nast::Stmt_;
+use oxidized::ast;
 use oxidized::ast::Pos;
 
 use crate::prelude::*;
@@ -67,29 +67,21 @@ fn assert_package_is_loaded(pkg: &Expr) -> Stmt {
             ),
             targs: vec![],
             args: vec![
-                (
-                    ParamKind::Pnormal,
-                    Expr(
-                        (),
-                        pos(),
-                        Expr_::Call(Box::new(CallExpr {
-                            func: Expr(
-                                (),
-                                pos(),
-                                Expr_::Id(Box::new(Id(
-                                    pos(),
-                                    pseudo_functions::PACKAGE_EXISTS.into(),
-                                ))),
-                            ),
-                            targs: vec![],
-                            args: vec![(ParamKind::Pnormal, { pkg.clone() })],
-                            unpacked_arg: None,
-                        })),
-                    ),
-                ),
-                (ParamKind::Pnormal, {
-                    Expr((), pos(), Expr_::String(msg.into()))
-                }),
+                ast::Argument::Anormal(Expr(
+                    (),
+                    pos(),
+                    Expr_::Call(Box::new(CallExpr {
+                        func: Expr(
+                            (),
+                            pos(),
+                            Expr_::Id(Box::new(Id(pos(), pseudo_functions::PACKAGE_EXISTS.into()))),
+                        ),
+                        targs: vec![],
+                        args: vec![ast::Argument::Anormal(pkg.clone())],
+                        unpacked_arg: None,
+                    })),
+                )),
+                ast::Argument::Anormal(Expr((), pos(), Expr_::String(msg.into()))),
             ],
             unpacked_arg: None,
         })),

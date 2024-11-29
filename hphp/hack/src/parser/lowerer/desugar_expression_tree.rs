@@ -477,8 +477,8 @@ fn visitor_variable() -> String {
 
 /// Given a list of arguments, make each a "normal" argument by annotating it with
 /// `ParamKind::Pnormal`
-fn build_args(args: Vec<Expr>) -> Vec<(ParamKind, Expr)> {
-    args.into_iter().map(|n| (ParamKind::Pnormal, n)).collect()
+fn build_args(args: Vec<Expr>) -> Vec<ast::Argument> {
+    args.into_iter().map(ast::Argument::Anormal).collect()
 }
 
 /// Build `$v->meth_name(args)`.
@@ -1112,8 +1112,8 @@ impl RewriteState {
                 let mut args_without_inout = vec![];
                 for arg in args {
                     match arg {
-                        (ParamKind::Pnormal, e) => args_without_inout.push(e),
-                        (ParamKind::Pinout(_), Expr(_, p, _)) => self.errors.push((
+                        ast::Argument::Anormal(e) => args_without_inout.push(e),
+                        ast::Argument::Ainout(_, Expr(_, p, _)) => self.errors.push((
                             p,
                             "Expression trees do not support `inout` function calls.".into(),
                         )),
@@ -1887,7 +1887,7 @@ fn immediately_invoked_lambda(
 
     let call_args = call_args
         .into_iter()
-        .map(|e: Expr| -> (ParamKind, Expr) { (ParamKind::Pnormal, e) })
+        .map(|e: Expr| -> ast::Argument { ast::Argument::Anormal(e) })
         .collect();
 
     let func_body = ast::FuncBody {

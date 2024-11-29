@@ -179,8 +179,8 @@ let rec expr_
   | A.(Call { func; args; _ }) ->
     (* Until interprocedural analaysis has been implemented, this is all incomplete. *)
     let (env, entity) = expr_ upcasted_info env func in
-    let handle_args env (_, arg) =
-      let (env, _) = expr_ upcasted_info env arg in
+    let handle_args env arg =
+      let (env, _) = expr_ upcasted_info env (Aast_utils.arg_to_expr arg) in
       env
     in
     let env = List.fold ~init:env args ~f:handle_args in

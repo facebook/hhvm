@@ -161,11 +161,11 @@ let visitor ~(cursor : Pos.t) =
             args
             |> List.map
                  ~f:
-                   Ast_defs.(
+                   Aast_defs.(
                      function
-                     | (Pinout inout_pos, expr) ->
+                     | Ainout (inout_pos, expr) ->
                        Pos.merge inout_pos (pos_of_expr expr)
-                     | (Pnormal, expr) -> pos_of_expr expr)
+                     | Anormal expr -> pos_of_expr expr)
             |> find_in_positions
           | Aast_defs.ValCollection (_, _, exprs)
           | Aast_defs.List exprs

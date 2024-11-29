@@ -322,7 +322,7 @@ Errors:
                               ((), [132:9-30],
                                (Call
                                   { func = ((), [132:9-17], (Id ([132:9-17], "\\vsprintf"))); 
-                                    targs = []; args = [(Pnormal, ((), [132:18-22], (String "%s"))); (Pnormal, ((), [132:24-29], (String "wow")))]; 
+                                    targs = []; args = [(Anormal ((), [132:18-22], (String "%s"))); (Anormal ((), [132:24-29], (String "wow")))]; 
                                     unpacked_arg = None }))),
                            Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));
@@ -470,7 +470,7 @@ Errors:
                                         ((), [165:10-31],
                                          (Call
                                             { func = ((), [165:10-18], (Id ([165:10-18], "\\vsprintf"))); 
-                                              targs = []; args = [(Pnormal, ((), [165:19-23], (String "%s"))); (Pnormal, ((), [165:25-30], (String "wow")))]; 
+                                              targs = []; args = [(Anormal ((), [165:19-23], (String "%s"))); (Anormal ((), [165:25-30], (String "wow")))]; 
                                               unpacked_arg = None }))),
                                      Is_prop))))));
                        targs = []; args = []; unpacked_arg = None }))));

@@ -204,12 +204,12 @@ impl<'ast> Visitor<'ast> for Checker {
                     || fun_name == "meth_caller")
                     && args.len() == 2
                 {
-                    if let (_, Expr(_, pos, String(classname))) = &args[0] {
+                    if let Expr(_, pos, String(classname)) = &args[0].to_expr_ref() {
                         if classname.contains(&b'$') {
                             self.add_error(pos, syntax_error::dollar_sign_in_meth_caller_argument);
                         }
                     }
-                    if let (_, Expr(_, pos, String(method_name))) = &args[1] {
+                    if let Expr(_, pos, String(method_name)) = &args[1].to_expr_ref() {
                         if method_name.contains(&b'$') {
                             self.add_error(pos, syntax_error::dollar_sign_in_meth_caller_argument);
                         }

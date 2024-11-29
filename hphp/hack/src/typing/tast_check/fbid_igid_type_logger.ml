@@ -157,7 +157,9 @@ let create_handler _ctx =
 
     method! at_Call env { func = (fx_ty, pos, _); args; _ } =
       let extract_param_types param : T.locl_ty = param.T.fp_type in
-      let extract_arg_types (_, arg_exp) : T.locl_ty = Tast.get_type arg_exp in
+      let extract_arg_types arg_exp : T.locl_ty =
+        Tast.get_type (Aast_utils.arg_to_expr arg_exp)
+      in
       let check ft =
         let param_names_and_types =
           List.map ft.T.ft_params ~f:(fun p ->

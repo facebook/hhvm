@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<8213fc6d15e08d60fab83f2a2e972dfa>>
+// @generated SignedSource<<cebc16fbf6024d4da47a6274ca984c7f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -118,6 +118,8 @@ pub type DefWithDynamic = tast_with_dynamic::TastWithDynamic<Def>;
 pub type Expr = aast::Expr<Ty, SavedEnv>;
 
 pub type Expr_ = aast::Expr_<Ty, SavedEnv>;
+
+pub type Argument = aast::Argument<Ty, SavedEnv>;
 
 pub type Stmt = aast::Stmt<Ty, SavedEnv>;
 

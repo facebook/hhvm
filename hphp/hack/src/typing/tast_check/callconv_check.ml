@@ -68,8 +68,8 @@ let handler =
       | (_, _, Call { args; _ }) ->
         List.iter
           ~f:(function
-            | (Ast_defs.Pnormal, _) -> ()
-            | (Ast_defs.Pinout _, e) -> check_types env e)
+            | Aast_defs.Anormal _ -> ()
+            | Aast_defs.Ainout (_, e) -> check_types env e)
           args
       | _ -> ()
   end

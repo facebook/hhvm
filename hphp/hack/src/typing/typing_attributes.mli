@@ -12,7 +12,7 @@ type new_object_checker =
   Pos.t ->
   Typing_env_types.env ->
   Typing_defs.pos_string ->
-  Nast.expr list ->
+  Nast.argument list ->
   Typing_env_types.env
 
 (** Checks a list of user attributes:

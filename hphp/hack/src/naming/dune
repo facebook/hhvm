@@ -185,6 +185,7 @@
  )
  (libraries
   ast
+  annotated_ast_utils
   ast_provider
   common
   file_provider

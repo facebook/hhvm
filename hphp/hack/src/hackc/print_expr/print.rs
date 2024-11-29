@@ -29,7 +29,6 @@ use lazy_static::lazy_static;
 use naming_special_names_rust::classes;
 use oxidized::ast;
 use oxidized::ast_defs;
-use oxidized::ast_defs::ParamKind;
 use oxidized::local_id;
 use regex::Regex;
 use write_bytes::write_bytes;
@@ -397,9 +396,9 @@ fn print_expr(
                 }
             };
             write::paren(w, |w| {
-                write::concat_by(w, ", ", args, |w, (pk, e)| match pk {
-                    ParamKind::Pnormal => print_expr(ctx, w, env, e),
-                    ParamKind::Pinout(_) => Err(Error::fail("illegal default value").into()),
+                write::concat_by(w, ", ", args, |w, arg| match arg {
+                    ast::Argument::Anormal(e) => print_expr(ctx, w, env, e),
+                    ast::Argument::Ainout(_, _) => Err(Error::fail("illegal default value").into()),
                 })?;
                 match unpacked_arg {
                     None => Ok(()),

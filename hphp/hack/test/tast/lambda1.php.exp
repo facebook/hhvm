@@ -59,7 +59,7 @@
                       ((string), [5:8-13],
                        (Call
                           { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); 
-                            targs = []; args = [(Pnormal, ((int), [5:11-12], (Int "4")))]; 
+                            targs = []; args = [(Anormal ((int), [5:11-12], (Int "4")))]; 
                             unpacked_arg = None }))
                       }))));
             ([6:3-18],
@@ -71,7 +71,7 @@
                       ((string), [6:8-17],
                        (Call
                           { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); 
-                            targs = []; args = [(Pnormal, ((string), [6:11-16], (String "bar")))]; 
+                            targs = []; args = [(Anormal ((string), [6:11-16], (String "bar")))]; 
                             unpacked_arg = None }))
                       }))))
             ]

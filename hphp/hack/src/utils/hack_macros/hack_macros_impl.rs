@@ -698,19 +698,19 @@ mod tests {
                         ),
                         targs: vec![],
                         args: vec![
-                            (ParamKind::Pnormal, {
+                            Argument::Anormal({
                                 let tmp: Expr = cexpr.clone();
                                 tmp
                             }),
-                            (ParamKind::Pnormal, {
+                            Argument::Anormal({
                                 let tmp: Expr = fexpr.clone();
                                 tmp
                             }),
-                            (ParamKind::Pnormal, {
+                            Argument::Anormal({
                                 let tmp: Expr = efun;
                                 tmp
                             }),
-                            (ParamKind::Pnormal, {
+                            Argument::Anormal({
                                 let tmp: Expr = force_val_expr;
                                 tmp
                             }),
@@ -747,7 +747,7 @@ mod tests {
                             ))),
                         ),
                         targs: vec![],
-                        args: vec![(ParamKind::Pnormal, {
+                        args: vec![Argument::Anormal({
                             let tmp: String = mangle_name.to_owned();
                             Expr((), __hygienic_pos.clone(), Expr_::String(tmp.into()))
                         })],
@@ -788,36 +788,33 @@ mod tests {
                         ),
                         targs: vec![],
                         args: vec![
-                            (
-                                ParamKind::Pnormal,
-                                Expr(
-                                    (),
-                                    __hygienic_pos.clone(),
-                                    Expr_::Call(Box::new(CallExpr {
-                                        func: Expr(
-                                            (),
+                            Argument::Anormal(Expr(
+                                (),
+                                __hygienic_pos.clone(),
+                                Expr_::Call(Box::new(CallExpr {
+                                    func: Expr(
+                                        (),
+                                        __hygienic_pos.clone(),
+                                        Expr_::Id(Box::new(Id(
                                             __hygienic_pos.clone(),
-                                            Expr_::Id(Box::new(Id(
-                                                __hygienic_pos.clone(),
-                                                "\\is_a".to_owned(),
-                                            ))),
-                                        ),
-                                        targs: vec![],
-                                        args: vec![
-                                            (ParamKind::Pnormal, {
-                                                let tmp: Expr = obj_lvar.clone();
-                                                tmp
-                                            }),
-                                            (ParamKind::Pnormal, {
-                                                let tmp: String = cls.to_owned();
-                                                Expr((), pc.clone(), Expr_::String(tmp.into()))
-                                            }),
-                                        ],
-                                        unpacked_arg: None,
-                                    })),
-                                ),
-                            ),
-                            (ParamKind::Pnormal, {
+                                            "\\is_a".to_owned(),
+                                        ))),
+                                    ),
+                                    targs: vec![],
+                                    args: vec![
+                                        Argument::Anormal({
+                                            let tmp: Expr = obj_lvar.clone();
+                                            tmp
+                                        }),
+                                        Argument::Anormal({
+                                            let tmp: String = cls.to_owned();
+                                            Expr((), pc.clone(), Expr_::String(tmp.into()))
+                                        }),
+                                    ],
+                                    unpacked_arg: None,
+                                })),
+                            )),
+                            Argument::Anormal({
                                 let tmp: String = msg;
                                 Expr((), __hygienic_pos.clone(), Expr_::String(tmp.into()))
                             }),
@@ -896,7 +893,7 @@ mod tests {
                             Expr_::Id(Box::new(Id(__hygienic_pos.clone(), "echo".to_owned()))),
                         ),
                         targs: vec![],
-                        args: vec![(ParamKind::Pnormal, {
+                        args: vec![Argument::Anormal({
                             let tmp: String = tail;
                             Expr((), __hygienic_pos.clone(), Expr_::String(tmp.into()))
                         })],
@@ -1045,7 +1042,7 @@ mod tests {
                                         ))),
                                     ),
                                     targs: vec![],
-                                    args: vec![(ParamKind::Pnormal, {
+                                    args: vec![Argument::Anormal({
                                         let tmp: LocalId = name;
                                         Expr(
                                             (),
@@ -1095,7 +1092,7 @@ mod tests {
                                     ))),
                                 ),
                                 targs: vec![],
-                                args: vec![(ParamKind::Pnormal, {
+                                args: vec![Argument::Anormal({
                                     let tmp: LocalId = name.clone();
                                     Expr(
                                         (),

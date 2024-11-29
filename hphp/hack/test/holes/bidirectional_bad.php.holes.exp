@@ -81,7 +81,7 @@
                        (Call
                           { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [9:8-11], (Id ([9:8-11], "\\HH\\idx")));
                             targs = [((string), ([9:8-11], Hwildcard)); ((mixed), ([9:8-11], Hwildcard))];
-                            args = [(Pnormal, ((dict<string, mixed>), [9:12-15], (Lvar ([9:12-15], $xs)))); (Pnormal, ((string), [9:17-27], (String "whatever")))]; 
+                            args = [(Anormal ((dict<string, mixed>), [9:12-15], (Lvar ([9:12-15], $xs)))); (Anormal ((string), [9:17-27], (String "whatever")))]; 
                             unpacked_arg = None }))
                       }))));
              ([10:3-13:4],
@@ -89,7 +89,7 @@
                  ((bool), [10:7-26],
                   (Call
                      { func = (((function(readonly mixed $arg)[]: bool)), [10:7-22], (Id ([10:7-22], "\\HH\\is_any_array"))); 
-                       targs = []; args = [(Pnormal, ((~?mixed), [10:23-25], (Lvar ([10:23-25], $x))))]; 
+                       targs = []; args = [(Anormal ((~?mixed), [10:23-25], (Lvar ([10:23-25], $x))))]; 
                        unpacked_arg = None })),
                  [([12:5-21],
                    (Expr
@@ -101,9 +101,9 @@
                                { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<nothing, nothing> $arr)[]: dict<nothing, nothing>)), [12:11-15], (Id ([12:11-15], "\\HH\\dict")));
                                  targs = [((nothing), ([12:11-15], Hwildcard)); ((nothing), ([12:11-15], Hwildcard))];
                                  args =
-                                 [(Pnormal,
-                                   ((~AnyArray<arraykey, mixed>), [12:16-18],
-                                    (Hole (((~AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (~AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
+                                 [(Anormal
+                                     ((~AnyArray<arraykey, mixed>), [12:16-18],
+                                      (Hole (((~AnyArray<arraykey, mixed>), [12:16-18], (Lvar ([12:16-18], $x))), (~AnyArray<arraykey, mixed>), (KeyedTraversable<nothing, nothing>), Typing))))
                                    ];
                                  unpacked_arg = None }))
                             ],
@@ -147,7 +147,7 @@
                        (Call
                           { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [17:8-11], (Id ([17:8-11], "\\HH\\idx")));
                             targs = [((string), ([17:8-11], Hwildcard)); ((mixed), ([17:8-11], Hwildcard))];
-                            args = [(Pnormal, ((dict<string, mixed>), [17:12-15], (Lvar ([17:12-15], $xs)))); (Pnormal, ((string), [17:17-27], (String "whatever")))]; 
+                            args = [(Anormal ((dict<string, mixed>), [17:12-15], (Lvar ([17:12-15], $xs)))); (Anormal ((string), [17:17-27], (String "whatever")))]; 
                             unpacked_arg = None }))
                       }))));
              ([18:3-22:4],
@@ -155,7 +155,7 @@
                  ((bool), [18:7-26],
                   (Call
                      { func = (((function(readonly mixed $arg)[]: bool)), [18:7-22], (Id ([18:7-22], "\\HH\\is_any_array"))); 
-                       targs = []; args = [(Pnormal, ((~?mixed), [18:23-25], (Lvar ([18:23-25], $x))))]; 
+                       targs = []; args = [(Anormal ((~?mixed), [18:23-25], (Lvar ([18:23-25], $x))))]; 
                        unpacked_arg = None })),
                  [([19:5-19],
                    (Expr
@@ -167,7 +167,7 @@
                              (Call
                                 { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict")));
                                   targs = [((arraykey), ([19:10-14], Hwildcard)); ((mixed), ([19:10-14], Hwildcard))];
-                                  args = [(Pnormal, ((~AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))]; 
+                                  args = [(Anormal ((~AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))]; 
                                   unpacked_arg = None }))
                             }))));
                    ([21:5-15],

@@ -31,7 +31,7 @@ Errors:
                       ((), [13:6-22],
                        (Call
                           { func = ((), [13:6-15], (Id ([13:6-15], "\\Vec\\range"))); 
-                            targs = []; args = [(Pnormal, ((), [13:16-17], (Int "1"))); (Pnormal, ((), [13:19-21], (Int "99")))]; 
+                            targs = []; args = [(Anormal ((), [13:16-17], (Int "1"))); (Anormal ((), [13:19-21], (Int "99")))]; 
                             unpacked_arg = None }))
                       }))));
             ([15:1-12], (Expr ((), [15:1-11], (Call { func = ((), [15:1-9], (Id ([15:1-9], "\\func_foo"))); targs = []; args = []; unpacked_arg = None }))))]

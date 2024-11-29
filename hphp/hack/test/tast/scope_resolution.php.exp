@@ -502,7 +502,7 @@ Errors:
                               ((dynamic), [132:9-30],
                                (Call
                                   { func = (((function(mixed $format, mixed $args)[]: dynamic)), [132:9-17], (Id ([132:9-17], "\\vsprintf"))); 
-                                    targs = []; args = [(Pnormal, ((string), [132:18-22], (String "%s"))); (Pnormal, ((string), [132:24-29], (String "wow")))]; 
+                                    targs = []; args = [(Anormal ((string), [132:18-22], (String "%s"))); (Anormal ((string), [132:24-29], (String "wow")))]; 
                                     unpacked_arg = None }))),
                            Is_method)));
                        targs = []; args = []; unpacked_arg = None }))));

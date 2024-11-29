@@ -57,3 +57,13 @@ val get_param_default :
   ('a, 'b) Aast_defs.fun_param -> ('a, 'b) Aast_defs.expr option
 
 val get_expr_pos : ('a, 'b) Aast_defs.expr -> Pos.t
+
+(* Gets the position of the argument expression (not of the inout, if present) *)
+val get_argument_pos : ('a, 'b) Aast_defs.argument -> Pos.t
+
+(** Convert an argument to an expression, ignoring whether it's inout or not *)
+val arg_to_expr : ('a, 'b) Aast_defs.argument -> ('a, 'b) Aast_defs.expr
+
+(** Convert an an expression to an argument, using the supplied inout *)
+val expr_to_arg :
+  Ast_defs.param_kind -> ('a, 'b) Aast_defs.expr -> ('a, 'b) Aast_defs.argument

@@ -1121,9 +1121,9 @@ let autocomplete_enum_class_label_call env f args =
       ~f:(fun (arg, arg_ty) ->
         (* If the argument was wrapped in a hole, remove it *)
         let arg =
-          match arg with
-          | (_, (_, _, Aast.Hole (e, _, _, _))) -> e
-          | _ -> snd arg
+          match Aast_utils.arg_to_expr arg with
+          | (_, _, Aast.Hole (e, _, _, _)) -> e
+          | e -> e
         in
         match (arg, get_node (expand_and_strip_dynamic env arg_ty.fp_type)) with
         | ( (_, p, Aast.EnumClassLabel (None, n)),
@@ -1230,9 +1230,7 @@ let unwrap_holes ((_, _, e_) as e : Tast.expr) : Tast.expr =
    takes_shape(shape('x' => 123, '|'));
 *)
 let autocomplete_shape_literal_in_call
-    env
-    (ft : Typing_defs.locl_fun_type)
-    (args : (Ast_defs.param_kind * Tast.expr) list) : unit =
+    env (ft : Typing_defs.locl_fun_type) (args : Tast.argument list) : unit =
   let add_shape_key_result pos key =
     let ty = Tprim Aast_defs.Tstring in
     let reason = Typing_reason.witness pos in
@@ -1268,7 +1266,9 @@ let autocomplete_shape_literal_in_call
     | _ -> None
   in
 
-  let args = List.map args ~f:(fun (_, e) -> unwrap_holes e) in
+  let args =
+    List.map args ~f:(fun arg -> unwrap_holes (Aast_utils.arg_to_expr arg))
+  in
 
   List.iter
     ~f:(fun (arg, expected_ty) ->
@@ -1492,7 +1492,9 @@ let autocomplete_enum_case env (expr : Tast.expr) (cases : Tast.case list) =
    takes_enum(AUTO332); *)
 let autocomplete_enum_value_in_call env (ft : Typing_defs.locl_fun_type) args :
     unit =
-  let args = List.map args ~f:(fun (_, e) -> unwrap_holes e) in
+  let args =
+    List.map args ~f:(fun arg -> unwrap_holes (Aast_utils.arg_to_expr arg))
+  in
 
   List.iter
     ~f:(fun (arg, expected_ty) ->

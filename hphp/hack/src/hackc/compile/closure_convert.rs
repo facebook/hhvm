@@ -1125,9 +1125,9 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
         } else {
             false
         };
-        if let [(pk_c, cexpr), (pk_f, fexpr)] = &mut *x.args {
-            error::ensure_normal_paramkind(pk_c)?;
-            error::ensure_normal_paramkind(pk_f)?;
+        if let [carg, farg] = &mut *x.args {
+            let cexpr = error::expect_normal_paramkind(carg)?;
+            let fexpr = error::expect_normal_paramkind(farg)?;
             let mut res = make_dyn_meth_caller_lambda(pos, cexpr, fexpr, force);
             res.recurse(scope, self)?;
             Ok(res)
@@ -1140,9 +1140,9 @@ impl<'a: 'b, 'b> ClosureVisitor<'a, 'b> {
 
     #[inline(never)]
     fn visit_meth_caller(&mut self, scope: &mut Scope<'b>, mut x: Box<CallExpr>) -> Result<Expr_> {
-        if let [(pk_cls, Expr(_, pc, cls)), (pk_f, Expr(_, pf, func))] = &mut *x.args {
-            error::ensure_normal_paramkind(pk_cls)?;
-            error::ensure_normal_paramkind(pk_f)?;
+        if let [carg, farg] = &mut *x.args {
+            let Expr(_, pc, cls) = error::expect_normal_paramkind_mut(carg)?;
+            let Expr(_, pf, func) = error::expect_normal_paramkind(farg)?;
             match (&cls, func.as_string()) {
                 (Expr_::ClassConst(cc), Some(_)) if string_utils::is_class(&(cc.1).1) => {
                     let mut cls_const = cls.as_class_const_mut();
@@ -1413,7 +1413,7 @@ fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
                 } =>
             {
                 // Select first argument
-                let Expr(_, _, e) = x.args.swap_remove(0).1;
+                let Expr(_, _, e) = x.args.swap_remove(0).to_expr();
                 e_owned = e;
             }
             _ => break e_owned,

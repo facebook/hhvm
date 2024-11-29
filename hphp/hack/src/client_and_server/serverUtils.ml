@@ -271,7 +271,7 @@ let resugar_invariant_call env (cond : Tast.expr) (then_body : Tast.block) :
                   recv_pos,
                   Id (name_pos, SN.AutoimportedFunctions.invariant) );
               targs = [];
-              args = (Ast_defs.Pnormal, invariant_cond) :: args;
+              args = Aast_defs.Anormal invariant_cond :: args;
               unpacked_arg = None;
             }) )
   | _ -> None

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd90fc34a9b41bbb91c8ab6d91388dbd>>
+// @generated SignedSource<<d6821a100f7d9912f85752537ad20c9b>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -532,6 +532,22 @@ pub trait Pass: PassClone {
         &mut self,
         env: &Env,
         elem: &mut CallExpr<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_argument_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut Argument<Ex, En>,
+    ) -> ControlFlow<()> {
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_argument_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut Argument<Ex, En>,
     ) -> ControlFlow<()> {
         Continue(())
     }
@@ -2126,6 +2142,28 @@ impl Pass for Passes {
     ) -> ControlFlow<()> {
         for pass in &mut self.passes {
             pass.on_ty_call_expr_bottom_up(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_argument_top_down(
+        &mut self,
+        env: &Env,
+        elem: &mut Argument<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_argument_top_down(env, elem)?;
+        }
+        Continue(())
+    }
+    #[inline(always)]
+    fn on_ty_argument_bottom_up(
+        &mut self,
+        env: &Env,
+        elem: &mut Argument<Ex, En>,
+    ) -> ControlFlow<()> {
+        for pass in &mut self.passes {
+            pass.on_ty_argument_bottom_up(env, elem)?;
         }
         Continue(())
     }

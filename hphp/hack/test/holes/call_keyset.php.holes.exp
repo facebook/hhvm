@@ -70,7 +70,7 @@
                 ((void), [13:3-8],
                  (Call
                     { func = (((function(keyset<int> $f): void)), [13:3-4], (Id ([13:3-4], "\\f"))); 
-                      targs = []; args = [(Pnormal, ((keyset<string>), [13:5-7], (Hole (((keyset<string>), [13:5-7], (Lvar ([13:5-7], $f))), (keyset<string>), (keyset<int>), Typing))))];
+                      targs = []; args = [(Anormal ((keyset<string>), [13:5-7], (Hole (((keyset<string>), [13:5-7], (Lvar ([13:5-7], $f))), (keyset<string>), (keyset<int>), Typing))))];
                       unpacked_arg = None }))));
              ([15:3-27],
               (Expr
@@ -85,7 +85,7 @@
                      { func =
                        (((function(keyset<int> $f): void)), [18:3-10],
                         (Obj_get (((exact TestKeyset), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(keyset<int> $f): void)), [18:9-10], (Id ([18:9-10], "f"))), OG_nullthrows, Is_method)));
-                       targs = []; args = [(Pnormal, ((keyset<string>), [18:11-13], (Hole (((keyset<string>), [18:11-13], (Lvar ([18:11-13], $f))), (keyset<string>), (keyset<int>), Typing))))];
+                       targs = []; args = [(Anormal ((keyset<string>), [18:11-13], (Hole (((keyset<string>), [18:11-13], (Lvar ([18:11-13], $f))), (keyset<string>), (keyset<int>), Typing))))];
                        unpacked_arg = None }))))
              ]
            };
@@ -118,13 +118,13 @@
                     { func = (((function(keyset<int> $f): void)), [25:3-4], (Id ([25:3-4], "\\f"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~keyset<int>), [25:5-58],
-                         (Hole (((keyset<string>), [25:55-57], (Lvar ([25:55-57], $f))), (keyset<string>), (keyset<int>),
-                            (UnsafeCast
-                               [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Hprim Tstring))])));
-                                 ([25:42-53], (Happly (([25:42-48], "\\HH\\keyset"), [([25:49-52], (Hprim Tint))])))])
-                            ))))
+                      [(Anormal
+                          ((~keyset<int>), [25:5-58],
+                           (Hole (((keyset<string>), [25:55-57], (Lvar ([25:55-57], $f))), (keyset<string>), (keyset<int>),
+                              (UnsafeCast
+                                 [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Hprim Tstring))])));
+                                   ([25:42-53], (Happly (([25:42-48], "\\HH\\keyset"), [([25:49-52], (Hprim Tint))])))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-27],
@@ -142,13 +142,13 @@
                         (Obj_get (((exact TestKeyset), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(keyset<int> $f): void)), [30:9-10], (Id ([30:9-10], "f"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~keyset<int>), [30:11-64],
-                          (Hole (((keyset<string>), [30:61-63], (Lvar ([30:61-63], $f))), (keyset<string>), (keyset<int>),
-                             (UnsafeCast
-                                [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Hprim Tstring))])));
-                                  ([30:48-59], (Happly (([30:48-54], "\\HH\\keyset"), [([30:55-58], (Hprim Tint))])))])
-                             ))))
+                       [(Anormal
+                           ((~keyset<int>), [30:11-64],
+                            (Hole (((keyset<string>), [30:61-63], (Lvar ([30:61-63], $f))), (keyset<string>), (keyset<int>),
+                               (UnsafeCast
+                                  [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Hprim Tstring))])));
+                                    ([30:48-59], (Happly (([30:48-54], "\\HH\\keyset"), [([30:55-58], (Hprim Tint))])))])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]
@@ -231,13 +231,13 @@
                     { func = (((function(keyset<int> $f): void)), [25:3-4], (Id ([25:3-4], "\\f"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~keyset<int>), [25:5-58],
-                         (Hole (((dynamic), [25:55-57], (Lvar ([25:55-57], $f))), (keyset<string>), (keyset<int>),
-                            (UnsafeCast
-                               [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Hprim Tstring))])));
-                                 ([25:42-53], (Happly (([25:42-48], "\\HH\\keyset"), [([25:49-52], (Hprim Tint))])))])
-                            ))))
+                      [(Anormal
+                          ((~keyset<int>), [25:5-58],
+                           (Hole (((dynamic), [25:55-57], (Lvar ([25:55-57], $f))), (keyset<string>), (keyset<int>),
+                              (UnsafeCast
+                                 [([25:27-41], (Happly (([25:27-33], "\\HH\\keyset"), [([25:34-40], (Hprim Tstring))])));
+                                   ([25:42-53], (Happly (([25:42-48], "\\HH\\keyset"), [([25:49-52], (Hprim Tint))])))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-27],
@@ -255,13 +255,13 @@
                         (Obj_get (((exact TestKeyset), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(keyset<int> $f): void)), [30:9-10], (Id ([30:9-10], "f"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~keyset<int>), [30:11-64],
-                          (Hole (((dynamic), [30:61-63], (Lvar ([30:61-63], $f))), (keyset<string>), (keyset<int>),
-                             (UnsafeCast
-                                [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Hprim Tstring))])));
-                                  ([30:48-59], (Happly (([30:48-54], "\\HH\\keyset"), [([30:55-58], (Hprim Tint))])))])
-                             ))))
+                       [(Anormal
+                           ((~keyset<int>), [30:11-64],
+                            (Hole (((dynamic), [30:61-63], (Lvar ([30:61-63], $f))), (keyset<string>), (keyset<int>),
+                               (UnsafeCast
+                                  [([30:33-47], (Happly (([30:33-39], "\\HH\\keyset"), [([30:40-46], (Hprim Tstring))])));
+                                    ([30:48-59], (Happly (([30:48-54], "\\HH\\keyset"), [([30:55-58], (Hprim Tint))])))])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]

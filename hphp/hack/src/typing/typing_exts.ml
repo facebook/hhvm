@@ -209,17 +209,15 @@ let rec get_possibly_like_format_string_type_arg t =
   | _ -> get_format_string_type_arg t
 
 (* Specialize a function type using whatever we can tell about the args *)
-let retype_magic_func
-    (env : env)
-    (ft : locl_fun_type)
-    (el : (Ast_defs.param_kind * Nast.expr) list) : env * locl_fun_type =
-  let rec f env param_types (args : (Ast_defs.param_kind * Nast.expr) list) :
+let retype_magic_func (env : env) (ft : locl_fun_type) (el : Nast.argument list)
+    : env * locl_fun_type =
+  let rec f env param_types (args : Nast.expr list) :
       env * locl_fun_params option =
     match (param_types, args) with
-    | ([{ fp_type; _ }], [(_, (_, _, Null))])
+    | ([{ fp_type; _ }], [(_, _, Null)])
       when is_some (get_possibly_like_format_string_type_arg fp_type) ->
       (env, None)
-    | ([({ fp_type; _ } as fp)], (_, arg) :: _) -> begin
+    | ([({ fp_type; _ } as fp)], arg :: _) -> begin
       match get_possibly_like_format_string_type_arg fp_type with
       | Some type_arg ->
         (match const_string_of env arg with
@@ -249,7 +247,9 @@ let retype_magic_func
     else
       ft.ft_params
   in
-  match f env non_variadic_param_types el with
+  match
+    f env non_variadic_param_types (List.map ~f:Aast_utils.arg_to_expr el)
+  with
   | (env, None) -> (env, ft)
   | (env, Some xs) ->
     ( env,

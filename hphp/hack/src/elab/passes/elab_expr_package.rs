@@ -8,7 +8,7 @@ use nast::CallExpr;
 use nast::Expr;
 use nast::Expr_;
 use nast::Id;
-use nast::ParamKind;
+use oxidized::ast;
 
 use crate::prelude::*;
 
@@ -27,10 +27,11 @@ impl Pass for ElabExprPackagePass {
                         Expr_::mk_id(Id(pos.clone(), pseudo_functions::PACKAGE_EXISTS.into())),
                     ),
                     targs: vec![],
-                    args: vec![(
-                        ParamKind::Pnormal,
-                        Expr::new((), pkg.pos().clone(), Expr_::mk_string(pkg.name().into())),
-                    )],
+                    args: vec![ast::Argument::Anormal(Expr::new(
+                        (),
+                        pkg.pos().clone(),
+                        Expr_::mk_string(pkg.name().into()),
+                    ))],
                     unpacked_arg: None,
                 }));
                 Break(())
@@ -67,7 +68,8 @@ mod tests {
                 args,
                 ..
             }) if fn_name == pseudo_functions::PACKAGE_EXISTS => {
-                if let [(ParamKind::Pnormal, Expr(_, _, Expr_::String(fn_param_name)))] = &args[..]
+                if let [ast::Argument::Anormal(Expr(_, _, Expr_::String(fn_param_name)))] =
+                    &args[..]
                 {
                     fn_param_name == "foo"
                 } else {

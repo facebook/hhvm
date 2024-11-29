@@ -225,6 +225,6 @@ let rewrite_attribute_access_into_call pos exp nullflavor =
       {
         func = obj_get_exp;
         targs = [];
-        args = [(Ast_defs.Pnormal, ((), pos, Aast.String ""))];
+        args = [Aast_defs.Anormal ((), pos, Aast.String "")];
         unpacked_arg = None;
       } )

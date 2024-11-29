@@ -33,6 +33,8 @@ type expr = (unit, unit) Aast.expr [@@deriving eq, show]
 
 type expr_ = (unit, unit) Aast.expr_
 
+type argument = (unit, unit) Aast.argument
+
 type stmt = (unit, unit) Aast.stmt
 
 type block = (unit, unit) Aast.block
@@ -507,8 +509,9 @@ module Visitor_DEPRECATED = struct
 
       method on_class_const : 'a -> class_id -> pstring -> 'a
 
-      method on_call :
-        'a -> expr -> (Ast_defs.param_kind * expr) list -> expr option -> 'a
+      method on_call : 'a -> expr -> argument list -> expr option -> 'a
+
+      method on_argument : 'a -> argument -> 'a
 
       method on_function_pointer :
         'a -> (unit, unit) function_ptr_id -> targ list -> 'a
@@ -943,15 +946,17 @@ module Visitor_DEPRECATED = struct
 
       method on_call acc e el unpacked_element =
         let acc = this#on_expr acc e in
-        let f acc_ (pk, e_) =
-          let acc_ = this#on_param_kind acc_ pk in
-          this#on_expr acc_ e_
-        in
+        let f acc_ arg = this#on_argument acc_ arg in
         let acc = List.fold_left el ~f ~init:acc in
         let acc =
           Option.value_map unpacked_element ~f:(this#on_expr acc) ~default:acc
         in
         acc
+
+      method on_argument acc arg =
+        match arg with
+        | Aast_defs.Anormal e -> this#on_expr acc e
+        | Aast_defs.Ainout (_pos, e) -> this#on_expr acc e
 
       method on_function_pointer acc e targs =
         let acc = this#on_function_ptr_id acc e in

@@ -230,7 +230,7 @@ let base_visitor ~human_friendly ~under_dynamic line_char_pairs =
             match (args, ft_params) with
             | (arg :: args, fp :: ft_params) ->
               let { Typing_defs.fp_type; _ } = fp in
-              let (_, (arg_type, p, expr_)) = arg in
+              let (arg_type, p, expr_) = Aast_utils.arg_to_expr arg in
               let fp =
                 match (expr_, Typing_defs.get_node arg_type) with
                 | (Aast.EnumClassLabel (None, label), _)

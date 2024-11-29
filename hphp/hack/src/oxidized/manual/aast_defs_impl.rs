@@ -7,6 +7,37 @@ use crate::aast_defs::*;
 use crate::ast_defs::*;
 use crate::pos::Pos;
 
+impl<En, Ex> Argument<En, Ex> {
+    pub fn to_expr(self) -> Expr<En, Ex> {
+        match self {
+            Argument::Anormal(e) => e,
+            Argument::Ainout(_, e) => e,
+        }
+    }
+
+    pub fn to_expr_ref(&self) -> &Expr<En, Ex> {
+        match self {
+            Argument::Anormal(e) => e,
+            Argument::Ainout(_, e) => e,
+        }
+    }
+
+    pub fn to_expr_mut(&mut self) -> &mut Expr<En, Ex> {
+        match self {
+            Argument::Anormal(e) => e,
+            Argument::Ainout(_, e) => e,
+        }
+    }
+
+    pub fn is_inout(&self) -> bool {
+        matches!(self, Argument::Ainout(_, _))
+    }
+
+    pub fn is_lvar(&self) -> bool {
+        matches!(self.to_expr_ref(), Expr(_, _, Expr_::Lvar(_)))
+    }
+}
+
 impl Lid {
     pub fn new(p: Pos, s: String) -> Self {
         Self(p, (0, s))

@@ -54,14 +54,14 @@ Errors:
                 ((void), [9:3-15],
                  (Call
                     { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [9:3-7], (Id ([9:3-7], "echo"))); 
-                      targs = []; args = [(Pnormal, ((string), [9:8-13], (String "foo")))]; 
+                      targs = []; args = [(Anormal ((string), [9:8-13], (String "foo")))]; 
                       unpacked_arg = None }))));
              ([10:3-16],
               (Expr
                  ((void), [10:3-15],
                   (Call
                      { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [10:3-15], (Id ([10:3-15], "echo"))); 
-                       targs = []; args = [(Pnormal, ((string), [10:9-14], (String "foo")))]; 
+                       targs = []; args = [(Anormal ((string), [10:9-14], (String "foo")))]; 
                        unpacked_arg = None }))));
              ([12:3-10], (Expr (((readonly function(C $c): void)), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [])))));
              ([13:3-18], (Expr (((readonly function(): void)), [13:3-17], (FunctionPointer ((FP_class_const (((C), [13:3-4], (CI ([13:3-4], "\\C"))), ([13:6-15], "staticFoo"))), [])))));
@@ -69,13 +69,11 @@ Errors:
              ([16:3-13],
               (Expr
                  ((bool), [16:3-12],
-                  (Call
-                     { func = (((function(mixed $x)[]: bool)), [16:3-8], (Id ([16:3-8], "\\isset"))); targs = []; args = [(Pnormal, ((C), [16:9-11], (Lvar ([16:9-11], $c))))]; unpacked_arg = None }))));
+                  (Call { func = (((function(mixed $x)[]: bool)), [16:3-8], (Id ([16:3-8], "\\isset"))); targs = []; args = [(Anormal ((C), [16:9-11], (Lvar ([16:9-11], $c))))]; unpacked_arg = None }))));
              ([17:3-13],
               (Expr
                  ((void), [17:3-13],
-                  (Call
-                     { func = (((function(mixed $x)[]: void)), [17:3-8], (Id ([17:3-8], "\\unset"))); targs = []; args = [(Pnormal, ((C), [17:9-11], (Lvar ([17:9-11], $c))))]; unpacked_arg = None }))));
+                  (Call { func = (((function(mixed $x)[]: void)), [17:3-8], (Id ([17:3-8], "\\unset"))); targs = []; args = [(Anormal ((C), [17:9-11], (Lvar ([17:9-11], $c))))]; unpacked_arg = None }))));
              ([19:3-26],
               (If (((bool), [19:13-17], (Unop (Unot, ((bool), [19:13-17], True)))),
                  [([19:3-25],
@@ -83,7 +81,7 @@ Errors:
                       ((noreturn), [19:3-25],
                        (Call
                           { func = (((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [19:3-12], (Id ([19:3-12], "\\HH\\invariant_violation"))); 
-                            targs = []; args = [(Pnormal, ((string), [19:19-24], (String "foo")))]; 
+                            targs = []; args = [(Anormal ((string), [19:19-24], (String "foo")))]; 
                             unpacked_arg = None }))))
                    ],
                  [([Pos.none], Noop)])));
@@ -92,7 +90,7 @@ Errors:
                  ((noreturn), [20:3-29],
                   (Call
                      { func = (((function(HH\FormatString<PlainSprintf> $fmt, mixed $fmt_args...)[]: noreturn)), [20:3-22], (Id ([20:3-22], "\\HH\\invariant_violation"))); 
-                       targs = []; args = [(Pnormal, ((string), [20:23-28], (String "foo")))]; 
+                       targs = []; args = [(Anormal ((string), [20:23-28], (String "foo")))]; 
                        unpacked_arg = None }))))
              ]
            };

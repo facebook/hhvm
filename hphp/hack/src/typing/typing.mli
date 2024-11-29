@@ -76,13 +76,10 @@ val call :
   recv_pos:Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
-  (Ast_defs.param_kind * Nast.expr) list ->
+  Nast.argument list ->
   Nast.expr option ->
   Typing_env_types.env
-  * ((Ast_defs.param_kind * Tast.expr) list
-    * Tast.expr option
-    * Typing_defs.locl_ty
-    * bool)
+  * (Tast.argument list * Tast.expr option * Typing_defs.locl_ty * bool)
 
 val with_special_coeffects :
   Typing_env_types.env ->

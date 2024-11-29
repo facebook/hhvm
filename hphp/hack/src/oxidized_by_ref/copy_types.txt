@@ -1,3 +1,4 @@
+aast_defs::Argument
 aast_defs::ClassPtrKind
 aast_defs::CtxRefinement
 aast_defs::Hint_

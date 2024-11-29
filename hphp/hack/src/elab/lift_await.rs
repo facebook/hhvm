@@ -182,7 +182,7 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
         }) => {
             let res = args
                 .iter()
-                .map(|(_, arg)| check_await_usage(arg))
+                .map(|arg| check_await_usage(arg.to_expr_ref()))
                 .fold(check_await_usage(func), combine_con);
             unpacked_arg
                 .iter()
@@ -554,8 +554,8 @@ impl LiftAwait {
                 unpacked_arg,
             }) => {
                 self.extract_await(func, con, seq, tmps);
-                for (_, arg) in args {
-                    self.extract_await(arg, con, seq, tmps)
+                for arg in args {
+                    self.extract_await(arg.to_expr_mut(), con, seq, tmps)
                 }
                 if let Some(unpack) = unpacked_arg {
                     self.extract_await(unpack, con, seq, tmps)

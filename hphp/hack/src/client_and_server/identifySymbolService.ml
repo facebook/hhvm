@@ -142,12 +142,11 @@ let process_arg_names recv (args : Tast.expr list) : Result_set.t =
                 //^ Hover shows: Parameter: $name
 *)
 let process_callee_arg_names
-    enclosing_class
-    (recv : Tast.expr)
-    (args : (Ast_defs.param_kind * Tast.expr) list) : Result_set.t =
+    enclosing_class (recv : Tast.expr) (args : Tast.argument list) :
+    Result_set.t =
   let enclosing_class_name = Option.map ~f:snd enclosing_class in
   let recv = get_callee enclosing_class_name recv in
-  process_arg_names recv (List.map ~f:snd args)
+  process_arg_names recv (List.map ~f:Aast_utils.arg_to_expr args)
 
 (* Add parameter names for all arguments at an instantiation
    site. This enables us to show hover information on arguments.
@@ -466,12 +465,12 @@ let visitor =
               Call
                 {
                   func = (_, _, Class_const (_, (_, methName)));
-                  args = [(_, arg)];
+                  args = [arg];
                   _;
                 })
             when String.equal methName SN.ExpressionTrees.symbolType ->
             (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
-            self#on_expr env arg
+            self#on_argument env arg
           | _ -> self#zero
         else
           let expr_ =
@@ -498,7 +497,7 @@ let visitor =
       in
 
       let tala = self#on_list self#on_targ env tal in
-      let ela = self#on_list self#on_expr env (List.map ~f:snd el) in
+      let ela = self#on_list self#on_argument env el in
       let arg_names = process_callee_arg_names !class_name e el in
       let uea =
         Option.value_map

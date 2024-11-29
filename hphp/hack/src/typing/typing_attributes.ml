@@ -17,7 +17,7 @@ module Cls = Folded_class
 type attribute_interface_name = string
 
 type new_object_checker =
-  Pos.t -> env -> Typing_defs.pos_string -> Nast.expr list -> env
+  Pos.t -> env -> Typing_defs.pos_string -> Nast.argument list -> env
 
 let check_implements
     (check_new_object : new_object_checker)
@@ -134,7 +134,11 @@ let check_implements
                  });
         env
       ) else
-        check_new_object attr_pos env attr_cid params
+        check_new_object
+          attr_pos
+          env
+          attr_cid
+          (List.map ~f:(fun e -> Aast_defs.Anormal e) params)
     | (Decl_entry.NotYetAvailable, _)
     | (_, Decl_entry.NotYetAvailable) ->
       (* A retry will happen. Don't emit error to avoid error-based backtracking *)

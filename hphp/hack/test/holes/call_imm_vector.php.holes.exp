@@ -70,7 +70,7 @@
                 ((void), [13:3-8],
                  (Call
                     { func = (((function(ImmVector<int> $k): void)), [13:3-4], (Id ([13:3-4], "\\k"))); 
-                      targs = []; args = [(Pnormal, ((ImmVector<float>), [13:5-7], (Hole (((ImmVector<float>), [13:5-7], (Lvar ([13:5-7], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))];
+                      targs = []; args = [(Anormal ((ImmVector<float>), [13:5-7], (Hole (((ImmVector<float>), [13:5-7], (Lvar ([13:5-7], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))];
                       unpacked_arg = None }))));
              ([15:3-30],
               (Expr
@@ -86,7 +86,7 @@
                        (((function(ImmVector<int> $k): void)), [18:3-10],
                         (Obj_get (((exact TestImmVector), [18:3-7], (Lvar ([18:3-7], $foo))), (((function(ImmVector<int> $k): void)), [18:9-10], (Id ([18:9-10], "k"))), OG_nullthrows, Is_method)));
                        targs = [];
-                       args = [(Pnormal, ((ImmVector<float>), [18:11-13], (Hole (((ImmVector<float>), [18:11-13], (Lvar ([18:11-13], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))];
+                       args = [(Anormal ((ImmVector<float>), [18:11-13], (Hole (((ImmVector<float>), [18:11-13], (Lvar ([18:11-13], $k))), (ImmVector<float>), (ImmVector<int>), Typing))))];
                        unpacked_arg = None }))))
              ]
            };
@@ -119,13 +119,13 @@
                     { func = (((function(ImmVector<int> $k): void)), [25:3-4], (Id ([25:3-4], "\\k"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~ImmVector<int>), [25:5-63],
-                         (Hole (((ImmVector<float>), [25:60-62], (Lvar ([25:60-62], $k))), (ImmVector<float>), (ImmVector<int>),
-                            (UnsafeCast
-                               [([25:27-43], (Happly (([25:27-36], "\\HH\\ImmVector"), [([25:37-42], (Hprim Tfloat))])));
-                                 ([25:44-58], (Happly (([25:44-53], "\\HH\\ImmVector"), [([25:54-57], (Hprim Tint))])))])
-                            ))))
+                      [(Anormal
+                          ((~ImmVector<int>), [25:5-63],
+                           (Hole (((ImmVector<float>), [25:60-62], (Lvar ([25:60-62], $k))), (ImmVector<float>), (ImmVector<int>),
+                              (UnsafeCast
+                                 [([25:27-43], (Happly (([25:27-36], "\\HH\\ImmVector"), [([25:37-42], (Hprim Tfloat))])));
+                                   ([25:44-58], (Happly (([25:44-53], "\\HH\\ImmVector"), [([25:54-57], (Hprim Tint))])))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-30],
@@ -143,13 +143,13 @@
                         (Obj_get (((exact TestImmVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmVector<int> $k): void)), [30:9-10], (Id ([30:9-10], "k"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~ImmVector<int>), [30:11-69],
-                          (Hole (((ImmVector<float>), [30:66-68], (Lvar ([30:66-68], $k))), (ImmVector<float>), (ImmVector<int>),
-                             (UnsafeCast
-                                [([30:33-49], (Happly (([30:33-42], "\\HH\\ImmVector"), [([30:43-48], (Hprim Tfloat))])));
-                                  ([30:50-64], (Happly (([30:50-59], "\\HH\\ImmVector"), [([30:60-63], (Hprim Tint))])))])
-                             ))))
+                       [(Anormal
+                           ((~ImmVector<int>), [30:11-69],
+                            (Hole (((ImmVector<float>), [30:66-68], (Lvar ([30:66-68], $k))), (ImmVector<float>), (ImmVector<int>),
+                               (UnsafeCast
+                                  [([30:33-49], (Happly (([30:33-42], "\\HH\\ImmVector"), [([30:43-48], (Hprim Tfloat))])));
+                                    ([30:50-64], (Happly (([30:50-59], "\\HH\\ImmVector"), [([30:60-63], (Hprim Tint))])))])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]
@@ -232,13 +232,13 @@
                     { func = (((function(ImmVector<int> $k): void)), [25:3-4], (Id ([25:3-4], "\\k"))); 
                       targs = [];
                       args =
-                      [(Pnormal,
-                        ((~ImmVector<int>), [25:5-63],
-                         (Hole (((dynamic), [25:60-62], (Lvar ([25:60-62], $k))), (ImmVector<float>), (ImmVector<int>),
-                            (UnsafeCast
-                               [([25:27-43], (Happly (([25:27-36], "\\HH\\ImmVector"), [([25:37-42], (Hprim Tfloat))])));
-                                 ([25:44-58], (Happly (([25:44-53], "\\HH\\ImmVector"), [([25:54-57], (Hprim Tint))])))])
-                            ))))
+                      [(Anormal
+                          ((~ImmVector<int>), [25:5-63],
+                           (Hole (((dynamic), [25:60-62], (Lvar ([25:60-62], $k))), (ImmVector<float>), (ImmVector<int>),
+                              (UnsafeCast
+                                 [([25:27-43], (Happly (([25:27-36], "\\HH\\ImmVector"), [([25:37-42], (Hprim Tfloat))])));
+                                   ([25:44-58], (Happly (([25:44-53], "\\HH\\ImmVector"), [([25:54-57], (Hprim Tint))])))])
+                              ))))
                         ];
                       unpacked_arg = None }))));
              ([27:3-30],
@@ -256,13 +256,13 @@
                         (Obj_get (((exact TestImmVector), [30:3-7], (Lvar ([30:3-7], $foo))), (((function(ImmVector<int> $k): void)), [30:9-10], (Id ([30:9-10], "k"))), OG_nullthrows, Is_method)));
                        targs = [];
                        args =
-                       [(Pnormal,
-                         ((~ImmVector<int>), [30:11-69],
-                          (Hole (((dynamic), [30:66-68], (Lvar ([30:66-68], $k))), (ImmVector<float>), (ImmVector<int>),
-                             (UnsafeCast
-                                [([30:33-49], (Happly (([30:33-42], "\\HH\\ImmVector"), [([30:43-48], (Hprim Tfloat))])));
-                                  ([30:50-64], (Happly (([30:50-59], "\\HH\\ImmVector"), [([30:60-63], (Hprim Tint))])))])
-                             ))))
+                       [(Anormal
+                           ((~ImmVector<int>), [30:11-69],
+                            (Hole (((dynamic), [30:66-68], (Lvar ([30:66-68], $k))), (ImmVector<float>), (ImmVector<int>),
+                               (UnsafeCast
+                                  [([30:33-49], (Happly (([30:33-42], "\\HH\\ImmVector"), [([30:43-48], (Hprim Tfloat))])));
+                                    ([30:50-64], (Happly (([30:50-59], "\\HH\\ImmVector"), [([30:60-63], (Hprim Tint))])))])
+                               ))))
                          ];
                        unpacked_arg = None }))))
              ]

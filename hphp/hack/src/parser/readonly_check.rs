@@ -260,7 +260,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
             {
                 if is_special_builtin(&i.1) && !args.is_empty() {
                     // Take first argument
-                    let (_, expr) = &args[0];
+                    let expr = &args[0].to_expr_ref();
                     rty_expr(context, expr)
                 } else {
                     Rty::Mutable
@@ -718,13 +718,18 @@ impl<'ast> VisitorMut<'ast> for Checker {
                     Rty::Readonly => explicit_readonly(func),
                     Rty::Mutable => {}
                 };
-                for (callconv, param) in args.iter_mut() {
-                    match (callconv, rty_expr(context, param)) {
-                        (ast_defs::ParamKind::Pinout(_), Rty::Readonly) => {
-                            self.add_error(param.pos(), syntax_error::inout_readonly_argument)
-                        }
-                        (ast_defs::ParamKind::Pnormal, Rty::Readonly) => explicit_readonly(param),
-                        (_, Rty::Mutable) => {}
+                for arg in args.iter_mut() {
+                    match arg {
+                        Argument::Ainout(_, param) => match rty_expr(context, param) {
+                            Rty::Readonly => {
+                                self.add_error(param.pos(), syntax_error::inout_readonly_argument)
+                            }
+                            Rty::Mutable => {}
+                        },
+                        Argument::Anormal(param) => match rty_expr(context, param) {
+                            Rty::Readonly => explicit_readonly(param),
+                            Rty::Mutable => {}
+                        },
                     }
                 }
             }

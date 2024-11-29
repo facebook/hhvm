@@ -1116,10 +1116,10 @@ fn check_l_iter<'a, 'd>(
                         false
                     };
 
-                    for (pk, arg) in args {
-                        match (is_unset, pk) {
-                            (true, _) | (_, ast_defs::ParamKind::Pinout(_)) => {
-                                self.visit_lval(arg, is_unset)
+                    for arg in args {
+                        match (is_unset, arg) {
+                            (true, _) | (_, ast::Argument::Ainout(_, _)) => {
+                                self.visit_lval(arg.to_expr_ref(), is_unset)
                             }
                             _ => (),
                         };

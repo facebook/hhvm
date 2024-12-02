@@ -72,12 +72,16 @@ let style_filename = Tty.(Normal Magenta)
 
 (* ~~ Context helpers ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
+let relative_path path =
+  let cwd = Filename.concat (Sys.getcwd ()) "" in
+  String_utils.lstrip path cwd
+
 let render_pos buf (pos : Pos.absolute) =
   let pos_string =
     Tty.apply_color style_filepos @@ Pos.multiline_string_no_file pos
   in
   let filename =
-    let fn = Pos.filename pos in
+    let fn = relative_path @@ Pos.filename pos in
     if String.is_suffix fn ~suffix:".hhi" then
       match String.split fn ~on:'/' with
       | _ :: "tmp" :: _ :: rest -> String.concat ~sep:"/" rest
@@ -96,6 +100,17 @@ let render_pos buf (pos : Pos.absolute) =
   in
   Buffer.add_string buf file_pos_string
 
+let context_pos ctxt_pos pos =
+  let ctxt_start_ln = Pos.line ctxt_pos
+  and ctxt_end_ln = Pos.end_line ctxt_pos in
+  let (start_ln, end_ln, start_col, end_col) = Pos.info_pos_extended pos in
+  ( ctxt_start_ln - pad_before - 1,
+    ctxt_end_ln + pad_after - 1,
+    start_ln - 1,
+    end_ln - 1,
+    start_col - 1,
+    end_col - 1 )
+
 (** Given a position and the list of all spans for each file:
    1) Find the relevant file and find the first span that contains the position
    2) Select the lines from that file corresponding to the containing span
@@ -106,7 +121,7 @@ let render_pos buf (pos : Pos.absolute) =
 *)
 let mark_with_context (pos : Pos.absolute) ~buf ~spans =
   (* Find the containing span for our position *)
-  let path = Pos.filename pos in
+  let path = relative_path @@ Pos.filename pos in
   let ctxt_pos_opt =
     Option.bind
       (SMap.find_opt path spans)
@@ -115,88 +130,75 @@ let mark_with_context (pos : Pos.absolute) ~buf ~spans =
              try Pos.contains spos @@ Pos.to_relative pos with
              | _ -> false))
   in
-  match ctxt_pos_opt with
-  | Some ctxt_pos ->
-    (* Determine start and end lines and columns and reindex to 0 *)
-    let (ctxt_start_ln, ctxt_end_ln, start_ln, end_ln, start_col, end_col) =
-      let ctxt_start_ln = Pos.line ctxt_pos
-      and ctxt_end_ln = Pos.end_line ctxt_pos in
-      let (start_ln, end_ln, start_col, end_col) = Pos.info_pos_extended pos in
-      ( ctxt_start_ln - pad_before - 1,
-        ctxt_end_ln + pad_after - 1,
-        start_ln - 1,
-        end_ln - 1,
-        start_col - 1,
-        end_col - 1 )
-    in
-    (* We'll use the same number of characters for each line number so find how
-       many chars the longest line number needs *)
-    let line_num_width = 1 + (String.length @@ string_of_int end_ln) in
-    (* Write to buffer *)
-    List.iteri (Errors.read_lines path) ~f:(fun ln str ->
-        if ln < ctxt_start_ln || ln > ctxt_end_ln then
-          (* This line isn't in our containing span so skip it *)
-          ()
-        else if
-          (ln = ctxt_start_ln || ln = ctxt_end_ln)
-          && String.(is_empty @@ lstrip str)
-        then
-          (* If the line is blank and is either the first of last line, skip it *)
-          ()
-        else begin
-          (* First write the line number and gutter marker  *)
-          let ln_num =
-            String.pad_left
-              (Int.to_string (ln + 1))
-              ~char:' '
-              ~len:line_num_width
-          in
-          let (_ : unit) =
-            Buffer.add_string buf @@ Tty.apply_color style_line_num ln_num;
-            Buffer.add_string buf @@ Tty.apply_color style_line_num " | "
-          in
-          let is_start = ln = start_ln and is_end = ln = end_ln in
-          let (_ : unit) =
-            if is_start && is_end then (
-              (* If our target pos starts and ends on the line..
-                 - write the prefix before the start of the marked pos
-                 - write the lhs cursor marker
-                 - write the marked string
-                 - write the rhs cursor marker
-                 - write the suffix after the end of the marked pos
-              *)
-              Buffer.add_string buf (String.prefix str start_col);
-              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_l;
-              Buffer.add_string buf
-              @@ Tty.apply_color
-                   style_elem
-                   (String.slice str start_col (end_col + 1));
-              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_r;
-              Buffer.add_string buf (String.drop_prefix str (end_col + 1))
-            ) else if is_start then (
-              (* If this is the start line, write the prefix, the lhs cursor and
-                 substring of the marked pos that is on this line *)
-              Buffer.add_string buf (String.prefix str start_col);
-              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_l;
-              Buffer.add_string buf
-              @@ Tty.apply_color style_elem (String.drop_prefix str start_col)
-            ) else if is_end then (
-              (* If this is the end line, write the substring of the marked pos
-                 that is on the line, the rhs cursor and the suffix *)
-              Buffer.add_string buf
-              @@ Tty.apply_color style_elem (String.prefix str end_col);
-              Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_r;
-              Buffer.add_string buf (String.drop_prefix str end_col)
-            ) else if ln < start_ln || ln > end_ln then
-              (* Either the whole line is part of the target pos or the target
-                 is not on the line at all; either way, write the entire line *)
-              Buffer.add_string buf str
-            else
-              Buffer.add_string buf @@ Tty.apply_color style_elem str
-          in
-          Buffer.add_string buf "\n"
-        end)
-  | _ -> Buffer.add_string buf "No source found.\n\n"
+  let (ctxt_start_ln, ctxt_end_ln, start_ln, end_ln, start_col, end_col) =
+    match ctxt_pos_opt with
+    | Some ctxt_pos -> context_pos ctxt_pos pos
+    | _ -> context_pos pos pos
+  in
+  (* We'll use the same number of characters for each line number so find how
+     many chars the longest line number needs *)
+  let line_num_width = 1 + (String.length @@ string_of_int end_ln) in
+  (* Write to buffer *)
+  List.iteri (Errors.read_lines path) ~f:(fun ln str ->
+      if ln < ctxt_start_ln || ln > ctxt_end_ln then
+        (* This line isn't in our containing span so skip it *)
+        ()
+      else if
+        (ln = ctxt_start_ln || ln = ctxt_end_ln)
+        && String.(is_empty @@ lstrip str)
+      then
+        (* If the line is blank and is either the first of last line, skip it *)
+        ()
+      else begin
+        (* First write the line number and gutter marker  *)
+        let ln_num =
+          String.pad_left (Int.to_string (ln + 1)) ~char:' ' ~len:line_num_width
+        in
+        let (_ : unit) =
+          Buffer.add_string buf @@ Tty.apply_color style_line_num ln_num;
+          Buffer.add_string buf @@ Tty.apply_color style_line_num " | "
+        in
+        let is_start = ln = start_ln and is_end = ln = end_ln in
+        let (_ : unit) =
+          if is_start && is_end then (
+            (* If our target pos starts and ends on the line..
+               - write the prefix before the start of the marked pos
+               - write the lhs cursor marker
+               - write the marked string
+               - write the rhs cursor marker
+               - write the suffix after the end of the marked pos
+            *)
+            Buffer.add_string buf (String.prefix str start_col);
+            Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_l;
+            Buffer.add_string buf
+            @@ Tty.apply_color
+                 style_elem
+                 (String.slice str start_col (end_col + 1));
+            Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_r;
+            Buffer.add_string buf (String.drop_prefix str (end_col + 1))
+          ) else if is_start then (
+            (* If this is the start line, write the prefix, the lhs cursor and
+               substring of the marked pos that is on this line *)
+            Buffer.add_string buf (String.prefix str start_col);
+            Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_l;
+            Buffer.add_string buf
+            @@ Tty.apply_color style_elem (String.drop_prefix str start_col)
+          ) else if is_end then (
+            (* If this is the end line, write the substring of the marked pos
+               that is on the line, the rhs cursor and the suffix *)
+            Buffer.add_string buf
+            @@ Tty.apply_color style_elem (String.prefix str end_col);
+            Buffer.add_string buf @@ Tty.apply_color style_cursor cursor_r;
+            Buffer.add_string buf (String.drop_prefix str end_col)
+          ) else if ln < start_ln || ln > end_ln then
+            (* Either the whole line is part of the target pos or the target
+               is not on the line at all; either way, write the entire line *)
+            Buffer.add_string buf str
+          else
+            Buffer.add_string buf @@ Tty.apply_color style_elem str
+        in
+        Buffer.add_string buf "\n"
+      end)
 
 let render_reason buf spans (pos, msg) =
   let pretty_msg = Markdown_lite.render msg in
@@ -269,7 +271,7 @@ let render_claim buf spans code (pos, msg) severity =
   Buffer.add_string buf "\n"
 
 let add_span acc p =
-  let file_checked = Pos.filename p in
+  let file_checked = relative_path @@ Pos.filename p in
   try
     let p = Pos.to_relative p in
     SMap.update
@@ -290,7 +292,7 @@ let to_string
   | Explanation.Empty ->
     (* If the explanation is empty then ust render the claim and reasons;
        only subtyping errors will have explanations at the moment *)
-    let file_checked = Pos.filename pos in
+    let file_checked = relative_path @@ Pos.filename pos in
     let init = SMap.singleton file_checked [Pos.to_relative pos] in
     let spans =
       SMap.map (fun ps ->
@@ -303,7 +305,7 @@ let to_string
     Buffer.contents buf
   | Explanation.Derivation elems ->
     let cols = Option.value ~default:header_cols @@ Tty.get_term_cols () in
-    let file_checked = Pos.filename pos in
+    let file_checked = relative_path @@ Pos.filename pos in
     let init =
       List.fold_left
         elems

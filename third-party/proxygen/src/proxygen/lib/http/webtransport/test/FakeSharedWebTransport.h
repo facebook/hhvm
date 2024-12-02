@@ -87,6 +87,10 @@ class FakeStreamHandle
     return folly::unit;
   }
 
+  bool open() const {
+    return !fin_ && !writeErr_ && (!promise_ || !promise_->isFulfilled());
+  }
+
   uint64_t id{0};
   folly::CancellationSource cs_;
   folly::Optional<folly::Promise<WebTransport::StreamData>> promise_;
@@ -221,7 +225,9 @@ class FakeSharedWebTransport : public WebTransport {
   folly::Expected<folly::Unit, ErrorCode> closeSession(
       folly::Optional<uint32_t> error = folly::none) override {
     for (auto& h : writeHandles) {
-      h.second->resetStream(std::numeric_limits<uint32_t>::max());
+      if (h.second->open()) {
+        h.second->resetStream(std::numeric_limits<uint32_t>::max());
+      }
     }
     writeHandles.clear();
     for (auto& h : readHandles) {

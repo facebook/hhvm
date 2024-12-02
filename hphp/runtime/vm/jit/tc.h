@@ -132,6 +132,10 @@ struct Translator {
   // Check on tc sizes and make sure we are looking to translate more
   // translations of the specified type.
   TranslationResult::Scope shouldTranslate(bool noThreshold, bool noSizeLimit);
+  // Returns false if the kind is Live and there are retranslateAll or profile
+  // translations are in flight.
+  // Returns true otherwise, including any other TransKind.
+  bool shouldEmitLiveTranslation();
   // Generate and emit machine code into the provided view (if given) otherwise
   // the default view.
   Optional<TranslationResult>

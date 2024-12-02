@@ -17,6 +17,8 @@
 #pragma once
 namespace HPHP::jit::mcgen {
 
+bool isAsyncJitEnabled(TransKind kind);
+
 void enqueueAsyncTranslateRequest(
   const RegionContext& ctx, int currNumTranslations);
 void enqueueAsyncPrologueRequest(Func* func, int nPassed);

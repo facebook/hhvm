@@ -81,7 +81,7 @@ std::atomic<size_t> s_rejectPrologue;
 std::atomic<size_t> s_activePrologue;
 
 InitFiniNode s_logJitStats([]{
-  if (!Cfg::Eval::EnableAsyncJIT ||
+  if ((!Cfg::Eval::EnableAsyncJIT && !Cfg::Eval::EnableAsyncJITLive) ||
       !isStandardRequest() ||
       !StructuredLog::coinflip(Cfg::Eval::AsyncJitLogStatsRate)) return;
   StructuredLogEntry ent;
@@ -138,10 +138,16 @@ struct AsyncTranslationWorker
 
     s_activeTrans++;
     SCOPE_EXIT {
-      s_activeTrans--;
-      if (rctx.currNumTranslations != kIgnoreNumTrans) {
-        s_enqueuedSKs.assign(ctx.sk, false);
+      if (!Cfg::Repo::Authoritative) {
+        assertx(Cfg::Eval::EnableAsyncJIT);
+        if (rctx.currNumTranslations != kIgnoreNumTrans) {
+          s_enqueuedSKs.assign(ctx.sk, false);
+        }
+      } else {
+        assertx(Cfg::Eval::EnableAsyncJITLive);
+        ctx.sk.func()->atomicFlags().unset(Func::Flags::LockedForAsyncJit);
       }
+      s_activeTrans--;
     };
 
     ProfileNonVMThread nonVM;
@@ -179,6 +185,19 @@ struct AsyncTranslationWorker
     translator.spOff = ctx.spOffset;
     translator.liveTypes = ctx.liveTypes;
     auto const noThreshold = ctxNumTrans == kIgnoreNumTrans;
+    if (!translator.shouldEmitLiveTranslation()) {
+      FTRACE(2, "shouldEmitLiveTranslation failed for sk {}\n", show(ctx.sk));
+      s_rejectTrans++;
+      return;
+    }
+
+    if (translator.exceededMaxLiveTranslations(numTrans)) {
+      FTRACE(2, "Max translations reached for sk {}\n", show(ctx.sk));
+      translator.setCachedForProcessFail();
+      s_permFailTrans++;
+      return;
+    }
+
     if (auto const s = translator.shouldTranslate(noThreshold,
                                                   false /*noSizeLimit*/);
       s != TranslationResult::Scope::Success) {
@@ -249,6 +268,13 @@ struct AsyncTranslationWorker
     if (tcAddr) {
       FTRACE(2, "getCached returned true for prologue of func {}\n",
              func->name());
+      return;
+    }
+
+    if (!translator.shouldEmitLiveTranslation()) {
+      FTRACE(2, "shouldEmitLiveTranslation failed for func prologue {}\n",
+             func->name());
+      s_rejectPrologue++;
       return;
     }
 
@@ -338,10 +364,24 @@ void enqueueAsyncTranslateRequestForJumpstart(const RegionContext& ctx) {
   FTRACE(2, "Enqueued sk {} for jitting in jumpstart\n", show(ctx.sk));
 }
 
+namespace {
+bool mayEnqueueAsyncTranslateRequest(const SrcKey& sk) {
+  if (!Cfg::Repo::Authoritative) {
+    assertx(Cfg::Eval::EnableAsyncJIT);
+    return s_enqueuedSKs.insert(sk, true).second ||
+      s_enqueuedSKs.assign_if_equal(sk, false, true);
+  } else {
+    assertx(Cfg::Eval::EnableAsyncJITLive);
+    auto const func = sk.func();
+    return !func->atomicFlags().set(Func::Flags::LockedForAsyncJit);
+  }
+  return false;
+}
+}
+
 void enqueueAsyncTranslateRequest(const RegionContext& ctx,
                                   int currNumTranslations) {
-  if (!s_enqueuedSKs.insert(ctx.sk, true).second &&
-      !s_enqueuedSKs.assign_if_equal(ctx.sk, false, true)) {
+  if (!mayEnqueueAsyncTranslateRequest(ctx.sk)) {
     FTRACE(2,
       "In progress jitting found, skipping enqueue for sk {}\n",
       show(ctx.sk)
@@ -378,4 +418,13 @@ void enqueueAsyncPrologueRequest(Func* func, int nPassed) {
 void enqueueAsyncPrologueRequestForJumpstart(Func* func, int nPassed) {
   enqueueAsyncPrologueRequestImpl<true>(func, nPassed);
 }
+
+bool isAsyncJitEnabled(TransKind kind) {
+  if (!Cfg::Repo::Authoritative) {
+    return Cfg::Eval::EnableAsyncJIT;
+  } else {
+    return isLive(kind) && Cfg::Eval::EnableAsyncJITLive;
+  }
+}
+
 }

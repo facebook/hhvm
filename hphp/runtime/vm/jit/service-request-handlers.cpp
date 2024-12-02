@@ -159,9 +159,8 @@ TranslationResult getTranslation(SrcKey sk) {
   }
 
   auto const ctx = getContext(args.sk, args.kind == TransKind::Profile);
-  if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!Cfg::Repo::Authoritative);
-    assertx(args.kind == TransKind::Live);
+  if (mcgen::isAsyncJitEnabled(args.kind)) {
+    assertx(isLive(args.kind));
     mcgen::enqueueAsyncTranslateRequest(ctx, 0);
     return TranslationResult::failTransiently();
   }
@@ -198,7 +197,10 @@ JitResumeAddr getFuncEntry(const Func* func) {
     return JitResumeAddr::transFuncEntry(addr);
   }
 
-  if (Cfg::Eval::EnableAsyncJIT) {
+  auto const kind = tc::profileFunc(func) ?
+    TransKind::Profile : TransKind::Live;
+  if (mcgen::isAsyncJitEnabled(kind)) {
+    assertx(isLive(kind));
     // JIT will be enqueued in handleResume
     return JitResumeAddr::helper(tc::ustubs().resumeHelperFuncEntryFromInterp);
   }
@@ -319,10 +321,10 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   INC_TPC(retranslate);
   auto const sk = SrcKey { liveFunc(), bcOff, liveResumeMode() };
   auto const isProfile = tc::profileFunc(sk.func());
+  auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
   auto const context = getContext(sk, isProfile);
-  if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!Cfg::Repo::Authoritative);
-    assertx(!isProfile);
+  if (mcgen::isAsyncJitEnabled(kind)) {
+    assertx(isLive(kind));
     auto const res = shouldEnqueueForRetranslate(context);
     if (res != TranslationResult::Scope::Success) {
       FTRACE_MOD(Trace::async_jit, 2,
@@ -332,18 +334,11 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
     auto const srcRec = tc::findSrcRec(sk);
     assertx(srcRec);
     auto const currNumTrans = srcRec->numTrans();
-    if (currNumTrans > Cfg::Jit::MaxTranslations) {
-      always_assert(currNumTrans == Cfg::Jit::MaxTranslations + 1);
-      FTRACE_MOD(Trace::async_jit, 2,
-                 "Max translations reached for sk {}\n", show(context.sk));
-      return resume(sk, TranslationResult::failForProcess());
-    } else {
-      FTRACE_MOD(Trace::async_jit, 2,
-                 "Enqueueing sk {} from handleRetranslate\n",
-                 show(context.sk));
-      mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
-      return resume(sk, TranslationResult::failTransiently());
-    }
+    FTRACE_MOD(Trace::async_jit, 2,
+               "Enqueueing sk {} from handleRetranslate\n",
+               show(context.sk));
+    mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
+    return resume(sk, TranslationResult::failTransiently());
   }
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
@@ -359,10 +354,10 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   INC_TPC(retranslate);
   auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };
   auto const isProfile = tc::profileFunc(sk.func());
+  auto const kind = isProfile ? TransKind::Profile : TransKind::Live;
   auto const context = getContext(sk, isProfile);
-  if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!Cfg::Repo::Authoritative);
-    assertx(!isProfile);
+  if (mcgen::isAsyncJitEnabled(kind)) {
+    assertx(isLive(kind));
     auto const res = shouldEnqueueForRetranslate(context);
     if (res != TranslationResult::Scope::Success) {
       FTRACE_MOD(Trace::async_jit, 2,
@@ -372,18 +367,11 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
     auto const srcRec = tc::findSrcRec(sk);
     assertx(srcRec);
     auto const currNumTrans = srcRec->numTrans();
-    if (currNumTrans > Cfg::Jit::MaxTranslations) {
-      always_assert(currNumTrans == Cfg::Jit::MaxTranslations + 1);
-      FTRACE_MOD(Trace::async_jit, 2,
-                 "Max translations reached for sk {}\n", show(context.sk));
-      return resume(sk, TranslationResult::failForProcess());
-    } else {
-      FTRACE_MOD(Trace::async_jit, 2,
-                 "Enqueueing sk {} from handleRetranslateFuncEntry\n",
-                 show(context.sk));
-      mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
-      return resume(sk, TranslationResult::failTransiently());
-    }
+    FTRACE_MOD(Trace::async_jit, 2,
+               "Enqueueing sk {} from handleRetranslateFuncEntry\n",
+               show(context.sk));
+    mcgen::enqueueAsyncTranslateRequest(context, currNumTrans);
+    return resume(sk, TranslationResult::failTransiently());
   }
   auto const transResult = mcgen::retranslate(TransArgs{sk}, context);
   SKTRACE(2, sk, "retranslated @%p\n", transResult.addr());
@@ -641,7 +629,9 @@ JitResumeAddr handleResume(ResumeFlags flags) {
     // If background jit is enabled, enqueueing a new translation request
     // after every basic block may generate too many overlapping translations
     // because no thread takes a function-level lease.
-    if (Cfg::Eval::EnableAsyncJIT) flags = flags.noTranslate();
+    auto const kind = tc::profileFunc(sk.func()) ?
+      TransKind::Profile : TransKind::Live;
+    if (mcgen::isAsyncJitEnabled(kind)) flags = flags.noTranslate();
     do {
       INC_TPC(interp_bb);
       if (auto const retAddr = HPHP::dispatchBB()) {

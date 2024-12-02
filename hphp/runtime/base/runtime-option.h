@@ -434,7 +434,7 @@ public:
   static std::string RepoPath;
   static bool RepoLitstrLazyLoad;
   static bool RepoDebugInfo;
-  
+
   // These are (functionally) unused
   static RepoMode RepoLocalMode;
   static std::string RepoLocalPath;

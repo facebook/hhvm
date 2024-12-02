@@ -53,6 +53,7 @@ struct RegionTranslator final : Translator {
   void gen() override;
   void publishMetaImpl() override;
   void publishCodeImpl() override;
+  bool exceededMaxLiveTranslations(int numTrans);
 };
 
 }

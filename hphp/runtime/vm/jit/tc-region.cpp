@@ -805,4 +805,11 @@ void RegionTranslator::setCachedForProcessFail() {
   srcRec->smashFallbacksToStub(stub);
 }
 
+bool RegionTranslator::exceededMaxLiveTranslations(int numTrans) {
+  always_assert(isLive(kind));
+  // After hitting limit, jit will generate one
+  // more translation that will call the interpreter.
+  always_assert(numTrans <= Cfg::Jit::MaxTranslations + 1);
+  return numTrans >= Cfg::Jit::MaxTranslations;
+}
 }

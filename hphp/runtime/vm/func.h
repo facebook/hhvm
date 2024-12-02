@@ -1647,6 +1647,7 @@ public:
     // A function is marked zombie before the unit or the class of the function
     // is treadmilled for destruction.
     Zombie = 1 << 4,
+    LockedForAsyncJit = 1 << 5,
   };
 
  /*

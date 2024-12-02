@@ -28,6 +28,7 @@
 
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/guard-type-profile.h"
+#include "hphp/runtime/vm/jit/mcgen-async.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
@@ -156,7 +157,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
   auto const maxTransTime = Cfg::Jit::MaxRequestTranslationTime;
   if (maxTransTime >= 0 &&
       RuntimeOption::ServerExecutionMode() &&
-      !Cfg::Eval::EnableAsyncJIT) {
+      !mcgen::isAsyncJitEnabled(kind)) {
     auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
     if (transCounter.wall_time_elapsed >= maxTransTime) {
       if (Trace::moduleEnabledRelease(Trace::mcg, 1)) {
@@ -480,30 +481,30 @@ Translator::Translator(SrcKey sk, TransKind kind)
 
 Translator::~Translator() = default;
 
-Optional<TranslationResult>
-Translator::acquireLeaseAndRequisitePaperwork() {
+bool Translator::shouldEmitLiveTranslation() {
   computeKind();
-
   // Avoid a race where we would create a Live translation while
   // retranslateAll is in flight and we haven't generated an
   // Optimized translation yet.
-  auto const shouldEmitLiveTranslation = [&] {
-    if (mcgen::retranslateAllPending() && !isProfiling(kind) && profData()) {
-      // When bespokes are enabled, we can't emit live translations until the
-      // bespoke hierarchy is finalized.
-      if (allowBespokeArrayLikes() && !bespoke::Layout::HierarchyFinalized()) {
-        return false;
-      }
-      // Functions that are marked as being profiled or marked as having been
-      // optimized are about to have their translations invalidated during the
-      // publish phase of retranslate all.  Don't allow live translations to be
-      // emitted in this scenario.
-      auto const fid = sk.func()->getFuncId();
-      return !profData()->profiling(fid) &&
-             !profData()->optimized(fid);
+  if (mcgen::retranslateAllPending() && !isProfiling(kind) && profData()) {
+    // When bespokes are enabled, we can't emit live translations until the
+    // bespoke hierarchy is finalized.
+    if (allowBespokeArrayLikes() && !bespoke::Layout::HierarchyFinalized()) {
+      return false;
     }
-    return true;
-  };
+    // Functions that are marked as being profiled or marked as having been
+    // optimized are about to have their translations invalidated during the
+    // publish phase of retranslate all.  Don't allow live translations to be
+    // emitted in this scenario.
+    auto const fid = sk.func()->getFuncId();
+    return !profData()->profiling(fid) &&
+           !profData()->optimized(fid);
+  }
+  return true;
+}
+
+Optional<TranslationResult>
+Translator::acquireLeaseAndRequisitePaperwork() {
   if (!shouldEmitLiveTranslation()) {
     return TranslationResult::failTransiently();
   }

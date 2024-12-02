@@ -162,14 +162,18 @@ TranslationResult getFuncPrologue(Func* func, int nPassed) {
 
   tc::PrologueTranslator translator(func, nPassed);
 
-  if (Cfg::Eval::EnableAsyncJIT) {
-    assertx(!Cfg::Repo::Authoritative);
-    assertx(!tc::profileFunc(func));
+  auto const kind = tc::profileFunc(func) ?
+    TransKind::ProfPrologue : TransKind::LivePrologue;
+  if (mcgen::isAsyncJitEnabled(kind)) {
+    // We currently support async jit for live translations only
+    assertx(isLive(kind));
     FTRACE_MOD(Trace::async_jit, 2,
-               "Attempting async prologue generation for func {}\n", func->name());
+               "Attempting async prologue generation for func {}\n",
+               func->name());
     if (auto const tcAddr = translator.getCached()) {
       FTRACE_MOD(Trace::async_jit, 2,
-                 "Found prologue for func {}, skipping enqueue\n", func->name());
+                 "Found prologue for func {}, skipping enqueue\n",
+                 func->name());
       return *tcAddr;
     }
     FTRACE_MOD(Trace::async_jit, 2,

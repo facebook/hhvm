@@ -16,10 +16,15 @@
 # pyre-strict
 
 import unittest
+from typing import Type
 
+import convertible.thrift_mutable_types as python_mutable_types
 import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
+
+from parameterized import parameterized
+from thrift.python.mutable_types import to_thrift_list, to_thrift_map, to_thrift_set
 from thrift.util.converter import to_py_struct
 
 
@@ -224,10 +229,6 @@ class PythonToPyDeprecatedConverterTest(unittest.TestCase):
             py_deprecated_types.Color.BLUE,
         )
 
-    def test_simple_union(self) -> None:
-        simple_union = python_types.Union(intField=42)._to_py_deprecated()
-        self.assertEqual(simple_union.get_intField(), 42)
-
     def test_union_with_containers(self) -> None:
         union_with_list = python_types.Union(intList=[1, 2, 3])._to_py_deprecated()
         self.assertEqual(union_with_list.get_intList(), [1, 2, 3])
@@ -247,8 +248,30 @@ class PythonToPyDeprecatedConverterTest(unittest.TestCase):
         self.assertEqual(complex_union.get_simpleField().intField, 42)
         self.assertEqual(complex_union.get_simpleField().name, "renamed")
 
-    def test_struct_with_mismatching_field(self) -> None:
-        tomayto = python_types.Tomayto(
+
+class PythonOrMutablePythonToPyDeprecatedConverterTest(unittest.TestCase):
+    @parameterized.expand(
+        [
+            (python_types.Union,),
+            (python_mutable_types.Union,),
+        ]
+    )
+    def test_simple_union(
+        self, Union: Type[python_types.Union] | Type[python_mutable_types.Union]
+    ) -> None:
+        simple_union = Union(intField=42)._to_py_deprecated()
+        self.assertEqual(simple_union.get_intField(), 42)
+
+    @parameterized.expand(
+        [
+            (python_types.Tomayto,),
+            (python_mutable_types.Tomayto,),
+        ]
+    )
+    def test_struct_with_mismatching_field(
+        self, Tomayto: Type[python_types.Tomayto] | Type[python_mutable_types.Tomayto]
+    ) -> None:
+        tomayto = Tomayto(
             to=42,
             mayto="blah",
         )
@@ -259,10 +282,18 @@ class PythonToPyDeprecatedConverterTest(unittest.TestCase):
         self.assertEqual(tomahto.to, 42)
         self.assertIsNone(tomahto.mahto)
 
-    def test_union_with_mismatching_field(self) -> None:
+    @parameterized.expand(
+        [
+            (python_types.Potayto,),
+            (python_mutable_types.Potayto,),
+        ]
+    )
+    def test_union_with_mismatching_field(
+        self, Potayto: Type[python_types.Potayto] | Type[python_mutable_types.Potayto]
+    ) -> None:
         po = to_py_struct(
             py_deprecated_types.Potahto,
-            python_types.Potayto(
+            Potayto(
                 po=42,
             ),
         )
@@ -271,7 +302,7 @@ class PythonToPyDeprecatedConverterTest(unittest.TestCase):
 
         tah = to_py_struct(
             py_deprecated_types.Potahto,
-            python_types.Potayto(
+            Potayto(
                 tay="tay",
             ),
         )
@@ -279,18 +310,118 @@ class PythonToPyDeprecatedConverterTest(unittest.TestCase):
 
         to = to_py_struct(
             py_deprecated_types.Potahto,
-            python_types.Potayto(
+            Potayto(
                 to=True,
             ),
         )
         self.assertEqual(to.getType(), py_deprecated_types.Potahto.TO)
         self.assertEqual(to.get_to(), True)
 
-    def test_enum(self) -> None:
+    @parameterized.expand(
+        [
+            (python_types.Color,),
+            (python_mutable_types.Color,),
+        ]
+    )
+    def test_enum(
+        self, Color: Type[python_types.Color] | Type[python_mutable_types.Color]
+    ) -> None:
         self.assertEqual(
-            python_types.Color.RED._to_py_deprecated(),
+            Color.RED._to_py_deprecated(),
             py_deprecated_types.Color.RED,
         )
+
+
+class MutablePythonToPyDeprecatedConverterTest(unittest.TestCase):
+    def test_simple(self) -> None:
+        simple = python_mutable_types.Simple(
+            intField=42,
+            strField="simple",
+            intList=to_thrift_list([1, 2, 3]),
+            strSet=to_thrift_set({"hello", "world"}),
+            strToIntMap=to_thrift_map({"one": 1, "two": 2}),
+            color=python_mutable_types.Color.GREEN,
+            name_="renamed",
+        )._to_py_deprecated()
+        self.assertEqual(simple.intField, 42)
+        self.assertEqual(simple.strField, "simple")
+        self.assertEqual(simple.intList, [1, 2, 3])
+        self.assertEqual(simple.strSet, {"hello", "world"})
+        self.assertEqual(simple.strToIntMap, {"one": 1, "two": 2})
+        self.assertEqual(simple.color, py_deprecated_types.Color.GREEN)
+        self.assertEqual(simple.name, "renamed")
+
+    def test_nested(self) -> None:
+        nested = python_mutable_types.Nested(
+            simpleField=python_mutable_types.Simple(
+                intField=42,
+                strField="simple",
+                intList=to_thrift_list([1, 2, 3]),
+                strSet=to_thrift_set({"hello", "world"}),
+                strToIntMap=to_thrift_map({"one": 1, "two": 2}),
+                color=python_mutable_types.Color.NONE,
+            ),
+            simpleList=to_thrift_list(
+                [
+                    python_mutable_types.Simple(
+                        intField=200,
+                        strField="face",
+                        intList=to_thrift_list([4, 5, 6]),
+                        strSet=to_thrift_set({"keep", "calm"}),
+                        strToIntMap=to_thrift_map({"three": 3, "four": 4}),
+                        color=python_mutable_types.Color.RED,
+                    ),
+                    python_mutable_types.Simple(
+                        intField=404,
+                        strField="b00k",
+                        intList=to_thrift_list([7, 8, 9]),
+                        strSet=to_thrift_set({"carry", "on"}),
+                        strToIntMap=to_thrift_map({"five": 5, "six": 6}),
+                        color=python_mutable_types.Color.GREEN,
+                    ),
+                ]
+            ),
+            colorToSimpleMap=to_thrift_map(
+                {
+                    python_mutable_types.Color.BLUE: python_mutable_types.Simple(
+                        intField=500,
+                        strField="internal",
+                        intList=to_thrift_list([10]),
+                        strSet=to_thrift_set({"server", "error"}),
+                        strToIntMap=to_thrift_map({"seven": 7, "eight": 8, "nine": 9}),
+                        color=python_mutable_types.Color.BLUE,
+                    )
+                }
+            ),
+        )._to_py_deprecated()
+        self.assertEqual(nested.simpleField.intField, 42)
+        self.assertEqual(nested.simpleList[0].intList, [4, 5, 6])
+        self.assertEqual(nested.simpleList[1].strSet, {"carry", "on"})
+        self.assertEqual(
+            nested.colorToSimpleMap[py_deprecated_types.Color.BLUE].color,
+            py_deprecated_types.Color.BLUE,
+        )
+
+    def test_union_with_containers(self) -> None:
+        union_with_list = python_mutable_types.Union(
+            intList=to_thrift_list([1, 2, 3])
+        )._to_py_deprecated()
+        self.assertEqual(union_with_list.get_intList(), [1, 2, 3])
+
+    def test_complex_union(self) -> None:
+        complex_union = python_mutable_types.Union(
+            simple_=python_mutable_types.Simple(
+                intField=42,
+                strField="simple",
+                intList=to_thrift_list([1, 2, 3]),
+                strSet=to_thrift_set({"hello", "world"}),
+                strToIntMap=to_thrift_map({"one": 1, "two": 2}),
+                color=python_mutable_types.Color.NONE,
+                name_="renamed",
+            )
+        )._to_py_deprecated()
+        self.assertEqual(complex_union.get_simpleField().intField, 42)
+        self.assertEqual(complex_union.get_simpleField().name, "renamed")
 
 
 class NoneToPyDeprecatedConverterTest(unittest.TestCase):

@@ -18,6 +18,7 @@ from thrift.py3.types cimport Struct as py3_Struct, Union as py3_Union
 from thrift.py3.types import Enum as py3_Enum
 import thrift.py3.reflection as py3_reflection
 cimport thrift.python.types as python_types
+cimport thrift.python.mutable_types as python_mutable_types
 from thrift.Thrift import TType
 from thrift.python.types import Enum
 from thrift.util import parse_struct_spec
@@ -46,17 +47,26 @@ cdef object _to_py_struct(object cls, object obj):
             spec.id: spec.py_name
             for spec in (<python_types.StructInfo>obj._fbthrift_struct_info).fields
         }
+    elif isinstance(obj, python_mutable_types.MutableStruct):
+        field_id_to_name = {
+            spec.id: spec.py_name
+            for spec in (<python_mutable_types.MutableStructInfo>obj._fbthrift_mutable_struct_info).fields
+        }
     elif isinstance(obj, python_types.Union):
         field_id_to_name = {
             spec.id: spec.py_name
             for spec in (<python_types.UnionInfo>obj._fbthrift_struct_info).fields
         }
+    elif isinstance(obj, python_mutable_types.MutableUnion):
+        field_id_to_name = {
+            spec.id: spec.py_name
+            for spec in (<python_mutable_types.MutableUnionInfo>obj._fbthrift_mutable_struct_info).fields
+        }
 
     if cls.isUnion():
-        if not isinstance(obj, py3_Union) and not isinstance(
-            obj, python_types.Union
-        ):
+        if not isinstance(obj, (py3_Union, python_types.Union, python_mutable_types.MutableUnion)):
             raise TypeError("Source object is not an Union")
+
         return cls(
             **{
                 field.name: _to_py_field(
@@ -65,7 +75,7 @@ cdef object _to_py_struct(object cls, object obj):
                     getattr(obj, field_id_to_name.get(field.id, field.name), None),
                 )
                 for field in parse_struct_spec(cls)
-                if field_id_to_name.get(field.id, field.name) == obj.type.name
+                if field_id_to_name.get(field.id, field.name) == obj.get_type().name
             }
         )
     else:

@@ -15,6 +15,7 @@
 import typing
 
 from thrift.py3.types import Struct as Py3Struct
+from thrift.python.mutable_types import MutableStructOrUnion as PythonMutableStruct
 from thrift.python.types import StructOrUnion as PythonStruct
 
 # thrift-py-deprecated struct doesn't have a base class,
@@ -24,7 +25,7 @@ class PyDeprecatedStruct(typing.Protocol):
     thrift_spec: typing.Any
 
 T = typing.TypeVar("T", bound=PyDeprecatedStruct)
-TObj = PythonStruct | Py3Struct | PyDeprecatedStruct
+TObj = PythonStruct | Py3Struct | PyDeprecatedStruct | PythonMutableStruct
 
 @typing.overload
 def to_py_struct(cls: typing.Type[T], obj: TObj) -> T: ...

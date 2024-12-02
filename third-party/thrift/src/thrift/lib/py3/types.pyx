@@ -95,6 +95,11 @@ cdef class StructMeta(type):
             # Unify different exception types to ValueError
             raise ValueError(e)
 
+    # make the __module__ customizable
+    # this just enables the slot; impl here is ignored
+    def __module__(cls):
+        pass
+
     def __iter__(cls):
         for i in range(cls._fbthrift_get_struct_size()):
             yield cls._fbthrift_get_field_name_by_index(i), None
@@ -272,6 +277,11 @@ cdef class UnionMeta(type):
             cls._fbthrift_get_field_name_by_index(i)
             for i in range(cls._fbthrift_get_struct_size())
         ] + ["type", "value"]
+
+    # make the __module__ customizeable
+    # this just enables the slot; impl here is ignored
+    def __module__(cls):
+        pass
 
 
 SetMetaClass(<PyTypeObject*> Union, <PyTypeObject*> UnionMeta)

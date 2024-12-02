@@ -59,6 +59,7 @@ import c.types as _c_types
 import s.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "s.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(

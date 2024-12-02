@@ -67,6 +67,7 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__string,
 )
 
+_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -77,6 +78,7 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class ComplexUnion(thrift.py3.types.Union):
+    __module__ = _fbthrift__module_name__
     Type = __ComplexUnionType
 
     def __init__(
@@ -312,6 +314,7 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
 @__cython.auto_pickle(False)
 cdef class ListUnion(thrift.py3.types.Union):
+    __module__ = _fbthrift__module_name__
     Type = __ListUnionType
 
     def __init__(
@@ -461,6 +464,7 @@ cdef class ListUnion(thrift.py3.types.Union):
 
 @__cython.auto_pickle(False)
 cdef class DataUnion(thrift.py3.types.Union):
+    __module__ = _fbthrift__module_name__
     Type = __DataUnionType
 
     def __init__(
@@ -608,6 +612,8 @@ cdef class DataUnion(thrift.py3.types.Union):
 
 @__cython.auto_pickle(False)
 cdef class Val(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Val self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cVal]()
         self._fields_setter = _fbthrift_types_fields.__Val_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -741,6 +747,7 @@ cdef class Val(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class ValUnion(thrift.py3.types.Union):
+    __module__ = _fbthrift__module_name__
     Type = __ValUnionType
 
     def __init__(
@@ -890,6 +897,7 @@ cdef class ValUnion(thrift.py3.types.Union):
 
 @__cython.auto_pickle(False)
 cdef class VirtualComplexUnion(thrift.py3.types.Union):
+    __module__ = _fbthrift__module_name__
     Type = __VirtualComplexUnionType
 
     def __init__(
@@ -1037,6 +1045,8 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
 
 @__cython.auto_pickle(False)
 cdef class NonCopyableStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(NonCopyableStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cNonCopyableStruct]()
         self._fields_setter = _fbthrift_types_fields.__NonCopyableStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1139,6 +1149,7 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class NonCopyableUnion(thrift.py3.types.Union):
+    __module__ = _fbthrift__module_name__
     Type = __NonCopyableUnionType
 
     def __init__(

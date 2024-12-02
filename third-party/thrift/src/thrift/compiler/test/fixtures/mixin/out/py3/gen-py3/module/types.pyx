@@ -55,6 +55,7 @@ import importlib
 import module.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -63,6 +64,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class Mixin1(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Mixin1 self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin1]()
         self._fields_setter = _fbthrift_types_fields.__Mixin1_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -176,6 +179,8 @@ cdef class Mixin1(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Mixin2(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Mixin2 self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin2]()
         self._fields_setter = _fbthrift_types_fields.__Mixin2_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -308,6 +313,8 @@ cdef class Mixin2(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Mixin3Base(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Mixin3Base self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMixin3Base]()
         self._fields_setter = _fbthrift_types_fields.__Mixin3Base_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -421,6 +428,8 @@ cdef class Mixin3Base(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Foo(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Foo self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFoo]()
         self._fields_setter = _fbthrift_types_fields.__Foo_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

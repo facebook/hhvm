@@ -58,6 +58,7 @@ from includes.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 )
 
 
+_fbthrift__module_name__ = "includes.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -66,6 +67,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class AStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(AStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_includes_cbindings.cAStruct]()
         self._fields_setter = _fbthrift_types_fields.__AStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -179,6 +182,8 @@ cdef class AStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class AStructB(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(AStructB self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_includes_cbindings.cAStructB]()
         self._fields_setter = _fbthrift_types_fields.__AStructB_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

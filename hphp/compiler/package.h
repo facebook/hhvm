@@ -82,9 +82,6 @@ struct Package {
 
     static Config make(bool coredump) {
       Config c;
-      #define R(Opt) c.Opt = RO::Opt;
-      UNITCACHEFLAGS()
-      #undef R
       #define C(Config, Name, ...) c.Name = Config;
       CONFIGS_FOR_UNITCACHEFLAGS()
       #undef C
@@ -95,9 +92,6 @@ struct Package {
     }
 
     void apply() const {
-      #define R(Opt) RO::Opt = Opt;
-      UNITCACHEFLAGS()
-      #undef R
       #define C(Config, Name, ...) Config = Name;
       CONFIGS_FOR_UNITCACHEFLAGS()
       #undef C
@@ -106,9 +100,6 @@ struct Package {
     }
 
     template <typename SerDe> void serde(SerDe& sd) {
-      #define R(Opt) sd(Opt);
-      UNITCACHEFLAGS()
-      #undef R
       #define C(_, Name, ...) sd(Name);
       CONFIGS_FOR_UNITCACHEFLAGS()
       #undef C
@@ -121,9 +112,6 @@ struct Package {
     bool CoreDump;
 
   private:
-    #define R(Opt) decltype(RuntimeOption::Opt) Opt;
-    UNITCACHEFLAGS()
-    #undef R
     #define C(_, Name, Type) Type Name;
     CONFIGS_FOR_UNITCACHEFLAGS()
     #undef C

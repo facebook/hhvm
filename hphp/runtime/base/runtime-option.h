@@ -377,7 +377,6 @@ struct RuntimeOption {
   static std::map<std::string, std::string> EnvVariables;
 
   // Eval options
-  static bool EnableXHP;
   static bool CheckSymLink;
   static bool TrustAutoloaderPath;
   static bool EnableArgsInBacktraces;

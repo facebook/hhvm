@@ -354,17 +354,6 @@ struct RuntimeOption {
   static int  HttpDefaultTimeout;
   static int  HttpSlowQueryThreshold;
 
-  static bool NativeStackTrace;
-  static bool ServerErrorMessage;
-  static bool RecordInput;
-  static bool ClearInputOnSuccess;
-  static std::string ProfilerOutputDir;
-  static std::string CoreDumpEmail;
-  static bool CoreDumpReport;
-  static std::string CoreDumpReportDirectory;
-  static std::string StackTraceFilename;
-  static int StackTraceTimeout;
-  static std::string RemoteTraceOutputDir;
   static std::set<std::string, stdltistr> TraceFunctions;
 
   static int64_t MaxSQLRowCount;

@@ -102,6 +102,7 @@
 #include "hphp/util/capability.h"
 #include "hphp/util/compatibility.h"
 #include "hphp/util/configs/adminserver.h"
+#include "hphp/util/configs/debug.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/errorhandling.h"
 #include "hphp/util/configs/eval.h"
@@ -2356,7 +2357,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
   if (po.mode == ExecutionMode::REPLAY && !po.args.empty()) {
-      RuntimeOption::RecordInput = false;
+      Cfg::Debug::RecordInput = false;
       set_execution_mode(ExecutionMode::SERVER);
 
       HttpServer server; // so we initialize runtime properly

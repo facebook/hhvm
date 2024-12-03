@@ -58,6 +58,7 @@
 #include "hphp/util/build-info.h"
 #include "hphp/util/bump-mapper.h"
 #include "hphp/util/configs/adminserver.h"
+#include "hphp/util/configs/debug.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/gc.h"
 #include "hphp/util/configs/repo.h"
@@ -658,22 +659,6 @@ std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 int RuntimeOption::HttpDefaultTimeout = 30;
 int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
 
-bool RuntimeOption::NativeStackTrace = false;
-bool RuntimeOption::ServerErrorMessage = false;
-bool RuntimeOption::RecordInput = false;
-bool RuntimeOption::ClearInputOnSuccess = true;
-std::string RuntimeOption::ProfilerOutputDir = "/tmp";
-std::string RuntimeOption::CoreDumpEmail;
-bool RuntimeOption::CoreDumpReport = true;
-std::string RuntimeOption::CoreDumpReportDirectory =
-#if defined(HPHP_OSS)
-  "/tmp";
-#else
-  "/var/tmp/cores";
-#endif
-std::string RuntimeOption::StackTraceFilename;
-int RuntimeOption::StackTraceTimeout = 0; // seconds; 0 means unlimited
-std::string RuntimeOption::RemoteTraceOutputDir = "/tmp";
 std::set<std::string, stdltistr> RuntimeOption::TraceFunctions;
 
 int64_t RuntimeOption::MaxSQLRowCount = 0;
@@ -783,7 +768,7 @@ bool RuntimeOption::ReadPerUserSettings(const std::filesystem::path& confFileNam
 
 std::string RuntimeOption::getTraceOutputFile() {
   return folly::sformat("{}/hphp.{}.log",
-                        RuntimeOption::RemoteTraceOutputDir, (int64_t)getpid());
+                        Cfg::Debug::RemoteTraceOutputDir, (int64_t)getpid());
 }
 
 using std::string;
@@ -1674,32 +1659,12 @@ void RuntimeOption::Load(
   }
   {
     // Debug
+    StackTrace::Enabled = Cfg::Debug::NativeStackTrace;
 
-    Config::Bind(NativeStackTrace, ini, config, "Debug.NativeStackTrace");
-    StackTrace::Enabled = NativeStackTrace;
-    Config::Bind(ServerErrorMessage, ini, config, "Debug.ServerErrorMessage");
-    Config::Bind(RecordInput, ini, config, "Debug.RecordInput");
-    Config::Bind(ClearInputOnSuccess, ini, config, "Debug.ClearInputOnSuccess",
-                 true);
-    Config::Bind(ProfilerOutputDir, ini, config, "Debug.ProfilerOutputDir",
-                 "/tmp");
-    Config::Bind(CoreDumpEmail, ini, config, "Debug.CoreDumpEmail");
-    Config::Bind(CoreDumpReport, ini, config, "Debug.CoreDumpReport", true);
-    if (CoreDumpReport) {
+    if (Cfg::Debug::CoreDumpReport) {
       install_crash_reporter();
     }
-    // Binding default dependent on whether we are using an OSS build or
-    // not, and that is set at initialization time of CoreDumpReportDirectory.
-    Config::Bind(CoreDumpReportDirectory, ini, config,
-                 "Debug.CoreDumpReportDirectory", CoreDumpReportDirectory);
-    std::ostringstream stack_trace_stream;
-    stack_trace_stream << CoreDumpReportDirectory << "/stacktrace."
-                       << (int64_t)getpid() << ".log";
-    StackTraceFilename = stack_trace_stream.str();
 
-    Config::Bind(StackTraceTimeout, ini, config, "Debug.StackTraceTimeout", 0);
-    Config::Bind(RemoteTraceOutputDir, ini, config,
-                 "Debug.RemoteTraceOutputDir", "/tmp");
     Config::Bind(TraceFunctions, ini, config,
                  "Debug.TraceFunctions", TraceFunctions);
   }

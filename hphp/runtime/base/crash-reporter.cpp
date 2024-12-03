@@ -35,6 +35,7 @@
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/debug.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
@@ -114,16 +115,16 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
   if (CrashingThread.compare_exchange_strong(expected, tid,
                                              std::memory_order_acq_rel)) {
     // We're the first crashing thread, go ahead and report everything.
-    if (RuntimeOption::StackTraceTimeout > 0) {
+    if (Cfg::Debug::StackTraceTimeout > 0) {
       signal(SIGALRM, bt_timeout_handler);
-      alarm(RuntimeOption::StackTraceTimeout);
+      alarm(Cfg::Debug::StackTraceTimeout);
     }
   } else {
     if (expected != tid) {
       // Another thread is already dealing with its own crash. Spin
       // until its done.
       while (true) {
-        sleep(RuntimeOption::StackTraceTimeout + 1);
+        sleep(Cfg::Debug::StackTraceTimeout + 1);
       }
     }
   }
@@ -134,7 +135,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
   // If we get here, we're running single threaded, but we might still
   // re-enter if we crash while generating the report - so make fd
   // static so its available to all re-entered calls.
-  static auto const fd = ::open(RuntimeOption::StackTraceFilename.c_str(),
+  static auto const fd = ::open(Cfg::Debug::StackTraceFilename.c_str(),
                                 O_CREAT|O_TRUNC|O_WRONLY, S_IRUSR|S_IWUSR);
 
   static int sig = sigin;
@@ -373,7 +374,7 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
         // get included in the coredump.
         mapFileIn(*serdesFile, s_jitprof_start, s_jitprof_end);
       }
-      auto const& stacktraceFile = RuntimeOption::StackTraceFilename;
+      auto const& stacktraceFile = Cfg::Debug::StackTraceFilename;
       mapFileIn(stacktraceFile, s_stacktrace_start, s_stacktrace_end);
       if (Cfg::Eval::PerfPidMap) {
         if (auto const debugInfo = Debug::DebugInfo::Get()) {
@@ -385,16 +386,16 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
     case CrashReportStage::SendEmail:
       s_crash_report_stage = CrashReportStage::Log;
 
-      if (!RuntimeOption::CoreDumpEmail.empty()) {
+      if (!Cfg::Debug::CoreDumpEmail.empty()) {
         char format [] = "cat %s | mail -s \"Stack Trace from %s\" '%s'";
         size_t cmdline_size = sizeof(char) *(strlen(format)
-             +RuntimeOption::StackTraceFilename.length()
+             +Cfg::Debug::StackTraceFilename.length()
              +strlen(Process::GetAppName().c_str())
-             +strlen(RuntimeOption::CoreDumpEmail.c_str())+1);
+             +strlen(Cfg::Debug::CoreDumpEmail.c_str())+1);
         char* cmdline = (char*)alloca(cmdline_size);
-        snprintf(cmdline, cmdline_size, format, RuntimeOption::StackTraceFilename.c_str(),
+        snprintf(cmdline, cmdline_size, format, Cfg::Debug::StackTraceFilename.c_str(),
                 Process::GetAppName().c_str(),
-                RuntimeOption::CoreDumpEmail.c_str());
+                Cfg::Debug::CoreDumpEmail.c_str());
         FileUtil::ssystem(cmdline);
       }
       [[fallthrough]];
@@ -406,10 +407,10 @@ void bt_handler(int sigin, siginfo_t* info, void* args) {
       // Do it last just in case
 
       Logger::FError("Core dumped: {}", strsignal(sig));
-      Logger::FError("Stack trace in {}", RuntimeOption::StackTraceFilename);
+      Logger::FError("Stack trace in {}", Cfg::Debug::StackTraceFilename);
 
       if (Cfg::Eval::DumpStacktraceToErrorLogOnCrash) {
-        stacktraceFile = fopen(RuntimeOption::StackTraceFilename.c_str(), "r");
+        stacktraceFile = fopen(Cfg::Debug::StackTraceFilename.c_str(), "r");
         if (stacktraceFile) {
           char line[256];
           while (fgets(line, sizeof(line), stacktraceFile)) {

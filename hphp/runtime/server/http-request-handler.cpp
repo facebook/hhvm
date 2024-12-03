@@ -42,6 +42,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/debug.h"
 #include "hphp/util/configs/debugger.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/proxy.h"
@@ -514,7 +515,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
       }
     }
     if (errorPage.empty()) {
-      if (RuntimeOption::ServerErrorMessage) {
+      if (Cfg::Debug::ServerErrorMessage) {
         transport->sendString(errorMsg, 500, false, false, "hphp_invoke");
       } else {
         transport->sendString(Cfg::Server::FatalErrorMessage,

@@ -20,6 +20,7 @@
 #include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
+#include "hphp/util/configs/debug.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/service-data.h"
 
@@ -126,7 +127,7 @@ protected:
     }
 
     if (error) {
-      if (RuntimeOption::ServerErrorMessage) {
+      if (Cfg::Debug::ServerErrorMessage) {
         transport->sendString(errorMsg, 500);
       } else {
         transport->sendString(Cfg::Server::FatalErrorMessage, 500);

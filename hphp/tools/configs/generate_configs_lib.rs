@@ -115,7 +115,7 @@ impl ConfigValue {
             ConfigValue::Const(v) => v.to_owned(),
             ConfigValue::Name(v) => {
                 for sn in section_names {
-                    if v.starts_with(sn) {
+                    if v.starts_with(&(sn.to_owned() + ".")) {
                         return format!(
                             "Cfg::{}::{}",
                             sn.replace('.', ""),
@@ -1255,12 +1255,12 @@ private:
                         config.hdf_path(section),
                         default_value
                     ));
-                    if config.features.has_post_process {
-                        bind_calls.push(format!(
-                            r#"  {}PostProcess(Cfg::{}::{});"#,
-                            shortname, section_shortname, shortname
-                        ));
-                    }
+                }
+                if config.features.has_post_process {
+                    bind_calls.push(format!(
+                        r#"  {}PostProcess(Cfg::{}::{});"#,
+                        shortname, section_shortname, shortname
+                    ));
                 }
                 debug_calls.push(format!(
                     r#"  fmt::format_to(std::back_inserter(out), "Cfg::{}::{} = {{}}\n", Cfg::{}::{});"#,

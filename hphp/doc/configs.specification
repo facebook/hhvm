@@ -327,6 +327,20 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::vector<std::string> Autoload.IndexedMethodAttributes = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IndexedMethodAttributes)
 - std::vector<std::string> Autoload.RepoBuildSearchDirs = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(RepoBuildSearchDirs)
 
+# Debug
+
+- bool Debug.NativeStackTrace = false, UNKNOWN
+- bool Debug.ServerErrorMessage = false, UNKNOWN
+- bool Debug.RecordInput = false, UNKNOWN
+- bool Debug.ClearInputOnSuccess = true, UNKNOWN
+- std::string Debug.ProfilerOutputDir = "/tmp", UNKNOWN
+- std::string Debug.CoreDumpEmail = "", UNKNOWN
+- bool Debug.CoreDumpReport = true, UNKNOWN
+- std::string Debug.CoreDumpReportDirectory, UNKNOWN
+- std::string Debug.StackTraceFilename = "", UNKNOWN, nobind|postprocess
+- int Debug.StackTraceTimeout = 0, UNKNOWN
+- std::string Debug.RemoteTraceOutputDir = "/tmp", UNKNOWN
+
 # Debugger (Eval.Debugger.)
 
 - bool Debugger.EnableHphpd = false, UNKNOWN, lookuppath(Eval.Debugger.EnableDebugger)

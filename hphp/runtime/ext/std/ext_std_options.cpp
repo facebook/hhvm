@@ -838,7 +838,7 @@ static bool HHVM_FUNCTION(putenv, const String& setting) {
 static void HHVM_FUNCTION(set_time_limit, int64_t seconds) {
   RequestInfo *info = RequestInfo::s_requestInfo.getNoCheck();
   RequestInjectionData &data = info->m_reqInjectionData;
-  if (RuntimeOption::TimeoutsUseWallTime) {
+  if (Cfg::Eval::TimeoutsUseWallTime) {
     data.setTimeout(seconds);
   } else {
     data.setCPUTimeout(seconds);

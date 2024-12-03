@@ -32,7 +32,6 @@ namespace HPHP {
 void RepoGlobalData::load(bool loadConstantFuncs) const {
   Cfg::LoadFromGlobalData(*this);
 
-  RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
   RO::EvalCoeffectEnforcementLevels                = EvalCoeffectEnforcementLevels;
 
   if (!Cfg::Eval::BuildMayNoticeOnMethCallerHelperIsObject) {

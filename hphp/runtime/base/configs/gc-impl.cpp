@@ -16,6 +16,8 @@
 
 #include "hphp/runtime/base/configs/gc-loader.h"
 
+#include <folly/lang/Bits.h>
+
 namespace HPHP::Cfg {
 
 #ifdef HHVM_EAGER_GC
@@ -34,6 +36,11 @@ bool GCLoader::EagerDefault() {
 
 bool GCLoader::QuarantineDefault() {
   return kEagerGC;
+}
+
+void GCLoader::SlabAllocAlignPostProcess(uint32_t& val) {
+  val = folly::nextPowTwo(val);
+  val = std::min(val, 4096U);
 }
 
 }

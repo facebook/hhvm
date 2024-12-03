@@ -133,7 +133,7 @@ jit::vector<AliasClass> backtrace_locals(const IRInstruction& inst) {
   // assume anything can be read. This can happen in test code, for instance.
   if (!inst.marker().fp()) return { ALocalAny };
 
-  if (!RuntimeOption::EnableArgsInBacktraces) return eachFunc(addInspectable);
+  if (!Cfg::Eval::EnableArgsInBacktraces) return eachFunc(addInspectable);
 
   return eachFunc([&] (SSATmp* fp, const Func* func, uint32_t depth) {
     auto ac = addInspectable(fp, func, depth);

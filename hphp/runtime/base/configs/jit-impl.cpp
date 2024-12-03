@@ -23,7 +23,9 @@
 #include <sys/auxv.h>
 #endif
 
+#include "hphp/util/alloc-defs.h"
 #include "hphp/util/arch.h"
+#include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/server.h"
@@ -31,6 +33,10 @@
 #include "hphp/util/process-cpu.h"
 
 namespace HPHP::Cfg {
+
+void JitLoader::SerdesFilePostProcess(std::string& val) {
+  replacePlaceholders(val);
+}
 
 bool JitLoader::TimerDefault() {
 #ifdef ENABLE_JIT_TIMER_DEFAULT
@@ -118,6 +124,10 @@ uint8_t JitLoader::LiveThresholdDefault() {
 
 uint8_t JitLoader::ProfileThresholdDefault() {
   return Cfg::Server::Mode ? 200 : 0;
+}
+
+void JitLoader::PGOUseAddrCountedCheckPostProcess(bool& val) {
+  val &= addr_encodes_persistency;
 }
 
 bool JitLoader::AlignMacroFusionPairsDefault() {

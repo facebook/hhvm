@@ -607,19 +607,10 @@ std::string RuntimeOption::DeploymentId;
 int64_t RuntimeOption::ConfigId = 0;
 std::string RuntimeOption::PidFile = "www.pid";
 
-bool RuntimeOption::CheckSymLink = true;
-bool RuntimeOption::TrustAutoloaderPath = false;
-bool RuntimeOption::EnableArgsInBacktraces = true;
 bool RuntimeOption::EnableZendIniCompat = true;
-bool RuntimeOption::TimeoutsUseWallTime = true;
-bool RuntimeOption::EvalAuthoritativeMode = false;
 bool RuntimeOption::DumpPreciseProfData = true;
-bool RuntimeOption::KeepProfData = arch_any(Arch::ARM);
 
 JitSerdesMode RuntimeOption::EvalJitSerdesMode{};
-int RuntimeOption::ProfDataTTLHours = 24;
-std::string RuntimeOption::ProfDataTag;
-std::string RuntimeOption::EvalJitSerdesFile;
 
 std::string RuntimeOption::EvalSBSerdesFile;
 
@@ -688,19 +679,11 @@ std::set<std::string, stdltistr> RuntimeOption::TraceFunctions;
 int64_t RuntimeOption::MaxSQLRowCount = 0;
 int64_t RuntimeOption::SocketDefaultTimeout = 60;
 
-#if FOLLY_SANITIZE
-bool RuntimeOption::DisableSmallAllocator = true;
-#else
-bool RuntimeOption::DisableSmallAllocator = false;
-#endif
-
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
 
 std::string RuntimeOption::WatchmanRootSocket;
 std::string RuntimeOption::WatchmanDefaultSocket;
-
-int RuntimeOption::CheckCLIClientCommands = 0;
 
 const std::string& RuntimeOption::GetServerPrimaryIPv4() {
    static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
@@ -809,9 +792,6 @@ using std::string;
 EVALFLAGS();
 #undef F
 hphp_string_map<TypedValue> RuntimeOption::ConstantFunctions;
-
-bool RuntimeOption::RecordCodeCoverage = false;
-std::string RuntimeOption::CodeCoverageOutputFile;
 
 RepoMode RuntimeOption::RepoLocalMode = RepoMode::ReadOnly;
 RepoMode RuntimeOption::RepoCentralMode = RepoMode::ReadWrite;
@@ -1488,8 +1468,6 @@ void RuntimeOption::Load(
 
   {
     // Eval
-    Config::Bind(TimeoutsUseWallTime, ini, config, "Eval.TimeoutsUseWallTime",
-                 true);
     static std::string jitSerdesMode;
     Config::Bind(jitSerdesMode, ini, config, "Eval.JitSerdesMode", "Off");
 
@@ -1505,9 +1483,6 @@ void RuntimeOption::Load(
       #undef X
       return JitSerdesMode::Off;
     }();
-    Config::Bind(EvalJitSerdesFile, ini, config,
-                 "Eval.JitSerdesFile", EvalJitSerdesFile);
-    replacePlaceholders(EvalJitSerdesFile);
 
     // DumpPreciseProfileData defaults to true only when we can possibly write
     // profile data to disk.  It can be set to false to avoid the performance
@@ -1516,22 +1491,14 @@ void RuntimeOption::Load(
     // JitSerdesMode::SerializeAndExit), to avoid checking too many flags in a
     // few places.  The config file should never need to explicitly set
     // DumpPreciseProfileData to true.
-    auto const couldDump = !EvalJitSerdesFile.empty() &&
+    auto const couldDump = !Cfg::Jit::SerdesFile.empty() &&
       (isJitSerializing() ||
        (EvalJitSerdesMode == JitSerdesMode::DeserializeOrGenerate));
     Config::Bind(DumpPreciseProfData, ini, config,
                  "Eval.DumpPreciseProfData", couldDump);
-    Config::Bind(ProfDataTTLHours, ini, config,
-                 "Eval.ProfDataTTLHours", ProfDataTTLHours);
-    Config::Bind(ProfDataTag, ini, config, "Eval.ProfDataTag", ProfDataTag);
-    Config::Bind(KeepProfData, ini, config, "Eval.KeepProfData", KeepProfData);
 
     Config::Bind(EvalSBSerdesFile, ini, config,
                  "Eval.SBSerdesFile", EvalSBSerdesFile);
-
-    Config::Bind(CheckSymLink, ini, config, "Eval.CheckSymLink", true);
-    Config::Bind(TrustAutoloaderPath, ini, config,
-                 "Eval.TrustAutoloaderPath", false);
 
 #define F(type, name, defaultVal) \
     Config::Bind(Eval ## name, ini, config, "Eval."#name, defaultVal);
@@ -1566,10 +1533,9 @@ void RuntimeOption::Load(
         }
         EvalJitSerdesMode = JitSerdesMode::Off;
       }
-      EvalJitSerdesFile.clear();
+      Cfg::Jit::SerdesFile.clear();
       DumpPreciseProfData = false;
     }
-    Cfg::Jit::PGOUseAddrCountedCheck &= addr_encodes_persistency;
     if (Cfg::GC::SanitizeReqHeap) {
       HeapObjectSanitizer::install_signal_handler();
     }
@@ -1582,31 +1548,11 @@ void RuntimeOption::Load(
                           Cfg::Eval::ProfileHWFastReads,
                           Cfg::Eval::ProfileHWExportInterval);
 
-    Config::Bind(RecordCodeCoverage, ini, config, "Eval.RecordCodeCoverage");
-    if (Cfg::Jit::Enabled && RecordCodeCoverage) {
+    if (Cfg::Jit::Enabled && Cfg::Eval::RecordCodeCoverage) {
       throw std::runtime_error("Code coverage is not supported with "
         "Eval.Jit=true");
     }
-    Config::Bind(DisableSmallAllocator, ini, config,
-                 "Eval.DisableSmallAllocator", DisableSmallAllocator);
-    SetArenaSlabAllocBypass(DisableSmallAllocator);
-    Cfg::GC::SlabAllocAlign = folly::nextPowTwo(Cfg::GC::SlabAllocAlign);
-    Cfg::GC::SlabAllocAlign = std::min(Cfg::GC::SlabAllocAlign,
-                                  decltype(Cfg::GC::SlabAllocAlign){4096});
-
-    if (RecordCodeCoverage) CheckSymLink = true;
-    Config::Bind(CodeCoverageOutputFile, ini, config,
-                 "Eval.CodeCoverageOutputFile");
-    // NB: after we know the value of RepoAuthoritative.
-    Config::Bind(EnableArgsInBacktraces, ini, config,
-                 "Eval.EnableArgsInBacktraces", !Cfg::Repo::Authoritative);
-    Config::Bind(EvalAuthoritativeMode, ini, config, "Eval.AuthoritativeMode",
-                 false);
-
-    Config::Bind(CheckCLIClientCommands, ini, config, "Eval.CheckCLIClientCommands", 1);
-    if (Cfg::Repo::Authoritative) {
-      EvalAuthoritativeMode = true;
-    }
+    SetArenaSlabAllocBypass(Cfg::Eval::DisableSmallAllocator);
   }
   {
     // CodeCache

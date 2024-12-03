@@ -370,26 +370,14 @@ struct RuntimeOption {
   static int64_t MaxSQLRowCount;
   static int64_t SocketDefaultTimeout;
 
-  static bool DisableSmallAllocator;
-
   static std::map<std::string, std::string> ServerVariables;
 
   static std::map<std::string, std::string> EnvVariables;
 
   // Eval options
-  static bool CheckSymLink;
-  static bool TrustAutoloaderPath;
-  static bool EnableArgsInBacktraces;
   static bool EnableZendIniCompat;
-  static bool TimeoutsUseWallTime;
-  static bool EvalAuthoritativeMode;
-  static int CheckCLIClientCommands;
   static JitSerdesMode EvalJitSerdesMode;
-  static int ProfDataTTLHours;
-  static std::string EvalJitSerdesFile;
-  static std::string ProfDataTag;
   static bool DumpPreciseProfData;
-  static bool KeepProfData;
 
   static std::string EvalSBSerdesFile;
 
@@ -425,9 +413,6 @@ public:
   static type Eval ## name;
   EVALFLAGS()
 #undef F
-
-  static bool RecordCodeCoverage;
-  static std::string CodeCoverageOutputFile;
 
   // These are (functionally) unused
   static RepoMode RepoLocalMode;

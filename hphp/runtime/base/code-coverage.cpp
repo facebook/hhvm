@@ -174,7 +174,7 @@ void CodeCoverage::onSessionInit() {
 }
 
 void CodeCoverage::onSessionExit() {
-  if (shouldDump) Report(RuntimeOption::CodeCoverageOutputFile);
+  if (shouldDump) Report(Cfg::Eval::CodeCoverageOutputFile);
   shouldDump = false;
   m_hits.reset();
 }

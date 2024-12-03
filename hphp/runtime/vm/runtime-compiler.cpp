@@ -176,7 +176,6 @@ RepoGlobalData getGlobalData() {
 
   Cfg::StoreToGlobalData(gd);
 
-  gd.EnableArgsInBacktraces        = RO::EnableArgsInBacktraces;
   gd.EvalCoeffectEnforcementLevels = RO::EvalCoeffectEnforcementLevels;
 
   return gd;

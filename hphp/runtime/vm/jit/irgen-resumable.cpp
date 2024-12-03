@@ -207,7 +207,7 @@ void implAwaitE(IRGS& env, SSATmp* child, Offset suspendOffset,
     // We don't need to create the new AFWH if we can do a tail-call check.
     auto const waitHandle = [&]{
       std::vector<Type> locals;
-      if (RO::EnableArgsInBacktraces) return createNewAFWH();
+      if (Cfg::Eval::EnableArgsInBacktraces) return createNewAFWH();
       if (!isTailAwait(env, locals)) return createNewAFWH();
 
       // We can run out of tailFrameIds and fail to make this optimization.

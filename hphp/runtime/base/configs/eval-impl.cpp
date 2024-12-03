@@ -28,6 +28,34 @@
 
 namespace HPHP::Cfg {
 
+void EvalLoader::CheckSymLinkPostProcess(bool& val) {
+  if (Cfg::Eval::RecordCodeCoverage) {
+    val = true;
+  }
+}
+
+bool EvalLoader::KeepProfDataDefault() {
+  return arch_any(Arch::ARM);
+}
+
+bool EvalLoader::DisableSmallAllocatorDefault() {
+#if FOLLY_SANITIZE
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool EvalLoader::EnableArgsInBacktracesDefault() {
+  return !Cfg::Repo::Authoritative;
+}
+
+void EvalLoader::AuthoritativeModePostProcess(bool& val) {
+  if (Cfg::Repo::Authoritative) {
+    val = true;
+  }
+}
+
 uint64_t EvalLoader::VMStackElmsDefault() {
 #if defined(VALGRIND) && !FOLLY_SANITIZE
  return 0x800;

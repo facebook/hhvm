@@ -121,7 +121,7 @@ MemoryManager::MemoryManager() {
   resetAllStats();
   setMemoryLimit(std::numeric_limits<int64_t>::max());
   resetGC(); // so each thread has unique req_num at startup
-  m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
+  m_bypassSlabAlloc = Cfg::Eval::DisableSmallAllocator;
   m_req_start_micros = HPHP::Timer::GetThreadCPUTimeNanos() / 1000;
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request, "zend.enable_gc",
                    &m_gc_enabled);
@@ -1107,7 +1107,7 @@ void MemoryManager::requestShutdown() {
 #endif
 
   always_assert(tl_heap->empty());
-  tl_heap->m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
+  tl_heap->m_bypassSlabAlloc = Cfg::Eval::DisableSmallAllocator;
   tl_heap->m_memThresholdCallbackPeakUsage = SIZE_MAX;
   profctx = ReqProfContext{};
 }
@@ -1119,7 +1119,7 @@ void MemoryManager::requestShutdown() {
 
 /* static */ void MemoryManager::teardownProfiling() {
   always_assert(tl_heap->empty());
-  tl_heap->m_bypassSlabAlloc = RuntimeOption::DisableSmallAllocator;
+  tl_heap->m_bypassSlabAlloc = Cfg::Eval::DisableSmallAllocator;
 }
 
 bool MemoryManager::isGCEnabled() {

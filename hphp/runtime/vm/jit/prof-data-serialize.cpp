@@ -2044,7 +2044,7 @@ std::string serializeProfData(const std::string& filename) {
     auto host = Process::GetHostName();
     write_raw(ser, host.size());
     write_raw(ser, &host[0], host.size());
-    auto& tag = RuntimeOption::ProfDataTag;
+    auto& tag = Cfg::Eval::ProfDataTag;
     write_raw(ser, tag.size());
     write_raw(ser, &tag[0], tag.size());
     write_raw(ser, TimeStamp::Current());
@@ -2227,7 +2227,7 @@ std::string deserializeProfData(const std::string& filename,
     int64_t buildTime;
     read_raw(ser, buildTime);
     auto const currTime = TimeStamp::Current();
-    if (buildTime <= currTime - 3600 * RuntimeOption::ProfDataTTLHours) {
+    if (buildTime <= currTime - 3600 * Cfg::Eval::ProfDataTTLHours) {
       throw std::runtime_error(
           "Stale profile data (check Eval.ProfDataTTLHours)");
     } else if (buildTime > currTime) {

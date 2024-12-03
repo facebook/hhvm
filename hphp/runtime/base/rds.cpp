@@ -593,16 +593,16 @@ void processInit() {
   // Attempt to load any RDS preassignments from the profiling file.
   if (Cfg::Repo::Authoritative &&
       Cfg::Eval::ReorderRDS &&
-      !RO::EvalJitSerdesFile.empty() &&
+      !Cfg::Jit::SerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     s_settingPreAssignments = true;
     SCOPE_EXIT { s_settingPreAssignments = false; };
     if (isJitDeserializing()) {
-      jit::deserializeProfData(RO::EvalJitSerdesFile, 1, true);
+      jit::deserializeProfData(Cfg::Jit::SerdesFile, 1, true);
     } else if (isJitSerializing() &&
                jit::serializeOptProfEnabled() &&
                Cfg::Jit::SerializeOptProfRestart) {
-      jit::tryDeserializePartialProfData(RO::EvalJitSerdesFile, 1, true);
+      jit::tryDeserializePartialProfData(Cfg::Jit::SerdesFile, 1, true);
     }
   }
 

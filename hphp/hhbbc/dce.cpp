@@ -1921,7 +1921,7 @@ CompactVector<Bytecode> eager_unsets(
     LocRaw type) {
   auto loc = std::min(safe_cast<uint32_t>(func->locals.size()),
                       safe_cast<uint32_t>(kMaxTrackedLocals));
-  auto const end = RuntimeOption::EnableArgsInBacktraces
+  auto const end = Cfg::Eval::EnableArgsInBacktraces
                    ? func->params.size() + (uint32_t)func->isReified
                    : 0;
   CompactVector<Bytecode> bcs;
@@ -2640,7 +2640,7 @@ void remap_locals(const FuncAnalysis& ainfo, php::WideFunc& func,
     if (isParam(i) || pinned[i]) continue;
     for (auto j = i; j-- > 0;) {
       if (func->locals[j].killed) continue;
-      if (RuntimeOption::EnableArgsInBacktraces && isParam(j)) continue;
+      if (Cfg::Eval::EnableArgsInBacktraces && isParam(j)) continue;
       if (localsInterfere(i, j)) continue;
       // Remap the local and update interference sets.
       func->locals[i].killed = true;
@@ -2722,7 +2722,7 @@ bool global_dce(const Index& index, const FuncAnalysis& ai,
    * they are live for any instruction that may throw. In order to converge
    * quickly in this case, we update the locLiveExn sets early.
    */
-  if (RuntimeOption::EnableArgsInBacktraces) {
+  if (Cfg::Eval::EnableArgsInBacktraces) {
     auto const args = func->params.size() + (int)func->isReified;
     auto locLiveExn = std::bitset<kMaxTrackedLocals>();
     if (args < kMaxTrackedLocals) {

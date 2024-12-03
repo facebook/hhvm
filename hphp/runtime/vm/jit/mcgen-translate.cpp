@@ -286,7 +286,7 @@ bool serializeProfDataAndLog() {
   }
   std::string errMsg;
   VMWorker([&errMsg] () {
-    errMsg = serializeProfData(RuntimeOption::EvalJitSerdesFile);
+    errMsg = serializeProfData(Cfg::Jit::SerdesFile);
   }).run();
 
   if (serverMode) {
@@ -376,7 +376,7 @@ extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
 void retranslateAll(bool skipSerialize) {
   const bool serverMode = RuntimeOption::ServerExecutionMode();
   const bool serialize = Cfg::Repo::Authoritative &&
-                         !RuntimeOption::EvalJitSerdesFile.empty() &&
+                         !Cfg::Jit::SerdesFile.empty() &&
                          isJitSerializing();
   const bool serializeOpt = serialize && serializeOptProfEnabled();
 
@@ -738,7 +738,7 @@ void checkSerializeOptProf() {
   }
 
   assertx(Cfg::Repo::Authoritative &&
-          !RuntimeOption::EvalJitSerdesFile.empty() &&
+          !Cfg::Jit::SerdesFile.empty() &&
           isJitSerializing());
 
   auto const uptime = HHVM_FN(server_uptime)(); // may be -1
@@ -767,7 +767,7 @@ void checkSerializeOptProf() {
                     "profile triggered");
     }
 
-    auto const errMsg = serializeOptProfData(RuntimeOption::EvalJitSerdesFile);
+    auto const errMsg = serializeOptProfData(Cfg::Jit::SerdesFile);
 
     if (serverMode) {
       if (errMsg.empty()) {

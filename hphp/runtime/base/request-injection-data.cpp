@@ -196,7 +196,7 @@ void RequestInjectionData::threadInit() {
       },
       [this] { return getCPUTimeout(); }
     );
-    auto setAndGet = RuntimeOption::TimeoutsUseWallTime
+    auto setAndGet = Cfg::Eval::TimeoutsUseWallTime
       ? setAndGetWall : setAndGetCPU;
     IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Request,
                      "max_execution_time", setAndGet);
@@ -570,7 +570,7 @@ void RequestInjectionData::reset() {
   m_timeoutFlags.fetch_and(TimeoutNone, std::memory_order_acq_rel);
   m_hostOutOfMemory.store(false, std::memory_order_release);
   m_OOMAbort = false;
-  m_coverage = RuntimeOption::RecordCodeCoverage;
+  m_coverage = Cfg::Eval::RecordCodeCoverage;
   m_jittingDisabled = false;
   m_debuggerAttached = false;
   m_vsdebugDisablesJit = false;

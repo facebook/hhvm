@@ -453,7 +453,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
 
     auto funcname = func->nameWithClosureName();
 
-    if (RuntimeOption::EnableArgsInBacktraces &&
+    if (Cfg::Eval::EnableArgsInBacktraces &&
         frm.localsAvailable() &&
         func->hasReifiedGenerics()) {
       // First local is always $0ReifiedGenerics which comes right after params
@@ -472,7 +472,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
       auto const ctx = func->cls();
       if (ctx != nullptr && !func->isClosureBody()) {
         String clsname{const_cast<StringData*>(ctx->name())};
-        if (RuntimeOption::EnableArgsInBacktraces &&
+        if (Cfg::Eval::EnableArgsInBacktraces &&
             frm.localsAvailable() &&
             !frm.isInlined() &&
             ctx->hasReifiedGenerics() &&
@@ -482,7 +482,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
           clsname += mangleReifiedGenericsName(reified_generics);
         }
         frame.set(s_class_idx, s_class, clsname);
-        if (RuntimeOption::EnableArgsInBacktraces &&
+        if (Cfg::Eval::EnableArgsInBacktraces &&
             frm.localsAvailable() &&
             !frm.isInlined() &&
             !func->isStatic() &&
@@ -496,7 +496,7 @@ Array createBacktrace(const BacktraceArgs& btArgs) {
     auto const withNames = btArgs.m_withArgNames;
     auto const withValues = btArgs.m_withArgValues;
     if ((!btArgs.m_withArgNames && !btArgs.m_withArgValues) ||
-        !RuntimeOption::EnableArgsInBacktraces) {
+        !Cfg::Eval::EnableArgsInBacktraces) {
       // do nothing
     } else if (funcname.same(s_include)) {
       auto filepath = const_cast<StringData*>(curUnit->filepath());

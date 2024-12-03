@@ -829,7 +829,7 @@ void execute_command_line_end(bool coverage, const char *program,
                               bool runCleanup) {
   auto& ti = RI();
   if (coverage && ti.m_reqInjectionData.getCoverage() &&
-      !RuntimeOption::CodeCoverageOutputFile.empty()) {
+      !Cfg::Eval::CodeCoverageOutputFile.empty()) {
     ti.m_coverage.dumpOnExit();
   }
   g_context->onShutdownPostSend(); // runs more php
@@ -2667,7 +2667,7 @@ void hphp_process_init(bool skipExtensions) {
   StaticContentCache::load();
 
   if (Cfg::Repo::Authoritative &&
-      !RuntimeOption::EvalJitSerdesFile.empty() &&
+      !Cfg::Jit::SerdesFile.empty() &&
       jit::mcgen::retranslateAllEnabled()) {
     auto const mode = RuntimeOption::EvalJitSerdesMode;
     auto const numWorkers = Cfg::Jit::WorkerThreadsForSerdes ?
@@ -2681,7 +2681,7 @@ void hphp_process_init(bool skipExtensions) {
       setup_extra_arenas(numArenas);
 #endif
       return f(
-        RO::EvalJitSerdesFile,
+        Cfg::Jit::SerdesFile,
         Cfg::Jit::ParallelDeserialize ? numWorkers : 1,
         false
       );
@@ -2706,7 +2706,7 @@ void hphp_process_init(bool skipExtensions) {
 
       if (RO::ServerExecutionMode()) {
         Logger::FInfo("Attempting to deserialize partial profile-data file: {}",
-                      RO::EvalJitSerdesFile);
+                      Cfg::Jit::SerdesFile);
       }
 
       auto const success = deserialize(jit::tryDeserializePartialProfData);
@@ -2726,7 +2726,7 @@ void hphp_process_init(bool skipExtensions) {
     if (isJitDeserializing()) {
       if (RuntimeOption::ServerExecutionMode()) {
         Logger::FInfo("JitDeserializeFrom: {}",
-                      RuntimeOption::EvalJitSerdesFile);
+                      Cfg::Jit::SerdesFile);
       }
 
       auto const errMsg = deserialize(jit::deserializeProfData);
@@ -2735,9 +2735,9 @@ void hphp_process_init(bool skipExtensions) {
         // Delete the serialized profile data when we finish reading
         if (RuntimeOption::ServerExecutionMode()) {
           Logger::FInfo("Deleting serialized profile-data file: {}",
-                        RuntimeOption::EvalJitSerdesFile);
+                        Cfg::Jit::SerdesFile);
         }
-        unlink(RuntimeOption::EvalJitSerdesFile.c_str());
+        unlink(Cfg::Jit::SerdesFile.c_str());
       }
 
       if (errMsg.empty()) {

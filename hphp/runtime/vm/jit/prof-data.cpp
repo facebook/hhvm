@@ -277,7 +277,7 @@ void discardProfData() {
   auto data = s_profData.exchange(nullptr, std::memory_order_acq_rel);
   if (data != nullptr) {
     s_profDataHolder.reset(data);
-    if (!RO::KeepProfData) {
+    if (!Cfg::Eval::KeepProfData) {
       if (RuntimeOption::ServerExecutionMode()) {
         Logger::Info("Putting JIT ProfData on Treadmill");
       }

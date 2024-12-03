@@ -244,7 +244,7 @@ AutoloadHandler::loadFromMapImpl(const String& name,
     auto const eagerSync = Cfg::Eval::AutoloadEagerSyncUnitCache && m_map;
     auto const unit = lookupUnit(fileRes->m_path.get(), fileRes->m_info, "",
                                  &initial, nullptr,
-                                 RuntimeOption::TrustAutoloaderPath,
+                                 Cfg::Eval::TrustAutoloaderPath,
                                  false /* forPrefetch */,
                                  eagerSync /* forAutoload */);
     if (unit) {

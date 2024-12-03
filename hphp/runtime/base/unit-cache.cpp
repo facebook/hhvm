@@ -953,7 +953,7 @@ getNonRepoCacheWithWrapper(const StringData* rpath) {
 const StringData* resolveRequestedPath(const StringData* requestedPath,
                                        bool alreadyRealpath) {
   auto const rpath = [&] (const StringData* p) {
-    if (!RuntimeOption::CheckSymLink || alreadyRealpath) {
+    if (!Cfg::Eval::CheckSymLink || alreadyRealpath) {
       return makeStaticString(p);
     }
     std::string rp;

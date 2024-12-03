@@ -215,9 +215,9 @@ struct BacktraceArgs {
       Cfg::Eval::EnableCompactBacktrace &&
       !m_skipInlined &&
       !m_withSelf &&
-      (!RuntimeOption::EnableArgsInBacktraces || !m_withThis) &&
+      (!Cfg::Eval::EnableArgsInBacktraces || !m_withThis) &&
       !m_withMetadata &&
-      (!RuntimeOption::EnableArgsInBacktraces || !m_withArgValues) &&
+      (!Cfg::Eval::EnableArgsInBacktraces || !m_withArgValues) &&
       !m_withArgNames &&
       !m_limit &&
       !m_parserFrame &&

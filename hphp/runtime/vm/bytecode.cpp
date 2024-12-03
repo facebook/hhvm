@@ -4550,7 +4550,7 @@ OPTBLD_INLINE void iopReqDoc() {
 OPTBLD_INLINE void iopEval() {
   TypedValue* c1 = vmStack().topC();
 
-  if (UNLIKELY(RuntimeOption::EvalAuthoritativeMode)) {
+  if (UNLIKELY(Cfg::Eval::AuthoritativeMode)) {
     // Ahead of time whole program optimizations need to assume it can
     // see all the code, or it really can't do much.
     raise_error("You can't use eval in RepoAuthoritative mode");

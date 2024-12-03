@@ -375,6 +375,30 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Eval.EnableXHP = true, UNKNOWN, unitcacheflag|compileroption(EnableXHP)
 
+- bool Eval.TimeoutsUseWallTime = true, UNKNOWN
+
+- bool Eval.RecordCodeCoverage = false, UNKNOWN
+
+- bool Eval.CheckSymLink = true, UNKNOWN, postprocess
+
+- bool Eval.TrustAutoloaderPath = false, UNKNOWN
+
+- bool Eval.KeepProfData, UNKNOWN
+
+- int Eval.ProfDataTTLHours = 24, UNKNOWN
+
+- std::string Eval.ProfDataTag = "", UNKNOWN
+
+- bool Eval.DisableSmallAllocator, UNKNOWN
+
+- std::string Eval.CodeCoverageOutputFile = "", UNKNOWN
+
+- bool Eval.EnableArgsInBacktraces, UNKNOWN, globaldata
+
+- bool Eval.AuthoritativeMode = false, UNKNOWN, postprocess
+
+- int Eval.CheckCLIClientCommands = 1, UNKNOWN
+
 - int32_t Eval.CheckPropTypeHints = 3, UNKNOWN, globaldata|compileroption(CheckPropTypeHints)
 
   CheckPropTypeHints:
@@ -1451,7 +1475,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - uint32_t GC.HeapAllocSampleBytes = 256 * 1024, UNKNOWN
 
-- uint32_t GC.SlabAllocAlign = GC.SlabAllocAlign, UNKNOWN, staticdefault(64)
+- uint32_t GC.SlabAllocAlign = GC.SlabAllocAlign, UNKNOWN, postprocess|staticdefault(64)
 
   The value is used before we load the config so we have to use staticdefault
 
@@ -1542,6 +1566,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Jit.Enabled = true, UNKNOWN, lookuppath(Eval.Jit)
 - bool Jit.EvaledCode = true, UNKNOWN
+- std::string Jit.SerdesFile = "", UNKNOWN, postprocess
 - bool Jit.RequireWriteLease = false, UNKNOWN
 - uint64_t Jit.RelocationSize = 1 << 20, UNKNOWN
 - uint64_t Jit.MatureSize = 125 << 20, UNKNOWN
@@ -1635,7 +1660,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - uint64_t Jit.PGOThreshold, UNKNOWN
 - bool Jit.PGOOnly = false, UNKNOWN
 - bool Jit.PGOUsePostConditions = true, UNKNOWN
-- bool Jit.PGOUseAddrCountedCheck = false, UNKNOWN
+- bool Jit.PGOUseAddrCountedCheck = false, UNKNOWN, postprocess
 - uint32_t Jit.PGOUnlikelyIncRefCountedPercent = 2, UNKNOWN
 - uint32_t Jit.PGOUnlikelyIncRefIncrementPercent = 5, UNKNOWN
 - uint32_t Jit.PGOUnlikelyDecRefReleasePercent = 5, UNKNOWN

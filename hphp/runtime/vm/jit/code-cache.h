@@ -46,26 +46,6 @@ struct CodeCache {
   static constexpr uint32_t kNullptrOffset =
     std::numeric_limits<uint32_t>::max();
 
-  /* Code block sizes read from configs. */
-  static uint32_t ASize;
-  static uint32_t AColdSize;
-  static uint32_t AFrozenSize;
-  static uint32_t ABytecodeSize;
-
-  static uint32_t GlobalDataSize;
-
-  static uint32_t AMaxUsage;
-  static uint32_t AColdMaxUsage;
-  static uint32_t AFrozenMaxUsage;
-
-  static bool MapTCHuge;
-
-  static uint32_t AutoTCShift;
-
-  static uint32_t TCNumHugeHotMB;
-  static uint32_t TCNumHugeMainMB;
-  static uint32_t TCNumHugeColdMB;
-
   CodeCache();
 
   template<typename L>

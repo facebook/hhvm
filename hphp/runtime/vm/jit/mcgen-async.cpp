@@ -27,6 +27,7 @@
 #include "hphp/runtime/vm/type-profile.h"
 
 #include "hphp/util/alloc.h"
+#include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/job-queue.h"
 #include "hphp/util/managed-arena.h"
@@ -106,10 +107,10 @@ InitFiniNode s_logJitStats([]{
   ent.setInt("frozen_used_bytes", tc::code().frozen().used());
   ent.setInt("data_used_bytes", tc::code().data().used());
 
-  ent.setInt("main_max_bytes", CodeCache::AMaxUsage);
-  ent.setInt("cold_max_bytes", CodeCache::AColdMaxUsage);
-  ent.setInt("frozen_max_bytes", CodeCache::AFrozenMaxUsage);
-  ent.setInt("data_max_bytes", CodeCache::GlobalDataSize);
+  ent.setInt("main_max_bytes", Cfg::CodeCache::AMaxUsage);
+  ent.setInt("cold_max_bytes", Cfg::CodeCache::AColdMaxUsage);
+  ent.setInt("frozen_max_bytes", Cfg::CodeCache::AFrozenMaxUsage);
+  ent.setInt("data_max_bytes", Cfg::CodeCache::GlobalDataSize);
 
   ent.setInt("request_index", requestCount());
   ent.setInt("reached_limit", tc::canTranslate() ? 0 : 1);

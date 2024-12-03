@@ -1540,31 +1540,6 @@ void RuntimeOption::Load(
     SetArenaSlabAllocBypass(Cfg::Eval::DisableSmallAllocator);
   }
   {
-    // CodeCache
-    using jit::CodeCache;
-    Config::Bind(CodeCache::ASize, ini, config, "Eval.JitASize", 60 << 20);
-    Config::Bind(CodeCache::AColdSize, ini, config, "Eval.JitAColdSize",
-                 24 << 20);
-    Config::Bind(CodeCache::AFrozenSize, ini, config, "Eval.JitAFrozenSize",
-                 40 << 20);
-    Config::Bind(CodeCache::ABytecodeSize, ini, config,
-                 "Eval.JitABytecodeSize", 0);
-    Config::Bind(CodeCache::GlobalDataSize, ini, config,
-                 "Eval.JitGlobalDataSize", CodeCache::ASize / 64);
-
-    Config::Bind(CodeCache::MapTCHuge, ini, config, "Eval.MapTCHuge",
-                 hugePagesSoundNice());
-
-    Config::Bind(CodeCache::TCNumHugeHotMB, ini, config,
-                 "Eval.TCNumHugeHotMB", 64);
-    Config::Bind(CodeCache::TCNumHugeMainMB, ini, config,
-                 "Eval.TCNumHugeMainMB", 16);
-    Config::Bind(CodeCache::TCNumHugeColdMB, ini, config,
-                 "Eval.TCNumHugeColdMB", 4);
-
-    Config::Bind(CodeCache::AutoTCShift, ini, config, "Eval.JitAutoTCShift", 1);
-  }
-  {
     // Server
     if (GetServerPrimaryIPv4().empty() && GetServerPrimaryIPv6().empty()) {
       throw std::runtime_error("Unable to resolve the server's IPv4 or IPv6 address");

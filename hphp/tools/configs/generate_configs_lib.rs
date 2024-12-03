@@ -831,7 +831,7 @@ private:
                     config.type_.str(),
                     section_shortname,
                     shortname,
-                    if config.features.has_no_bind {
+                    if config.features.has_no_bind && config.default_value.is_some() {
                         config
                             .default_value
                             .as_ref()
@@ -1255,11 +1255,16 @@ private:
                         config.hdf_path(section),
                         default_value
                     ));
-                }
-                if config.features.has_post_process {
+                    if config.features.has_post_process {
+                        bind_calls.push(format!(
+                            r#"  {}PostProcess(Cfg::{}::{});"#,
+                            shortname, section_shortname, shortname
+                        ));
+                    }
+                } else if config.default_value.is_none() {
                     bind_calls.push(format!(
-                        r#"  {}PostProcess(Cfg::{}::{});"#,
-                        shortname, section_shortname, shortname
+                        r#"  Cfg::{}::{} = {};"#,
+                        section_shortname, shortname, default_value
                     ));
                 }
                 debug_calls.push(format!(

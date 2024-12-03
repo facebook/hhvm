@@ -46,6 +46,7 @@
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 #include "hphp/runtime/vm/jit/write-lease.h"
 
+#include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/hhir.h"
 #include "hphp/util/disasm.h"
@@ -241,9 +242,9 @@ TranslationResult::Scope shouldTranslate(SrcKey sk, TransKind kind,
   const bool reachedMaxLiveMainLimit =
     getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage;
 
-  auto const main_under = code().main().used() < CodeCache::AMaxUsage;
-  auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
+  auto const main_under = code().main().used() < Cfg::CodeCache::AMaxUsage;
+  auto const cold_under = code().cold().used() < Cfg::CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozen().used() < Cfg::CodeCache::AFrozenMaxUsage;
 
   if (!reachedMaxLiveMainLimit && main_under && cold_under && froz_under) {
     return shouldTranslateNoSizeLimit(sk, kind, noThreshold);
@@ -403,7 +404,7 @@ void checkFreeProfData() {
   // generated.
   if (profData() &&
       !Cfg::Eval::EnableReusableTC &&
-      (code().main().used() >= CodeCache::AMaxUsage ||
+      (code().main().used() >= Cfg::CodeCache::AMaxUsage ||
        getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) &&
       !transdb::enabled() &&
       !mcgen::retranslateAllEnabled()) {
@@ -430,7 +431,7 @@ bool profileFunc(const Func* func) {
   // being added to ProfData.
   if (mcgen::retranslateAllScheduled()) return false;
 
-  if (code().main().used() >= CodeCache::AMaxUsage) return false;
+  if (code().main().used() >= Cfg::CodeCache::AMaxUsage) return false;
 
   if (getLiveMainUsage() >= Cfg::Jit::MaxLiveMainUsage) {
     return false;

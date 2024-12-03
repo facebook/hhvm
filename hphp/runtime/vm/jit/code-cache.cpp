@@ -27,6 +27,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/asm-x64.h"
 #include "hphp/util/bump-mapper.h"
+#include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hugetlb.h"
 #include "hphp/util/managed-arena.h"
@@ -37,27 +38,12 @@ namespace HPHP::jit {
 
 TRACE_SET_MOD(mcg);
 
-/* Initialized by RuntimeOption. */
-uint32_t CodeCache::ASize = 0;
-uint32_t CodeCache::AColdSize = 0;
-uint32_t CodeCache::AFrozenSize = 0;
-uint32_t CodeCache::ABytecodeSize = 0;
-uint32_t CodeCache::GlobalDataSize = 0;
-uint32_t CodeCache::AMaxUsage = 0;
-uint32_t CodeCache::AColdMaxUsage = 0;
-uint32_t CodeCache::AFrozenMaxUsage = 0;
-bool CodeCache::MapTCHuge = false;
-uint32_t CodeCache::AutoTCShift = 0;
-uint32_t CodeCache::TCNumHugeHotMB = 0;
-uint32_t CodeCache::TCNumHugeMainMB = 0;
-uint32_t CodeCache::TCNumHugeColdMB = 0;
-
 /////////////////////////////////////////////////////////////////////////
 
 namespace {
 
 void enhugen(void* base, unsigned numMB) {
-  if (CodeCache::MapTCHuge) {
+  if (Cfg::CodeCache::MapTCHuge) {
     assertx((uintptr_t(base) & (size2m - 1)) == 0);
     assertx(numMB < (1 << 12));
     remap_interleaved_2m_pages(base, /* number of 2M pages */ numMB / 2);
@@ -70,14 +56,14 @@ void enhugen(void* base, unsigned numMB) {
  * is a number of 2MB pages in-between. We appear to benefit from odd numbers.
  */
 uintptr_t shiftTC(uintptr_t base) {
-  if (!CodeCache::AutoTCShift || __hot_start == nullptr) return base;
+  if (!Cfg::CodeCache::AutoTCShift || __hot_start == nullptr) return base;
   // Make sure the offset from hot text is either odd or even number
   // of huge pages.
   const auto hugePagesDelta =
     (ru<size2m>(base) -
      rd<size2m>(reinterpret_cast<uintptr_t>(__hot_start))) / size2m;
   const size_t shiftAmount =
-    ((hugePagesDelta & 1) == (CodeCache::AutoTCShift & 1)) ? 0 : size2m;
+    ((hugePagesDelta & 1) == (Cfg::CodeCache::AutoTCShift & 1)) ? 0 : size2m;
 
   return base + shiftAmount;
 }
@@ -97,12 +83,12 @@ CodeCache::CodeCache() {
     Cfg::Eval::ThreadTCDataBufferSize
   );
 
-  auto const kASize         = ru<size2m>(CodeCache::ASize);
-  auto const kAColdSize     = ru<size2m>(CodeCache::AColdSize);
-  auto const kAFrozenSize   = ru<size2m>(CodeCache::AFrozenSize);
-  auto const kABytecodeSize = ru<size2m>(CodeCache::ABytecodeSize);
+  auto const kASize         = ru<size2m>(Cfg::CodeCache::ASize);
+  auto const kAColdSize     = ru<size2m>(Cfg::CodeCache::AColdSize);
+  auto const kAFrozenSize   = ru<size2m>(Cfg::CodeCache::AFrozenSize);
+  auto const kABytecodeSize = ru<size2m>(Cfg::CodeCache::ABytecodeSize);
 
-  auto kGDataSize = ru<size2m>(CodeCache::GlobalDataSize);
+  auto kGDataSize = ru<size2m>(Cfg::CodeCache::GlobalDataSize);
   m_totalSize = ru<size2m>(kASize + kAColdSize + kAFrozenSize +
                            kABytecodeSize + kGDataSize + thread_local_size);
   m_tcSize = m_totalSize - kABytecodeSize - kGDataSize;
@@ -178,7 +164,7 @@ CodeCache::CodeCache() {
   TRACE(1, "init a @%p\n", m_base);
 
   m_main.init(base, kASize, "main");
-  uint32_t hugeMainMBs = CodeCache::TCNumHugeHotMB + CodeCache::TCNumHugeMainMB;
+  uint32_t hugeMainMBs = Cfg::CodeCache::TCNumHugeHotMB + Cfg::CodeCache::TCNumHugeMainMB;
   // Don't map more pages to huge pages than kASize.  And if we're not in
   // jumpstart consumer mode, then we'll need to generate profiling code, which
   // will be placed in the beginning of code.main.  In this case, map all of
@@ -192,7 +178,7 @@ CodeCache::CodeCache() {
 
   TRACE(1, "init acold @%p\n", base);
   m_cold.init(base, kAColdSize, "cold");
-  const uint32_t hugeColdMBs = std::min(CodeCache::TCNumHugeColdMB,
+  const uint32_t hugeColdMBs = std::min(Cfg::CodeCache::TCNumHugeColdMB,
                                         uint32_t(kAColdSize >> 20));
   enhugen(base, hugeColdMBs);
   base += kAColdSize;
@@ -225,9 +211,9 @@ CodeCache::CodeCache() {
   }
   m_threadLocalSize = thread_local_size;
 
-  AMaxUsage = maxUsage(ASize);
-  AColdMaxUsage = maxUsage(AColdSize);
-  AFrozenMaxUsage = maxUsage(AFrozenSize);
+  Cfg::CodeCache::AMaxUsage = maxUsage(Cfg::CodeCache::ASize);
+  Cfg::CodeCache::AColdMaxUsage = maxUsage(Cfg::CodeCache::AColdSize);
+  Cfg::CodeCache::AFrozenMaxUsage = maxUsage(Cfg::CodeCache::AFrozenSize);
 
   assertx(base - m_base <= (2ul << 30));
 }
@@ -235,18 +221,20 @@ CodeCache::CodeCache() {
 void CodeCache::cutTCSizeTo(size_t targetSize) {
   assertx(targetSize < (2ull << 30));
   // Make sure the result if size_t to avoid 32-bit overflow
-  auto const total =
-    ASize + AColdSize + AFrozenSize + ABytecodeSize + GlobalDataSize;
+  auto const total = Cfg::CodeCache::ASize + Cfg::CodeCache::AColdSize +
+    Cfg::CodeCache::AFrozenSize + Cfg::CodeCache::ABytecodeSize +
+    Cfg::CodeCache::GlobalDataSize;
   if (total <= targetSize) return;
 
-  ASize = rd<size2m>(ASize * targetSize / total);
-  AColdSize = rd<size2m>(AColdSize * targetSize / total);
-  AFrozenSize = rd<size2m>(AFrozenSize * targetSize / total);
-  ABytecodeSize = rd<size2m>(ABytecodeSize * targetSize / total);
-  GlobalDataSize = rd<size2m>(GlobalDataSize * targetSize / total);
+  Cfg::CodeCache::ASize = rd<size2m>(Cfg::CodeCache::ASize * targetSize / total);
+  Cfg::CodeCache::AColdSize = rd<size2m>(Cfg::CodeCache::AColdSize * targetSize / total);
+  Cfg::CodeCache::AFrozenSize = rd<size2m>(Cfg::CodeCache::AFrozenSize * targetSize / total);
+  Cfg::CodeCache::ABytecodeSize = rd<size2m>(Cfg::CodeCache::ABytecodeSize * targetSize / total);
+  Cfg::CodeCache::GlobalDataSize = rd<size2m>(Cfg::CodeCache::GlobalDataSize * targetSize / total);
 
   std::array<uint32_t*, 4> sizes = {
-    &ASize, &AColdSize, &AFrozenSize, &GlobalDataSize
+    &Cfg::CodeCache::ASize, &Cfg::CodeCache::AColdSize, &Cfg::CodeCache::AFrozenSize,
+    &Cfg::CodeCache::GlobalDataSize
   };
   std::sort(sizes.begin(), sizes.end(), [](auto a, auto b) { return *a < *b; });
 
@@ -275,18 +263,19 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
     size2m
   );
 
-  AMaxUsage = maxUsage(ASize);
-  AColdMaxUsage = maxUsage(AColdSize);
-  AFrozenMaxUsage = maxUsage(AFrozenSize);
+  Cfg::CodeCache::AMaxUsage = maxUsage(Cfg::CodeCache::ASize);
+  Cfg::CodeCache::AColdMaxUsage = maxUsage(Cfg::CodeCache::AColdSize);
+  Cfg::CodeCache::AFrozenMaxUsage = maxUsage(Cfg::CodeCache::AFrozenSize);
 
-  assertx(ASize + AColdSize + AFrozenSize + GlobalDataSize <= targetSize);
+  assertx(Cfg::CodeCache::ASize + Cfg::CodeCache::AColdSize +
+          Cfg::CodeCache::AFrozenSize + Cfg::CodeCache::GlobalDataSize <= targetSize);
 
   if (RuntimeOption::ServerExecutionMode()) {
     Logger::FWarning("Adjusted TC sizes to fit in {} bytes: "
                      "ASize = {}, AColdSize = {}, "
                      "AFrozenSize = {}, GlobalDataSize = {}",
-                     targetSize, ASize, AColdSize,
-                     AFrozenSize, GlobalDataSize);
+                     targetSize, Cfg::CodeCache::ASize, Cfg::CodeCache::AColdSize,
+                     Cfg::CodeCache::AFrozenSize, Cfg::CodeCache::GlobalDataSize);
   }
 }
 

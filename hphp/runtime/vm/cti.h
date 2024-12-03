@@ -17,14 +17,16 @@
 #ifndef _incl_HPHP_RUNTIME_VM_CTI_H
 #define _incl_HPHP_RUNTIME_VM_CTI_H
 
-#include "hphp/util/data-block.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/rds-header.h"
-#include "hphp/util/asm-x64.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/tc-internal.h"
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/codecache.h"
+#include "hphp/util/data-block.h"
 
 #if defined(__x86_64__)
 #define CTI_SUPPORTED 1
@@ -83,7 +85,7 @@ void free_cti(Offset cti_entry, uint32_t nbytes);
 jit::TCA lookup_cti(const Func*, Offset cti_entry, PC pc, PC unitpc);
 
 inline bool cti_enabled() {
-  return jit::CodeCache::ABytecodeSize != 0;
+  return Cfg::CodeCache::ABytecodeSize != 0;
 }
 
 // global data

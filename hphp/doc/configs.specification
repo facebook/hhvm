@@ -327,6 +327,22 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::vector<std::string> Autoload.IndexedMethodAttributes = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(IndexedMethodAttributes)
 - std::vector<std::string> Autoload.RepoBuildSearchDirs = {}, UNKNOWN, repooptionsflag(Autoload)|lookuppath(RepoBuildSearchDirs)
 
+# CodeCache (Eval.Jit)
+
+- uint32_t CodeCache.ASize = 60 << 20, UNKNOWN
+- uint32_t CodeCache.AColdSize = 24 << 20, UNKNOWN
+- uint32_t CodeCache.AFrozenSize = 40 << 20, UNKNOWN
+- uint32_t CodeCache.ABytecodeSize = 0, UNKNOWN
+- uint32_t CodeCache.AMaxUsage = 0, UNKNOWN, nobind
+- uint32_t CodeCache.AColdMaxUsage = 0, UNKNOWN, nobind
+- uint32_t CodeCache.AFrozenMaxUsage = 0, UNKNOWN, nobind
+- uint32_t CodeCache.GlobalDataSize, UNKNOWN
+- bool CodeCache.MapTCHuge, UNKNOWN, lookuppath(Eval.MapTCHuge)
+- uint32_t CodeCache.TCNumHugeHotMB = 64, UNKNOWN, lookuppath(Eval.TCNumHugeHotMB)
+- uint32_t CodeCache.TCNumHugeMainMB = 16, UNKNOWN, lookuppath(Eval.TCNumHugeMainMB)
+- uint32_t CodeCache.TCNumHugeColdMB = 4, UNKNOWN, lookuppath(Eval.TCNumHugeColdMB)
+- uint32_t CodeCache.AutoTCShift = 1, UNKNOWN
+
 # Debug
 
 - bool Debug.NativeStackTrace = false, UNKNOWN
@@ -337,7 +353,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Debug.CoreDumpEmail = "", UNKNOWN
 - bool Debug.CoreDumpReport = true, UNKNOWN
 - std::string Debug.CoreDumpReportDirectory, UNKNOWN
-- std::string Debug.StackTraceFilename = "", UNKNOWN, nobind|postprocess
+- std::string Debug.StackTraceFilename, UNKNOWN, nobind
 - int Debug.StackTraceTimeout = 0, UNKNOWN
 - std::string Debug.RemoteTraceOutputDir = "/tmp", UNKNOWN
 

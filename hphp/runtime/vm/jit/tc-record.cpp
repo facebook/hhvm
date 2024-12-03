@@ -35,6 +35,7 @@
 #include "hphp/runtime/vm/jit/trans-db.h"
 #include "hphp/runtime/vm/jit/trans-rec.h"
 
+#include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/data-block.h"
@@ -293,9 +294,9 @@ void reportJitMaturity() {
   if (beforeRetranslateAll) {
     maturity = std::min(kMaxMaturityBeforeRTA, codeSize * 100 / fullSize);
   } else if (liveSize >= Cfg::Jit::MaxLiveMainUsage ||
-             code().main().used() >= CodeCache::AMaxUsage ||
-             code().cold().used() >= CodeCache::AColdMaxUsage ||
-             code().frozen().used() >= CodeCache::AFrozenMaxUsage) {
+             code().main().used() >= Cfg::CodeCache::AMaxUsage ||
+             code().cold().used() >= Cfg::CodeCache::AColdMaxUsage ||
+             code().frozen().used() >= Cfg::CodeCache::AFrozenMaxUsage) {
     maturity = g_maxJitMaturity;
   } else if (codeSize >= fullSize) {
     maturity = 99;
@@ -541,7 +542,7 @@ std::string warmupStatusString() {
                         name, codeSizeRate);
         }
       };
-      checkCodeSize("main", CodeCache::ASize);
+      checkCodeSize("main", Cfg::CodeCache::ASize);
     }
     if (status_str.empty()) {
       if (RuntimeOption::EvalJitSerdesMode == JitSerdesMode::SerializeAndExit) {

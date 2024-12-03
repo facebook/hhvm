@@ -48,6 +48,7 @@
 #include "hphp/runtime/vm/treadmill.h"
 
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/codecache.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/hardware-counter.h"
 #include "hphp/util/service-data.h"
@@ -127,9 +128,9 @@ size_t infoSize(const FuncMetaInfo& info) {
 }
 
 bool checkTCLimits() {
-  auto const main_under = code().main().used() < CodeCache::AMaxUsage;
-  auto const cold_under = code().cold().used() < CodeCache::AColdMaxUsage;
-  auto const froz_under = code().frozen().used() < CodeCache::AFrozenMaxUsage;
+  auto const main_under = code().main().used() < Cfg::CodeCache::AMaxUsage;
+  auto const cold_under = code().cold().used() < Cfg::CodeCache::AColdMaxUsage;
+  auto const froz_under = code().frozen().used() < Cfg::CodeCache::AFrozenMaxUsage;
 
   return main_under && cold_under && froz_under;
 }

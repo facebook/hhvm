@@ -18,9 +18,11 @@
 
 #ifdef CTI_SUPPORTED
 
-#include "hphp/util/asm-x64.h"
 #include "hphp/runtime/base/rds-header.h"
 #include "hphp/runtime/vm/verifier/cfg.h"
+
+#include "hphp/util/asm-x64.h"
+#include "hphp/util/configs/codecache.h"
 
 namespace HPHP {
 TRACE_SET_MOD(cti);
@@ -239,7 +241,7 @@ TCA lookup_cti(const Func* func, Offset cti_entry, PC unitpc, PC pc) {
   assert(pc && unitpc);
   if (tl_cti_cache.empty()) {
     // tl_cti_size must be a power of two because probes use (hash & (size - 1))
-    tl_cti_cache.resize(folly::nextPowTwo(jit::CodeCache::ABytecodeSize >> 10));
+    tl_cti_cache.resize(folly::nextPowTwo(Cfg::CodeCache::ABytecodeSize >> 10));
     always_assert(tl_cti_cache.size() > 0 &&
                   (tl_cti_cache.size() & (tl_cti_cache.size()-1)) == 0);
   }

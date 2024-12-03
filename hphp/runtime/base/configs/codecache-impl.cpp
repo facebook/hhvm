@@ -14,28 +14,19 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/configs/debug-loader.h"
+#include "hphp/runtime/base/configs/codecache-loader.h"
 
-#include "hphp/util/configs/debug.h"
-
-#include <sstream>
-#include <unistd.h>
+#include "hphp/util/configs/codecache.h"
+#include "hphp/util/configs/server.h"
 
 namespace HPHP::Cfg {
 
-std::string DebugLoader::CoreDumpReportDirectoryDefault() {
-#if defined(HPHP_OSS)
-  return "/tmp";
-#else
-  return "/var/tmp/cores";
-#endif
+uint32_t CodeCacheLoader::GlobalDataSizeDefault() {
+  return Cfg::CodeCache::ASize / 64;
 }
 
-std::string DebugLoader::StackTraceFilenameDefault() {
-  std::ostringstream stack_trace_stream;
-    stack_trace_stream << Cfg::Debug::CoreDumpReportDirectory << "/stacktrace."
-                       << (int64_t)getpid() << ".log";
-  return stack_trace_stream.str();
+bool CodeCacheLoader::MapTCHugeDefault() {
+  return Cfg::Server::Mode;
 }
 
 }

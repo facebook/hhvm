@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  *
  * @format
+ * @flow
  */
 
 'use strict';
@@ -17,6 +18,35 @@ const net = require('net');
 // We'll emit the responses to these when they get sent down to us
 const unilateralTags = ['subscription', 'log'];
 
+/*::
+interface BunserBuf extends EventEmitter {
+  append(buf: Buffer): void;
+}
+
+type Options = {
+  watchmanBinaryPath?: string,
+  ...
+};
+
+type Response = {
+  capabilities?: ?{[key: string]: boolean},
+  version: string,
+  error?: string,
+  ...
+};
+
+type CommandCallback = (error: ?Error, result?: Response) => void;
+
+type Command = {
+  cb: CommandCallback,
+  cmd: mixed,
+};
+*/
+
+class WatchmanError extends Error {
+  watchmanResponse /*: mixed */;
+}
+
 /**
  * @param options An object with the following optional keys:
  *   * 'watchmanBinaryPath' (string) Absolute path to the watchman binary.
@@ -24,7 +54,14 @@ const unilateralTags = ['subscription', 'log'];
  *     by the node child_process's default env.
  */
 class Client extends EventEmitter {
-  constructor(options) {
+  bunser /*: ?BunserBuf */;
+  commands /*: Array<Command> */;
+  connecting /*: boolean */;
+  currentCommand /*: ?Command */;
+  socket /*: ?net.Socket */;
+  watchmanBinaryPath /*: string */;
+
+  constructor(options /*: Options */) {
     super();
 
     this.watchmanBinaryPath = 'watchman';
@@ -47,10 +84,17 @@ class Client extends EventEmitter {
       return;
     }
 
-    this.socket.write(bser.dumpToBuffer(this.currentCommand.cmd));
+    if (this.socket) {
+      this.socket.write(bser.dumpToBuffer(this.currentCommand.cmd));
+    } else {
+      this.emit(
+        'error',
+        new Error('socket is null attempting to send command'),
+      );
+    }
   }
 
-  cancelCommands(why) {
+  cancelCommands(why /*: string*/) {
     const error = new Error(why);
 
     // Steal all pending commands before we start cancellation, in
@@ -70,15 +114,15 @@ class Client extends EventEmitter {
   }
 
   connect() {
-    const makeSock = sockname => {
+    const makeSock = (sockname /*:string*/) => {
       // bunser will decode the watchman BSER protocol for us
-      this.bunser = new bser.BunserBuf();
+      const bunser = (this.bunser = new bser.BunserBuf());
       // For each decoded line:
-      this.bunser.on('value', obj => {
+      bunser.on('value', obj => {
         // Figure out if this is a unliteral response or if it is the
         // response portion of a request-response sequence.  At the time
         // of writing, there are only two possible unilateral responses.
-        let unilateral = false;
+        let unilateral /*: false | string */ = false;
         for (let i = 0; i < unilateralTags.length; i++) {
           const tag = unilateralTags[i];
           if (tag in obj) {
@@ -92,7 +136,7 @@ class Client extends EventEmitter {
           const cmd = this.currentCommand;
           this.currentCommand = null;
           if ('error' in obj) {
-            const error = new Error(obj.error);
+            const error = new WatchmanError(obj.error);
             error.watchmanResponse = obj;
             cmd.cb(error);
           } else {
@@ -103,26 +147,26 @@ class Client extends EventEmitter {
         // See if we can dispatch the next queued command, if any
         this.sendNextCommand();
       });
-      this.bunser.on('error', err => {
+      bunser.on('error', err => {
         this.emit('error', err);
       });
 
-      this.socket = net.createConnection(sockname);
-      this.socket.on('connect', () => {
+      const socket = (this.socket = net.createConnection(sockname));
+      socket.on('connect', () => {
         this.connecting = false;
         this.emit('connect');
         this.sendNextCommand();
       });
-      this.socket.on('error', err => {
+      socket.on('error', err => {
         this.connecting = false;
         this.emit('error', err);
       });
-      this.socket.on('data', buf => {
+      socket.on('data', buf => {
         if (this.bunser) {
           this.bunser.append(buf);
         }
       });
-      this.socket.on('end', () => {
+      socket.on('end', () => {
         this.socket = null;
         this.bunser = null;
         this.cancelCommands('The watchman connection was closed');
@@ -151,7 +195,9 @@ class Client extends EventEmitter {
     let proc = null;
     let spawnFailed = false;
 
-    const spawnError = error => {
+    const spawnError = (
+      error /*: Error | {message: string, code?: string, errno?: string}*/,
+    ) => {
       if (spawnFailed) {
         // For ENOENT, proc 'close' will also trigger with a negative code,
         // let's suppress that second error.
@@ -216,7 +262,7 @@ class Client extends EventEmitter {
       try {
         const obj = JSON.parse(stdout.join(''));
         if ('error' in obj) {
-          const error = new Error(obj.error);
+          const error = new WatchmanError(obj.error);
           error.watchmanResponse = obj;
           this.emit('error', error);
           return;
@@ -228,7 +274,7 @@ class Client extends EventEmitter {
     });
   }
 
-  command(args, done = () => {}) {
+  command(args /*: mixed*/, done /*: CommandCallback */ = () => {}) {
     // Queue up the command
     this.commands.push({cmd: args, cb: done});
 
@@ -247,15 +293,20 @@ class Client extends EventEmitter {
   }
 
   // This is a helper that we expose for testing purposes
-  _synthesizeCapabilityCheck(resp, optional, required) {
-    resp.capabilities = {};
+  _synthesizeCapabilityCheck /*:: <T: { capabilities?: ?{[key: string]: boolean}, version: string, error?: string, ... }> */(
+    resp /*: T */,
+    optional /*: $ReadOnlyArray<string> */,
+    required /*: $ReadOnlyArray<string> */,
+  ) /*: T & { error?: string, ...} */ {
+    const capabilities /*:{[key: string]: boolean} */ = (resp.capabilities =
+      {});
     const version = resp.version;
     optional.forEach(name => {
-      resp.capabilities[name] = have_cap(version, name);
+      capabilities[name] = have_cap(version, name);
     });
     required.forEach(name => {
       const have = have_cap(version, name);
-      resp.capabilities[name] = have;
+      capabilities[name] = have;
       if (!have) {
         resp.error =
           'client required capability `' +
@@ -266,7 +317,10 @@ class Client extends EventEmitter {
     return resp;
   }
 
-  capabilityCheck(caps, done) {
+  capabilityCheck(
+    caps /*: $ReadOnly<{optional?: $ReadOnlyArray<string>, required?: $ReadOnlyArray<string>, ...}>*/,
+    done /*: CommandCallback */,
+  ) {
     const optional = caps.optional || [];
     const required = caps.required || [];
     this.command(
@@ -277,9 +331,9 @@ class Client extends EventEmitter {
           required: required,
         },
       ],
-      (error, resp) => {
-        if (error) {
-          done(error);
+      (error, resp /*: ?Response */) => {
+        if (error || !resp) {
+          done(error || new Error('no watchman response'));
           return;
         }
         if (!('capabilities' in resp)) {
@@ -287,7 +341,7 @@ class Client extends EventEmitter {
           // synthesize the results based on the version
           resp = this._synthesizeCapabilityCheck(resp, optional, required);
           if (resp.error) {
-            error = new Error(resp.error);
+            error = new WatchmanError(resp.error);
             error.watchmanResponse = resp;
             done(error);
             return;
@@ -309,7 +363,7 @@ class Client extends EventEmitter {
   }
 }
 
-const cap_versions = {
+const cap_versions /*: $ReadOnly<{[key:string]: ?string}>*/ = {
   'cmd-watch-del-all': '3.1.1',
   'cmd-watch-project': '3.1',
   relative_root: '3.3',
@@ -319,9 +373,9 @@ const cap_versions = {
 };
 
 // Compares a vs b, returns < 0 if a < b, > 0 if b > b, 0 if a == b
-function vers_compare(a, b) {
-  a = a.split('.');
-  b = b.split('.');
+function vers_compare(aStr /*:string*/, bStr /*:string*/) {
+  const a = aStr.split('.');
+  const b = bStr.split('.');
   for (let i = 0; i < 3; i++) {
     const d = parseInt(a[i] || '0') - parseInt(b[i] || '0');
     if (d != 0) {
@@ -331,8 +385,8 @@ function vers_compare(a, b) {
   return 0; // Equal
 }
 
-function have_cap(vers, name) {
-  if (name in cap_versions) {
+function have_cap(vers /*:string */, name /*:string*/) {
+  if (cap_versions[name] != null) {
     return vers_compare(vers, cap_versions[name]) >= 0;
   }
   return false;

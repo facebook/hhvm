@@ -1220,8 +1220,8 @@ static int start_server(const std::string &username) {
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::AccessLogs,
      username);
   AdminRequestHandler::GetAccessLog().init
-    (RuntimeOption::AdminLogFormat, Cfg::Log::BaseDirectory, RuntimeOption::AdminLogSymLink,
-     RuntimeOption::AdminLogFile,
+    (Cfg::Log::AdminLogFormat, Cfg::Log::BaseDirectory, Cfg::Log::AdminLogSymLink,
+     Cfg::Log::AdminLogFile,
      username);
   XboxRequestHandler::GetAccessLog().init
     (RuntimeOption::AccessLogDefaultFormat, RuntimeOption::RPCLogs,
@@ -2178,7 +2178,7 @@ static int execute_program_impl(int argc, char** argv) {
       }
     } catch (const FatalErrorException& e) {
       Cfg::ErrorHandling::CallUserHandlerOnFatals = false;
-      RuntimeOption::AlwaysLogUnhandledExceptions = false;
+      Cfg::Log::AlwaysLogUnhandledExceptions = false;
       g_context->onFatalError(e);
       return HPHP_EXIT_FAILURE;
     }

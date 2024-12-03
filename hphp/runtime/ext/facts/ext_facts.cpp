@@ -63,6 +63,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/assertions.h"
 #include "hphp/util/configs/autoload.h"
+#include "hphp/util/configs/watchman.h"
 #include "hphp/util/hash-map.h"
 #include "hphp/util/hash.h"
 #include "hphp/util/logger.h"
@@ -283,12 +284,12 @@ struct FactsExtension final : Extension {
           3, "Autoload.MapIdleGCTimeSeconds = {}\n", m_data->m_idleSec.count());
     }
 
-    if (!RO::WatchmanDefaultSocket.empty()) {
-      FTRACE(3, "watchman.socket.default = {}\n", RO::WatchmanDefaultSocket);
+    if (!Cfg::Watchman::SocketDefault.empty()) {
+      FTRACE(3, "watchman.socket.default = {}\n", Cfg::Watchman::SocketDefault);
     }
 
-    if (!RO::WatchmanRootSocket.empty()) {
-      FTRACE(3, "watchman.socket.root = {}\n", RO::WatchmanRootSocket);
+    if (!Cfg::Watchman::SocketRoot.empty()) {
+      FTRACE(3, "watchman.socket.root = {}\n", Cfg::Watchman::SocketRoot);
     }
 
     m_data->m_watchmanWatcherOpts = WatchmanWatcherOpts{
@@ -832,11 +833,11 @@ void FactsExtension::moduleInit() {
     return;
   }
 
-  if (RO::WatchmanDefaultSocket.empty()) {
+  if (Cfg::Watchman::SocketDefault.empty()) {
     XLOG(INFO) << "watchman.socket.default was not provided.";
   }
 
-  if (RO::WatchmanRootSocket.empty()) {
+  if (Cfg::Watchman::SocketRoot.empty()) {
     XLOG(INFO) << "watchman.socket.root was not provided.";
   }
 

@@ -22,7 +22,8 @@
 
 #include "hphp/runtime/base/config.h"
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/sandbox.h"
+#include "hphp/util/configs/watchman.h"
 #include "hphp/util/trace.h"
 #include "hphp/util/user-info.h"
 
@@ -92,9 +93,9 @@ folly::Singleton<WatchmanCache> s_watchmanClients;
  */
 Optional<std::string> find_user_socket(const std::filesystem::path& repoRoot) {
   auto def = [] (Optional<std::string_view> user) -> Optional<std::string> {
-    FTRACE(3, "Using watchman.socket.default = {}.\n", RO::WatchmanDefaultSocket);
-    if (RO::WatchmanDefaultSocket.empty()) return {};
-    return format_watchman_socket(RO::WatchmanDefaultSocket, user);
+    FTRACE(3, "Using watchman.socket.default = {}.\n", Cfg::Watchman::SocketDefault);
+    if (Cfg::Watchman::SocketDefault.empty()) return {};
+    return format_watchman_socket(Cfg::Watchman::SocketDefault, user);
   };
   int repoRootFD = ::open(repoRoot.native().c_str(), O_DIRECTORY | O_RDONLY);
   if (repoRootFD == -1) return def(std::nullopt);
@@ -105,7 +106,7 @@ Optional<std::string> find_user_socket(const std::filesystem::path& repoRoot) {
 
   // The repo is owned by root, so use a special root socket
   if (hstat.st_uid == 0) {
-    auto const& rootSock = RO::WatchmanRootSocket;
+    auto const& rootSock = Cfg::Watchman::SocketRoot;
     FTRACE(
         3,
         "{} is owned by root, looking for socket at {}\n",

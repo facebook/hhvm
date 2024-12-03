@@ -618,18 +618,9 @@ std::string RuntimeOption::EvalSBSerdesFile;
 std::map<std::string, ErrorLogFileData> RuntimeOption::ErrorLogs = {
   {Logger::DEFAULT, ErrorLogFileData()},
 };
-// these hold the DEFAULT logger
-std::string RuntimeOption::LogFile;
-std::string RuntimeOption::LogFileSymLink;
-uint16_t RuntimeOption::LogFilePeriodMultiplier;
 
-int RuntimeOption::LogHeaderMangle = 0;
-bool RuntimeOption::AlwaysLogUnhandledExceptions = true;
-bool RuntimeOption::AlwaysEscapeLog = true;
-bool RuntimeOption::NoSilencer = false;
 int RuntimeOption::RuntimeErrorReportingLevel =
   static_cast<int>(ErrorMode::HPHP_ALL);
-int RuntimeOption::ForceErrorReportingLevel = 0;
 
 std::vector<std::string> RuntimeOption::TzdataSearchPaths;
 hphp_fast_string_set RuntimeOption::ActiveExperiments;
@@ -640,10 +631,6 @@ int64_t RuntimeOption::SerializationSizeLimit = StringData::MaxSize;
 
 std::string RuntimeOption::AccessLogDefaultFormat = "%h %l %u %t \"%r\" %>s %b";
 std::map<std::string, AccessLogFileData> RuntimeOption::AccessLogs;
-
-std::string RuntimeOption::AdminLogFormat = "%h %t %s %U";
-std::string RuntimeOption::AdminLogFile;
-std::string RuntimeOption::AdminLogSymLink;
 
 std::map<std::string, AccessLogFileData> RuntimeOption::RPCLogs;
 
@@ -663,9 +650,6 @@ int64_t RuntimeOption::SocketDefaultTimeout = 60;
 
 std::map<std::string, std::string> RuntimeOption::ServerVariables;
 std::map<std::string, std::string> RuntimeOption::EnvVariables;
-
-std::string RuntimeOption::WatchmanRootSocket;
-std::string RuntimeOption::WatchmanDefaultSocket;
 
 const std::string& RuntimeOption::GetServerPrimaryIPv4() {
    static std::string serverPrimaryIPv4 = GetPrimaryIPv4();
@@ -1255,13 +1239,9 @@ void RuntimeOption::Load(
     ));
 
     Config::Bind(Logger::UseLogFile, ini, config, "Log.UseLogFile", true);
-    Config::Bind(LogFile, ini, config, "Log.File");
-    Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
-    Config::Bind(LogFilePeriodMultiplier, ini,
-                 config, "Log.PeriodMultiplier", 0);
     if (Logger::UseLogFile && Cfg::Server::Mode) {
       RuntimeOption::ErrorLogs[Logger::DEFAULT] =
-        ErrorLogFileData(Cfg::Log::BaseDirectory, LogFile, LogFileSymLink, LogFilePeriodMultiplier);
+        ErrorLogFileData(Cfg::Log::BaseDirectory, Cfg::Log::File, Cfg::Log::FileSymLink, Cfg::Log::FilePeriodMultiplier);
     }
     if (Config::GetBool(ini, config, "Log.AlwaysPrintStackTraces")) {
       Logger::SetTheLogger(Logger::DEFAULT, std::make_unique<ExtendedLogger>());
@@ -1281,19 +1261,9 @@ void RuntimeOption::Load(
                  config, "Log.MaxMessagesPerRequest", -1);
     Config::Bind(LogFileFlusher::DropCacheChunkSize, ini,
                  config, "Log.DropCacheChunkSize", 1 << 20);
-    Config::Bind(RuntimeOption::LogHeaderMangle, ini, config,
-                 "Log.HeaderMangle", 0);
-    Config::Bind(AlwaysLogUnhandledExceptions, ini,
-                 config, "Log.AlwaysLogUnhandledExceptions",
-                 true);
-    Config::Bind(NoSilencer, ini, config, "Log.NoSilencer");
     Config::Bind(RuntimeErrorReportingLevel, ini,
                  config, "Log.RuntimeErrorReportingLevel",
                  static_cast<int>(ErrorMode::HPHP_ALL));
-    Config::Bind(ForceErrorReportingLevel, ini,
-                 config, "Log.ForceErrorReportingLevel", 0);
-    Config::Bind(AccessLogDefaultFormat, ini, config,
-                 "Log.AccessLogDefaultFormat", "%h %l %u %t \"%r\" %>s %b");
 
     auto parseLogs = [] (const Hdf &config, const IniSetting::Map& ini,
                          const std::string &name,
@@ -1325,11 +1295,6 @@ void RuntimeOption::Load(
     parseLogs(config, ini, "Log.Access", AccessLogs);
     RPCLogs = AccessLogs;
     parseLogs(config, ini, "Log.RPC", RPCLogs);
-
-    Config::Bind(AdminLogFormat, ini, config, "Log.AdminLog.Format",
-                 "%h %t %s %U");
-    Config::Bind(AdminLogFile, ini, config, "Log.AdminLog.File");
-    Config::Bind(AdminLogSymLink, ini, config, "Log.AdminLog.SymLink");
   }
 
   // If we generated errors while loading RelativeConfigs report those now that
@@ -1363,12 +1328,6 @@ void RuntimeOption::Load(
                  0);
     Config::Bind(SerializationSizeLimit, ini, config,
                  "ResourceLimit.SerializationSizeLimit", StringData::MaxSize);
-  }
-  {
-    // watchman
-    Config::Bind(WatchmanRootSocket, ini, config, "watchman.socket.root", "");
-    Config::Bind(WatchmanDefaultSocket, ini, config,
-                 "watchman.socket.default", "");
   }
   {
     // Repo

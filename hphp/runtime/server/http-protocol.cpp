@@ -24,6 +24,7 @@
 #include "hphp/util/configs/debug.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/log.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/stack-trace.h"
 #include "hphp/util/text-util.h"
@@ -439,7 +440,7 @@ static void CopyHeaderVariables(Array& server,
     // header past a proxy that would either overwrite or filter it
     // otherwise.  Client code should use apache_request_headers() to
     // retrieve the original headers if they are security-critical.
-    if (RuntimeOption::LogHeaderMangle != 0 && server.exists(normalizedKey)) {
+    if (Cfg::Log::HeaderMangle != 0 && server.exists(normalizedKey)) {
       badHeaders.push_back(key);
     }
 
@@ -451,7 +452,7 @@ static void CopyHeaderVariables(Array& server,
 
   if (!badHeaders.empty()) {
     auto reqId = badRequests.fetch_add(1, std::memory_order_acq_rel) + 1;
-    if (!(reqId % RuntimeOption::LogHeaderMangle)) {
+    if (!(reqId % Cfg::Log::HeaderMangle)) {
       std::string badNames = folly::join(", ", badHeaders);
       std::string allHeaders;
 

@@ -1928,6 +1928,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 - bool Strobelight.Enabled = false, UNKNOWN
 
+# Watchman
+
+- std::string Watchman.Socket.Default = "", UNKNOWN, lookuppath(watchman.socket.default)
+- std::string Watchman.Socket.Root = "", UNKNOWN, lookuppath(watchman.socket.root)
+
 # Xbox
 
 - int Xbox.ServerInfo.ThreadCount = 10, UNKNOWN
@@ -1950,9 +1955,21 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 # Log
 
+- std::string Log.File = "", UNKNOWN
+- std::string Log.FileSymLink = "", UNKNOWN, lookuppath(Log.Symlink)
+- uint16_t Log.FilePeriodMultiplier = 0, UNKNOWN, lookuppath(Log.PeriodMultiplier)
+- bool Log.AlwaysLogUnhandledExceptions = true, UNKNOWN
+- int Log.HeaderMangle = 0, UNKNOWN
+- bool Log.NoSilencer = false, UNKNOWN
+- int Log.ForceErrorReportingLevel = 0, UNKNOWN
+- std::string Log.AccessLogDefaultFormat = "%h %l %u %t \"%r\" %>s %b", UNKNOWN
 - std::string Log.BaseDirectory = "", UNKNOWN
 
   Base directory for all logfiles
+
+- std::string Log.AdminLog.Format = "%h %t %s %U", UNKNOWN
+- std::string Log.AdminLog.File = "", UNKNOWN
+- std::string Log.AdminLog.SymLink = "", UNKNOWN
 
 # AdminServer
 

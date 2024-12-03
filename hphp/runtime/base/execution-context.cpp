@@ -26,6 +26,7 @@
 #include <folly/Format.h>
 #include <folly/Likely.h>
 
+#include "hphp/util/configs/log.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"
 #include "hphp/util/text-color.h"
@@ -753,8 +754,8 @@ bool ExecutionContext::errorNeedsHandling(int errnum,
 bool ExecutionContext::errorNeedsLogging(int errnum) {
   auto level =
     RID().getErrorReportingLevel() |
-    RuntimeOption::ForceErrorReportingLevel;
-  return RuntimeOption::NoSilencer || (level & errnum) != 0;
+    Cfg::Log::ForceErrorReportingLevel;
+  return Cfg::Log::NoSilencer || (level & errnum) != 0;
 }
 
 struct ErrorStateHelper {
@@ -971,7 +972,7 @@ bool ExecutionContext::onFatalError(const Exception& e) {
     fileAndLine = ee->getFileAndLine();
   }
   // need to silence even with the AlwaysLogUnhandledExceptions flag set
-  if (!silenced && RuntimeOption::AlwaysLogUnhandledExceptions) {
+  if (!silenced && Cfg::Log::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, prefix, e, fileAndLine.first.c_str(),
                 fileAndLine.second);
   }
@@ -979,7 +980,7 @@ bool ExecutionContext::onFatalError(const Exception& e) {
   if (Cfg::ErrorHandling::CallUserHandlerOnFatals) {
     handled = callUserErrorHandler(e, errnum, true);
   }
-  if (!handled && !silenced && !RuntimeOption::AlwaysLogUnhandledExceptions) {
+  if (!handled && !silenced && !Cfg::Log::AlwaysLogUnhandledExceptions) {
     Logger::Log(Logger::LogError, prefix, e, fileAndLine.first.c_str(),
                 fileAndLine.second);
   }
@@ -988,7 +989,7 @@ bool ExecutionContext::onFatalError(const Exception& e) {
 
 bool ExecutionContext::onUnhandledException(Object e) {
   String err = throwable_to_string(e.get());
-  if (RuntimeOption::AlwaysLogUnhandledExceptions) {
+  if (Cfg::Log::AlwaysLogUnhandledExceptions) {
     Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
 
@@ -1008,7 +1009,7 @@ bool ExecutionContext::onUnhandledException(Object e) {
   }
   m_lastError = err;
 
-  if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
+  if (!Cfg::Log::AlwaysLogUnhandledExceptions) {
     Logger::Error("\nFatal error: Uncaught %s", err.data());
   }
   return false;

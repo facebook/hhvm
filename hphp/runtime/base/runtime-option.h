@@ -300,26 +300,14 @@ struct RuntimeOption {
   static std::string PidFile;
 
   static std::map<std::string, ErrorLogFileData> ErrorLogs;
-  static std::string LogFile;
-  static std::string LogFileSymLink;
-  static uint16_t LogFilePeriodMultiplier;
 
-  static int LogHeaderMangle;
-  static bool AlwaysEscapeLog;
-  static bool AlwaysLogUnhandledExceptions;
-  static bool NoSilencer;
   static int RuntimeErrorReportingLevel;
-  static int ForceErrorReportingLevel; // Bitmask ORed with the reporting level
 
   static int RaiseDebuggingFrequency;
   static int64_t SerializationSizeLimit;
 
   static std::string AccessLogDefaultFormat;
   static std::map<std::string, AccessLogFileData> AccessLogs;
-
-  static std::string AdminLogFormat;
-  static std::string AdminLogFile;
-  static std::string AdminLogSymLink;
 
   static std::map<std::string, AccessLogFileData> RPCLogs;
 
@@ -362,9 +350,6 @@ struct RuntimeOption {
   static bool DumpPreciseProfData;
 
   static std::string EvalSBSerdesFile;
-
-  static std::string WatchmanRootSocket;
-  static std::string WatchmanDefaultSocket;
 
   static hphp_string_map<TypedValue> ConstantFunctions;
 

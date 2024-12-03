@@ -29,8 +29,6 @@ from thrift.py3.types cimport (
     init_unicode_from_cpp as __init_unicode_from_cpp,
     set_iter as __set_iter,
     map_iter as __map_iter,
-    map_contains as __map_contains,
-    map_getitem as __map_getitem,
     reference_shared_ptr as __reference_shared_ptr,
     get_field_name_by_index as __get_field_name_by_index,
     reset_field as __reset_field,

@@ -64,8 +64,6 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
     void assign_shared_const_ptr[T](shared_ptr[const T]& x, shared_ptr[const T] y)
     const T& default_inst[T]()
     bint richcmp[T](const shared_ptr[T]& a, const shared_ptr[T]& b, int op)
-    bint map_contains[T](const shared_ptr[T]& cpp_obj, ...)
-    void map_getitem[T](const shared_ptr[T]& cpp_obj, ...)
     void reset_field[T](T& obj, uint16_t index) except +
     string_view get_field_name_by_index[T](size_t idx) except +
     object init_unicode_from_cpp(...)
@@ -78,11 +76,7 @@ cdef extern from "thrift/lib/py3/types.h" namespace "::thrift::py3" nogil:
 
     cdef cppclass map_iter[T]:
         map_iter()
-        map_iter(const shared_ptr[T]& cpp_obj)
         map_iter(const T& cpp_obj)
-        void genNextKey(const shared_ptr[T]& cpp_obj, ...)
-        void genNextValue(const shared_ptr[T]& cpp_obj, ...)
-        void genNextItem(const shared_ptr[T]& cpp_obj, ...)
         void genNextKeyVal(...)
 
 

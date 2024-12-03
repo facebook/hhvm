@@ -71,7 +71,7 @@
                          returns_readonly = false; readonly_this = false;
                          support_dynamic_type = false; is_memoized = false;
                          variadic = false };
-                       ft_cross_package = None; ft_instantiated = false }));
+                       ft_cross_package = None; ft_instantiated = true }));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -100,7 +100,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None; ft_instantiated = false }));
+              ft_cross_package = None; ft_instantiated = true }));
         fe_pos = [7:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -150,7 +150,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None; ft_instantiated = false }));
+              ft_cross_package = None; ft_instantiated = true }));
         fe_pos = [14:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -208,7 +208,7 @@
                              returns_readonly = false; readonly_this = false;
                              support_dynamic_type = false;
                              is_memoized = false; variadic = false };
-                           ft_cross_package = None; ft_instantiated = false }))));
+                           ft_cross_package = None; ft_instantiated = true }))));
                  fp_flags =
                  { Typing_defs_flags.FunParam.accept_disposable = false;
                    inout = false; is_optional = false; readonly = false;
@@ -239,7 +239,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None; ft_instantiated = false }));
+              ft_cross_package = None; ft_instantiated = true }));
         fe_pos = [18:10-11]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

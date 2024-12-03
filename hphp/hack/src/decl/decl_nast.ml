@@ -78,7 +78,7 @@ let lambda_decl_in_env (env : Decl_env.env) (f : Nast.fun_) :
             (* TODO: handle const attribute *)
             (* Lambdas cannot be cross package *)
             ft_cross_package = None;
-            ft_instantiated = false;
+            ft_instantiated = true;
           } )
   in
   {

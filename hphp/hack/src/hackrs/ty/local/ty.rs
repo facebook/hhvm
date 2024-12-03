@@ -486,7 +486,7 @@ impl<'a, R: Reason> ToOxidized<'a> for FunType<R> {
             ret: &*arena.alloc(ret.to_oxidized(arena)),
             flags: flags.clone(),
             cross_package: None,
-            instantiated: false,
+            instantiated: true,
         }
     }
 }

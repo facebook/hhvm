@@ -47,7 +47,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None; ft_instantiated = false }));
+              ft_cross_package = None; ft_instantiated = true }));
         fe_pos = [5:10-21]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -85,7 +85,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None; ft_instantiated = false }));
+              ft_cross_package = None; ft_instantiated = true }));
         fe_pos = [9:10-23]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }));
@@ -134,7 +134,7 @@
                 is_function_pointer = false; returns_readonly = false;
                 readonly_this = false; support_dynamic_type = false;
                 is_memoized = false; variadic = false };
-              ft_cross_package = None; ft_instantiated = false }));
+              ft_cross_package = None; ft_instantiated = true }));
         fe_pos = [13:10-23]; fe_php_std_lib = false;
         fe_support_dynamic_type = false; fe_no_auto_dynamic = false;
         fe_no_auto_likes = false }))

@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Base interface for Thrift unions
  */
+<<Oncalls('thrift')>> // @oss-disable
 interface IThriftUnion<T> extends IThriftStruct {
-  public function getType(): T;
+  public function getType()[]: T;
 }

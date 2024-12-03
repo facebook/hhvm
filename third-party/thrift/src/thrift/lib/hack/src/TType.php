@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Data types that can be sent via Thrift

@@ -14,13 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  *  Determine (as best as possible) whether the transport can preform
  *  non-blocking read and write operations.
  */
+<<Oncalls('thrift')>> // @oss-disable
 interface TTransportStatus {
 
   /**
@@ -35,7 +37,7 @@ interface TTransportStatus {
    *  @return bool True if a non-blocking read can be preformed on the
    *               transport.
    */
-  public function isReadable(): bool;
+  public function isReadable()[leak_safe]: bool;
 
   /**
    *  Test whether the transport is ready for a non-blocking write.
@@ -47,5 +49,5 @@ interface TTransportStatus {
    *  @return bool True if a non-blocking write can be preformed on the
    *               transport.
    */
-  public function isWritable(): bool;
+  public function isWritable()[leak_safe]: bool;
 }

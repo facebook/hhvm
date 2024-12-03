@@ -14,25 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * This allows clients to perform calls as generators
  */
+<<Oncalls('thrift')>> // @oss-disable
 class TClientAsyncHandler {
-  // Called before send in gen_methodName() calls
-  public async function genBefore(): Awaitable<void> {
+
+  /**
+   * Called before send in gen_methodName() calls
+   * @param string $service_name The caller's Thrift service name
+   * @param string $func_name The caller's Thrift method name
+   * @param ?IThriftStruct $args The caller's Thrift method's argument
+   */
+  public async function genBefore(
+    string $service_name,
+    string $func_name,
+    ?IThriftStruct $args = null,
+  )[zoned_local]: Awaitable<void> {
     // Do nothing
   }
 
   // Called between the send and recv for gen_methodName() calls
-  public async function genWait(int $sequence_id): Awaitable<void> {
+  public async function genWait(
+    int $sequence_id,
+  )[zoned_local]: Awaitable<void> {
     // Do nothing
   }
 
   // Called after recv in gen_methodName() calls
-  public async function genAfter(): Awaitable<void> {
+  public async function genAfter<<<__Explicit>> TResponse>(
+    string $func_name,
+    TResponse $response,
+  )[zoned_local]: Awaitable<void> {
     // Do nothing
   }
 }

@@ -14,54 +14,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Protocol base class module.
  */
+<<Oncalls('thrift')>> // @oss-disable
 abstract class TProtocol {
-  // The below may seem silly, but it is to get around the problem that the
-  // "instanceof" operator can only take in a T_VARIABLE and not a T_STRING
-  // or T_CONSTANT_ENCAPSED_STRING. Using "is_a()" instead of "instanceof" is
-  // a workaround but is deprecated in PHP5. This is used in the generated
-  // deserialization code.
-  public static $TBINARYPROTOCOLACCELERATED = 'TBinaryProtocolAccelerated';
-  public static $TCOMPACTPROTOCOLACCELERATED = 'TCompactProtocolAccelerated';
-  public static
-    $TBINARYPROTOCOLUNACCELERATED = 'TBinaryProtocolUnaccelerated';
-  public static
-    $TCOMPACTPROTOCOLUNACCELERATED = 'TCompactProtocolUnaccelerated';
+  // The widest context used by a protocol when considering all transports used.
+  abstract const ctx CReadWriteDefault super [zoned_shallow];
 
-  /**
-   * Underlying transport
-   *
-   * @var TTransport
-   */
-  protected TTransport $trans_;
+  private int $options = 0;
 
-  /**
-   * Constructor
-   */
-  protected function __construct($trans) {
-    $this->trans_ = $trans;
+  protected function __construct(protected TTransport $trans_)[] {
   }
 
-  /**
-   * Accessor for transport
-   *
-   * @return TTransport
-   */
-  public function getTransport() {
+  public function getTransport()[]: TTransport {
     return $this->trans_;
   }
 
-  // NOTE: These are deprecated
-  public function getOutputTransport() {
-    return $this->trans_;
+  final public function setOptions(int $options)[write_props]: this {
+    $this->options = $options;
+    return $this;
   }
-  public function getInputTransport() {
-    return $this->trans_;
+
+  final public function getOptions()[]: int {
+    return $this->options;
   }
 
   /**
@@ -71,12 +51,16 @@ abstract class TProtocol {
    * @param int $type message type TMessageType::CALL or TMessageType::REPLY
    * @param int $seqid The sequence id of this message
    */
-  public abstract function writeMessageBegin($name, $type, $seqid);
+  public abstract function writeMessageBegin(
+    string $name,
+    TMessageType $type,
+    int $seqid,
+  )[this::CReadWriteDefault]: int;
 
   /**
    * Close the message
    */
-  public abstract function writeMessageEnd();
+  public abstract function writeMessageEnd()[write_props]: int;
 
   /**
    * Writes a struct header.
@@ -85,7 +69,7 @@ abstract class TProtocol {
    * @throws TException on write error
    * @return int How many bytes written
    */
-  public abstract function writeStructBegin($name);
+  public abstract function writeStructBegin(string $name)[write_props]: int;
 
   /**
    * Close a struct.
@@ -93,50 +77,72 @@ abstract class TProtocol {
    * @throws TException on write error
    * @return int How many bytes written
    */
-  public abstract function writeStructEnd();
+  public abstract function writeStructEnd()[write_props]: int;
 
   /*
    * Starts a field.
    *
    * @param string     $name Field name
-   * @param int        $type Field type
+   * @param TType        $type Field type
    * @param int        $fid  Field id
    * @throws TException on write error
    * @return int How many bytes written
    */
-  public abstract function writeFieldBegin($fieldName, $fieldType, $fieldId);
+  public abstract function writeFieldBegin(
+    string $field_name,
+    TType $field_type,
+    int $field_id,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function writeFieldEnd();
+  public abstract function writeFieldEnd()[write_props]: int;
 
-  public abstract function writeFieldStop();
+  public abstract function writeFieldStop()[this::CReadWriteDefault]: int;
 
-  public abstract function writeMapBegin($keyType, $valType, $size);
+  public abstract function writeMapBegin(
+    TType $key_type,
+    TType $val_type,
+    int $size,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function writeMapEnd();
+  public abstract function writeMapEnd()[write_props]: int;
 
-  public abstract function writeListBegin($elemType, $size);
+  public abstract function writeListBegin(
+    TType $elem_type,
+    int $size,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function writeListEnd();
+  public abstract function writeListEnd()[write_props]: int;
 
-  public abstract function writeSetBegin($elemType, $size);
+  public abstract function writeSetBegin(
+    TType $elem_type,
+    int $size,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function writeSetEnd();
+  public abstract function writeSetEnd()[write_props]: int;
 
-  public abstract function writeBool($bool);
+  public abstract function writeBool(bool $bool)[this::CReadWriteDefault]: int;
 
-  public abstract function writeByte($byte);
+  public abstract function writeByte(int $byte)[this::CReadWriteDefault]: int;
 
-  public abstract function writeI16($i16);
+  public abstract function writeI16(int $i16)[this::CReadWriteDefault]: int;
 
-  public abstract function writeI32($i32);
+  public abstract function writeI32(int $i32)[this::CReadWriteDefault]: int;
 
-  public abstract function writeI64($i64);
+  public abstract function writeI64(int $i64)[this::CReadWriteDefault]: int;
 
-  public abstract function writeDouble($dub);
+  public abstract function writeDouble(
+    float $dub,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function writeFloat($flt);
+  public abstract function writeFloat(float $flt)[this::CReadWriteDefault]: int;
 
-  public abstract function writeString($str);
+  public abstract function writeString(
+    string $str,
+  )[this::CReadWriteDefault]: int;
+
+  public function writeBinary(string $str)[this::CReadWriteDefault]: int {
+    return $this->writeString($str);
+  }
 
   /**
    * Reads the message header
@@ -146,77 +152,105 @@ abstract class TProtocol {
    * @param int $seqid The sequence id of this message
    */
   public abstract function readMessageBegin(
-    inout $name,
-    inout $type,
-    inout $seqid,
-  );
+    inout string $name,
+    inout int $type,
+    inout int $seqid,
+  )[this::CReadWriteDefault]: int;
 
   /**
    * Read the close of message
    */
-  public abstract function readMessageEnd();
+  public abstract function readMessageEnd()[write_props]: int;
 
-  public abstract function readStructBegin(inout $name);
+  public abstract function readStructBegin(
+    inout ?string $name,
+  )[write_props]: int;
 
-  public abstract function readStructEnd();
+  public abstract function readStructEnd()[write_props]: int;
 
   public abstract function readFieldBegin(
-    inout $name,
-    inout $fieldType,
-    inout $fieldId,
-  );
+    inout ?string $name,
+    inout ?TType $field_type,
+    inout ?int $field_id,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readFieldEnd();
+  public abstract function readFieldEnd()[write_props]: int;
 
   public abstract function readMapBegin(
-    inout $keyType,
-    inout $valType,
-    inout $size,
-  );
+    inout ?TType $key_type,
+    inout ?TType $val_type,
+    inout ?int $size,
+  )[this::CReadWriteDefault]: int;
 
-  public function readMapHasNext(): bool {
+  public function readMapHasNext()[write_props]: bool {
     throw new TProtocolException(
-      get_called_class().' does not support unknown map sizes',
+      nameof static.' does not support unknown map sizes',
     );
   }
 
-  public abstract function readMapEnd();
+  public abstract function readMapEnd()[write_props]: int;
 
-  public abstract function readListBegin(&$elemType, &$size);
+  public abstract function readListBegin(
+    inout ?TType $elem_type,
+    inout ?int $size,
+  )[this::CReadWriteDefault]: int;
 
-  public function readListHasNext(): bool {
+  public function readListHasNext()[write_props]: bool {
     throw new TProtocolException(
-      get_called_class().' does not support unknown list sizes',
+      nameof static.' does not support unknown list sizes',
     );
   }
 
-  public abstract function readListEnd();
+  public abstract function readListEnd()[write_props]: int;
 
-  public abstract function readSetBegin(&$elemType, &$size);
+  public abstract function readSetBegin(
+    inout ?TType $elem_type,
+    inout ?int $size,
+  )[this::CReadWriteDefault]: int;
 
-  public function readSetHasNext(): bool {
+  public function readSetHasNext()[write_props]: bool {
     throw new TProtocolException(
-      get_called_class().' does not support unknown set sizes',
+      nameof static.' does not support unknown set sizes',
     );
   }
 
-  public abstract function readSetEnd();
+  public abstract function readSetEnd()[write_props]: int;
 
-  public abstract function readBool(&$bool);
+  public abstract function readBool(
+    inout bool $bool,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readByte(&$byte);
+  public abstract function readByte(
+    inout int $byte,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readI16(&$i16);
+  public abstract function readI16(
+    inout int $i16,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readI32(&$i32);
+  public abstract function readI32(
+    inout int $i32,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readI64(&$i64);
+  public abstract function readI64(
+    inout int $i64,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readDouble(&$dub);
+  public abstract function readDouble(
+    inout float $dub,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readFloat(&$flt);
+  public abstract function readFloat(
+    inout float $flt,
+  )[this::CReadWriteDefault]: int;
 
-  public abstract function readString(&$str);
+  public abstract function readString(
+    inout string $str,
+  )[this::CReadWriteDefault]: int;
+
+  public function readBinary(inout string $str)[this::CReadWriteDefault]: int {
+    return $this->readString(inout $str);
+  }
 
   /**
    * The skip function is a utility to parse over unrecognized date without
@@ -224,88 +258,103 @@ abstract class TProtocol {
    *
    * @param TType $type What type is it
    */
-  public function skip($type) {
-    $_ref = null;
+  public function skip(TType $type)[this::CReadWriteDefault, write_props]: int {
     switch ($type) {
       case TType::BOOL:
-        return $this->readBool($_ref);
+        $_ref = false;
+        $result = $this->readBool(inout $_ref);
+        return $result;
       case TType::BYTE:
-        return $this->readByte($_ref);
+        $_ref = 0;
+        $result = $this->readByte(inout $_ref);
+        return $result;
       case TType::I16:
-        return $this->readI16($_ref);
+        $_ref = 0;
+        $result = $this->readI16(inout $_ref);
+        return $result;
       case TType::I32:
-        return $this->readI32($_ref);
+        $_ref = 0;
+        $result = $this->readI32(inout $_ref);
+        return $result;
       case TType::I64:
-        return $this->readI64($_ref);
+        $_ref = 0;
+        $result = $this->readI64(inout $_ref);
+        return $result;
       case TType::DOUBLE:
-        return $this->readDouble($_ref);
+        $_ref = 0.0;
+        $result = $this->readDouble(inout $_ref);
+        return $result;
       case TType::FLOAT:
-        return $this->readFloat($_ref);
+        $_ref = 0.0;
+        $result = $this->readFloat(inout $_ref);
+        return $result;
       case TType::STRING:
-        return $this->readString($_ref);
-      case TType::STRUCT: {
-          $result = $this->readStructBegin(inout $_ref);
-          while (true) {
-            $ftype = null;
-            $result += $this->readFieldBegin(
-              inout $_ref,
-              inout $ftype,
-              inout $_ref,
-            );
-            if ($ftype == TType::STOP) {
-              break;
-            }
-            $result += $this->skip($ftype);
-            $result += $this->readFieldEnd();
-          }
-          $result += $this->readStructEnd();
-          return $result;
-        }
-      case TType::MAP: {
-          $keyType = null;
-          $valType = null;
-          $size = 0;
-          $result = $this->readMapBegin(
-            inout $keyType,
-            inout $valType,
-            inout $size,
+        $_ref = '';
+        $result = $this->readString(inout $_ref);
+        return $result;
+      case TType::STRUCT:
+        $_ref_struct = null;
+        $result = $this->readStructBegin(inout $_ref_struct);
+        while (true) {
+          $_ref_field = null;
+          $ftype = null;
+          $_ref_field_id = null;
+          $field_res = $this->readFieldBegin(
+            inout $_ref_field,
+            inout $ftype,
+            inout $_ref_field_id,
           );
-          for ($i = 0; $size === null || $i < $size; $i++) {
-            if ($size === null && !$this->readMapHasNext()) {
-              break;
-            }
-            $result += $this->skip($keyType);
-            $result += $this->skip($valType);
+          $result += $field_res;
+          if ($ftype === TType::STOP) {
+            break;
           }
-          $result += $this->readMapEnd();
-          return $result;
+          $result += $this->skip(nullthrows($ftype, 'Got unexpected null'));
+          $result += $this->readFieldEnd();
         }
+        $result += $this->readStructEnd();
+        return $result;
+      case TType::MAP: {
+        $key_type = null;
+        $val_type = null;
+        $size = 0;
+        $result =
+          $this->readMapBegin(inout $key_type, inout $val_type, inout $size);
+        for ($i = 0; $size === null || $i < $size; $i++) {
+          if ($size === null && !$this->readMapHasNext()) {
+            break;
+          }
+          $result += $this->skip(nullthrows($key_type, 'Got unexpected null'));
+          $result += $this->skip(nullthrows($val_type, 'Got unexpected null'));
+        }
+        $result += $this->readMapEnd();
+        return $result;
+      }
       case TType::SET: {
-          $elemType = null;
-          $size = 0;
-          $result = $this->readSetBegin($elemType, $size);
-          for ($i = 0; $size === null || $i < $size; $i++) {
-            if ($size === null && !$this->readSetHasNext()) {
-              break;
-            }
-            $result += $this->skip($elemType);
+        $elem_type = null;
+        $size = 0;
+        $result = $this->readSetBegin(inout $elem_type, inout $size);
+        for ($i = 0; $size === null || $i < $size; $i++) {
+          if ($size === null && !$this->readSetHasNext()) {
+            break;
           }
-          $result += $this->readSetEnd();
-          return $result;
+          $result += $this->skip(nullthrows($elem_type, 'Got unexpected null'));
         }
+        $result += $this->readSetEnd();
+        return $result;
+      }
       case TType::LST: {
-          $elemType = null;
-          $size = 0;
-          $result = $this->readListBegin($elemType, $size);
-          for ($i = 0; $size === null || $i < $size; $i++) {
-            if ($size === null && !$this->readSetHasNext()) {
-              break;
-            }
-            $result += $this->skip($elemType);
+        $elem_type = null;
+        $size = 0;
+        $result = $this->readListBegin(inout $elem_type, inout $size);
+        for ($i = 0; $size === null || $i < $size; $i++) {
+          if ($size === null && !$this->readSetHasNext()) {
+            break;
           }
-          $result += $this->readListEnd();
-          return $result;
+          $result += $this->skip(nullthrows($elem_type, 'Got unexpected null'));
         }
+        $result += $this->readListEnd();
+        return $result;
+      }
       default:
         throw new TProtocolException(
           'Unknown field type: '.$type,
@@ -320,88 +369,101 @@ abstract class TProtocol {
    * @param TTransport $itrans TTransport object
    * @param int        $type   Field type
    */
-  public static function skipBinary($itrans, $type) {
+  public static function skipBinary(
+    TTransport $itrans,
+    TType $type,
+  )[zoned_shallow]: int {
     switch ($type) {
       case TType::BOOL:
-        return $itrans->readAll(1);
+        return Str\length($itrans->readAll(1));
       case TType::BYTE:
-        return $itrans->readAll(1);
+        return Str\length($itrans->readAll(1));
       case TType::I16:
-        return $itrans->readAll(2);
+        return Str\length($itrans->readAll(2));
       case TType::I32:
-        return $itrans->readAll(4);
+        return Str\length($itrans->readAll(4));
       case TType::I64:
-        return $itrans->readAll(8);
+        return Str\length($itrans->readAll(8));
       case TType::DOUBLE:
-        return $itrans->readAll(8);
+        return Str\length($itrans->readAll(8));
       case TType::FLOAT:
-        return $itrans->readAll(4);
+        return Str\length($itrans->readAll(4));
       case TType::STRING:
-        $len = unpack('N', $itrans->readAll(4));
+        $len = PHP\unpack('N', $itrans->readAll(4));
         $len = $len[1];
         if ($len > 0x7fffffff) {
           $len = 0 - (($len - 1) ^ 0xffffffff);
         }
-        return 4 + $itrans->readAll($len);
+        return 4 + Str\length($itrans->readAll($len));
       case TType::STRUCT: {
-          $result = 0;
-          while (true) {
-            $ftype = 0;
-            $fid = 0;
-            $data = $itrans->readAll(1);
-            $arr = unpack('c', $data);
-            $ftype = $arr[1];
-            if ($ftype == TType::STOP) {
-              break;
-            }
-            // I16 field id
-            $result += $itrans->readAll(2);
-            $result += self::skipBinary($itrans, $ftype);
+        $result = 0;
+        while (true) {
+          $data = $itrans->readAll(1);
+          $arr = PHP\unpack('c', $data);
+          $ftype = $arr[1];
+          if ($ftype === TType::STOP) {
+            break;
           }
-          return $result;
+          // I16 field id
+          $result += Str\length($itrans->readAll(2));
+          $result += self::skipBinary($itrans, HH\FIXME\UNSAFE_CAST<
+            dynamic,
+            TType,
+          >($ftype, 'Exposed as unpack may return false with invalid input'));
         }
+        return $result;
+      }
       case TType::MAP: {
-          // Ktype
-          $data = $itrans->readAll(1);
-          $arr = unpack('c', $data);
-          $ktype = $arr[1];
-          // Vtype
-          $data = $itrans->readAll(1);
-          $arr = unpack('c', $data);
-          $vtype = $arr[1];
-          // Size
-          $data = $itrans->readAll(4);
-          $arr = unpack('N', $data);
-          $size = $arr[1];
-          if ($size > 0x7fffffff) {
-            $size = 0 - (($size - 1) ^ 0xffffffff);
-          }
-          $result = 6;
-          for ($i = 0; $i < $size; $i++) {
-            $result += self::skipBinary($itrans, $ktype);
-            $result += self::skipBinary($itrans, $vtype);
-          }
-          return $result;
+        // Ktype
+        $data = $itrans->readAll(1);
+        $arr = PHP\unpack('c', $data);
+        $ktype = $arr[1];
+        // Vtype
+        $data = $itrans->readAll(1);
+        $arr = PHP\unpack('c', $data);
+        $vtype = $arr[1];
+        // Size
+        $data = $itrans->readAll(4);
+        $arr = PHP\unpack('N', $data);
+        $size = $arr[1];
+        if ($size > 0x7fffffff) {
+          $size = 0 - (($size - 1) ^ 0xffffffff);
         }
+        $result = 6;
+        for ($i = 0; $i < $size; $i++) {
+          $result += self::skipBinary($itrans, HH\FIXME\UNSAFE_CAST<
+            dynamic,
+            TType,
+          >($ktype, 'Exposed as unpack may return false with invalid input'));
+          $result += self::skipBinary($itrans, HH\FIXME\UNSAFE_CAST<
+            dynamic,
+            TType,
+          >($vtype, 'Exposed as unpack may return false with invalid input'));
+        }
+        return $result;
+      }
       case TType::SET:
       case TType::LST: {
-          // Vtype
-          $data = $itrans->readAll(1);
-          $arr = unpack('c', $data);
-          $vtype = $arr[1];
-          // Size
-          $data = $itrans->readAll(4);
-          $arr = unpack('N', $data);
-          $size = $arr[1];
-          if ($size > 0x7fffffff) {
-            $size = 0 - (($size - 1) ^ 0xffffffff);
-          }
-          $result = 5;
-          for ($i = 0; $i < $size; $i++) {
-            $result += self::skipBinary($itrans, $vtype);
-          }
-          return $result;
+        // Vtype
+        $data = $itrans->readAll(1);
+        $arr = PHP\unpack('c', $data);
+        $vtype = $arr[1];
+        // Size
+        $data = $itrans->readAll(4);
+        $arr = PHP\unpack('N', $data);
+        $size = $arr[1];
+        if ($size > 0x7fffffff) {
+          $size = 0 - (($size - 1) ^ 0xffffffff);
         }
+        $result = 5;
+        for ($i = 0; $i < $size; $i++) {
+          $result += self::skipBinary($itrans, HH\FIXME\UNSAFE_CAST<
+            dynamic,
+            TType,
+          >($vtype, 'Exposed as unpack may return false with invalid input'));
+        }
+        return $result;
+      }
       default:
         throw new TProtocolException(
           'Unknown field type: '.$type,

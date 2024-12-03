@@ -14,30 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.binary
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Accelerated binary protocol: used in conjunction with the thrift_protocol
  * extension for faster deserialization
  */
+<<Oncalls('thrift')>> // @oss-disable
 class TBinaryProtocolAccelerated extends TBinaryProtocolBase {
+
   public function __construct(
-    $trans,
-    $strict_read = false,
-    $strict_write = true,
-  ) {
-    // If the transport doesn't implement putBack, wrap it in a
-    // TBufferedTransport (which does)
-    if (!($trans instanceof IThriftBufferedTransport)) {
-      $trans = new TBufferedTransport($trans);
-    }
+    IThriftBufferedTransport $trans,
+    bool $strict_read = false,
+    bool $strict_write = true,
+  )[read_globals] {
     parent::__construct($trans, $strict_read, $strict_write);
   }
-  public function isStrictRead() {
-    return $this->strictRead_;
+
+  public function isStrictRead()[]: bool {
+    return $this->strictRead;
   }
-  public function isStrictWrite() {
-    return $this->strictWrite_;
+
+  public function isStrictWrite()[]: bool {
+    return $this->strictWrite;
   }
 }

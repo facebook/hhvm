@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.compact
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Do not use this class.
@@ -24,8 +25,6 @@
  * TCompactProtocolAccelerated or TCompactProtocolUnaccelerated
  * @deprecated
  */
-class TCompactProtocol extends TCompactProtocolAccelerated {
-  public function __construct($trans) {
-    parent::__construct($trans);
-  }
+<<Oncalls('thrift')>> // @oss-disable
+final class TCompactProtocol extends TCompactProtocolAccelerated {
 }

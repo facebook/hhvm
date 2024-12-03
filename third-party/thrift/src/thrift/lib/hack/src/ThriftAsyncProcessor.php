@@ -14,34 +14,54 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
-abstract class ThriftAsyncProcessor extends ThriftProcessorBase
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
+abstract class ThriftAsyncProcessor
+  extends ThriftProcessorBase
   implements IThriftAsyncProcessor {
 
   abstract const type TThriftIf as IThriftAsyncIf;
 
+  use TWithMasBuenopathLastSet;
+
+  <<StringMetadataExtractor('Thrift:')>>
   final public async function processAsync(
     TProtocol $input,
     TProtocol $output,
+    ?string $fname = null,
+    ?int $rseqid = null,
   ): Awaitable<bool> {
-    $rseqid = 0;
-    $fname = '';
-    $mtype = 0;
+    if ($fname === null || $rseqid === null) {
+      $rseqid = 0;
+      $fname = '';
+      $mtype = 0;
 
-    $input->readMessageBegin(inout $fname, inout $mtype, inout $rseqid);
+      $input->readMessageBegin(inout $fname, inout $mtype, inout $rseqid);
+    }
+
+    HH\set_frame_metadata(nameof static.':'.$fname);
+    if (!$this->isSubRequest()) {
+      RelativeScript::setMinorPath($fname);
+    }
     $methodname = 'process_'.$fname;
-    if (!method_exists($this, $methodname)) {
+    if (JustKnobs::eval('www/mas_buenopath:enable_mbp_thrift')) {
+      self::setBuenopath(ThriftMasBuenopath::newBuilder(
+        shape("class_name" => static::class, "method_name" => $methodname),
+      ));
+    }
+    if (!PHP\method_exists($this, $methodname)) {
       $handler_ctx = $this->eventHandler_->getHandlerContext($fname);
-      $this->eventHandler_->preRead($handler_ctx, $fname, array());
+      $this->eventHandler_->preRead($handler_ctx, $fname, dict[]);
       $input->skip(TType::STRUCT);
       $input->readMessageEnd();
-      $this->eventHandler_->postRead($handler_ctx, $fname, array());
-      $x = new TApplicationException(
-        'Function '.$fname.' not implemented.',
-        TApplicationException::UNKNOWN_METHOD,
-      );
+      $this->eventHandler_->postRead($handler_ctx, $fname, dict[]);
+      $x = TApplicationException::fromShape(shape(
+        'message' => 'Function '.$fname.' not implemented.',
+        'code' => TApplicationException::UNKNOWN_METHOD,
+      ));
       $this->eventHandler_->handlerError($handler_ctx, $fname, $x);
       $output->writeMessageBegin($fname, TMessageType::EXCEPTION, $rseqid);
       $x->write($output);
@@ -49,12 +69,19 @@ abstract class ThriftAsyncProcessor extends ThriftProcessorBase
       $output->getTransport()->flush();
       return true;
     }
-    /* UNSAFE_EXPR[2011]: This is safe */
+    /* HH_FIXME[2011]: This is safe */
     await $this->$methodname($rseqid, $input, $output);
     return true;
   }
 
-  final public function process(TProtocol $input, TProtocol $output): bool {
-    return HH\Asio\join($this->processAsync($input, $output));
+  public function process(
+    TProtocol $input,
+    TProtocol $output,
+    ?string $fname = null,
+    ?int $rseqid = null,
+  ): bool {
+    return Asio::awaitSynchronously(
+      $this->processAsync($input, $output, $fname, $rseqid),
+    );
   }
 }

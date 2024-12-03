@@ -14,18 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 interface TTransportSupportsHeaders {
-  public function setHeader(string $str_key, @string $str_value): this;
+  public function setWriteHeader(
+    string $str_key,
+    string $str_value,
+  )[write_props]: this;
   public function setPersistentHeader(
     string $str_key,
-    @string $str_value,
-  ): this;
-  public function getWriteHeaders(): KeyedContainer<string, string>;
-  public function getPersistentWriteHeaders(): KeyedContainer<string, string>;
-  public function getHeaders(): KeyedContainer<string, string>;
-  public function clearHeaders(): void;
-  public function clearPersistentHeaders(): void;
+    string $str_value,
+  )[write_props]: this;
+  public function getWriteHeaders()[]: KeyedContainer<string, string>;
+  public function getPersistentWriteHeaders()[]: KeyedContainer<string, string>;
+  public function getReadHeaders()[]: KeyedContainer<string, string>;
+  public function clearWriteHeaders()[write_props]: void;
 }

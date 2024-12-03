@@ -14,29 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.compact
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Accelerated compact protocol: used in conjunction with a Thrift HPHP
  * extension for faster serialization and deserialization. The generated Thrift
  * code uses instanceof to look for this class and call into the extension.
  */
+<<Oncalls('thrift')>> // @oss-disable
 class TCompactProtocolAccelerated extends TCompactProtocolBase {
   // The generated Thrift code calls this as a final check. If it returns true,
   // the HPHP extension will be used; if it returns false, the above PHP code is
   // used as a fallback.
-  public static function checkVersion($v) {
-    return $v == 1;
+  public static function checkVersion(int $v)[]: bool {
+    return $v === 1;
   }
 
-  public function __construct($trans) {
-    // If the transport doesn't implement putBack, wrap it in a
-    // TBufferedTransport (which does)
-    if (!($trans instanceof IThriftBufferedTransport)) {
-      $trans = new TBufferedTransport($trans);
-    }
-
+  public function __construct(IThriftBufferedTransport $trans)[] {
     parent::__construct($trans);
   }
 }

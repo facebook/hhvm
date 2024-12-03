@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.compact
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Old slow unaccelerated protocol.
  */
-class TCompactProtocolUnaccelerated extends TCompactProtocolBase {
-  public function __construct($trans) {
-    parent::__construct($trans);
-  }
+<<Oncalls('thrift')>> // @oss-disable
+final class TCompactProtocolUnaccelerated extends TCompactProtocolBase {
 }

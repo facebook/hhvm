@@ -14,15 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
-class TApplicationException extends TException {
-  static array<int, array<string, mixed>>
-    $_TSPEC = array(
-      1 => array('var' => 'message', 'type' => TType::STRING),
-      2 => array('var' => 'code', 'type' => TType::I32),
-    );
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
+final class TApplicationException extends TException implements IThriftStruct {
+
+  use ThriftSerializationTrait;
+
+  const ThriftStructTypes::TSpec SPEC = dict[
+    1 => shape(
+      'var' => 'message',
+      'type' => TType::STRING,
+    ),
+    2 => shape(
+      'var' => 'code',
+      'type' => TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'message' => 1,
+    'code' => 2,
+  ];
+  const type TConstructorShape = shape(
+    ?'message' => ?string,
+    ?'code' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 0;
 
   const UNKNOWN = 0;
   const UNKNOWN_METHOD = 1;
@@ -32,29 +52,40 @@ class TApplicationException extends TException {
   const MISSING_RESULT = 5;
   const INVALID_TRANSFORM = 6;
 
-  public function __construct(?string $message = null, int $code = 0) {
+  public function __construct(?string $message = null, ?int $code = null)[] {
     parent::__construct($message, $code);
   }
 
-  public function read(TProtocol $output) {
-    return $this->_read('TApplicationException', self::$_TSPEC, $output);
+  public static function withDefaultValues()[]: this {
+    return new static();
   }
 
-  public function write(TProtocol $output): int {
-    $xfer = 0;
-    $xfer += $output->writeStructBegin('TApplicationException');
-    if ($message = $this->getMessage()) {
-      $xfer += $output->writeFieldBegin('message', TType::STRING, 1);
-      $xfer += $output->writeString($message);
-      $xfer += $output->writeFieldEnd();
-    }
-    if ($code = $this->getCode()) {
-      $xfer += $output->writeFieldBegin('type', TType::I32, 2);
-      $xfer += $output->writeI32($code);
-      $xfer += $output->writeFieldEnd();
-    }
-    $xfer += $output->writeFieldStop();
-    $xfer += $output->writeStructEnd();
-    return $xfer;
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return
+      new static(Shapes::idx($shape, 'message'), Shapes::idx($shape, 'code'));
+  }
+
+  public function getName()[]: string {
+    return 'TApplicationException';
+  }
+
+  public static function getAllStructuredAnnotations()[]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'message' => shape(
+          'field' => dict[],
+          'type' => dict[],
+        ),
+        'code' => shape(
+          'field' => dict[],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return TCompactSerializer::serialize($this);
   }
 }

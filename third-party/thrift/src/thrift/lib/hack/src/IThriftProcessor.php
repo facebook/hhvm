@@ -14,14 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Base interface for Thrift processors
  */
+<<Oncalls('thrift')>> // @oss-disable
 interface IThriftProcessor {
-  public function getEventHandler(): TProcessorEventHandler;
-  public function setEventHandler(TProcessorEventHandler $handler): this;
-  public function process(TProtocol $input, TProtocol $output): bool;
+  abstract const classname<\IThriftServiceStaticMetadata>
+    SERVICE_METADATA_CLASS;
+  abstract const string THRIFT_SVC_NAME;
+
+  public function getEventHandler()[]: TProcessorEventHandler;
+  public function setEventHandler(
+    TProcessorEventHandler $handler,
+  )[write_props]: this;
+  public function process(
+    TProtocol $input,
+    TProtocol $output,
+    ?string $fname = null,
+    ?int $rseqid = null,
+  ): bool;
+
+  public function setIsSubRequest(
+    bool $is_sub_request = true,
+  )[write_props]: this;
+
+  public function isSubRequest()[]: bool;
 }

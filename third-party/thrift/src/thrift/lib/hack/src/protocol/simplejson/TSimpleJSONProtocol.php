@@ -14,80 +14,110 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.simplejson
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Protocol for encoding/decoding simple json
  */
+<<Oncalls('thrift')>> // @oss-disable
 class TSimpleJSONProtocol extends TProtocol {
+  const ctx CReadWriteDefault = [write_props];
+
   const VERSION_1 = 0x80010000;
 
-  private IThriftBufferedTransport $bufTrans;
+  // String constants for floating point types that aren't valid JSON.
+  const THRIFT_NAN = "NaN";
+  const THRIFT_NEGATIVE_NAN = "-NaN";
+  const THRIFT_INFINITY = "Infinity";
+  const THRIFT_NEGATIVE_INFINITY = "-Infinity";
+
+  protected TMemoryBuffer $buffer;
   private Vector<TSimpleJSONProtocolContext> $contexts;
+  private bool $binaryAsBase64;
 
-  public function __construct(TTransport $trans) {
-    $this->contexts = Vector {};
-    if (!($trans instanceof IThriftBufferedTransport)) {
-      $trans = new TBufferedTransport($trans);
-    }
-    $this->bufTrans = $trans;
+  // If the serialized data has just the number,
+  // then deserialization breaks as it reaches the end of the string.
+  // This flag will ensure that deserializer stops reading
+  // as soon as the end of buffer is reached.
+  private bool $specialHandlingForNumber = false;
+
+  public function __construct(TMemoryBuffer $trans)[] {
     parent::__construct($trans);
-    $this->contexts
-      ->add(new TSimpleJSONProtocolContext($this->trans_, $this->bufTrans));
+    $this->buffer = $trans;
+    $this->contexts = Vector {
+      new TSimpleJSONProtocolContext($this->buffer),
+    };
+    $this->binaryAsBase64 = false;
   }
 
-  private function pushListWriteContext(): int {
+  public function setSpecialHandlingForNumber(bool $value)[write_props]: this {
+    $this->specialHandlingForNumber = $value;
+    return $this;
+  }
+
+  public function setBinaryAsBase64(bool $value)[write_props]: this {
+    $this->binaryAsBase64 = $value;
+    return $this;
+  }
+
+  protected function pushListWriteContext()[write_props]: int {
     return $this->pushWriteContext(
-      new TSimpleJSONProtocolListContext($this->trans_, $this->bufTrans),
+      new TSimpleJSONProtocolListContext($this->buffer),
     );
   }
 
-  private function pushMapWriteContext(): int {
-    return $this->pushWriteContext(
-      new TSimpleJSONProtocolMapContext($this->trans_, $this->bufTrans),
-    );
+  protected function pushMapWriteContext()[write_props]: int {
+    return
+      $this->pushWriteContext(new TSimpleJSONProtocolMapContext($this->buffer));
   }
 
-  private function pushListReadContext(): void {
-    $this->pushReadContext(
-      new TSimpleJSONProtocolListContext($this->trans_, $this->bufTrans),
-    );
+  protected function pushListReadContext()[write_props]: int {
+    return
+      $this->pushReadContext(new TSimpleJSONProtocolListContext($this->buffer));
   }
 
-  private function pushMapReadContext(): void {
-    $this->pushReadContext(
-      new TSimpleJSONProtocolMapContext($this->trans_, $this->bufTrans),
-    );
+  protected function pushMapReadContext()[write_props]: int {
+    return
+      $this->pushReadContext(new TSimpleJSONProtocolMapContext($this->buffer));
   }
 
-  private function pushWriteContext(TSimpleJSONProtocolContext $ctx): int {
+  protected function pushWriteContext(
+    TSimpleJSONProtocolContext $ctx,
+  )[write_props]: int {
     $this->contexts->add($ctx);
     return $ctx->writeStart();
   }
 
-  private function popWriteContext(): int {
+  protected function popWriteContext()[write_props]: int {
     $ctx = $this->contexts->pop();
     return $ctx->writeEnd();
   }
 
-  private function pushReadContext(TSimpleJSONProtocolContext $ctx): void {
+  protected function pushReadContext(
+    TSimpleJSONProtocolContext $ctx,
+  )[write_props]: int {
     $this->contexts->add($ctx);
-    $ctx->readStart();
+    return $ctx->readStart();
   }
 
-  private function popReadContext(): void {
+  protected function popReadContext()[write_props]: int {
     $ctx = $this->contexts->pop();
-    $ctx->readEnd();
+    return $ctx->readEnd();
   }
 
-  private function getContext(): TSimpleJSONProtocolContext {
+  protected function getContext()[]: TSimpleJSONProtocolContext {
     return $this->contexts->at($this->contexts->count() - 1);
   }
 
-  public function writeMessageBegin($name, $type, $seqid) {
-    return
-      $this->getContext()->writeSeparator() +
+  <<__Override>>
+  public function writeMessageBegin(
+    string $name,
+    TMessageType $type,
+    int $seqid,
+  )[write_props]: int {
+    return $this->getContext()->writeSeparator() +
       $this->pushListWriteContext() +
       $this->writeI32(self::VERSION_1) +
       $this->writeString($name) +
@@ -95,117 +125,161 @@ class TSimpleJSONProtocol extends TProtocol {
       $this->writeI32($seqid);
   }
 
-  public function writeMessageEnd() {
+  <<__Override>>
+  public function writeMessageEnd()[write_props]: int {
     return $this->popWriteContext();
   }
 
-  public function writeStructBegin($name) {
-    return
-      $this->getContext()->writeSeparator() + $this->pushMapWriteContext();
+  <<__Override>>
+  public function writeStructBegin(string $_name)[write_props]: int {
+    return $this->getContext()->writeSeparator() + $this->pushMapWriteContext();
   }
 
-  public function writeStructEnd() {
+  <<__Override>>
+  public function writeStructEnd()[write_props]: int {
     return $this->popWriteContext();
   }
 
-  public function writeFieldBegin($fieldName, $fieldType, $fieldId) {
-    return $this->writeString($fieldName);
+  <<__Override>>
+  public function writeFieldBegin(
+    string $field_name,
+    TType $_field_type,
+    int $_field_id,
+  )[write_props]: int {
+    return $this->writeString($field_name);
   }
 
-  public function writeFieldEnd() {
+  <<__Override>>
+  public function writeFieldEnd()[]: int {
     return 0;
   }
 
-  public function writeFieldStop() {
+  <<__Override>>
+  public function writeFieldStop()[]: int {
     return 0;
   }
 
-  public function writeMapBegin($keyType, $valType, $size) {
-    return
-      $this->getContext()->writeSeparator() + $this->pushMapWriteContext();
+  <<__Override>>
+  public function writeMapBegin(
+    TType $_key_type,
+    TType $_val_type,
+    int $_size,
+  )[write_props]: int {
+    return $this->getContext()->writeSeparator() + $this->pushMapWriteContext();
   }
 
-  public function writeMapEnd() {
+  <<__Override>>
+  public function writeMapEnd()[write_props]: int {
     return $this->popWriteContext();
   }
 
-  public function writeListBegin($elemType, $size) {
+  <<__Override>>
+  public function writeListBegin(
+    TType $_elem_type,
+    int $_size,
+  )[write_props]: int {
     return
       $this->getContext()->writeSeparator() + $this->pushListWriteContext();
   }
 
-  public function writeListEnd() {
+  <<__Override>>
+  public function writeListEnd()[write_props]: int {
     return $this->popWriteContext();
   }
 
-  public function writeSetBegin($elemType, $size) {
+  <<__Override>>
+  public function writeSetBegin(
+    TType $_elem_type,
+    int $_size,
+  )[write_props]: int {
     return
       $this->getContext()->writeSeparator() + $this->pushListWriteContext();
   }
 
-  public function writeSetEnd() {
+  <<__Override>>
+  public function writeSetEnd()[write_props]: int {
     return $this->popWriteContext();
   }
 
-  public function writeBool($value) {
+  <<__Override>>
+  public function writeBool(bool $value)[write_props]: int {
     $x = $this->getContext()->writeSeparator();
     if ($value) {
-      $this->trans_->write('true');
+      $this->buffer->write('true');
       $x += 4;
     } else {
-      $this->trans_->write('false');
+      $this->buffer->write('false');
       $x += 5;
     }
     return $x;
   }
 
-  public function writeByte($value) {
-    return $this->writeNum((int) $value);
+  <<__Override>>
+  public function writeByte(int $value)[write_props]: int {
+    return $this->writeNum((int)$value);
   }
 
-  public function writeI16($value) {
-    return $this->writeNum((int) $value);
+  <<__Override>>
+  public function writeI16(int $value)[write_props]: int {
+    return $this->writeNum((int)$value);
   }
 
-  public function writeI32($value) {
-    return $this->writeNum((int) $value);
+  <<__Override>>
+  public function writeI32(int $value)[write_props]: int {
+    return $this->writeNum((int)$value);
   }
 
-  public function writeI64($value) {
-    return $this->writeNum((int) $value);
+  <<__Override>>
+  public function writeI64(int $value)[write_props]: int {
+    return $this->writeNum((int)$value);
   }
 
-  public function writeDouble($value) {
-    return $this->writeNum((float) $value);
+  <<__Override>>
+  public function writeDouble(num $value)[write_props]: int {
+    return $this->writeFloatingPoint((float)$value);
   }
 
-  public function writeFloat($value) {
-    return $this->writeNum((float) $value);
+  <<__Override>>
+  public function writeFloat(float $value)[write_props]: int {
+    return $this->writeFloatingPoint((float)$value);
   }
 
-  private function writeNum($value) {
-    $ctx = $this->getContext();
-    $ret = $ctx->writeSeparator();
-    if ($ctx->escapeNum()) {
-      $value = (string) $value;
+  // Convert the given double to a JSON string, which is either the number,
+  // "NaN" or "Infinity" or "-Infinity".
+  protected function writeFloatingPoint(float $value)[write_props]: int {
+    /* @lint-ignore FLOATING_POINT_COMPARISON */
+    if ($value === INF) {
+      $str = self::THRIFT_INFINITY;
+    /* @lint-ignore FLOATING_POINT_COMPARISON */
+    } else if ($value === -INF) {
+      $str = self::THRIFT_NEGATIVE_INFINITY;
+    } else if (Math\is_nan($value)) {
+      $str = self::THRIFT_NAN;
+    } else {
+      return $this->writeNum($value);
     }
 
-    $enc = json_encode($value);
-    $this->trans_->write($enc);
-
-    return $ret + strlen($enc);
+    return $this->writeString($str);
   }
 
-  public function writeString($value) {
+  protected function writeNum(num $value)[write_props]: int {
     $ctx = $this->getContext();
     $ret = $ctx->writeSeparator();
-    $value = (string) $value;
-    $sb = '';
-    $sb .= '"';
-    $len = strlen($value);
+    $value = (string)$value;
+    if ($ctx->escapeNum()) {
+      $value = '"'.$value.'"';
+    }
+    $this->buffer->write($value);
+    return $ret + Str\length($value);
+  }
+
+  <<TestsBypassVisibility>>
+  private static function quoteString(string $value)[write_props]: string {
+    $sb = '"';
+    $len = Str\length($value);
     for ($i = 0; $i < $len; $i++) {
       $c = $value[$i];
-      $ord = ord($c);
+      $ord = PHP\ord($c);
       switch ($ord) {
         case 8:
           $sb .= '\b';
@@ -223,7 +297,7 @@ class TSimpleJSONProtocol extends TProtocol {
           $sb .= '\r';
           break;
         case 34:
-          // "
+        // "
         case 92:
           // \
           $sb .= '\\';
@@ -232,7 +306,7 @@ class TSimpleJSONProtocol extends TProtocol {
         default:
           if ($ord < 32 || $ord > 126) {
             $sb .= '\\u00';
-            $sb .= bin2hex($c);
+            $sb .= PHP\bin2hex($c);
           } else {
             $sb .= $c;
           }
@@ -240,149 +314,210 @@ class TSimpleJSONProtocol extends TProtocol {
       }
     }
     $sb .= '"';
-    $enc = $sb;
-    $this->trans_->write($enc);
-
-    return $ret + strlen($enc);
+    return $sb;
   }
 
-  public function readMessageBegin(inout $name, inout $type, inout $seqid) {
+  <<__Override>>
+  public function writeString(string $value)[write_props]: int {
+    $ctx = $this->getContext();
+    $ret = $ctx->writeSeparator();
+    $value = (string)$value;
+    $sb = self::quoteString($value);
+
+    $this->buffer->write($sb);
+
+    return $ret + Str\length($sb);
+  }
+
+  <<__Override>>
+  public function writeBinary(string $str)[write_props]: int {
+    if ($this->binaryAsBase64) {
+      $str = Base64::encode($str);
+    }
+    return $this->writeString($str);
+  }
+
+  <<__Override>>
+  public function readMessageBegin(
+    inout string $_name,
+    inout int $_type,
+    inout int $_seqid,
+  )[]: int {
     throw new TProtocolException(
       'Reading with TSimpleJSONProtocol is not supported. '.
       'Use readFromJSON() on your struct',
     );
   }
 
-  public function readMessageEnd() {
+  <<__Override>>
+  public function readMessageEnd()[]: int {
     throw new TProtocolException(
       'Reading with TSimpleJSONProtocol is not supported. '.
       'Use readFromJSON() on your struct',
     );
   }
 
-  public function readStructBegin(inout $_name) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $this->pushMapReadContext();
+  <<__Override>>
+  public function readStructBegin(inout ?string $_name)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    $result += $this->pushMapReadContext();
+    return $result;
   }
 
-  public function readStructEnd() {
+  <<__Override>>
+  public function readStructEnd()[write_props]: int {
     $this->popReadContext();
+    return 0;
   }
 
+  <<__Override>>
   public function readFieldBegin(
-    inout $name,
-    inout $fieldType,
-    inout $fieldId,
-  ) {
-    $fieldId = null;
+    inout ?string $name,
+    inout ?TType $field_type,
+    inout ?int $field_id,
+  )[write_props]: int {
+    $field_id = null;
     $ctx = $this->getContext();
     $name = null;
+    $result = 0;
     while ($name === null) {
       if ($ctx->readContextOver()) {
-        $fieldType = TType::STOP;
+        $field_type = TType::STOP;
         break;
       } else {
-        $ctx->readSeparator();
-        $this->skipWhitespace();
+        $result += $ctx->readSeparator();
+        $result += $this->skipWhitespace();
         $name = $this->readJSONString()[0];
         // We need to guess the type of the value, in case the name is bogus or we are in a skip method up the stack
         $offset = $this->skipWhitespace(true);
         $this->expectChar(':', true, $offset);
         $offset += 1 + $this->skipWhitespace(true, $offset + 1);
-        $c = $this->bufTrans->peek(1, $offset);
-        if ($c === 'n' && $this->bufTrans->peek(4, $offset) === 'null') {
+        $c = $this->buffer->peek(1, $offset);
+        if ($c === 'n' && $this->buffer->peek(4, $offset) === 'null') {
           // We actually want to skip this field, but there isn't an appropriate
           // TType to send back. So instead, we will silently skip
-          $ctx->readSeparator();
-          $this->skipWhitespace();
-          $this->trans_->readAll(4);
+          $result += $ctx->readSeparator();
+          $result += $this->skipWhitespace();
+          $result += Str\length($this->buffer->readAll(4));
           $name = null;
           continue;
         } else {
-          $fieldType = $this->guessFieldTypeBasedOnByte($c);
+          $field_type = $this->guessFieldTypeBasedOnByte($c);
         }
       }
     }
+    return $result;
   }
 
-  public function readFieldEnd() {
+  <<__Override>>
+  public function readFieldEnd()[]: int {
     // Do nothing
+    return 0;
   }
 
-  public function readMapBegin(inout $keyType, inout $valType, inout $size) {
+  <<__Override>>
+  public function readMapBegin(
+    inout ?TType $key_type,
+    inout ?TType $val_type,
+    inout ?int $size,
+  )[write_props]: int {
     $size = null;
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $this->pushMapReadContext();
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    $result += $this->pushMapReadContext();
     if ($this->readMapHasNext()) {
-      // We need to guess the type of the keys/values, in case we are in a skip method up the stack
-      $keyType = TType::STRING;
-      $this->skipWhitespace(); // This is not a peek, since we can do this safely again
+      // We need to guess the type of the keys/values, in case we are in a skip
+      // method up the stack
+      $key_type = TType::STRING;
+      // This is not a peek, since we can do this safely again
+      $result += $this->skipWhitespace();
       $offset = $this->readJSONString(true)[1];
       $offset += $this->skipWhitespace(true, $offset);
       $this->expectChar(':', true, $offset);
       $offset += 1 + $this->skipWhitespace(true, $offset + 1);
-      $c = $this->bufTrans->peek(1, $offset);
-      $valType = $this->guessFieldTypeBasedOnByte($c);
+      $c = $this->buffer->peek(1, $offset);
+      $val_type = $this->guessFieldTypeBasedOnByte($c);
     }
+    return $result;
   }
 
-  public function readMapHasNext(): bool {
+  <<__Override>>
+  public function readMapHasNext()[write_props]: bool {
     return !$this->getContext()->readContextOver();
   }
 
-  public function readMapEnd() {
-    $this->popReadContext();
+  <<__Override>>
+  public function readMapEnd()[write_props]: int {
+    return $this->popReadContext();
   }
 
-  public function readListBegin(&$elemType, &$size) {
+  <<__Override>>
+  public function readListBegin(
+    inout ?TType $elem_type,
+    inout ?int $size,
+  )[write_props]: int {
     $size = null;
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $this->pushListReadContext();
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    $result += $this->pushListReadContext();
     if ($this->readListHasNext()) {
-      // We need to guess the type of the values, in case we are in a skip method up the stack
-      $this->skipWhitespace(); // This is not a peek, since we can do this safely again
-      $c = $this->bufTrans->peek(1);
-      $elemType = $this->guessFieldTypeBasedOnByte($c);
+      // We need to guess the type of the values, in case we are in a skip
+      // method up the stack.
+      // This is not a peek, since we can do this safely again.
+      $result += $this->skipWhitespace();
+      $c = $this->buffer->peek(1);
+      $elem_type = $this->guessFieldTypeBasedOnByte($c);
     }
+    return $result;
   }
 
-  public function readListHasNext(): bool {
+  <<__Override>>
+  public function readListHasNext()[write_props]: bool {
     return !$this->getContext()->readContextOver();
   }
 
-  public function readListEnd() {
-    $this->popReadContext();
+  <<__Override>>
+  public function readListEnd()[write_props]: int {
+    return $this->popReadContext();
   }
 
-  public function readSetBegin(&$elemType, &$size) {
+  <<__Override>>
+  public function readSetBegin(
+    inout ?TType $elem_type,
+    inout ?int $size,
+  )[write_props]: int {
     $size = null;
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $this->pushListReadContext();
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    $result += $this->pushListReadContext();
     if ($this->readSetHasNext()) {
-      // We need to guess the type of the values, in case we are in a skip method up the stack
-      $this->skipWhitespace(); // This is not a peek, since we can do this safely again
-      $c = $this->bufTrans->peek(1);
-      $elemType = $this->guessFieldTypeBasedOnByte($c);
+      // We need to guess the type of the values, in case we are in a skip
+      // method up the stack.
+      // This is not a peek, since we can do this safely again.
+      $result += $this->skipWhitespace();
+      $c = $this->buffer->peek(1);
+      $elem_type = $this->guessFieldTypeBasedOnByte($c);
     }
+    return $result;
   }
 
-  public function readSetHasNext(): bool {
+  <<__Override>>
+  public function readSetHasNext()[write_props]: bool {
     return !$this->getContext()->readContextOver();
   }
 
-  public function readSetEnd() {
-    $this->popReadContext();
+  <<__Override>>
+  public function readSetEnd()[write_props]: int {
+    return $this->popReadContext();
   }
 
-  public function readBool(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $c = $this->trans_->readAll(1);
-    $target = null;
+  <<__Override>>
+  public function readBool(inout bool $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    $c = $this->buffer->readAll(1);
+    $result++;
     switch ($c) {
       case 't':
         $value = true;
@@ -392,31 +527,78 @@ class TSimpleJSONProtocol extends TProtocol {
         $value = false;
         $target = 'alse';
         break;
+      case '0':
+        $value = false;
+        $target = '';
+        break;
+      case '1':
+        $value = true;
+        $target = '';
+        break;
       default:
         throw new TProtocolException(
           'TSimpleJSONProtocol: Expected t or f, encountered 0x'.
-          bin2hex($c),
+          PHP\bin2hex($c),
         );
     }
 
-    for ($i = 0; $i < strlen($target); $i++) {
+    for ($i = 0; $i < Str\length($target); $i++) {
       $this->expectChar($target[$i]);
     }
+    return $result;
   }
 
-  private function readInteger(?int $min, ?int $max): int {
-    $val = intval($this->readNumStr());
+  protected function readInteger(
+    ?int $min,
+    ?int $max,
+  )[write_props]: (int, int) {
+    list($str_val, $chars_read) = $this->readNumStr();
+    $val = PHP\intval($str_val);
     if (($min !== null && $max !== null) && ($val < $min || $val > $max)) {
       throw new TProtocolException(
-        'TProtocolException: value '.
-        $val.
-        ' is outside the expected bounds',
+        'TProtocolException: value '.$val.' is outside the expected bounds',
       );
     }
-    return $val;
+    return tuple($val, $chars_read);
   }
 
-  private function readNumStr(): string {
+  protected function readFloatingPoint()[write_props]: (float, int) {
+    $ctx = $this->getContext();
+
+    // Check for NaN, -NaN, Infinity, and -Infinity
+    if ($this->buffer->peek(1) === '"') {
+      list($str, $result) = $this->readJSONString();
+      switch ($str) {
+        case self::THRIFT_NAN:
+          $num = Math\NAN;
+          break;
+        case self::THRIFT_NEGATIVE_NAN:
+          $num = -Math\NAN;
+          break;
+        case self::THRIFT_INFINITY:
+          $num = INF;
+          break;
+        case self::THRIFT_NEGATIVE_INFINITY:
+          $num = -INF;
+          break;
+        default:
+          if (!$ctx->escapeNum()) {
+            throw new TProtocolException(
+              'TSimpleJSONProtocol: Numeric data unexpectedly quoted',
+            );
+          }
+          $num = (float)$str;
+          break;
+      }
+
+      return tuple($num, $result);
+    }
+
+    list($str, $result) = $this->readNumStr();
+    return tuple((float)$str, $result);
+  }
+
+  protected function readNumStr()[write_props]: (string, int) {
     $ctx = $this->getContext();
     if ($ctx->escapeNum()) {
       $this->expectChar('"');
@@ -424,7 +606,12 @@ class TSimpleJSONProtocol extends TProtocol {
     $count = 0;
     $reading = true;
     while ($reading) {
-      $c = $this->bufTrans->peek(1, $count);
+      if (
+        $this->specialHandlingForNumber && $count === $this->buffer->available()
+      ) {
+        break;
+      }
+      $c = $this->buffer->peek(1, $count);
       switch ($c) {
         case '+':
         case '-':
@@ -448,11 +635,13 @@ class TSimpleJSONProtocol extends TProtocol {
           break;
       }
     }
-    $str = $this->trans_->readAll($count);
-    if (!preg_match(
-          '/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/',
-          $str,
-        )) {
+    $str = $this->buffer->readAll($count);
+    if (
+      !PHP\fb\preg_match_simple(
+        '/^[+-]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/',
+        $str,
+      )
+    ) {
       throw new TProtocolException(
         'TSimpleJSONProtocol: Invalid json number '.$str,
       );
@@ -461,55 +650,85 @@ class TSimpleJSONProtocol extends TProtocol {
       $this->expectChar('"');
     }
 
-    return $str;
+    return tuple($str, $count);
   }
 
-  public function readByte(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $value = $this->readInteger(-0x80, 0x7f);
+  <<__Override>>
+  public function readByte(inout int $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    list($value, $chars_read) = $this->readInteger(-0x80, 0x7f);
+    $result += $chars_read;
+    return $result;
   }
 
-  public function readI16(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $value = $this->readInteger(-0x8000, 0x7fff);
+  <<__Override>>
+  public function readI16(inout int $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    list($value, $chars_read) = $this->readInteger(-0x8000, 0x7fff);
+    $result += $chars_read;
+    return $result;
   }
 
-  public function readI32(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $value = $this->readInteger(-0x80000000, 0x7fffffff);
+  <<__Override>>
+  public function readI32(inout int $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    list($value, $chars_read) = $this->readInteger(-0x80000000, 0x7fffffff);
+    $result += $chars_read;
+    return $result;
   }
 
-  public function readI64(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $value = $this->readInteger(null, null);
+  <<__Override>>
+  public function readI64(inout int $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    list($value, $chars_read) = $this->readInteger(null, null);
+    $result += $chars_read;
+    return $result;
   }
 
-  public function readDouble(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $value = (float)$this->readNumStr();
+  <<__Override>>
+  public function readDouble(inout float $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    list($value, $chars_read) = $this->readFloatingPoint();
+    $result += $chars_read;
+    return $result;
   }
 
-  public function readFloat(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $value = (float)$this->readNumStr();
+  <<__Override>>
+  public function readFloat(inout float $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    list($value, $chars_read) = $this->readFloatingPoint();
+    $result += $chars_read;
+    return $result;
   }
 
-  public function readString(&$value) {
-    $this->getContext()->readSeparator();
-    $this->skipWhitespace();
-    $value = $this->readJSONString()[0];
+  <<__Override>>
+  public function readString(inout string $value)[write_props]: int {
+    $result = $this->getContext()->readSeparator();
+    $result += $this->skipWhitespace();
+    list($value, $chars_read) = $this->readJSONString();
+    $result += $chars_read;
+    return $result;
   }
 
-  private function readJSONString(
+  <<__Override>>
+  public function readBinary(inout string $str)[write_props]: int {
+    $result = $this->readString(inout $str);
+    if ($this->binaryAsBase64) {
+      $str = Base64::decode($str);
+    }
+    return $result;
+  }
+
+  protected function readJSONString(
     bool $peek = false,
     int $start = 0,
-  ): Pair<string, int> {
+  )[write_props]: (string, int) {
     if (!$peek) {
       $start = 0;
     }
@@ -518,14 +737,14 @@ class TSimpleJSONProtocol extends TProtocol {
     $sb = '';
     $reading = true;
     while ($reading) {
-      $c = $this->bufTrans->peek(1, $start + $count);
+      $c = $this->buffer->peek(1, $start + $count);
       switch ($c) {
         case '"':
           $reading = false;
           break;
         case '\\':
           $count++;
-          $c = $this->bufTrans->peek(1, $start + $count);
+          $c = $this->buffer->peek(1, $start + $count);
           switch ($c) {
             case '\\':
               $count++;
@@ -537,7 +756,7 @@ class TSimpleJSONProtocol extends TProtocol {
               break;
             case 'b':
               $count++;
-              $sb .= chr(0x08);
+              $sb .= PHP\chr(0x08);
               break;
             case '/':
               $count++;
@@ -564,13 +783,14 @@ class TSimpleJSONProtocol extends TProtocol {
               $this->expectChar('0', true, $start + $count);
               $this->expectChar('0', true, $start + $count + 1);
               $count += 2;
-              $sb .= hex2bin($this->bufTrans->peek(2, $start + $count));
+              $sb .=
+                (string)PHP\hex2bin($this->buffer->peek(2, $start + $count));
               $count += 2;
               break;
             default:
               throw new TProtocolException(
                 'TSimpleJSONProtocol: Expected Control Character, found 0x'.
-                bin2hex($c),
+                PHP\bin2hex($c),
               );
           }
           break;
@@ -586,21 +806,24 @@ class TSimpleJSONProtocol extends TProtocol {
     }
 
     if (!$peek) {
-      $this->trans_->readAll($count);
+      $this->buffer->readAll($count);
     }
 
     $this->expectChar('"', $peek, $start + $count);
-    return Pair {$sb, $count + 1};
+    return tuple($sb, $count + 1);
   }
 
-  private function skipWhitespace(bool $peek = false, int $start = 0): int {
+  protected function skipWhitespace(
+    bool $peek = false,
+    int $start = 0,
+  )[write_props]: int {
     if (!$peek) {
       $start = 0;
     }
     $count = 0;
     $reading = true;
     while ($reading) {
-      $byte = $this->bufTrans->peek(1, $count + $start);
+      $byte = $this->buffer->peek(1, $count + $start);
       switch ($byte) {
         case ' ':
         case "\t":
@@ -614,25 +837,24 @@ class TSimpleJSONProtocol extends TProtocol {
       }
     }
     if (!$peek) {
-      $this->trans_->readAll($count);
+      $this->buffer->readAll($count);
     }
 
     return $count;
   }
 
-  private function expectChar(
+  protected function expectChar(
     string $char,
     bool $peek = false,
     int $start = 0,
-  ): void {
+  )[write_props]: void {
     if (!$peek) {
       $start = 0;
     }
-    $c = null;
     if ($peek) {
-      $c = $this->bufTrans->peek(1, $start);
+      $c = $this->buffer->peek(1, $start);
     } else {
-      $c = $this->trans_->readAll(1);
+      $c = $this->buffer->readAll(1);
     }
 
     if ($c !== $char) {
@@ -640,12 +862,12 @@ class TSimpleJSONProtocol extends TProtocol {
         'TSimpleJSONProtocol: Expected '.
         $char.
         ', but encountered 0x'.
-        bin2hex($c),
+        PHP\bin2hex($c),
       );
     }
   }
 
-  private function guessFieldTypeBasedOnByte(string $byte): ?int {
+  protected function guessFieldTypeBasedOnByte(string $byte)[]: TType {
     switch ($byte) {
       case '{':
         return TType::STRUCT;
@@ -665,7 +887,8 @@ class TSimpleJSONProtocol extends TProtocol {
       case '7':
       case '8':
       case '9':
-        // These technically aren't allowed to start JSON floats, but are here for backwards compatibility
+      // These technically aren't allowed to start JSON floats, but are here
+      // for backwards compatibility
       case '+':
       case '.':
         return TType::DOUBLE;
@@ -675,11 +898,14 @@ class TSimpleJSONProtocol extends TProtocol {
       case '}':
         // We can get here with empty lists/maps, returning a dummy value
         return TType::STOP;
+      /* added due to nonexhaustive switch */
+      default:
+        break;
     }
 
     throw new TProtocolException(
       'TSimpleJSONProtocol: Unable to guess TType for character 0x'.
-      bin2hex($byte),
+      PHP\bin2hex($byte),
     );
   }
 }

@@ -14,92 +14,262 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.compact
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Utility class for serializing and deserializing
  * a thrift object using TCompactProtocol.
  */
-class TCompactSerializer extends TProtocolSerializer {
+<<Oncalls('thrift')>> // @oss-disable
+final class TCompactSerializer extends TProtocolWritePropsSerializer {
 
+  <<__Override>>
   public static function serialize(
     IThriftStruct $object,
     ?int $override_version = null,
     bool $disable_hphp_extension = false,
-  ): string {
+  )[write_props]: string {
     $transport = new TMemoryBuffer();
     $protocol = new TCompactProtocolAccelerated($transport);
+    $override_version ??= TCompactProtocolBase::VERSION;
 
-    $use_hphp_extension =
-      function_exists('thrift_protocol_write_compact') &&
-      !$disable_hphp_extension;
-
-    $last_version = null;
     if ($override_version !== null) {
       $protocol->setWriteVersion($override_version);
-      if (function_exists('thrift_protocol_set_compact_version')) {
-        $last_version =
-          thrift_protocol_set_compact_version($override_version);
-      } else {
-        $use_hphp_extension = false;
-      }
     }
 
-    if ($use_hphp_extension) {
-      thrift_protocol_write_compact(
-        $protocol,
-        $object->getName(),
-        TMessageType::REPLY,
-        $object,
-        0,
+    if (!$disable_hphp_extension) {
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> thrift_protocol_write_compact2(
+          $protocol,
+          $object->getName(),
+          TMessageType::REPLY,
+          $object,
+          0,
+          false,
+          $override_version,
+        ),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
       );
-      if ($last_version !== null) {
-        thrift_protocol_set_compact_version($last_version);
-      }
-      $unused_name = null;
-      $unused_type = null;
-      $unused_seqid = null;
-      $protocol->readMessageBegin(
-        inout $unused_name,
-        inout $unused_type,
-        inout $unused_seqid,
+      $_name = '';
+      $_type = -1;
+      $_seqid = -1;
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> $protocol->readMessageBegin(
+          inout $_name,
+          inout $_type,
+          inout $_seqid,
+        ),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
       );
     } else {
-      $object->write($protocol);
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> $object->write($protocol),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
     }
     return $transport->getBuffer();
   }
 
+  public static function deserializeTyped<T as IThriftStruct>(
+    string $str,
+    T $object,
+    ?int $override_version = null,
+    bool $disable_hphp_extension = false,
+  )[write_props]: T {
+    return self::deserialize(
+      $str,
+      $object,
+      $override_version,
+      $disable_hphp_extension,
+    );
+  }
+
+  <<__Override>>
   public static function deserialize<T as IThriftStruct>(
     string $str,
     T $object,
     ?int $override_version = null,
     bool $disable_hphp_extension = false,
-  ) {
+    bool $should_leave_extra = false,
+    int $options = 0,
+  )[write_props]: T {
     $transport = new TMemoryBuffer();
-    $protocol = new TCompactProtocolAccelerated($transport);
-
-    $use_hphp_extension =
-      function_exists('thrift_protocol_read_compact') &&
-      !$disable_hphp_extension;
+    $protocol = (new TCompactProtocolAccelerated($transport))
+      ->setOptions($options);
 
     if ($override_version !== null) {
       $protocol->setWriteVersion($override_version);
-      if (!function_exists('thrift_protocol_set_compact_version')) {
-        $use_hphp_extension = false;
-      }
     }
 
-    if ($use_hphp_extension) {
-      $protocol->writeMessageBegin('', TMessageType::REPLY, 0);
+    if (!$disable_hphp_extension) {
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==>
+          $protocol->writeMessageBegin('', TMessageType::REPLY, 0),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
       $transport->write($str);
-      $object = thrift_protocol_read_compact($protocol, get_class($object));
+      $object = HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> thrift_protocol_read_compact(
+          $protocol,
+          get_class($object),
+          $protocol->getOptions(),
+        ),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
     } else {
       $transport->write($str);
-      /* HH_FIXME[2060] Trust me, I know what I'm doing */
-      $object->read($protocol);
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> $object->read($protocol),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
     }
+    /* END_STRIP */
+    return $object;
+  }/* BEGIN_STRIP */
+
+  public static function deserializeThrowing<T as IThriftStruct>(
+    string $str,
+    T $object,
+    ?int $override_version = null,
+    bool $disable_hphp_extension = false,
+    int $options = 0,
+  )[write_props]: T {
+    $transport = new TMemoryBuffer();
+    $protocol = (new TCompactProtocolAccelerated($transport))
+      ->setOptions($options);
+
+    if ($override_version !== null) {
+      $protocol->setWriteVersion($override_version);
+    }
+
+    if (!$disable_hphp_extension) {
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==>
+          $protocol->writeMessageBegin('', TMessageType::REPLY, 0),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+      $transport->write($str);
+      $object = HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> thrift_protocol_read_compact(
+          $protocol,
+          get_class($object),
+          $protocol->getOptions(),
+        ),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+    } else {
+      $transport->write($str);
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> $object->read($protocol),
+        'Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+    }
+    $remaining = $transport->available();
+    invariant(
+      !$remaining,
+      "Deserialization didn't consume the whole input string (%d bytes left)".
+      "Are you sure this was serialized as a '%s'?",
+      $remaining,
+      get_class($object),
+    );
     return $object;
   }
+
+  public static function deserialize_DEPRECATED(
+    string $string_object,
+    string $class_name,
+    ?int $override_version = null,
+    bool $disable_hphp_extension = false,
+  )[write_props]: IThriftStruct {
+    $class_name = ArgAssert::isClassname($class_name, IThriftStruct::class);
+    return static::deserialize(
+      (string)$string_object,
+      new $class_name(),
+      $override_version,
+      $disable_hphp_extension,
+    );
+  }
+
+  <<__Override>>
+  public static function serializeData(
+    mixed $object,
+    ThriftStructTypes::TGenericSpec $type_spec,
+  )[write_props]: string {
+    $transport = new TMemoryBuffer();
+    $protocol = new TCompactProtocolAccelerated($transport);
+    if ($type_spec['type'] === TType::BOOL && $object is bool) {
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> $protocol->writeByte(
+          $object
+            ? TCompactProtocolBase::COMPACT_TRUE
+            : TCompactProtocolBase::COMPACT_FALSE,
+        ),
+        '[T133628451] Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+    } else {
+      HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> ThriftSerializationHelper::writeStructHelper(
+          $protocol,
+          $type_spec['type'],
+          $object,
+          $type_spec,
+        ),
+        '[T133628451] Memory buffer transport would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+    }
+    return $transport->getBuffer();
+  }
+
+  <<__Override>>
+  public static function deserializeData(
+    string $str,
+    ThriftStructTypes::TGenericSpec $type_spec,
+  )[write_props]: mixed {
+    $transport = new TMemoryBuffer();
+    $transport->write($str);
+    $protocol = new TCompactProtocolAccelerated($transport);
+    if ($type_spec['type'] === TType::BOOL) {
+      return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> {
+          $result = -1;
+          $protocol->readByte(inout $result);
+          return (bool)$result;
+        },
+        '[T133628451] Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+    } else {
+      return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+        ()[defaults] ==> {
+          $result = null;
+          $has_wrapper = false;
+          ThriftSerializationHelper::readStructHelper(
+            $protocol,
+            $type_spec['type'],
+            inout $result,
+            $type_spec,
+            inout $has_wrapper,
+          );
+          return $result;
+        },
+        '[T133628451] Compact with memory buffer would have write_props, but Hack doesn\'t '.
+        'have a way to express this atm.',
+      );
+    }
+  }
+
+  /* END_STRIP */
 }

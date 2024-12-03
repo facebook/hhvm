@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * NonBlocking implementation of TSocket. Does internal
@@ -24,6 +25,7 @@
  *
  * @package thrift.transport
  */
+<<Oncalls('thrift')>> // @oss-disable
 class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
 
   /**
@@ -66,20 +68,6 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
   protected int $rBufPos_ = 0;
 
   /**
-   * Debug on?
-   *
-   * @var bool
-   */
-  protected bool $debug_ = false;
-
-  /**
-   * Debug handler
-   *
-   * @var mixed
-   */
-  protected (function(string): bool) $debugHandler_;
-
-  /**
    * Socket recv buffer capacity.
    * @var int or null.
    */
@@ -93,16 +81,11 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    * @param string $debugHandler Function to call for error logging
    */
 
-  public function __construct(
-    string $host = 'localhost',
-    int $port = 9090,
-    ?(function(string): bool) $debugHandler = null,
-  ) {
+  public function __construct(string $host = 'localhost', int $port = 9090)[] {
     $this->host_ = $host;
     $this->port_ = $port;
-    $this->ipV6_ = strlen(@inet_pton($host)) == 16;
-
-    $this->debugHandler_ = $debugHandler ?: fun('error_log');
+    $this->ipV6_ = Str\contains($host, ':') &&
+      PHP\filter_var($host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) !== false;
   }
 
   /**
@@ -110,7 +93,7 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    *
    * @return string host
    */
-  public function getHost(): string {
+  public function getHost()[]: string {
     return $this->host_;
   }
 
@@ -119,7 +102,7 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    *
    * @return int port
    */
-  public function getPort(): int {
+  public function getPort()[]: int {
     return $this->port_;
   }
 
@@ -128,7 +111,7 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    *
    * @return socket resource
    */
-  public function getSocket(): ?resource {
+  public function getSocket()[]: ?resource {
     return $this->handle_;
   }
 
@@ -137,47 +120,47 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    *
    * @return bool true if the socket is open
    */
-  public function isOpen(): bool {
-    return is_resource($this->handle_);
+  <<__Override>>
+  public function isOpen()[]: bool {
+    return $this->handle_ is resource;
   }
 
   /**
    * These methods are required for IThriftRemoteConn, but are not used
    */
-  public function getRecvTimeout(): int {
+  <<__Deprecated(
+    'This function was found unused by CodemodRuleDeprecateUnusedClassMethod',
+  )>>
+  public function getRecvTimeout()[]: int {
     return 0;
   }
 
-  public function setRecvTimeout(int $timeout): void {
+  public function setRecvTimeout(int $timeout)[]: void {
     throw new TTransportException('setRecvTimeout is insupported');
   }
 
-  public function isReadable(): bool {
+  public function isReadable()[]: bool {
     return $this->isOpen();
   }
 
-  public function isWritable(): bool {
+  public function isWritable()[]: bool {
     return $this->isOpen();
-  }
-
-  /**
-   * Set debugging
-   *
-   * @param bool on/off
-   */
-  public function setDebug(bool $debug): void {
-    $this->debug_ = $debug;
   }
 
   /**
    * Connects the socket.
    */
-  public function open(): void {
-    if ($this->ipV6_) {
-      $handle = socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
-    } else {
-      $handle = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-    }
+  <<__Override>>
+  public function open()[leak_safe]: void {
+    $handle = (
+      () ==> {
+        if ($this->ipV6_) {
+          return PHP\socket_create(AF_INET6, SOCK_STREAM, SOL_TCP);
+        } else {
+          return PHP\socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        }
+      }
+    )();
 
     if ($handle === false) {
       $error = 'TNonBlockingSocket: Could not create socket';
@@ -186,38 +169,56 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
 
     $this->handle_ = $handle;
 
-    if (!socket_set_nonblock($this->handle_)) {
+    if (
+      !HH\Coeffects\fb\backdoor_from_leak_safe__DO_NOT_USE(
+        ()[defaults] ==> PHP\socket_set_nonblock($this->handle_ as nonnull),
+        'Waiting for D32856835.',
+      )
+    ) {
       $error = 'TNonBlockingSocket: Could not set nonblocking.';
       throw new TTransportException($error);
-    }
+    }/* BEGIN_STRIP */
 
-    $res = @socket_connect(
-      $this->handle_,
-      $this->host_,
-      $this->port_,
+    WallTimeProfiler::pushInstance();
+    $timer = WallTimeOperation::begin();
+    WallTimeProfiler::get()->beginIOWait();
+    /* END_STRIP */
+
+    $res = PHPism_FIXME::suppressAllErrors(
+      ()[leak_safe] ==> HH\Coeffects\fb\backdoor_from_leak_safe__DO_NOT_USE(
+        ()[defaults] ==> PHP\socket_connect(
+          $this->handle_ as nonnull,
+          $this->host_,
+          $this->port_,
+        ),
+        'Waiting for D32856835.',
+      ),
+    );/* BEGIN_STRIP */
+    WallTimeProfiler::get()->endIOWait(null);
+    $timer->end();
+    WallTimeProfiler::popInstance();
+
+    $this->incrCount(ProfilingCounterCount::THRIFT_OPEN_COUNT);
+    $this->incrDuration(
+      ProfilingCounterDuration::THRIFT_OPEN_DURATION,
+      $timer->getOldestRunningIODuration(),
     );
+    /* END_STRIP */
 
     if (!$res) {
-      $errno = socket_last_error($this->handle_);
-      $errstr = socket_strerror($errno);
-      $error =
-        'TNonBlockingSocket: socket_connect error ('.
-        (string) $errstr.'['.(string) $errno.'])';
-      if ($errno != 115) {
-        if ($this->debug_) {
-          call_user_func($this->debugHandler_, $error);
-        }
-      }
+      $errno = PHP\socket_last_error($this->handle_);
+      $errstr = PHP\socket_strerror($errno);
+      $error = 'TNonBlockingSocket: socket_connect error ('.
+        (string)$errstr.
+        '['.
+        (string)$errno.
+        '])';
       throw new TTransportException($error);
     }
 
-    $wBuf_ = '';
-    $rBuf_ = '';
-    $rBufPos_ = 0;
-
     $this->sockRecvCapacity_ =
-      socket_get_option($this->handle_, SOL_SOCKET, SO_RCVBUF);
-    if ($this->sockRecvCapacity_ == false) {
+      PHP\socket_get_option($this->handle_ as nonnull, SOL_SOCKET, SO_RCVBUF);
+    if ($this->sockRecvCapacity_ === false) {
       $this->sockRecvCapacity_ = null;
     }
   }
@@ -225,9 +226,14 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
   /**
    * Closes the socket.
    */
-  public function close(): void {
+  <<__Override>>
+  public function close()[leak_safe]: void {
     if ($this->handle_ !== null) {
-      @socket_close($this->handle_);
+      PHPism_FIXME::suppressAllErrors(
+        ()[write_props] ==> (
+          () ==> PHP\socket_close($this->handle_ as nonnull)
+        )(),
+      );
     }
     $this->handle_ = null;
   }
@@ -239,21 +245,22 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    * @param int $len How many bytes
    * @return string Binary data
    */
-  public function readAll(int $len): string {
+  <<__Override>>
+  public function readAll(int $len)[zoned_shallow]: string {
     // We may already have data for this read in the buffer
-    $ret = (string) substr($this->rBuf_, $this->rBufPos_);
+    $ret = (string)PHP\substr($this->rBuf_, $this->rBufPos_);
     // set the buffer to all but this read
-    $this->rBuf_ = (string) substr($this->rBuf_, 0, $this->rBufPos_);
+    $this->rBuf_ = (string)PHP\substr($this->rBuf_, 0, $this->rBufPos_);
 
-    if ($len <= strlen($ret)) {
+    if ($len <= Str\length($ret)) {
       $this->rBuf_ .= $ret;
       $this->rBufPos_ += $len;
 
-      return substr($ret, 0, $len);
+      return PHP\substr($ret, 0, $len);
     }
 
     // we already have this much for this read
-    $len -= strlen($ret);
+    $len -= Str\length($ret);
 
     while (true) {
       $buf = $this->read($len);
@@ -272,21 +279,22 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
           ':'.
           $this->port_,
         );
-      } else if (($sz = strlen($buf)) < $len) {
-        $ret .= $buf;
-        $len -= $sz;
       } else {
-        $ret .= $buf;
-        $this->rBuf_ .= $ret;
-        $this->rBufPos_ += strlen($ret); // advance pos to next read
+        $sz = Str\length($buf);
+        if ($sz < $len) {
+          $ret .= $buf;
+          $len -= $sz;
+        } else {
+          $ret .= $buf;
+          $this->rBuf_ .= $ret;
+          $this->rBufPos_ += Str\length($ret); // advance pos to next read
 
-        return $ret;
+          return $ret;
+        }
       }
     }
 
-    throw new TTransportException(
-      "TNonBlockingSocket: You shouldn't be here",
-    );
+    throw new TTransportException("TNonBlockingSocket: You shouldn't be here");
   }
 
   /**
@@ -296,14 +304,14 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    * client does several recevies, and fails on one other than the first.
    * It then retries all of them
    */
-  public function resetBufferPos(): void {
+  public function resetBufferPos()[write_props]: void {
     $this->rBufPos_ = 0;
   }
 
   /*
    * Clear the buffer and reset it
    */
-  public function clearBuf(): void {
+  public function clearBuf()[write_props]: void {
     $this->rBuf_ = '';
     $this->rBufPos_ = 0;
   }
@@ -314,31 +322,50 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    * @param int $len How many bytes
    * @return string Binary data
    */
-  public function read(int $len): string {
+  <<__Override>>
+  public function read(int $len)[zoned_shallow]: string {
     if ($this->sockRecvCapacity_ !== null) {
-      $len = min($len, $this->sockRecvCapacity_);
-    }
+      $len = Math\minva($len, $this->sockRecvCapacity_);
+    }/* BEGIN_STRIP */
 
-    $data = @socket_read($this->handle_, $len);
+    WallTimeProfiler::pushInstance();
+    $timer = WallTimeOperation::begin();
+    WallTimeProfiler::get()->beginIOWait();
+    /* END_STRIP */
 
-    if ($data === false || $data === '') {
-      $errno = socket_last_error($this->handle_);
-      $errstr = socket_strerror($errno);
-      $error =
-        "read: no data to be read ".
-        $this->host_.
-        ':'.
-        $this->port_.
-        ' ('.
-        (string) $errstr.' ['.(string) $errno.'])';
-      if ($this->debug_) {
-        call_user_func($this->debugHandler_, $error);
-      }
+    $data = PHPism_FIXME::suppressAllErrors(
+      ()[zoned_shallow] ==> $this->socketRead($len),
+    );/* BEGIN_STRIP */
 
+    WallTimeProfiler::get()->endIOWait(null);
+    $timer->end();
+    WallTimeProfiler::popInstance();
+
+    $this->incrCount(ProfilingCounterCount::THRIFT_READ_COUNT);
+    $this->incrCount(
+      ProfilingCounterCount::THRIFT_READ_BYTES,
+      Str\length($data),
+    );
+    $this->incrDuration(
+      ProfilingCounterDuration::THRIFT_READ_DURATION,
+      $timer->getOldestRunningIODuration(),
+    );
+    /* END_STRIP */
+
+    if ($data === '') {
       return '';
     }
 
     return $data;
+  }
+
+  public function socketRead(int $len)[zoned_shallow]: string {
+    $data = HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+      ()[defaults] ==> PHP\socket_read($this->handle_ as nonnull, $len),
+      'Expecting a policy check higher in the stack. Backdoor for now '.
+      '(T107484356).',
+    );
+    return $data !== false ? $data as string : '';
   }
 
   /**
@@ -346,26 +373,56 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    *
    * @param string $buf The data to write
    */
-  public function write(string $buf): void {
+  <<__Override>>
+  public function write(string $buf)[write_props]: void {
     $this->wBuf_ .= $buf;
   }
 
-  public function doWrite(): void {
-    $got = @socket_write($this->handle_, $this->wBuf_);
+  public function doWrite()[zoned_shallow]: void {/* BEGIN_STRIP */
+    WallTimeProfiler::pushInstance();
+    $timer = WallTimeOperation::begin();
+    WallTimeProfiler::get()->beginIOWait();
+    /* END_STRIP */
+    $got = PHPism_FIXME::suppressAllErrors(
+      ()[zoned_shallow] ==> $this->socketWrite($this->wBuf_),
+    );/* BEGIN_STRIP */
+
+    WallTimeProfiler::get()->endIOWait(null);
+    $timer->end();
+    WallTimeProfiler::popInstance();
+
+    $this->incrCount(ProfilingCounterCount::THRIFT_WRITE_COUNT);
+    $this->incrCount(ProfilingCounterCount::THRIFT_WRITE_BYTES, (int)$got);
+    $this->incrDuration(
+      ProfilingCounterDuration::THRIFT_WRITE_DURATION,
+      $timer->getOldestRunningIODuration(),
+    );
+    /* END_STRIP */
 
     if ($got === 0 || $got === false) {
       // Could not write
-      $errno = socket_last_error($this->handle_);
-      $errstr = socket_strerror($errno);
-      $error =
-        'doWrite: write failed ('.
-        (string) $errno.
+      $errno = PHP\socket_last_error($this->handle_);
+      $errstr = PHP\socket_strerror($errno);
+      $error = 'doWrite: write failed ('.
+        (string)$errno.
         '): '.
-        (string) $errstr.' '.$this->host_.':'.$this->port_;
+        (string)$errstr.
+        ' '.
+        $this->host_.
+        ':'.
+        $this->port_;
       throw new TTransportException($error);
     }
 
-    $this->wBuf_ = substr($this->wBuf_, $got);
+    $this->wBuf_ = Str\slice($this->wBuf_, $got);
+  }
+
+  public function socketWrite(string $buf)[zoned_shallow]: dynamic {
+    return HH\Coeffects\fb\backdoor_from_write_props__DO_NOT_USE(
+      ()[defaults] ==> PHP\socket_write($this->handle_ as nonnull, $buf),
+      'Expecting a policy check higher in the stack. Backdoor for now '.
+      '(T107484356).',
+    );
   }
 
   /**
@@ -373,8 +430,8 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    *
    * @return bool
    */
-  public function haveData(): bool {
-    return strlen($this->wBuf_) > 0;
+  public function haveData()[]: bool {
+    return Str\length($this->wBuf_) > 0;
   }
 
   /**
@@ -382,5 +439,15 @@ class TNonBlockingSocket extends TTransport implements IThriftRemoteConn {
    * Generated code will flush on send, we'd like to send as data becomes
    * available without blocking.
    */
-  public function flush(): void {}
+  <<__Override>>
+  public function flush()[]: void {}/* BEGIN_STRIP */
+
+  /**
+   * Name of the transport (e.g.: socket).
+   */
+  <<__Override>>
+  public function getTransportType()[]: string {
+    return 'non-blocking-socket';
+  }
+  /* END_STRIP */
 }

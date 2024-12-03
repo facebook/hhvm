@@ -14,31 +14,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
-abstract class ThriftSyncProcessor
-  extends ThriftProcessorBase {
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
+abstract class ThriftSyncProcessor extends ThriftProcessorBase {
 
   abstract const type TThriftIf as IThriftSyncIf;
 
-  public function process(TProtocol $input, TProtocol $output): bool {
-    $rseqid = 0;
-    $fname = '';
-    $mtype = 0;
+  use TWithMasBuenopathLastSet;
 
-    $input->readMessageBegin(inout $fname, inout $mtype, inout $rseqid);
+  <<StringMetadataExtractor('Thrift:')>>
+  public function process(
+    TProtocol $input,
+    TProtocol $output,
+    ?string $fname = null,
+    ?int $rseqid = null,
+  ): bool {
+    if ($fname === null || $rseqid === null) {
+      $_type = 0;
+      $fname = '';
+      $rseqid = 0;
+      $input->readMessageBegin(inout $fname, inout $_type, inout $rseqid);
+    }
+
+    HH\set_frame_metadata(nameof static.':'.$fname);
+    if (!$this->isSubRequest()) {
+      RelativeScript::setMinorPath($fname);
+    }
     $methodname = 'process_'.$fname;
-    if (!method_exists($this, $methodname)) {
+    if (JustKnobs::eval('www/mas_buenopath:enable_mbp_thrift')) {
+      self::setBuenopath(ThriftMasBuenopath::newBuilder(
+        shape("class_name" => static::class, "method_name" => $methodname),
+      ));
+    }
+    if (!PHP\method_exists($this, $methodname)) {
       $handler_ctx = $this->eventHandler_->getHandlerContext($fname);
-      $this->eventHandler_->preRead($handler_ctx, $fname, array());
+      $this->eventHandler_->preRead($handler_ctx, $fname, dict[]);
       $input->skip(TType::STRUCT);
       $input->readMessageEnd();
-      $this->eventHandler_->postRead($handler_ctx, $fname, array());
-      $x = new TApplicationException(
-        'Function '.$fname.' not implemented.',
-        TApplicationException::UNKNOWN_METHOD,
-      );
+      $this->eventHandler_->postRead($handler_ctx, $fname, dict[]);
+      $x = TApplicationException::fromShape(shape(
+        'message' => 'Function '.$fname.' not implemented.',
+        'code' => TApplicationException::UNKNOWN_METHOD,
+      ));
       $this->eventHandler_->handlerError($handler_ctx, $fname, $x);
       $output->writeMessageBegin($fname, TMessageType::EXCEPTION, $rseqid);
       $x->write($output);
@@ -46,7 +66,8 @@ abstract class ThriftSyncProcessor
       $output->getTransport()->flush();
       return true;
     }
-    /* UNSAFE_EXPR[2011]: This is safe */
+
+    /* HH_FIXME[2011] Previously hidden by unsafe_expr */
     $this->$methodname($rseqid, $input, $output);
     return true;
   }

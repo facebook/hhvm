@@ -14,15 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
-class THandlerShortCircuitException extends Exception {
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
+final class THandlerShortCircuitException<T>
+  extends ExceptionWithPureGetMessage {
   const int R_SUCCESS = 0;
   const int R_EXPECTED_EX = 1;
   const int R_UNEXPECTED_EX = 2;
 
-  public function __construct(public $result, public int $resultType) {
+  public function __construct(public T $result, public int $resultType)[] {
     parent::__construct();
   }
 }

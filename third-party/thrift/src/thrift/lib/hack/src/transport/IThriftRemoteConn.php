@@ -14,22 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 interface IThriftRemoteConn extends TTransportStatus {
-  public function open(): void;
-  public function close(): void;
-  public function flush(): void;
-  public function isOpen(): bool;
+  public function open()[zoned_shallow]: void;
+  public function close()[zoned_shallow]: void;
+  public function flush()[zoned_shallow]: void;
+  public function isOpen()[]: bool;
 
-  public function read(int $len): string;
-  public function readAll(int $len): string;
-  public function write(string $buf): void;
+  public function read(int $len)[zoned_shallow]: string;
+  public function readAll(int $len)[zoned_shallow]: string;
+  public function write(string $buf)[zoned_shallow]: void;
+  public function setRecvTimeout(int $timeout)[write_props]: void;
 
-  public function getRecvTimeout(): int;
-  public function setRecvTimeout(int $timeout): void;
-
-  public function getHost(): string;
-  public function getPort(): int;
+  public function getHost()[leak_safe]: string;
+  public function getPort()[leak_safe]: int;
 }

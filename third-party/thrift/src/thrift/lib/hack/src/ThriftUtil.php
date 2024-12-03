@@ -14,58 +14,192 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 abstract final class ThriftUtil {
 
-  <<__Rx, __AtMostRxAsArgs>>
-  public static function mapDict<Tk as arraykey, Tv1, Tv2>(
-    <<__OnlyRxIfImpl(Rx\KeyedTraversable::class)>>
-    KeyedTraversable<Tk, Tv1> $traversable,
-    <<__AtMostRxAsFunc>> (function(Tv1): Tv2) $value_func,
-  ): dict<Tk, Tv2> {
+  const keyset<classname<IThriftShapishStruct>> INTISH_CAST_STRUCTS = keyset[
+    nameof AdReviewDocNNModelConfig,
+    nameof AdReviewDocNNModels,
+    nameof AdReviewModelTransformationConfig,
+    nameof BEAM_BEAMDynamicModelThresholdStructs,
+    nameof BEAM_BEAMPerGroupModelThresholdConfig,
+    nameof CallerNameToMeta,
+    nameof Dataeng_MappingConfig,
+    nameof EntityProviders,
+    nameof FeatureBank_BreakdownValuemap,
+    nameof FeatureBank_Parameters,
+    nameof GenericIrisGatekeeperTopicConfig,
+    nameof Laser_CommerceTagRelatedQueries_CommerceTagRelatedQueries,
+    nameof MarketplaceAdsMTSecondaryMapping,
+    nameof ModelActionableComponentConfig,
+    nameof ModelToPerCompTypeThresholdsWrapper,
+    nameof OnDemandConfig_MatchmakingSpec,
+    nameof OpsStreamEvent,
+    nameof QRTModelMapping,
+    nameof SignalMappingCollectionV2,
+    nameof WebsiteEventContextParamStruct,
+    nameof artillery2_StringRestraint,
+    nameof galileo_GalileoClientViewShardedMap,
+    nameof galileo_NoTransform,
+    nameof ig_launcher_Whitelist,
+    nameof mocha_TraitEntry,
+    nameof pytext_preprocessing_PreprocessingMap,
+    nameof story_interaction_FLMFBStoriesFeatureBreakdownMappingConfig,
+    nameof uipbreakdown_WeightedFormulaValue,
+    nameof uma_AlertBaseBreakdownConfig,
+    nameof uma_DynamicBreakdownSamplingConfig,
+    nameof Laser_OwnershipAggregatorFinalPredictions_OwnershipDiscoveryAggregatorFinalPredictionsSignal,
+    nameof RolloutConfig,
+    nameof qe_NewUniverse,
+    nameof SignalsIntegrityParameters,
+    nameof qe1_UniverseOverrides,
+    nameof Bloks_Versioning_VersionedProp,
+    nameof IDGraphPixelMatchResult,
+    nameof uma_ChangedExperimentConfig,
+    nameof uma_DynamicBreakdownConfig,
+  ];
+
+  /**
+   * This is a migration strategy used to preserve pre-existing behavior in
+   * Hack/PHP that used to cause int-like strings to be converted to ints
+   * when used as array keys. More info: https://fburl.com/intishcast
+   */
+  public static function toDArray<Tk as arraykey, Tv>(
+    KeyedTraversable<Tk, Tv> $traversable,
+    classname<IThriftShapishStruct> $caller,
+  )[]: dict<Tk, Tv> {
+    $caller ??= '<unknown>';
+    if (
+      !C\contains_key(
+        self::INTISH_CAST_STRUCTS,
+        HH_FIXME::tryClassToClassname($caller),
+      )
+    ) {
+      return dict($traversable);
+    }
+
     $result = dict[];
     foreach ($traversable as $key => $value) {
-      $result[$key] = $value_func($value);
+      $result[PHPArrayism::preserveLegacyKey($key)] = $value;
     }
-    return $result;
+    return HH\FIXME\UNSAFE_CAST<dict<arraykey, Tv>, dict<Tk, Tv>>(
+      $result,
+      'FIXME[4110] maintain lie',
+    );
   }
 
-  <<__Rx, __AtMostRxAsArgs>>
-  public static function mapVec<Tv1, Tv2>(
-    <<__OnlyRxIfImpl(Rx\Traversable::class)>> Traversable<Tv1> $traversable,
-    <<__AtMostRxAsFunc>> (function(Tv1): Tv2) $value_func,
-  ): vec<Tv2> {
-    $result = vec[];
-    foreach ($traversable as $value) {
-      $result[] = $value_func($value);
+  public static function getUnionTypeFromShape<
+    TUnion as IThriftUnion<TEnum> as IThriftShapishStruct with {
+      type TShape = TShape },
+    reify TEnum,
+    TShape as shape(...),
+  >(TShape $shape)[]: TEnum {
+    $found_type = null;
+    foreach (Shapes::toDict($shape) as $key => $val) {
+      if ($val is nonnull) {
+        invariant($found_type is null, 'Union type can only contain one value');
+        $found_type = $key;
+      }
     }
-    return $result;
+    $union_enum_name =
+      ArgAssert::isEnumname(HH\ReifiedGenerics\get_classname<TEnum>());
+    $union_enum_pointer = HH\classname_to_class($union_enum_name);
+    return $union_enum_pointer::getValues()[
+      $found_type is null ? '_EMPTY_' : (string)$found_type
+    ];
   }
 
-  <<__Rx, __AtMostRxAsArgs>>
-  public static function mapKeyset<Tv1, Tv2 as arraykey>(
-    <<__OnlyRxIfImpl(Rx\Traversable::class)>> Traversable<Tv1> $traversable,
-    <<__AtMostRxAsFunc>> (function(Tv1): Tv2) $value_func,
-  ): keyset<Tv2> {
-    $result = keyset[];
-    foreach ($traversable as $value) {
-      $result[] = $value_func($value);
-    }
-    return $result;
+  public static function requireSameType<T1, T2>()[]: void where T1 = T2 {}
+
+  // Replaces dynamic field access in use cases to a centralized helper method.
+  public static async function genToValueMap(
+    IThriftStruct $thrift_object,
+  )[zoned_shallow]: Awaitable<dict<string, mixed>> {
+    $is_union = $thrift_object is IThriftUnion<_>;
+    $obj_spec = $thrift_object::SPEC;
+    $thrift_object as dynamic;
+    $obj_spec = Dict\from_values($obj_spec, $field_spec ==> $field_spec['var']);
+    return await Dict\map_async(
+      $obj_spec,
+      async $field_spec ==> {
+        $is_wrapped = Shapes::idx($field_spec, 'is_wrapped', false);
+        $field_name = $field_spec['var'];
+        if ($is_wrapped || $is_union) {
+          $acc_meth = 'get_'.$field_name;
+          // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
+          // Wrapped fields and unions have a getter.
+          $val = $thrift_object->$acc_meth();
+          if ($is_wrapped) {
+            // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
+            // Wrappers have genUnwrap method.
+            $val = await $val?->genUnwrap();
+          }
+        } else {
+          $val = $thrift_object->$field_name;
+        }
+        return $val;
+      },
+    );
   }
 
-  <<__Rx, __AtMostRxAsArgs>>
-  public static function toDArray<Tk as arraykey, Tv>(
-    <<__OnlyRxIfImpl(Rx\KeyedTraversable::class)>>
-    KeyedTraversable<Tk, Tv> $traversable,
-  ): darray<Tk, Tv> {
-    $result = darray[];
-    foreach ($traversable as $key => $value) {
-      $result[HH\array_key_cast($key)] = $value;
+  public static async function genField(
+    IThriftStruct $thrift_object,
+    ThriftStructTypes::TFieldSpec $field_spec,
+  )[zoned_shallow]: Awaitable<dynamic> {
+    $is_union = $thrift_object is IThriftUnion<_>;
+    $is_wrapped = Shapes::idx($field_spec, 'is_wrapped', false);
+    $field_name = $field_spec['var'];
+    $thrift_object as dynamic;
+    if ($is_wrapped || $is_union) {
+      $acc_meth = 'get_'.$field_name;
+      // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
+      // Wrapped fields and unions have a getter.
+      $val = $thrift_object->$acc_meth();
+      if ($is_wrapped) {
+        // @lint-ignore DYNAMICALLY_INVOKING_TARGETS_CONSIDERED_HARMFUL
+        // Wrappers have genUnwrap method.
+        $val = await $val?->genUnwrap();
+      }
+    } else {
+      $val = $thrift_object->$field_name;
     }
-    /* HH_IGNORE_ERROR[4110] maintain lie */
-    return $result;
+    return $val;
   }
+
+  public static async function genSetField(
+    IThriftStruct $thrift_object,
+    ThriftStructTypes::TFieldSpec $field_spec,
+    dynamic $value,
+  ): Awaitable<void> {
+    $thrift_object
+      as dynamic; // -> setter method and field accesses are dynamic
+    $field_name = $field_spec['var'];
+    $is_wrapped = Shapes::idx($field_spec, 'is_wrapped', false);
+    if ($thrift_object is IThriftUnion<_>) {
+      if ($value !== null) {
+        $acc_meth = 'set_'.$field_name;
+        $thrift_object->$acc_meth($value);
+      }
+    } else if ($is_wrapped) {
+      $acc_meth = 'get_'.$field_name;
+      $wrapper = $thrift_object->$acc_meth();
+      await $wrapper->genWrap($value);
+    } else {
+      $thrift_object->$field_name = $value;
+    }
+  }
+}
+
+final class ThriftAdapterVerifier<TStructThriftType, TStructHackType> {
+  public function requireSameReturnType<TAdapterTThriftType, TAdapterTHackType>(
+    (function(TAdapterTThriftType, int, IThriftStruct): TAdapterTHackType) $_,
+    (function(TAdapterTHackType): TAdapterTThriftType) $_,
+  )[]: void
+  where
+    TStructThriftType = TAdapterTThriftType,
+    TStructHackType = TAdapterTHackType {}
 }

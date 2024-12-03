@@ -14,51 +14,93 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
+type ThriftStructGenericSpecRecursiveImpl<
+  T as ThriftStructGenericSpecRecursiveImpl<T>,
+> = shape(
+  'type' => TType,
+  ?'var' => string,
+  ?'union' => bool,
+  ?'etype' => TType,
+  ?'elem' => T,
+  ?'ktype' => TType,
+  ?'vtype' => TType,
+  ?'key' => T,
+  ?'val' => T,
+  ?'format' => string,
+  ?'class' => classname<IThriftStruct>,
+  ?'enum' => string, // enumname<int>
+  ?'adapter' => classname<IThriftAdapter>,
+  ?'is_wrapped' => bool,
+  ?'is_terse' => bool,
+  ?'is_type_wrapped' => bool,
+  ?'is_binary' => bool,
+  ...
+);
+
+type ThriftStructGenericSpecImpl = ThriftStructGenericSpecRecursiveImpl<
+  ThriftStructGenericSpecRecursiveImpl<
+    ThriftStructGenericSpecRecursiveImpl<
+      ThriftStructGenericSpecRecursiveImpl<
+        ThriftStructGenericSpecRecursiveImpl<HH_FIXME\MISSING_GENERIC>,
+      >,
+    >,
+  >,
+>;
+
+type ThriftStructElemSpecRecursiveImpl<
+  T as ThriftStructElemSpecRecursiveImpl<T>,
+> = shape(
+  'type' => TType,
+  ?'etype' => TType,
+  ?'elem' => T,
+  ?'ktype' => TType,
+  ?'vtype' => TType,
+  ?'key' => T,
+  ?'val' => T,
+  ?'format' => string,
+  ?'class' => classname<IThriftStruct>,
+  ?'enum' => string, // enumname<int>
+  ?'adapter' => classname<IThriftAdapter>,
+  ?'is_wrapped' => bool,
+  ?'is_terse' => bool,
+  ?'is_type_wrapped' => bool,
+  ?'is_binary' => bool,
+);
+
+type ThriftStructElemSpecImpl = ThriftStructElemSpecRecursiveImpl<
+  ThriftStructElemSpecRecursiveImpl<
+    ThriftStructElemSpecRecursiveImpl<
+      ThriftStructElemSpecRecursiveImpl<HH_FIXME\MISSING_GENERIC>,
+    >,
+  >,
+>;
+
+type ThriftStructFieldSpecImpl = shape(
+  'var' => string,
+  'type' => TType,
+  ?'union' => bool,
+  ?'etype' => TType,
+  ?'elem' => ThriftStructElemSpecImpl,
+  ?'ktype' => TType,
+  ?'vtype' => TType,
+  ?'key' => ThriftStructElemSpecImpl,
+  ?'val' => ThriftStructElemSpecImpl,
+  ?'format' => string,
+  ?'class' => classname<IThriftStruct>,
+  ?'enum' => string, // enumname<int>
+  ?'adapter' => classname<IThriftAdapter>,
+  ?'is_wrapped' => bool,
+  ?'is_terse' => bool,
+  ?'is_type_wrapped' => bool,
+  ?'is_binary' => bool,
+);
+
 abstract final class ThriftStructTypes {
-  const type TFieldSpec = shape(
-    'var' => string,
-    'type' => \TType,
-    ?'union' => bool,
-    ?'etype' => \TType,
-    ?'elem' => self::TElemSpec,
-    ?'ktype' => \TType,
-    ?'vtype' => \TType,
-    ?'key' => self::TElemSpec,
-    ?'val' => self::TElemSpec,
-    ?'format' => string,
-    ?'class' => string,
-    ?'enum' => string,
-    ?'type_annotations' => varray<\IThriftStruct>,
-    ?'field_annotations' => varray<\IThriftStruct>,
-  );
-  const type TElemSpec = shape(
-    'type' => \TType,
-    ?'etype' => \TType,
-    ?'elem' => mixed, // self::TElemSpec once hack supports recursive types
-    ?'ktype' => \TType,
-    ?'vtype' => \TType,
-    ?'key' => mixed, // self::TElemSpec once hack supports recursive types
-    ?'val' => mixed, // self::TElemSpec once hack supports recursive types
-    ?'format' => string,
-    ?'class' => string,
-    ?'enum' => string,
-  );
-  const type TGenericSpec = shape(
-    'type' => \TType,
-    ?'var' => string,
-    ?'union' => bool,
-    ?'etype' => \TType,
-    ?'elem' => mixed, // self::TElemSpec once hack supports recursive types
-    ?'ktype' => \TType,
-    ?'vtype' => \TType,
-    ?'key' => mixed, // self::TElemSpec once hack supports recursive types
-    ?'val' => mixed, // self::TElemSpec once hack supports recursive types
-    ?'format' => string,
-    ?'class' => classname<\IThriftStruct>,
-    ?'enum' => string, // enumname<int>
-    ...
-  );
+  const type TFieldSpec = ThriftStructFieldSpecImpl;
+  const type TElemSpec = ThriftStructElemSpecImpl;
+  // Union of TFieldSpec and TElemSpec. For use in places that operate on both.
+  const type TGenericSpec = ThriftStructGenericSpecImpl;
+  const type TSpec = dict<int, self::TFieldSpec>;
 }

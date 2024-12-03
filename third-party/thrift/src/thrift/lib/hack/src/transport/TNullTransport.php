@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Transport that only accepts writes and ignores them.
@@ -23,20 +24,34 @@
  *
  * @package thrift.transport
  */
-class TNullTransport extends TTransport {
+<<Oncalls('thrift')>> // @oss-disable
+final class TNullTransport
+  extends TWritePropsTransport
+  implements IThriftBufferedTransport {
 
-  public function isOpen(): bool {
+  <<__Override>>
+  public function isOpen()[]: bool {
     return true;
   }
 
-  public function open(): void {}
+  <<__Override>>
+  public function open()[]: void {}
 
-  public function close(): void {}
+  <<__Override>>
+  public function close()[]: void {}
 
-  public function read(int $len): string {
+  <<__Override>>
+  public function read(int $len)[]: string {
     throw new TTransportException("Can't read from TNullTransport.");
   }
 
-  public function write(string $buf): void {}
+  public function peek(int $len, int $start = 0)[]: string {
+    throw new TTransportException("Can't peek through TNullTransport.");
+  }
+
+  public function putBack(string $data)[]: void {}
+
+  <<__Override>>
+  public function write(string $buf)[]: void {}
 
 }

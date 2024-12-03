@@ -14,19 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.simplejson
  */
 
-class TSimpleJSONProtocolMapContext extends TSimpleJSONProtocolContext {
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
+final class TSimpleJSONProtocolMapContext extends TSimpleJSONProtocolContext {
   private bool $first = true;
   private bool $colon = true;
 
-  public function writeStart(): int {
+  <<__Override>>
+  public function writeStart()[write_props]: int {
     $this->trans->write('{');
     return 1;
   }
 
-  public function writeSeparator(): int {
+  <<__Override>>
+  public function writeSeparator()[write_props]: int {
     if ($this->first) {
       $this->first = false;
       return 0;
@@ -42,29 +46,35 @@ class TSimpleJSONProtocolMapContext extends TSimpleJSONProtocolContext {
     return 1;
   }
 
-  public function writeEnd(): int {
+  <<__Override>>
+  public function writeEnd()[write_props]: int {
     $this->trans->write('}');
     return 1;
   }
 
-  public function readStart(): void {
-    $this->skipWhitespace();
+  <<__Override>>
+  public function readStart()[write_props]: int {
+    $result = $this->skipWhitespace();
     $c = $this->trans->readAll(1);
+    $result++;
     if ($c !== '{') {
       throw new TProtocolException(
-        'TSimpleJSONProtocol: Expected "{", encountered 0x'.bin2hex($c),
+        'TSimpleJSONProtocol: Expected "{", encountered 0x'.PHP\bin2hex($c),
       );
     }
+    return $result;
   }
 
-  public function readSeparator(): void {
+  <<__Override>>
+  public function readSeparator()[write_props]: int {
     if ($this->first) {
       $this->first = false;
-      return;
+      return 0;
     }
 
-    $this->skipWhitespace();
+    $result = $this->skipWhitespace();
     $c = $this->trans->readAll(1);
+    $result++;
     $target = $this->colon ? ':' : ',';
 
     if ($c !== $target) {
@@ -72,37 +82,43 @@ class TSimpleJSONProtocolMapContext extends TSimpleJSONProtocolContext {
         'TSimpleJSONProtocol: Expected "'.
         $target.
         '", encountered 0x'.
-        bin2hex($c),
+        PHP\bin2hex($c),
       );
     }
 
     $this->colon = !$this->colon;
+    return $result;
   }
 
-  public function readContextOver(): bool {
+  <<__Override>>
+  public function readContextOver()[write_props]: bool {
     $pos = $this->skipWhitespace(false);
-    $c = $this->bufTrans->peek(1, $pos);
+    $c = $this->trans->peek(1, $pos);
     if (!$this->first && $c !== ',' && $c !== '}') {
       throw new TProtocolException(
         'TSimpleJSONProtocol: Expected "," or "}", encountered 0x'.
-        bin2hex($c),
+        PHP\bin2hex($c),
       );
     }
 
     return ($c === '}');
   }
 
-  public function readEnd(): void {
-    $this->skipWhitespace();
+  <<__Override>>
+  public function readEnd()[write_props]: int {
+    $result = $this->skipWhitespace();
     $c = $this->trans->readAll(1);
+    $result++;
     if ($c !== '}') {
       throw new TProtocolException(
-        'TSimpleJSONProtocol: Expected "}", encountered 0x'.bin2hex($c),
+        'TSimpleJSONProtocol: Expected "}", encountered 0x'.PHP\bin2hex($c),
       );
     }
+    return $result;
   }
 
-  public function escapeNum(): bool {
+  <<__Override>>
+  public function escapeNum()[]: bool {
     return $this->colon;
   }
 }

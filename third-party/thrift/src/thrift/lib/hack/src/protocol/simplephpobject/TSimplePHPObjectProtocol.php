@@ -14,414 +14,509 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.simplephpobject
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 class TSimplePHPObjectProtocol extends TProtocol {
+  const ctx CReadWriteDefault = [write_props];
 
-  private Iterator<mixed> $top;
-  private Vector<Iterator<mixed>> $stack;
+  // 'copy-on-write iterator'. tuple tracks (position, iterable).
+  const type TCOWIterator = (int, vec<mixed>);
+  private vec<this::TCOWIterator> $stack;
+  private int $stackTopIdx;
 
-  public function __construct(mixed $val) {
-    $this->top = new ArrayIterator(array($val));
-    $this->stack = Vector {$this->top};
+  public function __construct(mixed $val)[] {
+    $this->stack = vec[tuple(0, vec[$val])];
+    $this->stackTopIdx = 0;
     parent::__construct(new TNullTransport());
   }
 
-  public function readMessageBegin(inout $name, inout $type, inout $seqid) {
+  <<__Override>>
+  public function readMessageBegin(
+    inout string $_name,
+    inout int $_type,
+    inout int $_seqid,
+  )[]: int {
     throw new TProtocolException('Not Supported');
   }
 
-  public function readMessageEnd() {
+  <<__Override>>
+  public function readMessageEnd()[]: int {
     throw new TProtocolException('Not Supported');
   }
 
-  public function readStructBegin(inout $name) {
+  public static function toThriftObject<T as IThriftStruct>(
+    mixed $simple_object,
+    T $thrift_object,
+    int $options = 0,
+  )[write_props]: T {
+    $protocol = new TSimplePHPObjectProtocol($simple_object);
+    $protocol->setOptions($options);
+    $thrift_object->read($protocol);
+    return $thrift_object;
+  }
+
+  <<__Override>>
+  public function readStructBegin(inout ?string $name)[write_props]: int {
     $name = null;
-    $val = $this->top->current();
-    $this->top->next();
-    $itr = null;
-    if ($val instanceof Set || $val instanceof ImmSet) {
+    $val = $this->stackTopIterCurrent() ?? vec[];
+    $this->stackTopIterNext();
+    if ($val is ConstSet<_>) {
       throw new TProtocolException(
-        'Unsupported data structure for struct: '.gettype($val),
+        'Unsupported data structure for struct: '.PHP\gettype($val),
       );
-    } else if ($val instanceof Vector) {
-      if ($val->isEmpty()) {
-        // Empty maps can be (de)serialized incorrectly as vectors
-        $size = 0;
-        $itr = $val->getIterator();
-      } else {
+    } else if ($val is ConstVector<_>) {
+      if (!C\is_empty($val)) {
         throw new TProtocolException(
-          'Unsupported data structure for struct: '.gettype($val),
+          'Unsupported data structure for struct: '.PHP\gettype($val),
         );
       }
-    } else if ($val instanceof ImmVector) {
-      if ($val->isEmpty()) {
-        // Empty maps can be (de)serialized incorrectly as vectors
-        $size = 0;
-        $itr = $val->getIterator();
-      } else {
-        throw new TProtocolException(
-          'Unsupported data structure for struct: '.gettype($val),
-        );
-      }
-    } else if ($val instanceof Map) {
-      $itr = $val->getIterator();
-    } else if ($val instanceof ImmMap) {
-      $itr = $val->getIterator();
-    } else if (is_array($val)) {
-      $itr = new ArrayIterator($val);
-    } else {
-      $val = (array) $val;
-      $itr = new ArrayIterator($val);
+      $val = vec[];
+    } else if (!($val is KeyedContainer<_, _>)) {
+      // @lint-ignore PHPISM_ERROR
+      $val = PHPism_FIXME::arrayCast($val);
     }
-    $itr = new TSimplePHPObjectProtocolKeyedIteratorWrapper($itr);
-    $this->stack->add($itr);
-    $this->top = $itr;
+    $this->stackPush(self::flattenMap($val));
+    return 0;
   }
 
-  public function readStructEnd() {
-    $this->stack->pop();
-    $val = $this->stack->lastValue();
-    invariant($val !== null, "Stack is empty, this shouldn't happen!");
-    $this->top = $val;
+  <<__Override>>
+  public function readStructEnd()[write_props]: int {
+    $this->stackPopBack();
+    return 0;
   }
 
+  <<__Override>>
   public function readFieldBegin(
-    inout $name,
-    inout $fieldType,
-    inout $fieldId,
-  ) {
+    inout ?string $name,
+    inout ?TType $field_type,
+    inout ?int $field_id,
+  )[write_props]: int {
     $val = null;
     while ($val === null) {
-      if (!$this->top->valid()) {
-        $fieldType = TType::STOP;
-        return;
+      if (!$this->stackTopIterValid()) {
+        $field_type = TType::STOP;
+        return 0;
       }
 
-      $fieldId = null;
-      $name = $this->top->current();
-      $this->top->next();
-      $val = $this->top->current();
+      $field_id = null;
+      $name =
+        // It's expected to use it only for keys, which seem to be strings or
+        // alike.
+        PHPism_FIXME::stringishCastPure_UNSAFE($this->stackTopIterCurrent());
+      $this->stackTopIterNext();
+      $val = $this->stackTopIterCurrent();
       if ($val === null) {
-        $this->top->next();
+        $this->stackTopIterNext();
         continue;
       }
 
-      $fieldType = $this->guessTypeForValue($val);
+      $field_type = self::guessTypeForValue($val);
     }
+    return 0;
   }
 
-  public function readFieldEnd() {}
+  <<__Override>>
+  public function readFieldEnd()[]: int {
+    return 0;
+  }
 
-  public function readMapBegin(inout $keyType, inout $valType, inout $size) {
-    $val = $this->top->current();
-    $this->top->next();
-    $itr = null;
-    if ($val instanceof Set || $val instanceof ImmSet) {
+  <<__Override>>
+  public function readMapBegin(
+    inout ?TType $key_type,
+    inout ?TType $val_type,
+    inout ?int $size,
+  )[write_props]: int {
+    $val = $this->stackTopIterCurrent() ?? vec[];
+    $this->stackTopIterNext();
+    if ($val is ConstSet<_>) {
       throw new TProtocolException(
-        'Unsupported data structure for map: '.gettype($val),
+        'Unsupported data structure for map: '.PHP\gettype($val),
       );
-    } else if ($val instanceof Vector) {
-      if ($val->isEmpty()) {
-        // Empty maps can be (de)serialized incorrectly as vectors
-        $size = 0;
-        $itr = $val->getIterator();
-      } else {
+    } else if ($val is ConstVector<_>) {
+      if (!C\is_empty($val)) {
         throw new TProtocolException(
-          'Unsupported data structure for map: '.gettype($val),
+          'Unsupported data structure for map: '.PHP\gettype($val),
         );
       }
-    } else if ($val instanceof ImmVector) {
-      if ($val->isEmpty()) {
-        // Empty maps can be (de)serialized incorrectly as vectors
-        $size = 0;
-        $itr = $val->getIterator();
-      } else {
-        throw new TProtocolException(
-          'Unsupported data structure for map: '.gettype($val),
-        );
-      }
-    } else if ($val instanceof Map) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof ImmMap) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if (is_array($val)) {
-      $itr = new ArrayIterator($val);
-      $size = count($val);
-    } else {
-      $val = (array) $val;
-      $itr = new ArrayIterator($val);
-      $size = count($val);
+      // Empty maps can be (de)serialized incorrectly as vectors.
+      // We cannot correctly handle a Vector with values when reading a
+      // Map, but we can infer an empty vector as an empty map.
+      $val = vec[];
+    } else if (!($val is KeyedContainer<_, _>)) {
+      // @lint-ignore PHPISM_ERROR
+      $val = PHPism_FIXME::arrayCast($val);
     }
-    $itr = new TSimplePHPObjectProtocolKeyedIteratorWrapper($itr);
-    $this->stack->add($itr);
-    $this->top = $itr;
+    // @lint-ignore UNUSED_VARIABLE linter is confused by an inout variable
+    $size = C\count($val);
+    $this->stackPush(self::flattenMap($val));
 
-    if ($itr->valid()) {
-      $key_sample = $itr->current();
-      $itr->next();
-      $val_sample = $itr->current();
-      $itr->rewind();
+    if ($this->stackTopIterValid()) {
+      $key_sample = $this->stackTopIterCurrent();
+      $this->stackTopIterNext();
+      $val_sample = $this->stackTopIterCurrent();
+      $this->stackTopIterRewind();
 
-      $keyType = $this->guessTypeForValue($key_sample);
-      $valType = $this->guessTypeForValue($val_sample);
+      $key_type = self::guessTypeForValue($key_sample);
+      $val_type = self::guessTypeForValue($val_sample);
     }
+    return 0;
   }
 
-  public function readMapEnd() {
-    $this->stack->pop();
-    $val = $this->stack->lastValue();
-    invariant($val !== null, "Stack is empty, this shouldn't happen!");
-    $this->top = $val;
+  <<__Override>>
+  public function readMapEnd()[write_props]: int {
+    $this->stackPopBack();
+    return 0;
   }
 
-  public function readListBegin(&$elemType, &$size) {
-    $val = $this->top->current();
-    $this->top->next();
-    $itr = null;
-    if ($val instanceof Set || $val instanceof ImmSet) {
+  <<__Override>>
+  public function readListBegin(
+    inout ?TType $elem_type,
+    inout ?int $size,
+  )[write_props]: int {
+    $val = $this->stackTopIterCurrent() ?? vec[];
+    $this->stackTopIterNext();
+    if ($val is ConstSet<_> || $val is string) {
       throw new TProtocolException(
-        'Unsupported data structure for list: '.gettype($val),
+        'Unsupported data structure for list: '.PHP\gettype($val),
       );
-    } else if ($val instanceof Map) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof ImmMap) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof Vector) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof ImmVector) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if (is_array($val)) {
-      $itr = new ArrayIterator($val);
-      $size = count($val);
+    }
+    if (!($val is KeyedContainer<_, _>)) {
+      // @lint-ignore PHPISM_ERROR
+      $val = vec(PHPism_FIXME::arrayCast($val));
+    }
+    // @lint-ignore UNUSED_VARIABLE linter is confused by an inout variable
+    $size = C\count($val);
+    $this->stackPush(vec($val));
+
+    if ($this->stackTopIterValid()) {
+      $val_sample = $this->stackTopIterCurrent();
+      $elem_type = self::guessTypeForValue($val_sample);
+    }
+    return 0;
+  }
+
+  <<__Override>>
+  public function readListEnd()[write_props]: int {
+    $this->stackPopBack();
+    return 0;
+  }
+
+  <<__Override>>
+  public function readSetBegin(
+    inout ?TType $elem_type,
+    inout ?int $size,
+  )[write_props]: int {
+    $val = $this->stackTopIterCurrent() ?? vec[];
+    $this->stackTopIterNext();
+    if ($val is Container<_>) {
+      $val = vec($val);
     } else {
-      $val = (array) $val;
-      $itr = new ArrayIterator($val);
-      $size = count($val);
+      // @lint-ignore PHPISM_ERROR
+      $val = Vec\keys(PHPism_FIXME::arrayCast($val));
     }
-    $this->stack->add($itr);
-    $this->top = $itr;
+    // @lint-ignore UNUSED_VARIABLE linter is confused by an inout variable
+    $size = C\count($val);
+    $this->stackPush($val);
 
-    if ($itr->valid()) {
-      $val_sample = $itr->current();
-      $elemType = $this->guessTypeForValue($val_sample);
+    if ($this->stackTopIterValid()) {
+      $val_sample = $this->stackTopIterCurrent();
+      $elem_type = self::guessTypeForValue($val_sample);
     }
+    return 0;
   }
 
-  public function readListEnd() {
-    $this->stack->pop();
-    $val = $this->stack->lastValue();
-    invariant($val !== null, "Stack is empty, this shouldn't happen!");
-    $this->top = $val;
+  <<__Override>>
+  public function readSetEnd()[write_props]: int {
+    $this->stackPopBack();
+    return 0;
   }
 
-  public function readSetBegin(&$elemType, &$size) {
-    $val = $this->top->current();
-    $this->top->next();
-    $itr = null;
-    if ($val instanceof Map) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof ImmMap) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof Vector) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof ImmVector) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof Set) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if ($val instanceof ImmSet) {
-      $itr = $val->getIterator();
-      $size = $val->count();
-    } else if (is_array($val)) {
-      $itr = new ArrayIterator($val);
-      $size = count($val);
-    } else {
-      $val = array_keys((array) $val);
-      $itr = new ArrayIterator($val);
-      $size = count($val);
-    }
-    $this->stack->add($itr);
-    $this->top = $itr;
-
-    if ($itr->valid()) {
-      $val_sample = $itr->current();
-      $elemType = $this->guessTypeForValue($val_sample);
-    }
+  <<__Override>>
+  public function readBool(inout bool $value)[write_props]: int {
+    $value = (bool)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
+    return 0;
   }
 
-  public function readSetEnd() {
-    $this->stack->pop();
-    $val = $this->stack->lastValue();
-    invariant($val !== null, "Stack is empty, this shouldn't happen!");
-    $this->top = $val;
-  }
-
-  public function readBool(&$value) {
-    $value = (bool) $this->top->current();
-    $this->top->next();
-  }
-
-  public function readByte(&$value) {
-    $value = (int) $this->top->current();
-    $this->top->next();
+  <<__Override>>
+  public function readByte(inout int $value)[write_props]: int {
+    $value = (int)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
     if ($value < -0x80 || $value > 0x7F) {
       throw new TProtocolException('Value is outside of valid range');
     }
+    return 0;
   }
 
-  public function readI16(&$value) {
-    $value = (int) $this->top->current();
-    $this->top->next();
+  <<__Override>>
+  public function readI16(inout int $value)[write_props]: int {
+    $value = (int)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
     if ($value < -0x8000 || $value > 0x7FFF) {
       throw new TProtocolException('Value is outside of valid range');
     }
+    return 0;
   }
 
-  public function readI32(&$value) {
-    $value = (int) $this->top->current();
-    $this->top->next();
+  <<__Override>>
+  public function readI32(inout int $value)[write_props]: int {
+    $value = (int)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
     if ($value < -0x80000000 || $value > 0x7FFFFFFF) {
       throw new TProtocolException('Value is outside of valid range');
     }
+    return 0;
   }
 
-  public function readI64(&$value) {
-    $value = (int) $this->top->current();
-    $this->top->next();
-    if ($value < (-0x80000000 << 32) ||
-        $value > (0x7FFFFFFF << 32 | 0xFFFFFFFF)) {
+  <<__Override>>
+  public function readI64(inout int $value)[write_props]: int {
+    $value = (int)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
+    if (
+      $value < (-0x80000000 << 32) || $value > (0x7FFFFFFF << 32 | 0xFFFFFFFF)
+    ) {
       throw new TProtocolException('Value is outside of valid range');
     }
+    return 0;
   }
 
-  public function readDouble(&$value) {
-    $value = (float) $this->top->current();
-    $this->top->next();
+  <<__Override>>
+  public function readDouble(inout float $value)[write_props]: int {
+    $value = (float)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
+    return 0;
   }
 
-  public function readFloat(&$value) {
-    $value = (float) $this->top->current();
-    $this->top->next();
+  <<__Override>>
+  public function readFloat(inout float $value)[write_props]: int {
+    $value = (float)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
+    return 0;
   }
 
-  public function readString(&$value) {
-    $value = (string) $this->top->current();
-    $this->top->next();
+  <<__Override>>
+  public function readString(inout string $value)[write_props]: int {
+    $value = (string)$this->stackTopIterCurrent();
+    $this->stackTopIterNext();
+    return 0;
   }
 
-  public function writeMessageBegin($name, $type, $seqid) {
+  <<__Override>>
+  public function writeMessageBegin(
+    string $_name,
+    TMessageType $_type,
+    int $_seqid,
+  )[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeMessageEnd() {
+  <<__Override>>
+  public function writeMessageEnd()[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeStructBegin($name) {
+  <<__Override>>
+  public function writeStructBegin(string $_name)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeStructEnd() {
+  <<__Override>>
+  public function writeStructEnd()[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeFieldBegin($fieldName, $fieldType, $fieldId) {
+  <<__Override>>
+  public function writeFieldBegin(
+    string $_field_name,
+    TType $_field_type,
+    int $_field_id,
+  )[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeFieldEnd() {
+  <<__Override>>
+  public function writeFieldEnd()[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeFieldStop() {
+  <<__Override>>
+  public function writeFieldStop()[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeMapBegin($keyType, $valType, $size) {
+  <<__Override>>
+  public function writeMapBegin(
+    TType $_key_type,
+    TType $_val_type,
+    int $_size,
+  )[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeMapEnd() {
+  <<__Override>>
+  public function writeMapEnd()[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeListBegin($elemType, $size) {
+  <<__Override>>
+  public function writeListBegin(TType $_elem_type, int $_size)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeListEnd() {
+  <<__Override>>
+  public function writeListEnd()[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeSetBegin($elemType, $size) {
+  <<__Override>>
+  public function writeSetBegin(TType $_elem_ype, int $_size)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeSetEnd() {
+  <<__Override>>
+  public function writeSetEnd()[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeBool($value) {
+  <<__Override>>
+  public function writeBool(bool $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeByte($value) {
+  <<__Override>>
+  public function writeByte(int $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeI16($value) {
+  <<__Override>>
+  public function writeI16(int $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeI32($value) {
+  <<__Override>>
+  public function writeI32(int $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeI64($value) {
+  <<__Override>>
+  public function writeI64(int $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeDouble($value) {
+  <<__Override>>
+  public function writeDouble(float $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeFloat($value) {
+  <<__Override>>
+  public function writeFloat(float $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  public function writeString($value) {
+  <<__Override>>
+  public function writeString(string $_value)[]: int {
     throw new TProtocolException('Not Implemented');
   }
 
-  private function guessTypeForValue(mixed $val): int {
-    if (is_bool($val)) {
+  /**
+   * Returns the index of the topmost element in the stack.
+   */
+  private function stackTopIdx()[]: int {
+    return $this->stackTopIdx;
+  }
+
+  /**
+   * Returns true if the position of the iterator at the top of the stack is
+   * valid, or false if the position is out of bounds.
+   */
+  private function stackTopIterValid()[]: bool {
+    list($top_pos, $top_iter) = C\last($this->stack) as nonnull;
+    return $top_pos >= 0 && $top_pos < C\count($top_iter);
+  }
+
+  /**
+   * Returns the current element for the iterator at the top of the stack.
+   */
+  private function stackTopIterCurrent()[]: mixed {
+    list($top_pos, $top_iter) = C\last($this->stack) as nonnull;
+    return $top_iter[$top_pos];
+  }
+
+  /**
+   * Moves the position for the iterator at the top of the stack forward.
+   */
+  private function stackTopIterNext()[write_props]: void {
+    $this->stack[$this->stackTopIdx()][0]++;
+  }
+
+  /**
+   * Moves the position for the iterator at the top of the stack backward.
+   */
+  private function stackTopIterRewind()[write_props]: void {
+    $this->stack[$this->stackTopIdx()][0]--;
+  }
+
+  /**
+   * Turns an iterable into a COW iterator and pushes it onto the stack.
+   */
+  private function stackPush(vec<mixed> $iterable)[write_props]: void {
+    $this->stack[] = tuple(0, $iterable);
+    $this->stackTopIdx++;
+  }
+
+  /**
+   * Pops the iterator at the top of the stack.
+   */
+  private function stackPopBack()[write_props]: void {
+    /* HH_FIXME[4135] Exposed by banning unset and isset in partial mode */
+    unset($this->stack[$this->stackTopIdx()]);
+    $this->stackTopIdx--;
+    invariant(
+      !C\is_empty($this->stack),
+      'Stack is empty, this shouldn\'t happen!',
+    );
+  }
+
+  /**
+   * Flattens the keys and values of a map sequentially into a vec.
+   *
+   * e.g. dict['foo' => 123, 'bar' => 456] -> vec['foo', 123, 'bar', 456]
+   */
+  private static function flattenMap(
+    KeyedContainer<arraykey, mixed> $map,
+  )[]: vec<mixed> {
+    $res = vec[];
+    foreach ($map as $key => $value) {
+      $res[] = $key;
+      $res[] = $value;
+    }
+    return $res;
+  }
+
+  private static function guessTypeForValue(mixed $val)[]: TType {
+    if ($val is bool) {
       return TType::BOOL;
-    } else if (is_int($val)) {
+    } else if ($val is int) {
       return TType::I64;
-    } else if (is_float($val)) {
+    } else if ($val is float) {
       return TType::DOUBLE;
-    } else if (is_string($val)) {
+    } else if ($val is string) {
       return TType::STRING;
-    } else if (is_object($val) || is_array($val) || $val instanceof Map) {
+    } else if (
+      PHP\is_object($val) || ($val is dict<_, _>) || $val is Map<_, _>
+    ) {
       return TType::STRUCT;
-    } else if ($val instanceof Iterable) {
+    } else if ($val is Iterable<_> || ($val is vec<_>)) {
       return TType::LST;
+    } else if ($val is keyset<_>) {
+      return TType::SET;
     }
 
     throw new TProtocolException(
-      'Unable to guess thrift type for '.gettype($val),
+      'Unable to guess thrift type for '.PHP\gettype($val),
     );
   }
 }

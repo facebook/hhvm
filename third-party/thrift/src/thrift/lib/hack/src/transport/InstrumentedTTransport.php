@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 interface InstrumentedTTransport {
-  public function getBytesWritten(): int;
-  public function getBytesRead(): int;
-  public function resetBytesWritten(): void;
-  public function resetBytesRead(): void;
+  public function getBytesWritten()[]: int;
+  public function getBytesRead()[]: int;
+  public function resetBytesWritten()[write_props]: void;
+  public function resetBytesRead()[write_props]: void;
 }

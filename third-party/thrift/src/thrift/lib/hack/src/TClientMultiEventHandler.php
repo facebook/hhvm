@@ -14,41 +14,53 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 final class TClientMultiEventHandler extends TClientEventHandler {
   private Map<string, TClientEventHandler> $handlers;
 
-  public function __construct() {
+  public function __construct()[] {
     $this->handlers = Map {};
   }
 
-  public function addHandler(string $key, TClientEventHandler $handler): this {
+  public function addHandler(
+    string $key,
+    TClientEventHandler $handler,
+  )[write_props]: this {
     $this->handlers[$key] = $handler;
     return $this;
   }
 
-  public function getHandler(string $key): TClientEventHandler {
+  public function getHandler(string $key)[]: TClientEventHandler {
     return $this->handlers[$key];
   }
 
-  public function removeHandler(string $key): TClientEventHandler {
+  public function removeHandler(string $key)[write_props]: TClientEventHandler {
     $handler = $this->getHandler($key);
     $this->handlers->remove($key);
     return $handler;
   }
 
+  public function getHandlers()[]: ConstMap<string, TClientEventHandler> {
+    return new ImmMap($this->handlers);
+  }
+
+  <<__Override>>
   public function preSend(
     string $fn_name,
     mixed $args,
     int $sequence_id,
+    string $service_interface,
   ): void {
     foreach ($this->handlers as $handler) {
-      $handler->preSend($fn_name, $args, $sequence_id);
+      $handler->preSend($fn_name, $args, $sequence_id, $service_interface);
     }
   }
 
+  <<__Override>>
   public function postSend(
     string $fn_name,
     mixed $args,
@@ -59,6 +71,7 @@ final class TClientMultiEventHandler extends TClientEventHandler {
     }
   }
 
+  <<__Override>>
   public function sendError(
     string $fn_name,
     mixed $args,
@@ -70,12 +83,14 @@ final class TClientMultiEventHandler extends TClientEventHandler {
     }
   }
 
+  <<__Override>>
   public function preRecv(string $fn_name, ?int $ex_sequence_id): void {
     foreach ($this->handlers as $handler) {
       $handler->preRecv($fn_name, $ex_sequence_id);
     }
   }
 
+  <<__Override>>
   public function postRecv(
     string $fn_name,
     ?int $ex_sequence_id,
@@ -86,6 +101,7 @@ final class TClientMultiEventHandler extends TClientEventHandler {
     }
   }
 
+  <<__Override>>
   public function recvException(
     string $fn_name,
     ?int $ex_sequence_id,
@@ -96,6 +112,7 @@ final class TClientMultiEventHandler extends TClientEventHandler {
     }
   }
 
+  <<__Override>>
   public function recvError(
     string $fn_name,
     ?int $ex_sequence_id,

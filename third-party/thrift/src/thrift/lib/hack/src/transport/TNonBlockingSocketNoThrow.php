@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Wrapper class over TNonBlockingSocket that suppresses
@@ -23,14 +24,17 @@
  * is called. This is helpful for classes that don't
  * handle properly this event. Ie. TFramedTransport.
  */
-class TNonBlockingSocketNoThrow extends TNonBlockingSocket {
-  public function open(): void {
+<<Oncalls('thrift')>> // @oss-disable
+final class TNonBlockingSocketNoThrow extends TNonBlockingSocket {
+  <<__Override>>
+  public function open()[leak_safe]: void {
     try {
       parent::open();
-    } catch (Exception $e) {
-      $op_in_progress =
-        (strpos($e->getMessage(), "socket_connect error") !== false) &&
-        (strpos($e->getMessage(), "[115]") !== false);
+    } catch (ExceptionWithPureGetMessage $e) {
+      $op_in_progress = (
+        PHP\strpos($e->getMessage(), "socket_connect error") !== false
+      ) &&
+        (PHP\strpos($e->getMessage(), "[115]") !== false);
       if (!$op_in_progress) {
         throw $e;
       }

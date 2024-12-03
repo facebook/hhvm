@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Header transport. Writes and reads data with
@@ -27,7 +28,9 @@
  *
  * @package thrift.transport
  */
-class THeaderTransport extends TFramedTransport
+<<Oncalls('thrift')>> // @oss-disable
+final class THeaderTransport
+  extends TFramedTransport
   implements TTransportSupportsHeaders {
   const int TBINARY_PROTOCOL = 0;
   const int TJSON_PROTOCOL = 1;
@@ -39,6 +42,8 @@ class THeaderTransport extends TFramedTransport
 
   // Transforms
   const int ZLIB_TRANSFORM = 0x01;
+  const int HMAC_TRANSFORM = 0x02;
+  const int SNAPPY_TRANSFORM = 0x03;
 
   // Infos
   const int INFO_KEYVALUE = 0x01;
@@ -54,7 +59,7 @@ class THeaderTransport extends TFramedTransport
   protected int $protoId_ = self::TBINARY_PROTOCOL;
   protected int $clientType_ = self::HEADER_CLIENT_TYPE;
   protected Set<int> $supportedProtocols;
-  protected Vector<int> $readTrans_;
+  protected HH_FIXME\WRONG_TYPE<Vector<int>> $readTrans_;
   protected Vector<int> $writeTrans_;
   protected int $seqId_ = 0;
   protected int $flags_ = 0;
@@ -76,39 +81,35 @@ class THeaderTransport extends TFramedTransport
   public function __construct(
     ?TTransport $transport = null,
     ?Traversable<int> $protocols = null,
-  ) {
+  )[] {
     parent::__construct($transport, true, true);
     $this->readTrans_ = Vector {};
     $this->writeTrans_ = Vector {};
     $this->readHeaders = Map {};
     $this->writeHeaders = Map {};
     $this->persistentWriteHeaders = Map {};
-    $this->supportedProtocols = Set {
-      self::HEADER_CLIENT_TYPE,
-      self::FRAMED_DEPRECATED,
-      self::UNFRAMED_DEPRECATED,
-      self::HTTP_CLIENT_TYPE,
-    };
-    if ($protocols) {
-      $this->supportedProtocols->addAll($protocols);
-    }
+    $this->supportedProtocols = Set::fromArrays(
+      vec[
+        self::HEADER_CLIENT_TYPE,
+        self::FRAMED_DEPRECATED,
+        self::UNFRAMED_DEPRECATED,
+        self::HTTP_CLIENT_TYPE,
+      ],
+      $protocols ? vec($protocols) : vec[],
+    );
   }
 
-  public function getProtocolID(): int {
-    return $this->protoId_;
-  }
-
-  public function setProtocolID(int $protoId): this {
+  public function setProtocolID(int $protoId)[write_props]: this {
     $this->protoId_ = $protoId;
     return $this;
   }
 
-  public function addTransform(int $trans_id): this {
+  public function addTransform(int $trans_id)[write_props]: this {
     $this->writeTrans_[] = $trans_id;
     return $this;
   }
 
-  public function resetProtocol(): void {
+  public function resetProtocol()[zoned_shallow]: void {
     if ($this->clientType_ === self::HTTP_CLIENT_TYPE) {
       $this->flush();
     }
@@ -116,43 +117,66 @@ class THeaderTransport extends TFramedTransport
     $this->readFrame(0);
   }
 
-  public function setHeader(string $str_key, @string $str_value): this {
-    $this->writeHeaders[$str_key] = (string) $str_value;
+  <<__Deprecated("Use `setWriteHeader` instead")>>
+  public function setHeader(
+    string $str_key,
+    string $str_value,
+  )[write_props]: this {
+    return $this->setWriteHeader($str_key, $str_value);
+  }
+
+  public function setWriteHeader(
+    string $str_key,
+    string $str_value,
+  )[write_props]: this {
+    $this->writeHeaders[$str_key] = (string)$str_value;
     return $this;
   }
 
   public function setPersistentHeader(
     string $str_key,
-    @string $str_value,
-  ): this {
-    $this->persistentWriteHeaders[$str_key] = (string) $str_value;
+    string $str_value,
+  )[write_props]: this {
+    $this->persistentWriteHeaders[$str_key] = (string)$str_value;
     return $this;
   }
 
-  public function getWriteHeaders(): KeyedContainer<string, string> {
+  public function getWriteHeaders()[]: KeyedContainer<string, string> {
     return $this->writeHeaders;
   }
 
-  public function getPersistentWriteHeaders(): KeyedContainer<string, string> {
+  public function getPersistentWriteHeaders(
+  )[]: KeyedContainer<string, string> {
     return $this->persistentWriteHeaders;
   }
 
-  public function getHeaders(): KeyedContainer<string, string> {
+  <<__Deprecated("Use `getReadHeaders` instead")>>
+  public function getHeaders()[]: KeyedContainer<string, string> {
+    return $this->getReadHeaders();
+  }
+
+  public function getReadHeaders()[]: KeyedContainer<string, string> {
     return $this->readHeaders;
   }
 
-  public function clearHeaders(): void {
+  <<__Deprecated("Use `clearWriteHeaders` instead")>>
+  public function clearHeaders()[write_props]: void {
+    $this->clearWriteHeaders();
+  }
+
+  public function clearWriteHeaders()[write_props]: void {
     $this->writeHeaders = Map {};
   }
 
-  public function clearPersistentHeaders(): void {
+  public function clearPersistentHeaders()[write_props]: void {
     $this->persistentWriteHeaders = Map {};
   }
 
-  public function getPeerIdentity(): ?string {
+  public function getPeerIdentity()[write_props]: ?string {
     if ($this->readHeaders->contains(self::IDENTITY_HEADER)) {
-      if ((int) $this->readHeaders[self::ID_VERSION_HEADER] ===
-          self::ID_VERSION) {
+      if (
+        (int)$this->readHeaders[self::ID_VERSION_HEADER] === self::ID_VERSION
+      ) {
         return $this->readHeaders[self::IDENTITY_HEADER];
       }
     }
@@ -160,7 +184,7 @@ class THeaderTransport extends TFramedTransport
     return null;
   }
 
-  public function setIdentity(string $identity): this {
+  public function setIdentity(string $identity)[write_props]: this {
     $this->identity = $identity;
     return $this;
   }
@@ -171,20 +195,21 @@ class THeaderTransport extends TFramedTransport
    *
    * @param int $len How much data
    */
-  public function read(int $len): @string { // Task #5347782
+  <<__Override>>
+  public function read(int $len)[zoned_shallow]: string {
     if ($this->clientType_ === self::UNFRAMED_DEPRECATED) {
       return $this->transport_->readAll($len);
     }
 
-    if (strlen($this->rBuf_) === 0) {
+    if (Str\length($this->rBuf_) === 0) {
       $this->readFrame($len);
     }
 
     // Return substr
-    $out = substr($this->rBuf_, $this->rIndex_, $len);
+    $out = PHP\substr($this->rBuf_, $this->rIndex_, $len);
     $this->rIndex_ += $len;
 
-    if (strlen($this->rBuf_) <= $this->rIndex_) {
+    if (Str\length($this->rBuf_) <= $this->rIndex_) {
       $this->rBuf_ = '';
       $this->rIndex_ = 0;
     }
@@ -194,9 +219,9 @@ class THeaderTransport extends TFramedTransport
   /**
    * Reads a chunk of data into the internal read buffer.
    */
-  private function readFrame(int $req_sz): void {
+  private function readFrame(int $req_sz)[zoned_shallow]: void {
     $buf = $this->transport_->readAll(4);
-    $val = unpack('N', $buf);
+    $val = PHP\unpack('N', $buf);
     $sz = $val[1];
 
     if (($sz & TBinaryProtocol::VERSION_MASK) === TBinaryProtocol::VERSION_1) {
@@ -214,10 +239,12 @@ class THeaderTransport extends TFramedTransport
     } else {
       // Either header format or framed. Check next byte
       $buf2 = $this->transport_->readAll(4);
-      $val2 = unpack('N', $buf2);
+      $val2 = PHP\unpack('N', $buf2);
       $version = $val2[1];
-      if (($version & TBinaryProtocol::VERSION_MASK) ===
-          TBinaryProtocol::VERSION_1) {
+      if (
+        ($version & TBinaryProtocol::VERSION_MASK) ===
+          TBinaryProtocol::VERSION_1
+      ) {
         $this->clientType_ = self::FRAMED_DEPRECATED;
         if ($sz - 4 > self::MAX_FRAME_SIZE) {
           throw new TTransportException(
@@ -237,15 +264,15 @@ class THeaderTransport extends TFramedTransport
         $this->flags_ = ($version & 0x0000ffff);
         // read seqId
         $buf3 = $this->transport_->readAll(4);
-        $val3 = unpack('N', $buf3);
+        $val3 = PHP\unpack('N', $buf3);
         $this->seqId_ = $val3[1];
         // read header_size
         $buf4 = $this->transport_->readAll(2);
-        $val4 = unpack('n', $buf4);
+        $val4 = PHP\unpack('n', $buf4);
         $header_size = $val4[1];
 
         $data = $buf.$buf2.$buf3.$buf4;
-        $index = strlen($data);
+        $index = Str\length($data);
 
         $data .= $this->transport_->readAll($sz - 10);
         $this->readHeaderFormat($sz - 10, $header_size, $data, $index);
@@ -267,12 +294,13 @@ class THeaderTransport extends TFramedTransport
 
   }
 
-  protected function readVarint(string $data, int &$index): int {
+  protected function readVarint(string $data, inout int $index)[]: int {
     $result = 0;
     $shift = 0;
     while (true) {
-      $x = substr($data, $index++, 1);
-      $byte = ord($x);
+      $x = PHP\substr($data, $index, 1);
+      $index++;
+      $byte = PHP\ord($x);
       $result |= ($byte & 0x7f) << $shift;
       if (($byte >> 7) === 0) {
         return $result;
@@ -283,32 +311,32 @@ class THeaderTransport extends TFramedTransport
     throw new TTransportException("THeaderTransport: You shouldn't be here");
   }
 
-  protected function getVarint(int $data): string {
+  protected function getVarint(int $data)[]: string {
     $out = "";
     while (true) {
       if (($data & ~0x7f) === 0) {
-        $out .= chr($data);
+        $out .= PHP\chr($data);
         break;
       } else {
-        $out .= chr(($data & 0xff) | 0x80);
+        $out .= PHP\chr(($data & 0xff) | 0x80);
         $data = $data >> 7;
       }
     }
     return $out;
   }
 
-  protected function writeString(string $str): string {
-    $buf = $this->getVarint(strlen($str));
+  protected function writeString(string $str)[]: string {
+    $buf = $this->getVarint(Str\length($str));
     $buf .= $str;
     return $buf;
   }
 
   protected function readString(
     string $data,
-    int &$index,
+    inout int $index,
     int $limit,
-  ): string {
-    $str_sz = $this->readVarint($data, $index);
+  )[]: string {
+    $str_sz = $this->readVarint($data, inout $index);
     if ($str_sz + $index > $limit) {
       throw new TTransportException(
         'String read too long',
@@ -316,7 +344,7 @@ class THeaderTransport extends TFramedTransport
       );
     }
 
-    $str = substr($data, $index, $str_sz);
+    $str = PHP\substr($data, $index, $str_sz);
     $index += $str_sz;
     return $str;
   }
@@ -326,7 +354,7 @@ class THeaderTransport extends TFramedTransport
     int $header_size,
     string $data,
     int $index,
-  ): void {
+  )[write_props]: void {
     $this->readTrans_ = Vector {};
 
     $header_size = $header_size * 4;
@@ -338,10 +366,11 @@ class THeaderTransport extends TFramedTransport
     }
     $end_of_header = $index + $header_size;
 
-    $this->protoId_ = $this->readVarint($data, $index);
-    $numHeaders = $this->readVarint($data, $index);
-    if ($this->protoId_ === 1 &&
-        $this->clientType_ !== self::HTTP_CLIENT_TYPE) {
+    $this->protoId_ = $this->readVarint($data, inout $index);
+    $numHeaders = $this->readVarint($data, inout $index);
+    if (
+      $this->protoId_ === 1 && $this->clientType_ !== self::HTTP_CLIENT_TYPE
+    ) {
       throw new TTransportException(
         'Trying to recv JSON encoding over binary',
         TTransportException::INVALID_CLIENT,
@@ -350,33 +379,43 @@ class THeaderTransport extends TFramedTransport
 
     // Read in the headers.  Data for each header varies.
     for ($i = 0; $i < $numHeaders; $i++) {
-      $transId = $this->readVarint($data, $index);
+      $transId = $this->readVarint($data, inout $index);
       switch ($transId) {
         case self::ZLIB_TRANSFORM:
+        case self::SNAPPY_TRANSFORM:
           $this->readTrans_[] = $transId;
           break;
 
+        case self::HMAC_TRANSFORM:
+          throw TApplicationException::fromShape(shape(
+            'message' => 'Hmac transform no longer supported',
+            'code' => TApplicationException::INVALID_TRANSFORM,
+          ));
+
         default:
-          throw new TApplicationException(
-            'Unknown transform in client request',
-            TApplicationException::INVALID_TRANSFORM,
-          );
+          throw TApplicationException::fromShape(shape(
+            'message' => 'Unknown transform in client request',
+            'code' => TApplicationException::INVALID_TRANSFORM,
+          ));
       }
     }
     // Make sure that the read transforms are applied in the reverse order
     // from when the data was written.
-    $this->readTrans_ = array_reverse($this->readTrans_);
+    $this->readTrans_ = HH\FIXME\UNSAFE_CAST<dict<arraykey, int>, Vector<int>>(
+      PHP\array_reverse($this->readTrans_),
+      'Exposed by typing PHP\array_reduce',
+    );
 
     // Read the info headers
     $this->readHeaders = Map {};
     while ($index < $end_of_header) {
-      $infoId = $this->readVarint($data, $index);
+      $infoId = $this->readVarint($data, inout $index);
       switch ($infoId) {
         case self::INFO_KEYVALUE:
-          $num_keys = $this->readVarint($data, $index);
+          $num_keys = $this->readVarint($data, inout $index);
           for ($i = 0; $i < $num_keys; $i++) {
-            $strKey = $this->readString($data, $index, $end_of_header);
-            $strValue = $this->readString($data, $index, $end_of_header);
+            $strKey = $this->readString($data, inout $index, $end_of_header);
+            $strValue = $this->readString($data, inout $index, $end_of_header);
             $this->readHeaders[$strKey] = $strValue;
           }
           break;
@@ -387,17 +426,21 @@ class THeaderTransport extends TFramedTransport
     }
 
     $this->rBuf_ =
-      $this->untransform(substr($data, $end_of_header, $sz - $header_size));
+      $this->untransform(PHP\substr($data, $end_of_header, $sz - $header_size));
   }
 
-  protected function transform(string $data): string {
-    // UNSAFE_BLOCK: the only way we know that these possibly iterated compressors
+  protected function transform(string $data)[]: string {
+    // the only way we know that these possibly iterated compressors
     // will produce reeasonable results is by complicated promises of the way
     // thrift sets things up, which Hack has no way to understand.
     foreach ($this->writeTrans_ as $trans) {
       switch ($trans) {
         case self::ZLIB_TRANSFORM:
-          $data = gzcompress($data);
+          $data = HH\FIXME\UNSAFE_CAST<dynamic, string>(PHP\gzcompress($data));
+          break;
+
+        case self::SNAPPY_TRANSFORM:
+          $data = HH\FIXME\UNSAFE_CAST<dynamic, string>(PHP\sncompress($data));
           break;
 
         default:
@@ -407,43 +450,51 @@ class THeaderTransport extends TFramedTransport
           );
       }
     }
-    return $data;
+    return ($data);
   }
 
-  protected function untransform(string $data): @string { // Task #5347782
-    // UNSAFE_BLOCK: the only way we know that these possibly iterated compressors
+  protected function untransform(string $data)[]: string {
+    // the only way we know that these possibly iterated compressors
     // will produce reeasonable results is by complicated promises of the way
     // thrift sets things up, which Hack has no way to understand.
     foreach ($this->readTrans_ as $trans) {
       switch ($trans) {
         case self::ZLIB_TRANSFORM:
-          $data = gzuncompress($data);
+          $data =
+            HH\FIXME\UNSAFE_CAST<dynamic, string>(PHP\gzuncompress($data));
+          break;
+
+        case self::SNAPPY_TRANSFORM:
+          $data =
+            HH\FIXME\UNSAFE_CAST<dynamic, string>(PHP\snuncompress($data));
           break;
 
         default:
-          throw new TApplicationException(
-            'Unknown transform during recv',
-            TTransportException::INVALID_TRANSFORM,
-          );
+          throw TApplicationException::fromShape(shape(
+            'message' => 'Unknown transform during recv',
+            'code' => TTransportException::INVALID_TRANSFORM,
+          ));
       }
     }
-    return $data;
+    return ($data);
   }
 
   /**
    * Writes the output buffer in header format, or format
    * client responded with (framed, unframed, http)
    */
-  public function flush(): void {
+  <<__Override>>
+  public function flush()[zoned_shallow]: void {
     $this->flushImpl(false);
   }
 
-  public function onewayFlush(): void {
+  <<__Override>>
+  public function onewayFlush()[zoned_shallow]: void {
     $this->flushImpl(true);
   }
 
-  private function flushImpl(bool $oneway): void {
-    if (strlen($this->wBuf_) == 0) {
+  private function flushImpl(bool $oneway)[zoned_shallow]: void {
+    if (Str\length($this->wBuf_) === 0) {
       if ($oneway) {
         $this->transport_->onewayFlush();
       } else {
@@ -459,15 +510,15 @@ class THeaderTransport extends TFramedTransport
     // if the underlying write throws up an exception
     $this->wBuf_ = '';
 
-    if ($this->protoId_ === 1 &&
-        $this->clientType_ !== self::HTTP_CLIENT_TYPE) {
+    if (
+      $this->protoId_ === 1 && $this->clientType_ !== self::HTTP_CLIENT_TYPE
+    ) {
       throw new TTransportException(
         'Trying to send JSON encoding over binary',
         TTransportException::INVALID_CLIENT,
       );
     }
 
-    $buf = '';
     if ($this->clientType_ === self::HEADER_CLIENT_TYPE) {
       $transformData = '';
 
@@ -480,8 +531,7 @@ class THeaderTransport extends TFramedTransport
 
       // Add in special flags.
       if ($this->identity !== null) {
-        $this->writeHeaders[self::ID_VERSION_HEADER] =
-          (string) self::ID_VERSION;
+        $this->writeHeaders[self::ID_VERSION_HEADER] = (string)self::ID_VERSION;
         $this->writeHeaders[self::IDENTITY_HEADER] = $this->identity;
       }
 
@@ -489,8 +539,7 @@ class THeaderTransport extends TFramedTransport
       if ($this->writeHeaders || $this->persistentWriteHeaders) {
         $infoData .= $this->getVarint(self::INFO_KEYVALUE);
         $infoData .= $this->getVarint(
-          count($this->writeHeaders) +
-          count($this->persistentWriteHeaders),
+          C\count($this->writeHeaders) + C\count($this->persistentWriteHeaders),
         );
         foreach ($this->persistentWriteHeaders as $str_key => $str_value) {
           $infoData .= $this->writeString($str_key);
@@ -505,29 +554,30 @@ class THeaderTransport extends TFramedTransport
 
       $headerData =
         $this->getVarint($this->protoId_).$this->getVarint($num_headers);
-      $header_size =
-        strlen($transformData) + strlen($infoData) + strlen($headerData);
+      $header_size = Str\length($transformData) +
+        Str\length($infoData) +
+        Str\length($headerData);
       $paddingSize = 4 - ($header_size % 4);
       $header_size += $paddingSize;
 
-      $buf = (string) pack('nn', self::HEADER_MAGIC, $this->flags_);
-      $buf .= (string) pack('Nn', $this->seqId_, $header_size / 4);
+      $buf = (string)PHP\pack('nn', self::HEADER_MAGIC, $this->flags_);
+      $buf .= (string)PHP\pack('Nn', $this->seqId_, $header_size / 4);
 
       $buf .= $headerData.$transformData;
       $buf .= $infoData;
 
       // Pad out the header with 0x00
       for ($i = 0; $i < $paddingSize; $i++) {
-        $buf .= (string) pack('C', '\0');
+        $buf .= (string)PHP\pack('C', '\0');
       }
 
       // Append the data
       $buf .= $out;
 
       // Prepend the size.
-      $buf = (string) pack('N', strlen($buf)).$buf;
+      $buf = (string)PHP\pack('N', Str\length($buf)).$buf;
     } else if ($this->clientType_ === self::FRAMED_DEPRECATED) {
-      $buf = (string) pack('N', strlen($out));
+      $buf = (string)PHP\pack('N', Str\length($out));
       $buf .= $out;
     } else if ($this->clientType_ === self::UNFRAMED_DEPRECATED) {
       $buf = $out;
@@ -543,7 +593,7 @@ class THeaderTransport extends TFramedTransport
       );
     }
 
-    if (strlen($buf) > self::MAX_FRAME_SIZE) {
+    if (Str\length($buf) > self::MAX_FRAME_SIZE) {
       throw new TTransportException(
         'Attempting to send oversize frame',
         TTransportException::INVALID_FRAME_SIZE,

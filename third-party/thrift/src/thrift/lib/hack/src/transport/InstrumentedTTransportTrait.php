@@ -14,38 +14,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * TTransport subclasses that implement InstrumentedTTransport and use
  * InstrumentedTTransportTrait have a simple set of counters available.
  */
+<<Oncalls('thrift')>> // @oss-disable
 trait InstrumentedTTransportTrait {
   private int $bytesWritten = 0;
   private int $bytesRead = 0;
 
-  public function getBytesWritten(): int {
+  public function getBytesWritten()[]: int {
     return $this->bytesWritten;
   }
 
-  public function getBytesRead(): int {
+  public function getBytesRead()[]: int {
     return $this->bytesRead;
   }
 
-  public function resetBytesWritten(): void {
+  public function resetBytesWritten()[write_props]: void {
     $this->bytesWritten = 0;
   }
 
-  public function resetBytesRead(): void {
+  public function resetBytesRead()[write_props]: void {
     $this->bytesRead = 0;
   }
 
-  protected function onWrite(int $bytes_written): void {
+  protected function onWrite(int $bytes_written)[write_props]: void {
     $this->bytesWritten += $bytes_written;
   }
 
-  protected function onRead(int $bytes_read): void {
+  protected function onRead(int $bytes_read)[write_props]: void {
     $this->bytesRead += $bytes_read;
   }
 }

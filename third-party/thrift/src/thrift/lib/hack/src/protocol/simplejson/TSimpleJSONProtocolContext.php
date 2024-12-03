@@ -14,52 +14,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.simplejson
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 class TSimpleJSONProtocolContext {
-  final public function __construct(
-    protected TTransport $trans,
-    protected IThriftBufferedTransport $bufTrans,
-  ) {}
 
-  public function writeStart(): int {
+  final public function __construct(protected TMemoryBuffer $trans)[] {}
+
+  public function writeStart()[write_props]: int {
     return 0;
   }
 
-  public function writeSeparator(): int {
+  public function writeSeparator()[write_props]: int {
     return 0;
   }
 
-  public function writeEnd(): int {
+  public function writeEnd()[write_props]: int {
     return 0;
   }
 
-  public function readStart(): void {
+  public function readStart()[write_props]: int {
     // Do nothing
+    return 0;
   }
 
-  public function readSeparator(): void {
+  public function readSeparator()[write_props]: int {
     // Do nothing
+    return 0;
   }
 
-  public function readContextOver(): bool {
+  public function readContextOver()[write_props]: bool {
     return true;
   }
 
-  public function readEnd(): void {
+  public function readEnd()[write_props]: int {
     // Do nothing
+    return 0;
   }
 
-  public function escapeNum(): bool {
+  public function escapeNum()[]: bool {
     return false;
   }
 
-  protected function skipWhitespace(bool $skip = true): int {
+  protected function skipWhitespace(bool $skip = true)[write_props]: int {
     $count = 0;
     $reading = true;
     while ($reading) {
-      $byte = $this->bufTrans->peek(1, $count);
+      $byte = $this->trans->peek(1, $count);
       switch ($byte) {
         case ' ':
         case "\t":

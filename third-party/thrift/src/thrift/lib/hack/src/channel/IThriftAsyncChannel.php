@@ -14,13 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 // Result message and read headers
 type TAsyncChannelResponse = (string, darray<string, string>);
+type TAsyncChannelStreamResponse =
+  (string, darray<string, string>, TClientBufferedStream);
+type TAsyncChannelSinkResponse = (string, darray<string, string>, TClientSink);
 
-<<Oncalls('thrift')>>
+<<Oncalls('thrift')>> // @oss-disable
 interface IThriftAsyncChannel {
   public function genSendRequestResponse(
     \RpcOptions $options,
@@ -31,4 +35,14 @@ interface IThriftAsyncChannel {
     \RpcOptions $options,
     string $msg,
   ): Awaitable<void>;
+
+  public function genSendRequestStreamResponse(
+    \RpcOptions $options,
+    string $msg,
+  ): Awaitable<TAsyncChannelStreamResponse>;
+
+  public function genSendRequestSink(
+    \RpcOptions $options,
+    string $msg,
+  ): Awaitable<TAsyncChannelSinkResponse>;
 }

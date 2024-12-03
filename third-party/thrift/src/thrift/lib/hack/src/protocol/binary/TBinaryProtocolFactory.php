@@ -14,27 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.binary
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Binary Protocol Factory
  */
-class TBinaryProtocolFactory implements TProtocolFactory {
+<<Oncalls('thrift')>> // @oss-disable
+final class TBinaryProtocolFactory implements TProtocolFactory {
   protected bool $strictRead = false;
   protected bool $strictWrite = true;
 
   public function __construct(
     bool $strict_read = false,
     bool $strict_write = true,
-  ) {
+  )[] {
     $this->strictRead = $strict_read;
     $this->strictWrite = $strict_write;
   }
 
-  public function getProtocol(TTransport $trans): TProtocol {
+  public function getProtocol(TTransport $trans)[read_globals]: TProtocol {
     return new TBinaryProtocolAccelerated(
-      $trans,
+      $trans is IThriftBufferedTransport
+        ? $trans
+        : new TBufferedTransport<TTransport>($trans),
       $this->strictRead,
       $this->strictWrite,
     );

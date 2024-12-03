@@ -14,15 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Base interface for Thrift clients
  */
+<<Oncalls('thrift')>> // @oss-disable
 interface IThriftClient {
-  public function getEventHandler(): TClientEventHandler;
-  public function setEventHandler(TClientEventHandler $handler): this;
-  public function getAsyncHandler(): TClientAsyncHandler;
-  public function setAsyncHandler(TClientAsyncHandler $handler): this;
+  public function getEventHandler()[]: TClientEventHandler;
+  public function setEventHandler(
+    TClientEventHandler $handler,
+  )[write_props]: this;
+  public function getAsyncHandler()[]: TClientAsyncHandler;
+  public function setAsyncHandler(
+    TClientAsyncHandler $handler,
+  )[write_props]: this;
+  public function getHHFrameMetadata()[]: ?string;
+  public function setHHFrameMetadata(string $frame_metadata)[write_props]: this;
 }

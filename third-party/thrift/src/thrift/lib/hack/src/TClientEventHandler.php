@@ -14,19 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Event handler for thrift clients
  */
+<<Oncalls('thrift')>> // @oss-disable
 class TClientEventHandler {
-  public function setClient(IThriftClient $client): void {}
   // Called before the request is sent to the server
   public function preSend(
     string $fn_name,
     mixed $args,
     int $sequence_id,
+    string $_service_interface,
   ): void {}
 
   // Called after the request is sent to the server

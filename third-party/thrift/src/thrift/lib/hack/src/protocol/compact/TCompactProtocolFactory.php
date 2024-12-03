@@ -14,17 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.compact
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Compact Protocol Factory
  */
-class TCompactProtocolFactory implements TProtocolFactory {
+<<Oncalls('thrift')>> // @oss-disable
+final class TCompactProtocolFactory implements TProtocolFactory {
 
   public function __construct() {}
 
-  public function getProtocol(TTransport $trans): TProtocol {
-    return new TCompactProtocolAccelerated($trans);
+  public function getProtocol(TTransport $trans)[]: TProtocol {
+    return new TCompactProtocolAccelerated(
+      $trans is IThriftBufferedTransport
+        ? $trans
+        : new TBufferedTransport<TTransport>($trans),
+    );
   }
 }

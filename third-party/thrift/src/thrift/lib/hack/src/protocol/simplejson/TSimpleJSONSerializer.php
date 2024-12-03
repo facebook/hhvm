@@ -14,28 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.simplejson
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Utility class for serializing
- * a thrift object using TSimpleJSONProtocol
+ * a thrift object using TSimpleJSONProtocol.
+ *
+ * DEPRECATED: Use JSONThriftSerializer instead. It's faster.
  */
-class TSimpleJSONSerializer extends TProtocolSerializer {
-  public static function serialize(IThriftStruct $object): string {
-    $transport = new TMemoryBuffer();
-    $protocol = new TSimpleJSONProtocol($transport);
-    $object->write($protocol);
-    return $transport->getBuffer();
-  }
-
-  public static function deserialize<T as IThriftStruct>(
-    string $str,
-    T $object,
-  ): T {
-    $transport = new TMemoryBuffer($str);
-    $protocol = new TSimpleJSONProtocol($transport);
-    $object->read($protocol);
-    return $object;
-  }
+<<Oncalls('thrift')>> // @oss-disable
+final class TSimpleJSONSerializer {
 }

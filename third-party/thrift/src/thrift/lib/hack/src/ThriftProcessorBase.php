@@ -14,34 +14,219 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 abstract class ThriftProcessorBase implements IThriftProcessor {
   abstract const type TThriftIf as IThriftIf;
+  abstract const string THRIFT_SVC_NAME;
   protected TProcessorEventHandler $eventHandler_;
+  private bool $isSubRequest = false;
 
-  // This exists so subclasses still using php can still access the handler
-  // Once the migration to hack is complete, this field can be removed safely
-  protected mixed $handler_;
-
-  public function __construct(
-    protected this::TThriftIf $handler,
-  ) {
+  public function __construct(protected this::TThriftIf $handler)[] {
     $this->eventHandler_ = new TProcessorEventHandler();
-    $this->handler_ = $handler;
   }
 
-  public function getHandler(): this::TThriftIf {
+  public function getHandler()[]: this::TThriftIf {
     return $this->handler;
   }
 
-  public function setEventHandler(TProcessorEventHandler $event_handler): this {
+  public function setEventHandler(
+    TProcessorEventHandler $event_handler,
+  )[write_props]: this {
     $this->eventHandler_ = $event_handler;
     return $this;
   }
 
-  public function getEventHandler(): TProcessorEventHandler {
+  public function getEventHandler()[]: TProcessorEventHandler {
     return $this->eventHandler_;
+  }
+
+  final public function setIsSubRequest(
+    bool $is_sub_request = true,
+  )[write_props]: this {
+    $this->isSubRequest = $is_sub_request;
+    return $this;
+  }
+
+  final public function isSubRequest()[]: bool {
+    return $this->isSubRequest;
+  }
+
+  /**
+   * Helper method to be used in the generated {Sync,Async}ProcessorBase classes
+   */
+  final protected function readHelper<TResult as IThriftStruct>(
+    classname<TResult> $request_args_class,
+    \TProtocol $input,
+    string $request_name,
+    mixed $handler_ctx,
+  ): dynamic {
+    $this->eventHandler_->preRead($handler_ctx, $request_name, dict[]);
+
+    if ($input is \TBinaryProtocolAccelerated) {
+      $args = thrift_protocol_read_binary_struct(
+        $input,
+        HH\class_to_classname($request_args_class),
+      );
+    } else if ($input is \TCompactProtocolAccelerated) {
+      $args = thrift_protocol_read_compact_struct(
+        $input,
+        HH\class_to_classname($request_args_class),
+      );
+    } else {
+      $args = $request_args_class::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $this->eventHandler_->postRead($handler_ctx, $request_name, $args);
+
+    return $args;
+  }
+
+  /**
+   * Helper method to be used in the generated {Sync,Async}ProcessorBase classes
+   */
+  final protected function writeHelper<TResult as IThriftStruct>(
+    TResult $result,
+    string $request_name,
+    int $seqid,
+    mixed $handler_ctx,
+    \TProtocol $output,
+    TMessageType $reply_type,
+  ): void {
+    $this->eventHandler_->preWrite($handler_ctx, $request_name, $result);
+    if ($output is \TBinaryProtocolAccelerated) {
+      thrift_protocol_write_binary(
+        $output,
+        $request_name,
+        $reply_type,
+        $result,
+        $seqid,
+        $output->isStrictWrite(),
+      );
+    } else if ($output is \TCompactProtocolAccelerated) {
+      thrift_protocol_write_compact2(
+        $output,
+        $request_name,
+        $reply_type,
+        $result,
+        $seqid,
+        false,
+        TCompactProtocolBase::VERSION,
+      );
+    } else {
+      $output->writeMessageBegin($request_name, $reply_type, $seqid);
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
+    $this->eventHandler_->postWrite($handler_ctx, $request_name, $result);
+  }
+
+  final protected async function genExecuteStream<
+    TStreamResponseType as IResultThriftStruct with {
+      type TResult = TStreamType },
+    TStreamType,
+  >(
+    HH\AsyncGenerator<null, TStreamType, void> $stream,
+    classname<TStreamResponseType> $stream_response_type,
+    \TProtocol $output,
+  ): Awaitable<void> {
+    $transport = $output->getTransport();
+    invariant(
+      $transport is \TMemoryBuffer,
+      "Stream methods require TMemoryBuffer transport",
+    );
+    $encoded_first_response = $transport->getBuffer();
+    $transport->resetBuffer();
+    $server_stream = await gen_start_thrift_stream($encoded_first_response);
+
+    $payload_encoder = ThriftStreamingSerializationHelpers::encodeStreamHelper(
+      $stream_response_type,
+      $output,
+    );
+    if ($server_stream === null) {
+      // Stream was cancelled by the client.
+      return;
+    }
+    await $server_stream->genStream<TStreamType>($stream, $payload_encoder);
+  }
+}
+
+/**
+ * This trait defines the `process_getThriftServiceMetadataHelper()` method.
+ * This method is used to implement the `process_getThriftServiceMetadata()`
+ * method in {ServiceName}{Async|Sync}ProcessorBase classes.
+ */
+trait GetThriftServiceMetadata {
+  require extends ThriftProcessorBase;
+  require implements IThriftProcessor;
+
+  private function process_getThriftServiceMetadataHelper(
+    int $seqid,
+    \TProtocol $input,
+    \TProtocol $output,
+    classname<\IThriftServiceStaticMetadata> $service_metadata_class,
+  ): void {
+    $reply_type = TMessageType::REPLY;
+
+    if ($input is \TBinaryProtocolAccelerated) {
+      thrift_protocol_read_binary_struct(
+        $input,
+        '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args',
+      );
+    } else if ($input is \TCompactProtocolAccelerated) {
+      thrift_protocol_read_compact_struct(
+        $input,
+        '\tmeta_ThriftMetadataService_getThriftServiceMetadata_args',
+      );
+    } else {
+      $args =
+        tmeta_ThriftMetadataService_getThriftServiceMetadata_args::withDefaultValues();
+      $args->read($input);
+    }
+    $input->readMessageEnd();
+    $result =
+      tmeta_ThriftMetadataService_getThriftServiceMetadata_result::withDefaultValues();
+    try {
+      $result->success = $service_metadata_class::getServiceMetadataResponse();
+    } catch (\Exception $ex) {
+      $reply_type = TMessageType::EXCEPTION;
+      $result = new \TApplicationException(
+        $ex->getMessage()."\n".$ex->getTraceAsString(),
+      );
+    }
+    if ($output is \TBinaryProtocolAccelerated) {
+      thrift_protocol_write_binary(
+        $output,
+        'getThriftServiceMetadata',
+        $reply_type,
+        $result,
+        $seqid,
+        $output->isStrictWrite(),
+      );
+    } else if ($output is \TCompactProtocolAccelerated) {
+      thrift_protocol_write_compact2(
+        $output,
+        'getThriftServiceMetadata',
+        $reply_type,
+        $result,
+        $seqid,
+        false,
+        TCompactProtocolBase::VERSION,
+      );
+    } else {
+      $output->writeMessageBegin(
+        "getThriftServiceMetadata",
+        $reply_type,
+        $seqid,
+      );
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
   }
 }

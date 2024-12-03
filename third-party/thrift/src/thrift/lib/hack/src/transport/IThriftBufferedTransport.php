@@ -14,11 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 interface IThriftBufferedTransport {
-  public function peek(int $len, int $start = 0);
-  public function putBack(string $data): void;
-  public function minBytesAvailable(): int;
+  require extends TTransport;
+
+  public function peek(int $len, int $start = 0)[zoned_shallow]: string;
 }

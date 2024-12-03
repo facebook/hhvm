@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Protocol module. Contains all the types and definitions needed to implement
@@ -27,7 +28,8 @@
 /**
  * Protocol exceptions
  */
-class TProtocolException extends TException {
+<<Oncalls('thrift')>> // @oss-disable
+final class TProtocolException extends TException {
   const UNKNOWN = 0;
   const INVALID_DATA = 1;
   const NEGATIVE_SIZE = 2;
@@ -36,7 +38,7 @@ class TProtocolException extends TException {
   const NOT_IMPLEMENTED = 5;
   const MISSING_REQUIRED_FIELD = 6;
 
-  public function __construct(?string $message = null, int $code = 0) {
+  public function __construct(?string $message = null, int $code = 0)[] {
     parent::__construct($message, $code);
   }
 }

@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Message types for RPC
  */
-abstract class TMessageType {
-  const CALL = 1;
-  const REPLY = 2;
-  const EXCEPTION = 3;
+enum TMessageType: int as int {
+  CALL = 1;
+  REPLY = 2;
+  EXCEPTION = 3;
 }

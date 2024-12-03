@@ -14,18 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol.binary
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Old slow unaccelerated protocol.
  */
-class TBinaryProtocolUnaccelerated extends TBinaryProtocolBase {
-  public function __construct(
-    $trans,
-    $strict_read = false,
-    $strict_write = true,
-  ) {
-    parent::__construct($trans, $strict_read, $strict_write);
-  }
+<<Oncalls('thrift')>> // @oss-disable
+final class TBinaryProtocolUnaccelerated extends TBinaryProtocolBase {
 }

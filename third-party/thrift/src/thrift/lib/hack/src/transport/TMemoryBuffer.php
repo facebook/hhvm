@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * A memory buffer is a tranpsort that simply reads from and writes to an
@@ -25,9 +26,11 @@
  *
  * @package thrift.transport
  */
-class TMemoryBuffer extends TTransport implements IThriftBufferedTransport {
+<<Oncalls('thrift')>> // @oss-disable
+final class TMemoryBuffer
+  extends TWritePropsTransport
+  implements IThriftBufferedTransport {
 
-  private string $buf_ = '';
   private int $index_ = 0;
   private ?int $length_ = null;
 
@@ -35,42 +38,40 @@ class TMemoryBuffer extends TTransport implements IThriftBufferedTransport {
    * Constructor. Optionally pass an initial value
    * for the buffer.
    */
-  public function __construct(string $buf = '') {
-    $this->buf_ = (string) $buf;
-  }
+  public function __construct(private string $buf_ = '')[] {}
 
-  public function isOpen(): bool {
+  <<__Override>>
+  public function isOpen()[]: bool {
     return true;
   }
 
-  public function open(): void {}
+  <<__Override>>
+  public function open()[]: void {}
 
-  public function close(): void {}
+  <<__Override>>
+  public function close()[]: void {}
 
-  private function length(): int {
+  private function length()[write_props]: int {
     if ($this->length_ === null) {
-      $this->length_ = strlen($this->buf_);
+      $this->length_ = Str\length($this->buf_);
     }
     return $this->length_;
   }
 
-  public function available(): int {
+  public function available()[write_props]: int {
     return $this->length() - $this->index_;
   }
 
-  public function minBytesAvailable(): int {
-    return $this->available();
-  }
-
-  public function write(string $buf): void {
+  <<__Override>>
+  public function write(string $buf)[write_props]: void {
     $this->buf_ .= $buf;
     $this->length_ = null; // reset length
   }
 
-  public function read(int $len): string {
+  <<__Override>>
+  public function read(int $len)[write_props]: string {
     $available = $this->available();
     if ($available === 0) {
-      $buffer_dump = bin2hex($this->buf_);
       throw new TTransportException(
         'TMemoryBuffer: Could not read '.
         $len.
@@ -78,10 +79,7 @@ class TMemoryBuffer extends TTransport implements IThriftBufferedTransport {
         ' Original length is '.
         $this->length().
         ' Current index is '.
-        $this->index_.
-        ' Buffer content <start>'.
-        $buffer_dump.
-        '<end>',
+        $this->index_,
         TTransportException::UNKNOWN,
       );
     }
@@ -94,32 +92,45 @@ class TMemoryBuffer extends TTransport implements IThriftBufferedTransport {
     return $ret;
   }
 
-  public function peek(int $len, int $start = 0): string {
-    return
-      $len === 1
-        ? $this->buf_[$this->index_ + $start]
-        : substr($this->buf_, $this->index_ + $start, $len);
+  // This is the same as the parent implementation except the narrower coeffect.
+  <<__Override>>
+  public function readAll(int $len)[write_props]: string {
+    $data = '';
+    for ($got = Str\length($data); $got < $len; $got = Str\length($data)) {
+      $data .= $this->read($len - $got);
+    }
+    return $data;
   }
 
-  public function putBack(string $buf): void {
+  public function peek(int $len, int $start = 0)[]: string {
+    if ($len !== 1) {
+      return Str\slice($this->buf_, $this->index_ + $start, $len);
+    }
+    if (Str\length($this->buf_)) {
+      return $this->buf_[$this->index_ + $start];
+    }
+    return '';
+  }
+
+  public function putBack(string $buf)[write_props]: void {
     if ($this->available() === 0) {
       $this->buf_ = $buf;
     } else {
-      $remaining = (string) substr($this->buf_, $this->index_);
+      $remaining = (string)PHP\substr($this->buf_, $this->index_);
       $this->buf_ = $buf.$remaining;
     }
     $this->length_ = null;
     $this->index_ = 0;
   }
 
-  public function getBuffer(): @string { // Task #5347782
+  public function getBuffer()[]: <<__Soft>> string {
     if ($this->index_ === 0) {
       return $this->buf_;
     }
-    return substr($this->buf_, $this->index_);
+    return PHP\substr($this->buf_, $this->index_);
   }
 
-  public function resetBuffer(): void {
+  public function resetBuffer()[write_props]: void {
     $this->buf_ = '';
     $this->index_ = 0;
     $this->length_ = null;

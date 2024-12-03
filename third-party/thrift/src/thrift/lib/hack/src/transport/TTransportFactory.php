@@ -14,16 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
 
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
 class TTransportFactory {
   /**
    * @static
    * @param TTransport $transport
    * @return TTransport
    */
-  public function getTransport(TTransport $transport): TTransport {
+  public function getTransport(TTransport $transport)[write_props]: TTransport {
     return $transport;
   }
 }

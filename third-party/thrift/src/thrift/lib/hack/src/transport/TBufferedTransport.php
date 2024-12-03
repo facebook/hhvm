@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Buffered transport. Stores data to an internal buffer that it doesn't
@@ -24,42 +25,23 @@
  *
  * @package thrift.transport
  */
-class TBufferedTransport extends TTransport
+<<Oncalls('thrift')>> // @oss-disable
+final class TBufferedTransport<<<__Soft>> reify TTrans as TTransport>
+  extends TTransport
   implements TTransportStatus, IThriftBufferedTransport {
 
   /**
    * Constructor. Creates a buffered transport around an underlying transport
+   *
+   * @param $transport_ The underlying transport
+   * @param $rBufSize_ The receive buffer size
+   * @param $wBufSize_ The write buffer size
    */
   public function __construct(
-    ?TTransport $transport = null,
-    int $rBufSize = 512,
-    int $wBufSize = 512,
-  ) {
-    $this->transport_ = $transport ?: new TNullTransport();
-    $this->rBufSize_ = $rBufSize;
-    $this->wBufSize_ = $wBufSize;
-  }
-
-  /**
-   * The underlying transport
-   *
-   * @var TTransport
-   */
-  protected TTransport $transport_;
-
-  /**
-   * The receive buffer size
-   *
-   * @var int
-   */
-  protected int $rBufSize_ = 512;
-
-  /**
-   * The write buffer size
-   *
-   * @var int
-   */
-  protected int $wBufSize_ = 512;
+    protected TTrans $transport_,
+    protected int $rBufSize_ = 512,
+    protected int $wBufSize_ = 512,
+  )[] {}
 
   /**
    * The write buffer.
@@ -75,56 +57,55 @@ class TBufferedTransport extends TTransport
    */
   protected string $rBuf_ = '';
 
-  public function isOpen(): bool {
+  <<__Override>>
+  public function isOpen()[]: bool {
     return $this->transport_->isOpen();
   }
 
-  public function open(): void {
+  <<__Override>>
+  public function open()[zoned_shallow]: void {
     $this->transport_->open();
   }
 
-  public function close(): void {
+  <<__Override>>
+  public function close()[zoned_shallow]: void {
     $this->transport_->close();
   }
 
-  public function putBack(string $data): void {
-    if (strlen($this->rBuf_) === 0) {
+  public function putBack(string $data)[write_props]: void {
+    if (Str\length($this->rBuf_) === 0) {
       $this->rBuf_ = $data;
     } else {
       $this->rBuf_ = ($data.$this->rBuf_);
     }
   }
 
-  public function getMetaData(): array<string, mixed> {
-    if ($this->transport_ instanceof TSocket) {
+  public function getMetaData()[]: dict<string, mixed> {
+    if ($this->transport_ is TSocket) {
       return $this->transport_->getMetaData();
     }
 
-    return array();
+    return dict[];
   }
 
-  public function isReadable(): bool {
-    if (strlen($this->rBuf_) > 0) {
+  public function isReadable()[leak_safe]: bool {
+    if (Str\length($this->rBuf_) > 0) {
       return true;
     }
 
-    if ($this->transport_ instanceof TTransportStatus) {
+    if ($this->transport_ is TTransportStatus) {
       return $this->transport_->isReadable();
     }
 
     return true;
   }
 
-  public function isWritable(): bool {
-    if ($this->transport_ instanceof TTransportStatus) {
+  public function isWritable()[leak_safe]: bool {
+    if ($this->transport_ is TTransportStatus) {
       return $this->transport_->isWritable();
     }
 
     return true;
-  }
-
-  public function minBytesAvailable(): int {
-    return strlen($this->rBuf_);
   }
 
   /**
@@ -136,38 +117,40 @@ class TBufferedTransport extends TTransport
    * Therefore, use the readAll method of the wrapped transport inside
    * the buffered readAll.
    */
-  public function readAll(int $len): string {
-    $have = strlen($this->rBuf_);
+  <<__Override>>
+  public function readAll(int $len)[zoned_shallow]: string {
+    $have = Str\length($this->rBuf_);
     $data = '';
-    if ($have == 0) {
+    if ($have === 0) {
       $data = $this->transport_->readAll($len);
     } else if ($have < $len) {
       $data = $this->rBuf_;
       $this->rBuf_ = '';
       $data .= $this->transport_->readAll($len - $have);
-    } else if ($have == $len) {
+    } else if ($have === $len) {
       $data = $this->rBuf_;
       $this->rBuf_ = '';
     } else if ($have > $len) {
-      $data = substr($this->rBuf_, 0, $len);
-      $this->rBuf_ = substr($this->rBuf_, $len);
+      $data = PHP\substr($this->rBuf_, 0, $len);
+      $this->rBuf_ = PHP\substr($this->rBuf_, $len);
     }
     return $data;
   }
 
-  public function read(int $len): string {
-    if (strlen($this->rBuf_) === 0) {
+  <<__Override>>
+  public function read(int $len)[zoned_shallow]: string {
+    if (Str\length($this->rBuf_) === 0) {
       $this->rBuf_ = $this->transport_->read($this->rBufSize_);
     }
 
-    if (strlen($this->rBuf_) <= $len) {
+    if (Str\length($this->rBuf_) <= $len) {
       $ret = $this->rBuf_;
       $this->rBuf_ = '';
       return $ret;
     }
 
-    $ret = substr($this->rBuf_, 0, $len);
-    $this->rBuf_ = substr($this->rBuf_, $len);
+    $ret = PHP\substr($this->rBuf_, 0, $len);
+    $this->rBuf_ = PHP\substr($this->rBuf_, $len);
     return $ret;
   }
 
@@ -179,23 +162,24 @@ class TBufferedTransport extends TTransport
    *
    * @return null on peek failure
    */
-  public function peek(int $len, int $start = 0): string {
+  public function peek(int $len, int $start = 0)[zoned_shallow]: string {
     $bytes_needed = $len + $start;
     // read until either timeout OR get enough bytes
-    if (strlen($this->rBuf_) == 0) {
+    if (Str\length($this->rBuf_) === 0) {
       $this->rBuf_ = $this->transport_->readAll($bytes_needed);
-    } else if ($bytes_needed > strlen($this->rBuf_)) {
-      $this->rBuf_ .=
-        $this->transport_->readAll($bytes_needed - strlen($this->rBuf_));
+    } else if ($bytes_needed > Str\length($this->rBuf_)) {
+      $this->rBuf_ .= $this->transport_
+        ->readAll($bytes_needed - Str\length($this->rBuf_));
     }
 
-    $ret = substr($this->rBuf_, $start, $len);
+    $ret = PHP\substr($this->rBuf_, $start, $len);
     return $ret;
   }
 
-  public function write(string $buf): void {
+  <<__Override>>
+  public function write(string $buf)[zoned_shallow]: void {
     $this->wBuf_ .= $buf;
-    if (strlen($this->wBuf_) >= $this->wBufSize_) {
+    if (Str\length($this->wBuf_) >= $this->wBufSize_) {
       $out = $this->wBuf_;
 
       // Note that we clear the internal wBuf_ prior to the underlying write
@@ -206,8 +190,9 @@ class TBufferedTransport extends TTransport
     }
   }
 
-  public function flush(): void {
-    if (strlen($this->wBuf_) > 0) {
+  <<__Override>>
+  public function flush()[zoned_shallow]: void {
+    if (Str\length($this->wBuf_) > 0) {
       $this->transport_->write($this->wBuf_);
       $this->wBuf_ = '';
     }
@@ -215,4 +200,3 @@ class TBufferedTransport extends TTransport
   }
 
 }
-

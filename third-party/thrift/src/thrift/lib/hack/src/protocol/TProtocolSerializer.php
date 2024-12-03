@@ -14,13 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.protocol
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Base class for serializing thrift structs using a TProtocol
  */
-<<__ConsistentConstruct>>
+<<__ConsistentConstruct, Oncalls('thrift')>> // @oss-disable
 abstract class TProtocolSerializer {
   abstract public static function serialize(IThriftStruct $object): string;
 
@@ -28,4 +29,38 @@ abstract class TProtocolSerializer {
     string $str,
     T $object,
   ): T;
+
+  abstract public static function serializeData(
+    mixed $object,
+    ThriftStructTypes::TGenericSpec $type_spec,
+  ): string;
+
+  abstract public static function deserializeData(
+    string $str,
+    ThriftStructTypes::TGenericSpec $type_spec,
+  ): mixed;
+}
+
+<<Oncalls('thrift')>> // @oss-disable
+abstract class TProtocolWritePropsSerializer extends TProtocolSerializer {
+  <<__Override>>
+  abstract public static function serialize(
+    IThriftStruct $object,
+  )[write_props]: string;
+
+  <<__Override>>
+  abstract public static function deserialize<T as IThriftStruct>(
+    string $str,
+    T $object,
+  )[write_props]: T;
+  <<__Override>>
+  abstract public static function serializeData(
+    mixed $object,
+    ThriftStructTypes::TGenericSpec $type_spec,
+  )[write_props]: string;
+  <<__Override>>
+  abstract public static function deserializeData(
+    string $str,
+    ThriftStructTypes::TGenericSpec $type_spec,
+  )[write_props]: mixed;
 }

@@ -14,16 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift.transport
  */
 
-class THeaderTransportFactory extends TTransportFactory {
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
+
+<<Oncalls('thrift')>> // @oss-disable
+final class THeaderTransportFactory extends TTransportFactory {
   /**
    * @static
    * @param TTransport $transport
    * @return TTransport
    */
-  public function getTransport(TTransport $transport): THeaderTransport {
+  <<__Override>>
+  public function getTransport(
+    TTransport $transport,
+  )[write_props]: THeaderTransport {
     $p = Vector {
       THeaderTransport::HEADER_CLIENT_TYPE,
       THeaderTransport::FRAMED_DEPRECATED,

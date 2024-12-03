@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @package thrift
  */
+
+// @oss-enable: use namespace FlibSL\{C, Math, Str, Vec};
 
 /**
  * Event handler for thrift processors
  */
+<<Oncalls('thrift')>> // @oss-disable
 class TProcessorEventHandler {
 
   // Called at the start of processing a handler method
@@ -89,5 +91,6 @@ class TProcessorEventHandler {
     mixed $handler_context,
     string $fn_name,
     Exception $exception,
-  ): void {}
+  ): void {
+  }
 }

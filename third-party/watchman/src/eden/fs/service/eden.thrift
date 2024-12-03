@@ -1908,11 +1908,11 @@ union ChangeNotification {
  * Return value of the changesSinceV2 API
  *
  * toPosition - a new journal poistion that indicates the next change
- * that will occur in the future. Should be used in the next call to
- * changesSinceV2 go get the next list of changes.
+ *   that will occur in the future. Should be used in the next call to
+ *   changesSinceV2 go get the next list of changes.
  *
  * changes -  a list of all change notifications that have ocurred in
- * within the given mount point since the provided journal position.
+ *   within the given mount point since the provided journal position.
  */
 struct ChangesSinceV2Result {
   1: JournalPosition toPosition;
@@ -1925,14 +1925,29 @@ struct ChangesSinceV2Result {
  * mountPoint - the EdenFS checkout to request changes about.
  *
  * fromPosition - the journal position used as the starting point to
- * request changes since. Typically, fromPosition is the set to the
- * toPostiion value returned in ChangesSinceV2Result. However, for
- * the initial invocation of changesSinceV2, the caller can obtain
- * the current journal position by calling getCurrentJournalPosition.
+ *   request changes since. Typically, fromPosition is the set to the
+ *   toPostiion value returned in ChangesSinceV2Result. However, for
+ *   the initial invocation of changesSinceV2, the caller can obtain
+ *   the current journal position by calling getCurrentJournalPosition.
+ *
+ * includeVCSRoots - optional flag indicating the VCS roots should be included
+ *   in the returned results. By default, VCS roots will be excluded from
+ *   results.
+ *
+ * includedRoots - optional list of roots to include in results. If not
+ *   provided or an empty list, all roots will be included in results.
+ *   Applied before roots are excluded - see excludedRoots.
+ *
+ * excludedRoots - optional ist of roots to exclude from results. If not
+ *   provided or an empty list, no roots will be excluded from results.
+ *   Applied after roots are included - see includedRoots.
  */
 struct ChangesSinceV2Params {
   1: PathString mountPoint;
   2: JournalPosition fromPosition;
+  3: optional bool includeVCSRoots;
+  4: optional list<PathString> includedRoots;
+  5: optional list<PathString> excludedRoots;
 }
 
 service EdenService extends fb303_core.BaseService {

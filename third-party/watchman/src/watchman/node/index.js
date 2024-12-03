@@ -9,13 +9,13 @@
 
 'use strict';
 
-var net = require('net');
-var EE = require('events').EventEmitter;
-var childProcess = require('child_process');
-var bser = require('bser');
+const bser = require('bser');
+const childProcess = require('child_process');
+const {EventEmitter} = require('events');
+const net = require('net');
 
 // We'll emit the responses to these when they get sent down to us
-var unilateralTags = ['subscription', 'log'];
+const unilateralTags = ['subscription', 'log'];
 
 /**
  * @param options An object with the following optional keys:
@@ -23,10 +23,9 @@ var unilateralTags = ['subscription', 'log'];
  *     If not provided, the Client locates the binary using the PATH specified
  *     by the node child_process's default env.
  */
-class Client extends EE {
+class Client extends EventEmitter {
   constructor(options) {
     super();
-    const self = this;
 
     this.watchmanBinaryPath = 'watchman';
     if (options && options.watchmanBinaryPath) {
@@ -52,11 +51,11 @@ class Client extends EE {
   }
 
   cancelCommands(why) {
-    var error = new Error(why);
+    const error = new Error(why);
 
     // Steal all pending commands before we start cancellation, in
     // case something decides to schedule more commands
-    var cmds = this.commands;
+    const cmds = this.commands;
     this.commands = [];
 
     if (this.currentCommand) {
@@ -65,37 +64,35 @@ class Client extends EE {
     }
 
     // Synthesize an error condition for any commands that were queued
-    cmds.forEach(function (cmd) {
+    cmds.forEach(cmd => {
       cmd.cb(error);
     });
   }
 
   connect() {
-    var self = this;
-
-    function makeSock(sockname) {
+    const makeSock = sockname => {
       // bunser will decode the watchman BSER protocol for us
-      self.bunser = new bser.BunserBuf();
+      this.bunser = new bser.BunserBuf();
       // For each decoded line:
-      self.bunser.on('value', function (obj) {
+      this.bunser.on('value', obj => {
         // Figure out if this is a unliteral response or if it is the
         // response portion of a request-response sequence.  At the time
         // of writing, there are only two possible unilateral responses.
-        var unilateral = false;
-        for (var i = 0; i < unilateralTags.length; i++) {
-          var tag = unilateralTags[i];
+        let unilateral = false;
+        for (let i = 0; i < unilateralTags.length; i++) {
+          const tag = unilateralTags[i];
           if (tag in obj) {
             unilateral = tag;
           }
         }
 
         if (unilateral) {
-          self.emit(unilateral, obj);
-        } else if (self.currentCommand) {
-          var cmd = self.currentCommand;
-          self.currentCommand = null;
+          this.emit(unilateral, obj);
+        } else if (this.currentCommand) {
+          const cmd = this.currentCommand;
+          this.currentCommand = null;
           if ('error' in obj) {
-            var error = new Error(obj.error);
+            const error = new Error(obj.error);
             error.watchmanResponse = obj;
             cmd.cb(error);
           } else {
@@ -104,34 +101,34 @@ class Client extends EE {
         }
 
         // See if we can dispatch the next queued command, if any
-        self.sendNextCommand();
+        this.sendNextCommand();
       });
-      self.bunser.on('error', function (err) {
-        self.emit('error', err);
+      this.bunser.on('error', err => {
+        this.emit('error', err);
       });
 
-      self.socket = net.createConnection(sockname);
-      self.socket.on('connect', function () {
-        self.connecting = false;
-        self.emit('connect');
-        self.sendNextCommand();
+      this.socket = net.createConnection(sockname);
+      this.socket.on('connect', () => {
+        this.connecting = false;
+        this.emit('connect');
+        this.sendNextCommand();
       });
-      self.socket.on('error', function (err) {
-        self.connecting = false;
-        self.emit('error', err);
+      this.socket.on('error', err => {
+        this.connecting = false;
+        this.emit('error', err);
       });
-      self.socket.on('data', function (buf) {
-        if (self.bunser) {
-          self.bunser.append(buf);
+      this.socket.on('data', buf => {
+        if (this.bunser) {
+          this.bunser.append(buf);
         }
       });
-      self.socket.on('end', function () {
-        self.socket = null;
-        self.bunser = null;
-        self.cancelCommands('The watchman connection was closed');
-        self.emit('end');
+      this.socket.on('end', () => {
+        this.socket = null;
+        this.bunser = null;
+        this.cancelCommands('The watchman connection was closed');
+        this.emit('end');
       });
-    }
+    };
 
     // triggers will export the sock path to the environment.
     // If we're invoked in such a way, we can simply pick up the
@@ -145,16 +142,16 @@ class Client extends EE {
     // We need to ask the client binary where to find it.
     // This will cause the service to start for us if it isn't
     // already running.
-    var args = ['--no-pretty', 'get-sockname'];
+    const args = ['--no-pretty', 'get-sockname'];
 
     // We use the more elaborate spawn rather than exec because there
     // are some error cases on Windows where process spawning can hang.
     // It is desirable to pipe stderr directly to stderr live so that
     // we can discover the problem.
-    var proc = null;
-    var spawnFailed = false;
+    let proc = null;
+    let spawnFailed = false;
 
-    function spawnError(error) {
+    const spawnError = error => {
       if (spawnFailed) {
         // For ENOENT, proc 'close' will also trigger with a negative code,
         // let's suppress that second error.
@@ -172,8 +169,8 @@ class Client extends EE {
           'for installation instructions';
       }
       console.error('Watchman: ', error.message);
-      self.emit('error', error);
-    }
+      this.emit('error', error);
+    };
 
     try {
       proc = childProcess.spawn(this.watchmanBinaryPath, args, {
@@ -185,25 +182,25 @@ class Client extends EE {
       return;
     }
 
-    var stdout = [];
-    var stderr = [];
-    proc.stdout.on('data', function (data) {
+    const stdout = [];
+    const stderr = [];
+    proc.stdout.on('data', data => {
       stdout.push(data);
     });
-    proc.stderr.on('data', function (data) {
+    proc.stderr.on('data', data => {
       data = data.toString('utf8');
       stderr.push(data);
       console.error(data);
     });
-    proc.on('error', function (error) {
+    proc.on('error', error => {
       spawnError(error);
     });
 
-    proc.on('close', function (code, signal) {
+    proc.on('close', (code, signal) => {
       if (code !== 0) {
         spawnError(
           new Error(
-            self.watchmanBinaryPath +
+            this.watchmanBinaryPath +
               ' ' +
               args.join(' ') +
               ' returned with exit code=' +
@@ -217,23 +214,21 @@ class Client extends EE {
         return;
       }
       try {
-        var obj = JSON.parse(stdout.join(''));
+        const obj = JSON.parse(stdout.join(''));
         if ('error' in obj) {
-          var error = new Error(obj.error);
+          const error = new Error(obj.error);
           error.watchmanResponse = obj;
-          self.emit('error', error);
+          this.emit('error', error);
           return;
         }
         makeSock(obj.sockname);
       } catch (e) {
-        self.emit('error', e);
+        this.emit('error', e);
       }
     });
   }
 
-  command(args, done) {
-    done = done || function () {};
-
+  command(args, done = () => {}) {
     // Queue up the command
     this.commands.push({cmd: args, cb: done});
 
@@ -254,12 +249,12 @@ class Client extends EE {
   // This is a helper that we expose for testing purposes
   _synthesizeCapabilityCheck(resp, optional, required) {
     resp.capabilities = {};
-    var version = resp.version;
-    optional.forEach(function (name) {
+    const version = resp.version;
+    optional.forEach(name => {
       resp.capabilities[name] = have_cap(version, name);
     });
-    required.forEach(function (name) {
-      var have = have_cap(version, name);
+    required.forEach(name => {
+      const have = have_cap(version, name);
       resp.capabilities[name] = have;
       if (!have) {
         resp.error =
@@ -272,9 +267,8 @@ class Client extends EE {
   }
 
   capabilityCheck(caps, done) {
-    var optional = caps.optional || [];
-    var required = caps.required || [];
-    var self = this;
+    const optional = caps.optional || [];
+    const required = caps.required || [];
     this.command(
       [
         'version',
@@ -283,7 +277,7 @@ class Client extends EE {
           required: required,
         },
       ],
-      function (error, resp) {
+      (error, resp) => {
         if (error) {
           done(error);
           return;
@@ -291,7 +285,7 @@ class Client extends EE {
         if (!('capabilities' in resp)) {
           // Server doesn't support capabilities, so we need to
           // synthesize the results based on the version
-          resp = self._synthesizeCapabilityCheck(resp, optional, required);
+          resp = this._synthesizeCapabilityCheck(resp, optional, required);
           if (resp.error) {
             error = new Error(resp.error);
             error.watchmanResponse = resp;
@@ -315,7 +309,7 @@ class Client extends EE {
   }
 }
 
-var cap_versions = {
+const cap_versions = {
   'cmd-watch-del-all': '3.1.1',
   'cmd-watch-project': '3.1',
   relative_root: '3.3',
@@ -328,8 +322,8 @@ var cap_versions = {
 function vers_compare(a, b) {
   a = a.split('.');
   b = b.split('.');
-  for (var i = 0; i < 3; i++) {
-    var d = parseInt(a[i] || '0') - parseInt(b[i] || '0');
+  for (let i = 0; i < 3; i++) {
+    const d = parseInt(a[i] || '0') - parseInt(b[i] || '0');
     if (d != 0) {
       return d;
     }

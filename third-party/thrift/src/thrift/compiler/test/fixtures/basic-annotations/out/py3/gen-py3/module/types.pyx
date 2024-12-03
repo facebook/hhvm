@@ -61,7 +61,6 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     std_deque_std_string__List__string,
 )
 
-_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -70,8 +69,6 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(MyStructNestedAnnotation self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cMyStructNestedAnnotation]()
         self._fields_setter = _fbthrift_types_fields.__MyStructNestedAnnotation_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -185,8 +182,6 @@ cdef class MyStructNestedAnnotation(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class SecretStruct(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(SecretStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSecretStruct]()
         self._fields_setter = _fbthrift_types_fields.__SecretStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

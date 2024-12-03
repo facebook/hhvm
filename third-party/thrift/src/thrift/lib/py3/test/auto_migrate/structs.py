@@ -38,10 +38,7 @@ from testing.types import (
     StringBucket,
     UnusedError,
 )
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
-    brokenInAutoMigrate,
-    is_auto_migrated,
-)
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
 from thrift.py3.common import Protocol
 from thrift.py3.serializer import deserialize
 from thrift.py3.types import Struct
@@ -250,17 +247,6 @@ class StructTests(unittest.TestCase):
 
         self.assertEqual(x, x2)
         self.assertNotEqual(x, y)
-
-    def test_struct_module_name(self) -> None:
-        variant_prefix = "thrift_" if is_auto_migrated() else ""
-        expected = f"testing.{variant_prefix}types"
-
-        self.assertEqual(easy.__module__, expected)
-        self.assertEqual(easy().__class__.__module__, expected)
-        self.assertEqual(File.__module__, expected)
-        self.assertEqual(File().__class__.__module__, expected)
-        self.assertEqual(hard.__module__, expected)
-        self.assertEqual(hard().__class__.__module__, expected)
 
     @brokenInAutoMigrate()
     def test_noncopyable(self) -> None:

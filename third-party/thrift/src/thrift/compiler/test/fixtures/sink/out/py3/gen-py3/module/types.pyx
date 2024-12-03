@@ -55,7 +55,6 @@ import importlib
 import module.thrift_types as _fbthrift_python_types
 
 
-_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -64,8 +63,6 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class InitialResponse(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(InitialResponse self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cInitialResponse]()
         self._fields_setter = _fbthrift_types_fields.__InitialResponse_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -179,8 +176,6 @@ cdef class InitialResponse(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class FinalResponse(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(FinalResponse self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFinalResponse]()
         self._fields_setter = _fbthrift_types_fields.__FinalResponse_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -294,8 +289,6 @@ cdef class FinalResponse(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class SinkPayload(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(SinkPayload self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSinkPayload]()
         self._fields_setter = _fbthrift_types_fields.__SinkPayload_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -409,8 +402,6 @@ cdef class SinkPayload(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(CompatibleWithKeywordSink self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCompatibleWithKeywordSink]()
         self._fields_setter = _fbthrift_types_fields.__CompatibleWithKeywordSink_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -524,8 +515,6 @@ cdef class CompatibleWithKeywordSink(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class InitialException(thrift.py3.exceptions.GeneratedError):
-    __module__ = _fbthrift__module_name__
-
     def __init__(InitialException self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cInitialException]()
         self._fields_setter = _fbthrift_types_fields.__InitialException_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -630,8 +619,6 @@ cdef class InitialException(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
-    __module__ = _fbthrift__module_name__
-
     def __init__(SinkException1 self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSinkException1]()
         self._fields_setter = _fbthrift_types_fields.__SinkException1_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -736,8 +723,6 @@ cdef class SinkException1(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class SinkException2(thrift.py3.exceptions.GeneratedError):
-    __module__ = _fbthrift__module_name__
-
     def __init__(SinkException2 self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSinkException2]()
         self._fields_setter = _fbthrift_types_fields.__SinkException2_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

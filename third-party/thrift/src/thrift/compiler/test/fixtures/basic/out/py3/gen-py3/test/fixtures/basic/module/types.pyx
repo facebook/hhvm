@@ -66,7 +66,6 @@ from test.fixtures.basic.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__string,
 )
 
-_fbthrift__module_name__ = "test.fixtures.basic.module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -75,8 +74,6 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(MyStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyStruct]()
         self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -260,8 +257,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Containers(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(Containers self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cContainers]()
         self._fields_setter = _fbthrift_types_fields.__Containers_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -397,8 +392,6 @@ cdef class Containers(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MyDataItem(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(MyDataItem self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem]()
         self._fields_setter = _fbthrift_types_fields.__MyDataItem_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -499,7 +492,6 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MyUnion(thrift.py3.types.Union):
-    __module__ = _fbthrift__module_name__
     Type = __MyUnionType
 
     def __init__(
@@ -683,8 +675,6 @@ cdef class MyUnion(thrift.py3.types.Union):
 
 @__cython.auto_pickle(False)
 cdef class MyException(thrift.py3.exceptions.GeneratedError):
-    __module__ = _fbthrift__module_name__
-
     def __init__(MyException self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyException]()
         self._fields_setter = _fbthrift_types_fields.__MyException_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -817,8 +807,6 @@ cdef class MyException(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
-    __module__ = _fbthrift__module_name__
-
     def __init__(MyExceptionWithMessage self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyExceptionWithMessage]()
         self._fields_setter = _fbthrift_types_fields.__MyExceptionWithMessage_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -954,8 +942,6 @@ cdef class MyExceptionWithMessage(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class ReservedKeyword(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(ReservedKeyword self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cReservedKeyword]()
         self._fields_setter = _fbthrift_types_fields.__ReservedKeyword_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1071,7 +1057,6 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class UnionToBeRenamed(thrift.py3.types.Union):
-    __module__ = _fbthrift__module_name__
     Type = __UnionToBeRenamedType
 
     def __init__(

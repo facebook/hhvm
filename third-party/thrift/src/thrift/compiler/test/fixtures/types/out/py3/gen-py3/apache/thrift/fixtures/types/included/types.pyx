@@ -58,7 +58,6 @@ from apache.thrift.fixtures.types.included.containers_FBTHRIFT_ONLY_DO_NOT_USE i
     List__std_unordered_map__Map__i32_string,
 )
 
-_fbthrift__module_name__ = "apache.thrift.fixtures.types.included.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(

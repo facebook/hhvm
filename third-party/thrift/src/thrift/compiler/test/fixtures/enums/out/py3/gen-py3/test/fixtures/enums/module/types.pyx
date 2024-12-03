@@ -67,7 +67,6 @@ from test.fixtures.enums.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__i32,
 )
 
-_fbthrift__module_name__ = "test.fixtures.enums.module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -76,8 +75,6 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class SomeStruct(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(SomeStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_enums_module_cbindings.cSomeStruct]()
         self._fields_setter = _fbthrift_types_fields.__SomeStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -223,8 +220,6 @@ cdef class SomeStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
-    __module__ = _fbthrift__module_name__
-
     def __init__(MyStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_enums_module_cbindings.cMyStruct]()
         self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

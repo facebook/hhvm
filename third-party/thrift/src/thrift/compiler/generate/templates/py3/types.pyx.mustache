@@ -119,7 +119,6 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 )
 {{/program:hasPyContainerTypes}}
 
-_fbthrift__module_name__ = "{{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -130,8 +129,6 @@ cdef object get_types_reflection():
 {{^struct:union?}}
 @__cython.auto_pickle(False)
 cdef class {{struct:name}}({{> types/python_struct_class}}):
-    __module__ = _fbthrift__module_name__
-
     def __init__({{struct:name}} self,{{#struct:exception?}} *args,{{/struct:exception?}} **kwargs):
         self.{{> types/cpp_obj}} = make_shared[{{> types/current_module_cbindings}}.{{> types/c_struct }}]()
         self._fields_setter = _fbthrift_types_fields.__{{struct:name}}_FieldsSetter._fbthrift_create(self.{{> types/cpp_obj}}.get())
@@ -232,7 +229,6 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
 
 @__cython.auto_pickle(False)
 cdef class {{struct:name}}(thrift.py3.types.Union):
-    __module__ = _fbthrift__module_name__
     Type = __{{struct:name}}Type
 
     def __init__(

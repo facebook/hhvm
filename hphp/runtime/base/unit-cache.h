@@ -94,7 +94,6 @@ Unit* lookupSyslibUnit(StringData* path);
 
 #define UNITCACHEFLAGS()                        \
   R(EnableXHP)                                  \
-  R(RepoDebugInfo)                              \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,

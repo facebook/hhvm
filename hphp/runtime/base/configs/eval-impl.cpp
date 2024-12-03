@@ -19,6 +19,7 @@
 #include "hphp/util/arch.h"
 #include "hphp/util/build-info.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/util/low-ptr.h"
@@ -80,6 +81,14 @@ bool EvalLoader::EnableNumaDefault() {
   return (numa_num_nodes > 1) && Cfg::Server::Mode;
 }
 
+void EvalLoader::EnableNumaPostProcess(bool& val) {
+  if (numa_num_nodes <= 1) val = false;
+}
+
+void EvalLoader::ReusableTCPaddingPostProcess(uint32_t& val) {
+  if (!Cfg::Eval::EnableReusableTC) val = 0;
+}
+
 uint32_t EvalLoader::UnixServerWorkersDefault() {
   return Process::GetCPUCount();
 }
@@ -94,6 +103,11 @@ void EvalLoader::EmbeddedDataExtractPathPostProcess(std::string& path) {
 
 void EvalLoader::EmbeddedDataFallbackPathPostProcess(std::string& path) {
   replacePlaceholders(path);
+}
+
+void EvalLoader::FastMethodInterceptPostProcess(bool& val) {
+  // Fast method intercept is currently unsupported on ARM.
+  if (arch() == Arch::ARM) val = false;
 }
 
 }

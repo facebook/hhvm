@@ -215,8 +215,8 @@ void Replayer::onRuntimeOptionLoad(IniSettingMap& ini, Hdf& hdf,
   hdf = newHdf;
   ini = newIni;
   if (Cfg::Repo::Authoritative) {
-    RO::RepoPath = std::tmpnam(nullptr);
-    std::ofstream ofs{RO::RepoPath, std::ios::binary};
+    Cfg::Repo::Path = std::tmpnam(nullptr);
+    std::ofstream ofs{Cfg::Repo::Path, std::ios::binary};
     ofs.write(&data[size], sv.rfind('\0') - size);
   }
 }

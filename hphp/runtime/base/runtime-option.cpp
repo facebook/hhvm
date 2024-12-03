@@ -814,20 +814,8 @@ hphp_string_map<TypedValue> RuntimeOption::ConstantFunctions;
 bool RuntimeOption::RecordCodeCoverage = false;
 std::string RuntimeOption::CodeCoverageOutputFile;
 
-std::string RuntimeOption::RepoPath;
 RepoMode RuntimeOption::RepoLocalMode = RepoMode::ReadOnly;
-std::string RuntimeOption::RepoLocalPath;
 RepoMode RuntimeOption::RepoCentralMode = RepoMode::ReadWrite;
-std::string RuntimeOption::RepoCentralPath;
-int32_t RuntimeOption::RepoCentralFileMode;
-std::string RuntimeOption::RepoCentralFileUser;
-std::string RuntimeOption::RepoCentralFileGroup;
-std::string RuntimeOption::RepoJournal = "delete";
-bool RuntimeOption::RepoAllowFallbackPath = true;
-bool RuntimeOption::RepoCommit = true;
-bool RuntimeOption::RepoDebugInfo = true;
-bool RuntimeOption::RepoLitstrLazyLoad = true;
-uint32_t RuntimeOption::RepoBusyTimeoutMS = 15000;
 
 bool RuntimeOption::HHProfEnabled = false;
 bool RuntimeOption::HHProfActive = false;
@@ -1475,60 +1463,17 @@ void RuntimeOption::Load(
     Config::Bind(repoLocalMode, ini, config, "Repo.Local.Mode", repoModeToStr(RepoLocalMode));
     RepoLocalMode = parseRepoMode(repoLocalMode, "Local", RepoMode::ReadOnly);
 
-    // Repo.Path
-    Config::Bind(RepoPath, ini, config, "Repo.Path", RepoPath);
-
-    // Repo.Local.Path
-    Config::Bind(RepoLocalPath, ini, config, "Repo.Local.Path");
-    if (RepoLocalPath.empty()) {
-      const char* HHVM_REPO_LOCAL_PATH = getenv("HHVM_REPO_LOCAL_PATH");
-      if (HHVM_REPO_LOCAL_PATH != nullptr) {
-        RepoLocalPath = HHVM_REPO_LOCAL_PATH;
-      }
-    }
-
     // Central Repo
     static std::string repoCentralMode;
     Config::Bind(repoCentralMode, ini, config, "Repo.Central.Mode", repoModeToStr(RepoCentralMode));
     RepoCentralMode = parseRepoMode(repoCentralMode, "Central", RepoMode::ReadWrite);
 
-    // Repo.Central.Path
-    Config::Bind(RepoCentralPath, ini, config, "Repo.Central.Path");
-    Config::Bind(RepoCentralFileMode, ini, config, "Repo.Central.FileMode");
-    Config::Bind(RepoCentralFileUser, ini, config, "Repo.Central.FileUser");
-    Config::Bind(RepoCentralFileGroup, ini, config, "Repo.Central.FileGroup");
-
-    Config::Bind(RepoAllowFallbackPath, ini, config, "Repo.AllowFallbackPath",
-                 RepoAllowFallbackPath);
-
-    replacePlaceholders(RepoLocalPath);
-    replacePlaceholders(RepoCentralPath);
-    replacePlaceholders(RepoPath);
-
-    Config::Bind(RepoJournal, ini, config, "Repo.Journal", RepoJournal);
-    Config::Bind(RepoCommit, ini, config, "Repo.Commit",
-                 RepoCommit);
-    Config::Bind(RepoDebugInfo, ini, config, "Repo.DebugInfo", RepoDebugInfo);
-    Config::Bind(RepoLitstrLazyLoad, ini, config, "Repo.LitstrLazyLoad",
-                 RepoLitstrLazyLoad);
-    Config::Bind(RepoBusyTimeoutMS, ini, config,
-                 "Repo.BusyTimeoutMS", RepoBusyTimeoutMS);
-
-    if (RepoPath.empty()) {
-      if (!RepoLocalPath.empty()) {
-        RepoPath = RepoLocalPath;
-      } else if (!RepoCentralPath.empty()) {
-        RepoPath = RepoCentralPath;
-      } else if (auto const env = getenv("HHVM_REPO_CENTRAL_PATH")) {
-        RepoPath = env;
-        replacePlaceholders(RepoPath);
-      } else {
-        always_assert_flog(
-          !Cfg::Repo::Authoritative,
-          "Either Repo.Path, Repo.LocalPath, or Repo.CentralPath "
-          "must be set in RepoAuthoritative mode"
-        );
-      }
+    if (Cfg::Repo::Path.empty()) {
+      always_assert_flog(
+        !Cfg::Repo::Authoritative,
+        "Either Repo.Path, Repo.LocalPath, or Repo.CentralPath "
+        "must be set in RepoAuthoritative mode"
+      );
     }
   }
 
@@ -1600,13 +1545,6 @@ void RuntimeOption::Load(
     }
 
     if (Cfg::Jit::SerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
-    if (!Cfg::Eval::EnableReusableTC) Cfg::Eval::ReusableTCPadding = 0;
-    if (numa_num_nodes <= 1) {
-      Cfg::Eval::EnableNuma = false;
-    }
-
-    // Fast method intercept is currently unsupported on ARM.
-    if (arch() == Arch::ARM) Cfg::Eval::FastMethodIntercept = false;
 
     if (!Cfg::Server::ForkingEnabled && ServerExecutionMode()) {
       // Only use hugetlb pages when we don't fork().

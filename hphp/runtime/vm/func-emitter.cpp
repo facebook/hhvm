@@ -779,7 +779,7 @@ void FuncEmitter::serde(SerDe& sd, bool lazy) {
   if constexpr (SerDe::deserializing) {
     sd(m_sourceLocTab);
   } else {
-    sd(RO::RepoDebugInfo ? m_sourceLocTab : decltype(m_sourceLocTab){});
+    sd(Cfg::Repo::DebugInfo ? m_sourceLocTab : decltype(m_sourceLocTab){});
   }
 
   // Bytecode

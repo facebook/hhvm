@@ -136,13 +136,6 @@ void Option::Load(const IniSetting::Map& ini, Hdf &config) {
 
   Cfg::LoadForCompiler(ini, config);
 
-  {
-    // Repo
-    Config::Bind(RuntimeOption::RepoDebugInfo,
-                 ini, config, "Repo.DebugInfo",
-                 RuntimeOption::RepoDebugInfo);
-  }
-
   Config::Bind(RuntimeOption::EnableXHP, ini, config, "EnableXHP",
                RuntimeOption::EnableXHP);
 

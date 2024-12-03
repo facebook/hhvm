@@ -11,8 +11,8 @@ from libcpp.utility cimport move as cmove
 from apache.thrift.metadata.cbindings cimport (
     cThriftMetadata,
 )
-from apache.thrift.metadata.types cimport (
-    ThriftMetadata,
+from apache.thrift.metadata.converter cimport (
+    ThriftMetadata_from_cpp
 )
 
 from c.metadata cimport cGetThriftModuleMetadata
@@ -20,4 +20,4 @@ from c.metadata cimport cGetThriftModuleMetadata
 def getThriftModuleMetadata():
     cdef shared_ptr[cThriftMetadata] metadata
     metadata = make_shared[cThriftMetadata](cGetThriftModuleMetadata())
-    return ThriftMetadata._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(metadata))
+    return ThriftMetadata_from_cpp(cmove(metadata))

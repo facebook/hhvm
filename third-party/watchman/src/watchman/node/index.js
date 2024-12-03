@@ -3,6 +3,8 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
+ *
+ * @format
  */
 
 'use strict';
@@ -29,7 +31,7 @@ function Client(options) {
   this.watchmanBinaryPath = 'watchman';
   if (options && options.watchmanBinaryPath) {
     this.watchmanBinaryPath = options.watchmanBinaryPath.trim();
-  };
+  }
   this.commands = [];
 }
 util.inherits(Client, EE);
@@ -37,7 +39,7 @@ util.inherits(Client, EE);
 module.exports.Client = Client;
 
 // Try to send the next queued command, if any
-Client.prototype.sendNextCommand = function() {
+Client.prototype.sendNextCommand = function () {
   if (this.currentCommand) {
     // There's a command pending response, don't send this new one yet
     return;
@@ -50,9 +52,9 @@ Client.prototype.sendNextCommand = function() {
   }
 
   this.socket.write(bser.dumpToBuffer(this.currentCommand.cmd));
-}
+};
 
-Client.prototype.cancelCommands = function(why) {
+Client.prototype.cancelCommands = function (why) {
   var error = new Error(why);
 
   // Steal all pending commands before we start cancellation, in
@@ -66,19 +68,19 @@ Client.prototype.cancelCommands = function(why) {
   }
 
   // Synthesize an error condition for any commands that were queued
-  cmds.forEach(function(cmd) {
+  cmds.forEach(function (cmd) {
     cmd.cb(error);
   });
-}
+};
 
-Client.prototype.connect = function() {
+Client.prototype.connect = function () {
   var self = this;
 
   function makeSock(sockname) {
     // bunser will decode the watchman BSER protocol for us
     self.bunser = new bser.BunserBuf();
     // For each decoded line:
-    self.bunser.on('value', function(obj) {
+    self.bunser.on('value', function (obj) {
       // Figure out if this is a unliteral response or if it is the
       // response portion of a request-response sequence.  At the time
       // of writing, there are only two possible unilateral responses.
@@ -107,26 +109,26 @@ Client.prototype.connect = function() {
       // See if we can dispatch the next queued command, if any
       self.sendNextCommand();
     });
-    self.bunser.on('error', function(err) {
+    self.bunser.on('error', function (err) {
       self.emit('error', err);
     });
 
     self.socket = net.createConnection(sockname);
-    self.socket.on('connect', function() {
+    self.socket.on('connect', function () {
       self.connecting = false;
       self.emit('connect');
       self.sendNextCommand();
     });
-    self.socket.on('error', function(err) {
+    self.socket.on('error', function (err) {
       self.connecting = false;
       self.emit('error', err);
     });
-    self.socket.on('data', function(buf) {
+    self.socket.on('data', function (buf) {
       if (self.bunser) {
         self.bunser.append(buf);
       }
     });
-    self.socket.on('end', function() {
+    self.socket.on('end', function () {
       self.socket = null;
       self.bunser = null;
       self.cancelCommands('The watchman connection was closed');
@@ -163,12 +165,14 @@ Client.prototype.connect = function() {
     }
     spawnFailed = true;
     if (error.code === 'EACCES' || error.errno === 'EACCES') {
-      error.message = 'The Watchman CLI is installed but cannot ' +
-                      'be spawned because of a permission problem';
+      error.message =
+        'The Watchman CLI is installed but cannot ' +
+        'be spawned because of a permission problem';
     } else if (error.code === 'ENOENT' || error.errno === 'ENOENT') {
-      error.message = 'Watchman was not found in PATH.  See ' +
-          'https://facebook.github.io/watchman/docs/install.html ' +
-          'for installation instructions';
+      error.message =
+        'Watchman was not found in PATH.  See ' +
+        'https://facebook.github.io/watchman/docs/install.html ' +
+        'for installation instructions';
     }
     console.error('Watchman: ', error.message);
     self.emit('error', error);
@@ -177,7 +181,7 @@ Client.prototype.connect = function() {
   try {
     proc = childProcess.spawn(this.watchmanBinaryPath, args, {
       stdio: ['ignore', 'pipe', 'pipe'],
-      windowsHide: true
+      windowsHide: true,
     });
   } catch (error) {
     spawnError(error);
@@ -186,24 +190,33 @@ Client.prototype.connect = function() {
 
   var stdout = [];
   var stderr = [];
-  proc.stdout.on('data', function(data) {
+  proc.stdout.on('data', function (data) {
     stdout.push(data);
   });
-  proc.stderr.on('data', function(data) {
+  proc.stderr.on('data', function (data) {
     data = data.toString('utf8');
     stderr.push(data);
     console.error(data);
   });
-  proc.on('error', function(error) {
+  proc.on('error', function (error) {
     spawnError(error);
   });
 
   proc.on('close', function (code, signal) {
     if (code !== 0) {
-      spawnError(new Error(
-          self.watchmanBinaryPath + ' ' + args.join(' ') +
-          ' returned with exit code=' + code + ', signal=' +
-          signal + ', stderr= ' + stderr.join('')));
+      spawnError(
+        new Error(
+          self.watchmanBinaryPath +
+            ' ' +
+            args.join(' ') +
+            ' returned with exit code=' +
+            code +
+            ', signal=' +
+            signal +
+            ', stderr= ' +
+            stderr.join(''),
+        ),
+      );
       return;
     }
     try {
@@ -219,10 +232,10 @@ Client.prototype.connect = function() {
       self.emit('error', e);
     }
   });
-}
+};
 
-Client.prototype.command = function(args, done) {
-  done = done || function() {};
+Client.prototype.command = function (args, done) {
+  done = done || function () {};
 
   // Queue up the command
   this.commands.push({cmd: args, cb: done});
@@ -239,16 +252,16 @@ Client.prototype.command = function(args, done) {
 
   // If we're already connected and idle, try sending the command immediately
   this.sendNextCommand();
-}
+};
 
 var cap_versions = {
-    "cmd-watch-del-all": "3.1.1",
-    "cmd-watch-project": "3.1",
-    "relative_root": "3.3",
-    "term-dirname": "3.1",
-    "term-idirname": "3.1",
-    "wildmatch": "3.7",
-}
+  'cmd-watch-del-all': '3.1.1',
+  'cmd-watch-project': '3.1',
+  relative_root: '3.3',
+  'term-dirname': '3.1',
+  'term-idirname': '3.1',
+  wildmatch: '3.7',
+};
 
 // Compares a vs b, returns < 0 if a < b, > 0 if b > b, 0 if a == b
 function vers_compare(a, b) {
@@ -271,9 +284,12 @@ function have_cap(vers, name) {
 }
 
 // This is a helper that we expose for testing purposes
-Client.prototype._synthesizeCapabilityCheck = function(
-    resp, optional, required) {
-  resp.capabilities = {}
+Client.prototype._synthesizeCapabilityCheck = function (
+  resp,
+  optional,
+  required,
+) {
+  resp.capabilities = {};
   var version = resp.version;
   optional.forEach(function (name) {
     resp.capabilities[name] = have_cap(version, name);
@@ -282,46 +298,54 @@ Client.prototype._synthesizeCapabilityCheck = function(
     var have = have_cap(version, name);
     resp.capabilities[name] = have;
     if (!have) {
-      resp.error = 'client required capability `' + name +
-                   '` is not supported by this server';
+      resp.error =
+        'client required capability `' +
+        name +
+        '` is not supported by this server';
     }
   });
   return resp;
-}
+};
 
-Client.prototype.capabilityCheck = function(caps, done) {
+Client.prototype.capabilityCheck = function (caps, done) {
   var optional = caps.optional || [];
   var required = caps.required || [];
   var self = this;
-  this.command(['version', {
-      optional: optional,
-      required: required
-  }], function (error, resp) {
-    if (error) {
-      done(error);
-      return;
-    }
-    if (!('capabilities' in resp)) {
-      // Server doesn't support capabilities, so we need to
-      // synthesize the results based on the version
-      resp = self._synthesizeCapabilityCheck(resp, optional, required);
-      if (resp.error) {
-        error = new Error(resp.error);
-        error.watchmanResponse = resp;
+  this.command(
+    [
+      'version',
+      {
+        optional: optional,
+        required: required,
+      },
+    ],
+    function (error, resp) {
+      if (error) {
         done(error);
         return;
       }
-    }
-    done(null, resp);
-  });
-}
+      if (!('capabilities' in resp)) {
+        // Server doesn't support capabilities, so we need to
+        // synthesize the results based on the version
+        resp = self._synthesizeCapabilityCheck(resp, optional, required);
+        if (resp.error) {
+          error = new Error(resp.error);
+          error.watchmanResponse = resp;
+          done(error);
+          return;
+        }
+      }
+      done(null, resp);
+    },
+  );
+};
 
 // Close the connection to the service
-Client.prototype.end = function() {
+Client.prototype.end = function () {
   this.cancelCommands('The client was ended');
   if (this.socket) {
     this.socket.end();
     this.socket = null;
   }
   this.bunser = null;
-}
+};

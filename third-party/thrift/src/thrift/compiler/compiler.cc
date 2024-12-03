@@ -334,7 +334,7 @@ std::string parse_args(
     } else if (flag == "allow-neg-keys") {
       fprintf(
           stderr,
-          "NOTE: The --allow-neg-keys option is deprecated and ignored.");
+          "NOTE: The --allow-neg-keys option is deprecated and ignored.\n");
       // no-op
     } else if (flag == "ignore-non-positive-keys") {
       // DO_BEFORE(aristidis,20250301): Remove --ignore-non-positive-keys

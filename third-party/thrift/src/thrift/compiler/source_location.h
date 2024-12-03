@@ -130,6 +130,8 @@ class source_manager {
   // Makes use of the result of previous calls to find_include_file.
   std::optional<source> get_file(const std::string& file_name);
 
+  std::string get_file_path(const std::string& file_name) const;
+
   // Adds a virtual file with the specified name and content.
   source add_virtual_file(const std::string& file_name, const std::string& src);
 

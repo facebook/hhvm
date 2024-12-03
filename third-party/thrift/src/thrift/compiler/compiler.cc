@@ -764,27 +764,29 @@ std::unique_ptr<t_program_bundle> parse_and_mutate(
   const std::string schema_path = "thrift/lib/thrift/schema.thrift";
   found_or_error =
       source_mgr.find_include_file(schema_path, "", pparams.incl_searchpath);
-  if (found_or_error.index() == 0 &&
-      !program_bundle->find_program(schema_path)) {
-    sema_context stdlib_ctx(
-        source_mgr,
-        [&](diagnostic&& d) {
-          ctx.report(
-              source_location{},
-              diagnostic_level::debug,
-              "Could not load Thrift standard libraries: {}",
-              d);
-        },
-        diagnostic_params::only_errors());
-    std::unique_ptr<t_program_bundle> inc = parse_ast(
-        source_mgr,
-        stdlib_ctx,
-        schema_path,
-        pparams,
-        nullptr,
-        program_bundle.get());
-    if (inc && !stdlib_ctx.has_errors()) {
-      program_bundle->add_implicit_includes(std::move(inc));
+  if (found_or_error.index() == 0) {
+    if (!program_bundle->find_program_by_full_path(
+            std::get<0>(found_or_error))) {
+      sema_context stdlib_ctx(
+          source_mgr,
+          [&](diagnostic&& d) {
+            ctx.report(
+                source_location{},
+                diagnostic_level::debug,
+                "Could not load Thrift standard libraries: {}",
+                d);
+          },
+          diagnostic_params::only_errors());
+      std::unique_ptr<t_program_bundle> inc = parse_ast(
+          source_mgr,
+          stdlib_ctx,
+          schema_path,
+          pparams,
+          nullptr,
+          program_bundle.get());
+      if (inc && !stdlib_ctx.has_errors()) {
+        program_bundle->add_implicit_includes(std::move(inc));
+      }
     }
   }
 

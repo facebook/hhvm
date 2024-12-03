@@ -39,8 +39,8 @@ class SemaTest : public ::testing::Test {
 
   t_program* root_program() { return program_bundle_.root_program(); }
 
-  t_program_bundle program_bundle_{
-      std::make_unique<t_program>("/path/to/file.thrift")};
+  t_program_bundle program_bundle_{std::make_unique<t_program>(
+      "/path/to/file.thrift", "/root/path/to/file.thrift")};
 };
 
 TEST_F(SemaTest, terse_write_field) {

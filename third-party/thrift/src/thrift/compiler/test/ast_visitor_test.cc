@@ -28,7 +28,7 @@ namespace apache::thrift::compiler {
 
 class base_program_test : public testing::Test {
  protected:
-  t_program program_{"path/to/program.thrift"};
+  t_program program_{"path/to/program.thrift", "/root/path/to/program.thrift"};
 
   template <typename T>
   T& create_def(const std::string& name, fmt::string_view uri = {}) {
@@ -420,7 +420,8 @@ TEST(AstVisitorTest, sink) {
   auto sink2ptr = sink2.get();
   sink2->set_final_response_exceptions(std::make_unique<t_throws>());
 
-  auto program = t_program("path/to/program.thrift");
+  auto program =
+      t_program("path/to/program.thrift", "/root/path/to/program.thrift");
   auto service = std::make_unique<t_service>(&program, "Service");
   auto ret = t_type_ref();
   service->add_function(std::make_unique<t_function>(
@@ -452,7 +453,8 @@ TEST(AstVisitorTest, stream) {
   auto stream2 = std::make_unique<t_stream>(t_primitive_type::t_i32());
   auto stream2ptr = stream2.get();
 
-  auto program = t_program("path/to/program.thrift");
+  auto program =
+      t_program("path/to/program.thrift", "/root/path/to/program.thrift");
   auto service = std::make_unique<t_service>(&program, "Service");
   auto ret = t_type_ref();
   service->add_function(std::make_unique<t_function>(
@@ -475,7 +477,7 @@ TEST(AstVisitorTest, stream) {
 }
 
 TEST(AstVisitorTest, modifications) {
-  t_program program("path/to/program.thrift");
+  t_program program("path/to/program.thrift", "/root/path/to/program.thrift");
   program.create_def<t_union>(&program, "Union1");
   program.create_def<t_union>(&program, "Union2");
   std::vector<std::string> seen;

@@ -67,7 +67,7 @@ TEST(PackageTest, Validation) {
 }
 
 TEST(TProgram, GetNamespace) {
-  t_program program("");
+  t_program program("", "");
 
   const std::string expect_1 = "this.namespace";
   program.set_namespace("java", expect_1);
@@ -87,7 +87,7 @@ TEST(TProgram, GetNamespace) {
 }
 
 TEST(TProgram, SetIncludePrefix) {
-  t_program program("");
+  t_program program("", "");
 
   const std::string dir_path_1 = "/this/is/a/dir";
   const std::string dir_path_2 = "/this/is/a/dir/";
@@ -101,7 +101,7 @@ TEST(TProgram, SetIncludePrefix) {
 }
 
 TEST(TProgram, ComputeNameFromFilePath) {
-  t_program program("");
+  t_program program("", "");
 
   const std::string expect = "tprogramtest";
   const std::string& file_path_1 = expect;
@@ -114,7 +114,8 @@ TEST(TProgram, ComputeNameFromFilePath) {
 }
 
 TEST(TProgram, AddDefinitionUri) {
-  t_program program("path/to/program.thrift");
+  t_program program(
+      "path/to/program.thrift", "/root/some/path/to/program.thrift");
   program.set_package(t_package{"test.dev/foo/bar"});
 
   EXPECT_EQ(program.name(), "program");

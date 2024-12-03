@@ -29,7 +29,7 @@ namespace apache::thrift::compiler {
 namespace {
 
 TEST(TEnumTest, Unused) {
-  t_program program("path/to/program.thrift");
+  t_program program("path/to/program.thrift", "path/to/program.thrift");
   program.set_package(t_package{"test.dev/foo/bar"});
 
   t_enum& def = program.add_def(std::make_unique<t_enum>(&program, "Enum"));

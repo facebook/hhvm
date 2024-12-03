@@ -319,7 +319,7 @@ class GeneratedReservedIdentifierValidatorTest
     : public testing::TestWithParam<definition_factory> {};
 
 TEST_P(GeneratedReservedIdentifierValidatorTest, GeneratedNodeMustNotError) {
-  t_program program("path/to/program.thrift");
+  t_program program("path/to/program.thrift", "path/to/program.thrift");
   source_manager source_mgr;
   auto loc = source_mgr.add_virtual_file(program.path(), "").start;
   program.set_src_range({loc, loc});

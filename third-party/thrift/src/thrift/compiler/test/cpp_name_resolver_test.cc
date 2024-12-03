@@ -55,7 +55,8 @@ struct ref_builder : gen::base_thrift_annotation_builder {
 class CppNameResolverTest : public ::testing::Test {
  public:
   CppNameResolverTest() noexcept
-      : program_("path/to/program.thrift"), struct_(&program_, "ThriftStruct") {
+      : program_("path/to/program.thrift", "path/to/program.thrift"),
+        struct_(&program_, "ThriftStruct") {
     program_.set_namespace("cpp2", "path.to");
   }
 
@@ -95,7 +96,7 @@ class CppNameResolverTest : public ::testing::Test {
 };
 
 TEST_F(CppNameResolverTest, gen_namespace_components_cpp2) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   p.set_namespace("cpp2", "foo.bar");
   p.set_namespace("cpp", "baz.foo");
   EXPECT_THAT(
@@ -104,7 +105,7 @@ TEST_F(CppNameResolverTest, gen_namespace_components_cpp2) {
 }
 
 TEST_F(CppNameResolverTest, gen_namespace_components_cpp) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   p.set_namespace("cpp", "baz.foo");
   EXPECT_THAT(
       cpp_name_resolver::gen_namespace_components(p),
@@ -112,38 +113,38 @@ TEST_F(CppNameResolverTest, gen_namespace_components_cpp) {
 }
 
 TEST_F(CppNameResolverTest, gen_namespace_components_none) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   EXPECT_THAT(
       cpp_name_resolver::gen_namespace_components(p),
       testing::ElementsAreArray({"cpp2"}));
 }
 
 TEST_F(CppNameResolverTest, get_namespace_cpp2) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   p.set_namespace("cpp2", "foo.bar");
   p.set_namespace("cpp", "baz.foo");
   EXPECT_EQ("::foo::bar", resolver_.get_namespace(p));
 }
 
 TEST_F(CppNameResolverTest, get_namespace_cpp) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   p.set_namespace("cpp", "baz.foo");
   EXPECT_EQ("::baz::foo::cpp2", resolver_.get_namespace(p));
 }
 
 TEST_F(CppNameResolverTest, get_namespace_none) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   EXPECT_EQ("::cpp2", resolver_.get_namespace(p));
 }
 
 TEST_F(CppNameResolverTest, get_namespace_from_package) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   p.set_package(t_package("foo.bar/path/to/program"));
   EXPECT_EQ("::foo::path::to::program", resolver_.get_namespace(p));
 }
 
 TEST_F(CppNameResolverTest, gen_namespaced_name) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   p.set_namespace("cpp2", "foo.bar");
   t_enum e1(&p, "MyEnum1");
   t_enum e2(&p, "MyEnum2");
@@ -657,7 +658,7 @@ TEST_F(CppNameResolverTest, gen_type_tag_container) {
 }
 
 TEST_F(CppNameResolverTest, gen_type_tag_struct) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   t_struct s(&p, "struct_name");
   t_union u(&p, "union_name");
   t_exception e(&p, "exception_name");

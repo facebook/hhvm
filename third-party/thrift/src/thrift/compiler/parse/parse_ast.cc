@@ -1009,11 +1009,16 @@ std::unique_ptr<t_program_bundle> parse_ast(
     const parsing_params& params,
     const sema_params* sparams,
     t_program_bundle* already_parsed) {
+  std::string full_root_path = sm.get_file_path(path);
   auto programs = std::make_unique<t_program_bundle>(
       std::make_unique<t_program>(
-          path, already_parsed ? already_parsed->get_root_program() : nullptr),
+          path,
+          full_root_path,
+          already_parsed ? already_parsed->get_root_program() : nullptr),
       already_parsed);
-  assert(!already_parsed || !already_parsed->find_program(path));
+  assert(
+      !already_parsed ||
+      !already_parsed->find_program_by_full_path(full_root_path));
 
   auto circular_deps = std::set<std::string>{path};
 
@@ -1041,26 +1046,28 @@ std::unique_ptr<t_program_bundle> parse_ast(
     }
 
     // Skip already parsed files.
-    t_program* program = programs->find_program(include_path);
+    t_program* program = nullptr;
     const std::string* resolved_path = &include_path;
-    if (!program && path_or_error.index() == 0) {
-      program = programs->find_program(std::get<0>(path_or_error));
+    const std::string* full_path = resolved_path;
+    if (path_or_error.index() == 0) {
+      full_path = &std::get<0>(path_or_error);
+      program = programs->find_program_by_full_path(*full_path);
       if (program) {
         // We've already seen this program but know it by another path.
-        resolved_path = &std::get<0>(path_or_error);
+        resolved_path = &program->path();
       }
     }
     if (program) {
       if (program == programs->get_root_program()) {
         // If we're including the root program we must have a dependency cycle.
-        assert(circular_deps.count(*resolved_path));
+        assert(circular_deps.count(*full_path));
       } else {
         return program;
       }
     }
 
     // Fail on circular dependencies.
-    if (!circular_deps.insert(*resolved_path).second) {
+    if (!circular_deps.insert(*full_path).second) {
       diags.error(
           range.begin,
           "Circular dependency found: file `{}` is already parsed.",
@@ -1072,7 +1079,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
     // set its include_prefix by parsing the directory which it is
     // included from.
     auto included_program =
-        std::make_unique<t_program>(*resolved_path, &parent);
+        std::make_unique<t_program>(*resolved_path, *full_path, &parent);
     program = included_program.get();
     programs->add_program(std::move(included_program));
 
@@ -1085,7 +1092,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
       }
     }
 
-    circular_deps.erase(*resolved_path);
+    circular_deps.erase(*full_path);
     return program;
   };
 

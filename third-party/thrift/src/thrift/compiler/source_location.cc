@@ -86,6 +86,13 @@ source source_manager::add_source(
   return {source_location(sources_.size(), 0), sv};
 }
 
+std::string source_manager::get_file_path(const std::string& file_name) const {
+  if (file_source_map_.find(file_name) != file_source_map_.end()) {
+    return file_name;
+  }
+  return std::filesystem::absolute(file_name).string();
+}
+
 std::optional<source> source_manager::get_file(const std::string& file_name) {
   if (auto source = file_source_map_.find(file_name);
       source != file_source_map_.end()) {
@@ -98,6 +105,11 @@ std::optional<source> source_manager::get_file(const std::string& file_name) {
     path = itr->second;
   } else {
     path = file_name;
+  }
+
+  if (auto source = file_source_map_.find(std::string(path));
+      source != file_source_map_.end()) {
+    return source->second;
   }
 
   std::string absPath;
@@ -218,7 +230,8 @@ source_manager::path_or_error source_manager::find_include_file(
     if ((*it) != "." && (*it) != "") {
       sfilename = std::filesystem::path(*(it)) / filename;
     }
-    if (std::filesystem::exists(sfilename)) {
+    if (std::filesystem::exists(sfilename) ||
+        file_source_map_.find(sfilename.string()) != file_source_map_.end()) {
       return found(sfilename.string());
     }
 #ifdef _WIN32

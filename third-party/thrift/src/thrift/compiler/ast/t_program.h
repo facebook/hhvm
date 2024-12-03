@@ -61,9 +61,13 @@ class t_program : public t_named {
    *
    * @param path - A *.thrift file path.
    */
-  explicit t_program(std::string path, const t_program* parent = nullptr)
+  explicit t_program(
+      std::string path,
+      std::string full_path,
+      const t_program* parent = nullptr)
       : t_program(
             std::move(path),
+            std::move(full_path),
             parent ? parent->scope_ : std::make_shared<t_scope>()) {}
 
   void set_package(t_package package) { package_ = std::move(package); }
@@ -160,6 +164,8 @@ class t_program : public t_named {
    * t_program getters
    */
   const std::string& path() const { return path_; }
+
+  const std::string& full_path() const { return full_path_; }
 
   const std::string& include_prefix() const { return include_prefix_; }
 
@@ -299,13 +305,17 @@ class t_program : public t_named {
   std::vector<t_interaction*> interactions_;
 
   std::string path_; // initialized in ctor init-list
+  std::string full_path_;
   std::string include_prefix_;
   std::map<std::string, std::string> namespaces_;
   std::unordered_map<std::string, std::vector<std::string>> language_includes_;
   std::shared_ptr<t_scope> scope_;
 
-  t_program(std::string path, std::shared_ptr<t_scope> scope)
-      : path_(std::move(path)), scope_(std::move(scope)) {
+  t_program(
+      std::string path, std::string full_path, std::shared_ptr<t_scope> scope)
+      : path_(std::move(path)),
+        full_path_(std::move(full_path)),
+        scope_(std::move(scope)) {
     set_name(compute_name_from_file_path(path_));
   }
 

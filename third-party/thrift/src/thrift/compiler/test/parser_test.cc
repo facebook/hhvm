@@ -79,6 +79,35 @@ TEST(ParserTest, missing_includes) {
   }
 }
 
+TEST(ParserTest, include_paths) {
+  auto source_mgr = source_manager();
+  source_mgr.add_virtual_file("some/path/test.thrift", R"(
+    struct S {
+    }
+  )");
+  source_mgr.add_virtual_file("middleFile.thrift", R"(
+    include "test.thrift"
+  )");
+  source_mgr.add_virtual_file("rootFile.thrift", R"(
+    include "middleFile.thrift"
+    include "some/path/test.thrift"
+  )");
+  auto diag = std::optional<diagnostic>();
+  auto diags =
+      diagnostics_engine(source_mgr, [&diag](diagnostic d) { diag = d; });
+
+  parsing_params params;
+  params.incl_searchpath.push_back("some/path/");
+
+  // Types must be resolved in parse_ast.
+  auto programs = parse_ast(source_mgr, diags, "rootFile.thrift", params);
+
+  EXPECT_FALSE(diags.has_errors());
+  EXPECT_TRUE(programs != nullptr);
+
+  EXPECT_EQ(programs->get_programs().size(), 3);
+}
+
 TEST(ParserTest, struct_doc) {
   auto source_mgr = source_manager();
   source_mgr.add_virtual_file("test.thrift", R"(

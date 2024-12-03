@@ -49,7 +49,7 @@ class UtilTest : public ::testing::Test {};
 TEST_F(UtilTest, is_orderable_set_template) {
   t_set t(&t_primitive_type::t_double());
   t.set_annotation("cpp2.template", "blah");
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   t_struct s(&p, "struct_name");
   s.append(std::make_unique<t_field>(&t, "set_field", 1));
   EXPECT_FALSE(cpp2::is_orderable(t));
@@ -57,7 +57,7 @@ TEST_F(UtilTest, is_orderable_set_template) {
 }
 
 TEST_F(UtilTest, is_orderable_struct) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   t_struct s(&p, "struct_name");
   s.append(std::make_unique<t_field>(
       &t_primitive_type::t_string(), "field_name", 1));
@@ -65,7 +65,7 @@ TEST_F(UtilTest, is_orderable_struct) {
 }
 
 TEST_F(UtilTest, is_orderable_struct_self_reference) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
 
   t_set t(&t_primitive_type::t_double());
   t.set_annotation("cpp2.template", "blah");
@@ -122,7 +122,7 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
     EXPECT_TRUE(is_eligible_for_constexpr(&type)) << a;
   }
 
-  auto program = t_program("path/to/program.thrift");
+  auto program = t_program("path/to/program.thrift", "path/to/program.thrift");
   {
     auto s = t_struct(&program, "struct_name");
     EXPECT_TRUE(is_eligible_for_constexpr(&s));
@@ -165,7 +165,7 @@ TEST_F(UtilTest, is_eligible_for_constexpr) {
 }
 
 TEST_F(UtilTest, for_each_transitive_field) {
-  auto program = t_program("path/to/program.thrift");
+  auto program = t_program("path/to/program.thrift", "path/to/program.thrift");
   auto empty = t_struct(&program, "struct_name");
   cpp2::for_each_transitive_field(&empty, [](const t_field*) {
     ADD_FAILURE();
@@ -277,7 +277,7 @@ TEST_F(UtilTest, get_gen_type_class) {
 }
 
 TEST_F(UtilTest, is_custom_type) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
 
   {
     auto cppType = t_primitive_type::t_string();
@@ -388,7 +388,7 @@ TEST_F(UtilTest, get_internal_injected_field_id) {
 }
 
 TEST_F(UtilTest, gen_adapter_dependency_graph) {
-  t_program p("path/to/program.thrift");
+  t_program p("path/to/program.thrift", "path/to/program.thrift");
   std::mt19937 gen;
   auto test = [&](std::string name, std::vector<const t_type*> expected) {
     constexpr int kIters = 42;

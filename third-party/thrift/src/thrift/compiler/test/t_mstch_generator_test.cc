@@ -62,7 +62,8 @@ TEST(MstchGeneratorTest, cache_leaks) {
 
   int object_count = 0;
   {
-    t_program_bundle pb(std::make_unique<t_program>("my_leak.thrift"));
+    t_program_bundle pb(
+        std::make_unique<t_program>("my_leak.thrift", "my_leak.thrift"));
     leaky_generator generator(*pb.get_root_program(), &object_count, pb);
     generator.generate_program();
   }

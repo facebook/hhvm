@@ -80,7 +80,7 @@ TEST_F(ReferenceTypeTest, CppRefType_box) {
 }
 
 TEST_F(ReferenceTypeTest, ThriftBox) {
-  t_program program{"path/to/program.thrift"};
+  t_program program{"path/to/program.thrift", "/root/path/to/program.thrift"};
   t_field tfield(&t_primitive_type::t_string(), "my_string");
   tfield.add_structured_annotation(
       thrift_annotation_builder::box(program).make());

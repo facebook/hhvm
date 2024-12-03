@@ -2630,7 +2630,7 @@ void t_hack_generator::append_to_t_enum(
 }
 
 const t_type* t_hack_generator::tmeta_ThriftType_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_union type(&empty_program, "tmeta_ThriftType");
   static t_enum primitive_type(&empty_program, "");
   static t_struct list_type(&empty_program, "tmeta_ThriftListType");
@@ -2701,7 +2701,7 @@ const t_type* t_hack_generator::tmeta_ThriftType_type() {
 }
 
 const t_type* t_hack_generator::tmeta_ThriftField_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftField");
   if (type.has_fields()) {
     return &type;
@@ -2716,7 +2716,7 @@ const t_type* t_hack_generator::tmeta_ThriftField_type() {
 }
 
 const t_type* t_hack_generator::tmeta_ThriftFunction_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftFunction");
   static t_list tlist(tmeta_ThriftField_type());
   if (type.has_fields()) {
@@ -2734,7 +2734,7 @@ const t_type* t_hack_generator::tmeta_ThriftFunction_type() {
 }
 
 const t_type* t_hack_generator::tmeta_ThriftService_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftService");
   static t_list tlist(tmeta_ThriftFunction_type());
   if (type.has_fields()) {
@@ -2749,7 +2749,7 @@ const t_type* t_hack_generator::tmeta_ThriftService_type() {
 }
 
 const t_type* t_hack_generator::tmeta_ThriftEnum_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftEnum");
   static t_map tmap(&t_primitive_type::t_i32(), &t_primitive_type::t_string());
   if (type.has_fields()) {
@@ -2762,7 +2762,7 @@ const t_type* t_hack_generator::tmeta_ThriftEnum_type() {
 }
 
 const t_type* t_hack_generator::tmeta_ThriftStruct_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftStruct");
   static t_list tlist(tmeta_ThriftField_type());
   if (type.has_fields()) {
@@ -2777,7 +2777,7 @@ const t_type* t_hack_generator::tmeta_ThriftStruct_type() {
 }
 
 const t_type* t_hack_generator::tmeta_ThriftException_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftException");
   static t_list tlist(tmeta_ThriftField_type());
   if (type.has_fields()) {
@@ -2790,7 +2790,7 @@ const t_type* t_hack_generator::tmeta_ThriftException_type() {
 }
 
 const t_type* t_hack_generator::tmeta_ThriftMetadata_type() {
-  static t_program empty_program("");
+  static t_program empty_program("", "");
   static t_struct type(&empty_program, "tmeta_ThriftMetadata");
   static t_map tmap_enums(
       &t_primitive_type::t_string(), tmeta_ThriftEnum_type());

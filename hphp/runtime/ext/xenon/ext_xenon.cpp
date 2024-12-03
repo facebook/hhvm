@@ -22,11 +22,11 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/configs/xenon.h"
 #include "hphp/util/thread-local.h"
 #include "hphp/util/rds-local.h"
 #include "hphp/util/struct-log.h"
@@ -129,20 +129,20 @@ int64_t Xenon::getAndClearMissedSampleCount() {
 
 // Start Xenon profiler. Needs to be done once per process invocation.
 void Xenon::start() {
-  TRACE(1, "XenonForceAlwaysOn %d\n", RuntimeOption::XenonForceAlwaysOn);
+  TRACE(1, "XenonForceAlwaysOn %d\n", Cfg::Xenon::ForceAlwaysOn);
 
   // No initialization needed if always on.
-  if (RuntimeOption::XenonForceAlwaysOn) return;
+  if (Cfg::Xenon::ForceAlwaysOn) return;
 
   // Xenon not enabled.
-  if (RuntimeOption::XenonPeriodSeconds <= 0) return;
+  if (Cfg::Xenon::PeriodSeconds <= 0) return;
 
   assertx(!m_thread.joinable());
   assertx(!m_stopping);
   m_thread = std::thread([](Xenon* xenon) { xenon->run(); }, this);
 
   TRACE(1, "Xenon::start periodic %.2f seconds\n",
-        RuntimeOption::XenonPeriodSeconds);
+        Cfg::Xenon::PeriodSeconds);
 }
 
 // If Xenon owns a pthread, tell it to stop, also clean up anything from start.
@@ -161,7 +161,7 @@ void Xenon::stop() {
 
 void Xenon::run() {
   auto const interval = std::chrono::duration_cast<std::chrono::nanoseconds>(
-    std::chrono::duration<double>(RuntimeOption::XenonPeriodSeconds));
+    std::chrono::duration<double>(Cfg::Xenon::PeriodSeconds));
 
   // Stagger the initial event.
   auto next = std::chrono::steady_clock::now() + std::chrono::nanoseconds(
@@ -185,7 +185,7 @@ void Xenon::log(SampleType t,
                 EventHook::Source sourceType,
                 c_WaitableWaitHandle* wh) const {
   if (getSurpriseFlag(XenonSignalFlag)) {
-    if (!RuntimeOption::XenonForceAlwaysOn) {
+    if (!Cfg::Xenon::ForceAlwaysOn) {
       clearSurpriseFlag(XenonSignalFlag);
     }
     TRACE(1, "Xenon::log %s\n", show(t));
@@ -275,14 +275,14 @@ void XenonRequestLocalData::log(Xenon::SampleType t,
     s_sourceType, show(sourceType),
     s_isWait, !Xenon::isCPUTime(t),
     s_pagelets_workers,
-    RuntimeOption::XenonTrackActiveWorkers ? PageletServer::GetActiveWorker() : -1,
+    Cfg::Xenon::TrackActiveWorkers ? PageletServer::GetActiveWorker() : -1,
     s_xbox_workers,
-    RuntimeOption::XenonTrackActiveWorkers ? XboxServer::GetActiveWorkers() : -1,
+    Cfg::Xenon::TrackActiveWorkers ? XboxServer::GetActiveWorkers() : -1,
     s_http_workers,
-    RuntimeOption::XenonTrackActiveWorkers ?
+    Cfg::Xenon::TrackActiveWorkers ?
     (HttpServer::Server ? HttpServer::Server->getPageServer()->getActiveWorker() : 0) : -1,
     s_cli_workers,
-    RuntimeOption::XenonTrackActiveWorkers ? cli_server_active_workers() : -1
+    Cfg::Xenon::TrackActiveWorkers ? cli_server_active_workers() : -1
   ));
 }
 
@@ -291,7 +291,7 @@ void XenonRequestLocalData::requestInit() {
 
   assertx(!m_isProfiledRequest);
   assertx(m_stackSnapshots.get() == nullptr);
-  if (RuntimeOption::XenonForceAlwaysOn) {
+  if (Cfg::Xenon::ForceAlwaysOn) {
     setSurpriseFlag(XenonSignalFlag);
   } else {
     // Clear any Xenon flags that might still be on in this thread so that we do
@@ -299,7 +299,7 @@ void XenonRequestLocalData::requestInit() {
     clearSurpriseFlag(XenonSignalFlag);
   }
 
-  uint32_t freq = RuntimeOption::XenonRequestFreq;
+  uint32_t freq = Cfg::Xenon::RequestFreq;
   m_isProfiledRequest = (freq > 0 && folly::Random::rand32(freq) == 0);
 }
 
@@ -321,8 +321,8 @@ bool XenonRequestLocalData::getIsProfiledRequest() {
 // gathered via surprise flags.
 
 Array HHVM_FUNCTION(xenon_get_data, void) {
-  if (RuntimeOption::XenonForceAlwaysOn ||
-      RuntimeOption::XenonPeriodSeconds > 0) {
+  if (Cfg::Xenon::ForceAlwaysOn ||
+      Cfg::Xenon::PeriodSeconds > 0) {
     TRACE(1, "xenon_get_data\n");
     return s_xenonData->createResponse();
   }
@@ -330,8 +330,8 @@ Array HHVM_FUNCTION(xenon_get_data, void) {
 }
 
 Array HHVM_FUNCTION(xenon_get_and_clear_samples, void) {
-  if (RuntimeOption::XenonForceAlwaysOn ||
-      RuntimeOption::XenonPeriodSeconds > 0) {
+  if (Cfg::Xenon::ForceAlwaysOn ||
+      Cfg::Xenon::PeriodSeconds > 0) {
     TRACE(1, "xenon_get_and_clear_samples\n");
     Array ret = s_xenonData->createResponse();
     s_xenonData->m_stackSnapshots.reset();

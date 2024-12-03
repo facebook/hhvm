@@ -351,9 +351,6 @@ struct RuntimeOption {
   static std::set<std::string> StaticFileGenerators;
   static std::vector<std::shared_ptr<FilesMatch>> FilesMatches;
 
-  static int  HttpDefaultTimeout;
-  static int  HttpSlowQueryThreshold;
-
   static std::set<std::string, stdltistr> TraceFunctions;
 
   static int64_t MaxSQLRowCount;
@@ -413,13 +410,6 @@ public:
   static bool HHProfAccum;
   static bool HHProfRequest;
 
-  // Mail options
-  static std::string SendmailPath;
-  static std::string MailForceExtraParameters;
-
-  // SimpleXML options
-  static bool SimpleXMLEmptyNamespaceMatchesAll;
-
 #ifdef HHVM_FACEBOOK
   // ThriftFBServer
   static int ThriftFBServerThriftServerIOWorkerThreads;
@@ -454,17 +444,6 @@ public:
   // utilization is above this threshold.
   static double ServerThreadTuneThreadUtilizationThreshold;
 #endif
-
-  // Xenon options
-  static double XenonPeriodSeconds;
-  static uint32_t XenonRequestFreq;
-  static bool XenonForceAlwaysOn;
-  static bool XenonTrackActiveWorkers;
-
-  // Strobelight options
-  static bool StrobelightEnabled;
-
-  static bool SetProfileNullThisObject;
 
   static bool funcIsRenamable(const StringData* name);
 };

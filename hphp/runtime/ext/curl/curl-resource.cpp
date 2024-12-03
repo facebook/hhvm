@@ -15,6 +15,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
+#include "hphp/util/configs/http.h"
 #include "hphp/util/configs/php7.h"
 
 #include <curl/curl.h>
@@ -149,9 +150,9 @@ void CurlResource::setDefaultOptions() {
                    CurlResource::ssl_ctx_callback);
 
   curl_easy_setopt(m_cp, CURLOPT_TIMEOUT,
-                   minTimeout(RuntimeOption::HttpDefaultTimeout));
+                   minTimeout(Cfg::Http::DefaultTimeout));
   curl_easy_setopt(m_cp, CURLOPT_CONNECTTIMEOUT,
-                   minTimeout(RuntimeOption::HttpDefaultTimeout));
+                   minTimeout(Cfg::Http::DefaultTimeout));
   reseat();
 }
 

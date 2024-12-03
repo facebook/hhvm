@@ -1592,6 +1592,16 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - bool HHIR.AllocSIMDRegs = true, UNKNOWN
 - uint32_t HHIR.SpecializedDestructorThreshold = 80, UNKNOWN
 
+# Http
+
+- int Http.DefaultTimeout = 30, UNKNOWN
+
+  seconds
+
+- int Http.SlowQueryThreshold = 5000, UNKNOWN
+
+  milliseconds
+
 # Jit (Eval.Jit)
 
 - bool Jit.Enabled = true, UNKNOWN, lookuppath(Eval.Jit)
@@ -1757,6 +1767,11 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
   Functions to upload traces from to the blob store.
 
+# Mail
+
+- std::string Mail.SendmailPath = "/usr/lib/sendmail -t -i", UNKNOWN
+- std::string Mail.ForceExtraParameters = "", UNKNOWN
+
 # PCRE (Eval.PCRE)
 
 - uint32_t PCRE.TableSize = PCRE.TableSize, UNKNOWN, staticdefault(96 * 1024)
@@ -1879,6 +1894,14 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Sandbox.DefaultUserFile = "", UNKNOWN
 - std::string Sandbox.HostAlias = "", UNKNOWN
 
+# SetProfile
+
+- bool SetProfile.NullThisObject = true, UNKNOWN
+
+# SimpleXML
+
+- bool SimpleXML.EmptyNamespaceMatchesAll = false, UNKNOWN
+
 # Stats
 
 - bool Stats.Enable = false, UNKNOWN
@@ -1901,6 +1924,10 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - int32_t Stats.ProfilerMaxTraceBuffer = 0, UNKNOWN
 - bool Stats.TrackPerUnitMemory = false, UNKNOWN
 
+# Strobelight
+
+- bool Strobelight.Enabled = false, UNKNOWN
+
 # Xbox
 
 - int Xbox.ServerInfo.ThreadCount = 10, UNKNOWN
@@ -1913,6 +1940,13 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 - std::string Xbox.ServerInfo.RequestInitDocument = "", UNKNOWN
 - bool Xbox.ServerInfo.LogInfo = false, UNKNOWN
 - std::string Xbox.ProcessMessageFunc = "xbox_process_message", UNKNOWN
+
+# Xenon
+
+- double Xenon.PeriodSeconds = 0.0, UNKNOWN
+- uint32_t Xenon.RequestFreq = 1, UNKNOWN
+- bool Xenon.ForceAlwaysOn = false, UNKNOWN
+- bool Xenon.TrackActiveWorkers = false, UNKNOWN
 
 # Log
 

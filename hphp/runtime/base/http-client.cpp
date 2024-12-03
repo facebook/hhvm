@@ -15,10 +15,10 @@
 */
 
 #include "hphp/runtime/base/http-client.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/base/curl-tls-workarounds.h"
 #include "hphp/runtime/base/execution-context.h"
+#include "hphp/util/configs/http.h"
 #include "hphp/util/timer.h"
 #include <curl/easy.h>
 #include <vector>
@@ -126,7 +126,7 @@ int HttpClient::request(const char* verb,
                      const char *url, const char *data, size_t size,
                      StringBuffer &response, const HeaderMap *requestHeaders,
                      req::vector<String> *responseHeaders) {
-  SlowTimer timer(RuntimeOption::HttpSlowQueryThreshold, "curl", url);
+  SlowTimer timer(Cfg::Http::SlowQueryThreshold, "curl", url);
 
   m_response = &response;
 

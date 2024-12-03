@@ -29,6 +29,8 @@
 #include "hphp/runtime/vm/vm-regs.h"
 #include "hphp/runtime/vm/native-prop-handler.h"
 
+#include "hphp/util/configs/simplexml.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // Iter type
@@ -200,7 +202,7 @@ static inline bool match_ns(SimpleXMLElement* /*sxe*/, xmlNodePtr node,
     return true;
   }
 
-  if (RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll &&
+  if (Cfg::SimpleXML::EmptyNamespaceMatchesAll &&
       (name == nullptr || *name == '\0')) {
     return true;
   }

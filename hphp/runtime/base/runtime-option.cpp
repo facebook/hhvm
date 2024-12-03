@@ -61,6 +61,7 @@
 #include "hphp/util/configs/debug.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/gc.h"
+#include "hphp/util/configs/mail.h"
 #include "hphp/util/configs/repo.h"
 #include "hphp/util/configs/sandbox.h"
 #include "hphp/util/configs/server.h"
@@ -656,9 +657,6 @@ hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 hphp_string_imap<std::string> RuntimeOption::PhpFileExtensions;
 std::vector<std::shared_ptr<FilesMatch>> RuntimeOption::FilesMatches;
 
-int RuntimeOption::HttpDefaultTimeout = 30;
-int RuntimeOption::HttpSlowQueryThreshold = 5000; // ms
-
 std::set<std::string, stdltistr> RuntimeOption::TraceFunctions;
 
 int64_t RuntimeOption::MaxSQLRowCount = 0;
@@ -786,11 +784,6 @@ bool RuntimeOption::HHProfActive = false;
 bool RuntimeOption::HHProfAccum = false;
 bool RuntimeOption::HHProfRequest = false;
 
-std::string RuntimeOption::SendmailPath = "sendmail -t -i";
-std::string RuntimeOption::MailForceExtraParameters;
-
-bool RuntimeOption::SimpleXMLEmptyNamespaceMatchesAll = false;
-
 #ifdef HHVM_FACEBOOK
 
 int RuntimeOption::ThriftFBServerThriftServerIOWorkerThreads = 1;
@@ -812,15 +805,6 @@ double RuntimeOption::ServerThreadTuneStepPct = 5;
 double RuntimeOption::ServerThreadTuneCPUThreshold = 95.0;
 double RuntimeOption::ServerThreadTuneThreadUtilizationThreshold = 90.0;
 #endif
-
-double RuntimeOption::XenonPeriodSeconds = 0.0;
-uint32_t RuntimeOption::XenonRequestFreq = 1;
-bool RuntimeOption::XenonForceAlwaysOn = false;
-bool RuntimeOption::XenonTrackActiveWorkers = false;
-
-bool RuntimeOption::StrobelightEnabled = false;
-
-bool RuntimeOption::SetProfileNullThisObject = true;
 
 std::map<std::string, std::string> RuntimeOption::CustomSettings;
 
@@ -1627,12 +1611,6 @@ void RuntimeOption::Load(
     Cfg::AdminServer::HashedPasswords = Config::GetSet(ini, config, "AdminServer.HashedPasswords");
   }
   {
-    // Http
-    Config::Bind(HttpDefaultTimeout, ini, config, "Http.DefaultTimeout", 30);
-    Config::Bind(HttpSlowQueryThreshold, ini, config, "Http.SlowQueryThreshold",
-                 5000);
-  }
-  {
     // Debug
     StackTrace::Enabled = Cfg::Debug::NativeStackTrace;
 
@@ -1646,18 +1624,6 @@ void RuntimeOption::Load(
   {
     Config::Bind(ServerVariables, ini, config, "ServerVariables");
     Config::Bind(EnvVariables, ini, config, "EnvVariables");
-  }
-  {
-    // Mail
-    Config::Bind(SendmailPath, ini, config, "Mail.SendmailPath",
-                 "/usr/lib/sendmail -t -i");
-    Config::Bind(MailForceExtraParameters, ini, config,
-                 "Mail.ForceExtraParameters");
-  }
-  {
-    // SimpleXML
-    Config::Bind(SimpleXMLEmptyNamespaceMatchesAll, ini, config,
-                 "SimpleXML.EmptyNamespaceMatchesAll", false);
   }
 #ifdef HHVM_FACEBOOK
   {
@@ -1696,23 +1662,6 @@ void RuntimeOption::Load(
                  "Server.ThreadTune.ThreadUtilizationThreshold", ServerThreadTuneThreadUtilizationThreshold);
   }
 #endif
-
-  {
-    // Xenon
-    Config::Bind(XenonPeriodSeconds, ini, config, "Xenon.Period", 0.0);
-    Config::Bind(XenonRequestFreq, ini, config, "Xenon.RequestFreq", 1);
-    Config::Bind(XenonForceAlwaysOn, ini, config, "Xenon.ForceAlwaysOn", false);
-    Config::Bind(XenonTrackActiveWorkers, ini, config, "Xenon.TrackActiveWorkers", false);
-  }
-  {
-    // Strobelight
-    Config::Bind(StrobelightEnabled, ini, config, "Strobelight.Enabled", false);
-  }
-  {
-    // Profiling
-    Config::Bind(SetProfileNullThisObject, ini, config,
-                 "SetProfile.NullThisObject", true);
-  }
 
   Config::Bind(TzdataSearchPaths, ini, config, "TzdataSearchPaths");
 
@@ -1754,7 +1703,7 @@ void RuntimeOption::Load(
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
                    "doc_root", &Cfg::Server::SourceRoot);
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,
-                   "sendmail_path", &RuntimeOption::SendmailPath);
+                   "sendmail_path", &Cfg::Mail::SendmailPath);
 
   // FastCGI
   IniSetting::Bind(IniSetting::CORE, IniSetting::Mode::Config,

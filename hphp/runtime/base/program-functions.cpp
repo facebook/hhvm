@@ -109,6 +109,7 @@
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/log.h"
 #include "hphp/util/configs/server.h"
+#include "hphp/util/configs/xenon.h"
 #include "hphp/util/embedded-data.h"
 #include "hphp/util/exception.h"
 #include "hphp/util/hardware-counter.h"
@@ -811,7 +812,7 @@ init_command_line_globals(
     RID().setTimeout(Cfg::Server::RequestTimeoutSeconds);
   }
 
-  if (RuntimeOption::XenonForceAlwaysOn) {
+  if (Cfg::Xenon::ForceAlwaysOn) {
     Xenon::getInstance().surpriseAll();
   }
 

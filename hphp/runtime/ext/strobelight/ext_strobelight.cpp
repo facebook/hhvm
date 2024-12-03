@@ -23,6 +23,9 @@
 #include "hphp/runtime/base/backtrace.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/surprise-flags.h"
+
+#include "hphp/util/configs/strobelight.h"
+#include "hphp/util/configs/xenon.h"
 #include "hphp/util/sync-signal.h"
 
 #include <mutex>
@@ -49,7 +52,7 @@ struct strobelight::backtrace_t bt_slab;
 std::mutex usdt_mutex;
 
 void onStrobelightSignal(int signo) {
-  if (!RuntimeOption::StrobelightEnabled) {
+  if (!Cfg::Strobelight::Enabled) {
     // Handle the signal so we don't crash, but do nothing.
     return;
   }
@@ -159,7 +162,7 @@ bool Strobelight::active() {
 }
 
 bool Strobelight::isXenonActive() {
-  if (RuntimeOption::XenonForceAlwaysOn) {
+  if (Cfg::Xenon::ForceAlwaysOn) {
     return true;
   }
 
@@ -173,7 +176,7 @@ bool Strobelight::isXenonActive() {
 
 void Strobelight::log(Xenon::SampleType t,
                       c_WaitableWaitHandle* wh) const {
-  if (RuntimeOption::XenonForceAlwaysOn) {
+  if (Cfg::Xenon::ForceAlwaysOn) {
     // Disable strobelight if Xenon forced on
     // TODO remove this when strobelight has its own surpriseFlag
     return;
@@ -219,7 +222,7 @@ void Strobelight::surpriseAll() {
 }
 
 void Strobelight::shutdown() {
-  RuntimeOption::StrobelightEnabled = false;
+  Cfg::Strobelight::Enabled = false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

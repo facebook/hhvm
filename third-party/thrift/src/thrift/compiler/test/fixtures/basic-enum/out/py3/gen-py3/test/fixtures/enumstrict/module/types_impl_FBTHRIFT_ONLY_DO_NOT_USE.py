@@ -8,7 +8,7 @@
 import enum
 import thrift.py3.types
 import test.fixtures.enumstrict.module.thrift_metadata as _fbthrift_python_metadata
-import test.fixtures.enumstrict.module.thrift_types as _fbthrift_python_types
+import test.fixtures.enumstrict.module.thrift_enums as _fbthrift_python_enums
 
 _fbthrift__module_name__ = "test.fixtures.enumstrict.module.types"
 
@@ -28,7 +28,7 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
         return "module.EmptyEnum"
 
     def _to_python(self):
-        return _fbthrift_python_types.EmptyEnum(self._fbthrift_value_)
+        return _fbthrift_python_enums.EmptyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -69,7 +69,7 @@ class MyEnum(thrift.py3.types.CompiledEnum):
         return "module.MyEnum"
 
     def _to_python(self):
-        return _fbthrift_python_types.MyEnum(self._fbthrift_value_)
+        return _fbthrift_python_enums.MyEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -111,7 +111,7 @@ class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
         return "module.MyUseIntrinsicDefaultEnum"
 
     def _to_python(self):
-        return _fbthrift_python_types.MyUseIntrinsicDefaultEnum(self._fbthrift_value_)
+        return _fbthrift_python_enums.MyUseIntrinsicDefaultEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -170,7 +170,7 @@ class MyBigEnum(thrift.py3.types.CompiledEnum):
         return "module.MyBigEnum"
 
     def _to_python(self):
-        return _fbthrift_python_types.MyBigEnum(self._fbthrift_value_)
+        return _fbthrift_python_enums.MyBigEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

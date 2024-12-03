@@ -155,10 +155,11 @@ class WhisperException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 
 # This unfortunately has to be down here to prevent circular imports
 import meta.example.thrift.service.thrift_metadata
-
+from meta.example.thrift.service.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 def _fbthrift_metadata__struct_EchoRequest():
     return meta.example.thrift.service.thrift_metadata.gen_metadata_struct_EchoRequest()

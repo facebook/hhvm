@@ -123,10 +123,11 @@ class ShouldBeBoxed(metaclass=_fbthrift_python_types.StructMeta):
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.interactions.module.thrift_metadata
-
+from test.fixtures.interactions.module.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 def _fbthrift_metadata__exception_CustomException():
     return test.fixtures.interactions.module.thrift_metadata.gen_metadata_exception_CustomException()

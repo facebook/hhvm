@@ -61,10 +61,11 @@ class HsFoo(metaclass=_fbthrift_python_types.StructMeta):
 
 # This unfortunately has to be down here to prevent circular imports
 import python_module_root.my.namespacing.test.hsmodule.thrift_metadata
-
+from python_module_root.my.namespacing.test.hsmodule.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 def _fbthrift_metadata__struct_HsFoo():
     return python_module_root.my.namespacing.test.hsmodule.thrift_metadata.gen_metadata_struct_HsFoo()

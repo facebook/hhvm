@@ -61,10 +61,11 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
 
 # This unfortunately has to be down here to prevent circular imports
 import emptyns.thrift_metadata
-
+from emptyns.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 def _fbthrift_metadata__struct_Foo():
     return emptyns.thrift_metadata.gen_metadata_struct_Foo()

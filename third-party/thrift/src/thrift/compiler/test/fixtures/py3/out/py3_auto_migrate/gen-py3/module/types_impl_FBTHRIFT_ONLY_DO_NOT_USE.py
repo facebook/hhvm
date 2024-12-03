@@ -8,7 +8,7 @@
 import enum
 import thrift.py3.types
 import module.thrift_metadata as _fbthrift_python_metadata
-import module.thrift_types as _fbthrift_python_types
+import module.thrift_enums as _fbthrift_python_enums
 
 _fbthrift__module_name__ = "module.types"
 
@@ -33,7 +33,7 @@ class AnEnum(thrift.py3.types.CompiledEnum):
         return "module.AnEnum"
 
     def _to_python(self):
-        return _fbthrift_python_types.AnEnum(self._fbthrift_value_)
+        return _fbthrift_python_enums.AnEnum(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -75,7 +75,7 @@ class AnEnumRenamed(thrift.py3.types.CompiledEnum):
         return "module.AnEnumRenamed"
 
     def _to_python(self):
-        return _fbthrift_python_types.AnEnumRenamed(self._fbthrift_value_)
+        return _fbthrift_python_enums.AnEnumRenamed(self._fbthrift_value_)
 
     def _to_py3(self):
         return self
@@ -118,7 +118,7 @@ class Flags(thrift.py3.types.Flag):
         return "module.Flags"
 
     def _to_python(self):
-        return _fbthrift_python_types.Flags(self._fbthrift_value_)
+        return _fbthrift_python_enums.Flags(self._fbthrift_value_)
 
     def _to_py3(self):
         return self

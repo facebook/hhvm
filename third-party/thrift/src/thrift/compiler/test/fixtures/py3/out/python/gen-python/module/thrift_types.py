@@ -1078,100 +1078,14 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-
-
-class AnEnum(_fbthrift_python_types.Enum, int):
-    NOTSET = 0
-    ONE = 1
-    TWO = 2
-    THREE = 3
-    FOUR = 4
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.AnEnum"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return None
-
-    @staticmethod
-    def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_AnEnum()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.AnEnum(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-class AnEnumRenamed(_fbthrift_python_types.Enum, int):
-    name_ = 0
-    value_ = 1
-    renamed_ = 2
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.AnEnumRenamed"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return None
-
-    @staticmethod
-    def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_AnEnumRenamed()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.AnEnumRenamed(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-class Flags(_fbthrift_python_types.Flag):
-    flag_A = 1
-    flag_B = 2
-    flag_C = 4
-    flag_D = 8
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "module.Flags"
-
-    @staticmethod
-    def __get_thrift_uri__():
-        return None
-
-    @staticmethod
-    def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_Flags()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("module.types")
-        return py3_types.Flags(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
-
+from module.thrift_enums import *
 
 _fbthrift_all_enums = [
     AnEnum,
     AnEnumRenamed,
     Flags,
 ]
+
 
 def _fbthrift_metadata__exception_SimpleException():
     return module.thrift_metadata.gen_metadata_exception_SimpleException()

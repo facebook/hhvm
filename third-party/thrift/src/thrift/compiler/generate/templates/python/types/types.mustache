@@ -189,9 +189,7 @@ Until we resolve the above error, register the class as virtual subclass of the 
 {{#program:generate_immutable_types}}
 # This unfortunately has to be down here to prevent circular imports
 import {{program:module_path}}.thrift_metadata
-{{> enums/thrift_enums }}
 {{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
 from {{program:module_path}}.thrift_enums import *
 
 {{!
@@ -206,7 +204,6 @@ _fbthrift_all_enums = [
     {{enum:name}},
     {{/program:enums}}
 ]
-{{/program:generate_mutable_types}}
 {{#program:generate_immutable_types}}{{!
 }}{{#program:structs}}
 

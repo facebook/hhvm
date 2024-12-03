@@ -47,31 +47,8 @@ import {{included_module_path}}.{{> types/types_import_path}} as {{included_modu
 {{#program:adapter_type_hint_modules}}
 import {{module_path}}
 {{/program:adapter_type_hint_modules}}
-{{#program:generate_immutable_types}}
-{{#program:enums}}
-
-class _fbthrift_compatible_with_{{enum:name}}:
-    pass
-
-
-class {{enum:name}}(_fbthrift_python_types.{{!
-        }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-        }}{{^enum:flags?}}Enum, int{{/enum:flags?}}{{!
-        }}, _fbthrift_compatible_with_{{enum:name}}):
-    {{#enum:values}}
-    {{enum_value:py_name}}: {{enum:name}} = ...
-    {{/enum:values}}
-    {{#enum:legacy_api?}}
-    def _to_python(self) -> {{enum:name}}: ...
-    def _to_py3(self) -> "{{program:module_path}}.types.{{enum:name}}": ...  # type: ignore
-    def _to_py_deprecated(self) -> int: ...
-    {{/enum:legacy_api?}}
-{{/program:enums}}
-{{/program:generate_immutable_types}}
-{{#program:generate_mutable_types}}
 {{> types/import_enums}}
 
-{{/program:generate_mutable_types}}
 {{#program:structs}}
 
 

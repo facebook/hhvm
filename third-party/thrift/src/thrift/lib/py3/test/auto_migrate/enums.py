@@ -230,7 +230,7 @@ class EnumTests(unittest.TestCase):
             self.assertEqual(repr(e), f"<Color.{color}: {i}>")
 
     def test_enum_module(self) -> None:
-        module = "thrift_types" if is_auto_migrated() else "types"
+        module = "thrift_enums" if is_auto_migrated() else "types"
         self.assertEqual(Color.__module__, f"testing.{module}")
 
     def test_enum_print(self) -> None:

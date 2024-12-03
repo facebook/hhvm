@@ -92,10 +92,11 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-
+from module.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 def _fbthrift_metadata__struct_MyStruct():
     return module.thrift_metadata.gen_metadata_struct_MyStruct()

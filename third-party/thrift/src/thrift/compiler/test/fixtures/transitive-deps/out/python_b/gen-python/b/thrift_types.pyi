@@ -15,5 +15,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import c.thrift_types as _fbthrift__c__thrift_types
 
+from b.thrift_enums import *
+
 B = _typing.List[_fbthrift__c__thrift_types.C]
 E = _fbthrift__c__thrift_types.E

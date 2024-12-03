@@ -17,10 +17,11 @@ import c.thrift_types as _fbthrift__c__thrift_types
 
 # This unfortunately has to be down here to prevent circular imports
 import b.thrift_metadata
-
+from b.thrift_enums import *
 
 _fbthrift_all_enums = [
 ]
+
 
 _fbthrift_all_structs = [
 ]

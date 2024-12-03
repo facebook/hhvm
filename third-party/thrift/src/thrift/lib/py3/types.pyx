@@ -705,5 +705,5 @@ def _is_python_struct(obj):
 def _is_python_enum(obj):
     return (
         isinstance(obj, _fbthrift_python_Enum) and
-        obj.__class__.__module__.endswith(".thrift_types")
+        obj.__class__.__module__.endswith(".thrift_enums")
     )

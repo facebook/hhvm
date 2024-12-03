@@ -8,7 +8,7 @@
 import enum
 import thrift.py3.types
 import my.namespacing.test.module.module.thrift_metadata as _fbthrift_python_metadata
-import my.namespacing.test.module.module.thrift_types as _fbthrift_python_types
+import my.namespacing.test.module.module.thrift_enums as _fbthrift_python_enums
 
 _fbthrift__module_name__ = "my.namespacing.test.module.module.types"
 

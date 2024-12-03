@@ -17,6 +17,8 @@ import b.thrift_types as _fbthrift__b__thrift_types
 
 import c.thrift_types as _fbthrift__c__thrift_types
 
+from s.thrift_enums import *
+
 
 class _fbthrift_TestService_test_args(_fbthrift_python_types.Struct):
 

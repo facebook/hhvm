@@ -19,6 +19,8 @@ import module.thrift_types as _fbthrift__module__thrift_types
 
 import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
+from service.thrift_enums import *
+
 IncludesIncluded = _fbthrift__includes__thrift_types.Included
 IncludesTransitiveFoo = _fbthrift__transitive__thrift_types.Foo
 

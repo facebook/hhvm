@@ -14,28 +14,10 @@ import enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
+from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_HackEnum
 
-class _fbthrift_compatible_with_MyEnum:
-    pass
-
-
-class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum):
-    MyValue1: MyEnum = ...
-    MyValue2: MyEnum = ...
-    def _to_python(self) -> MyEnum: ...
-    def _to_py3(self) -> "test.fixtures.basic.module.types.MyEnum": ...  # type: ignore
-    def _to_py_deprecated(self) -> int: ...
-
-class _fbthrift_compatible_with_HackEnum:
-    pass
-
-
-class HackEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_HackEnum):
-    Value1: HackEnum = ...
-    Value2: HackEnum = ...
-    def _to_python(self) -> HackEnum: ...
-    def _to_py3(self) -> "test.fixtures.basic.module.types.HackEnum": ...  # type: ignore
-    def _to_py_deprecated(self) -> int: ...
+from test.fixtures.basic.module.thrift_enums import *
 
 
 class _fbthrift_compatible_with_MyStruct:

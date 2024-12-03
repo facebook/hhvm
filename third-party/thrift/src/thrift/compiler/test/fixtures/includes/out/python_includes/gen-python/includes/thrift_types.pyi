@@ -15,6 +15,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
+from includes.thrift_enums import *
+
 
 class _fbthrift_compatible_with_Included:
     pass

@@ -434,7 +434,7 @@ FactsStore* SqliteAutoloadMapFactory::getForOptions(
                mapKey->m_root,
                std::move(dbOpener),
                make_watcher(*mapKey),
-               RuntimeOption::ServerExecutionMode(),
+               Cfg::Server::Mode,
                std::move(updateSuppressionPath),
                mapKey->m_indexedMethodAttrs)})
       .first->second.get();

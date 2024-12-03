@@ -279,7 +279,7 @@ void killProcess() {
  * mode. This function returns true if retranslate-all should be skipped.
  */
 bool serializeProfDataAndLog() {
-  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  auto const serverMode = Cfg::Server::Mode;
   auto const mode = RuntimeOption::EvalJitSerdesMode;
   if (serverMode) {
     Logger::Info("retranslateAll: serializing profile data");
@@ -327,7 +327,7 @@ void scheduleSerializeOptProf() {
     return;
   }
 
-  auto const serverMode    = RuntimeOption::ServerExecutionMode();
+  auto const serverMode    = Cfg::Server::Mode;
   auto const delayRequests = Cfg::Jit::SerializeOptProfRequests;
   auto const delaySeconds  = Cfg::Jit::SerializeOptProfSeconds;
 
@@ -374,7 +374,7 @@ extern "C" void __llvm_profile_reset_counters() __attribute__((__weak__));
  *   6) Relocate the functions in the TC according to the selected order.
  */
 void retranslateAll(bool skipSerialize) {
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
+  const bool serverMode = Cfg::Server::Mode;
   const bool serialize = Cfg::Repo::Authoritative &&
                          !Cfg::Jit::SerdesFile.empty() &&
                          isJitSerializing();
@@ -420,7 +420,7 @@ void retranslateAll(bool skipSerialize) {
   {
     std::lock_guard<std::mutex> lock{s_dispatcherMutex};
     BootStats::Block timer("RTA_translate_and_relocate",
-                           RuntimeOption::ServerExecutionMode());
+                           Cfg::Server::Mode);
     auto const runParallelRetranslate = [&] {
       {
         Treadmill::Session session(Treadmill::SessionKind::Retranslate);
@@ -638,7 +638,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
     return;
   }
 
-  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  auto const serverMode = Cfg::Server::Mode;
   if (!force) {
     auto const uptime = static_cast<int>(HHVM_FN(server_uptime)()); // may be -1
     if (uptime >= (int)Cfg::Jit::RetranslateAllSeconds) {
@@ -682,7 +682,7 @@ void checkRetranslateAll(bool force, bool skipSerialize) {
     s_retranslateAllThread = std::thread([skipSerialize] {
       folly::setThreadName("jit.rta");
       BootStats::Block timer("retranslateall",
-                             RuntimeOption::ServerExecutionMode());
+                             Cfg::Server::Mode);
       rds::local::init();
       zend_get_bigint_data();
       SCOPE_EXIT { rds::local::fini(); };
@@ -761,7 +761,7 @@ void checkSerializeOptProf() {
   s_serializeOptProfThread = std::thread([] {
     rds::local::init();
     SCOPE_EXIT { rds::local::fini(); };
-    auto const serverMode = RuntimeOption::ServerExecutionMode();
+    auto const serverMode = Cfg::Server::Mode;
     if (serverMode) {
       Logger::FInfo("retranslateAll: serialization of optimized code's "
                     "profile triggered");

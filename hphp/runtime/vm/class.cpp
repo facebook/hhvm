@@ -2884,7 +2884,7 @@ void Class::sortOwnProps(const PropMap::Builder& curPropMap,
                          uint32_t first,
                          uint32_t past,
                          std::vector<uint16_t>& slotIndex) {
-  auto const serverMode = RuntimeOption::ServerExecutionMode();
+  auto const serverMode = Cfg::Server::Mode;
   FTRACE(3, "Class::sortOwnProps: PreClass: {}\n", m_preClass->name()->data());
   if (serverMode && Cfg::Server::LogReorderProps) {
     Logger::FInfo("Class::sortOwnProps: PreClass: {}",

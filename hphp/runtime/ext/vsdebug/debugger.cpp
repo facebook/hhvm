@@ -341,7 +341,7 @@ void Debugger::setClientConnected(
       // in script mode: on initial startup the script request thread will have
       // been created already in HHVM main, but is not ready for us to attach
       // yet because extensions are still being initialized.
-      if (RuntimeOption::ServerExecutionMode() ||
+      if (Cfg::Server::Mode ||
           m_totalRequestCount.load() > 0) {
 
         RequestInfo::ExecutePerRequest([this] (RequestInfo* ti) {
@@ -1417,7 +1417,7 @@ void Debugger::logClientCommand(
       : g_context->getSandboxId().toCppString();
     const std::string data =
       folly::json::serialize(command->getMessage(), jsonOptions);
-    const std::string mode = RuntimeOption::ServerExecutionMode()
+    const std::string mode = Cfg::Server::Mode
       ? "vsdebug-webserver"
       : "vsdebug-script";
     logger->log(m_session->getClientId(), mode, sandboxId, cmd, data);

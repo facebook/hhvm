@@ -97,7 +97,7 @@ void VSDebugExtension::moduleInit() {
   DebugTransport* transport = nullptr;
   SocketTransportOptions opts{};
 
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     // If HHVM is running in server mode, start up the debugger socket server
     // and listen for debugger clients to connect.
     VSDebugLogger::Log(VSDebugLogger::LogLevelInfo,
@@ -184,7 +184,7 @@ void VSDebugExtension::requestInit() {
   // If we're in SCRIPT mode and a listen port/path was specified on the command
   // line, we need to block starting the script until the debugger client
   // connects.
-  if (!RuntimeOption::ServerExecutionMode() &&
+  if (!Cfg::Server::Mode &&
       (Cfg::Debugger::VSDebuggerListenPort > 0 ||
         !Cfg::Debugger::VSDebuggerDomainSocketPath.empty())) {
 

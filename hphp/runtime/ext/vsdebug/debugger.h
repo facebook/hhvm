@@ -413,7 +413,7 @@ struct Debugger final {
   bool isPaused() { return m_state != ProgramState::Running; }
 
   static bool hasSameTty() {
-    return !RuntimeOption::ServerExecutionMode() &&
+    return !Cfg::Server::Mode &&
       Cfg::Debugger::VSDebuggerListenPort <= 0 &&
       Cfg::Debugger::VSDebuggerDomainSocketPath.empty();
   }

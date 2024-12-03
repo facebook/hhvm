@@ -33,7 +33,7 @@ static StaticString s_file{"file"}, s_line{"line"};
 
 void StaticContentCache::load() {
   BootStats::Block timer("loading static content",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
 
   if (Cfg::Repo::Authoritative && !Cfg::Server::FileCache.empty()) {
     TheFileCache = std::make_shared<VirtualFileSystem>(

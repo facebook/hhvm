@@ -194,7 +194,7 @@ const PackageInfo::Deployment* PackageInfo::getActiveDeployment() const {
     return nullptr;
   };
 
-  if (Cfg::Repo::Authoritative || !RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Repo::Authoritative || !Cfg::Server::Mode) {
     return findDeploymentByName(Cfg::Eval::ActiveDeployment);
   }
   // If unset, set the cached active deployment to null by default.

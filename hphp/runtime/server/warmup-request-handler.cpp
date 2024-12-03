@@ -89,7 +89,7 @@ void InternalWarmupWorker::doJob(WarmupJob job) {
   auto const pos = f.rfind('/');
   auto const str = (pos == f.npos) ? f : f.subpiece(pos + 1);
   BootStats::Block timer(folly::sformat("warmup:{}:{}", str, job.index),
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   try {
     HttpRequestHandler handler(0);
     ReplayTransport rt;
@@ -179,7 +179,7 @@ static InitFiniNode _([] { delete GetReplayer(); },
 }
 
 void replayExtendedWarmupRequests() {
-  if (!RO::ServerExecutionMode()) return;
+  if (!Cfg::Server::Mode) return;
   auto const threadCount = Cfg::Server::ExtendedWarmupThreadCount;
   if (threadCount <= 0) return;
   if (Cfg::Server::ExtendedWarmupRequests.empty()) return;

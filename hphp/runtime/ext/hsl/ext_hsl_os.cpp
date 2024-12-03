@@ -1020,7 +1020,7 @@ int64_t HHVM_FUNCTION(HSL_os_fork_and_execve,
       pgid
     );
   } else {
-    if (RuntimeOption::ServerExecutionMode()) {
+    if (Cfg::Server::Mode) {
       throw_errno_exception(
         ENOSYS,
         "Fork and execve requires lightprocesses in server mode"

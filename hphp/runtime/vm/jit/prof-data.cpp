@@ -78,7 +78,7 @@ typename Map::Config makeAHMConfig() {
 }
 
 ProfData::ProfData()
-  : m_counters(RuntimeOption::ServerExecutionMode()
+  : m_counters(Cfg::Server::Mode
                  ? std::numeric_limits<int64_t>::max()
                  : Cfg::Jit::PGOThreshold)
   , m_profilingFuncs(Cfg::Eval::PGOFuncCountHint,
@@ -226,7 +226,7 @@ std::unique_ptr<ProfData> s_profDataHolder{nullptr};
  */
 struct ProfDataTreadmillDeleter {
   void operator()() {
-    if (RuntimeOption::ServerExecutionMode()) {
+    if (Cfg::Server::Mode) {
       Logger::Info("Deleting JIT ProfData");
     }
   }
@@ -278,7 +278,7 @@ void discardProfData() {
   if (data != nullptr) {
     s_profDataHolder.reset(data);
     if (!Cfg::Eval::KeepProfData) {
-      if (RuntimeOption::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         Logger::Info("Putting JIT ProfData on Treadmill");
       }
       Treadmill::enqueue(ProfDataTreadmillDeleter{std::move(s_profDataHolder)});

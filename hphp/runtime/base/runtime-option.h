@@ -257,10 +257,6 @@ struct RuntimeOption {
     std::vector<std::string>* messages = nullptr,
     std::string cmd = "");
 
-  static bool ServerExecutionMode() {
-    return Cfg::Server::Mode;
-  }
-
   static bool GcSamplingEnabled() {
     return Cfg::GC::SampleRate > 0;
   }

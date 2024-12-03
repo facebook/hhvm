@@ -1800,7 +1800,7 @@ static int execute_program_impl(int argc, char** argv) {
   rds::local::init();
   SCOPE_EXIT { rds::local::fini(); };
   tl_heap.getCheck();
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     // Create the hardware counter before reading options,
     // so that the main thread never has inherit set in server
     // mode
@@ -1997,7 +1997,7 @@ static int execute_program_impl(int argc, char** argv) {
     proc::daemonize();
   }
 
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     for (auto const& m : messages) {
       Logger::Info(m);
     }
@@ -2025,7 +2025,7 @@ static int execute_program_impl(int argc, char** argv) {
   }
 
 #if USE_JEMALLOC_EXTENT_HOOKS
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     purge_all();
     setup_arena0({Cfg::Eval::Num1GPagesForA0,
                   Cfg::Eval::Num2MPagesForA0});
@@ -2613,7 +2613,7 @@ void hphp_process_init(bool skipExtensions) {
   InitFiniNode::ProcessPreInit();
   // TODO(9795696): Race in thread map may trigger spurious logging at
   // thread exit, so for now, only spawn threads if we're a server.
-  const uint32_t maxWorkers = RuntimeOption::ServerExecutionMode() ? 3 : 0;
+  const uint32_t maxWorkers = Cfg::Server::Mode ? 3 : 0;
   InitFiniNode::ProcessInitConcurrentStart(maxWorkers);
   SCOPE_EXIT {
     InitFiniNode::ProcessInitConcurrentWaitForEnd();
@@ -2706,27 +2706,27 @@ void hphp_process_init(bool skipExtensions) {
       if (!jit::serializeOptProfEnabled()) return;
       if (!Cfg::Jit::SerializeOptProfRestart) return;
 
-      if (RO::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         Logger::FInfo("Attempting to deserialize partial profile-data file: {}",
                       Cfg::Jit::SerdesFile);
       }
 
       auto const success = deserialize(jit::tryDeserializePartialProfData);
       if (success) {
-        if (RO::ServerExecutionMode()) {
+        if (Cfg::Server::Mode) {
           Logger::FInfo("Successfully deserialized partial profile-data file. "
                         "Loaded {} units with {} workers",
                         numLoadedUnits(), numWorkers);
         }
         rta("jit::tryDeserializePartialProfData", true);
-      } else if (RO::ServerExecutionMode()) {
+      } else if (Cfg::Server::Mode) {
         Logger::FInfo("Failed deserializing partial profile-data file. "
                       "Proceeding normally");
       }
     };
 
     if (isJitDeserializing()) {
-      if (RuntimeOption::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         Logger::FInfo("JitDeserializeFrom: {}",
                       Cfg::Jit::SerdesFile);
       }
@@ -2735,7 +2735,7 @@ void hphp_process_init(bool skipExtensions) {
 
       if (mode == JitSerdesMode::DeserializeAndDelete) {
         // Delete the serialized profile data when we finish reading
-        if (RuntimeOption::ServerExecutionMode()) {
+        if (Cfg::Server::Mode) {
           Logger::FInfo("Deleting serialized profile-data file: {}",
                         Cfg::Jit::SerdesFile);
         }
@@ -2743,14 +2743,14 @@ void hphp_process_init(bool skipExtensions) {
       }
 
       if (errMsg.empty()) {
-        if (RuntimeOption::ServerExecutionMode()) {
+        if (Cfg::Server::Mode) {
           Logger::FInfo("JitDeserialize: Loaded {} Units with {} workers",
                         numLoadedUnits(), numWorkers);
         }
         rta("jit::deserializeProfData", false);
 
         if (mode == JitSerdesMode::DeserializeAndExit) {
-          if (RuntimeOption::ServerExecutionMode()) {
+          if (Cfg::Server::Mode) {
             Logger::Info("JitDeserialize finished; exiting");
           }
           if (jit::tc::dumpEnabled()) {

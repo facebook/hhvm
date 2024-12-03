@@ -477,7 +477,7 @@ std::string getCacheBreakerSchemaHash(std::string_view root,
     root,
     optsHash
   );
-  if (RO::ServerExecutionMode() && !is_cli_server_mode()) {
+  if (Cfg::Server::Mode && !is_cli_server_mode()) {
     Logger::FInfo(logStr);
   } else {
     Logger::FVerbose(logStr);
@@ -694,7 +694,7 @@ static inline uint64_t pgoThresholdDefault() {
 }
 
 static inline bool hugePagesSoundNice() {
-  return RuntimeOption::ServerExecutionMode();
+  return Cfg::Server::Mode;
 }
 
 static inline uint32_t hotTextHugePagesDefault() {
@@ -1259,7 +1259,7 @@ void RuntimeOption::Load(
     Config::Bind(LogFileSymLink, ini, config, "Log.SymLink");
     Config::Bind(LogFilePeriodMultiplier, ini,
                  config, "Log.PeriodMultiplier", 0);
-    if (Logger::UseLogFile && RuntimeOption::ServerExecutionMode()) {
+    if (Logger::UseLogFile && Cfg::Server::Mode) {
       RuntimeOption::ErrorLogs[Logger::DEFAULT] =
         ErrorLogFileData(Cfg::Log::BaseDirectory, LogFile, LogFileSymLink, LogFilePeriodMultiplier);
     }
@@ -1479,7 +1479,7 @@ void RuntimeOption::Load(
 
     if (Cfg::Jit::SerdesModeForceOff) EvalJitSerdesMode = JitSerdesMode::Off;
 
-    if (!Cfg::Server::ForkingEnabled && ServerExecutionMode()) {
+    if (!Cfg::Server::ForkingEnabled && Cfg::Server::Mode) {
       // Only use hugetlb pages when we don't fork().
       low_2m_pages(Cfg::Eval::MaxLowMemHugePages);
       high_2m_pages(Cfg::Eval::MaxHighArenaHugePages);

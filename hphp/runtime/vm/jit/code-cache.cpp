@@ -126,7 +126,7 @@ CodeCache::CodeCache() {
   // When we have a low arena, TC must fit below lowArenaMinAddr(). If it
   // doesn't, we shrink things to make it so.
   auto const lowArenaStart = lowArenaMinAddr();
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     Logger::Info("lowArenaMinAddr(): 0x%lx", lowArenaStart);
   }
   always_assert_flog(
@@ -270,7 +270,7 @@ void CodeCache::cutTCSizeTo(size_t targetSize) {
   assertx(Cfg::CodeCache::ASize + Cfg::CodeCache::AColdSize +
           Cfg::CodeCache::AFrozenSize + Cfg::CodeCache::GlobalDataSize <= targetSize);
 
-  if (RuntimeOption::ServerExecutionMode()) {
+  if (Cfg::Server::Mode) {
     Logger::FWarning("Adjusted TC sizes to fit in {} bytes: "
                      "ASize = {}, AColdSize = {}, "
                      "AFrozenSize = {}, GlobalDataSize = {}",

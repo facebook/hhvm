@@ -365,7 +365,7 @@ void VSDebugHook::tryEnterDebugger(
     // which behaves like server mode.
     bool scriptAttachMode =
       Cfg::Debugger::VSDebuggerListenPort > 0 ||
-      (!RuntimeOption::ServerExecutionMode() &&
+      (!Cfg::Server::Mode &&
        !Cfg::Debugger::VSDebuggerDomainSocketPath.empty());
     if (!Debugger::hasSameTty()) {
       if (debugger->getDebuggerOptions().disableStdoutRedirection == false) {

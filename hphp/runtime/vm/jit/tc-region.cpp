@@ -222,7 +222,7 @@ void relocateSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             SrcKeyTransMap& srcKeyTrans) {
   size_t failedBytes = 0;
 
-  bool shouldLog = RuntimeOption::ServerExecutionMode();
+  bool shouldLog = Cfg::Server::Mode;
   for (auto& finfo : infos) {
     // We clear the translations that are not relocated to ensure
     // no one tries publishing such translations.
@@ -392,7 +392,7 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
                             const PrologueTCAMap& prologueTCAs,
                             const SrcKeyTransMap& srcKeyTrans) {
   BootStats::Block timer("RTA_smash_opt_funcs",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   for (auto& finfo : infos) {
     if (!Func::isFuncIdValid(finfo.fid)) continue;
 
@@ -413,7 +413,7 @@ void smashOptSortedOptFuncs(std::vector<FuncMetaInfo>& infos,
 
 void invalidateFuncsProfSrcKeys() {
   BootStats::Block timer("RTA_invalidate_prof_srckeys",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   auto const pd = profData();
   assertx(pd);
   pd->forEachProfilingFunc([&](auto const& func) {
@@ -432,7 +432,7 @@ void invalidateFuncsProfSrcKeys() {
 
 void publishSortedOptFuncsMeta(std::vector<FuncMetaInfo>& infos) {
   BootStats::Block timer("RTA_publish_meta",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   for (auto& finfo : infos) {
     if (Func::isFuncIdValid(finfo.fid)) {
       publishOptFuncMeta(finfo);
@@ -443,7 +443,7 @@ void publishSortedOptFuncsMeta(std::vector<FuncMetaInfo>& infos) {
 void publishSortedOptFuncsCode(std::vector<FuncMetaInfo>& infos,
                                jit::hash_set<TCA>* publishedSet) {
   BootStats::Block timer("RTA_publish_code",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   for (auto& finfo : infos) {
     if (Func::isFuncIdValid(finfo.fid)) {
       publishOptFuncCode(finfo, publishedSet);
@@ -540,7 +540,7 @@ void relocatePublishSortedOptFuncs(std::vector<FuncMetaInfo> infos) {
   // Grab the session now (which includes a Treadmill::Session) so
   // that no Func's get destroyed during this step
   ProfData::Session pds(Treadmill::SessionKind::RetranslateAll);
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
+  const bool serverMode = Cfg::Server::Mode;
 
   PrologueTCAMap prologueTCAs;
   SrcKeyTransMap srcKeyTrans;

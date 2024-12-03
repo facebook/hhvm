@@ -279,7 +279,7 @@ void write_units_preload(ProfDataSerializer& ser) {
 
 void read_units_preload(ProfDataDeserializer& ser, const std::string& root) {
   BootStats::Block timer("DES_read_units_preload",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   if (Cfg::Jit::DesUnitPreload) {
     auto const threads =
       std::max(1, std::min(Cfg::Jit::WorkerThreadsForSerdes,
@@ -666,7 +666,7 @@ void write_seen_types(ProfDataSerializer& ser, ProfData* pd) {
 
 void read_seen_types(ProfDataDeserializer& ser) {
   BootStats::Block timer("DES_read_classes_and_type_aliases",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   while (read_seen_type(ser)) {
     // nothing to do. this was just to make sure everything is loaded
     // into the NamedType table
@@ -740,7 +740,7 @@ void maybe_output_prof_trans_rec_trace(
 
 void read_prof_data(ProfDataDeserializer& ser, ProfData* pd) {
   BootStats::Block timer("DES_read_prof_data",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   read_profiled_funcs(ser, pd);
 
   pd->resetCounters(read_raw<int64_t>(ser));
@@ -960,7 +960,7 @@ struct SymbolFixup : boost::static_visitor<void> {
 
 void read_target_profiles(ProfDataDeserializer& ser) {
   BootStats::Block timer("DES_read_target_profiles",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   while (true) {
     auto const size = read_raw<uint32_t>(ser);
     if (!size) break;
@@ -980,7 +980,7 @@ void read_target_profiles(ProfDataDeserializer& ser) {
 
 void merge_loaded_units(int numWorkers) {
   BootStats::Block timer("DES_merge_loaded_units",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
   auto units = loadedUnitsRepoAuth();
 
   std::vector<VMWorker> workers;
@@ -1039,7 +1039,7 @@ void merge_loaded_units(int numWorkers) {
 
 void merge_and_enqueue_for_jit(const std::string& root, int numWorkers) {
   BootStats::Block timer("DES_merge_and_enqueue_for_jit",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
 
   auto const& pds = getSBDeserProfData();
 
@@ -2305,7 +2305,7 @@ std::string deserializeProfData(const std::string& filename,
 
     if (s_preload_dispatcher) {
       BootStats::Block timer("DES_wait_for_units_preload",
-                             RuntimeOption::ServerExecutionMode());
+                             Cfg::Server::Mode);
       s_preload_dispatcher->waitEmpty(true);
       delete s_preload_dispatcher;
       s_preload_dispatcher = nullptr;
@@ -2383,7 +2383,7 @@ std::string deserializeSBProfData(const std::string& root,
     auto& sbProfData = getSBDeserProfData();
     {
       BootStats::Block timer("DES_read_sb_prof_data",
-                             RuntimeOption::ServerExecutionMode());
+                             Cfg::Server::Mode);
       read_container(des, [&] {read_sb_prof_data(des, sbProfData, root);});
     }
 
@@ -2391,7 +2391,7 @@ std::string deserializeSBProfData(const std::string& root,
 
     if (s_preload_dispatcher) {
       BootStats::Block timer("DES_wait_for_units_preload",
-                             RuntimeOption::ServerExecutionMode());
+                             Cfg::Server::Mode);
       s_preload_dispatcher->waitEmpty(true);
       delete s_preload_dispatcher;
       s_preload_dispatcher = nullptr;

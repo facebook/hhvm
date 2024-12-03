@@ -42,7 +42,6 @@
 #include <folly/logging/LogStreamProcessor.h>
 #include <folly/logging/xlog.h>
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/facts/autoload-db.h"
 #include "hphp/runtime/ext/facts/file-facts.h"
 #include "hphp/runtime/ext/facts/sqlite-key.h"

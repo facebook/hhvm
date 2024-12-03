@@ -27,7 +27,6 @@
 
 #include "hphp/runtime/base/datetime.h"
 #include "hphp/runtime/base/timestamp.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/log-writer.h"
 #include "hphp/runtime/server/server-note.h"
 #include "hphp/runtime/server/server-stats.h"

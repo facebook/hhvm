@@ -17,8 +17,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/datatype-macros.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-
 namespace HPHP {
 
 namespace {

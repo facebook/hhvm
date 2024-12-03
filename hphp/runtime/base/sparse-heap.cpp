@@ -16,6 +16,7 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/alloc.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/trace.h"
 #include <folly/portability/SysMman.h>

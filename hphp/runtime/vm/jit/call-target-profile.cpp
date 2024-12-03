@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/call-target-profile.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/func.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 

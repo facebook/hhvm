@@ -21,7 +21,6 @@
 #include <folly/Random.h>
 
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/ini-setting.h"
 
 #include "hphp/util/brotli.h"

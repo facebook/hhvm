@@ -39,7 +39,6 @@
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/php-globals.h"
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stream-wrapper.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/surprise-flags.h"

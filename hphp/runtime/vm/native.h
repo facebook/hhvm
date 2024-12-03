@@ -18,7 +18,6 @@
 #include "hphp/runtime/base/record-replay.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/type-string.h"
 #include "hphp/runtime/base/type-nonnull-ret.h"
 #include "hphp/runtime/base/typed-value.h"

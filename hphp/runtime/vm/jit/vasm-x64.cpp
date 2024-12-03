@@ -16,7 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-emit.h"
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tracing.h"
 
 #include "hphp/runtime/vm/jit/abi-x64.h"

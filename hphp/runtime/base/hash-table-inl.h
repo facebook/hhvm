@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/util/configs/server.h"
 #include "hphp/util/portability.h"
 
 namespace HPHP {

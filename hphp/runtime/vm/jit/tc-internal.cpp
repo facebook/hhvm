@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/init-fini-node.h"
 #include "hphp/runtime/base/perf-warning.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/vm/debug/debug.h"
@@ -157,7 +156,7 @@ TranslationResult::Scope shouldTranslateNoSizeLimit(SrcKey sk, TransKind kind,
 
   auto const maxTransTime = Cfg::Jit::MaxRequestTranslationTime;
   if (maxTransTime >= 0 &&
-      RuntimeOption::ServerExecutionMode() &&
+      Cfg::Server::Mode &&
       !mcgen::isAsyncJitEnabled(kind)) {
     auto const transCounter = Timer::CounterValue(Timer::mcg_translate);
     if (transCounter.wall_time_elapsed >= maxTransTime) {
@@ -632,7 +631,7 @@ Translator::translate(Optional<CodeCache::View> view) {
         e.setStr("data_block", dbFull.name);
         e.setInt("bytes_dropped", bytes);
       });
-      if (RuntimeOption::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         Logger::Warning("TC area %s filled up!", dbFull.name.c_str());
       }
       reset();

@@ -29,6 +29,8 @@
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/string-data-macros.h"
 #include "hphp/util/assertions.h"
+#include "hphp/util/blob-encoder.h"
+#include "hphp/util/hash-map.h"
 
 namespace HPHP {
 

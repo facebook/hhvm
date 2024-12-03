@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/vanilla-dict.h"

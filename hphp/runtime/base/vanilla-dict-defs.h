@@ -20,7 +20,6 @@
 
 #include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-iterator.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-val.h"
 
 #include "hphp/util/word-mem.h"

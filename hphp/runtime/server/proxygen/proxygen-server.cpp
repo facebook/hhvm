@@ -25,7 +25,6 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/util/configs/server.h"
 #include "hphp/runtime/base/crash-reporter.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/url.h"
 #include "hphp/runtime/debugger/debugger.h"

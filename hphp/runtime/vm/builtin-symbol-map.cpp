@@ -18,7 +18,6 @@
 #include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
 
 #include "hphp/runtime/base/autoload-map.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/vm/builtin-symbol-map.h"
 

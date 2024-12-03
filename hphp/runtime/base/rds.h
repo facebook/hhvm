@@ -16,7 +16,6 @@
 #pragma once
 
 #include "hphp/runtime/base/rds-symbol.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 
 #include "hphp/util/alloc.h"

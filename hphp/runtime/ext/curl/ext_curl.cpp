@@ -29,7 +29,6 @@
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/string-util.h"
 #include "hphp/runtime/base/req-ptr.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stack-logger.h"
 #include "hphp/runtime/ext/extension-registry.h"
 #include "hphp/runtime/server/server-stats.h"

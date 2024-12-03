@@ -19,7 +19,6 @@
 #include <folly/Format.h>
 #include <folly/Conv.h>
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"

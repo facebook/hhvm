@@ -40,7 +40,6 @@
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-array-like.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-functions.h"

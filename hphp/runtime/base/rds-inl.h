@@ -15,8 +15,10 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/type-profile.h"
 #include "hphp/util/compilation-flags.h"
+#include "hphp/util/configs/eval.h"
 #include "hphp/util/safe-cast.h"
 
 #include <tbb/concurrent_vector.h>

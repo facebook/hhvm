@@ -21,7 +21,6 @@
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/comparisons.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/util/configs/pageletserver.h"
 #include "hphp/util/configs/xbox.h"

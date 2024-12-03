@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/location.h"
 #include "hphp/runtime/base/repo-auth-type.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/unit-cache.h"

@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/server/cert-reloader.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/extended-logger.h"
 #include "hphp/runtime/base/file-util.h"
 #include <sys/types.h>

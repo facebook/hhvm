@@ -19,11 +19,12 @@
 #include "hphp/runtime/base/countable.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/header-kind.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sort-flags.h"
 #include "hphp/runtime/base/str-key-table.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/base/typed-value.h"
+
+#include "hphp/util/blob-encoder.h"
 
 #include <folly/Likely.h>
 

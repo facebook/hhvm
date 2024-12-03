@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/safe-cast.h"

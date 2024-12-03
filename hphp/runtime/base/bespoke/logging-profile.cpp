@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/bespoke/layout.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/server/memory-stats.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"

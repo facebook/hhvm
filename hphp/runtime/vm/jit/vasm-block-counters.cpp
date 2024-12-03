@@ -16,8 +16,6 @@
 
 #include "hphp/runtime/vm/jit/vasm-block-counters.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/prof-data-serialize.h"
 #include "hphp/runtime/vm/jit/trans-prof-counters.h"

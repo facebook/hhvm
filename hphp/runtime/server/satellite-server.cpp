@@ -18,7 +18,6 @@
 #include "hphp/runtime/server/http-request-handler.h"
 #include "hphp/runtime/server/xbox-request-handler.h"
 #include "hphp/runtime/server/virtual-host.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/preg.h"
 #include "hphp/runtime/base/config.h"
 #include "hphp/util/text-util.h"

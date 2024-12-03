@@ -16,7 +16,6 @@
 */
 
 #include "hphp/runtime/base/ini-setting.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/extension.h"
 
 #include "hphp/runtime/vm/bytecode.h"

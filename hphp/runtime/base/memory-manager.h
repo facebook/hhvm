@@ -25,6 +25,7 @@
 
 #include "hphp/util/alloc.h" // must be included before USE_JEMALLOC is used
 #include "hphp/util/bloom-filter.h"
+#include "hphp/util/configs/gc.h"
 #include "hphp/util/compilation-flags.h"
 #include "hphp/util/radix-map.h"
 #include "hphp/util/rds-local.h"
@@ -36,8 +37,8 @@
 
 #include "hphp/runtime/base/memory-usage-stats.h"
 #include "hphp/runtime/base/request-event-handler.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/sweepable.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/header-kind.h"
 #include "hphp/runtime/base/req-malloc.h"
 #include "hphp/runtime/base/req-ptr.h"

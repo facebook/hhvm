@@ -18,7 +18,6 @@
 #include <algorithm>
 #include <cstring>
 #include <folly/Range.h>
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/bstring.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/hash-map.h"

@@ -19,7 +19,6 @@
 
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/zend-url.h"
 #include "hphp/runtime/vm/func.h"

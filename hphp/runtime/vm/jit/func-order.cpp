@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/func.h"
@@ -28,6 +27,7 @@
 #include "hphp/util/assertions.h"
 #include "hphp/util/boot-stats.h"
 #include "hphp/util/configs/jit.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/hfsort.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/trace.h"
@@ -198,7 +198,7 @@ createCallGraphFromOptCode(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
 hfsort::TargetGraph
 createCallGraph(jit::hash_map<hfsort::TargetId, FuncId>& funcID) {
   BootStats::Block timer("RTA_create_callgraph",
-                         RuntimeOption::ServerExecutionMode());
+                         Cfg::Server::Mode);
 
   // If we have the call counters collected from optimized code use them to
   // build the call graph; otherwise, use the estimates based on profile code.
@@ -231,7 +231,7 @@ std::pair<std::vector<FuncId>, uint64_t> hfsortFuncs() {
   // inlining.
   std::pair<std::vector<FuncId>, uint64_t> ret;
 
-  const bool serverMode = RuntimeOption::ServerExecutionMode();
+  const bool serverMode = Cfg::Server::Mode;
   jit::hash_map<hfsort::TargetId, FuncId> target2FuncId;
   auto cg = createCallGraph(target2FuncId);
 

@@ -25,7 +25,6 @@
 #include "hphp/runtime/base/dummy-resource.h"
 #include "hphp/runtime/base/req-root.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-arith.h"
 #include "hphp/runtime/base/tv-refcount.h"
 #include "hphp/runtime/base/vanilla-dict.h"

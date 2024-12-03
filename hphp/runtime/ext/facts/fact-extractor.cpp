@@ -24,7 +24,6 @@
 #include <folly/logging/xlog.h>
 
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/facts/exception.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/thread-factory.h"

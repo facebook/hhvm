@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/implicit-context.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/type-variant.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"

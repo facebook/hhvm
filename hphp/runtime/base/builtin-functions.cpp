@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/opaque-resource.h"
 #include "hphp/runtime/base/request-injection-data.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/unit-cache.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/base/variable-unserializer.h"

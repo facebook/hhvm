@@ -29,7 +29,6 @@
 #include <folly/portability/SysTime.h>
 #include <folly/Likely.h>
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/util/logger.h"
 #include "hphp/util/process.h"

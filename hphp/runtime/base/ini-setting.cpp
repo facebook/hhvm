@@ -24,7 +24,6 @@
 #include "hphp/runtime/base/req-optional.h"
 #include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/string-functors.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/base/ini-parser/zend-ini.h"
 
@@ -35,6 +34,7 @@
 
 #include "hphp/util/build-info.h"
 #include "hphp/util/configs/eval.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/logger.h"
@@ -919,7 +919,7 @@ void logSettings() {
   StructuredLogEntry ent;
   ent.force_init = true;
   ent.setStr("cmd_line", Process::GetAppName());
-  ent.setInt("server_mode", RO::ServerExecutionMode() ? 1 : 0);
+  ent.setInt("server_mode", Cfg::Server::Mode ? 1 : 0);
   ent.setInt("sample_rate", Cfg::Eval::StartOptionLogRate);
   ent.setInt("hash", hash);
   ent.setProcessUuid("hhvm_uuid");

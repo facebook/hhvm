@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/exceptions.h"
 #include "hphp/runtime/base/object-data.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/ext/core/ext_core_closure.h"
 #include "hphp/runtime/vm/act-rec.h"

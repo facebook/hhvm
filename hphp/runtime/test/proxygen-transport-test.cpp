@@ -4,7 +4,6 @@
 #include <limits>
 #include <ostream>
 
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/server/proxygen/proxygen-server.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
 

@@ -50,7 +50,6 @@
 #include "hphp/runtime/server/files-match.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/runtime/server/server-stats.h"
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
 #include "hphp/runtime/vm/treadmill.h"
 #include "hphp/util/arch.h"

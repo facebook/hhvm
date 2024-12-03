@@ -26,7 +26,6 @@
 #include <folly/portability/Unistd.h>
 
 #include "hphp/util/trace.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/text-util.h"
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/tracing.h"

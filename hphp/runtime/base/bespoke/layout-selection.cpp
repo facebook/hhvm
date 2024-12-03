@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/bespoke/monotype-vec.h"
 #include "hphp/runtime/base/bespoke/struct-dict.h"
 #include "hphp/runtime/base/bespoke/type-structure.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/union-find.h"
 

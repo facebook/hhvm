@@ -29,6 +29,7 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/async-job.h"
 #include "hphp/util/boot-stats.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/hdf.h"
 #include "hphp/util/logger.h"
 
@@ -40,7 +41,6 @@
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/ini-setting.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/ext/fb/ext_fb.h"
@@ -106,7 +106,7 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
   Config::Bind(HotKeyAllocLow, ini, config, "Server.APC.HotKeyAllocLow", false);
   Config::Bind(HotMapAllocLow, ini, config, "Server.APC.HotMapAllocLow", false);
   Config::Bind(UseUncounted, ini, config, "Server.APC.MemModelTreadmill",
-               use_lowptr || RuntimeOption::ServerExecutionMode());
+               use_lowptr || Cfg::Server::Mode);
   Config::Bind(ShareUncounted, ini, config, "Server.APC.ShareUncounted", true);
   if (!UseUncounted && ShareUncounted) ShareUncounted = false;
 

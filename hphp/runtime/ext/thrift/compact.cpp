@@ -20,7 +20,6 @@
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/request-event-handler.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/strings.h"
 
 #include "hphp/runtime/ext/collections/ext_collections-map.h"

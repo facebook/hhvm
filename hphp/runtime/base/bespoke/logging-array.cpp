@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/bespoke/logging-profile.h"
 #include "hphp/runtime/base/bespoke-runtime.h"
 #include "hphp/runtime/base/memory-manager.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-uncounted.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"
 #include "hphp/runtime/vm/jit/irgen.h"

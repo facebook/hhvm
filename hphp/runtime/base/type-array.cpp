@@ -21,7 +21,6 @@
 #include "hphp/runtime/base/comparisons.h"
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/request-info.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/types.h"
 #include "hphp/runtime/base/vanilla-dict-defs.h"

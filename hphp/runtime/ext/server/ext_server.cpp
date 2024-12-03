@@ -19,7 +19,6 @@
 #include <folly/Conv.h>
 
 #include "hphp/runtime/base/builtin-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-buffer.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/server/http-protocol.h"

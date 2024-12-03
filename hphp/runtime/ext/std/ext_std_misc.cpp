@@ -121,7 +121,7 @@ const StaticString
 String HHVM_FUNCTION(execution_context) {
   if (auto t = g_context->getTransport()) return t->describe();
   if (is_cli_server_mode()) return s_clisrv;
-  return RO::ServerExecutionMode() ? s_worker : s_cli;
+  return Cfg::Server::Mode ? s_worker : s_cli;
 }
 
 }

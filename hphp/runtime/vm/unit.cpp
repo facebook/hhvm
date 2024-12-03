@@ -42,6 +42,7 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/configs/jit.h"
 #include "hphp/util/configs/repo.h"
+#include "hphp/util/configs/server.h"
 #include "hphp/util/functional.h"
 #include "hphp/util/lock.h"
 #include "hphp/util/mutex.h"
@@ -55,7 +56,6 @@
 #include "hphp/runtime/base/file-util.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/runtime-error.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/strings.h"
@@ -390,7 +390,7 @@ void Unit::initialMerge() {
       StructuredLogEntry ent;
       ent.setStr("path", m_origFilepath->data());
       ent.setInt("index", index);
-      if (RuntimeOption::ServerExecutionMode()) {
+      if (Cfg::Server::Mode) {
         ent.setInt("uptime", HHVM_FN(server_uptime)());
       }
       StructuredLog::log("hhvm_first_units", ent);

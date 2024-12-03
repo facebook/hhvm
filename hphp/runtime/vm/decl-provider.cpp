@@ -15,7 +15,6 @@
 */
 
 #include "hphp/runtime/base/autoload-handler.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
 #include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/decl-provider.h"

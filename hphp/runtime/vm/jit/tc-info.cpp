@@ -18,7 +18,6 @@
 #include "hphp/runtime/vm/jit/tc-internal.h"
 
 #include "hphp/runtime/base/rds.h"
-#include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/jit/code-cache.h"

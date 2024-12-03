@@ -18,7 +18,6 @@
 
 #include <hphp/runtime/base/datatype.h>
 #include "hphp/runtime/base/annot-type.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/string-data.h"
 #include "hphp/runtime/base/tv-val.h"
 #include "hphp/runtime/vm/hhbc.h"

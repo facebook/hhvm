@@ -20,8 +20,6 @@
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator.h"
 
-#include "hphp/runtime/base/runtime-option.h"
-
 #include "hphp/util/timer.h"
 
 #include <folly/SharedMutex.h>

@@ -16,10 +16,10 @@
 
 #include "hphp/runtime/ext/facts/config.h"
 
-#include <folly/logging/xlog.h>
-
-#include "hphp/runtime/base/runtime-option.h"
+#include "hphp/util/configs/autoload.h"
 #include "hphp/util/user-info.h"
+
+#include <folly/logging/xlog.h>
 
 namespace HPHP::Facts {
 

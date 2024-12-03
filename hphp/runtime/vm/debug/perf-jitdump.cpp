@@ -23,7 +23,6 @@
  */
 
 #include "hphp/runtime/vm/debug/debug.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/vm/debug/oprof-jitdump.h"
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/cycles.h"

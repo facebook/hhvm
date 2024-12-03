@@ -26,7 +26,6 @@
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/recorder.h"
 #include "hphp/runtime/base/replayer.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/ext/asio/ext_async-function-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_await-all-wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_concurrent-wait-handle.h"

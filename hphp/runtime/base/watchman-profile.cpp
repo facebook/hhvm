@@ -25,7 +25,6 @@
 #include <watchman/cppclient/WatchmanClient.h>
 
 #include "hphp/runtime/base/init-fini-node.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/util/configs/autoload.h"
 #include "hphp/util/configs/eval.h"

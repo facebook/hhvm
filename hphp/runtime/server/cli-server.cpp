@@ -137,7 +137,6 @@ way to determine how much progress the server made.
 #include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/plain-file.h"
 #include "hphp/runtime/base/program-functions.h"
-#include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/surprise-flags.h"
 #include "hphp/runtime/base/stream-wrapper-registry.h"
 #include "hphp/runtime/base/stream-wrapper.h"
@@ -2203,7 +2202,7 @@ bool is_cli_server_mode() {
 }
 
 bool is_any_cli_mode() {
-  return is_cli_server_mode() || !RuntimeOption::ServerExecutionMode();
+  return is_cli_server_mode() || !Cfg::Server::Mode;
 }
 
 int cli_server_active_workers() {

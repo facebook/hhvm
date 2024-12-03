@@ -34,6 +34,12 @@ using AnyPatch = detail::AnyPatch<AnyPatchStruct>;
 namespace apache::thrift::protocol {
 class DiffVisitorBase;
 
+class DynamicListPatch;
+class DynamicSetPatch;
+class DynamicMapPatch;
+class DynamicStructPatch;
+class DynamicUnionPatch;
+
 namespace detail {
 using ValueList = std::vector<Value>;
 using ValueSet = folly::F14FastSet<Value>;
@@ -382,6 +388,9 @@ class DynamicMapPatch {
     return patchByKeyImpl(std::move(k), std::move(p));
   }
 
+  DynamicPatch& patchByKey(detail::Badge, Value&&);
+  DynamicPatch& patchByKey(detail::Badge, const Value&);
+
   [[nodiscard]] Object toObject() &&;
   [[nodiscard]] Object toObject() const&;
   void fromObject(detail::Badge, Object obj);
@@ -457,18 +466,9 @@ class DynamicStructurePatch {
 
   // patchIfSet
   template <class Tag>
-  op::patch_type<Tag>& patchIfSet(detail::Badge badge, FieldId id) {
-    using Patch = op::patch_type<Tag>;
-    auto& patch = patchIfSet(badge, id);
-
-    // patch already has the correct type, return it directly.
-    if (auto p = patch.template get_if<Patch>(badge)) {
-      return *p;
-    }
-
-    // Use merge to change patch's type.
-    patch.merge(badge, DynamicPatch{Patch{}});
-    return *patch.template get_if<Patch>(badge);
+  auto& patchIfSet(detail::Badge badge, FieldId id) {
+    auto& subPatch = patchIfSet(badge, id);
+    return subPatch.template getStoredPatchByTag<Tag>(badge);
   }
 
   DynamicPatch& patchIfSet(detail::Badge, FieldId id) {
@@ -488,6 +488,12 @@ class DynamicStructurePatch {
   void fromObject(detail::Badge, Object obj);
   void doNotConvertStringToBinary(detail::Badge) {
     options_.doNotConvertStringToBinary = true;
+  }
+
+  bool modifies(detail::Badge, FieldId id) const {
+    return assign_ || clear_ || patchPrior_.contains(id) ||
+        ensure_.contains(id) || patchAfter_.contains(id) ||
+        remove_.contains(id);
   }
 
  private:
@@ -582,7 +588,36 @@ class DynamicPatch {
   detail::if_same_type_after_remove_cvref<Other, DynamicPatch> merge(
       detail::Badge, Other&&);
 
+  template <class Tag>
+  auto& getStoredPatchByTag(detail::Badge badge) {
+    if constexpr (type::is_a_v<Tag, type::list_c>) {
+      return getStoredPatch<DynamicListPatch>(badge);
+    } else if constexpr (type::is_a_v<Tag, type::set_c>) {
+      return getStoredPatch<DynamicSetPatch>(badge);
+    } else if constexpr (type::is_a_v<Tag, type::map_c>) {
+      return getStoredPatch<DynamicMapPatch>(badge);
+    } else if constexpr (type::is_a_v<Tag, type::struct_c>) {
+      return getStoredPatch<DynamicStructPatch>(badge);
+    } else if constexpr (type::is_a_v<Tag, type::union_c>) {
+      return getStoredPatch<DynamicUnionPatch>(badge);
+    } else {
+      return getStoredPatch<op::patch_type<Tag>>(badge);
+    }
+  }
+
  private:
+  template <class Patch>
+  Patch& getStoredPatch(detail::Badge badge) {
+    // patch already has the correct type, return it directly.
+    if (auto p = get_if<Patch>(badge)) {
+      return *p;
+    }
+
+    // Use merge to change patch's type.
+    merge(badge, DynamicPatch{Patch{}});
+    return *get_if<Patch>(badge);
+  }
+
   template <class Self, class Visitor>
   static decltype(auto) visitPatchImpl(
       Self&& self, detail::Badge, Visitor&& visitor) {

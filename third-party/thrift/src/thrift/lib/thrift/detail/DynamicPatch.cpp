@@ -240,6 +240,12 @@ bool DynamicPatch::empty(detail::Badge badge) const {
 bool DynamicPatch::empty() const {
   return empty(badge);
 }
+DynamicPatch& DynamicMapPatch::patchByKey(detail::Badge, Value&& k) {
+  return patchByKey(badge, std::move(k), {});
+}
+DynamicPatch& DynamicMapPatch::patchByKey(detail::Badge, const Value& k) {
+  return patchByKey(badge, k, {});
+}
 
 template <class SubPatch>
 DynamicPatch& DynamicMapPatch::patchByKeyImpl(Value k, SubPatch&& p) {

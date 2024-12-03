@@ -49,7 +49,7 @@ struct parsing_params {
    * specified keys that is still backwards compatible with older .thrift files
    * that did not specify key values.
    */
-  bool allow_neg_field_keys = false;
+  bool allow_neg_field_keys = true;
 
   /**
    * Whether or not 64-bit constants will generate a warning.

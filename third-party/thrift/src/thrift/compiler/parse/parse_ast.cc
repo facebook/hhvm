@@ -343,10 +343,12 @@ class ast_builder : public parser_actions {
       // allow_neg_field_keys exists to allow users to add explicitly specified
       // id values to old .thrift files without breaking protocol compatibility.
       if (field.id() != next_id) {
+        // DO_BEFORE(aristidis,20250301): Remove when --ignore-non-positive-keys
+        // no longer exists.
         diags_.warning(
             field,
             "Nonpositive field id ({}) differs from what would be "
-            "auto-assigned by thrift ({}).",
+            "auto-assigned by thrift (if 'allow-neg-keys' was disabled): {}",
             field.id(),
             next_id);
       }

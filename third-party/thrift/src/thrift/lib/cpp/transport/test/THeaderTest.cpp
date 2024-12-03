@@ -34,7 +34,7 @@ namespace transport {
 
 TEST(THeaderTest, largetransform) {
   THeader header;
-  header.setTransform(THeader::ZLIB_TRANSFORM); // ZLib flag
+  header.setTTransform(TTransform::ZLIB); // ZLib flag
 
   size_t buf_size = 10000000;
   std::unique_ptr<IOBuf> buf(IOBuf::create(buf_size));

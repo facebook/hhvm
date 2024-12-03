@@ -211,7 +211,10 @@ class THeader final {
    * @return IOBuf output data section
    */
   static std::unique_ptr<folly::IOBuf> untransform(
-      std::unique_ptr<folly::IOBuf>, std::vector<uint16_t>& readTrans);
+      std::unique_ptr<folly::IOBuf> buf, std::vector<TTransform>& tTransforms);
+  [[deprecated("Use TTransform version instead.")]]
+  static std::unique_ptr<folly::IOBuf> untransform(
+      std::unique_ptr<folly::IOBuf> buf, std::vector<uint16_t>& readTrans);
 
   /**
    * Transform the data based on our write transform flags
@@ -222,7 +225,12 @@ class THeader final {
    * @return transformed data IOBuf
    */
   static std::unique_ptr<folly::IOBuf> transform(
-      std::unique_ptr<folly::IOBuf>,
+      std::unique_ptr<folly::IOBuf> buf,
+      std::vector<TTransform>& tTransforms,
+      size_t minCompressBytes = 0);
+  [[deprecated("Use TTransform version instead.")]]
+  static std::unique_ptr<folly::IOBuf> transform(
+      std::unique_ptr<folly::IOBuf> buf,
       std::vector<uint16_t>& writeTrans,
       size_t minCompressBytes = 0);
 
@@ -231,17 +239,54 @@ class THeader final {
    */
   void copyMetadataFrom(const THeader& src);
 
+  static uint16_t getNumTTransforms(
+      const std::vector<TTransform>& tTransforms) {
+    return folly::to_narrow(tTransforms.size());
+  }
+  [[deprecated("Use getNumTTransforms instead.")]]
   static uint16_t getNumTransforms(const std::vector<uint16_t>& transforms) {
     return folly::to_narrow(transforms.size());
   }
 
-  void setTransform(uint16_t transId);
-  void setReadTransform(uint16_t transId);
-  void setTransforms(const std::vector<uint16_t>& trans) {
-    c_.writeTrans_ = trans;
+  void setTTransform(TTransform transId);
+  [[deprecated("Use setTTransform instead.")]]
+  void setTransform(uint16_t transId) {
+    setTTransform(static_cast<TTransform>(transId));
   }
-  const std::vector<uint16_t>& getTransforms() const { return c_.readTrans_; }
-  std::vector<uint16_t>& getWriteTransforms() { return c_.writeTrans_; }
+
+  void setReadTTransform(TTransform transId);
+  [[deprecated("Use setReadTTransform instead.")]]
+  void setReadTransform(uint16_t transId) {
+    setReadTTransform(static_cast<TTransform>(transId));
+  }
+
+  void setTTransforms(const std::vector<TTransform>& tTransforms) {
+    c_.writeTrans_ = tTransforms;
+  }
+  [[deprecated("Use setTTransforms instead.")]]
+  void setTransforms(const std::vector<uint16_t>& trans) {
+    static_assert(
+        std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+    setTTransforms(reinterpret_cast<const std::vector<TTransform>&>(trans));
+  }
+
+  const std::vector<TTransform>& getTTransforms() const {
+    return c_.readTrans_;
+  }
+  [[deprecated("Use getTTransforms instead.")]]
+  const std::vector<uint16_t>& getTransforms() const {
+    static_assert(
+        std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+    return reinterpret_cast<const std::vector<uint16_t>&>(getTTransforms());
+  }
+
+  std::vector<TTransform>& getWriteTTransforms() { return c_.writeTrans_; }
+  [[deprecated("Use getWriteTransforms instead.")]]
+  std::vector<uint16_t>& getWriteTransforms() {
+    static_assert(
+        std::is_same_v<std::underlying_type<TTransform>::type, uint16_t>);
+    return reinterpret_cast<std::vector<uint16_t>&>(getWriteTTransforms());
+  }
 
   void setClientMetadata(const ClientMetadata& clientMetadata);
   std::optional<ClientMetadata> extractClientMetadata();
@@ -291,6 +336,7 @@ class THeader final {
     // DO NOT USE. Sentinel value for enum count. Always keep as last value.
     TRANSFORM_LAST_FIELD = 0x06,
   };
+  [[deprecated("Use apache::thrift::TTransform instead")]]
 
   /* IOBuf interface */
 
@@ -494,8 +540,8 @@ class THeader final {
     uint16_t flags_;
     std::string identity_;
 
-    std::vector<uint16_t> readTrans_;
-    std::vector<uint16_t> writeTrans_;
+    std::vector<TTransform> readTrans_;
+    std::vector<TTransform> writeTrans_;
 
     // Map to use for headers
     std::optional<StringToStringMap> readHeaders_;

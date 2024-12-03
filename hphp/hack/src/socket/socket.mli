@@ -11,4 +11,6 @@
   so that `accept` can subsequently be called). *)
 val init_unix_socket : string -> Unix.file_descr
 
-val get_path : string -> string
+(** Unix socket names must be less than 104 characters.
+    This makes the given path 104 characters if necessary. *)
+val make_valid_socket_path : string -> string

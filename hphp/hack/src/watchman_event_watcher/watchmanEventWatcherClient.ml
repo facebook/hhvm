@@ -46,7 +46,7 @@ module Client_actual = struct
 
   let init root =
     let socket_file = Config.socket_file root in
-    let sock_path = Socket.get_path socket_file in
+    let sock_path = Socket.make_valid_socket_path socket_file in
     (* Copied wholesale from MonitorConnection *)
     let sockaddr =
       if Sys.win32 then (

@@ -51,7 +51,9 @@ let wait_on_server_restart ic =
     ()
 
 let get_sockaddr config =
-  let sock_name = Socket.get_path config.MonitorUtils.socket_file in
+  let sock_name =
+    Socket.make_valid_socket_path config.MonitorUtils.socket_file
+  in
   if Sys.win32 then (
     let ic = In_channel.create ~binary:true sock_name in
     let port = Option.value_exn (In_channel.input_binary_int ic) in

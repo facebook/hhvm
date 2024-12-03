@@ -155,7 +155,7 @@ Set.register(Set__string)
 __all__.append('Set__string')
 
 
-class Map__string_i64(thrift.py3.types.MapNew):
+class Map__string_i64(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -207,7 +207,7 @@ Mapping.register(Map__string_i64)
 __all__.append('Map__string_i64')
 
 
-class Map__string_List__i32(thrift.py3.types.MapNew):
+class Map__string_List__i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

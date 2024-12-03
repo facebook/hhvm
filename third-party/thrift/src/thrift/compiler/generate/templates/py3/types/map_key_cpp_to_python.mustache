@@ -40,11 +40,7 @@ Used to convert C++ `ckey` to python object.
 }}{{#type:struct?}}{{!
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(ckey)){{!
 }}{{/type:struct?}}{{!
-}}{{#type:map?}}{{!
-    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(ckey)){{!
-}}{{/type:map?}}{{!
-}}{{#type:list?}}{{> types/container_from_cpp }}(ckey){{/type:list?}}{{!
-}}{{#type:set?}}{{> types/container_from_cpp }}(ckey){{/type:set?}}{{!
+}}{{#type:container?}}{{> types/container_from_cpp }}(ckey){{/type:container?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/python_type}}, <int> ckey){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

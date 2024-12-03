@@ -47,16 +47,14 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
     {{! Use an aliasing constructor since the object we're returning is still
         managed by the top-level object, possible via a unique_ptr }}
     self.__fbthrift_cached_{{field:py_name}} = {{!
-      }}{{#type:list?}}{{!
+      }}{{#type:container?}}{{!
       }}{{> types/container_from_cpp }}({{!
         }}deref(deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref())){{!
-      }}{{/type:list?}}{{#type:set?}}{{!
-      }}{{> types/container_from_cpp }}({{!
-        }}deref(deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref())){{!
-      }}{{/type:set?}}{{^type:list?}}{{^type:set?}}{{!
+      }}{{/type:container?}}{{!
+      }}{{^type:container?}}{{!
       }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
         }}deref(deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref()), self.{{> types/cpp_obj}})){{!
-      }}{{/type:set?}}{{/type:list?}}
+      }}{{/type:container?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/field:reference?}}{{!
 }}{{^field:reference?}}{{!
@@ -74,17 +72,14 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
         }}{{> types/python_type }}, <int>({{!
         }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}{{!
       }})){{/type:enum}}{{!
-      }}{{#type:list?}}{{> types/container_from_cpp }}({{!
+      }}{{#type:container?}}{{> types/container_from_cpp }}({{!
         }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_ref}}){{!
-      }}{{/type:list?}}{{!
-      }}{{#type:set?}}{{> types/container_from_cpp }}({{!
-        }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_ref}}){{!
-      }}{{/type:set?}}{{!
-      }}{{^type:enum?}}{{^type:list?}}{{^type:set?}}{{!
+      }}{{/type:container?}}{{!
+      }}{{^type:enum?}}{{^type:container?}}{{!
         }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr({{!
       }}deref(self.{{> types/cpp_obj}}).{{> types/cython_field_ref}}, {{!
       }}self.{{> types/cpp_obj}}{{!
-      }})){{/type:set?}}{{/type:list?}}{{/type:enum?}}
+      }})){{/type:container?}}{{/type:enum?}}
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/type:base?}}{{!
 }}{{/field:reference?}}{{!

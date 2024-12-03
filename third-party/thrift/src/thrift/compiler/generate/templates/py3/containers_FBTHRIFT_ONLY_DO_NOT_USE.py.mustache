@@ -205,7 +205,7 @@ class {{type:flat_name}}(thrift.py3.types.Set):
 Set.register({{type:flat_name}})
 
 {{/type:set?}}{{#type:map?}}
-class {{type:flat_name}}(thrift.py3.types.MapNew):
+class {{type:flat_name}}(thrift.py3.types.Map):
     {{! make the type appear to originate from .types module }}
     __module__ = _fbthrift__module_name__
     {{! __slots__ prevents accidental treatment as py-deprecated }}

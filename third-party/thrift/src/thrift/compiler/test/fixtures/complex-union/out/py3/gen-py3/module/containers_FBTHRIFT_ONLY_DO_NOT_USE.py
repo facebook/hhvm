@@ -113,7 +113,7 @@ Sequence.register(List__string)
 __all__.append('List__string')
 
 
-class Map__i16_string(thrift.py3.types.MapNew):
+class Map__i16_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

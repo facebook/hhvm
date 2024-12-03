@@ -38,12 +38,7 @@ in the client or server source rather than the type definition source.
   }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
   }}{{struct:name}}{{!
 }}{{/type:struct}}{{!
-}}{{#type:list?}}object{{/type:list?}}{{!
-}}{{#type:set?}}object{{/type:set?}}{{!
-}}{{#type:map?}}{{!
-  }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
-  }}{{type:flat_name}}{{!
-}}{{/type:map?}}{{!
+}}{{#type:container?}}object{{/type:container?}}{{!
 }}{{#type:void?}}object{{/type:void?}}{{!
 }}{{#type:enum}}object{{/type:enum}}{{!
 }}{{/type:iobufWrapper?}}

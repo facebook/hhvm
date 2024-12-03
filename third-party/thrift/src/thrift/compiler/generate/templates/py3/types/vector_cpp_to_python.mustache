@@ -47,12 +47,7 @@ citem.
     }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
     }}make_shared[{{> types/cython_cpp_type }}](c_vec[idx])){{!
 }}{{/type:struct?}}{{!
-}}{{#type:map?}}{{!
-    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-    }}make_shared[{{> types/cython_cpp_type }}](c_vec[idx])){{!
-}}{{/type:map?}}{{!
-}}{{#type:list?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:list?}}{{!
-}}{{#type:set?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:set?}}{{!
+}}{{#type:container?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:container?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/python_type}}, <int> c_vec[idx]){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

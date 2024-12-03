@@ -69,7 +69,7 @@ Set.register(Set__i64)
 __all__.append('Set__i64')
 
 
-class Map__Animal_string(thrift.py3.types.MapNew):
+class Map__Animal_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

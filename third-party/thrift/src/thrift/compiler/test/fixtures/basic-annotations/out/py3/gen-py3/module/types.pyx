@@ -301,16 +301,16 @@ cdef class SecretStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.SecretStruct, self)
 
-
 cdef _module_cbindings.std_deque_std_string std_deque_std_string__List__string__make_instance(object items) except *:
     cdef _module_cbindings.std_deque_std_string c_inst
-    if items is not None:
-        if isinstance(items, str):
-            raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
-        for item in items:
-            if not isinstance(item, str):
-                raise TypeError(f"{item!r} is not of type str")
-            c_inst.push_back(item.encode('UTF-8'))
+    if items is None:
+        return cmove(c_inst)
+    if isinstance(items, str):
+        raise TypeError("If you really want to pass a string into a _typing.Sequence[str] field, explicitly convert it first.")
+    for item in items:
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
+        c_inst.push_back(item.encode('UTF-8'))
     return cmove(c_inst)
 
 cdef object std_deque_std_string__List__string__from_cpp(const _module_cbindings.std_deque_std_string& c_vec) except *:

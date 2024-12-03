@@ -170,7 +170,7 @@ cdef api void call_cy_SomeService_bounce_map(
     unique_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] m
 ) noexcept:
     cdef Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string __promise = Promise__apache_thrift_fixtures_types_module_cbindings_std_unordered_map__cint32_t_string._fbthrift_create(cmove(cPromise))
-    arg_m = _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(m)))
+    arg_m = _apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string__from_cpp(deref(m))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -250,7 +250,7 @@ async def SomeService_bounce_map_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](deref((<_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]](_apache_thrift_fixtures_types_module_types.std_unordered_map__Map__i32_string__make_instance(result)))
 
 async def SomeService_binary_keyed_map_coro(
     object self,
@@ -281,7 +281,7 @@ async def SomeService_binary_keyed_map_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](deref((<_apache_thrift_fixtures_types_module_types.Map__binary_i64?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cmap[string,cint64_t]](_apache_thrift_fixtures_types_module_types.Map__binary_i64__make_instance(result)))
 
 async def SomeService_onStartServing_coro(
     object self,

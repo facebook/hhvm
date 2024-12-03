@@ -150,7 +150,7 @@ cdef api void call_cy_NestedContainers_mapList(
     unique_ptr[cmap[cint32_t,vector[cint32_t]]] foo
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_foo = _module_types.Map__i32_List__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(foo)))
+    arg_foo = _module_types.Map__i32_List__i32__from_cpp(deref(foo))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -168,7 +168,7 @@ cdef api void call_cy_NestedContainers_mapSet(
     unique_ptr[cmap[cint32_t,cset[cint32_t]]] foo
 ) noexcept:
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit._fbthrift_create(cmove(cPromise))
-    arg_foo = _module_types.Map__i32_Set__i32._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(foo)))
+    arg_foo = _module_types.Map__i32_Set__i32__from_cpp(deref(foo))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(

@@ -153,7 +153,7 @@ Set.register(Set__i32)
 __all__.append('Set__i32')
 
 
-class Map__i32_i32(thrift.py3.types.MapNew):
+class Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

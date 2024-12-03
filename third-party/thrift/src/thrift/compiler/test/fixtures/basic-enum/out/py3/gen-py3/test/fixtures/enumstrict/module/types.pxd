@@ -63,13 +63,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_enumstrict_module_cbindings.cMyStruct])
 
 
-cdef class Map__MyEnum_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] Map__MyEnum_string__make_instance(object items) except *
+cdef cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string] Map__MyEnum_string__make_instance(object items) except *
 cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]&) except *
 
 

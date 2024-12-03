@@ -67,16 +67,9 @@ file.
 {{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
     }}{{> types/current_module_cbindings}}.{{> types/c_constant }}()))
 {{/type:struct?}}
-{{#type:map?}}
-{{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
-    }}{{> types/current_module_cbindings}}.{{> types/c_constant }}()))
-{{/type:map?}}
-{{#type:list?}}
+{{#type:container?}}
 {{constant:name}} = {{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}())
-{{/type:list?}}
-{{#type:set?}}
-{{constant:name}} = {{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}())
-{{/type:set?}}
+{{/type:container?}}
 {{#type:enum}}
 {{constant:name}} = {{#type:need_module_path?}}{{type:modulePath}}.{{!
     }}{{/type:need_module_path?}}{{enum:name}}(<int> ({{> types/current_module_cbindings}}.{{> types/c_constant }}()))

@@ -27,7 +27,7 @@ def get_types_reflection():
 
 __all__ = []
 
-class std_unordered_map__Map__i32_string(thrift.py3.types.MapNew):
+class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

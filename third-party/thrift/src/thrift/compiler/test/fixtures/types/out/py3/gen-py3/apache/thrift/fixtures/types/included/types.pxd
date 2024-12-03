@@ -50,13 +50,7 @@ cdef extern from "thrift/compiler/test/fixtures/types/gen-py3/included/types.h":
   pass
 
 
-cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
-    cdef shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *
 cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]&) except *
 
 cdef vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *

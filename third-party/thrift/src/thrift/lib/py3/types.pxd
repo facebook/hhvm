@@ -119,11 +119,7 @@ cdef class Set(Container):
     cdef object _child_cls
     cdef _fbthrift_py_richcmp(self, other, int op)
 
-
 cdef class Map(Container):
-    pass
-
-cdef class MapNew(Container):
     cdef dict _py_obj
     cdef object _child_cls
 

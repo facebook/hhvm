@@ -1057,7 +1057,7 @@ cdef api void call_cy_SimpleService_get_map_value(
     unique_ptr[string] key
 ) noexcept:
     cdef Promise_string __promise = Promise_string._fbthrift_create(cmove(cPromise))
-    arg_words = _module_types.Map__string_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(words)))
+    arg_words = _module_types.Map__string_string__from_cpp(deref(words))
     arg_key = (deref(key)).data().decode('UTF-8')
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
@@ -1077,7 +1077,7 @@ cdef api void call_cy_SimpleService_map_length(
     unique_ptr[cmap[string,_module_cbindings.cSimpleStruct]] items
 ) noexcept:
     cdef Promise_cint16_t __promise = Promise_cint16_t._fbthrift_create(cmove(cPromise))
-    arg_items = _module_types.Map__string_SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(items)))
+    arg_items = _module_types.Map__string_SimpleStruct__from_cpp(deref(items))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1095,7 +1095,7 @@ cdef api void call_cy_SimpleService_sum_map_values(
     unique_ptr[cmap[string,cint16_t]] items
 ) noexcept:
     cdef Promise_cint16_t __promise = Promise_cint16_t._fbthrift_create(cmove(cPromise))
-    arg_items = _module_types.Map__string_i16._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(items)))
+    arg_items = _module_types.Map__string_i16__from_cpp(deref(items))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -1293,7 +1293,7 @@ cdef api void call_cy_SimpleService_nested_map_argument(
     unique_ptr[cmap[string,vector[_module_cbindings.cSimpleStruct]]] struct_map
 ) noexcept:
     cdef Promise_cint32_t __promise = Promise_cint32_t._fbthrift_create(cmove(cPromise))
-    arg_struct_map = _module_types.Map__string_List__SimpleStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__to_shared_ptr(cmove(struct_map)))
+    arg_struct_map = _module_types.Map__string_List__SimpleStruct__from_cpp(deref(struct_map))
     __context = RequestContext._fbthrift_create(ctx)
     __context_token = __THRIFT_REQUEST_CONTEXT.set(__context)
     asyncio.get_event_loop().create_task(
@@ -2309,7 +2309,7 @@ async def SimpleService_words_count_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cint16_t]](deref((<_module_types.Map__string_i16?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cmap[string,cint16_t]](_module_types.Map__string_i16__make_instance(result)))
 
 async def SimpleService_set_enum_coro(
     object self,
@@ -2403,7 +2403,7 @@ async def SimpleService_word_character_frequency_coro(
             cTApplicationExceptionType__UNKNOWN, (f'Application was cancelled on the server with message: {str(ex)}').encode('UTF-8')
         ))
     else:
-        promise.cPromise.setValue(make_unique[cmap[string,cmap[string,cint32_t]]](deref((<_module_types.Map__string_Map__string_i32?> result)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        promise.cPromise.setValue(make_unique[cmap[string,cmap[string,cint32_t]]](_module_types.Map__string_Map__string_i32__make_instance(result)))
 
 async def SimpleService_list_of_sets_coro(
     object self,

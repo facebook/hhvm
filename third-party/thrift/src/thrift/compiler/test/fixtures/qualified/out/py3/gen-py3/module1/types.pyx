@@ -188,14 +188,14 @@ cdef class Struct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module1.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Struct, self)
 
-
 cdef vector[_module1_cbindings.cEnum] List__Enum__make_instance(object items) except *:
     cdef vector[_module1_cbindings.cEnum] c_inst
-    if items is not None:
-        for item in items:
-            if not isinstance(item, Enum):
-                raise TypeError(f"{item!r} is not of type Enum")
-            c_inst.push_back(<_module1_cbindings.cEnum><int>item)
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, Enum):
+            raise TypeError(f"{item!r} is not of type Enum")
+        c_inst.push_back(<_module1_cbindings.cEnum><int>item)
     return cmove(c_inst)
 
 cdef object List__Enum__from_cpp(const vector[_module1_cbindings.cEnum]& c_vec) except *:

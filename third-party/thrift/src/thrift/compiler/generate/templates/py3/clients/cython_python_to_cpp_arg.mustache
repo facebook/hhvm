@@ -41,14 +41,8 @@ This template assumes that the Python object is in a variable named <field>.
 }}{{#type:struct}}{{!
   }}deref((<{{> types/cython_python_type}}>{{field:py_name}}).{{> types/cpp_obj}}){{!
 }}{{/type:struct}}{{!
-}}{{#type:list?}}{{!
+}}{{#type:container?}}{{!
   }}{{> types/container_to_cpp }}({{field:py_name}}){{!
-}}{{/type:list?}}{{!
-}}{{#type:set?}}{{!
-  }}{{> types/container_to_cpp }}({{field:py_name}}){{!
-}}{{/type:set?}}{{!
-}}{{#type:map?}}{{!
-  }}deref((<{{> types/cython_python_type}}>{{field:py_name}}).{{> types/cpp_obj}}){{!
-}}{{/type:map?}}{{!
+}}{{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>{{field:py_name}}{{/type:enum?}}{{!
 }}{{/type:hasCustomTypeBehavior?}}

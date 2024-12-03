@@ -43,17 +43,9 @@ to a python type.
   }}make_shared[{{> types/cython_cpp_type}}]({{!
   }}cmove(result.value()))){{!
 }}{{/type:struct}}{{!
-}}{{#type:list?}}{{!
+}}{{#type:container?}}{{!
   }}{{> types/container_from_cpp}}(cmove(result.value())){{!
-}}{{/type:list?}}{{!
-}}{{#type:set?}}{{!
-  }}{{> types/container_from_cpp}}(cmove(result.value())){{!
-}}{{/type:set?}}{{!
-}}{{#type:map?}}{{!
-  }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE({{!
-  }}make_shared[{{> types/cython_cpp_type}}]({{!
-  }}cmove(result.value()))){{!
-}}{{/type:map?}}{{!
+}}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{> types/python_type}}(<int> result.value()){{/type:enum}}{{!
 }}{{/type:hasCustomTypeBehavior?}}{{!

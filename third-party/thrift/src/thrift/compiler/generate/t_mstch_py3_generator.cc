@@ -154,8 +154,8 @@ class py3_mstch_program : public mstch_program {
              &py3_mstch_program::includeNamespaces},
             {"program:cppIncludes", &py3_mstch_program::getCppIncludes},
             {"program:containerTypes", &py3_mstch_program::getContainerTypes},
-            {"program:hasPyContainerTypes",
-             &py3_mstch_program::hasPyContainerTypes},
+            {"program:hasContainerTypes",
+             &py3_mstch_program::hasContainerTypes},
             {"program:hasEnumTypes", &py3_mstch_program::hasEnumTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
@@ -199,14 +199,7 @@ class py3_mstch_program : public mstch_program {
 
   mstch::node getContainerTypes() { return make_mstch_types(containers_); }
 
-  mstch::node hasPyContainerTypes() {
-    for (const auto* ttype : containers_) {
-      if (ttype->is_list() || ttype->is_set()) {
-        return true;
-      }
-    }
-    return false;
-  }
+  mstch::node hasContainerTypes() { return !containers_.empty(); }
 
   mstch::node hasEnumTypes() {
     if (!program_->enums().empty()) {
@@ -712,7 +705,7 @@ class py3_mstch_type : public mstch_type {
   // as used, non-simple types live in shared_ptr in container conversions
   mstch::node isSimple() {
     return (type_->is_primitive_type() || type_->is_enum() ||
-            type_->is_list() || type_->is_set()) &&
+            type_->is_container()) &&
         !has_custom_type_behavior();
   }
 

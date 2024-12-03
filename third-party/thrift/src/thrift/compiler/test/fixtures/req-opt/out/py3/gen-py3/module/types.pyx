@@ -208,14 +208,14 @@ cdef class Foo(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Foo, self)
 
-
 cdef vector[cbool] List__bool__make_instance(object items) except *:
     cdef vector[cbool] c_inst
-    if items is not None:
-        for item in items:
-            if not isinstance(item, bool):
-                raise TypeError(f"{item!r} is not of type bool")
-            c_inst.push_back(item)
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, bool):
+            raise TypeError(f"{item!r} is not of type bool")
+        c_inst.push_back(item)
     return cmove(c_inst)
 
 cdef object List__bool__from_cpp(const vector[cbool]& c_vec) except *:
@@ -225,15 +225,15 @@ cdef object List__bool__from_cpp(const vector[cbool]& c_vec) except *:
         py_list.append(c_vec[idx])
     return List__bool(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
-
 cdef vector[cint32_t] List__i32__make_instance(object items) except *:
     cdef vector[cint32_t] c_inst
-    if items is not None:
-        for item in items:
-            if not isinstance(item, int):
-                raise TypeError(f"{item!r} is not of type int")
-            item = <cint32_t> item
-            c_inst.push_back(item)
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
     return cmove(c_inst)
 
 cdef object List__i32__from_cpp(const vector[cint32_t]& c_vec) except *:

@@ -173,7 +173,7 @@ cdef class __Containers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_basic_module_cbindings.cContainers](deref(self._struct_cpp_obj), 2)
             return
-        deref(self._struct_cpp_obj).StringToI64Map_ref().assign(deref(_test_fixtures_basic_module_types.Map__string_i64(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).StringToI64Map_ref().assign(_test_fixtures_basic_module_types.Map__string_i64__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)

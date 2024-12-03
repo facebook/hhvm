@@ -115,7 +115,7 @@ cdef class Val(thrift.py3.types.Struct):
     cdef inline object strVal_impl(self)
     cdef inline object intVal_impl(self)
     cdef inline object typedefValue_impl(self)
-    cdef Map__i16_string __fbthrift_cached_typedefValue
+    cdef object __fbthrift_cached_typedefValue
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cVal])
@@ -190,13 +190,7 @@ cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
 cdef vector[string] List__string__make_instance(object items) except *
 cdef object List__string__from_cpp(const vector[string]&) except *
 
-cdef class Map__i16_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cint16_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint16_t,string]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[cint16_t,string]] Map__i16_string__make_instance(object items) except *
+cdef cmap[cint16_t,string] Map__i16_string__make_instance(object items) except *
 cdef object Map__i16_string__from_cpp(const cmap[cint16_t,string]&) except *
 
 

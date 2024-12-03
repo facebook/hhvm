@@ -28,7 +28,7 @@ def get_types_reflection():
 
 __all__ = []
 
-class std_unordered_map__Map__i32_string(thrift.py3.types.MapNew):
+class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -122,7 +122,7 @@ Sequence.register(List__i64)
 __all__.append('List__i64')
 
 
-class Map__binary_i64(thrift.py3.types.MapNew):
+class Map__binary_i64(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -426,7 +426,7 @@ Set.register(folly_sorted_vector_set__Set__i32)
 __all__.append('folly_sorted_vector_set__Set__i32')
 
 
-class Map__i32_string(thrift.py3.types.MapNew):
+class Map__i32_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -520,7 +520,7 @@ Sequence.register(std_list_int32_t__List__i32)
 __all__.append('std_list_int32_t__List__i32')
 
 
-class Map__string_i32(thrift.py3.types.MapNew):
+class Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -618,7 +618,7 @@ Sequence.register(List__std_unordered_map__Map__i32_string)
 __all__.append('List__std_unordered_map__Map__i32_string')
 
 
-class Map__i32_IncompleteMapDep(thrift.py3.types.MapNew):
+class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -670,7 +670,7 @@ Mapping.register(Map__i32_IncompleteMapDep)
 __all__.append('Map__i32_IncompleteMapDep')
 
 
-class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.MapNew):
+class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -932,7 +932,7 @@ Set.register(Set__i32)
 __all__.append('Set__i32')
 
 
-class Map__i32_i32(thrift.py3.types.MapNew):
+class Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

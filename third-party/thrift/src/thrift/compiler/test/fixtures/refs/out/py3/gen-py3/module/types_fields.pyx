@@ -299,7 +299,7 @@ cdef class __StructWithContainers_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cStructWithContainers](deref(self._struct_cpp_obj), 2)
             return
-        assign_unique_ptr[cmap[cint32_t,cint32_t]](deref(self._struct_cpp_obj).map_ref_ref(), make_unique[cmap[cint32_t,cint32_t]](deref(_module_types.Map__i32_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)))
+        assign_unique_ptr[cmap[cint32_t,cint32_t]](deref(self._struct_cpp_obj).map_ref_ref(), make_unique[cmap[cint32_t,cint32_t]](_module_types.Map__i32_i32__make_instance(_fbthrift_value)))
 
     cdef void _set_field_3(self, _fbthrift_value) except *:
         # for field list_ref_unique

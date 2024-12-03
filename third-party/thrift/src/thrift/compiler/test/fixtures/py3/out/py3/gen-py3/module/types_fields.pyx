@@ -181,7 +181,7 @@ cdef class __SimpleStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cSimpleStruct](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).something_ref().assign(deref(_module_types._std_unordered_map__Map__i32_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).something_ref().assign(_module_types._std_unordered_map__Map__i32_i32__make_instance(_fbthrift_value))
 
 
 @__cython.auto_pickle(False)
@@ -446,7 +446,7 @@ cdef class __CustomFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cCustomFields](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).map_field_ref().assign(deref(_module_types._MyType__Map__i32_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).map_field_ref().assign(_module_types._MyType__Map__i32_i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field struct_field
@@ -553,7 +553,7 @@ cdef class __CustomTypedefFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cCustomTypedefFields](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).map_field_ref().assign(deref(_module_types._MyType__Map__i32_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).map_field_ref().assign(_module_types._MyType__Map__i32_i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field struct_field
@@ -660,7 +660,7 @@ cdef class __AdaptedTypedefFields_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_module_cbindings.cAdaptedTypedefFields](deref(self._struct_cpp_obj), 7)
             return
-        deref(self._struct_cpp_obj).map_field_ref().assign(deref(_module_types.Map__i32_i32(_fbthrift_value)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+        deref(self._struct_cpp_obj).map_field_ref().assign(_module_types.Map__i32_i32__make_instance(_fbthrift_value))
 
     cdef void _set_field_8(self, _fbthrift_value) except *:
         # for field struct_field

@@ -89,8 +89,8 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
     cdef object __fbthrift_cached_fieldD
     cdef object __fbthrift_cached_fieldE
     cdef object __fbthrift_cached_fieldF
-    cdef Map__i32_string __fbthrift_cached_fieldG
-    cdef std_unordered_map__Map__i32_string __fbthrift_cached_fieldH
+    cdef object __fbthrift_cached_fieldG
+    cdef object __fbthrift_cached_fieldH
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct])
@@ -159,7 +159,7 @@ cdef class ComplexString(thrift.py3.types.Struct):
     cdef _fbthrift_types_fields.__ComplexString_FieldsSetter _fields_setter
     cdef inline object a_impl(self)
     cdef inline object b_impl(self)
-    cdef Map__string_i32 __fbthrift_cached_b
+    cdef object __fbthrift_cached_b
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cComplexString])
@@ -290,7 +290,7 @@ cdef class IncompleteMap(thrift.py3.types.Struct):
     cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__IncompleteMap_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
-    cdef Map__i32_IncompleteMapDep __fbthrift_cached_field
+    cdef object __fbthrift_cached_field
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap])
@@ -310,7 +310,7 @@ cdef class CompleteMap(thrift.py3.types.Struct):
     cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMap] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef _fbthrift_types_fields.__CompleteMap_FieldsSetter _fields_setter
     cdef inline object field_impl(self)
-    cdef std_unordered_map__Map__i32_CompleteMapDep __fbthrift_cached_field
+    cdef object __fbthrift_cached_field
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cCompleteMap])
@@ -400,7 +400,7 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
     cdef inline object aa_shared_impl(self)
     cdef object __fbthrift_cached_aa_list
     cdef object __fbthrift_cached_aa_set
-    cdef Map__i32_i32 __fbthrift_cached_aa_map
+    cdef object __fbthrift_cached_aa_map
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware])
@@ -439,25 +439,13 @@ cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.cStructWithDoubleUnderscores])
 
 
-cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
-    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *
 cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]&) except *
 
 cdef vector[cint64_t] List__i64__make_instance(object items) except *
 cdef object List__i64__from_cpp(const vector[cint64_t]&) except *
 
-cdef class Map__binary_i64(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[string,cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cint64_t]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[string,cint64_t]] Map__binary_i64__make_instance(object items) except *
+cdef cmap[string,cint64_t] Map__binary_i64__make_instance(object items) except *
 cdef object Map__binary_i64__from_cpp(const cmap[string,cint64_t]&) except *
 
 cdef vector[cint32_t] List__i32__make_instance(object items) except *
@@ -478,46 +466,22 @@ cdef object folly_small_vector__List__i32__from_cpp(const _apache_thrift_fixture
 cdef _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t] folly_sorted_vector_set__Set__i32__make_instance(object items) except *
 cdef object folly_sorted_vector_set__Set__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.folly_sorted_vector_set[cint32_t]&) except *
 
-cdef class Map__i32_string(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cint32_t,string]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint32_t,string]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[cint32_t,string]] Map__i32_string__make_instance(object items) except *
+cdef cmap[cint32_t,string] Map__i32_string__make_instance(object items) except *
 cdef object Map__i32_string__from_cpp(const cmap[cint32_t,string]&) except *
 
 cdef _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t std_list_int32_t__List__i32__make_instance(object items) except *
 cdef object std_list_int32_t__List__i32__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_list_int32_t&) except *
 
-cdef class Map__string_i32(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[string,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cint32_t]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[string,cint32_t]] Map__string_i32__make_instance(object items) except *
+cdef cmap[string,cint32_t] Map__string_i32__make_instance(object items) except *
 cdef object Map__string_i32__from_cpp(const cmap[string,cint32_t]&) except *
 
 cdef vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *
 cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,string]]&) except *
 
-cdef class Map__i32_IncompleteMapDep(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]] Map__i32_IncompleteMapDep__make_instance(object items) except *
+cdef cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep] Map__i32_IncompleteMapDep__make_instance(object items) except *
 cdef object Map__i32_IncompleteMapDep__from_cpp(const cmap[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]&) except *
 
-cdef class std_unordered_map__Map__i32_CompleteMapDep(thrift.py3.types.Map):
-    cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[_apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *
+cdef _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep] std_unordered_map__Map__i32_CompleteMapDep__make_instance(object items) except *
 cdef object std_unordered_map__Map__i32_CompleteMapDep__from_cpp(const _apache_thrift_fixtures_types_module_cbindings.std_unordered_map[cint32_t,_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]&) except *
 
 cdef _apache_thrift_fixtures_types_module_cbindings._std_list[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep] _std_list__List__IncompleteListDep__make_instance(object items) except *
@@ -535,13 +499,7 @@ cdef object List__DependentAdaptedListDep__from_cpp(const vector[_apache_thrift_
 cdef cset[cint32_t] Set__i32__make_instance(object items) except *
 cdef object Set__i32__from_cpp(const cset[cint32_t]&) except *
 
-cdef class Map__i32_i32(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[cint32_t,cint32_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[cint32_t,cint32_t]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[cint32_t,cint32_t]] Map__i32_i32__make_instance(object items) except *
+cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *
 cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]&) except *
 
 

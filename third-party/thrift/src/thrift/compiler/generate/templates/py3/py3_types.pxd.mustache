@@ -113,22 +113,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
 {{/program:filtered_structs}}
 
 {{#program:containerTypes}}
-{{#type:map?}}
-cdef class {{type:flat_name}}(thrift.py3.types.{{!
-        }}{{#type:list?}}List{{/type:list?}}{{!
-        }}{{#type:set?}}Set{{/type:set?}}{{!
-        }}{{#type:map?}}Map{{/type:map?}}{{!
-        }}):
-    cdef shared_ptr[{{> types/cython_cpp_type}}] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/cython_cpp_type}}])
-    {{#type:map?}}
-    cdef _check_key_type(self, key)
-    {{/type:map?}}
-
-{{/type:map?}}
-cdef {{#type:map?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:map?}}{{!
-}}{{^type:map?}}{{> types/cython_cpp_type}}{{/type:map?}}{{!
+cdef {{> types/cython_cpp_type}}{{!
 }} {{type:flat_name}}__make_instance(object items) except *
 {{^program:auto_migrate?}}
 cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}&) except *

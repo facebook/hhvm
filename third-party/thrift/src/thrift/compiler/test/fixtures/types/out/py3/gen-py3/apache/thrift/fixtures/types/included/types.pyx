@@ -55,6 +55,7 @@ import importlib
 import apache.thrift.fixtures.types.included.thrift_types as _fbthrift_python_types
 
 from apache.thrift.fixtures.types.included.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    std_unordered_map__Map__i32_string,
     List__std_unordered_map__Map__i32_string,
 )
 
@@ -64,100 +65,18 @@ cdef object get_types_reflection():
         "apache.thrift.fixtures.types.included.types_reflection"
     )
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class std_unordered_map__Map__i32_string(thrift.py3.types.Map):
-    def __init__(self, items=None):
-        if isinstance(items, std_unordered_map__Map__i32_string):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<std_unordered_map__Map__i32_string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = std_unordered_map__Map__i32_string__make_instance(items)
+cdef _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string] std_unordered_map__Map__i32_string__make_instance(object items) except *:
+    cdef _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, int):
+            raise TypeError(f"{key!r} is not of type int")
+        key = <cint32_t> key
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] c_items):
-        __fbthrift_inst = <std_unordered_map__Map__i32_string>std_unordered_map__Map__i32_string.__new__(std_unordered_map__Map__i32_string)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(std_unordered_map__Map__i32_string self):
-        cdef shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] cpp_obj = make_shared[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _check_key_type(self, key):
-        if not self or key is None:
-            return
-        if isinstance(key, int):
-            return key
-
-    def __getitem__(self, key):
-        err = KeyError(f'{key}')
-        key = self._check_key_type(key)
-        if key is None:
-            raise err
-        cdef cint32_t ckey = key
-        if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
-            raise err
-        cdef string citem
-        __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-        return bytes(citem).decode('UTF-8')
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] itr = __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cint32_t citem = 0
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield citem
-
-    def __contains__(self, key):
-        key = self._check_key_type(key)
-        if key is None:
-            return False
-        cdef cint32_t ckey = key
-        return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
-
-    def values(self):
-        if not self:
-            return
-        cdef __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] itr = __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield bytes(citem).decode('UTF-8')
-
-    def items(self):
-        if not self:
-            return
-        cdef __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] itr = __map_iter[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef cint32_t ckey = 0
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-            yield (ckey, bytes(citem).decode('UTF-8'))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__std_unordered_map__Map__i32_string()
-
-Mapping.register(std_unordered_map__Map__i32_string)
-
-cdef shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] std_unordered_map__Map__i32_string__make_instance(object items) except *:
-    cdef shared_ptr[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] c_inst = make_shared[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]]()
-    if items is not None:
-        for key, item in items.items():
-            if not isinstance(key, int):
-                raise TypeError(f"{key!r} is not of type int")
-            key = <cint32_t> key
-            if not isinstance(item, str):
-                raise TypeError(f"{item!r} is not of type str")
-
-            deref(c_inst)[key] = item.encode('UTF-8')
+        c_inst[key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]& c_map) except *:
@@ -170,23 +89,23 @@ cdef object std_unordered_map__Map__i32_string__from_cpp(const _apache_thrift_fi
         py_items[ckey] = __init_unicode_from_cpp(cval)
     return std_unordered_map__Map__i32_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
-
 cdef vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] List__std_unordered_map__Map__i32_string__make_instance(object items) except *:
     cdef vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]] c_inst
-    if items is not None:
-        for item in items:
-            if item is None:
-                raise TypeError("None is not of the type _typing.Mapping[int, str]")
-            if not isinstance(item, std_unordered_map__Map__i32_string):
-                item = std_unordered_map__Map__i32_string(item)
-            c_inst.push_back(deref((<std_unordered_map__Map__i32_string>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if item is None:
+            raise TypeError("None is not of the type _typing.Mapping[int, str]")
+        if not isinstance(item, std_unordered_map__Map__i32_string):
+            item = std_unordered_map__Map__i32_string(item)
+        c_inst.push_back(std_unordered_map__Map__i32_string__make_instance(item))
     return cmove(c_inst)
 
 cdef object List__std_unordered_map__Map__i32_string__from_cpp(const vector[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]]& c_vec) except *:
     cdef list py_list = []
     cdef int idx = 0
     for idx in range(c_vec.size()):
-        py_list.append(std_unordered_map__Map__i32_string._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_apache_thrift_fixtures_types_included_cbindings.std_unordered_map[cint32_t,string]](c_vec[idx])))
+        py_list.append(std_unordered_map__Map__i32_string__from_cpp(c_vec[idx]))
     return List__std_unordered_map__Map__i32_string(py_list, thrift.py3.types._fbthrift_list_private_ctor)
 
 

@@ -38,7 +38,5 @@ need to be moved to the called function.
     }}{{/type:iobufRef?}}{{!
 }}{{/type:binary?}}{{!
 }}{{#type:struct?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:struct?}}{{!
-}}{{#type:list?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:list?}}{{!
-}}{{#type:set?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:set?}}{{!
-}}{{#type:map?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:map?}}{{!
+}}{{#type:container?}}{{field:cppName}} = std::move({{field:cppName}}){{/type:container?}}{{!
 }}{{#type:enum?}}{{field:cppName}}{{/type:enum?}}

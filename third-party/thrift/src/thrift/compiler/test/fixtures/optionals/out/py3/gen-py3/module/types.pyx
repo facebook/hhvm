@@ -59,6 +59,7 @@ from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 
 from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Set__i64,
+    Map__Animal_string,
     List__Vehicle,
 )
 
@@ -465,7 +466,7 @@ cdef class Person(thrift.py3.types.Struct):
         if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).petNames_ref().has_value():
             return None
         if self.__fbthrift_cached_petNames is None:
-            self.__fbthrift_cached_petNames = Map__Animal_string._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).petNames_ref().ref_unchecked(), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+            self.__fbthrift_cached_petNames = Map__Animal_string__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).petNames_ref().ref_unchecked())
         return self.__fbthrift_cached_petNames
 
     @property
@@ -569,15 +570,15 @@ cdef class Person(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.Person, self)
 
-
 cdef cset[cint64_t] Set__i64__make_instance(object items) except *:
     cdef cset[cint64_t] c_inst
-    if items is not None:
-        for item in items:
-            if not isinstance(item, int):
-                raise TypeError(f"{item!r} is not of type int")
-            item = <cint64_t> item
-            c_inst.insert(item)
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint64_t> item
+        c_inst.insert(item)
     return cmove(c_inst)
 
 cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:
@@ -589,99 +590,17 @@ cdef object Set__i64__from_cpp(const cset[cint64_t]& c_set) except *:
         py_items.append(citem)
     return Set__i64(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Map__Animal_string(thrift.py3.types.Map):
-    def __init__(self, items=None):
-        if isinstance(items, Map__Animal_string):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Map__Animal_string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Map__Animal_string__make_instance(items)
+cdef cmap[_module_cbindings.cAnimal,string] Map__Animal_string__make_instance(object items) except *:
+    cdef cmap[_module_cbindings.cAnimal,string] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, Animal):
+            raise TypeError(f"{key!r} is not of type Animal")
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[_module_cbindings.cAnimal,string]] c_items):
-        __fbthrift_inst = <Map__Animal_string>Map__Animal_string.__new__(Map__Animal_string)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Map__Animal_string self):
-        cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] cpp_obj = make_shared[cmap[_module_cbindings.cAnimal,string]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Map__Animal_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _check_key_type(self, key):
-        if not self or key is None:
-            return
-        if isinstance(key, Animal):
-            return key
-
-    def __getitem__(self, key):
-        err = KeyError(f'{key}')
-        key = self._check_key_type(key)
-        if key is None:
-            raise err
-        cdef _module_cbindings.cAnimal ckey = <_module_cbindings.cAnimal><int>key
-        if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
-            raise err
-        cdef string citem
-        __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-        return bytes(citem).decode('UTF-8')
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[_module_cbindings.cAnimal,string]] itr = __map_iter[cmap[_module_cbindings.cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef _module_cbindings.cAnimal citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield translate_cpp_enum_to_python(Animal, <int> citem)
-
-    def __contains__(self, key):
-        key = self._check_key_type(key)
-        if key is None:
-            return False
-        cdef _module_cbindings.cAnimal ckey = <_module_cbindings.cAnimal><int>key
-        return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
-
-    def values(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[_module_cbindings.cAnimal,string]] itr = __map_iter[cmap[_module_cbindings.cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield bytes(citem).decode('UTF-8')
-
-    def items(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[_module_cbindings.cAnimal,string]] itr = __map_iter[cmap[_module_cbindings.cAnimal,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef _module_cbindings.cAnimal ckey
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-            yield (translate_cpp_enum_to_python(Animal, <int> ckey), bytes(citem).decode('UTF-8'))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Map__Animal_string()
-
-Mapping.register(Map__Animal_string)
-
-cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] Map__Animal_string__make_instance(object items) except *:
-    cdef shared_ptr[cmap[_module_cbindings.cAnimal,string]] c_inst = make_shared[cmap[_module_cbindings.cAnimal,string]]()
-    if items is not None:
-        for key, item in items.items():
-            if not isinstance(key, Animal):
-                raise TypeError(f"{key!r} is not of type Animal")
-            if not isinstance(item, str):
-                raise TypeError(f"{item!r} is not of type str")
-
-            deref(c_inst)[<_module_cbindings.cAnimal><int>key] = item.encode('UTF-8')
+        c_inst[<_module_cbindings.cAnimal><int>key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__Animal_string__from_cpp(const cmap[_module_cbindings.cAnimal,string]& c_map) except *:
@@ -694,14 +613,14 @@ cdef object Map__Animal_string__from_cpp(const cmap[_module_cbindings.cAnimal,st
         py_items[translate_cpp_enum_to_python(Animal, <int> ckey)] = __init_unicode_from_cpp(cval)
     return Map__Animal_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
-
 cdef vector[_module_cbindings.cVehicle] List__Vehicle__make_instance(object items) except *:
     cdef vector[_module_cbindings.cVehicle] c_inst
-    if items is not None:
-        for item in items:
-            if not isinstance(item, Vehicle):
-                raise TypeError(f"{item!r} is not of type Vehicle")
-            c_inst.push_back(deref((<Vehicle>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, Vehicle):
+            raise TypeError(f"{item!r} is not of type Vehicle")
+        c_inst.push_back(deref((<Vehicle>item)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
     return cmove(c_inst)
 
 cdef object List__Vehicle__from_cpp(const vector[_module_cbindings.cVehicle]& c_vec) except *:

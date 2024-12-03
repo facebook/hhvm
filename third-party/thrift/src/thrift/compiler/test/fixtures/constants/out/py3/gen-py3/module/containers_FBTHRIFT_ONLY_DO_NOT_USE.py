@@ -69,7 +69,7 @@ Sequence.register(List__i32)
 __all__.append('List__i32')
 
 
-class Map__string_i32(thrift.py3.types.MapNew):
+class Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -167,7 +167,7 @@ Sequence.register(List__Map__string_i32)
 __all__.append('List__Map__string_i32')
 
 
-class Map__string_string(thrift.py3.types.MapNew):
+class Map__string_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -476,7 +476,7 @@ Set.register(Set__string)
 __all__.append('Set__string')
 
 
-class Map__i32_i32(thrift.py3.types.MapNew):
+class Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -528,7 +528,7 @@ Mapping.register(Map__i32_i32)
 __all__.append('Map__i32_i32')
 
 
-class Map__i32_string(thrift.py3.types.MapNew):
+class Map__i32_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -580,7 +580,7 @@ Mapping.register(Map__i32_string)
 __all__.append('Map__i32_string')
 
 
-class Map__i32_bool(thrift.py3.types.MapNew):
+class Map__i32_bool(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

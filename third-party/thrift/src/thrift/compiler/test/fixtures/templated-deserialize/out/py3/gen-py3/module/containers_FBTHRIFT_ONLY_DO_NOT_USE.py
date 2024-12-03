@@ -27,7 +27,7 @@ def get_types_reflection():
 
 __all__ = []
 
-class Map__string_bool(thrift.py3.types.MapNew):
+class Map__string_bool(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -255,7 +255,7 @@ Sequence.register(List__List__List__i32)
 __all__.append('List__List__List__i32')
 
 
-class Map__string_i32(thrift.py3.types.MapNew):
+class Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -307,7 +307,7 @@ Mapping.register(Map__string_i32)
 __all__.append('Map__string_i32')
 
 
-class Map__string_Map__string_i32(thrift.py3.types.MapNew):
+class Map__string_Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -359,7 +359,7 @@ Mapping.register(Map__string_Map__string_i32)
 __all__.append('Map__string_Map__string_i32')
 
 
-class Map__string_Map__string_Map__string_i32(thrift.py3.types.MapNew):
+class Map__string_Map__string_Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -457,7 +457,7 @@ Sequence.register(List__Set__i32)
 __all__.append('List__Set__i32')
 
 
-class Map__string_List__i32(thrift.py3.types.MapNew):
+class Map__string_List__i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -825,7 +825,7 @@ Sequence.register(List__Set__string)
 __all__.append('List__Set__string')
 
 
-class Map__List__Set__string_string(thrift.py3.types.MapNew):
+class Map__List__Set__string_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -881,7 +881,7 @@ Mapping.register(Map__List__Set__string_string)
 __all__.append('Map__List__Set__string_string')
 
 
-class Map__Set__List__i32_Map__List__Set__string_string(thrift.py3.types.MapNew):
+class Map__Set__List__i32_Map__List__Set__string_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

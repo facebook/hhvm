@@ -111,13 +111,13 @@ from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:nam
 )
 {{/program:hasEnumTypes}}
 
-{{#program:hasPyContainerTypes}}
+{{#program:hasContainerTypes}}
 from {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
-{{#program:containerTypes}}{{^type:map?}}
+{{#program:containerTypes}}
     {{type:flat_name}},
-{{/type:map?}}{{/program:containerTypes}}
+{{/program:containerTypes}}
 )
-{{/program:hasPyContainerTypes}}
+{{/program:hasContainerTypes}}
 
 
 cdef object get_types_reflection():
@@ -518,213 +518,95 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         return thrift.util.converter.to_py_struct(py_deprecated_types.{{struct:name}}, self)
 
 {{/program:filtered_structs}}
-{{#program:containerTypes}}{{#type:map?}}
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class {{type:flat_name}}(thrift.py3.types.Map):
-    def __init__(self, items=None):
-        if isinstance(items, {{type:flat_name}}):
-            self.{{> types/cpp_obj}} = (<{{type:flat_name}}> items).{{> types/cpp_obj}}
-        else:
-            self.{{> types/cpp_obj}} = {{type:flat_name}}__make_instance(items)
-
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/cython_cpp_type}}] c_items):
-        __fbthrift_inst = <{{type:flat_name}}>{{type:flat_name}}.__new__({{type:flat_name}})
-        __fbthrift_inst.{{> types/cpp_obj}} = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__({{type:flat_name}} self):
-        cdef shared_ptr[{{> types/cython_cpp_type}}] cpp_obj = make_shared[{{> types/cython_cpp_type}}](
-            deref(self.{{> types/cpp_obj}})
-        )
-        return {{type:flat_name}}._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self.{{> types/cpp_obj}}).size()
-
-    cdef _check_key_type(self, key):
-        if not self or key is None:
-            return
-        {{#type:key_type}}
-        if isinstance(key, {{> types/python_type}}):
-            return key
-        {{#type:container?}}
-        try:
-            return {{> types/python_type}}(key)
-        except:
-            pass
-        {{/type:container?}}
-        {{/type:key_type}}
-
-    def __getitem__(self, key):
-        err = KeyError(f'{key}')
-        key = self._check_key_type(key)
-        if key is None:
-            raise err
-        {{#type:key_type}}
-        cdef {{> types/cython_cpp_type}} ckey = {{> types/cython_python_to_cpp_key}}
-        {{/type:key_type}}
-        if not __map_contains(self.{{> types/cpp_obj}}, ckey):
-            raise err
-        {{#type:value_type}}
-        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
-        __map_getitem(self.{{> types/cpp_obj}}, ckey, citem)
-        return {{> types/container_cython_cpp_to_python_item}}
-        {{/type:value_type}}
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __map_iter[{{> types/cython_cpp_type}}] itr = __map_iter[{{> types/cython_cpp_type}}](self.{{> types/cpp_obj}})
-        {{#type:key_type}}
-        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
-        for i in range(deref(self.{{> types/cpp_obj}}).size()):
-            itr.genNextKey(self.{{> types/cpp_obj}}, citem)
-            yield {{> types/container_cython_cpp_to_python_item}}
-        {{/type:key_type}}
-
-    def __contains__(self, key):
-        key = self._check_key_type(key)
-        if key is None:
-            return False
-        {{#type:key_type}}
-        cdef {{> types/cython_cpp_type}} ckey = {{> types/cython_python_to_cpp_key}}
-        {{/type:key_type}}
-        return __map_contains(self.{{> types/cpp_obj}}, ckey)
-
-    def values(self):
-        if not self:
-            return
-        cdef __map_iter[{{> types/cython_cpp_type}}] itr = __map_iter[{{> types/cython_cpp_type}}](self.{{> types/cpp_obj}})
-        {{#type:value_type}}
-        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
-        for i in range(deref(self.{{> types/cpp_obj}}).size()):
-            itr.genNextValue(self.{{> types/cpp_obj}}, citem)
-            yield {{> types/container_cython_cpp_to_python_item}}
-        {{/type:value_type}}
-
-    def items(self):
-        if not self:
-            return
-        cdef __map_iter[{{> types/cython_cpp_type}}] itr = __map_iter[{{> types/cython_cpp_type}}](self.{{> types/cpp_obj}})
-        {{#type:key_type}}
-        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} ckey{{> types/type_default_value}}
-        {{/type:key_type}}
-        {{#type:value_type}}
-        cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-            }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
-        {{/type:value_type}}
-        for i in range(deref(self.{{> types/cpp_obj}}).size()):
-            itr.genNextItem(self.{{> types/cpp_obj}}, ckey, citem)
-            yield ({{!
-              }}{{#type:key_type}}{{!
-              }}{{> types/container_cython_cpp_to_python_key}}{{!
-              }}{{/type:key_type}}, {{!
-              }}{{#type:value_type}}{{!
-              }}{{> types/container_cython_cpp_to_python_item}}{{!
-              }}{{/type:value_type}})
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__{{type:flat_name}}()
-
-Mapping.register({{type:flat_name}})
-{{/type:map?}}
-
+{{#program:containerTypes}}
 {{! container to cpp converter }}
-{{^type:map?}}
 cdef {{> types/cython_cpp_type}} {{type:flat_name}}__make_instance(object items) except *:
     cdef {{> types/cython_cpp_type}} c_inst
-    if items is not None:
-        {{#type:containerOfString?}}
-        if isinstance(items, str):
-            raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
-        {{/type:containerOfString?}}
-        for item in items:
-{{/type:map?}}{{#type:list?}}
-            {{#type:list_elem_type}}
-            {{#type:container?}}
-            if item is None:
-                raise TypeError("None is not of the type {{> types/pep484_type}}")
-            if not isinstance(item, {{> types/python_type}}):
-                item = {{> types/python_type}}(item)
-            {{/type:container?}}
-            {{^type:container?}}
-            if not isinstance(item, {{> types/python_is_instance_type}}):
-                raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
-            {{#type:integer?}}
-            {{! inject cython int overflow checks }}
-            item = <{{> types/cython_python_type}}> item
-            {{/type:integer?}}
-            {{/type:container?}}
-            c_inst.push_back({{> types/cython_python_to_cpp_item}})
-            {{/type:list_elem_type}}
+    if items is None:
+        return cmove(c_inst)
+{{^type:map?}}
+    {{#type:containerOfString?}}
+    if isinstance(items, str):
+        raise TypeError("If you really want to pass a string into a {{> types/pep484_type}} field, explicitly convert it first.")
+    {{/type:containerOfString?}}
+    for item in items:
+{{/type:map?}}
+{{#type:list?}}
+        {{#type:list_elem_type}}
+        {{#type:container?}}
+        if item is None:
+            raise TypeError("None is not of the type {{> types/pep484_type}}")
+        if not isinstance(item, {{> types/python_type}}):
+            item = {{> types/python_type}}(item)
+        {{/type:container?}}
+        {{^type:container?}}
+        if not isinstance(item, {{> types/python_is_instance_type}}):
+            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+        {{#type:integer?}}
+        {{! inject cython int overflow checks }}
+        item = <{{> types/cython_python_type}}> item
+        {{/type:integer?}}
+        {{/type:container?}}
+        c_inst.push_back({{> types/cython_python_to_cpp_item}})
+        {{/type:list_elem_type}}
 {{/type:list?}}{{#type:set?}}
-            {{#type:set_elem_type}}
-            {{#type:container?}}
-            if item is None:
-                raise TypeError("None is not of type {{> types/pep484_type}}")
-            if not isinstance(item, {{> types/python_type}}):
-                item = {{> types/python_type}}(item)
-            {{/type:container?}}
-            {{^type:container?}}
-            if not isinstance(item, {{> types/python_is_instance_type}}):
-                raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
-            {{#type:integer?}}
-            {{! inject cython int overflow checks }}
-            item = <{{> types/cython_python_type}}> item
-            {{/type:integer?}}
-            {{/type:container?}}
-            c_inst.insert({{> types/cython_python_to_cpp_item}})
-            {{/type:set_elem_type}}
+        {{#type:set_elem_type}}
+        {{#type:container?}}
+        if item is None:
+            raise TypeError("None is not of type {{> types/pep484_type}}")
+        if not isinstance(item, {{> types/python_type}}):
+            item = {{> types/python_type}}(item)
+        {{/type:container?}}
+        {{^type:container?}}
+        if not isinstance(item, {{> types/python_is_instance_type}}):
+            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+        {{#type:integer?}}
+        {{! inject cython int overflow checks }}
+        item = <{{> types/cython_python_type}}> item
+        {{/type:integer?}}
+        {{/type:container?}}
+        c_inst.insert({{> types/cython_python_to_cpp_item}})
+        {{/type:set_elem_type}}
 {{/type:set?}}
 {{#type:map?}}
-cdef shared_ptr[{{> types/cython_cpp_type}}] {{type:flat_name}}__make_instance(object items) except *:
-    cdef shared_ptr[{{> types/cython_cpp_type}}] c_inst = make_shared[{{> types/cython_cpp_type}}]()
-    if items is not None:
-        for key, item in items.items():
-            {{#type:key_type}}
-            {{#type:container?}}
-            if key is None:
-                raise TypeError("None is not of type {{> types/pep484_type}}")
-            if not isinstance(key, {{> types/python_type}}):
-                key = {{> types/python_type}}(key)
-            {{/type:container?}}
-            {{^type:container?}}
-            if not isinstance(key, {{> types/python_is_instance_type}}):
-                raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
-            {{#type:integer?}}
-            {{! inject cython int overflow checks }}
-            key = <{{> types/cython_python_type}}> key
-            {{/type:integer?}}
-            {{/type:container?}}
-            {{/type:key_type}}
-            {{#type:value_type}}
-            {{#type:container?}}
-            if item is None:
-                raise TypeError("None is not of type {{> types/pep484_type}}")
-            if not isinstance(item, {{> types/python_type}}):
-                item = {{> types/python_type}}(item)
-            {{/type:container?}}
-            {{^type:container?}}
-            if not isinstance(item, {{> types/python_is_instance_type}}):
-                raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
-            {{#type:integer?}}
-            {{! inject cython int overflow checks }}
-            item = <{{> types/cython_python_type}}> item
-            {{/type:integer?}}
-            {{/type:container?}}
-            {{/type:value_type}}
+    for key, item in items.items():
+        {{#type:key_type}}
+        {{#type:container?}}
+        if key is None:
+            raise TypeError("None is not of type {{> types/pep484_type}}")
+        if not isinstance(key, {{> types/python_type}}):
+            key = {{> types/python_type}}(key)
+        {{/type:container?}}
+        {{^type:container?}}
+        if not isinstance(key, {{> types/python_is_instance_type}}):
+            raise TypeError(f"{key!r} is not of type {{> types/pep484_type}}")
+        {{#type:integer?}}
+        {{! inject cython int overflow checks }}
+        key = <{{> types/cython_python_type}}> key
+        {{/type:integer?}}
+        {{/type:container?}}
+        {{/type:key_type}}
+        {{#type:value_type}}
+        {{#type:container?}}
+        if item is None:
+            raise TypeError("None is not of type {{> types/pep484_type}}")
+        if not isinstance(item, {{> types/python_type}}):
+            item = {{> types/python_type}}(item)
+        {{/type:container?}}
+        {{^type:container?}}
+        if not isinstance(item, {{> types/python_is_instance_type}}):
+            raise TypeError(f"{item!r} is not of type {{> types/pep484_type}}")
+        {{#type:integer?}}
+        {{! inject cython int overflow checks }}
+        item = <{{> types/cython_python_type}}> item
+        {{/type:integer?}}
+        {{/type:container?}}
+        {{/type:value_type}}
 
-            deref(c_inst)[{{!
-                }}{{#type:key_type}}{{> types/cython_python_to_cpp_key}}{{/type:key_type}}{{!
-                }}] = {{!
-                }}{{#type:value_type}}{{> types/cython_python_to_cpp_item}}{{/type:value_type}}
+        c_inst[{{#type:key_type}}{{!
+            }}{{> types/cython_python_to_cpp_key}}{{/type:key_type}}{{!
+                }}] = {{#type:value_type}}{{!
+            }}{{> types/cython_python_to_cpp_item}}{{/type:value_type}}
 {{/type:map?}}
     return cmove(c_inst)
 

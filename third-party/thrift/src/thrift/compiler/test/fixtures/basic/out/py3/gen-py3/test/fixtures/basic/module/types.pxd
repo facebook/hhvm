@@ -80,7 +80,7 @@ cdef class Containers(thrift.py3.types.Struct):
     cdef inline object StringToI64Map_impl(self)
     cdef object __fbthrift_cached_I32List
     cdef object __fbthrift_cached_StringSet
-    cdef Map__string_i64 __fbthrift_cached_StringToI64Map
+    cdef object __fbthrift_cached_StringToI64Map
 
     @staticmethod
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cContainers])
@@ -181,22 +181,10 @@ cdef object List__i32__from_cpp(const vector[cint32_t]&) except *
 cdef cset[string] Set__string__make_instance(object items) except *
 cdef object Set__string__from_cpp(const cset[string]&) except *
 
-cdef class Map__string_i64(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[string,cint64_t]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,cint64_t]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[string,cint64_t]] Map__string_i64__make_instance(object items) except *
+cdef cmap[string,cint64_t] Map__string_i64__make_instance(object items) except *
 cdef object Map__string_i64__from_cpp(const cmap[string,cint64_t]&) except *
 
-cdef class Map__string_List__i32(thrift.py3.types.Map):
-    cdef shared_ptr[cmap[string,vector[cint32_t]]] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[string,vector[cint32_t]]])
-    cdef _check_key_type(self, key)
-
-cdef shared_ptr[cmap[string,vector[cint32_t]]] Map__string_List__i32__make_instance(object items) except *
+cdef cmap[string,vector[cint32_t]] Map__string_List__i32__make_instance(object items) except *
 cdef object Map__string_List__i32__from_cpp(const cmap[string,vector[cint32_t]]&) except *
 
 

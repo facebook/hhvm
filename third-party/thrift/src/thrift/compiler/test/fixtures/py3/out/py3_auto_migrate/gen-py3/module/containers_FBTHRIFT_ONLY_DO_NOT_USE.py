@@ -325,7 +325,7 @@ Set.register(Set__string)
 __all__.append('Set__string')
 
 
-class Map__string_string(thrift.py3.types.MapNew):
+class Map__string_string(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -377,7 +377,7 @@ Mapping.register(Map__string_string)
 __all__.append('Map__string_string')
 
 
-class Map__string_SimpleStruct(thrift.py3.types.MapNew):
+class Map__string_SimpleStruct(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -429,7 +429,7 @@ Mapping.register(Map__string_SimpleStruct)
 __all__.append('Map__string_SimpleStruct')
 
 
-class Map__string_i16(thrift.py3.types.MapNew):
+class Map__string_i16(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -527,7 +527,7 @@ Sequence.register(List__List__i32)
 __all__.append('List__List__i32')
 
 
-class Map__string_i32(thrift.py3.types.MapNew):
+class Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -579,7 +579,7 @@ Mapping.register(Map__string_i32)
 __all__.append('Map__string_i32')
 
 
-class Map__string_Map__string_i32(thrift.py3.types.MapNew):
+class Map__string_Map__string_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -677,7 +677,7 @@ Sequence.register(List__Set__string)
 __all__.append('List__Set__string')
 
 
-class Map__string_List__SimpleStruct(thrift.py3.types.MapNew):
+class Map__string_List__SimpleStruct(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -998,7 +998,7 @@ Sequence.register(List__AnEnum)
 __all__.append('List__AnEnum')
 
 
-class _std_unordered_map__Map__i32_i32(thrift.py3.types.MapNew):
+class _std_unordered_map__Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1134,7 +1134,7 @@ Set.register(_MyType__Set__i32)
 __all__.append('_MyType__Set__i32')
 
 
-class _MyType__Map__i32_i32(thrift.py3.types.MapNew):
+class _MyType__Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1186,7 +1186,7 @@ Mapping.register(_MyType__Map__i32_i32)
 __all__.append('_MyType__Map__i32_i32')
 
 
-class Map__i32_i32(thrift.py3.types.MapNew):
+class Map__i32_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1238,7 +1238,7 @@ Mapping.register(Map__i32_i32)
 __all__.append('Map__i32_i32')
 
 
-class Map__i32_double(thrift.py3.types.MapNew):
+class Map__i32_double(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 
@@ -1336,7 +1336,7 @@ Sequence.register(List__Map__i32_double)
 __all__.append('List__Map__i32_double')
 
 
-class Map__AnEnumRenamed_i32(thrift.py3.types.MapNew):
+class Map__AnEnumRenamed_i32(thrift.py3.types.Map):
     __module__ = _fbthrift__module_name__
     __slots__ = ()
 

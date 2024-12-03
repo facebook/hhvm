@@ -60,6 +60,9 @@ from test.fixtures.enumstrict.module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import 
     MyBigEnum,
 )
 
+from test.fixtures.enumstrict.module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
+    Map__MyEnum_string,
+)
 
 
 cdef object get_types_reflection():
@@ -192,99 +195,17 @@ cdef class MyStruct(thrift.py3.types.Struct):
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
 
-@__cython.auto_pickle(False)
-@__cython.final
-cdef class Map__MyEnum_string(thrift.py3.types.Map):
-    def __init__(self, items=None):
-        if isinstance(items, Map__MyEnum_string):
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = (<Map__MyEnum_string> items)._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-        else:
-            self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = Map__MyEnum_string__make_instance(items)
+cdef cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string] Map__MyEnum_string__make_instance(object items) except *:
+    cdef cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string] c_inst
+    if items is None:
+        return cmove(c_inst)
+    for key, item in items.items():
+        if not isinstance(key, MyEnum):
+            raise TypeError(f"{key!r} is not of type MyEnum")
+        if not isinstance(item, str):
+            raise TypeError(f"{item!r} is not of type str")
 
-    @staticmethod
-    cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] c_items):
-        __fbthrift_inst = <Map__MyEnum_string>Map__MyEnum_string.__new__(Map__MyEnum_string)
-        __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(c_items)
-        return __fbthrift_inst
-
-    def __copy__(Map__MyEnum_string self):
-        cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] cpp_obj = make_shared[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](
-            deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        )
-        return Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(cmove(cpp_obj))
-
-    def __len__(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()
-
-    cdef _check_key_type(self, key):
-        if not self or key is None:
-            return
-        if isinstance(key, MyEnum):
-            return key
-
-    def __getitem__(self, key):
-        err = KeyError(f'{key}')
-        key = self._check_key_type(key)
-        if key is None:
-            raise err
-        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum ckey = <_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key
-        if not __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey):
-            raise err
-        cdef string citem
-        __map_getitem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-        return bytes(citem).decode('UTF-8')
-
-    def __iter__(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] itr = __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextKey(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield translate_cpp_enum_to_python(MyEnum, <int> citem)
-
-    def __contains__(self, key):
-        key = self._check_key_type(key)
-        if key is None:
-            return False
-        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum ckey = <_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key
-        return __map_contains(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey)
-
-    def values(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] itr = __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextValue(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, citem)
-            yield bytes(citem).decode('UTF-8')
-
-    def items(self):
-        if not self:
-            return
-        cdef __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] itr = __map_iter[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]](self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE)
-        cdef _test_fixtures_enumstrict_module_cbindings.cMyEnum ckey
-        cdef string citem
-        for i in range(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).size()):
-            itr.genNextItem(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE, ckey, citem)
-            yield (translate_cpp_enum_to_python(MyEnum, <int> ckey), bytes(citem).decode('UTF-8'))
-
-    @staticmethod
-    def __get_reflection__():
-        return get_types_reflection().get_reflection__Map__MyEnum_string()
-
-Mapping.register(Map__MyEnum_string)
-
-cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] Map__MyEnum_string__make_instance(object items) except *:
-    cdef shared_ptr[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]] c_inst = make_shared[cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]]()
-    if items is not None:
-        for key, item in items.items():
-            if not isinstance(key, MyEnum):
-                raise TypeError(f"{key!r} is not of type MyEnum")
-            if not isinstance(item, str):
-                raise TypeError(f"{item!r} is not of type str")
-
-            deref(c_inst)[<_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key] = item.encode('UTF-8')
+        c_inst[<_test_fixtures_enumstrict_module_cbindings.cMyEnum><int>key] = item.encode('UTF-8')
     return cmove(c_inst)
 
 cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_module_cbindings.cMyEnum,string]& c_map) except *:
@@ -299,4 +220,4 @@ cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_mo
 
 
 kOne = MyEnum(<int> (_test_fixtures_enumstrict_module_cbindings.ckOne()))
-enumNames = Map__MyEnum_string._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr(_test_fixtures_enumstrict_module_cbindings.cenumNames()))
+enumNames = Map__MyEnum_string__from_cpp(_test_fixtures_enumstrict_module_cbindings.cenumNames())

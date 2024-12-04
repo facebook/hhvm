@@ -116,12 +116,12 @@ pub fn desugar(
                 &et_literal_pos,
             )]),
         };
-        let param_type = aast::Hint(
+        let param_type = aast::Hint::new(
             et_literal_pos.clone(),
-            Box::new(Hint_::Hshape(aast::NastShapeInfo {
+            Hint_::Hshape(aast::NastShapeInfo {
                 allows_unknown_fields: true,
                 field_map: vec![],
-            })),
+            }),
         );
         let freevar_param = aast::FunParam {
             annotation: (),
@@ -147,15 +147,15 @@ pub fn desugar(
         );
         typing_fun_.ctxs = Some(aast::Contexts(
             et_literal_pos.clone(),
-            vec![ast::Hint(
+            vec![ast::Hint::new(
                 et_literal_pos.clone(),
-                Box::new(Hint_::Happly(
+                Hint_::Happly(
                     Id(
                         et_literal_pos.clone(),
                         naming_special_names_rust::coeffects::DEFAULTS.to_string(),
                     ),
                     vec![],
-                )),
+                ),
             )],
         ));
         let mut spliced_vars: Vec<_> = (0..splice_count)
@@ -216,12 +216,9 @@ pub fn desugar(
         annotation: (),
         type_hint: ast::TypeHint(
             (),
-            Some(aast::Hint(
+            Some(aast::Hint::new(
                 visitor_pos.clone(),
-                Box::new(Hint_::Happly(
-                    Id(visitor_pos.clone(), visitor_name.clone()),
-                    vec![],
-                )),
+                Hint_::Happly(Id(visitor_pos.clone(), visitor_name.clone()), vec![]),
             )),
         ),
         pos: visitor_pos.clone(),
@@ -303,7 +300,7 @@ pub fn desugar(
 
 /// Convert `foo` to `return foo;`.
 fn wrap_return(e: Expr, pos: &Pos) -> Stmt {
-    Stmt::new(pos.clone(), Stmt_::Return(Box::new(Some(e))))
+    Stmt::new(pos.clone(), Stmt_::mk_return(Some(e)))
 }
 
 /// Wrap a FuncBody into an anonymous Fun_
@@ -353,10 +350,10 @@ impl<'ast> VisitorMut<'ast> for DollarDollarRewriter {
             Lvar(l) => {
                 if local_id::get_name(&l.1) == special_idents::DOLLAR_DOLLAR {
                     // Replace and remember the position
-                    e.2 = Lvar(Box::new(ast::Lid(
+                    e.2 = Expr_::mk_lvar(ast::Lid(
                         e.1.clone(),
                         local_id::make_unscoped(et::DOLLARDOLLAR_TMP_VAR),
-                    )));
+                    ));
                     if self.pos.is_none() {
                         self.pos = Some(e.1.clone());
                     }
@@ -451,7 +448,7 @@ fn vec_literal_with_pos(pos: &Pos, items: Vec<Expr>) -> Expr {
     Expr::new(
         (),
         pos.clone(),
-        Expr_::ValCollection(Box::new(((pos.clone(), aast::VcKind::Vec), None, items))),
+        Expr_::mk_val_collection((pos.clone(), aast::VcKind::Vec), None, items),
     )
 }
 
@@ -463,7 +460,7 @@ fn dict_literal(pos: &Pos, key_value_pairs: Vec<(Expr, Expr)>) -> Expr {
     Expr::new(
         (),
         pos.clone(),
-        Expr_::KeyValCollection(Box::new(((pos.clone(), aast::KvcKind::Dict), None, fields))),
+        Expr_::mk_key_val_collection((pos.clone(), aast::KvcKind::Dict), None, fields),
     )
 }
 
@@ -487,24 +484,24 @@ fn v_meth_call(meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Expr {
     let meth = Expr::new(
         (),
         pos.clone(),
-        Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
+        Expr_::mk_id(ast::Id(pos.clone(), meth_name.into())),
     );
 
-    let c = Expr_::Call(Box::new(ast::CallExpr {
+    let c = Expr_::mk_call(ast::CallExpr {
         func: Expr::new(
             (),
             pos.clone(),
-            Expr_::ObjGet(Box::new((
+            Expr_::mk_obj_get(
                 receiver,
                 meth,
                 OgNullFlavor::OGNullthrows,
                 ast::PropOrMethod::IsMethod,
-            ))),
+            ),
         ),
         targs: vec![],
         args: build_args(args),
         unpacked_arg: None,
-    }));
+    });
     Expr::new((), pos.clone(), c)
 }
 
@@ -512,24 +509,24 @@ fn meth_call(receiver: Expr, meth_name: &str, args: Vec<Expr>, pos: &Pos) -> Exp
     let meth = Expr::new(
         (),
         pos.clone(),
-        Expr_::Id(Box::new(ast::Id(pos.clone(), meth_name.into()))),
+        Expr_::mk_id(ast::Id(pos.clone(), meth_name.into())),
     );
 
-    let c = Expr_::Call(Box::new(ast::CallExpr {
+    let c = Expr_::mk_call(ast::CallExpr {
         func: Expr::new(
             (),
             pos.clone(),
-            Expr_::ObjGet(Box::new((
+            Expr_::mk_obj_get(
                 receiver,
                 meth,
                 OgNullFlavor::OGNullthrows,
                 ast::PropOrMethod::IsMethod,
-            ))),
+            ),
         ),
         targs: vec![],
         args: build_args(args),
         unpacked_arg: None,
-    }));
+    });
     Expr::new((), pos.clone(), c)
 }
 
@@ -543,7 +540,7 @@ fn static_meth_call_with_meth_pos(
     let callee = Expr::new(
         (),
         meth_pos.clone(),
-        Expr_::ClassConst(Box::new((
+        Expr_::mk_class_const(
             // TODO: Refactor ClassId creation with new_obj
             ClassId(
                 (),
@@ -551,21 +548,21 @@ fn static_meth_call_with_meth_pos(
                 ClassId_::CIexpr(Expr::new(
                     (),
                     meth_pos.clone(),
-                    Expr_::Id(Box::new(Id(meth_pos.clone(), classname.to_string()))),
+                    Expr_::mk_id(Id(meth_pos.clone(), classname.to_string())),
                 )),
             ),
             (meth_pos.clone(), meth_name.to_string()),
-        ))),
+        ),
     );
     Expr::new(
         (),
         pos.clone(),
-        Expr_::Call(Box::new(ast::CallExpr {
+        Expr_::mk_call(ast::CallExpr {
             func: callee,
             targs: vec![],
             args: build_args(args),
             unpacked_arg: None,
-        })),
+        }),
     )
 }
 
@@ -602,15 +599,15 @@ fn create_temp_statement_parallel(
     // an await, and that might not be the case here.
     vec![Stmt::new(
         pos.clone(),
-        Stmt_::Expr(Box::new(Expr::new(
+        Stmt_::mk_expr(Expr::new(
             (),
             pos.clone(),
-            Expr_::Assign(Box::new((
+            Expr_::mk_assign(
                 Expr::new((), pos.clone(), Expr_::List(lhss)),
                 None,
                 Expr::new((), pos.clone(), Expr_::Tuple(exprs)),
-            ))),
-        ))),
+            ),
+        )),
     )]
 }
 
@@ -621,11 +618,11 @@ fn create_temp_statements(exprs: Vec<Expr>, mk_lvar: fn(&Pos, usize) -> Expr) ->
         .map(|(i, expr)| {
             Stmt::new(
                 expr.1.clone(),
-                Stmt_::Expr(Box::new(Expr::new(
+                Stmt_::mk_expr(Expr::new(
                     (),
                     expr.1.clone(),
-                    Expr_::Assign(Box::new((mk_lvar(&expr.1, i), None, expr))),
-                ))),
+                    Expr_::mk_assign(mk_lvar(&expr.1, i), None, expr),
+                )),
             )
         })
         .collect()
@@ -685,7 +682,7 @@ fn exprpos(pos: &Pos) -> Expr {
                 Expr::new(
                     (),
                     pos.clone(),
-                    Expr_::Id(Box::new(make_id(pos.clone(), "__FILE__"))),
+                    Expr_::mk_id(make_id(pos.clone(), "__FILE__")),
                 ),
             ),
             ("start_line", int_literal(pos.clone(), start_lnum)),
@@ -938,11 +935,7 @@ impl RewriteState {
                 let virtual_expr = Expr(
                     (),
                     pos.clone(),
-                    Assign(Box::new((
-                        rewritten_lhs.virtual_expr,
-                        bop,
-                        rewritten_rhs.virtual_expr,
-                    ))),
+                    Expr_::mk_assign(rewritten_lhs.virtual_expr, bop, rewritten_rhs.virtual_expr),
                 );
                 RewriteResult {
                     virtual_expr,
@@ -1048,11 +1041,11 @@ impl RewriteState {
                 let virtual_expr = Expr(
                     (),
                     pos,
-                    Eif(Box::new((
+                    Expr_::mk_eif(
                         boolify(rewritten_e1.virtual_expr),
                         Some(rewritten_e2.virtual_expr),
                         rewritten_e3.virtual_expr,
-                    ))),
+                    ),
                 );
                 RewriteResult {
                     virtual_expr,
@@ -1088,12 +1081,12 @@ impl RewriteState {
                         let call_e = Expr::new(
                             (),
                             pos,
-                            Call(Box::new(ast::CallExpr {
+                            Expr_::mk_call(ast::CallExpr {
                                 func: recv,
                                 targs,
                                 args,
                                 unpacked_arg: variadic,
-                            })),
+                            }),
                         );
                         return RewriteResult {
                             desugar_expr: call_e.clone(),
@@ -1142,7 +1135,7 @@ impl RewriteState {
                         let virtual_expr = Expr(
                             (),
                             pos.clone(),
-                            Call(Box::new(ast::CallExpr {
+                            Expr_::mk_call(ast::CallExpr {
                                 func: _virtualize_call(
                                     static_meth_call(
                                         visitor_name,
@@ -1155,7 +1148,7 @@ impl RewriteState {
                                 targs: vec![],
                                 args: build_args(virtual_args),
                                 unpacked_arg: None,
-                            })),
+                            }),
                         );
                         RewriteResult {
                             virtual_expr,
@@ -1207,7 +1200,7 @@ impl RewriteState {
                         let virtual_expr = Expr(
                             (),
                             pos.clone(),
-                            Call(Box::new(ast::CallExpr {
+                            Expr_::mk_call(ast::CallExpr {
                                 func: _virtualize_call(
                                     static_meth_call(
                                         visitor_name,
@@ -1220,7 +1213,7 @@ impl RewriteState {
                                 targs: vec![],
                                 args: build_args(virtual_args),
                                 unpacked_arg: None,
-                            })),
+                            }),
                         );
                         RewriteResult {
                             virtual_expr,
@@ -1251,7 +1244,7 @@ impl RewriteState {
                         let virtual_expr = Expr(
                             (),
                             pos.clone(),
-                            Call(Box::new(ast::CallExpr {
+                            Expr_::mk_call(ast::CallExpr {
                                 func: if should_virtualize_call {
                                     _virtualize_call(rewritten_recv.virtual_expr, &pos)
                                 } else {
@@ -1260,7 +1253,7 @@ impl RewriteState {
                                 targs: vec![],
                                 args: build_args(virtual_args),
                                 unpacked_arg: None,
-                            })),
+                            }),
                         );
                         RewriteResult {
                             virtual_expr,
@@ -1337,12 +1330,12 @@ impl RewriteState {
                 if should_append_return {
                     virtual_body_stmts.push(Stmt(
                         pos.clone(),
-                        aast::Stmt_::Return(Box::new(Some(static_meth_call(
+                        aast::Stmt_::mk_return(Some(static_meth_call(
                             visitor_name,
                             et::VOID_TYPE,
                             vec![],
                             &pos,
-                        )))),
+                        ))),
                     ));
                 }
                 let mut exprs = vec![
@@ -1359,7 +1352,7 @@ impl RewriteState {
 
                 let virtual_expr = _virtualize_lambda(
                     visitor_name,
-                    Expr((), pos.clone(), Lfun(Box::new((fun_, vec![])))),
+                    Expr((), pos.clone(), Expr_::mk_lfun(fun_, vec![])),
                     &pos,
                 );
 
@@ -1381,11 +1374,11 @@ impl RewriteState {
                 self.splices.push(Expr(
                     (),
                     expr_pos.clone(),
-                    ETSplice(Box::new(aast::EtSplice {
+                    Expr_::mk_etsplice(aast::EtSplice {
                         spliced_expr,
                         extract_client_type: false,
                         contains_await,
-                    })),
+                    }),
                 ));
                 let temp_variable = temp_splice_lvar(&expr_pos, len);
                 let temp_variable_string = string_literal(expr_pos, &temp_splice_lvar_string(len));
@@ -1397,11 +1390,11 @@ impl RewriteState {
                 let virtual_expr = Expr(
                     (),
                     pos,
-                    ETSplice(Box::new(aast::EtSplice {
+                    Expr_::mk_etsplice(aast::EtSplice {
                         spliced_expr: temp_variable,
                         extract_client_type,
                         contains_await,
-                    })),
+                    }),
                 );
                 self.contains_spliced_await |= contains_await;
                 RewriteResult {
@@ -1451,12 +1444,7 @@ impl RewriteState {
                 let virtual_expr = Expr(
                     (),
                     pos,
-                    ObjGet(Box::new((
-                        rewritten_e1.virtual_expr,
-                        e2,
-                        null_flavor,
-                        is_prop_call,
-                    ))),
+                    Expr_::mk_obj_get(rewritten_e1.virtual_expr, e2, null_flavor, is_prop_call),
                 );
                 RewriteResult {
                     virtual_expr,
@@ -1511,20 +1499,20 @@ impl RewriteState {
 
                 // Construct nameof :foo.
                 let hint_pos = hint.0.clone();
-                let hint_class = Expr_::Nameof(Box::new(ClassId(
+                let hint_class = Expr_::mk_nameof(ClassId(
                     (),
                     hint_pos.clone(),
                     ClassId_::CIexpr(Expr::new(
                         (),
                         hint_pos.clone(),
-                        Expr_::Id(Box::new(ast_defs::Id(hint_pos.clone(), hint.1.clone()))),
+                        Expr_::mk_id(ast_defs::Id(hint_pos.clone(), hint.1.clone())),
                     )),
-                )));
+                ));
 
                 let virtual_expr = Expr(
                     (),
                     pos.clone(),
-                    Xml(Box::new((hint, virtual_attrs, virtual_children))),
+                    Expr_::mk_xml(hint, virtual_attrs, virtual_children),
                 );
                 let desugar_expr = v_meth_call(
                     et::VISIT_XHP,
@@ -1665,7 +1653,7 @@ impl RewriteState {
             Expr(e) => {
                 let result = self.rewrite_expr(*e, visitor_name);
                 (
-                    Stmt(pos, Expr(Box::new(result.virtual_expr))),
+                    Stmt(pos, Stmt_::mk_expr(result.virtual_expr)),
                     Some(result.desugar_expr),
                 )
             }
@@ -1677,7 +1665,7 @@ impl RewriteState {
                     let result = self.rewrite_expr(e, visitor_name);
                     let desugar_expr =
                         v_meth_call(et::VISIT_RETURN, vec![pos_expr, result.desugar_expr], &pos);
-                    let virtual_stmt = Stmt(pos, Return(Box::new(Some(result.virtual_expr))));
+                    let virtual_stmt = Stmt(pos, Stmt_::mk_return(Some(result.virtual_expr)));
                     (virtual_stmt, Some(desugar_expr))
                 }
                 // Source: MyDsl`return;`
@@ -1692,7 +1680,7 @@ impl RewriteState {
 
                     let virtual_void_expr =
                         static_meth_call(visitor_name, et::VOID_TYPE, vec![], &pos);
-                    let virtual_stmt = Stmt(pos, Return(Box::new(Some(virtual_void_expr))));
+                    let virtual_stmt = Stmt(pos, Stmt_::mk_return(Some(virtual_void_expr)));
                     (virtual_stmt, Some(desugar_expr))
                 }
             },
@@ -1720,11 +1708,11 @@ impl RewriteState {
                 );
                 let virtual_stmt = Stmt(
                     pos,
-                    If(Box::new((
+                    Stmt_::mk_if(
                         boolify(rewritten_cond.virtual_expr),
                         ast::Block(virtual_then_stmts),
                         ast::Block(virtual_else_stmts),
-                    ))),
+                    ),
                 );
                 (virtual_stmt, Some(desugar_expr))
             }
@@ -1748,10 +1736,10 @@ impl RewriteState {
                 );
                 let virtual_stmt = Stmt(
                     pos,
-                    While(Box::new((
+                    Stmt_::mk_while(
                         boolify(rewritten_cond.virtual_expr),
                         ast::Block(virtual_body_stmts),
-                    ))),
+                    ),
                 );
                 (virtual_stmt, Some(desugar_expr))
             }
@@ -1793,12 +1781,12 @@ impl RewriteState {
                 );
                 let virtual_stmt = Stmt(
                     pos,
-                    For(Box::new((
+                    Stmt_::mk_for(
                         virtual_init_exprs,
                         virtual_cond_option,
                         virtual_incr_exprs,
                         ast::Block(virtual_body_stmts),
-                    ))),
+                    ),
                 );
                 (virtual_stmt, Some(desugar_expr))
             }
@@ -1893,15 +1881,15 @@ fn immediately_invoked_lambda(
     let call = Expr::new(
         (),
         pos.clone(),
-        Expr_::Call(Box::new(ast::CallExpr {
+        Expr_::mk_call(ast::CallExpr {
             func: lambda_expr,
             targs: vec![],
             args: call_args,
             unpacked_arg: None,
-        })),
+        }),
     );
     if async_ {
-        Expr::new((), pos.clone(), Expr_::Await(Box::new(call)))
+        Expr::new((), pos.clone(), Expr_::mk_await(call))
     } else {
         call
     }
@@ -1997,7 +1985,7 @@ fn global_func_ptr(sid: &Sid) -> Expr {
     Expr::new(
         (),
         pos,
-        Expr_::FunctionPointer(Box::new((ast::FunctionPtrId::FPId(sid.clone()), vec![]))),
+        Expr_::mk_function_pointer(ast::FunctionPtrId::FPId(sid.clone()), vec![]),
     )
 }
 
@@ -2005,9 +1993,9 @@ fn static_meth_ptr(pos: &Pos, cid: &ClassId, meth: &Pstring) -> Expr {
     Expr::new(
         (),
         pos.clone(),
-        Expr_::FunctionPointer(Box::new((
+        Expr_::mk_function_pointer(
             aast::FunctionPtrId::FPClassConst(cid.clone(), meth.clone()),
             vec![],
-        ))),
+        ),
     )
 }

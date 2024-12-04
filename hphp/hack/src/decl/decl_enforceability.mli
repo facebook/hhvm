@@ -71,13 +71,13 @@ module Enforce : functor (ContextAccess : ContextAccess) -> sig
 end
 
 module Pessimize : functor (Provider : ShallowProvider) -> sig
-  (** Pessimise the type if in implicit pessimisation mode, otherwise
-    return the type *)
-  val maybe_pessimise_type :
-    reason:Typing_reason.decl_t ->
+  (** Pessimise the type of a property if in implicit pessimisation mode and no_auto_likes is false *)
+  val pessimise_prop_type :
     is_xhp_attr:bool ->
     this_class:Shallow_decl_defs.shallow_class option ->
+    no_auto_likes:bool ->
     Provider.t ->
+    Pos_or_decl.t ->
     Typing_defs.decl_ty ->
     Typing_defs.decl_ty
 

@@ -530,26 +530,28 @@ module Pessimize (Provider : ShallowProvider) = struct
     else
       like_if_not_void ty
 
-  let pessimise_type ~reason ~is_xhp_attr ~this_class ctx ty =
-    if
-      (not is_xhp_attr)
-      && is_enforceable ~return_from_async:false ~this_class ctx ty
-    then
-      ty
-    else
-      make_like_type ~reason ~intersect_with:None ~return_from_async:false ty
-
   let implicit_sdt_for_class ctx this_class =
     implicit_sdt_for_class (Provider.get_tcopt ctx) this_class
 
-  let maybe_pessimise_type
-      ~reason
+  let pessimise_prop_type
       ~is_xhp_attr
       ~(this_class : Shallow_decl_defs.shallow_class option)
+      ~no_auto_likes
       (ctx : ctx)
+      p
       ty =
-    if implicit_sdt_for_class ctx this_class then
-      pessimise_type ~reason ~is_xhp_attr ~this_class ctx ty
+    let do_pessimise =
+      implicit_sdt_for_class ctx this_class
+      && (not no_auto_likes)
+      && (is_xhp_attr
+         || not (is_enforceable ~return_from_async:false ~this_class ctx ty))
+    in
+    if do_pessimise then
+      make_like_type
+        ~reason:(Typing_reason.pessimised_prop p)
+        ~intersect_with:None
+        ~return_from_async:false
+        ty
     else
       ty
 

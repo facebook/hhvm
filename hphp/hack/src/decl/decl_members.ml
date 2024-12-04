@@ -24,15 +24,13 @@ module Make (Provider : Decl_enforceability.ShallowProvider) = struct
     let no_auto_likes =
       Shallow_decl_defs.PropFlags.get_no_auto_likes sp_flags
     in
-    if no_auto_likes then
+    Pessimize.pessimise_prop_type
+      ~is_xhp_attr
+      ~this_class
+      ~no_auto_likes
+      ctx
+      (Typing_defs.get_pos sp_type)
       sp_type
-    else
-      Pessimize.maybe_pessimise_type
-        ~reason:(Typing_reason.pessimised_prop (Typing_defs.get_pos sp_type))
-        ~is_xhp_attr
-        ~this_class
-        ctx
-        sp_type
 
   let build_constructor
       ({

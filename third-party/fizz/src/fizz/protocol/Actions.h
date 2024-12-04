@@ -31,9 +31,8 @@ struct DeliverAppData {
 
 /**
  * Raw data that must be written to the transport.
- * callback: The callback that should be invoked after the write has finished.
- *           This is usually when the kernel has accepted the buffer in the
- *           case of TCP.
+ * token:    An opaque handle passed through the state machine to the IO layer,
+ *           which defines and manages its specific use.
  * contents: The TLS records that need to be written. Each TLSContent object
  *           can represent several TLS records at a certain encryption level /
  *           content type.

@@ -57,6 +57,7 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     Map__i64_List__string,
 )
 
+_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(

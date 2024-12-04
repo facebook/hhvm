@@ -116,6 +116,14 @@ class MapTests(unittest.TestCase):
             StrStrIntListMapMap(px)
         self.assertNotIn("bar", cx)
 
+    # in thrift-python, these are MapTypeFactory
+    @brokenInAutoMigrate()
+    def test_module_name(self) -> None:
+        self.assertEqual(StrI32ListMap.__module__, "testing.types")
+        self.assertEqual(StrIntMap.__module__, "testing.types")
+        self.assertEqual(StrStrIntListMapMap.__module__, "testing.types")
+        self.assertEqual(StrStrMap.__module__, "testing.types")
+
     def test_hashability(self) -> None:
         hash(StrI32ListMap())
         x = StrStrIntListMapMap({"foo": StrI32ListMap()})

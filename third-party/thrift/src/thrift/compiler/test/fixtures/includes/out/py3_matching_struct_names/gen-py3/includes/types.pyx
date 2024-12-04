@@ -55,6 +55,7 @@ import transitive.types as _transitive_types
 import includes.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "includes.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -63,6 +64,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class Included(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Included self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_includes_cbindings.cIncluded]()
         self._fields_setter = _fbthrift_types_fields.__Included_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

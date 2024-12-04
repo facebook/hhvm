@@ -88,6 +88,15 @@ class UnionTests(unittest.TestCase):
         x = deserialize(Integers, b"{}", Protocol.JSON)
         self.assertEqual(x.type, Integers.Type.EMPTY)
 
+    def test_union_module_name(self) -> None:
+        variant_prefix = "thrift_" if is_auto_migrated() else ""
+        expected = f"testing.{variant_prefix}types"
+
+        self.assertEqual(Integers.__module__, expected)
+        self.assertEqual(Integers().__class__.__module__, expected)
+        self.assertEqual(ComplexUnion.__module__, expected)
+        self.assertEqual(ComplexUnion().__class__.__module__, expected)
+
     @brokenInAutoMigrate()
     def test_union_usage(self) -> None:
         value = hash("i64")

@@ -53,6 +53,7 @@ import importlib
 import foo.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "foo.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -61,6 +62,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class Fields(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Fields self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_foo_cbindings.cFields]()
         self._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

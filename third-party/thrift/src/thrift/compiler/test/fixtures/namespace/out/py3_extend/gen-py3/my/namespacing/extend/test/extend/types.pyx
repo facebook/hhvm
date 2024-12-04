@@ -55,6 +55,7 @@ import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 import my.namespacing.extend.test.extend.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "my.namespacing.extend.test.extend.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(

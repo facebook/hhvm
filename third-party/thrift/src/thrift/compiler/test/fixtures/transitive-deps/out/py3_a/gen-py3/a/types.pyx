@@ -61,6 +61,7 @@ from a.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__List__c_C,
 )
 
+_fbthrift__module_name__ = "a.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -69,6 +70,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class A(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(A self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_a_cbindings.cA]()
         self._fields_setter = _fbthrift_types_fields.__A_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

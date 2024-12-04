@@ -55,6 +55,7 @@ import foo.types as _foo_types
 import module.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -63,6 +64,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class Fields(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Fields self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFields]()
         self._fields_setter = _fbthrift_types_fields.__Fields_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -176,6 +179,8 @@ cdef class Fields(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(FieldsInjectedToEmptyStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFieldsInjectedToEmptyStruct]()
         self._fields_setter = _fbthrift_types_fields.__FieldsInjectedToEmptyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -289,6 +294,8 @@ cdef class FieldsInjectedToEmptyStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(FieldsInjectedToStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFieldsInjectedToStruct]()
         self._fields_setter = _fbthrift_types_fields.__FieldsInjectedToStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -410,6 +417,8 @@ cdef class FieldsInjectedToStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class FieldsInjectedWithIncludedStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(FieldsInjectedWithIncludedStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFieldsInjectedWithIncludedStruct]()
         self._fields_setter = _fbthrift_types_fields.__FieldsInjectedWithIncludedStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

@@ -61,6 +61,7 @@ from matching_struct_names.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__List__module_MyStruct,
 )
 
+_fbthrift__module_name__ = "matching_struct_names.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -69,6 +70,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(MyStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_matching_struct_names_cbindings.cMyStruct]()
         self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -182,6 +185,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Combo(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Combo self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_matching_struct_names_cbindings.cCombo]()
         self._fields_setter = _fbthrift_types_fields.__Combo_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

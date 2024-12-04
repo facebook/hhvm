@@ -53,6 +53,7 @@ import importlib
 import module.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -61,6 +62,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class Fiery(thrift.py3.exceptions.GeneratedError):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Fiery self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cFiery]()
         self._fields_setter = _fbthrift_types_fields.__Fiery_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -168,6 +171,8 @@ cdef class Fiery(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class Serious(thrift.py3.exceptions.GeneratedError):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Serious self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cSerious]()
         self._fields_setter = _fbthrift_types_fields.__Serious_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -277,6 +282,8 @@ cdef class Serious(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ComplexFieldNames self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cComplexFieldNames]()
         self._fields_setter = _fbthrift_types_fields.__ComplexFieldNames_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -392,6 +399,8 @@ cdef class ComplexFieldNames(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
+    __module__ = _fbthrift__module_name__
+
     def __init__(CustomFieldNames self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cCustomFieldNames]()
         self._fields_setter = _fbthrift_types_fields.__CustomFieldNames_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -507,6 +516,8 @@ cdef class CustomFieldNames(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ExceptionWithPrimitiveField self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cExceptionWithPrimitiveField]()
         self._fields_setter = _fbthrift_types_fields.__ExceptionWithPrimitiveField_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -622,6 +633,8 @@ cdef class ExceptionWithPrimitiveField(thrift.py3.exceptions.GeneratedError):
 
 @__cython.auto_pickle(False)
 cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedError):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ExceptionWithStructuredAnnotation self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cExceptionWithStructuredAnnotation]()
         self._fields_setter = _fbthrift_types_fields.__ExceptionWithStructuredAnnotation_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -737,6 +750,8 @@ cdef class ExceptionWithStructuredAnnotation(thrift.py3.exceptions.GeneratedErro
 
 @__cython.auto_pickle(False)
 cdef class Banal(thrift.py3.exceptions.GeneratedError):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Banal self, *args, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cBanal]()
         self._fields_setter = _fbthrift_types_fields.__Banal_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

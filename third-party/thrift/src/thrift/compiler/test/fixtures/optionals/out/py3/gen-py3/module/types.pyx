@@ -61,6 +61,7 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     List__Vehicle,
 )
 
+_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -69,6 +70,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class Color(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Color self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cColor]()
         self._fields_setter = _fbthrift_types_fields.__Color_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -206,6 +209,8 @@ cdef class Color(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Vehicle(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Vehicle self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cVehicle]()
         self._fields_setter = _fbthrift_types_fields.__Vehicle_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -359,6 +364,8 @@ cdef class Vehicle(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Person(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Person self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cPerson]()
         self._fields_setter = _fbthrift_types_fields.__Person_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

@@ -42,6 +42,8 @@ EnumMeta = _fbthrift_python_EnumMeta
 __all__ = ['Struct', 'BadEnum', 'Union', 'Enum', 'Flag', 'EnumMeta']
 
 
+_fbthrift__module_name__ = "thrift.py3.types"
+
 # This isn't exposed to the module dict
 Object = cython.fused_type(Struct, GeneratedError)
 
@@ -95,6 +97,11 @@ cdef class StructMeta(type):
             # Unify different exception types to ValueError
             raise ValueError(e)
 
+    # make the __module__ customizable
+    # this just enables the slot; impl here is ignored
+    def __module__(cls):
+        pass
+
     def __iter__(cls):
         for i in range(cls._fbthrift_get_struct_size()):
             yield cls._fbthrift_get_field_name_by_index(i), None
@@ -146,6 +153,8 @@ cdef class Struct:
     """
     Base class for all thrift structs
     """
+    __module__ = _fbthrift__module_name__
+
     cdef IOBuf _fbthrift_serialize(self, Protocol proto):
         return IOBuf(b'')
 
@@ -237,6 +246,8 @@ cdef class Union(Struct):
     """
     Base class for all thrift Unions
     """
+    __module__ = _fbthrift__module_name__
+
     cdef bint _fbthrift_noncomparable_eq(self, other):
         return self.type == other.type and self.value == other.value
 
@@ -272,6 +283,11 @@ cdef class UnionMeta(type):
             cls._fbthrift_get_field_name_by_index(i)
             for i in range(cls._fbthrift_get_struct_size())
         ] + ["type", "value"]
+
+    # make the __module__ customizeable
+    # this just enables the slot; impl here is ignored
+    def __module__(cls):
+        pass
 
 
 SetMetaClass(<PyTypeObject*> Union, <PyTypeObject*> UnionMeta)

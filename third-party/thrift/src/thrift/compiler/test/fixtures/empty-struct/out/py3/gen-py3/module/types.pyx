@@ -56,6 +56,7 @@ from module.types_impl_FBTHRIFT_ONLY_DO_NOT_USE import (
 )
 
 
+_fbthrift__module_name__ = "module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -64,6 +65,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class Empty(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Empty self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cEmpty]()
         self._fields_setter = _fbthrift_types_fields.__Empty_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -164,6 +167,7 @@ cdef class Empty(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Nada(thrift.py3.types.Union):
+    __module__ = _fbthrift__module_name__
     Type = __NadaType
 
     def __init__(

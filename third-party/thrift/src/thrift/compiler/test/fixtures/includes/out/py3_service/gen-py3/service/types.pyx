@@ -59,6 +59,7 @@ import transitive.types as _transitive_types
 import service.thrift_types as _fbthrift_python_types
 
 
+_fbthrift__module_name__ = "service.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(

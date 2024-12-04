@@ -83,6 +83,7 @@ from apache.thrift.fixtures.types.module.containers_FBTHRIFT_ONLY_DO_NOT_USE imp
     Map__i32_i32,
 )
 
+_fbthrift__module_name__ = "apache.thrift.fixtures.types.module.types"
 
 cdef object get_types_reflection():
     return importlib.import_module(
@@ -91,6 +92,8 @@ cdef object get_types_reflection():
 
 @__cython.auto_pickle(False)
 cdef class empty_struct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(empty_struct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cempty_struct]()
         self._fields_setter = _fbthrift_types_fields.__empty_struct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -189,6 +192,8 @@ cdef class empty_struct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class decorated_struct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(decorated_struct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cdecorated_struct]()
         self._fields_setter = _fbthrift_types_fields.__decorated_struct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -302,6 +307,8 @@ cdef class decorated_struct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class ContainerStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ContainerStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cContainerStruct]()
         self._fields_setter = _fbthrift_types_fields.__ContainerStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -487,6 +494,8 @@ cdef class ContainerStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class CppTypeStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(CppTypeStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cCppTypeStruct]()
         self._fields_setter = _fbthrift_types_fields.__CppTypeStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -602,6 +611,8 @@ cdef class CppTypeStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class VirtualStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(VirtualStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cVirtualStruct]()
         self._fields_setter = _fbthrift_types_fields.__VirtualStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -715,6 +726,8 @@ cdef class VirtualStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(MyStructWithForwardRefEnum self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cMyStructWithForwardRefEnum]()
         self._fields_setter = _fbthrift_types_fields.__MyStructWithForwardRefEnum_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -840,6 +853,8 @@ cdef class MyStructWithForwardRefEnum(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class TrivialNumeric(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(TrivialNumeric self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cTrivialNumeric]()
         self._fields_setter = _fbthrift_types_fields.__TrivialNumeric_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -961,6 +976,8 @@ cdef class TrivialNumeric(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class TrivialNestedWithDefault(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(TrivialNestedWithDefault self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cTrivialNestedWithDefault]()
         self._fields_setter = _fbthrift_types_fields.__TrivialNestedWithDefault_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1084,6 +1101,8 @@ cdef class TrivialNestedWithDefault(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class ComplexString(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ComplexString self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cComplexString]()
         self._fields_setter = _fbthrift_types_fields.__ComplexString_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1207,6 +1226,8 @@ cdef class ComplexString(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class ComplexNestedWithDefault(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ComplexNestedWithDefault self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cComplexNestedWithDefault]()
         self._fields_setter = _fbthrift_types_fields.__ComplexNestedWithDefault_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1330,6 +1351,8 @@ cdef class ComplexNestedWithDefault(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MinPadding(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(MinPadding self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cMinPadding]()
         self._fields_setter = _fbthrift_types_fields.__MinPadding_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1475,6 +1498,8 @@ cdef class MinPadding(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(MinPaddingWithCustomType self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cMinPaddingWithCustomType]()
         self._fields_setter = _fbthrift_types_fields.__MinPaddingWithCustomType_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1615,6 +1640,8 @@ cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(MyStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cMyStruct]()
         self._fields_setter = _fbthrift_types_fields.__MyStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1749,6 +1776,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class MyDataItem(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(MyDataItem self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cMyDataItem]()
         self._fields_setter = _fbthrift_types_fields.__MyDataItem_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1842,6 +1871,8 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class Renaming(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(Renaming self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cRenaming]()
         self._fields_setter = _fbthrift_types_fields.__Renaming_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -1955,6 +1986,8 @@ cdef class Renaming(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class AnnotatedTypes(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(AnnotatedTypes self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cAnnotatedTypes]()
         self._fields_setter = _fbthrift_types_fields.__AnnotatedTypes_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2078,6 +2111,8 @@ cdef class AnnotatedTypes(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class ForwardUsageRoot(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ForwardUsageRoot self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageRoot]()
         self._fields_setter = _fbthrift_types_fields.__ForwardUsageRoot_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2206,6 +2241,8 @@ cdef class ForwardUsageRoot(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class ForwardUsageStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ForwardUsageStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageStruct]()
         self._fields_setter = _fbthrift_types_fields.__ForwardUsageStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2322,6 +2359,8 @@ cdef class ForwardUsageStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class ForwardUsageByRef(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(ForwardUsageByRef self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cForwardUsageByRef]()
         self._fields_setter = _fbthrift_types_fields.__ForwardUsageByRef_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2438,6 +2477,8 @@ cdef class ForwardUsageByRef(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class IncompleteMap(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(IncompleteMap self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMap]()
         self._fields_setter = _fbthrift_types_fields.__IncompleteMap_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2555,6 +2596,8 @@ cdef class IncompleteMap(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class IncompleteMapDep(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(IncompleteMapDep self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cIncompleteMapDep]()
         self._fields_setter = _fbthrift_types_fields.__IncompleteMapDep_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2653,6 +2696,8 @@ cdef class IncompleteMapDep(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class CompleteMap(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(CompleteMap self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cCompleteMap]()
         self._fields_setter = _fbthrift_types_fields.__CompleteMap_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2770,6 +2815,8 @@ cdef class CompleteMap(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class CompleteMapDep(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(CompleteMapDep self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cCompleteMapDep]()
         self._fields_setter = _fbthrift_types_fields.__CompleteMapDep_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2868,6 +2915,8 @@ cdef class CompleteMapDep(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class IncompleteList(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(IncompleteList self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cIncompleteList]()
         self._fields_setter = _fbthrift_types_fields.__IncompleteList_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -2985,6 +3034,8 @@ cdef class IncompleteList(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class IncompleteListDep(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(IncompleteListDep self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cIncompleteListDep]()
         self._fields_setter = _fbthrift_types_fields.__IncompleteListDep_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3083,6 +3134,8 @@ cdef class IncompleteListDep(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class CompleteList(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(CompleteList self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cCompleteList]()
         self._fields_setter = _fbthrift_types_fields.__CompleteList_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3200,6 +3253,8 @@ cdef class CompleteList(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class CompleteListDep(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(CompleteListDep self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cCompleteListDep]()
         self._fields_setter = _fbthrift_types_fields.__CompleteListDep_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3298,6 +3353,8 @@ cdef class CompleteListDep(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class AdaptedList(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(AdaptedList self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cAdaptedList]()
         self._fields_setter = _fbthrift_types_fields.__AdaptedList_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3415,6 +3472,8 @@ cdef class AdaptedList(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class DependentAdaptedList(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(DependentAdaptedList self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cDependentAdaptedList]()
         self._fields_setter = _fbthrift_types_fields.__DependentAdaptedList_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3532,6 +3591,8 @@ cdef class DependentAdaptedList(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class AllocatorAware(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(AllocatorAware self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware]()
         self._fields_setter = _fbthrift_types_fields.__AllocatorAware_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3705,6 +3766,8 @@ cdef class AllocatorAware(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class AllocatorAware2(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(AllocatorAware2 self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cAllocatorAware2]()
         self._fields_setter = _fbthrift_types_fields.__AllocatorAware2_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3828,6 +3891,8 @@ cdef class AllocatorAware2(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class TypedefStruct(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(TypedefStruct self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cTypedefStruct]()
         self._fields_setter = _fbthrift_types_fields.__TypedefStruct_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())
@@ -3957,6 +4022,8 @@ cdef class TypedefStruct(thrift.py3.types.Struct):
 
 @__cython.auto_pickle(False)
 cdef class StructWithDoubleUnderscores(thrift.py3.types.Struct):
+    __module__ = _fbthrift__module_name__
+
     def __init__(StructWithDoubleUnderscores self, **kwargs):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_apache_thrift_fixtures_types_module_cbindings.cStructWithDoubleUnderscores]()
         self._fields_setter = _fbthrift_types_fields.__StructWithDoubleUnderscores_FieldsSetter._fbthrift_create(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get())

@@ -34,7 +34,6 @@
 #include <thrift/compiler/generate/mstch_objects.h>
 #include <thrift/compiler/generate/python/util.h>
 #include <thrift/compiler/generate/t_mstch_generator.h>
-#include <thrift/compiler/sema/explicit_include_validator.h>
 
 namespace apache::thrift::compiler {
 
@@ -671,19 +670,6 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
     }
     set_mstch_factories();
     generate_types();
-  }
-
-  void fill_validator_visitors(ast_validator& validator) const override {
-    validator.add_field_visitor([](sema_context& ctx, const t_field& f) {
-      if (f.is_injected()) {
-        return;
-      }
-      validate_explicit_include(ctx, f, *f.get_type(), diagnostic_level::error);
-    });
-    validator.add_typedef_visitor([](sema_context& ctx, const t_typedef& td) {
-      validate_explicit_include(
-          ctx, td, *td.get_type(), diagnostic_level::error);
-    });
   }
 
  protected:

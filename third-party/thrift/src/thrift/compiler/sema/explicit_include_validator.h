@@ -21,10 +21,6 @@
 
 namespace apache::thrift::compiler {
 
-class sema_context;
-class t_named;
-class t_type;
-
 inline constexpr std::string_view implicit_include_rule_name =
     "implicit-include";
 
@@ -41,15 +37,8 @@ inline constexpr std::string_view implicit_include_rule_name =
  * benefit.
  */
 
-void validate_explicit_include(
-    sema_context& ctx,
-    const t_named& src,
-    const t_type& type,
-    diagnostic_level level);
-
 void add_explicit_include_validators(
     ast_validator& validator,
-    diagnostic_level level = diagnostic_level::warning,
     bool skip_annotations = false,
     bool skip_service_extends = false);
 

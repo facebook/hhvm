@@ -2021,7 +2021,7 @@ TEST(CompilerTest, warn_on_non_explicit_includes) {
   )";
 
   name_contents_map["path/to/transitive_struct_field.thrift"] = R"(
-    # expected-warning@3#original[]#replacement[include "path/to/upstream.thrift"\n]@5: Your thrift file depends on a type that it did not include. Please add the following include. [implicit-include]
+    # expected-error@3#original[]#replacement[include "path/to/upstream.thrift"\n]@5: Your thrift file depends on a type that it did not include. Please add the following include. [implicit-include]
     include "path/to/direct.thrift"
 
     struct A {

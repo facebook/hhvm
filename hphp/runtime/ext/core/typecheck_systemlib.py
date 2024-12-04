@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# pyre-unsafe
+
 # Gather all of the relevant files from buck file groups and execute
 # `hh_single_type_check` with the correct flags
 

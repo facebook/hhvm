@@ -1,5 +1,7 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
+# pyre-unsafe
+
 """The main module you load in your .lldbinit."""
 
 import sys

@@ -1,3 +1,4 @@
+# pyre-unsafe
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hphp.tools.lldb.sizeof as sizeof
 import hphp.tools.lldb.utils as utils

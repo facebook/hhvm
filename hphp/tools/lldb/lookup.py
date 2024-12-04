@@ -1,3 +1,4 @@
+# pyre-unsafe
 import shlex
 import typing
 

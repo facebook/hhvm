@@ -1,3 +1,4 @@
+# pyre-unsafe
 """
 LLDB command for extracting various information from cores
 """

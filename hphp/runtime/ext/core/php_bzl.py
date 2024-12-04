@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+# pyre-unsafe
+
 # Utility to generate or verify `php.bzl` from `php.txt`
 
 import os.path

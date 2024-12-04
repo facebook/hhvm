@@ -1,3 +1,4 @@
+# pyre-unsafe
 """
 Set the target Unit; used implicitly by some other commands.
 """

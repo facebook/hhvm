@@ -1,3 +1,4 @@
+# pyre-unsafe
 import re
 
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)

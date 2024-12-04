@@ -1,5 +1,7 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
+# pyre-unsafe
+
 """Pretty printers for HPHP types"""
 
 import re

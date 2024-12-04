@@ -1,5 +1,7 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
+# pyre-unsafe
+
 from . import base  # usort: skip (must be first, needed for sys.path side-effects)
 import hphp.tools.lldb.hhbc as hhbc
 import hphp.tools.lldb.utils as utils

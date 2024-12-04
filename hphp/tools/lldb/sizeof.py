@@ -1,3 +1,4 @@
+# pyre-unsafe
 """
 LLDB command for printing the sizes of various containers.
 """

@@ -1,5 +1,7 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
+# pyre-unsafe
+
 import os
 import pathlib
 import subprocess

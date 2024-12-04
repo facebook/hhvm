@@ -1083,25 +1083,6 @@ void THeader::setServiceTraceMeta(const std::string& serviceTraceMeta) {
   c_.serviceTraceMeta_ = serviceTraceMeta;
 }
 
-static constexpr folly::StringPiece TRANSFORMS_STRING_LIST[] = {
-    folly::StringPiece("none"),
-    folly::StringPiece("zlib"),
-    folly::StringPiece("hmac"),
-    folly::StringPiece("snappy"),
-    folly::StringPiece("qlz"),
-    folly::StringPiece("zstd"),
-};
-
-const folly::StringPiece THeader::getStringTransform(
-    const TRANSFORMS transform) {
-  constexpr const std::size_t num_string_transforms =
-      sizeof(TRANSFORMS_STRING_LIST) / sizeof(folly::StringPiece);
-  static_assert(
-      num_string_transforms == THeader::TRANSFORMS::TRANSFORM_LAST_FIELD,
-      "TRANSFORMS enum and TRANSFORMS_STRING_LIST mismatch");
-  return TRANSFORMS_STRING_LIST[transform];
-}
-
 void THeader::setClientMetadata(const ClientMetadata& clientMetadata) {
   ensureWriteHeaders()[std::string{CLIENT_METADATA_HEADER}] =
       apache::thrift::SimpleJSONSerializer::serialize<std::string>(

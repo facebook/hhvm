@@ -81,12 +81,6 @@ TEST(THeaderTest, http_clear_header) {
   EXPECT_TRUE(header.isWriteHeadersEmpty());
 }
 
-TEST(THeaderTest, transform) {
-  // Simple test for TRANSFORMS enum to string conversion
-  EXPECT_EQ(
-      THeader::getStringTransform(THeader::TRANSFORMS::ZLIB_TRANSFORM), "zlib");
-}
-
 TEST(THeaderTest, eraseReadHeader) {
   THeader header;
   header.setReadHeaders({{"foo", "v"}, {"bar", "v"}, {"moo", "v"}});

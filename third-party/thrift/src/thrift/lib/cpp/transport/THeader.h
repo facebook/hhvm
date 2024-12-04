@@ -326,15 +326,12 @@ class THeader final {
   void setSequenceNumber(uint32_t sid) { c_.seqId_ = sid; }
 
   enum TRANSFORMS {
-    NONE = 0x00,
-    ZLIB_TRANSFORM = 0x01,
+    NONE = folly::to_underlying(TTransform::NONE),
+    ZLIB_TRANSFORM = folly::to_underlying(TTransform::ZLIB),
     // HMAC_TRANSFORM = 0x02, Deprecated and no longer supported
     // SNAPPY_TRANSFORM = 0x03, Deprecated and no longer supported
     // QLZ_TRANSFORM = 0x04, Deprecated and no longer supported
-    ZSTD_TRANSFORM = 0x05,
-
-    // DO NOT USE. Sentinel value for enum count. Always keep as last value.
-    TRANSFORM_LAST_FIELD = 0x06,
+    ZSTD_TRANSFORM = folly::to_underlying(TTransform::ZSTD),
   };
   [[deprecated("Use apache::thrift::TTransform instead")]]
 
@@ -435,10 +432,6 @@ class THeader final {
   void setClientId(const std::string& clientId);
   void setTenantId(const std::string& tenantId);
   void setServiceTraceMeta(const std::string& serviceTraceMeta);
-
-  // Utility method for converting TRANSFORMS enum to string
-  static const folly::StringPiece getStringTransform(
-      const TRANSFORMS transform);
 
   static CLIENT_TYPE tryGetClientType(const folly::IOBuf& data);
 

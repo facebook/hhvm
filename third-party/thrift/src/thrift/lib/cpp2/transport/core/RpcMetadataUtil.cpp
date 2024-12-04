@@ -225,38 +225,4 @@ ErrorClassification deserializeErrorClassification(std::string_view str) {
   return CompactSerializer::deserialize<ErrorClassification>(buf.get());
 }
 
-// Make these in sync with thrift/lib/thrift/RpcMetadata.thrift
-folly::Optional<std::string> errorKindToString(ErrorKind kind) {
-  switch (kind) {
-    case ErrorKind::TRANSIENT:
-      return std::string("TRANSIENT");
-    case ErrorKind::STATEFUL:
-      return std::string("STATEFUL");
-    case ErrorKind::PERMANENT:
-      return std::string("PERMANENT");
-    default:
-      return folly::none;
-  }
-}
-
-folly::Optional<std::string> errorBlameToString(ErrorBlame blame) {
-  switch (blame) {
-    case ErrorBlame::SERVER:
-      return std::string("SERVER");
-    case ErrorBlame::CLIENT:
-      return std::string("CLIENT");
-    default:
-      return folly::none;
-  }
-}
-
-folly::Optional<std::string> errorSafetyToString(ErrorSafety safety) {
-  switch (safety) {
-    case ErrorSafety::SAFE:
-      return std::string("SAFE");
-    default:
-      return folly::none;
-  }
-}
-
 } // namespace apache::thrift::detail

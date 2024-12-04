@@ -19,11 +19,11 @@ export const Example = (props) => {
   return <Collapse {...rest} title={title} open={true} />
 }
 
-Whisker is a **templating language** with a canonical implementation in C++. It is heavily inspired by [Mustache](https://mustache.github.io/mustache.5.html), [Handlebars](https://handlebarsjs.com/), and [EmberJS templates](https://emberjs.com/) (each of which is an extension of the previous).
+Whisker is a **templating language** with a canonical implementation in C++. It draws inspiration from [Mustache](https://mustache.github.io/mustache.5.html), [Handlebars](https://handlebarsjs.com/), and [EmberJS templates](https://emberjs.com/), building upon the strengths of each.
 
-Within Thrift, Whisker is heavily used within the compiler's backend infrastructure for generating code in many target languages, including C++, Python, Rust, and Go.
+Within the Thrift ecosystem, Whisker plays a crucial role in the compiler's backend infrastructur. It is utilized for generating code in multiple target languages, including C++, Python, Rust, and Go.
 
-Whisker was built to replace the open-source library, [`mstch`](https://github.com/no1msd/mstch), which did not scale to meet the needs of Thrift.
+Whisker was developed to replace the open-source library, [`mstch`](https://github.com/no1msd/mstch), which did not scale to meet the needs of Thrift.
 
 ## Basics
 
@@ -34,8 +34,9 @@ std::string render(
   context variables
 );
 ```
+This function takes in a Whisker template source as a string, a *context* (variables) object, and returns the rendered output.
 
-A typical Whisker template might be:
+A typical Whisker template:
 ```handlebars
 Hello {{name}}
 You have just won {{value}} dollars!
@@ -44,7 +45,7 @@ Well, {{taxed_value}} dollars, after taxes.
 {{/if}}
 ```
 
-Given the following input:
+With the following input context:
 ```json title=Context
 {
   "name": "Chris",
@@ -54,18 +55,18 @@ Given the following input:
 }
 ```
 
-Will produce the following text:
-```
+Produces the output:
+```text
 Hello Chris,
 You have just won 10000 dollars!
 Well, 6000 dollars, after taxes.
 ```
 
-Whisker's templating syntax is a mix of raw text and *templates* (denoted by `{{` and `}}`). The formal grammar is covered below.
+Whisker's templating syntax combines raw text and *templates* (denoted by `{{` and `}}`). The formal grammar is detailed below.
 
 ## Grammar Syntax
 
-The grammar of the templating language is described with [PEG](https://en.wikipedia.org/wiki/Parsing_expression_grammar)-like production rules, closely resembling the syntax of [Pest](https://pest.rs/).
+The grammar of the templating language is described with [PEG](https://en.wikipedia.org/wiki/Parsing_expression_grammar)-like production rules, similar to [Pest](https://pest.rs/).
 
 Production rules are of the form:
 ```
@@ -73,26 +74,26 @@ rule → { <term> <op> <term> ... }
 ```
 
 `<term>` represents other rules. `<op>` represents a combinator of rules.
-The supported set of combinators are:
 
-* `a ~ b` — exactly one a followed by exactly one b.
-* `a*` — zero or more repetitions of a.
-* `a+` — one or more repetitions of a.
-* `a?` — exactly zero or one repetition of a.
-* `!a` — assert that there is no match to a (without consuming input).
-* `a | b` — exactly one a or one b (a matches first)
+The supported set of combinators are:
+* `a ~ b` — exactly one *a* followed by exactly one *b*.
+* `a*` — zero or more repetitions of *a*.
+* `a+` — one or more repetitions of *a*.
+* `a?` — exactly zero or one repetition of *a*.
+* `!a` — assert that there is no match to *a* (without consuming input).
+* `a | b` — exactly one *a* or one *b* (*a* matches first)
 * `(a <op> b)` — parentheses to disambiguate groups of rules and combinators.
 
 ## Text & Template
 
-A Whisker source file is a repeated pattern of *textual content* and *template* placeholders.
+A Whisker source file is a repeated pattern of textual content and *template* placeholders.
 
 `text` is a sequence of unicode characters except `newline`s and `{{`, which denotes the opening of a `template` (or `comment`).
 
-`newline` is either `"\n"`, `"\r"` or `"\r\n"`.
+`newline` is either `"\r"`, `"\n"`, or `"\r\n"`.
 
 :::note
-To interpret `{{` as `text`, the escape sequence, `\{{`, can be used.
+To interpret `{{` as literal text, use the escape sequence `\{{`.
 :::
 
 <Grammar>
@@ -109,9 +110,8 @@ comment  → { <see below> }
 
 ## Comments
 
-Comments in Whisker are omitted from the produced output.
+Comments are ignored during rendering and do not appear in the output. Whisker supports two types of comments:
 
-There are two types of comments:
 ```handlebars
 {{! This is a comment }}
 {{!-- This is a comment that is allowed to contain "}}" --}}
@@ -130,17 +130,17 @@ escaped-comment → { "{{!--" ~ <raw text until we see "--}}"> ~ "--}}" }
 
 ## Templates
 
-A `template` is the basic building block for expressing variability in the produced output of a Whisker template.
+A `template` is the fundamental building block for expressing variability in the output produced by a Whisker template.
 
 There are four categories of `template`s:
 * ***Expressions*** — `{{foo}}` — *interpolate* a value from the *context* into the rendered output.
-* ***Blocks*** — `{{#foo}} ... {{/foo}}` — *control flow* capabilities like conditionals (`{{#if}}`), or loops (`{{#each}}`) etc.
+* ***Blocks*** — `{{#foo}} ... {{/foo}}` — *control flow* capabilities like conditionals ([`{{#if}}`](#if-blocks)), or loops ([`{{#each}}`](#each-blocks)) etc.
   * All blocks open with an `{{# ...}}` tag.
   * All blocks close with a corresponding `{{/ ...}}` tag.
-  * All blocks contain zero or more `body` elements inside them.
-* ***Statements*** — `{{#foo}}` — language features that are not rendered into the output like name bindings (`{{#let}}`), `{{#else}}` etc.
+  * All blocks contain zero or more body elements inside them.
+* ***Statements*** — `{{#foo}}` — non-rendering operations like name bindings ([`{{#let}}`](#let-statements)), `{{#else}}` etc.
   * All statements are of the form `{{# ...}}`. Unlike blocks, there is no closing tag.
-* [***Partial Application***](#partial-applications) — `{{> foo}}` — subtitute a different Whisker source body into the output.
+* [***Partial Application***](#partial-applications) — `{{> foo}}` — for reusable templates.
 
 <Grammar>
 
@@ -160,19 +160,19 @@ partial-apply → { <see below> }
 An `expression` represents an *interpolation*. That is, the result of an `expression` is rendered into the output at the position of the enclosing `{{ ... }}`.
 
 There are three types of `expression`s in Whisker:
-* ***Literal*** — values "hard-coded" into the template, like the string literal, `{{ "hello" }}`.
-  * `string-literal` — a "C-style" string literal, which is wrapped by `"..."`. A subset of [escape sequences from C](https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences) are supported: `\n`, `\r`, `\t`, `\\`, `\'`, and `\"`. Examples:
+* ***Literal*** — "hard-coded" values in the template, like the string literal, `{{ "hello" }}`.
+  * `string-literal` — a "C-style" string literal, enclosed in double quotes (`"..."`). Whisker supports a subset of [escape sequences from C](https://en.wikipedia.org/wiki/Escape_sequences_in_C#Table_of_escape_sequences): `\n`, `\r`, `\t`, `\\`, `\'`, and `\"`. Examples:
     * `"hello\nworld"`.
     * `"\"quoted\""`
-  * `i64-literal` —  a "C-style" *decimal* integer literal, possibly with a leading `-` for non-positive numbers. The value must be representable by a 64-bit two's complement signed integer: <code>-2<sup>63</sup> ≤ value < 2<sup>63</sup></code>. Examples:
+  * `i64-literal` —  a *decimal* integer literal with an optional leading `-` for negative values. The value must be representable by a 64-bit two's complement signed integer: <code>-2<sup>63</sup> ≤ value < 2<sup>63</sup></code>. Examples:
     * `-742`
     * `0`
     * `124`
-  * `boolean-literal` — *exactly* `true` or `false`.
+  * `boolean-literal` — either `true` or `false`.
   * `null-literal` — *exactly* `null`.
-* ***Variable*** — values to be interpolated from the provided *context*, like `{{ person.name }}`. Such an interpolation is a series of *identifiers* delimited with `.`, representing scoped access into the *context*.
-  * In addition, the special *implicit context* variable, `{{ . }}`, can be used to refer to the *context* object itself.
-* ***Function call*** — A [lisp-like](https://en.wikipedia.org/wiki/Lisp_(programming_language)#Syntax_and_semantics) function invocation syntax, often also called [S-expressions](https://en.wikipedia.org/wiki/S-expression). The section on the [*data model*](#data-model) describes the semantics of a function call. Examples:
+* ***Variable*** — values interpolated from the *context*, like `{{ person.name }}`. Variables allow scoped access into the context using a series of *identifiers* separated by dots (`.`).
+  * Additionally, the special *implicit context* variable, `{{ . }}`, refers to the *context* object itself.
+* ***Function call*** — [lisp-like](https://en.wikipedia.org/wiki/Lisp_(programming_language)#Syntax_and_semantics) syntax for invoking functions, often referred to as [S-expressions](https://en.wikipedia.org/wiki/S-expression). Functions are defined in the [*data model*](#data-model). Examples:
   * `{{ (uppercase "hello") }}`
   * `{{ (concat (uppercase person.firstName) " " (uppercase person.lastName)) }}`
 
@@ -184,7 +184,7 @@ Function call expressions have not been implemented yet.
 Whisker includes a set of *keywords* that are reserved. These cannot be used as identifiers. See the grammar below.
 :::
 
-Every `expression` produces an `object`. However, not all `object`s are *printable*. The top-level `expression` in a `template` **must** be *printable*. `expression`s passed as arguments in a function call do **not** need be *printable*. The section on the [*data model*](#data-model) elaborates further.
+Every `expression` produces an `object`. However, not all `object`s are *printable*. The top-level `expression` in a `template` **must** be *printable*. `expression`s passed as arguments in a function call do **not** need be *printable*. See the [*data model*](#data-model) for details.
 
 <Grammar>
 
@@ -234,7 +234,7 @@ function-lookup → { variable | "and" | "or" | "not" }
 
 ### If Blocks
 
-Whisker supports a conditional block type: `{{#if}}`. A typical conditional block might be:
+Whisker supports a conditionally rendering block type: `{{#if}}`. A typical conditional block might look like:
 
 ```handlebars
 {{#if person.hasName}}
@@ -244,11 +244,9 @@ I don't know who you are.
 {{/if}}
 ```
 
-In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean`. If the value is `true`, then the conditional `body` is rendered.
+`{{#if}}` blocks can **optionally** include one `{{#else}}` statement. When omitted, the behavior matches an `{{#else}}` with an empty body.
 
-`{{#if}}` blocks may **optionally** have one `{{#else}}` statement.
-If the `expression` value is `true`, then the `body` preceding the `{{#else}}` is rendered.
-If the `expression` value is `false`, then the `body` following the `{{#else}}` is rendered.
+In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean`. If its value is `true`, then the body before the `{{#else}}` is rendered. Otherwise, the body after the `{{#else}}` is rendered.
 
 <Example title="Example (positive)">
 
@@ -284,13 +282,13 @@ I don't know who you are.
 </Example>
 
 :::note
-`{{#unless}}` blocks have the same behavior as `{{#if}}` except that its *condition* is negated. This block is **deprecated** since the behavior can be replicated with `{{#if}}` in conjunction with the `not` function.
+`{{#unless}}` blocks are functionally equivalent to `{{#if}}` with a negated condition. However, they are **deprecated** as their behavior can be replicated using `{{#if}}` with the `not` function.
 :::
 
 <Example title={<>Example of <code>unless</code> being redundant</>}>
 
 ```handlebars title=example.whisker
-{{! The following blocks have the same behavior }}
+{{! These two blocks have identical behavior }}
 
 {{#unless failed?}}
 Nice!
@@ -322,7 +320,7 @@ Whisker `{{#if}}` blocks are based on [EmberJS `{{#if}}`](https://guides.emberjs
 `{{#each}}` blocks have not been implemented yet.
 :::
 
-Whisker supports a block type for repetition: `{{#each}}`. A typical repetition block might be:
+Whisker supports a block type for repeated rendering: `{{#each}}`. A typical repetition block might look like:
 
 ```handlebars
 Rankings are:
@@ -331,9 +329,9 @@ Rankings are:
 {{/each}}
 ```
 
-The `expression` being repeated upon (`winners`) **must** evaluate to an `array`, or a `native_object` that supports `array`-like iteration.
+The `expression` being iterated (`winners`) **must** evaluate to an `array`, or a `native_object` that supports `array`-like iteration. The body will be rendered once for each element of the `array`.
 
-The `body` will be rendered once for each element of the `array`. The first capture name (`winner`) will be [locally bound](#scopes) to the current `object`. The second capture name (`index`) will be [locally bound](#scopes) to the index of the current `object` (as an `i64`).
+The first capture name (`winner`) will be [locally bound](#scopes) to the current element in the `array`. The second capture name (`index`) will be [locally bound](#scopes) to the zero-based index (as an `i64`).
 
 <Example>
 
@@ -356,7 +354,7 @@ Rankings are:
 
 </Example>
 
-The `index` argument in the `as` *captures* is **optional**.
+The `index` capture is **optional**.
 
 <Example title="Example without index">
 
@@ -386,7 +384,7 @@ Carol
 
 </Example>
 
-The entire `as` *captures* are **optional**, in which case, the *implicit context* (`{{ . }}`) can be used instead.
+Both captures are **optional**, in which case, the *implicit context* (`{{ . }}`) can be used.
 
 <Example title="Example with implicit context">
 
@@ -416,7 +414,7 @@ Carol
 
 </Example>
 
-`{{#each}}` blocks may **optionally** have an `{{#else}}` statement. The body following the `{{#else}}` is rendered only if there were zero repetitions performed.
+`{{#each}}` blocks may **optionally** have an `{{#else}}` statement. Its body is rendered only if the `array` is empty.
 
 <Example title={<>Example with <code>else</code></>}>
 
@@ -461,7 +459,7 @@ Whisker `{{#each}}` blocks are based on [EmberJS `{{#each}}`](https://guides.emb
 `{{#with}}` blocks have not been implemented yet.
 :::
 
-Whisker supports a block type for de-structuring: `{{#with}}`. A typical de-structuring block might be:
+Whisker supports a block type for de-structuring: `{{#with}}`. A typical de-structuring block might look like:
 
 ```handlebars
 {{#with person}}
@@ -469,9 +467,9 @@ The name's {{lastName}}... {{firstName}} {{lastName}}.
 {{/with}}
 ```
 
-The `expression` being de-structured (in this case, `person`) **must** evaluate to a `map`, or a `native_object` that supports `map`-like property access.
+The `expression` being de-structured (`person`) **must** evaluate to a `map`, or a `native_object` that supports `map`-like property access.
 
-The `body` will be rendered exactly once. The result of the expression (`person`) will become the [*current* evaluation scope](#evaluation-context) within the block. This means that all its properties can be accessed without the `person.` prefix.
+The body will be rendered exactly once. The result of the expression (`person`) will become the [*implicit context* `object`](#scopes) within the block, meaning it can be accessed using `{{ . }}`. All its properties can be accessed without the `person.` prefix.
 
 <Example>
 
@@ -506,7 +504,7 @@ with-block-close → { "{{" ~ "/" ~ "with" ~ "}}" }
 `{{#let}}` statements have not been implemented yet.
 :::
 
-Whisker `{{#let}}` statements allow binding the result of an `expression` to an *identifier* in the [*current* lexical scope](#scopes) of the [evaluation context](#evaluation-context). A simple `{{#let}}` statement might be:
+Whisker `{{#let}}` statements allow binding the result of an `expression` to an *identifier* in the [current scope](#scopes). A simple `{{#let}}` statement might look like:
 
 ```handlebars
 {{#let result = (add input 1)}}
@@ -587,7 +585,7 @@ let → { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
 `{{#partial}}` blocks have not been implemented yet.
 :::
 
-Partial blocks allow defining reusable templates within a Whisker template itself. A simple example of a `{{#partial}}` block might be:
+Partial blocks allow defining reusable templates within a Whisker template. A simple example of a `{{#partial}}` block might be:
 
 ```handlebars
 {{#partial greeting as |person|}}
@@ -617,7 +615,7 @@ Whisker `{{#partial}}` blocks are based on [Handlebars partial parameters](https
 
 ### Partial Applications
 
-Partials are `template`s that are not immediately applied. They have to be *applied* by name within Whisker template source. Partials allow reusing templates. A simple example of partial application might be:
+Partials are reusable templates that are not rendered unless *applied* (by name). A simple example of partial application might be:
 
 ```handlebars
 {{> path/to/my-partial}}
@@ -628,7 +626,7 @@ Currently, partials cannot be defined in Whisker — they must be provided by th
 This will change once [`{{#partial}}` blocks](#partial-blocks) are implemented.
 :::
 
-Partial applications (without captures) assume the [evaluation context](#scopes) at the site of application.
+Partial applications (without captures) assume the [scope](#scopes) at the site of application. This behavior is analogous to [C preprocessor macro expansion](https://en.wikipedia.org/wiki/C_preprocessor#Macro_definition_and_expansion). Names accessible from the site of the application are also available within the block.
 
 <Example title="Example with implied context (macro)">
 
@@ -655,10 +653,7 @@ Greetings, Dave Grohl!
 
 </Example>
 
-[Partial applications (with captures)](#partial-blocks) have names (provided via `as`) [bound](#scopes) to `expression`s provided during application.
-
-The contained `body` is rendered with a [derived evaluation context](#derived-evaluation-context).
-That is, names accessible from the site of the application are **not** *implicitly* available within the block.
+[Partial applications (with captures)](#partial-blocks) have names (provided via `as`) [bound](#scopes) to `expression`s provided during application. The contained body is rendered with a [derived evaluation context](#derived-evaluation-context). Names accessible from the site of the application are **not** *implicitly* available within the block.
 
 <Example>
 
@@ -821,32 +816,34 @@ Since the *current* scope is changing, the output for `{{name}}` differs between
 
 ### Scopes
 
-A *lexical scope* has two properties:
-  * an **implicit context** [`object`](#data-model).
-  * a **local bindings** [`map`](#data-model).
+A *lexical scope* has two key properties:
+  * an **implicit context** represented by an [`object`](#data-model).
+  * a set of **local bindings** stored in a [`map`](#data-model).
 
-An evaluation context has three properties:
+An evaluation context consists of three key elements:
   * a **stack of *lexical scopes***.
-  * a **global scope** [`map`](#data-model).
+  * a **global scope** represented by a [`map`](#data-model).
 
-The *global scope* is always the bottom of the stack. It cannot be popped.
+The *global scope* is always the bottom of the stack and cannot be popped.
 
-Whisker's uses scopes to describe how top-level names are resolved. It provides an answer to the question: what is `foo` in `{{foo.bar.baz}}`? `bar` and `baz` are *property* resolutions which are simple lookups into a `map` or `map`-like `native_object`.
+Whisker uses scopes to describe how top-level names are resolved. This process answers the question: what does `foo` in `{{foo.bar.baz}}` refer to? By contrast, `bar` and `baz` represent *property* resolutions, which are straightforward lookups into a `map` or `map`-like `native_object`.
 
-Given an *identifier*, `name`:
-1. Start with the *current* scope (top of stack).
-2. Look in the **local bindings** `map` for `name`.
-    * If an entry is found, return the corresponding `object`.
-3. Look in the **implicit context** `object`.
+When resolving an *identifier* like `name`, the process works as follows:
+1. Start with the *current* scope (at the top of the stack).
+2. Check the **local bindings** `map` for `name`.
+    * If found, return the corresponding `object`.
+3. Check the **implicit context** `object`'s properties.
     * If a property is found, return the corresponding `object`.
-4. Repeat (2) with the previous scope (from the stack) if possible.
-    * If we are at the bottom of the stack, return an error.
+4. Move to the previous scope in the stack and repeat (2) and (3).
+    * If the bottom of the stack is reached without resolution, return an error.
 
-Local bindings are introduced into the current scope with [`{{#let}}`](#let-statements) statements, `as` captures in [`{{#each}}`](#each-blocks) or [`{{#partial}}`](#partial-blocks) blocks etc.
+Local bindings can be added to the current scope using [`{{#let}}`](#let-statements), `as` captures in [`{{#each}}`](#each-blocks) or [`{{#partial}}`](#partial-blocks), and similar constructs.
+
+Certain scopes lack an **implicit context** `object`, which is represented by `null`. For instance, [`{{#if}}`](#if-blocks) blocks always have a `null` context. [`{{#each}}`](#each-blocks) blocks have a `null` context when captures are present.
 
 ### Derived Evaluation Context
 
-`{{#partial}}` blocks with `as` captures are rendered within an evaluation context *derived* from the the call site. This is a new evaluation context with an empty stack, except that it shares the same global scope `map`.
+`{{#partial}}` blocks with `as` captures are rendered within a new evaluation context *derived* from the the call site. This context starts with an empty stack but retains access to the same global scope `map`.
 
 ## Standalone Tags
 

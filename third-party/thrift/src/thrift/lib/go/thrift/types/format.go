@@ -22,7 +22,8 @@ import (
 	"math"
 )
 
-type ProtocolID int16
+// ProtocolID is the type of protocol used to serialize/deserialize data.
+type ProtocolID uint16
 
 const (
 	ProtocolIDBinary     ProtocolID = 0

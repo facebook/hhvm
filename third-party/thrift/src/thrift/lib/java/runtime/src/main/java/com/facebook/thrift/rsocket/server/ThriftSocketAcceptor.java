@@ -16,14 +16,17 @@
 
 package com.facebook.thrift.rsocket.server;
 
+import com.facebook.thrift.payload.Constants;
 import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.resources.RpcResources;
 import io.rsocket.ConnectionSetupPayload;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
+import io.rsocket.exceptions.UnsupportedSetupException;
 import reactor.core.publisher.Mono;
 
 public class ThriftSocketAcceptor implements SocketAcceptor {
+
   private final RpcServerHandler serverHandler;
 
   public ThriftSocketAcceptor(RpcServerHandler serverHandler) {
@@ -32,6 +35,11 @@ public class ThriftSocketAcceptor implements SocketAcceptor {
 
   @Override
   public Mono<RSocket> accept(ConnectionSetupPayload setup, RSocket sendingSocket) {
+    String metadataMimeType = setup.metadataMimeType();
+    if (!metadataMimeType.equals(Constants.ROCKET_METADATA_COMPACT_MIME_TYPE)) {
+      throw new UnsupportedSetupException("Unsupported Metadata Mime Type: " + metadataMimeType);
+    }
+
     ThriftServerRSocket rSocket =
         new ThriftServerRSocket(serverHandler, RpcResources.getByteBufAllocator());
 

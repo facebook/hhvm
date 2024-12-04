@@ -26,6 +26,7 @@ import com.facebook.thrift.metadata.ThriftTransportType;
 import com.facebook.thrift.model.StreamResponse;
 import com.facebook.thrift.payload.ClientRequestPayload;
 import com.facebook.thrift.payload.ClientResponsePayload;
+import com.facebook.thrift.payload.Constants;
 import com.facebook.thrift.payload.Reader;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.protocol.TProtocolType;
@@ -411,6 +412,7 @@ public final class RpcClientUtils {
     final Payload setupPayload = ByteBufPayload.create(Unpooled.EMPTY_BUFFER, setupMetadata);
 
     return RSocketConnector.create()
+        .metadataMimeType(Constants.ROCKET_METADATA_COMPACT_MIME_TYPE)
         .setupPayload(setupPayload)
         .payloadDecoder(PayloadDecoder.ZERO_COPY);
   }

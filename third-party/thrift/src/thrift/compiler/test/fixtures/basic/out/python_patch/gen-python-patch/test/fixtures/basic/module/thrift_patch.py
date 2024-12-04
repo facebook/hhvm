@@ -40,7 +40,6 @@ class MyStructPatch(
     BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyStruct]
 ):
     pass
-
     @property
     def MyIntField(self) -> UnqualifiedFieldPatch[
             int,
@@ -262,7 +261,6 @@ class ContainersPatch(
     BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.Containers]
 ):
     pass
-
     @property
     def I32List(self) -> UnqualifiedFieldPatch[
             _typing.Sequence[int],
@@ -341,12 +339,10 @@ class MyDataItemPatch(
 ):
     pass
 
-
 class MyUnionPatch(
     BaseUnionPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyUnion]
 ):
     pass
-
     @property
     def myEnum(self) -> OptionalFieldPatch[
             _fbthrift__test__fixtures__basic__module__thrift_types.MyEnum,
@@ -448,7 +444,6 @@ class MyExceptionPatch(
     BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyException]
 ):
     pass
-
     @property
     def MyIntField(self) -> UnqualifiedFieldPatch[
             int,
@@ -550,7 +545,6 @@ class MyExceptionWithMessagePatch(
     BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.MyExceptionWithMessage]
 ):
     pass
-
     @property
     def MyIntField(self) -> UnqualifiedFieldPatch[
             int,
@@ -652,7 +646,6 @@ class ReservedKeywordPatch(
     BaseStructPatch[_fbthrift__test__fixtures__basic__module__thrift_types.ReservedKeyword]
 ):
     pass
-
     @property
     def reserved_field(self) -> UnqualifiedFieldPatch[
             int,
@@ -682,7 +675,6 @@ class UnionToBeRenamedPatch(
     BaseUnionPatch[_fbthrift__test__fixtures__basic__module__thrift_types.UnionToBeRenamed]
 ):
     pass
-
     @property
     def reserved_field(self) -> OptionalFieldPatch[
             int,

@@ -129,6 +129,7 @@ class python_mstch_program : public mstch_program {
         this,
         {
             {"program:module_path", &python_mstch_program::module_path},
+            {"program:safe_patch?", &python_mstch_program::safe_patch},
             {"program:safe_patch_module_path",
              &python_mstch_program::safe_patch_module_path},
             {"program:module_mangle", &python_mstch_program::module_mangle},
@@ -200,6 +201,11 @@ class python_mstch_program : public mstch_program {
   mstch::node module_path() {
     return get_py3_namespace_with_name_and_prefix(
         program_, get_option("root_module_prefix"));
+  }
+
+  mstch::node safe_patch() {
+    constexpr std::string_view prefix = "gen_safe_patch_";
+    return program_->name().substr(0, prefix.size()) == prefix;
   }
 
   mstch::node safe_patch_module_path() {

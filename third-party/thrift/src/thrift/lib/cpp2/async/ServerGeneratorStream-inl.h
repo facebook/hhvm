@@ -119,9 +119,13 @@ ServerStreamFn<T> ServerGeneratorStream::fromAsyncGenerator(
           std::move(gen),
           TileStreamGuard::transferFrom(std::move(interaction)))
           .scheduleOn(std::move(serverExecutor))
-          .start([](folly::Try<folly::Unit> t) {
+          .start([sp = stream->copy()](folly::Try<folly::Unit> t) {
             if (t.hasException()) {
-              LOG(FATAL) << t.exception();
+              LOG(ERROR)
+                  << "Closing Stream because it received an exception before it started: "
+                  << std::endl
+                  << t.exception();
+              sp->close();
             }
           });
       std::ignore =

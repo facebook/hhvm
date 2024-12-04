@@ -99,7 +99,8 @@ and check_await_usage expr =
           (* Can't have await in || or && (parse error) *)
           lhs = expr1;
           rhs = expr2;
-        } ->
+        }
+    | Assign (expr1, _, expr2) ->
       combine_con (check_await_usage expr1) (check_await_usage expr2)
     (* Expressions with lists of sub-expressions that we can lift an await out of
        and run concurrently *)

@@ -36,15 +36,13 @@
            [([11:3-21],
              (Expr
                 ((), [11:3-20],
-                 (Binop
-                    { bop = (Eq None); lhs = ((), [11:3-5], (Lvar ([11:3-5], $x)));
-                      rhs = ((), [11:8-20], (FunctionPointer ((FP_class_const (((), [11:8-12], (CI ([11:8-12], "\\Foo\\Bar\\Fizz"))), ([11:14-18], "buzz"))), []))) }))));
+                 (Assign (((), [11:3-5], (Lvar ([11:3-5], $x))), None,
+                    ((), [11:8-20], (FunctionPointer ((FP_class_const (((), [11:8-12], (CI ([11:8-12], "\\Foo\\Bar\\Fizz"))), ([11:14-18], "buzz"))), []))))))));
              ([14:3-28],
               (Expr
                  ((), [14:3-27],
-                  (Binop
-                     { bop = (Eq None); lhs = ((), [14:3-5], (Lvar ([14:3-5], $x)));
-                       rhs = ((), [14:8-27], (FunctionPointer ((FP_class_const (((), [14:8-14], (CI ([14:8-14], "\\HH\\Vector"))), ([14:16-25], "fromItems"))), []))) }))))
+                  (Assign (((), [14:3-5], (Lvar ([14:3-5], $x))), None,
+                     ((), [14:8-27], (FunctionPointer ((FP_class_const (((), [14:8-14], (CI ([14:8-14], "\\HH\\Vector"))), ([14:16-25], "fromItems"))), []))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-13], "__SupportDynamicType"); ua_params = [] }]; 

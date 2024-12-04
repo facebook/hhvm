@@ -17,15 +17,12 @@
         f_body =
         { fb_ast =
           [([4:3-18],
-            (Expr
-               ((keyset<nothing>), [4:3-17],
-                (Binop { bop = (Eq None); lhs = ((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))); rhs = ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))) }))));
+            (Expr ((keyset<nothing>), [4:3-17], (Assign (((keyset<nothing>), [4:3-6], (Lvar ([4:3-6], $xs))), None, ((keyset<nothing>), [4:9-17], (ValCollection (([4:9-15], Keyset), None, []))))))));
             ([6:3-14],
              (Expr
                 ((bool), [6:3-13],
-                 (Binop
-                    { bop = (Eq None); lhs = ((bool), [6:3-8], (Array_get (((keyset<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), None)));
-                      rhs = ((bool), [6:11-13], (Hole (((bool), [6:11-13], (Lvar ([6:11-13], $x))), (bool), (arraykey), Typing))) }))))
+                 (Assign (((bool), [6:3-8], (Array_get (((keyset<nothing>), [6:3-6], (Lvar ([6:3-6], $xs))), None))), None,
+                    ((bool), [6:11-13], (Hole (((bool), [6:11-13], (Lvar ([6:11-13], $x))), (bool), (arraykey), Typing))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-29], "__SupportDynamicType"); ua_params = [] }]; 
@@ -52,14 +49,12 @@
          { fb_ast =
            [([10:3-18],
              (Expr
-                ((keyset<nothing>), [10:3-17],
-                 (Binop { bop = (Eq None); lhs = ((keyset<nothing>), [10:3-6], (Lvar ([10:3-6], $xs))); rhs = ((keyset<nothing>), [10:9-17], (ValCollection (([10:9-15], Keyset), None, []))) }))));
+                ((keyset<nothing>), [10:3-17], (Assign (((keyset<nothing>), [10:3-6], (Lvar ([10:3-6], $xs))), None, ((keyset<nothing>), [10:9-17], (ValCollection (([10:9-15], Keyset), None, []))))))));
              ([12:3-14],
               (Expr
                  ((?string), [12:3-13],
-                  (Binop
-                     { bop = (Eq None); lhs = ((?string), [12:3-8], (Array_get (((keyset<string>), [12:3-6], (Lvar ([12:3-6], $xs))), None)));
-                       rhs = ((?string), [12:11-13], (Hole (((?string), [12:11-13], (Lvar ([12:11-13], $x))), (?string), (string), Typing))) }))))
+                  (Assign (((?string), [12:3-8], (Array_get (((keyset<string>), [12:3-6], (Lvar ([12:3-6], $xs))), None))), None,
+                     ((?string), [12:11-13], (Hole (((?string), [12:11-13], (Lvar ([12:11-13], $x))), (?string), (string), Typing))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([9:10-40], "__SupportDynamicType"); ua_params = [] }]; 

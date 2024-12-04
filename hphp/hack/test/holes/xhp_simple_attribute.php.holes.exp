@@ -56,28 +56,23 @@
            [([7:38-49],
              (Expr
                 ((dict<string, dynamic>), [7:38-49],
-                 (Binop
-                    { bop = (Eq None);
-                      lhs = ((~dict<string, dynamic>), [7:38-49], (Obj_get (((this), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop)));
-                      rhs = ((dict<string, dynamic>), [7:38-49], (Lvar ([7:38-49], $attributes))) }))));
+                 (Assign (((~dict<string, dynamic>), [7:38-49], (Obj_get (((this), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop))),
+                    None, ((dict<string, dynamic>), [7:38-49], (Lvar ([7:38-49], $attributes))))))));
              ([8:30-39],
               (Expr
                  ((vec<dynamic>), [8:30-39],
-                  (Binop
-                     { bop = (Eq None); lhs = ((~vec<dynamic>), [8:30-39], (Obj_get (((this), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop)));
-                       rhs = ((vec<dynamic>), [8:30-39], (Lvar ([8:30-39], $children))) }))));
+                  (Assign (((~vec<dynamic>), [8:30-39], (Obj_get (((this), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop))), None,
+                     ((vec<dynamic>), [8:30-39], (Lvar ([8:30-39], $children))))))));
              ([9:21-26],
               (Expr
                  ((string), [9:21-26],
-                  (Binop
-                     { bop = (Eq None); lhs = ((string), [9:21-26], (Obj_get (((this), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop)));
-                       rhs = ((string), [9:21-26], (Lvar ([9:21-26], $file))) }))));
+                  (Assign (((string), [9:21-26], (Obj_get (((this), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop))), None,
+                     ((string), [9:21-26], (Lvar ([9:21-26], $file))))))));
              ([10:18-23],
               (Expr
                  ((int), [10:18-23],
-                  (Binop
-                     { bop = (Eq None); lhs = ((int), [10:18-23], (Obj_get (((this), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop)));
-                       rhs = ((int), [10:18-23], (Lvar ([10:18-23], $line))) }))));
+                  (Assign (((int), [10:18-23], (Obj_get (((this), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop))), None,
+                     ((int), [10:18-23], (Lvar ([10:18-23], $line))))))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -113,17 +108,15 @@
            [([16:5-38],
              (Expr
                 ((exact XhpSimple\:element), [16:5-37],
-                 (Binop
-                    { bop = (Eq None); lhs = ((exact XhpSimple\:element), [16:5-10], (Lvar ([16:5-10], $elem)));
-                      rhs =
-                      ((exact XhpSimple\:element), [16:13-37],
-                       (Xml (([16:14-21], "\\XhpSimple\\:element"),
-                          [(Xhp_simple
-                              { xs_name = ([16:22-26], "prop"); xs_type = (~int);
-                                xs_expr = ((string), [16:28-33], (Hole (((string), [16:28-33], (Lvar ([16:28-33], $prop))), (string), (~int), Typing))) })
-                            ],
-                          [])))
-                      }))))
+                 (Assign (((exact XhpSimple\:element), [16:5-10], (Lvar ([16:5-10], $elem))), None,
+                    ((exact XhpSimple\:element), [16:13-37],
+                     (Xml (([16:14-21], "\\XhpSimple\\:element"),
+                        [(Xhp_simple
+                            { xs_name = ([16:22-26], "prop"); xs_type = (~int); 
+                              xs_expr = ((string), [16:28-33], (Hole (((string), [16:28-33], (Lvar ([16:28-33], $prop))), (string), (~int), Typing))) })
+                          ],
+                        [])))
+                    )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([14:12-32], "__SupportDynamicType"); ua_params = [] }]; 
@@ -188,31 +181,25 @@
             [([7:38-49],
               (Expr
                  ((dynamic), [7:38-49],
-                  (Binop
-                     { bop = (Eq None);
-                       lhs =
-                       ((~dict<string, dynamic>), [7:38-49],
-                        (Obj_get ((((this & dynamic)), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop)));
-                       rhs = ((dynamic), [7:38-49], (Lvar ([7:38-49], $attributes))) }))));
+                  (Assign (
+                     ((~dict<string, dynamic>), [7:38-49],
+                      (Obj_get ((((this & dynamic)), [7:38-49], This), ((~dict<string, dynamic>), [7:38-49], (Id ([7:38-49], "attributes"))), OG_nullthrows, Is_prop))),
+                     None, ((dynamic), [7:38-49], (Lvar ([7:38-49], $attributes))))))));
               ([8:30-39],
                (Expr
                   ((dynamic), [8:30-39],
-                   (Binop
-                      { bop = (Eq None);
-                        lhs = ((~vec<dynamic>), [8:30-39], (Obj_get ((((this & dynamic)), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop)));
-                        rhs = ((dynamic), [8:30-39], (Lvar ([8:30-39], $children))) }))));
+                   (Assign (((~vec<dynamic>), [8:30-39], (Obj_get ((((this & dynamic)), [8:30-39], This), ((~vec<dynamic>), [8:30-39], (Id ([8:30-39], "children"))), OG_nullthrows, Is_prop))), None,
+                      ((dynamic), [8:30-39], (Lvar ([8:30-39], $children))))))));
               ([9:21-26],
                (Expr
                   ((string), [9:21-26],
-                   (Binop
-                      { bop = (Eq None); lhs = ((string), [9:21-26], (Obj_get ((((this & dynamic)), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop)));
-                        rhs = ((string), [9:21-26], (Lvar ([9:21-26], $file))) }))));
+                   (Assign (((string), [9:21-26], (Obj_get ((((this & dynamic)), [9:21-26], This), ((string), [9:21-26], (Id ([9:21-26], "file"))), OG_nullthrows, Is_prop))), None,
+                      ((string), [9:21-26], (Lvar ([9:21-26], $file))))))));
               ([10:18-23],
                (Expr
                   ((int), [10:18-23],
-                   (Binop
-                      { bop = (Eq None); lhs = ((int), [10:18-23], (Obj_get ((((this & dynamic)), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop)));
-                        rhs = ((int), [10:18-23], (Lvar ([10:18-23], $line))) }))));
+                   (Assign (((int), [10:18-23], (Obj_get ((((this & dynamic)), [10:18-23], This), ((int), [10:18-23], (Id ([10:18-23], "line"))), OG_nullthrows, Is_prop))), None,
+                      ((int), [10:18-23], (Lvar ([10:18-23], $line))))))));
               ([Pos.none], Noop)]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

@@ -185,8 +185,7 @@ let visitor =
 
     method! on_stmt (env, ctx) stmt =
       match snd stmt with
-      | Expr ((_, _, Binop { bop = Ast_defs.Eq _; _ }) as e) ->
-        this#on_expr (env, allow_awaitable) e
+      | Expr ((_, _, Assign _) as e) -> this#on_expr (env, allow_awaitable) e
       | Expr e -> this#on_expr (env, disallow_awaitable) e
       | If (e, b1, b2) ->
         this#on_expr (env, disallow_due_to_cast ctx env) e;

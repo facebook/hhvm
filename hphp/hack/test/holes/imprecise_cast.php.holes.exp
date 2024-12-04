@@ -41,9 +41,8 @@
            [([8:3-18],
              (Expr
                 ((exact Sub), [8:3-17],
-                 (Binop
-                    { bop = (Eq None); lhs = ((exact Sub), [8:3-5], (Lvar ([8:3-5], $b)));
-                      rhs = ((exact Sub), [8:8-17], (New (((exact Sub), [8:12-15], (CI ([8:12-15], "\\Sub"))), [], [], None, ((function(): void))))) }))));
+                 (Assign (((exact Sub), [8:3-5], (Lvar ([8:3-5], $b))), None, (
+                    (exact Sub), [8:8-17], (New (((exact Sub), [8:12-15], (CI ([8:12-15], "\\Sub"))), [], [], None, ((function(): void))))))))));
              ([10:3-47],
               (Return
                  (Some ((~int), [10:10-46],

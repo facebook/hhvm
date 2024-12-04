@@ -26,9 +26,8 @@
            [([4:42-44],
              (Expr
                 ((int), [4:42-44],
-                 (Binop
-                    { bop = (Eq None); lhs = ((int), [4:42-44], (Obj_get (((this), [4:42-44], This), ((int), [4:42-44], (Id ([4:42-44], "x"))), OG_nullthrows, Is_prop)));
-                      rhs = ((int), [4:42-44], (Lvar ([4:42-44], $x))) }))));
+                 (Assign (((int), [4:42-44], (Obj_get (((this), [4:42-44], This), ((int), [4:42-44], (Id ([4:42-44], "x"))), OG_nullthrows, Is_prop))), None,
+                    ((int), [4:42-44], (Lvar ([4:42-44], $x))))))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -71,16 +70,14 @@
            [([9:3-38],
              (Expr
                 ((?exact MyVeryOwnC), [9:3-37],
-                 (Binop
-                    { bop = (Eq None); lhs = ((?exact MyVeryOwnC), [9:3-5], (Lvar ([9:3-5], $c)));
-                      rhs =
-                      ((?exact MyVeryOwnC), [9:8-37],
-                       (Eif (((bool), [9:8-10], (Lvar ([9:8-10], $a))), (Some (
-                          (null), [9:13-17], Null)),
-                          ((exact MyVeryOwnC), [9:20-37],
-                           (New (((exact MyVeryOwnC), [9:24-34], (CI ([9:24-34], "\\MyVeryOwnC"))), [], [((int), [9:35-36], (Int "0"))], None, ((function(int $x): void)))))
-                          )))
-                      }))));
+                 (Assign (((?exact MyVeryOwnC), [9:3-5], (Lvar ([9:3-5], $c))), None,
+                    ((?exact MyVeryOwnC), [9:8-37],
+                     (Eif (((bool), [9:8-10], (Lvar ([9:8-10], $a))), (Some (
+                        (null), [9:13-17], Null)),
+                        ((exact MyVeryOwnC), [9:20-37],
+                         (New (((exact MyVeryOwnC), [9:24-34], (CI ([9:24-34], "\\MyVeryOwnC"))), [], [((int), [9:35-36], (Int "0"))], None, ((function(int $x): void)))))
+                        )))
+                    )))));
              ([11:3-9],
               (Expr
                  ((nothing), [11:3-8],

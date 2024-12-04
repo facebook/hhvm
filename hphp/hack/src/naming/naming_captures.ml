@@ -72,15 +72,9 @@ let visitor =
       vars := add_local_ref !vars lv;
       super#on_Lvar () e lv
 
-    method! on_Binop () e (Aast.{ bop; lhs; _ } as binop) =
-      (match bop with
-      | Ast_defs.Eq None ->
-        (* Introducing a new local variable.
-
-           $x = ... *)
-        vars := add_local_defs_from_lvalue !vars lhs
-      | _ -> ());
-      super#on_Binop () e binop
+    method! on_Assign () e lhs bop rhs =
+      vars := add_local_defs_from_lvalue !vars lhs;
+      super#on_Assign () e lhs bop rhs
 
     method! on_as_expr () ae =
       (* [as] inside a foreach loop introduces a new local variable.

@@ -19,9 +19,8 @@
           [([4:3-27],
             (Expr
                ((), [4:3-26],
-                (Binop
-                   { bop = (Eq None); lhs = ((), [4:3-5], (Lplaceholder [4:3-5]));
-                     rhs = ((), [4:8-26], (New (((), [4:12-18], (CI ([4:12-18], "\\HH\\Vector"))), [((), ([4:19-20], Hwildcard))], [((), [4:22-25], (Lvar ([4:22-25], $xs)))], None, ()))) }))))
+                (Assign (((), [4:3-5], (Lplaceholder [4:3-5])), None,
+                   ((), [4:8-26], (New (((), [4:12-18], (CI ([4:12-18], "\\HH\\Vector"))), [((), ([4:19-20], Hwildcard))], [((), [4:22-25], (Lvar ([4:22-25], $xs)))], None, ()))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-25], "__SupportDynamicType"); ua_params = [] }]; 
@@ -49,12 +48,10 @@
            [([8:3-27],
              (Expr
                 ((), [8:3-26],
-                 (Binop
-                    { bop = (Eq None); lhs = ((), [8:3-5], (Lplaceholder [8:3-5]));
-                      rhs =
-                      ((), [8:8-26],
-                       (New (((), [8:12-15], (CI ([8:12-15], "\\HH\\Map"))), [((), ([8:16-17], Hwildcard)); ((), ([8:19-20], Hwildcard))], [((), [8:22-25], (Lvar ([8:22-25], $xs)))], None, ())))
-                      }))))
+                 (Assign (((), [8:3-5], (Lplaceholder [8:3-5])), None,
+                    ((), [8:8-26],
+                     (New (((), [8:12-15], (CI ([8:12-15], "\\HH\\Map"))), [((), ([8:16-17], Hwildcard)); ((), ([8:19-20], Hwildcard))], [((), [8:22-25], (Lvar ([8:22-25], $xs)))], None, ())))
+                    )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-22], "__SupportDynamicType"); ua_params = [] }]; 

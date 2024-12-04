@@ -28,9 +28,7 @@
                                  f_body =
                                  { fb_ast =
                                    [([4:37-40],
-                                     (Expr
-                                        ((), [4:37-40],
-                                         (Binop { bop = (Eq None); lhs = ((), [4:37-40], (Lvar ([4:37-40], $0fp0))); rhs = ((), [4:37-40], (FunctionPointer ((FP_id ([4:37-40], "\\foo")), []))) }))));
+                                     (Expr ((), [4:37-40], (Assign (((), [4:37-40], (Lvar ([4:37-40], $0fp0))), None, ((), [4:37-40], (FunctionPointer ((FP_id ([4:37-40], "\\foo")), []))))))));
                                      ([4:14-47],
                                       (Return
                                          (Some ((), [4:3-13],

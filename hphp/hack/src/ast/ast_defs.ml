@@ -125,7 +125,6 @@ and bop =
   | Xor  (** Bitwise XOR: x ^ y *)
   | Cmp  (** Spaceship operator: x <=> y *)
   | QuestionQuestion  (** Coalesce: x ?? y *)
-  | Eq of bop option  (** =, +=, -=, ... *)
 [@@transform.opaque]
 
 and uop =

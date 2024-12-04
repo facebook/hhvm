@@ -75,9 +75,8 @@
              ([15:3-29],
               (Expr
                  ((exact TestIterable), [15:3-28],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestIterable), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((exact TestIterable), [15:10-28], (New (((exact TestIterable), [15:14-26], (CI ([15:14-26], "\\TestIterable"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestIterable), [15:3-7], (Lvar ([15:3-7], $foo))), None,
+                     ((exact TestIterable), [15:10-28], (New (((exact TestIterable), [15:14-26], (CI ([15:14-26], "\\TestIterable"))), [], [], None, ((function(): void))))))))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -130,9 +129,8 @@
              ([27:3-29],
               (Expr
                  ((exact TestIterable), [27:3-28],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestIterable), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestIterable), [27:10-28], (New (((exact TestIterable), [27:14-26], (CI ([27:14-26], "\\TestIterable"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestIterable), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestIterable), [27:10-28], (New (((exact TestIterable), [27:14-26], (CI ([27:14-26], "\\TestIterable"))), [], [], None, ((function(): void))))))))));
              ([30:3-69],
               (Expr
                  ((~void), [30:3-68],
@@ -243,9 +241,8 @@
              ([27:3-29],
               (Expr
                  ((exact TestIterable), [27:3-28],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestIterable), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestIterable), [27:10-28], (New (((exact TestIterable), [27:14-26], (CI ([27:14-26], "\\TestIterable"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestIterable), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestIterable), [27:10-28], (New (((exact TestIterable), [27:14-26], (CI ([27:14-26], "\\TestIterable"))), [], [], None, ((function(): void))))))))));
              ([30:3-69],
               (Expr
                  ((~void), [30:3-68],

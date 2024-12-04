@@ -10,7 +10,6 @@ use hack_macros::hack_stmt;
 use naming_special_names_rust::special_idents;
 use nast::Afield;
 use nast::Block;
-use nast::Bop;
 use nast::ClassId_;
 use nast::Expr;
 use nast::Expr_;
@@ -23,7 +22,6 @@ use nast::XhpAttribute;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
-use oxidized::ast::Binop;
 use oxidized::naming_phase_error::NamingPhaseError;
 use oxidized::nast;
 use oxidized::parsing_error::ParsingError;
@@ -156,7 +154,10 @@ fn check_await_usage(expr: &Expr) -> AwaitUsage {
             bop: _, // Can't have await in || or && (parse error)
             lhs: expr1,
             rhs: expr2,
-        }) => combine_con(check_await_usage(expr1), check_await_usage(expr2)),
+        })
+        | Expr_::Assign(box (expr1, _, expr2)) => {
+            combine_con(check_await_usage(expr1), check_await_usage(expr2))
+        }
 
         // Expressions with lists of sub-expressions that we can lift an await out of
         // and run concurrently
@@ -519,12 +520,19 @@ impl LiftAwait {
                 self.extract_await(expr1, con, seq, tmps);
                 self.extract_await(expr2, con, seq, tmps)
             }
-            Expr_::Binop(box nast::Binop { bop, lhs, rhs }) => {
+            Expr_::Binop(box nast::Binop { bop: _, lhs, rhs }) => {
                 // If the operator is || or &&, there are syntactic restrictions that
                 // there is no await on the rhs, and so it is safe to traverse it here
                 // just to replace $$
                 self.extract_await(lhs, con, seq, tmps);
-                if matches!(bop, Bop::Eq(None)) {
+                self.extract_await(rhs, con, seq, tmps)
+            }
+            Expr_::Assign(box (lhs, bop, rhs)) => {
+                // If the operator is || or &&, there are syntactic restrictions that
+                // there is no await on the rhs, and so it is safe to traverse it here
+                // just to replace $$
+                self.extract_await(lhs, con, seq, tmps);
+                if bop.is_none() {
                     self.leave_await = leave_await;
                 }
                 self.extract_await(rhs, con, seq, tmps)
@@ -825,15 +833,7 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                     }
                     if let Stmt(
                         p1,
-                        Stmt_::Expr(box Expr(
-                            (),
-                            p2,
-                            Expr_::Binop(box Binop {
-                                bop: Bop::Eq(op),
-                                lhs: e1,
-                                rhs: e2,
-                            }),
-                        )),
+                        Stmt_::Expr(box Expr((), p2, Expr_::Assign(box (e1, op, e2)))),
                     ) = n
                     {
                         let tv = match tmp_vars.next() {
@@ -847,11 +847,7 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                                 Stmt_::Expr(Box::new(Expr::new(
                                     (),
                                     p2.clone(),
-                                    Expr_::mk_binop(Binop {
-                                        bop: Bop::Eq(None),
-                                        lhs: tmp_n.clone(),
-                                        rhs: e2.clone(),
-                                    }),
+                                    Expr_::mk_assign(tmp_n.clone(), None, e2.clone()),
                                 ))),
                             );
                             body_stmts.push(new_n);
@@ -861,11 +857,7 @@ impl<'a> VisitorMut<'a> for LiftAwait {
                             Stmt_::Expr(Box::new(Expr::new(
                                 (),
                                 p2,
-                                Expr_::mk_binop(Binop {
-                                    bop: Bop::Eq(op),
-                                    lhs: e1,
-                                    rhs: tmp_n,
-                                }),
+                                Expr_::mk_assign(e1, op, tmp_n),
                             ))),
                         );
                         assign_stmts.push(assign_stmt);

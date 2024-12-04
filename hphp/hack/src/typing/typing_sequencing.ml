@@ -98,7 +98,7 @@ let used_variables_visitor =
       * (We do still count operator-assignments) *)
      method! on_expr acc ((_, _, e_) as e) =
        match e_ with
-       | Binop Aast.{ bop = Ast_defs.Eq None; lhs = e1; rhs = e2 } ->
+       | Aast.Assign (e1, None, e2) ->
          let (_, not_vars) = List.partition_map (unpack_lvals e1) ~f:get_lvar in
          let acc = List.fold_left ~f:this#on_expr ~init:acc not_vars in
          this#on_expr acc e2
@@ -203,7 +203,7 @@ let sequence_visitor ~require_used used_vars =
        (* Assignment. This is pretty hairy because of list(...)
         * destructuring and the treatment necessary to allow
         * code like '$x = $x + 1'. *)
-       | Binop Aast.{ bop = Ast_defs.Eq _; lhs = e1; rhs = e2 } ->
+       | Assign (e1, _, e2) ->
          (* Unpack any list(...) destructuring and separate out locals
           * we are assigning to from other lvals. *)
          let (lvars, lval_exprs) =

@@ -25,9 +25,8 @@
            [([16:5-26],
              (Expr
                 ((Vector<T>), [16:5-25],
-                 (Binop
-                    { bop = (Eq None); lhs = ((~Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((~Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, Is_prop)));
-                      rhs = ((Vector<T>), [16:16-25], (ValCollection (([16:16-22], Vector), None, []))) }))))
+                 (Assign (((~Vector<T>), [16:5-13], (Obj_get (((this), [16:5-10], This), ((~Vector<T>), [16:12-13], (Id ([16:12-13], "x"))), OG_nullthrows, Is_prop))), None,
+                    ((Vector<T>), [16:16-25], (ValCollection (([16:16-22], Vector), None, []))))))))
              ]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -48,12 +47,9 @@
             [([20:5-21],
               (Expr
                  ((T), [20:5-20],
-                  (Binop
-                     { bop = (Eq None);
-                       lhs =
-                       ((T), [20:5-15],
-                        (Array_get (((~Vector<T>), [20:5-13], (Obj_get (((this), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None)));
-                       rhs = ((T), [20:18-20], (Lvar ([20:18-20], $x))) }))))
+                  (Assign (
+                     ((T), [20:5-15], (Array_get (((~Vector<T>), [20:5-13], (Obj_get (((this), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None))),
+                     None, ((T), [20:18-20], (Lvar ([20:18-20], $x))))))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -157,12 +153,10 @@
            [([33:3-28],
              (Expr
                 ((exact MyPhonyVector<X>), [33:3-27],
-                 (Binop
-                    { bop = (Eq None); lhs = ((exact MyPhonyVector<X>), [33:3-5], (Lvar ([33:3-5], $x)));
-                      rhs =
-                      ((exact MyPhonyVector<X>), [33:8-27],
-                       (New (((exact MyPhonyVector<X>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((X), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
-                      }))));
+                 (Assign (((exact MyPhonyVector<X>), [33:3-5], (Lvar ([33:3-5], $x))), None,
+                    ((exact MyPhonyVector<X>), [33:8-27],
+                     (New (((exact MyPhonyVector<X>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((X), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
+                    )))));
              ([34:3-20],
               (Expr
                  ((void), [34:3-19],
@@ -227,12 +221,10 @@
             [([20:5-21],
               (Expr
                  ((dynamic), [20:5-20],
-                  (Binop
-                     { bop = (Eq None);
-                       lhs =
-                       ((dynamic), [20:5-15],
-                        (Array_get (((~Vector<T>), [20:5-13], (Obj_get ((((this & dynamic)), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None)));
-                       rhs = ((dynamic), [20:18-20], (Lvar ([20:18-20], $x))) }))))
+                  (Assign (
+                     ((dynamic), [20:5-15],
+                      (Array_get (((~Vector<T>), [20:5-13], (Obj_get ((((this & dynamic)), [20:5-10], This), ((~Vector<T>), [20:12-13], (Id ([20:12-13], "x"))), OG_nullthrows, Is_prop))), None))),
+                     None, ((dynamic), [20:18-20], (Lvar ([20:18-20], $x))))))))
               ]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -271,12 +263,10 @@
            [([33:3-28],
              (Expr
                 ((exact MyPhonyVector<#3>), [33:3-27],
-                 (Binop
-                    { bop = (Eq None); lhs = ((exact MyPhonyVector<#3>), [33:3-5], (Lvar ([33:3-5], $x)));
-                      rhs =
-                      ((exact MyPhonyVector<#3>), [33:8-27],
-                       (New (((exact MyPhonyVector<#3>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((#3), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
-                      }))));
+                 (Assign (((exact MyPhonyVector<#3>), [33:3-5], (Lvar ([33:3-5], $x))), None,
+                    ((exact MyPhonyVector<#3>), [33:8-27],
+                     (New (((exact MyPhonyVector<#3>), [33:12-25], (CI ([33:12-25], "\\MyPhonyVector"))), [((#3), ([33:12-25], Hwildcard))], [], None, ((function(): void)))))
+                    )))));
              ([34:3-20],
               (Expr
                  ((void), [34:3-19],

@@ -50,7 +50,9 @@ Typing error (Typing[4110])
   Expected `dynamic`
   File "expr_tree.php", line 79, characters 39-48:
   Type `ExampleInt` is not a subtype of `dynamic` under dynamic-aware subtyping
-ERROR: File "invalid_operator.php", line 32, characters 34-40:
-You are trying to access the method `__unsupported` but this is an int (Typing[4062])
-  File "invalid_operator.php", line 32, characters 20-22:
-  Definition is here
+ERROR: File "invalid_operator.php", line 32, characters 40-40:
+Typing error (Typing[4429])
+  File "invalid_operator.php", line 32, characters 34-40:
+  Expected `num` because this is used in an arithmetic operation
+  File "expr_tree.php", line 79, characters 39-48:
+  But got `ExampleInt`

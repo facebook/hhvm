@@ -1815,7 +1815,7 @@ let refine_lvalue_type env ((ty, _, _) as te) ~refine =
 let rec condition_nullity ~is_sketchy ~nonnull (env : env) te =
   match te with
   (* assignment: both the rhs and lhs of the '=' must be made null/non-null *)
-  | (_, _, Aast.Binop { bop = Ast_defs.Eq None; lhs = var; rhs = te }) ->
+  | (_, _, Aast.Assign (var, None, te)) ->
     let env = condition_nullity ~is_sketchy ~nonnull env te in
     let env = condition_nullity ~is_sketchy ~nonnull env var in
     env
@@ -3716,6 +3716,15 @@ end = struct
       make_result env p e fty
     | Binop { bop; lhs = e1; rhs = e2 } ->
       Binop.check_binop
+        ~check_defined:ctxt.Context.check_defined
+        ~expected
+        env
+        p
+        bop
+        e1
+        (Either.First e2)
+    | Assign (e1, bop, e2) ->
+      Binop.check_assign
         ~check_defined:ctxt.Context.check_defined
         ~expected
         env
@@ -7127,7 +7136,7 @@ end = struct
     | Aast.Lvar _
     | Aast.Obj_get _
     | Aast.Class_get _
-    | Aast.Binop { bop = Ast_defs.Eq None; _ } ->
+    | Aast.Assign (_, None, _) ->
       let (env, ety) = Env.expand_type env ty in
       (match get_node ety with
       | Tprim Tbool -> (env, { pkgs = SSet.empty })
@@ -7786,9 +7795,7 @@ end = struct
     | Concurrent b ->
       let check_expr_rhs env s =
         match s with
-        | ( _pos,
-            ( Expr ((), _, Binop { bop = Ast_defs.Eq _; lhs = _; rhs = e })
-            | Expr (((), _, _) as e) ) ) ->
+        | (_pos, (Expr ((), _, Assign (_, _, e)) | Expr (((), _, _) as e))) ->
           let (env, te, ty) =
             Expr.expr ~expected:None ~ctxt:Expr.Context.default env e
           in
@@ -7797,18 +7804,17 @@ end = struct
       in
       let check_assign env ((((pos : Pos.t), s_) as s), te_ty_opt) =
         match s_ with
-        | Expr (((), _, Binop { bop = Ast_defs.Eq op; lhs; rhs = _ }) as outer)
-          ->
+        | Expr (((), _, Assign (lhs, op, _)) as outer) ->
           (match te_ty_opt with
           | Some (te, ty) ->
             let (env, te, _ty) =
-              Binop.check_binop
+              Binop.check_assign
                 ~check_defined:true
                 ~expected:None
                 env
                 outer
                 pos
-                (Ast_defs.Eq op)
+                op
                 lhs
                 (Either.Second (te, ty))
             in
@@ -9844,9 +9850,19 @@ and Binop : sig
     check_defined:bool ->
     expected:ExpectedTy.t option ->
     env ->
-    Nast.expr ->
     pos ->
     Ast_defs.bop ->
+    Nast.expr ->
+    (Nast.expr, Tast.expr * locl_ty) Either.t ->
+    env * Tast.expr * locl_ty
+
+  val check_assign :
+    check_defined:bool ->
+    expected:ExpectedTy.t option ->
+    env ->
+    Nast.expr ->
+    pos ->
+    Ast_defs.bop option ->
     Nast.expr ->
     (Nast.expr, Tast.expr * locl_ty) Either.t ->
     env * Tast.expr * locl_ty
@@ -9861,39 +9877,96 @@ end = struct
     | ( topt,
         p,
         Aast.(
-          Binop
-            {
-              bop = _;
-              lhs = te1;
-              rhs =
-                ( _,
-                  _,
-                  Hole
-                    ( (_, _, Binop { bop = op; lhs = _; rhs = te2 }),
-                      ty_have,
-                      ty_expect,
-                      source ) );
-            }) ) ->
+          Assign
+            ( te1,
+              _,
+              ( _,
+                _,
+                Hole
+                  ( (_, _, Binop { bop = op; lhs = _; rhs = te2 }),
+                    ty_have,
+                    ty_expect,
+                    source ) ) )) ) ->
       let hte2 = mk_hole te2 ~ty_have ~ty_expect ~source in
-      let te =
-        Aast.Binop { bop = Ast_defs.Eq (Some op); lhs = te1; rhs = hte2 }
-      in
+      let te = Aast.Assign (te1, Some op, hte2) in
       Some (topt, p, te)
     | ( topt,
         p,
-        Aast.Binop
-          {
-            bop = _;
-            lhs = te1;
-            rhs = (_, _, Aast.Binop { bop = op; lhs = _; rhs = te2 });
-          } ) ->
-      let te =
-        Aast.Binop { bop = Ast_defs.Eq (Some op); lhs = te1; rhs = te2 }
-      in
+        Aast.Assign (te1, _, (_, _, Aast.Binop { bop = op; lhs = _; rhs = te2 }))
+      ) ->
+      let te = Aast.Assign (te1, Some op, te2) in
       Some (topt, p, te)
     | _ -> None
 
-  let check_binop ~check_defined ~expected env outer p bop e1 e2 =
+  let check_assign ~check_defined ~expected env outer p op_opt e1 e2 =
+    let check_e2 checker env e2 =
+      match e2 with
+      | Either.First expr -> checker env expr
+      | Either.Second (te, ty) -> (env, te, ty)
+    in
+    let make_result env p te ty =
+      let (env, te, ty) = make_result env p te ty in
+      let env = Typing_local_ops.check_assignment env te in
+      (env, te, ty)
+    in
+    match op_opt with
+    (* For example, e1 += e2. This is typed and translated as if
+     * written e1 = e1 + e2.
+     * TODO TAST: is this right? e1 will get evaluated more than once
+     *)
+    | Some op ->
+      let (_, _, lval_) = e1 in
+      (match (op, lval_) with
+      | (Ast_defs.QuestionQuestion, Class_get _) ->
+        Errors.experimental_feature
+          p
+          "null coalesce assignment operator with static properties";
+        expr_error env p outer
+      | _ ->
+        let (env, te, ty) =
+          Binop.check_binop ~check_defined ~expected env p op e1 e2
+        in
+        let (env, te2, ty2) =
+          Binop.check_assign
+            ~check_defined
+            ~expected
+            env
+            outer
+            p
+            None
+            e1
+            (Either.Second (te, ty))
+        in
+        let te_opt = resugar_binop te2 in
+        begin
+          match te_opt with
+          | Some (_, _, te) -> make_result env p te ty2
+          | _ -> assert false
+        end)
+    | None ->
+      let (env, te2, ty2) =
+        check_e2
+          (Expr.expr
+             ~expected:None
+             ~ctxt:Expr.Context.{ default with check_defined })
+          env
+          e2
+      in
+      let (_, pos2, _) = te2 in
+      let expr_for_string_check =
+        match e2 with
+        | Either.First e -> Some e
+        | Either.Second _ -> None
+      in
+      let (env, te1, ty, ty_mismatch_opt) =
+        Assign.assign ?expr_for_string_check p env e1 pos2 ty2
+      in
+      let te =
+        Aast.Assign (te1, None, hole_on_ty_mismatch ~ty_mismatch_opt te2)
+      in
+      make_result env p te ty
+
+  let check_binop ~check_defined ~expected env p bop e1 e2 =
     let check_e2 checker env e2 =
       match e2 with
       | Either.First expr -> checker env expr
@@ -9934,73 +10007,6 @@ end = struct
         p
         (Aast.Binop { bop = Ast_defs.QuestionQuestion; lhs = te1; rhs = te2 })
         ty
-    | Ast_defs.Eq op_opt ->
-      let make_result env p te ty =
-        let (env, te, ty) = make_result env p te ty in
-        let env = Typing_local_ops.check_assignment env te in
-        (env, te, ty)
-      in
-      (match op_opt with
-      (* For example, e1 += e2. This is typed and translated as if
-       * written e1 = e1 + e2.
-       * TODO TAST: is this right? e1 will get evaluated more than once
-       *)
-      | Some op ->
-        let (_, _, expr_) = e1 in
-        (match (op, expr_) with
-        | (Ast_defs.QuestionQuestion, Class_get _) ->
-          Errors.experimental_feature
-            p
-            "null coalesce assignment operator with static properties";
-          expr_error env p outer
-        | _ ->
-          let (env, te, ty) =
-            Binop.check_binop ~check_defined ~expected env outer p op e1 e2
-          in
-          let (env, te2, ty2) =
-            Binop.check_binop
-              ~check_defined
-              ~expected
-              env
-              outer
-              p
-              (Ast_defs.Eq None)
-              e1
-              (Either.Second (te, ty))
-          in
-          let te_opt = resugar_binop te2 in
-          begin
-            match te_opt with
-            | Some (_, _, te) -> make_result env p te ty2
-            | _ -> assert false
-          end)
-      | None ->
-        let (env, te2, ty2) =
-          check_e2
-            (Expr.expr
-               ~expected:None
-               ~ctxt:Expr.Context.{ default with check_defined })
-            env
-            e2
-        in
-        let (_, pos2, _) = te2 in
-        let expr_for_string_check =
-          match e2 with
-          | Either.First e -> Some e
-          | Either.Second _ -> None
-        in
-        let (env, te1, ty, ty_mismatch_opt) =
-          Assign.assign ?expr_for_string_check p env e1 pos2 ty2
-        in
-        let te =
-          Aast.Binop
-            {
-              bop = Ast_defs.Eq None;
-              lhs = te1;
-              rhs = hole_on_ty_mismatch ~ty_mismatch_opt te2;
-            }
-        in
-        make_result env p te ty)
     | Ast_defs.Ampamp
     | Ast_defs.Barbar ->
       let c = Ast_defs.(equal_bop bop Ampamp) in
@@ -10358,8 +10364,7 @@ end = struct
   let check_using_expr has_await env ((_, pos, content) as using_clause) =
     match content with
     (* Simple assignment to local of form `$lvar = e` *)
-    | Binop { bop = Ast_defs.Eq None; lhs = (_, lvar_pos, Lvar lvar); rhs = e }
-      ->
+    | Assign ((_, lvar_pos, Lvar lvar), None, e) ->
       let (env, te, ty) =
         Expr.expr
           ~expected:None
@@ -10386,7 +10391,7 @@ end = struct
           env
           pos
           ty
-          (Aast.Binop { bop = Ast_defs.Eq None; lhs = inner_tast; rhs = te })
+          (Aast.Assign (inner_tast, None, te))
       in
       (env, (tast, [snd lvar]))
     (* Arbitrary expression. This will be assigned to a temporary *)

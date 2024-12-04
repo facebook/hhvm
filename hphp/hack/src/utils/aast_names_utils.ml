@@ -63,6 +63,7 @@ let expr_name = function
   | A.Cast _ -> "Cast"
   | A.Unop _ -> "Unop"
   | A.Binop _ -> "Binop"
+  | A.Assign _ -> "Assign"
   | A.Pipe _ -> "Pipe"
   | A.Eif _ -> "Eif"
   | A.Is _ -> "Is"

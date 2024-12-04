@@ -8,7 +8,6 @@ use std::collections::HashSet;
 use hack_macros::hack_expr;
 use naming_special_names_rust::special_idents;
 use nast::AsExpr;
-use nast::Binop;
 use nast::Block;
 use nast::CaptureLid;
 use nast::Expr;
@@ -24,7 +23,6 @@ use nast::UsingStmt;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
 use oxidized::aast_visitor::VisitorMut;
-use oxidized::ast_defs::Bop;
 use oxidized::local_id;
 use oxidized::naming_error::NamingError;
 use oxidized::nast;
@@ -220,15 +218,7 @@ impl TypedLocal {
     // need enforcement that cannot be done on the rhs, return an error
     fn enforce_assign_expr_rhs(&mut self, expr: &mut Expr) -> Result<(), ()> {
         match expr {
-            Expr(
-                (),
-                pos,
-                Expr_::Binop(box Binop {
-                    bop: Bop::Eq(None),
-                    lhs,
-                    rhs,
-                }),
-            ) => match self.get_lvar_hint(lhs) {
+            Expr((), pos, Expr_::Assign(box (lhs, None, rhs))) => match self.get_lvar_hint(lhs) {
                 Ok(Some(hint)) => {
                     self.wrap_rhs_with_as(rhs, hint, pos);
                     Ok(())
@@ -236,15 +226,7 @@ impl TypedLocal {
                 Ok(None) => Ok(()),
                 Err(()) => Err(()),
             },
-            Expr(
-                (),
-                _pos,
-                Expr_::Binop(box Binop {
-                    bop: Bop::Eq(Some(_)),
-                    lhs: _,
-                    rhs: _,
-                }),
-            ) => Err(()),
+            Expr((), _pos, Expr_::Assign(box (_, Some(_), _))) => Err(()),
             _ => Ok(()),
         }
     }
@@ -302,15 +284,9 @@ impl TypedLocal {
         used_tmps: &mut Vec<Lid>,
     ) {
         match expr {
-            Expr(
-                (),
-                _pos,
-                Expr_::Binop(box Binop {
-                    bop: Bop::Eq(op),
-                    lhs,
-                    rhs: _,
-                }),
-            ) => self.get_vars_to_enforce_lhs(lhs, op.is_some(), hints, assign_tmp, used_tmps),
+            Expr((), _pos, Expr_::Assign(box (lhs, op, _))) => {
+                self.get_vars_to_enforce_lhs(lhs, op.is_some(), hints, assign_tmp, used_tmps)
+            }
             _ => {}
         }
     }
@@ -518,11 +494,11 @@ impl<'a> VisitorMut<'a> for TypedLocal {
                         std::mem::swap(&mut init_lid, lid);
                         let mut init_expr = Expr((), Pos::NONE, Expr_::Null);
                         std::mem::swap(expr, &mut init_expr);
-                        let assign_expr_ = Expr_::Binop(Box::new(Binop {
-                            bop: Bop::Eq(None),
-                            lhs: Expr((), pos.clone(), Expr_::Lvar(Box::new(init_lid))),
-                            rhs: init_expr,
-                        }));
+                        let assign_expr_ = Expr_::mk_assign(
+                            Expr((), pos.clone(), Expr_::Lvar(Box::new(init_lid))),
+                            None,
+                            init_expr,
+                        );
                         let assign_expr = Expr((), pos.clone(), assign_expr_);
                         *stmt_ = Stmt_::Expr(Box::new(assign_expr));
                     } else if self.should_elab {
@@ -819,6 +795,7 @@ mod tests {
     use nast::Def;
     use nast::LocalId;
     use nast::Program;
+    use oxidized::ast::Bop;
 
     use super::*;
 
@@ -1124,15 +1101,15 @@ mod tests {
             Stmt_::Expr(Box::new(Expr(
                 (),
                 Pos::NONE,
-                Expr_::Binop(Box::new(Binop {
-                    bop: Bop::Eq(Some(Box::new(Bop::Plus))),
-                    lhs: Expr(
+                Expr_::mk_assign(
+                    Expr(
                         (),
                         Pos::NONE,
                         Expr_::Lvar(Box::new(Lid(Pos::NONE, (0, "$x".to_string())))),
                     ),
-                    rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
-                })),
+                    Some(Bop::Plus),
+                    Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                ),
             ))),
         );
         let mut orig = build_program(hack_stmts!("let $x:t = 1; #stmt;"));
@@ -1142,15 +1119,15 @@ mod tests {
             Stmt_::Expr(Box::new(Expr(
                 (),
                 Pos::NONE,
-                Expr_::Binop(Box::new(Binop {
-                    bop: Bop::Eq(Some(Box::new(Bop::Plus))),
-                    lhs: Expr(
+                Expr_::mk_assign(
+                    Expr(
                         (),
                         Pos::NONE,
                         Expr_::Lvar(Box::new(Lid(Pos::NONE, tmp0.clone()))),
                     ),
-                    rhs: Expr((), Pos::NONE, Expr_::Int("1".to_string())),
-                })),
+                    Some(Bop::Plus),
+                    Expr((), Pos::NONE, Expr_::Int("1".to_string())),
+                ),
             ))),
         );
         let stmt =

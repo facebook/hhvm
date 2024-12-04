@@ -125,8 +125,7 @@ let rec check_assign_lval on_expr env (((), pos, expr_) as expr) =
 let check_assign_expr on_expr env (((), _pos, expr_) as expr) =
   on_expr env expr;
   match expr_ with
-  | Binop { bop = Ast_defs.Eq _; lhs; rhs = _ } ->
-    check_assign_lval on_expr env lhs
+  | Assign (lhs, _, _) -> check_assign_lval on_expr env lhs
   | _ -> env
 
 let rec check_stmt on_expr env (id_pos, stmt_) =

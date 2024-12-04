@@ -12,7 +12,6 @@ use naming_special_names_rust::members;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::user_attributes;
 use oxidized::aast;
-use oxidized::aast::Binop;
 use oxidized::aast::Hint_;
 use oxidized::aast_defs;
 use oxidized::aast_defs::Hint;
@@ -316,12 +315,7 @@ impl Checker {
     }
 
     fn do_write_props_check(&mut self, e: &aast::Expr<(), ()>) {
-        if let Some(Binop {
-            bop: ast_defs::Bop::Eq(_),
-            lhs,
-            ..
-        }) = e.2.as_binop()
-        {
+        if let Some((lhs, _, _)) = e.2.as_assign() {
             self.check_is_obj_property_write_expr(e, lhs, true /* ignore_this_writes */);
         }
         if let Some((unop, expr)) = e.2.as_unop() {
@@ -335,12 +329,7 @@ impl Checker {
         if c.is_constructor_or_clone() {
             return;
         }
-        if let Some(aast::Binop {
-            bop: ast_defs::Bop::Eq(_),
-            lhs,
-            ..
-        }) = e.2.as_binop()
-        {
+        if let Some((lhs, _, _)) = e.2.as_assign() {
             self.check_is_obj_property_write_expr(e, lhs, false /* ignore_this_writes */);
         }
         if let Some((unop, expr)) = e.2.as_unop() {
@@ -473,12 +462,7 @@ impl<'ast> Visitor<'ast> for Checker {
             }
             if !c.has_access_globals() {
                 // Do access globals check e.g. C::$x = 5;
-                if let Some(Binop {
-                    bop: ast_defs::Bop::Eq(_),
-                    lhs,
-                    rhs,
-                }) = p.2.as_binop()
-                {
+                if let Some((lhs, _, rhs)) = p.2.as_assign() {
                     if let Some((_, _, ast_defs::PropOrMethod::IsProp)) = lhs.2.as_class_get() {
                         self.add_error(&lhs.1, syntax_error::access_globals_without_capability);
                         // Skipping one level of recursion when read_globals are present

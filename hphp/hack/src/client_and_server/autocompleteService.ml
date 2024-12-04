@@ -1836,7 +1836,7 @@ class local_vars =
           id_at_cursor <- Some (pos, name)
         else
           self#add id ty
-      | Aast.(Binop { bop = Ast_defs.Eq _; lhs = e1; rhs = e2 }) ->
+      | Aast.Assign (e1, _, e2) ->
         (* Process the rvalue before the lvalue, since the lvalue is annotated
            with its type after the assignment. *)
         self#on_expr env e2;

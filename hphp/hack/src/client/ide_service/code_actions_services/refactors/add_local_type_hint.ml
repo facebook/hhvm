@@ -53,12 +53,10 @@ let find_candidate ~(selection : Pos.t) ~entry ctx : candidate option =
           | Expr
               ( _,
                 _,
-                Binop
-                  {
-                    bop = Ast_defs.Eq None;
-                    lhs = (lvar_ty, lhs_pos, Lvar (lid_pos, lid));
-                    rhs = (_, rhs_pos, _);
-                  } )
+                Assign
+                  ( (lvar_ty, lhs_pos, Lvar (lid_pos, lid)),
+                    None,
+                    (_, rhs_pos, _) ) )
             when should_offer_refactor ~selection ~lhs_pos ~rhs_pos ->
             Some
               {

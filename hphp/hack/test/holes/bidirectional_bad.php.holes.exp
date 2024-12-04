@@ -32,10 +32,8 @@
            [([5:59-64],
              (Expr
                 ((dict<string, mixed>), [5:59-64],
-                 (Binop
-                    { bop = (Eq None);
-                      lhs = ((~dict<string, mixed>), [5:59-64], (Obj_get (((this), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop)));
-                      rhs = ((dict<string, mixed>), [5:59-64], (Lvar ([5:59-64], $spec))) }))));
+                 (Assign (((~dict<string, mixed>), [5:59-64], (Obj_get (((this), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop))), None,
+                    ((dict<string, mixed>), [5:59-64], (Lvar ([5:59-64], $spec))))))));
              ([Pos.none], Noop)]
            };
          m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
@@ -74,16 +72,14 @@
            [([9:3-29],
              (Expr
                 ((~?mixed), [9:3-28],
-                 (Binop
-                    { bop = (Eq None); lhs = ((~?mixed), [9:3-5], (Lvar ([9:3-5], $x)));
-                      rhs =
-                      ((~?mixed), [9:8-28],
-                       (Call
-                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [9:8-11], (Id ([9:8-11], "\\HH\\idx")));
-                            targs = [((string), ([9:8-11], Hwildcard)); ((mixed), ([9:8-11], Hwildcard))];
-                            args = [(Anormal ((dict<string, mixed>), [9:12-15], (Lvar ([9:12-15], $xs)))); (Anormal ((string), [9:17-27], (String "whatever")))]; 
-                            unpacked_arg = None }))
-                      }))));
+                 (Assign (((~?mixed), [9:3-5], (Lvar ([9:3-5], $x))), None,
+                    ((~?mixed), [9:8-28],
+                     (Call
+                        { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [9:8-11], (Id ([9:8-11], "\\HH\\idx")));
+                          targs = [((string), ([9:8-11], Hwildcard)); ((mixed), ([9:8-11], Hwildcard))];
+                          args = [(Anormal ((dict<string, mixed>), [9:12-15], (Lvar ([9:12-15], $xs)))); (Anormal ((string), [9:17-27], (String "whatever")))]; 
+                          unpacked_arg = None }))
+                    )))));
              ([10:3-13:4],
               (If (
                  ((bool), [10:7-26],
@@ -140,16 +136,14 @@
            [([17:3-29],
              (Expr
                 ((~?mixed), [17:3-28],
-                 (Binop
-                    { bop = (Eq None); lhs = ((~?mixed), [17:3-5], (Lvar ([17:3-5], $x)));
-                      rhs =
-                      ((~?mixed), [17:8-28],
-                       (Call
-                          { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [17:8-11], (Id ([17:8-11], "\\HH\\idx")));
-                            targs = [((string), ([17:8-11], Hwildcard)); ((mixed), ([17:8-11], Hwildcard))];
-                            args = [(Anormal ((dict<string, mixed>), [17:12-15], (Lvar ([17:12-15], $xs)))); (Anormal ((string), [17:17-27], (String "whatever")))]; 
-                            unpacked_arg = None }))
-                      }))));
+                 (Assign (((~?mixed), [17:3-5], (Lvar ([17:3-5], $x))), None,
+                    ((~?mixed), [17:8-28],
+                     (Call
+                        { func = (((function<Tk as arraykey, Tv>(?KeyedContainer<string, mixed> $collection, ?string $index)[]: ~?mixed)), [17:8-11], (Id ([17:8-11], "\\HH\\idx")));
+                          targs = [((string), ([17:8-11], Hwildcard)); ((mixed), ([17:8-11], Hwildcard))];
+                          args = [(Anormal ((dict<string, mixed>), [17:12-15], (Lvar ([17:12-15], $xs)))); (Anormal ((string), [17:17-27], (String "whatever")))]; 
+                          unpacked_arg = None }))
+                    )))));
              ([18:3-22:4],
               (If (
                  ((bool), [18:7-26],
@@ -160,16 +154,14 @@
                  [([19:5-19],
                    (Expr
                       ((~dict<arraykey, mixed>), [19:5-18],
-                       (Binop
-                          { bop = (Eq None); lhs = ((~dict<arraykey, mixed>), [19:5-7], (Lvar ([19:5-7], $y)));
-                            rhs =
-                            ((~dict<arraykey, mixed>), [19:10-18],
-                             (Call
-                                { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict")));
-                                  targs = [((arraykey), ([19:10-14], Hwildcard)); ((mixed), ([19:10-14], Hwildcard))];
-                                  args = [(Anormal ((~AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))]; 
-                                  unpacked_arg = None }))
-                            }))));
+                       (Assign (((~dict<arraykey, mixed>), [19:5-7], (Lvar ([19:5-7], $y))), None,
+                          ((~dict<arraykey, mixed>), [19:10-18],
+                           (Call
+                              { func = (((function<Tk as arraykey, Tv>(KeyedTraversable<arraykey, mixed> $arr)[]: dict<arraykey, mixed>)), [19:10-14], (Id ([19:10-14], "\\HH\\dict")));
+                                targs = [((arraykey), ([19:10-14], Hwildcard)); ((mixed), ([19:10-14], Hwildcard))];
+                                args = [(Anormal ((~AnyArray<arraykey, mixed>), [19:15-17], (Lvar ([19:15-17], $x))))]; 
+                                unpacked_arg = None }))
+                          )))));
                    ([21:5-15],
                     (Expr
                        ((C), [21:5-14],
@@ -218,11 +210,9 @@
             [([5:59-64],
               (Expr
                  ((dynamic), [5:59-64],
-                  (Binop
-                     { bop = (Eq None);
-                       lhs =
-                       ((~dict<string, mixed>), [5:59-64], (Obj_get ((((this & dynamic)), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop)));
-                       rhs = ((dynamic), [5:59-64], (Lvar ([5:59-64], $spec))) }))));
+                  (Assign (
+                     ((~dict<string, mixed>), [5:59-64], (Obj_get ((((this & dynamic)), [5:59-64], This), ((~dict<string, mixed>), [5:59-64], (Id ([5:59-64], "spec"))), OG_nullthrows, Is_prop))),
+                     None, ((dynamic), [5:59-64], (Lvar ([5:59-64], $spec))))))));
               ([Pos.none], Noop)]
             };
           m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 

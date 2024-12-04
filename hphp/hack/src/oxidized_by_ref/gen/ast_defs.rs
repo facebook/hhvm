@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c965574b67b0b4c732f79edc9596c4ca>>
+// @generated SignedSource<<d1c3aa1851788902f152c1cb8f1272d6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,6 +11,7 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
 pub use pos::Pos;
@@ -146,6 +147,7 @@ pub use oxidized::ast_defs::SplatKind;
     Deserialize,
     Eq,
     EqModuloPos,
+    FromOcamlRep,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -157,8 +159,8 @@ pub use oxidized::ast_defs::SplatKind;
 )]
 #[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "transform.opaque")]
-#[repr(C, u8)]
-pub enum Bop<'a> {
+#[repr(u8)]
+pub enum Bop {
     /// Addition: x + y
     Plus,
     /// Subtraction: x - y
@@ -207,12 +209,9 @@ pub enum Bop<'a> {
     Cmp,
     /// Coalesce: x ?? y
     QuestionQuestion,
-    /// =, +=, -=, ...
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    Eq(Option<&'a Bop<'a>>),
 }
-impl<'a> TrivialDrop for Bop<'a> {}
-arena_deserializer::impl_deserialize_in_arena!(Bop<'arena>);
+impl TrivialDrop for Bop {}
+arena_deserializer::impl_deserialize_in_arena!(Bop);
 
 pub use oxidized::ast_defs::Uop;
 pub use oxidized::ast_defs::Visibility;

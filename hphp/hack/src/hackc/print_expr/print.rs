@@ -379,6 +379,16 @@ fn print_expr(
             w.write_all(b" ")?;
             print_expr(ctx, w, env, rhs)
         }
+        Expr_::Assign(x) => {
+            let (lhs, bop, rhs) = &**x;
+            print_expr(ctx, w, env, lhs)?;
+            w.write_all(b" ")?;
+            if let Some(bop) = bop {
+                print_bop(w, bop)?
+            }
+            w.write_all(b"= ")?;
+            print_expr(ctx, w, env, rhs)
+        }
         Expr_::Call(c) => {
             let ast::CallExpr {
                 func,
@@ -918,11 +928,6 @@ fn print_bop(w: &mut dyn Write, bop: &ast_defs::Bop) -> Result<()> {
         Bop::Eqeq => w.write_all(b"=="),
         Bop::Eqeqeq => w.write_all(b"==="),
         Bop::Starstar => w.write_all(b"**"),
-        Bop::Eq(None) => w.write_all(b"="),
-        Bop::Eq(Some(bop)) => {
-            w.write_all(b"=")?;
-            print_bop(w, bop)
-        }
         Bop::Ampamp => w.write_all(b"&&"),
         Bop::Barbar => w.write_all(b"||"),
         Bop::Lt => w.write_all(b"<"),

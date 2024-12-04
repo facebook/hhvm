@@ -36,15 +36,6 @@ impl std::fmt::Debug for Id {
     }
 }
 
-impl Bop {
-    pub fn is_any_eq(&self) -> bool {
-        match self {
-            Self::Eq(_) => true,
-            _ => false,
-        }
-    }
-}
-
 impl Variance {
     pub fn negate(&self) -> Self {
         match self {

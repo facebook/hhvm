@@ -22,9 +22,7 @@
         f_body =
         { fb_ast =
           [([5:3-14],
-            (Expr
-               ((nothing), [5:3-13],
-                (Binop { bop = (Eq None); lhs = ((nothing), [5:3-8], (Array_get (((Vector<nothing>), [5:3-6], (Lvar ([5:3-6], $xs))), None))); rhs = ((nothing), [5:11-13], (Lvar ([5:11-13], $x))) }))))
+            (Expr ((nothing), [5:3-13], (Assign (((nothing), [5:3-8], (Array_get (((Vector<nothing>), [5:3-6], (Lvar ([5:3-6], $xs))), None))), None, ((nothing), [5:11-13], (Lvar ([5:11-13], $x))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-42], "__SupportDynamicType"); ua_params = [] }]; 
@@ -55,10 +53,7 @@
          f_body =
          { fb_ast =
            [([5:3-14],
-             (Expr
-                ((dynamic), [5:3-13],
-                 (Binop { bop = (Eq None); lhs = ((dynamic), [5:3-8], (Array_get (((dynamic), [5:3-6], (Lvar ([5:3-6], $xs))), None))); rhs = ((dynamic), [5:11-13], (Lvar ([5:11-13], $x))) }))))
-             ]
+             (Expr ((dynamic), [5:3-13], (Assign (((dynamic), [5:3-8], (Array_get (((dynamic), [5:3-6], (Lvar ([5:3-6], $xs))), None))), None, ((dynamic), [5:11-13], (Lvar ([5:11-13], $x))))))))]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-42], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };

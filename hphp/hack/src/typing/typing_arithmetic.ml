@@ -609,10 +609,7 @@ let binop p env bop p1 te1 ty1 p2 te2 ty2 =
   | Ast_defs.Barbar
   | Ast_defs.Ampamp ->
     make_result env te1 None te2 None (MakeType.bool (Reason.logic_ret p))
-  | Ast_defs.QuestionQuestion
-  | Ast_defs.Eq _
-    when not contains_any ->
-    assert false
+  | Ast_defs.QuestionQuestion when not contains_any -> assert false
   | _ ->
     assert contains_any;
     if is_any ty1 then

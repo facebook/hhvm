@@ -101,8 +101,7 @@ let visitor (selection : Pos.t) =
             pos;
             placeholder_n = 0 (* will be adjusted on the way up *);
           }
-      | (_, Aast.(Binop { bop = Ast_defs.Eq _; lhs = (_, lhs_pos, _); rhs = _ }))
-        ->
+      | (_, Aast.Assign ((_, lhs_pos, _), _, _)) ->
         let acc = super#on_expr env expr in
         Option.filter acc ~f:(fun candidate ->
             not @@ Pos.contains lhs_pos candidate.pos)

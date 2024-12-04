@@ -38,17 +38,15 @@ Errors:
            [([6:2-25],
              (Expr
                 ((~<expr#2> as C), [6:2-24],
-                 (Binop
-                    { bop = (Eq None); lhs = ((~<expr#2> as C), [6:2-4], (Lvar ([6:2-4], $x)));
-                      rhs =
-                      ((~<expr#2> as C), [6:7-24],
-                       (New (
-                          ((~C), [6:11-22],
-                           (CIexpr
-                              (((int | classname<C>)), [6:11-22],
-                               (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<nothing> | classname<C>)), Typing))))),
-                          [], [], None, (~(function(): void)))))
-                      }))))
+                 (Assign (((~<expr#2> as C), [6:2-4], (Lvar ([6:2-4], $x))), None,
+                    ((~<expr#2> as C), [6:7-24],
+                     (New (
+                        ((~C), [6:11-22],
+                         (CIexpr
+                            (((int | classname<C>)), [6:11-22],
+                             (Hole ((((int | classname<C>)), [6:11-22], (Lvar ([6:11-22], $class_name))), ((int | classname<C>)), ((classname<nothing> | classname<C>)), Typing))))),
+                        [], [], None, (~(function(): void)))))
+                    )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([4:10-40], "__SupportDynamicType"); ua_params = [] }]; 

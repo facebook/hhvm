@@ -309,11 +309,9 @@ mod inout_locals {
                 p.recurse(c, self.object())?;
                 Ok(match p {
                     // lhs op= _
-                    ast::Expr_::Binop(expr) => {
-                        let ast::Binop { bop, lhs: left, .. } = &**expr;
-                        if let ast_defs::Bop::Eq(_) = bop {
-                            collect_lvars_hs(c, left)
-                        }
+                    ast::Expr_::Assign(expr) => {
+                        let (left, _, _) = &**expr;
+                        collect_lvars_hs(c, left)
                     }
                     // $i++ or $i--
                     ast::Expr_::Unop(expr) => {
@@ -487,6 +485,7 @@ pub fn emit_expr<'a, 'd>(
             Expr_::ClassConst(e) => emit_class_const(emitter, env, pos, &e.0, &e.1),
             Expr_::Unop(e) => emit_unop(emitter, env, pos, e),
             Expr_::Binop(_) => emit_binop(emitter, env, pos, expression),
+            Expr_::Assign(_) => emit_assign(emitter, env, pos, expression),
             Expr_::Pipe(e) => emit_pipe(emitter, env, e),
             Expr_::Is(is_expr) => emit_is_expr(emitter, env, pos, is_expr),
             Expr_::As(box e) => emit_as(emitter, env, pos, e),
@@ -4787,9 +4786,6 @@ fn from_binop(op: &ast_defs::Bop) -> Result<InstrSeq> {
         B::Cmp => instr::cmp(),
         B::Percent => instr::mod_(),
         B::Xor => instr::bit_xor(),
-        B::Eq(_) => {
-            return Err(Error::unrecoverable("assignment is emitted differently"));
-        }
         B::QuestionQuestion => {
             return Err(Error::unrecoverable(
                 "null coalescence is emitted differently",
@@ -4985,14 +4981,6 @@ fn emit_binop<'a, 'd>(
     use ast_defs::Bop as B;
     match op {
         B::Ampamp | B::Barbar => emit_short_circuit_op(e, env, pos, expr),
-        B::Eq(None) => emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), false),
-        B::Eq(Some(eop)) if eop.is_question_question() => {
-            emit_null_coalesce_assignment(e, env, pos, e1, e2)
-        }
-        B::Eq(Some(eop)) => match binop_to_setopop(eop) {
-            None => Err(Error::unrecoverable("illegal eq op")),
-            Some(op) => emit_lval_op(e, env, pos, LValOp::SetOp(op), e1, Some(e2), false),
-        },
         B::QuestionQuestion => {
             let end_label = e.label_gen_mut().next_regular();
             let rhs = emit_expr(e, env, e2)?;
@@ -5032,6 +5020,25 @@ fn emit_binop<'a, 'd>(
                 default(e)
             }
         }
+    }
+}
+
+fn emit_assign<'a, 'd>(
+    e: &mut Emitter<'d>,
+    env: &Env<'a>,
+    pos: &Pos,
+    expr: &ast::Expr,
+) -> Result<InstrSeq> {
+    let (e1, op, e2) = expr.2.as_assign().unwrap();
+    match op {
+        None => emit_lval_op(e, env, pos, LValOp::Set, e1, Some(e2), false),
+        Some(eop) if eop.is_question_question() => {
+            emit_null_coalesce_assignment(e, env, pos, e1, e2)
+        }
+        Some(eop) => match binop_to_setopop(eop) {
+            None => Err(Error::unrecoverable("illegal eq op")),
+            Some(op) => emit_lval_op(e, env, pos, LValOp::SetOp(op), e1, Some(e2), false),
+        },
     }
 }
 
@@ -5898,13 +5905,15 @@ fn can_use_as_rhs_in_list_assignment(expr: &ast::Expr_) -> Result<bool> {
         | Expr_::ReadonlyExpr(_)
         | Expr_::ClassConst(_) => true,
         Expr_::Pipe(p) => can_use_as_rhs_in_list_assignment(&(p.2).2)?,
-        Expr_::Binop(b) => {
-            if let ast_defs::Bop::Eq(None) = &b.bop {
-                if (b.lhs).2.is_list() {
-                    return can_use_as_rhs_in_list_assignment(&(b.rhs).2);
+        Expr_::Binop(b) => b.bop.is_plus() || b.bop.is_question_question(),
+        Expr_::Assign(b) => {
+            let (lhs, bop, rhs) = &**b;
+            if bop.is_none() {
+                if lhs.2.is_list() {
+                    return can_use_as_rhs_in_list_assignment(&rhs.2);
                 }
             }
-            b.bop.is_plus() || b.bop.is_question_question() || b.bop.is_any_eq()
+            true
         }
         _ => false,
     })

@@ -20,13 +20,11 @@
           [([5:3-13],
             (Expr
                ((int), [5:3-12],
-                (Binop
-                   { bop = (Eq None);
-                     lhs =
-                     ((int), [5:3-8],
-                      (Array_get (((Pair<string, int>), [5:3-5], (Hole (((Pair<string, int>), [5:3-5], (Lvar ([5:3-5], $x))), (Pair<string, int>), (nothing), Typing))),
-                         (Some ((int), [5:6-7], (Int "1"))))));
-                     rhs = ((int), [5:11-12], (Int "1")) }))))
+                (Assign (
+                   ((int), [5:3-8],
+                    (Array_get (((Pair<string, int>), [5:3-5], (Hole (((Pair<string, int>), [5:3-5], (Lvar ([5:3-5], $x))), (Pair<string, int>), (nothing), Typing))),
+                       (Some ((int), [5:6-7], (Int "1")))))),
+                   None, ((int), [5:11-12], (Int "1")))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-29], "__SupportDynamicType"); ua_params = [] }]; 
@@ -55,14 +53,12 @@
            [([10:3-13],
              (Expr
                 ((int), [10:3-12],
-                 (Binop
-                    { bop = (Eq None);
-                      lhs =
-                      ((int), [10:3-8],
-                       (Array_get (
-                          ((KeyedContainer<string, int>), [10:3-5], (Hole (((KeyedContainer<string, int>), [10:3-5], (Lvar ([10:3-5], $x))), (KeyedContainer<string, int>), (nothing), Typing))),
-                          (Some ((int), [10:6-7], (Int "1"))))));
-                      rhs = ((int), [10:11-12], (Int "1")) }))))
+                 (Assign (
+                    ((int), [10:3-8],
+                     (Array_get (
+                        ((KeyedContainer<string, int>), [10:3-5], (Hole (((KeyedContainer<string, int>), [10:3-5], (Lvar ([10:3-5], $x))), (KeyedContainer<string, int>), (nothing), Typing))),
+                        (Some ((int), [10:6-7], (Int "1")))))),
+                    None, ((int), [10:11-12], (Int "1")))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([8:10-39], "__SupportDynamicType"); ua_params = [] }]; 
@@ -91,13 +87,11 @@
            [([15:3-13],
              (Expr
                 ((int), [15:3-12],
-                 (Binop
-                    { bop = (Eq None);
-                      lhs =
-                      ((int), [15:3-8],
-                       (Array_get (((AnyArray<string, int>), [15:3-5], (Hole (((AnyArray<string, int>), [15:3-5], (Lvar ([15:3-5], $x))), (AnyArray<string, int>), (nothing), Typing))),
-                          (Some ((int), [15:6-7], (Int "1"))))));
-                      rhs = ((int), [15:11-12], (Int "1")) }))))
+                 (Assign (
+                    ((int), [15:3-8],
+                     (Array_get (((AnyArray<string, int>), [15:3-5], (Hole (((AnyArray<string, int>), [15:3-5], (Lvar ([15:3-5], $x))), (AnyArray<string, int>), (nothing), Typing))),
+                        (Some ((int), [15:6-7], (Int "1")))))),
+                    None, ((int), [15:11-12], (Int "1")))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([13:10-33], "__SupportDynamicType"); ua_params = [] }]; 

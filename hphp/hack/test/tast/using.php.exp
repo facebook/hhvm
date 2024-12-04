@@ -40,13 +40,11 @@
                   us_exprs =
                   ([8:10-46],
                    [((exact Handle), [8:10-27],
-                     (Binop
-                        { bop = (Eq None); lhs = ((exact Handle), [8:10-12], (Lvar ([8:10-12], $x)));
-                          rhs = ((exact Handle), [8:15-27], (New (((exact Handle), [8:19-25], (CI ([8:19-25], "\\Handle"))), [], [], None, ((function(): void))))) }));
+                     (Assign (((exact Handle), [8:10-12], (Lvar ([8:10-12], $x))), None,
+                        ((exact Handle), [8:15-27], (New (((exact Handle), [8:19-25], (CI ([8:19-25], "\\Handle"))), [], [], None, ((function(): void))))))));
                      ((exact Handle), [8:29-46],
-                      (Binop
-                         { bop = (Eq None); lhs = ((exact Handle), [8:29-31], (Lvar ([8:29-31], $y)));
-                           rhs = ((exact Handle), [8:34-46], (New (((exact Handle), [8:38-44], (CI ([8:38-44], "\\Handle"))), [], [], None, ((function(): void))))) }))
+                      (Assign (((exact Handle), [8:29-31], (Lvar ([8:29-31], $y))), None,
+                         ((exact Handle), [8:34-46], (New (((exact Handle), [8:38-44], (CI ([8:38-44], "\\Handle"))), [], [], None, ((function(): void))))))))
                      ]);
                   us_block =
                   [([9:5-33],
@@ -55,9 +53,8 @@
                          us_exprs =
                          ([9:12-29],
                           [((exact Handle), [9:12-29],
-                            (Binop
-                               { bop = (Eq None); lhs = ((exact Handle), [9:12-14], (Lvar ([9:12-14], $z)));
-                                 rhs = ((exact Handle), [9:17-29], (New (((exact Handle), [9:21-27], (CI ([9:21-27], "\\Handle"))), [], [], None, ((function(): void))))) }))
+                            (Assign (((exact Handle), [9:12-14], (Lvar ([9:12-14], $z))), None,
+                               ((exact Handle), [9:17-29], (New (((exact Handle), [9:21-27], (CI ([9:21-27], "\\Handle"))), [], [], None, ((function(): void))))))))
                             ]);
                          us_block = [([Pos.none], Noop)] }))
                     ]

@@ -27,10 +27,7 @@
                                  f_unsafe_ctxs = None;
                                  f_body =
                                  { fb_ast =
-                                   [([6:7-10],
-                                     (Expr
-                                        ((), [6:7-10],
-                                         (Binop { bop = (Eq None); lhs = ((), [6:7-10], (Lvar ([6:7-10], $0fp0))); rhs = ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))) }))));
+                                   [([6:7-10], (Expr ((), [6:7-10], (Assign (((), [6:7-10], (Lvar ([6:7-10], $0fp0))), None, ((), [6:7-10], (FunctionPointer ((FP_id ([6:7-10], "\\foo")), []))))))));
                                      ([4:14-8:4],
                                       (Return
                                          (Some ((), [4:3-13],
@@ -108,18 +105,14 @@
                                                                     [([5:5-7:6],
                                                                     (For (
                                                                     [((), [5:10-16],
-                                                                    (Binop
-                                                                    { bop = (Eq None); 
-                                                                    lhs = ((), [5:10-12], (Lvar ([5:10-12], $i)));
-                                                                    rhs =
-                                                                    (
-                                                                    (), [5:15-16],
-                                                                    (
-                                                                    Call
+                                                                    (Assign ((
+                                                                    (), [5:10-12], (Lvar ([5:10-12], $i))), None,
+                                                                    ((), [5:15-16],
+                                                                    (Call
                                                                     { func = ((), [5:15-16], (Class_const (((), [5:15-16], (CI ([5:15-16], "\\ExampleDsl"))), ([5:15-16], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None })) }))],
+                                                                    unpacked_arg = None })))))],
                                                                     (Some (
                                                                     (), [5:18-22],
                                                                     (
@@ -138,14 +131,10 @@
                                                                     args = []; 
                                                                     unpacked_arg = None }))),
                                                                     [((), [5:24-35],
-                                                                    (Binop
-                                                                    { bop = (Eq None); 
-                                                                    lhs = ((), [5:24-26], (Lvar ([5:24-26], $i)));
-                                                                    rhs =
-                                                                    (
-                                                                    (), [5:29-35],
-                                                                    (
-                                                                    Call
+                                                                    (Assign ((
+                                                                    (), [5:24-26], (Lvar ([5:24-26], $i))), None,
+                                                                    ((), [5:29-35],
+                                                                    (Call
                                                                     { func =
                                                                     ((), [5:29-35],
                                                                     (Obj_get (((), [5:29-31], (Lvar ([5:29-31], $i))), ((), [5:29-35], (Id ([5:29-35], "__plus"))), OG_nullthrows, Is_method)));
@@ -158,7 +147,7 @@
                                                                     targs = []; 
                                                                     args = []; 
                                                                     unpacked_arg = None })))]; 
-                                                                    unpacked_arg = None })) }))],
+                                                                    unpacked_arg = None })))))],
                                                                     [([6:7-13],
                                                                     (Expr
                                                                     ((), [6:7-12],

@@ -1108,9 +1108,8 @@ mod tests {
                             Stmt_::Expr(Box::new(Expr(
                                 (),
                                 __hygienic_pos.clone(),
-                                Expr_::Binop(Box::new(Binop {
-                                    bop: Bop::Eq(None),
-                                    lhs: {
+                                Expr_::Assign(Box::new((
+                                    {
                                         let tmp: LocalId = name;
                                         Expr(
                                             (),
@@ -1118,7 +1117,8 @@ mod tests {
                                             Expr_::Lvar(Box::new(Lid(__hygienic_pos.clone(), tmp))),
                                         )
                                     },
-                                    rhs: Expr(
+                                    None,
+                                    Expr(
                                         (),
                                         __hygienic_pos.clone(),
                                         Expr_::New(Box::new((
@@ -1140,7 +1140,7 @@ mod tests {
                                             (),
                                         ))),
                                     ),
-                                })),
+                                ))),
                             ))),
                         )]),
                         Block(vec![Stmt(__hygienic_pos.clone(), Stmt_::Noop)]),
@@ -1218,9 +1218,8 @@ mod tests {
                     Stmt_::Expr(Box::new(Expr(
                         (),
                         __hygienic_pos.clone(),
-                        Expr_::Binop(Box::new(Binop {
-                            bop: Bop::Eq(None),
-                            lhs: Expr(
+                        Expr_::Assign(Box::new((
+                            Expr(
                                 (),
                                 __hygienic_pos.clone(),
                                 Expr_::Lvar(Box::new(Lid(
@@ -1228,7 +1227,8 @@ mod tests {
                                     (0isize, "$r".to_owned())
                                 )))
                             ),
-                            rhs: Expr(
+                            None,
+                            Expr(
                                 (),
                                 __hygienic_pos.clone(),
                                 Expr_::ClassGet(Box::new((
@@ -1251,7 +1251,7 @@ mod tests {
                                     PropOrMethod::IsProp
                                 )))
                             )
-                        }))
+                        )))
                     )))
                 ));
                 let stmt2 = quote!(Stmt(
@@ -1279,9 +1279,8 @@ mod tests {
                                 Stmt_::Expr(Box::new(Expr(
                                     (),
                                     __hygienic_pos.clone(),
-                                    Expr_::Binop(Box::new(Binop {
-                                        bop: Bop::Eq(None),
-                                        lhs: Expr(
+                                    Expr_::Assign(Box::new((
+                                        Expr(
                                             (),
                                             __hygienic_pos.clone(),
                                             Expr_::ClassGet(Box::new((
@@ -1304,7 +1303,8 @@ mod tests {
                                                 PropOrMethod::IsProp
                                             )))
                                         ),
-                                        rhs: Expr(
+                                        None,
+                                        Expr(
                                             (),
                                             __hygienic_pos.clone(),
                                             Expr_::Call(Box::new(CallExpr {
@@ -1324,7 +1324,7 @@ mod tests {
                                                 unpacked_arg: None
                                             }))
                                         )
-                                    }))
+                                    )))
                                 )))
                             ),
                             Stmt(
@@ -1332,9 +1332,8 @@ mod tests {
                                 Stmt_::Expr(Box::new(Expr(
                                     (),
                                     __hygienic_pos.clone(),
-                                    Expr_::Binop(Box::new(Binop {
-                                        bop: Bop::Eq(None),
-                                        lhs: Expr(
+                                    Expr_::Assign(Box::new((
+                                        Expr(
                                             (),
                                             __hygienic_pos.clone(),
                                             Expr_::Lvar(Box::new(Lid(
@@ -1342,7 +1341,8 @@ mod tests {
                                                 (0isize, "$r".to_owned())
                                             )))
                                         ),
-                                        rhs: Expr(
+                                        None,
+                                        Expr(
                                             (),
                                             __hygienic_pos.clone(),
                                             Expr_::ClassGet(Box::new((
@@ -1365,7 +1365,7 @@ mod tests {
                                                 PropOrMethod::IsProp
                                             )))
                                         )
-                                    }))
+                                    )))
                                 )))
                             )
                         ]),
@@ -1564,9 +1564,8 @@ mod tests {
                                                 Stmt_::Expr(Box::new(Expr(
                                                     (),
                                                     __hygienic_pos.clone(),
-                                                    Expr_::Binop(Box::new(Binop {
-                                                        bop: Bop::Eq(None),
-                                                        lhs: Expr(
+                                                    Expr_::Assign(Box::new((
+                                                        Expr(
                                                             (),
                                                             __hygienic_pos.clone(),
                                                             Expr_::Lvar(Box::new(Lid(
@@ -1574,11 +1573,12 @@ mod tests {
                                                                 (0isize, "$result".to_owned()),
                                                             ))),
                                                         ),
-                                                        rhs: {
+                                                        None,
+                                                        {
                                                             let tmp: Expr = kind;
                                                             tmp
                                                         },
-                                                    })),
+                                                    ))),
                                                 ))),
                                             ),
                                             Stmt(

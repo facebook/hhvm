@@ -21,7 +21,6 @@
 use std::collections::BTreeMap;
 
 use naming_special_names_rust as sn;
-use nast::Binop;
 use nast::CaptureLid;
 use nast::Expr;
 use nast::Expr_;
@@ -97,13 +96,11 @@ impl<'ast> VisitorMut<'ast> for Visitor {
                 self.add_local_ref(lv);
                 e.recurse(env, self.object())
             }
-            Expr_::Binop(box Binop { bop, lhs, .. }) => {
-                if let nast::Bop::Eq(None) = bop {
-                    // Introducing a new local variable.
-                    //
-                    //     $x = ...
-                    self.add_local_defs_from_lvalue(lhs);
-                }
+            Expr_::Assign(box (lhs, _, _)) => {
+                // Introducing a new local variable.
+                //
+                //     $x = ...
+                self.add_local_defs_from_lvalue(lhs);
                 e.recurse(env, self.object())
             }
             Expr_::Lfun(box (f, idl)) => {

@@ -28,7 +28,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([5:3-10], (Expr ((int), [5:3-9], (Binop { bop = (Eq None); lhs = ((int), [5:3-5], (Lvar ([5:3-5], $x))); rhs = ((int), [5:8-9], (Int "0")) }))));
+          [([5:3-10], (Expr ((int), [5:3-9], (Assign (((int), [5:3-5], (Lvar ([5:3-5], $x))), None, ((int), [5:8-9], (Int "0")))))));
             ([6:3-15],
              (Expr
                 ((#0), [6:3-14],
@@ -48,7 +48,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                               targs = [((#2), ([12:7-14], Hwildcard))]; 
                               args = [(Anormal ((int), [12:15-17], (Lvar ([12:15-17], $x))))]; 
                               unpacked_arg = None }))));
-                     ([14:7-15], (Expr ((string), [14:7-14], (Binop { bop = (Eq None); lhs = ((string), [14:7-9], (Lvar ([14:7-9], $x))); rhs = ((string), [14:12-14], (String "")) }))));
+                     ([14:7-15], (Expr ((string), [14:7-14], (Assign (((string), [14:7-9], (Lvar ([14:7-9], $x))), None, ((string), [14:12-14], (String "")))))));
                      ([15:7-19],
                       (Expr
                          ((#4), [15:7-18],
@@ -67,7 +67,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                               targs = [((#6), ([19:7-14], Hwildcard))]; 
                               args = [(Anormal (((int | string)), [19:15-17], (Lvar ([19:15-17], $x))))]; 
                               unpacked_arg = None }))));
-                     ([20:7-17], (Expr ((bool), [20:7-16], (Binop { bop = (Eq None); lhs = ((bool), [20:7-9], (Lvar ([20:7-9], $x))); rhs = ((bool), [20:12-16], True) }))));
+                     ([20:7-17], (Expr ((bool), [20:7-16], (Assign (((bool), [20:7-9], (Lvar ([20:7-9], $x))), None, ((bool), [20:12-16], True))))));
                      ([22:7-19],
                       (Expr
                          ((#8), [22:7-18],
@@ -96,7 +96,7 @@ File "switch_fallthrough.php", line 37, characters 3-13:
                               targs = [((#12), ([30:7-14], Hwildcard))]; 
                               args = [(Anormal ((int), [30:15-17], (Lvar ([30:15-17], $x))))]; 
                               unpacked_arg = None }))));
-                     ([32:7-16], (Expr ((float), [32:7-15], (Binop { bop = (Eq None); lhs = ((float), [32:7-9], (Lvar ([32:7-9], $x))); rhs = ((float), [32:12-15], (Float "1.0")) }))));
+                     ([32:7-16], (Expr ((float), [32:7-15], (Assign (((float), [32:7-9], (Lvar ([32:7-9], $x))), None, ((float), [32:12-15], (Float "1.0")))))));
                      ([33:7-19],
                       (Expr
                          ((#14), [33:7-18],

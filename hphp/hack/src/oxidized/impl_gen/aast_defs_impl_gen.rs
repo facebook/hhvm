@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9b7a9ca695fda3215d2cc0201adb66cb>>
+// @generated SignedSource<<35005f823a3eca166148242429a85327>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1048,6 +1048,9 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn mk_binop(p0: Binop<Ex, En>) -> Self {
         Expr_::Binop(Box::new(p0))
     }
+    pub fn mk_assign(p0: Expr<Ex, En>, p1: Option<ast_defs::Bop>, p2: Expr<Ex, En>) -> Self {
+        Expr_::Assign(Box::new((p0, p1, p2)))
+    }
     pub fn mk_pipe(p0: Lid, p1: Expr<Ex, En>, p2: Expr<Ex, En>) -> Self {
         Expr_::Pipe(Box::new((p0, p1, p2)))
     }
@@ -1307,6 +1310,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn is_binop(&self) -> bool {
         match self {
             Expr_::Binop(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_assign(&self) -> bool {
+        match self {
+            Expr_::Assign(..) => true,
             _ => false,
         }
     }
@@ -1599,6 +1608,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_binop(&self) -> Option<&Binop<Ex, En>> {
         match self {
             Expr_::Binop(p0) => Some(&p0),
+            _ => None,
+        }
+    }
+    pub fn as_assign(&self) -> Option<(&Expr<Ex, En>, &Option<ast_defs::Bop>, &Expr<Ex, En>)> {
+        match self {
+            Expr_::Assign(p0) => Some((&p0.0, &p0.1, &p0.2)),
             _ => None,
         }
     }
@@ -1922,6 +1937,18 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_binop_mut(&mut self) -> Option<&mut Binop<Ex, En>> {
         match self {
             Expr_::Binop(p0) => Some(p0.as_mut()),
+            _ => None,
+        }
+    }
+    pub fn as_assign_mut(
+        &mut self,
+    ) -> Option<(
+        &mut Expr<Ex, En>,
+        &mut Option<ast_defs::Bop>,
+        &mut Expr<Ex, En>,
+    )> {
+        match self {
+            Expr_::Assign(p0) => Some((&mut p0.0, &mut p0.1, &mut p0.2)),
             _ => None,
         }
     }
@@ -2250,6 +2277,12 @@ impl<Ex, En> Expr_<Ex, En> {
     pub fn as_binop_into(self) -> Option<Binop<Ex, En>> {
         match self {
             Expr_::Binop(p0) => Some(*p0),
+            _ => None,
+        }
+    }
+    pub fn as_assign_into(self) -> Option<(Expr<Ex, En>, Option<ast_defs::Bop>, Expr<Ex, En>)> {
+        match self {
+            Expr_::Assign(p0) => Some(((*p0).0, (*p0).1, (*p0).2)),
             _ => None,
         }
     }

@@ -98,7 +98,7 @@ let rec expr_
     (* unary operations won't return function pointrs, so we discard the entity. *)
     let (env, _) = expr_ upcasted_info env e in
     (env, None)
-  | A.(Binop { bop = Ast_defs.Eq None; lhs = e1; rhs = e2 }) ->
+  | A.Assign (e1, None, e2) ->
     let (env, entity_rhs) = expr_ upcasted_info env e2 in
     let env = assign env e1 entity_rhs in
     (env, None)
@@ -106,13 +106,7 @@ let rec expr_
     let (env, entity1) = expr_ upcasted_info env e1 in
     let (env, entity2) = expr_ upcasted_info env e2 in
     join env entity1 entity2
-  | A.(
-      Binop
-        {
-          bop = Ast_defs.Eq (Some Ast_defs.QuestionQuestion);
-          lhs = e1;
-          rhs = e2;
-        }) ->
+  | A.Assign (e1, Some Ast_defs.QuestionQuestion, e2) ->
     let (env, entity1) = expr_ upcasted_info env e1 in
     let (env, entity2) = expr_ upcasted_info env e2 in
     let (env, entity_rhs) = join env entity1 entity2 in

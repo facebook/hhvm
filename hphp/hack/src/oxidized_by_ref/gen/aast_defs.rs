@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ee2a7450924a761ade8025956a972a07>>
+// @generated SignedSource<<1822db25083a71674bae3ec71c04b3e9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1194,6 +1194,15 @@ pub enum Expr_<'a, Ex, En> {
     ///     $foo + $bar
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     Binop(&'a Binop<'a, Ex, En>),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(inline_tuple)]
+    Assign(
+        &'a (
+            &'a Expr<'a, Ex, En>,
+            Option<ast_defs::Bop>,
+            &'a Expr<'a, Ex, En>,
+        ),
+    ),
     /// Pipe expression. The lid is the ID of the $$ that is implicitly
     /// declared by this pipe.
     ///
@@ -1461,9 +1470,8 @@ arena_deserializer::impl_deserialize_in_arena!(HoleSource<'arena>);
 #[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Binop<'a, Ex, En> {
-    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.opaque")]
-    pub bop: ast_defs::Bop<'a>,
+    pub bop: ast_defs::Bop,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     #[rust_to_ocaml(attr = "transform.explicit")]
     pub lhs: &'a Expr<'a, Ex, En>,

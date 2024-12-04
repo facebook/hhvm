@@ -42,17 +42,14 @@
            [([10:3-16],
              (Expr
                 ((exact A), [10:3-15],
-                 (Binop
-                    { bop = (Eq None); lhs = ((exact A), [10:3-5], (Lvar ([10:3-5], $x)));
-                      rhs = ((exact A), [10:8-15], (New (((exact A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, ((function(): void))))) }))));
+                 (Assign (((exact A), [10:3-5], (Lvar ([10:3-5], $x))), None, ((exact A), [10:8-15], (New (((exact A), [10:12-13], (CI ([10:12-13], "\\A"))), [], [], None, ((function(): void))))))))));
              ([11:3-13:4],
               (While (((?A), [11:10-12], (Lvar ([11:10-12], $x))),
                  [([12:5-22],
                    (Expr
                       ((?A), [12:5-21],
-                       (Binop
-                          { bop = (Eq None); lhs = ((?A), [12:5-7], (Lvar ([12:5-7], $x)));
-                            rhs = ((?A), [12:10-21], (Call { func = (((function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })) }))))
+                       (Assign (((?A), [12:5-7], (Lvar ([12:5-7], $x))), None,
+                          ((?A), [12:10-21], (Call { func = (((function(): ?A)), [12:10-19], (Id ([12:10-19], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })))))))
                    ]
                  )))
              ]
@@ -76,15 +73,13 @@
            [([17:3-18:4],
              (For (
                 [((exact A), [17:8-20],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact A), [17:8-10], (Lvar ([17:8-10], $x)));
-                       rhs = ((exact A), [17:13-20], (New (((exact A), [17:17-18], (CI ([17:17-18], "\\A"))), [], [], None, ((function(): void))))) }))
+                  (Assign (((exact A), [17:8-10], (Lvar ([17:8-10], $x))), None, (
+                     (exact A), [17:13-20], (New (((exact A), [17:17-18], (CI ([17:17-18], "\\A"))), [], [], None, ((function(): void))))))))
                   ],
                 (Some ((?A), [17:22-24], (Lvar ([17:22-24], $x)))),
                 [((?A), [17:26-42],
-                  (Binop
-                     { bop = (Eq None); lhs = ((?A), [17:26-28], (Lvar ([17:26-28], $x)));
-                       rhs = ((?A), [17:31-42], (Call { func = (((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })) }))
+                  (Assign (((?A), [17:26-28], (Lvar ([17:26-28], $x))), None,
+                     ((?A), [17:31-42], (Call { func = (((function(): ?A)), [17:31-40], (Id ([17:31-40], "\\get_A_opt"))); targs = []; args = []; unpacked_arg = None })))))
                   ],
                 [])))
              ]

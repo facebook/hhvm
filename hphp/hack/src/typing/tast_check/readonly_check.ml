@@ -566,7 +566,7 @@ let check =
 
     method! on_expr env e =
       match e with
-      | (_, _, Binop { bop = Ast_defs.Eq _; lhs; rhs }) ->
+      | (_, _, Assign (lhs, _, rhs)) ->
         assign env lhs rhs;
         self#on_expr env rhs
       | ( _,
@@ -742,7 +742,7 @@ let handler =
           fun e ->
         let val_kind = Tast_env.get_val_kind env in
         match (e, val_kind) with
-        | ((_, _, Binop { bop = Ast_defs.Eq _; lhs; rhs }), _) ->
+        | ((_, _, Assign (lhs, _, rhs)), _) ->
           (* Check property assignments to make sure they're safe *)
           assign env lhs rhs
         (* Assume obj is mutable here since you can't have a readonly thing

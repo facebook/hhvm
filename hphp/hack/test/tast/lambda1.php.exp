@@ -10,70 +10,63 @@
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([3:3-14], (Expr ((string), [3:3-13], (Binop { bop = (Eq None); lhs = ((string), [3:3-5], (Lvar ([3:3-5], $s))); rhs = ((string), [3:8-13], (String "foo")) }))));
+          [([3:3-14], (Expr ((string), [3:3-13], (Assign (((string), [3:3-5], (Lvar ([3:3-5], $s))), None, ((string), [3:8-13], (String "foo")))))));
             ([4:3-42],
              (Expr
                 (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:3-41],
-                 (Binop
-                    { bop = (Eq None); lhs = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:3-5], (Lvar ([4:3-5], $f)));
-                      rhs =
-                      (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:8-41],
-                       (Lfun (
-                          { f_span = [4:8-41]; f_readonly_this = None; 
-                            f_annotation = (); f_readonly_ret = None; 
-                            f_ret = ((string), None);
-                            f_params =
-                            [{ param_annotation = (~?(bool | float | resource | arraykey | HH\FormatString<nothing>));
-                               param_type_hint = ((~?(bool | float | resource | arraykey | HH\FormatString<nothing>)), None); 
-                               param_pos = [4:8-10]; param_name = "$n"; 
-                               param_info = Param_required; param_readonly = None; 
-                               param_splat = None; param_callconv = Pnormal; 
-                               param_user_attributes = []; param_visibility = None }
-                              ];
-                            f_ctxs = None; f_unsafe_ctxs = None;
-                            f_body =
-                            { fb_ast =
-                              [([4:17-39],
-                                (Return
-                                   (Some ((string), [4:24-38],
-                                          (Binop
-                                             { bop = Dot;
-                                               lhs =
-                                               ((string), [4:24-31],
-                                                (Binop
-                                                   { bop = Dot; lhs = ((~?(bool | float | resource | arraykey | HH\FormatString<nothing>)), [4:24-26], (Lvar ([4:24-26], $n)));
-                                                     rhs = ((~string), [4:29-31], (Lvar ([4:29-31], $s))) }));
-                                               rhs = ((string), [4:34-38], (String "\\n")) })))))
-                                ]
-                              };
-                            f_fun_kind = FSync; f_user_attributes = []; 
-                            f_external = false; f_doc_comment = None },
-                          [((string), ([4:29-31], $s))])))
-                      }))));
+                 (Assign ((((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:3-5], (Lvar ([4:3-5], $f))), None,
+                    (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [4:8-41],
+                     (Lfun (
+                        { f_span = [4:8-41]; f_readonly_this = None; 
+                          f_annotation = (); f_readonly_ret = None; f_ret = ((string), None);
+                          f_params =
+                          [{ param_annotation = (~?(bool | float | resource | arraykey | HH\FormatString<nothing>));
+                             param_type_hint = ((~?(bool | float | resource | arraykey | HH\FormatString<nothing>)), None); 
+                             param_pos = [4:8-10]; param_name = "$n"; 
+                             param_info = Param_required; param_readonly = None; 
+                             param_splat = None; param_callconv = Pnormal; 
+                             param_user_attributes = []; param_visibility = None }
+                            ];
+                          f_ctxs = None; f_unsafe_ctxs = None;
+                          f_body =
+                          { fb_ast =
+                            [([4:17-39],
+                              (Return
+                                 (Some ((string), [4:24-38],
+                                        (Binop
+                                           { bop = Dot;
+                                             lhs =
+                                             ((string), [4:24-31],
+                                              (Binop
+                                                 { bop = Dot; lhs = ((~?(bool | float | resource | arraykey | HH\FormatString<nothing>)), [4:24-26], (Lvar ([4:24-26], $n)));
+                                                   rhs = ((~string), [4:29-31], (Lvar ([4:29-31], $s))) }));
+                                             rhs = ((string), [4:34-38], (String "\\n")) })))))
+                              ]
+                            };
+                          f_fun_kind = FSync; f_user_attributes = []; 
+                          f_external = false; f_doc_comment = None },
+                        [((string), ([4:29-31], $s))])))
+                    )))));
             ([5:3-14],
              (Expr
                 ((string), [5:3-13],
-                 (Binop
-                    { bop = (Eq None); lhs = ((string), [5:3-5], (Lvar ([5:3-5], $x)));
-                      rhs =
-                      ((string), [5:8-13],
-                       (Call
-                          { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); 
-                            targs = []; args = [(Anormal ((int), [5:11-12], (Int "4")))]; 
-                            unpacked_arg = None }))
-                      }))));
+                 (Assign (((string), [5:3-5], (Lvar ([5:3-5], $x))), None,
+                    ((string), [5:8-13],
+                     (Call
+                        { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [5:8-10], (Lvar ([5:8-10], $f))); 
+                          targs = []; args = [(Anormal ((int), [5:11-12], (Int "4")))]; 
+                          unpacked_arg = None }))
+                    )))));
             ([6:3-18],
              (Expr
                 ((string), [6:3-17],
-                 (Binop
-                    { bop = (Eq None); lhs = ((string), [6:3-5], (Lvar ([6:3-5], $y)));
-                      rhs =
-                      ((string), [6:8-17],
-                       (Call
-                          { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); 
-                            targs = []; args = [(Anormal ((string), [6:11-16], (String "bar")))]; 
-                            unpacked_arg = None }))
-                      }))))
+                 (Assign (((string), [6:3-5], (Lvar ([6:3-5], $y))), None,
+                    ((string), [6:8-17],
+                     (Call
+                        { func = (((function(~?(bool | float | resource | arraykey | HH\FormatString<nothing>) $n): string)), [6:8-10], (Lvar ([6:8-10], $f))); 
+                          targs = []; args = [(Anormal ((string), [6:11-16], (String "bar")))]; 
+                          unpacked_arg = None }))
+                    )))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([2:10-22], "__SupportDynamicType"); ua_params = [] }]; 

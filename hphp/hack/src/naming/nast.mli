@@ -192,6 +192,8 @@ module Visitor_DEPRECATED : sig
 
       method on_binop : 'a -> Ast_defs.bop -> expr -> expr -> 'a
 
+      method on_assign : 'a -> expr -> Ast_defs.bop option -> expr -> 'a
+
       method on_block : 'a -> block -> 'a
 
       method on_break : 'a -> 'a

@@ -601,6 +601,10 @@ and ('ex, 'en) expr_ =
       (** Binary operator.
        *
        *     $foo + $bar *)
+  | Assign of
+      ('ex, 'en) expr
+      * (Ast_defs.bop[@transform.opaque]) option
+      * ('ex, 'en) expr
   | Pipe of lid * ('ex, 'en) expr * ('ex, 'en) expr
       (** Pipe expression. The lid is the ID of the $$ that is implicitly
        * declared by this pipe.

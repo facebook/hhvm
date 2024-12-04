@@ -75,9 +75,8 @@
              ([15:3-24],
               (Expr
                  ((exact TestVec), [15:3-23],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestVec), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((exact TestVec), [15:10-23], (New (((exact TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestVec), [15:3-7], (Lvar ([15:3-7], $foo))), None,
+                     ((exact TestVec), [15:10-23], (New (((exact TestVec), [15:14-21], (CI ([15:14-21], "\\TestVec"))), [], [], None, ((function(): void))))))))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -129,9 +128,8 @@
              ([27:3-24],
               (Expr
                  ((exact TestVec), [27:3-23],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestVec), [27:10-23], (New (((exact TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestVec), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestVec), [27:10-23], (New (((exact TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))))))));
              ([30:3-59],
               (Expr
                  ((~void), [30:3-58],
@@ -241,9 +239,8 @@
              ([27:3-24],
               (Expr
                  ((exact TestVec), [27:3-23],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestVec), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestVec), [27:10-23], (New (((exact TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestVec), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestVec), [27:10-23], (New (((exact TestVec), [27:14-21], (CI ([27:14-21], "\\TestVec"))), [], [], None, ((function(): void))))))))));
              ([30:3-59],
               (Expr
                  ((~void), [30:3-58],

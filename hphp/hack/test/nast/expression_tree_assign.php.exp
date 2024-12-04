@@ -82,18 +82,14 @@
                                                                     [([4:23-30],
                                                                     (Expr
                                                                     ((), [4:23-29],
-                                                                    (Binop
-                                                                    { bop = (Eq None); 
-                                                                    lhs = ((), [4:23-25], (Lvar ([4:23-25], $x)));
-                                                                    rhs =
-                                                                    (
-                                                                    (), [4:28-29],
-                                                                    (
-                                                                    Call
+                                                                    (Assign ((
+                                                                    (), [4:23-25], (Lvar ([4:23-25], $x))), None,
+                                                                    ((), [4:28-29],
+                                                                    (Call
                                                                     { func = ((), [4:28-29], (Class_const (((), [4:28-29], (CI ([4:28-29], "\\ExampleDsl"))), ([4:28-29], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None })) }))));
+                                                                    unpacked_arg = None })))))));
                                                                     ([4:14-32],
                                                                     (Return
                                                                     (Some (

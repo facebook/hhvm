@@ -26,8 +26,7 @@ class await_visitor =
     method! on_stmt () stmt =
       begin
         match snd stmt with
-        | Expr
-            (_, p, Binop { bop = Ast_defs.Eq _; lhs = _; rhs = (_, _, Await _) })
+        | Expr (_, p, Assign (_, _, (_, _, Await _)))
         | Expr (_, p, Await _) ->
           Lints_errors.await_in_loop p
         | _ -> ()

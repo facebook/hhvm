@@ -21,12 +21,3 @@ impl std::fmt::Debug for Id<'_> {
         write!(f, "Id({:?}, {:?})", self.pos(), self.name())
     }
 }
-
-impl<'a> Bop<'a> {
-    pub fn is_any_eq(&self) -> bool {
-        match self {
-            Self::Eq(_) => true,
-            _ => false,
-        }
-    }
-}

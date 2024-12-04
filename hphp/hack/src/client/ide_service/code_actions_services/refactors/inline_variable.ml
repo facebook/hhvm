@@ -222,12 +222,7 @@ let visitor ~(selection : Pos.t) =
       let (pos, stmt_) = stmt in
       let open Aast in
       match stmt_ with
-      | Expr
-          ( _,
-            _,
-            Binop
-              { bop = Ast_defs.Eq _; lhs = (_, _, Lvar (_, lid)) as lhs; rhs }
-          ) ->
+      | Expr (_, _, Assign (((_, _, Lvar (_, lid)) as lhs), _, rhs)) ->
         let name = Local_id.get_name lid in
         let def_needs_grouping =
           match rhs with

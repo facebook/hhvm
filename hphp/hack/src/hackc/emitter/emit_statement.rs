@@ -117,7 +117,7 @@ pub fn emit_stmt<'a, 'd>(
         a::Stmt_::Expr(e_) => match &e_.2 {
             a::Expr_::Await(a) => emit_await_(e, env, e_, pos, a),
             a::Expr_::Call(c) => emit_call(e, env, e_, pos, c),
-            a::Expr_::Binop(bop) => emit_binop(e, env, e_, pos, bop),
+            a::Expr_::Assign(box (lhs, bop, rhs)) => emit_assign(e, env, e_, pos, lhs, bop, rhs),
             _ => emit_expr::emit_ignored_expr(e, env, pos, e_),
         },
         a::Stmt_::Return(r_opt) => emit_return_(e, env, (**r_opt).as_ref(), pos),
@@ -162,19 +162,16 @@ fn emit_await_<'a, 'd>(
     ]))
 }
 
-fn emit_binop<'a, 'd>(
+fn emit_assign<'a, 'd>(
     e: &mut Emitter<'d>,
     env: &mut Env<'a>,
     e_: &ast::Expr,
     pos: &Pos,
-    bop: &ast::Binop,
+    lhs: &ast::Expr,
+    bop: &Option<ast::Bop>,
+    rhs: &ast::Expr,
 ) -> Result<InstrSeq> {
-    if let ast::Binop {
-        bop: ast_defs::Bop::Eq(None),
-        lhs,
-        rhs,
-    } = bop
-    {
+    if bop.is_none() {
         if let Some(e_await) = rhs.2.as_await() {
             let await_pos = &rhs.1;
             if let Some(l) = lhs.2.as_list() {
@@ -491,8 +488,8 @@ fn emit_using<'a, 'd>(
     } else {
         e.local_scope(|e| {
             let (local, preamble) = match &(using.exprs.1[0].2) {
-                ast::Expr_::Binop(binop) => match (&binop.bop, (binop.lhs).2.as_lvar()) {
-                    (ast_defs::Bop::Eq(None), Some(ast::Lid(_, id))) => (
+                ast::Expr_::Assign(box (lhs, bop, _)) => match (bop, lhs.2.as_lvar()) {
+                    (None, Some(ast::Lid(_, id))) => (
                         e.named_local(local_id::get_name(id)),
                         InstrSeq::gather(vec![
                             emit_expr::emit_expr(e, env, &(using.exprs.1[0]))?,
@@ -1088,7 +1085,6 @@ fn check_l_iter<'a, 'd>(
         }
 
         fn visit_expr_(&mut self, _c: &mut (), p: &ast::Expr_) -> Result<(), ()> {
-            use ast_defs::Bop;
             use ast_defs::Uop;
 
             if self.saw_write {
@@ -1100,11 +1096,9 @@ fn check_l_iter<'a, 'd>(
                     self.visit_lval(e, false)
                 }
 
-                ast::Expr_::Binop(e) => {
-                    let ast::Binop { bop, lhs: left, .. } = &**e;
-                    if let Bop::Eq(_) = bop {
-                        self.visit_lval(left, false);
-                    }
+                ast::Expr_::Assign(e) => {
+                    let (left, _, _) = &**e;
+                    self.visit_lval(left, false)
                 }
 
                 ast::Expr_::Call(expr) => {
@@ -1951,13 +1945,10 @@ fn emit_declare_local<'a, 'd>(
     e_: &Option<ast::Expr>,
 ) -> Result<InstrSeq> {
     if let Some(e_) = e_ {
-        let bop = ast::Binop {
-            bop: ast_defs::Bop::Eq(None),
-            lhs: ast::Expr::new((), pos.clone(), ast::Expr_::mk_lvar(id.clone())),
-            rhs: e_.clone(),
-        };
-        let e2 = ast::Expr::new((), pos.clone(), ast::Expr_::mk_binop(bop.clone()));
-        emit_binop(e, env, &e2, pos, &bop)
+        let lhs = ast::Expr::new((), pos.clone(), ast::Expr_::mk_lvar(id.clone()));
+        let assign = ast::Expr_::mk_assign(lhs.clone(), None, e_.clone());
+        let e2 = ast::Expr::new((), pos.clone(), assign);
+        emit_assign(e, env, &e2, pos, &lhs, &None, e_)
     } else {
         Ok(InstrSeq::gather(vec![]))
     }

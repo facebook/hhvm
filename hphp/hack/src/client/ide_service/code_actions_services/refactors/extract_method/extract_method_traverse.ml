@@ -289,7 +289,7 @@ See [selection region]
           (region :=
              Region.{ !region with defined = Scopes.exit !region.defined });
           acc
-        | Aast.(Binop { bop = Ast_defs.Eq _; lhs; rhs }) ->
+        | Aast.Assign (lhs, _, rhs) ->
           let rhs = self#on_expr env rhs in
           self#plus rhs (with_in_lvalue (fun () -> self#on_expr env lhs))
         | Aast.Lvar (_, lid) when !in_lvalue ->

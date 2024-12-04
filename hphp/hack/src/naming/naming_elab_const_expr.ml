@@ -93,13 +93,10 @@ let on_expr_top_down
         on_error (Err.naming @@ Naming_error.Illegal_constant pos);
         (ctx, Error (Err.invalid_expr expr))
     end
-    | Aast.(Binop { bop; _ }) -> begin
-      match bop with
-      | Ast_defs.Eq _ ->
-        on_error (Err.naming @@ Naming_error.Illegal_constant pos);
-        (ctx, Error (Err.invalid_expr expr))
-      | _ -> (ctx, Ok expr)
-    end
+    | Aast.(Binop _) -> (ctx, Ok expr)
+    | Aast.Assign (_, _, _) ->
+      on_error (Err.naming @@ Naming_error.Illegal_constant pos);
+      (ctx, Error (Err.invalid_expr expr))
     | Aast.(ValCollection ((_, vc_kind), _, _)) -> begin
       match vc_kind with
       | Aast.(Vec | Keyset) -> (ctx, Ok expr)

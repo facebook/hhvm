@@ -75,9 +75,8 @@
              ([15:3-27],
               (Expr
                  ((exact TestVarray), [15:3-26],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestVarray), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((exact TestVarray), [15:10-26], (New (((exact TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestVarray), [15:3-7], (Lvar ([15:3-7], $foo))), None,
+                     ((exact TestVarray), [15:10-26], (New (((exact TestVarray), [15:14-24], (CI ([15:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))))))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -129,9 +128,8 @@
              ([27:3-27],
               (Expr
                  ((exact TestVarray), [27:3-26],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestVarray), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestVarray), [27:10-26], (New (((exact TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestVarray), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestVarray), [27:10-26], (New (((exact TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))))))));
              ([30:3-65],
               (Expr
                  ((~void), [30:3-64],
@@ -241,9 +239,8 @@
              ([27:3-27],
               (Expr
                  ((exact TestVarray), [27:3-26],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestVarray), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestVarray), [27:10-26], (New (((exact TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestVarray), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestVarray), [27:10-26], (New (((exact TestVarray), [27:14-24], (CI ([27:14-24], "\\TestVarray"))), [], [], None, ((function(): void))))))))));
              ([30:3-65],
               (Expr
                  ((~void), [30:3-64],

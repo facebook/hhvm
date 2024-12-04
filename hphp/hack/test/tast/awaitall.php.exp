@@ -43,13 +43,11 @@
                 [([13:5-25],
                   (Expr
                      ((int), [13:5-25],
-                      (Binop
-                         { bop = (Eq None); lhs = ((int), [13:5-7], (Lvar ([13:5-7], $a)));
-                           rhs =
-                           ((int), [13:10-24],
-                            (Await
-                               ((Awaitable<int>), [13:16-24], (Call { func = (((function(): Awaitable<int>)), [13:16-22], (Id ([13:16-22], "\\genInt"))); targs = []; args = []; unpacked_arg = None }))))
-                           }))));
+                      (Assign (((int), [13:5-7], (Lvar ([13:5-7], $a))), None,
+                         ((int), [13:10-24],
+                          (Await
+                             ((Awaitable<int>), [13:16-24], (Call { func = (((function(): Awaitable<int>)), [13:16-22], (Id ([13:16-22], "\\genInt"))); targs = []; args = []; unpacked_arg = None }))))
+                         )))));
                   ([14:5-23],
                    (Expr
                       ((string), [14:5-22],
@@ -59,14 +57,12 @@
                   ([15:5-28],
                    (Expr
                       ((string), [15:5-28],
-                       (Binop
-                          { bop = (Eq None); lhs = ((string), [15:5-7], (Lvar ([15:5-7], $c)));
-                            rhs =
-                            ((string), [15:10-27],
-                             (Await
-                                ((Awaitable<string>), [15:16-27],
-                                 (Call { func = (((function(): Awaitable<string>)), [15:16-25], (Id ([15:16-25], "\\genString"))); targs = []; args = []; unpacked_arg = None }))))
-                            }))))
+                       (Assign (((string), [15:5-7], (Lvar ([15:5-7], $c))), None,
+                          ((string), [15:10-27],
+                           (Await
+                              ((Awaitable<string>), [15:16-27],
+                               (Call { func = (((function(): Awaitable<string>)), [15:16-25], (Id ([15:16-25], "\\genString"))); targs = []; args = []; unpacked_arg = None }))))
+                          )))))
                   ]))
              ]
            };

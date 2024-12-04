@@ -13,9 +13,8 @@
           [([4:3-26],
             (Expr
                ((), [4:3-25],
-                (Binop
-                   { bop = (Eq None); lhs = ((), [4:3-5], (Lplaceholder [4:3-5]));
-                     rhs = ((), [4:8-25], (Pair ((Some (((), ([4:13-14], Hwildcard)), ((), ([4:16-17], Hwildcard)))), ((), [4:20-21], (Int "1")), ((), [4:23-24], (Int "2"))))) }))))
+                (Assign (((), [4:3-5], (Lplaceholder [4:3-5])), None,
+                   ((), [4:8-25], (Pair ((Some (((), ([4:13-14], Hwildcard)), ((), ([4:16-17], Hwildcard)))), ((), [4:20-21], (Int "1")), ((), [4:23-24], (Int "2"))))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-23], "__SupportDynamicType"); ua_params = [] }]; 

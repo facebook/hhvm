@@ -12,7 +12,6 @@ use hhbc::Param;
 use naming_special_names_rust::emitter_special_functions;
 use naming_special_names_rust::special_idents;
 use oxidized::aast;
-use oxidized::aast::Binop;
 use oxidized::aast_visitor::visit;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::Node;
@@ -107,9 +106,9 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
     fn visit_expr_(&mut self, env: &mut (), e: &Expr_) -> Result<(), String> {
         use aast::Expr_;
         match e {
-            Expr_::Binop(box Binop { bop, lhs, rhs }) => {
-                match (bop, &rhs.2) {
-                    (Bop::Eq(_), Expr_::Await(_)) | (Bop::Eq(_), Expr_::Yield(_)) => {
+            Expr_::Assign(box (lhs, _, rhs)) => {
+                match &rhs.2 {
+                    Expr_::Await(_) | Expr_::Yield(_) => {
                         // Visit e2 before e1. The ordering of declvars in async
                         // expressions matters to HHVM. See D5674623.
                         self.visit_expr(env, rhs)?;
@@ -118,7 +117,6 @@ impl<'ast, 'a> Visitor<'ast> for DeclvarVisitor<'a> {
                     _ => e.recurse(env, self.object()),
                 }
             }
-
             Expr_::Lvar(x) => {
                 self.add_local(x.name());
                 Ok(())

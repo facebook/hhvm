@@ -91,18 +91,14 @@
                                                                     [([7:5-12],
                                                                     (Expr
                                                                     ((), [7:5-11],
-                                                                    (Binop
-                                                                    { bop = (Eq None); 
-                                                                    lhs = ((), [7:5-7], (Lvar ([7:5-7], $x)));
-                                                                    rhs =
-                                                                    (
-                                                                    (), [7:10-11],
-                                                                    (
-                                                                    Call
+                                                                    (Assign ((
+                                                                    (), [7:5-7], (Lvar ([7:5-7], $x))), None,
+                                                                    ((), [7:10-11],
+                                                                    (Call
                                                                     { func = ((), [7:10-11], (Class_const (((), [7:10-11], (CI ([7:10-11], "\\ExampleDsl"))), ([7:10-11], "intType")))); 
                                                                     targs = []; 
                                                                     args = []; 
-                                                                    unpacked_arg = None })) }))));
+                                                                    unpacked_arg = None })))))));
                                                                     ([8:5-17],
                                                                     (Expr
                                                                     ((), [8:5-16],

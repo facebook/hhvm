@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0690a5df335f61e9f50e5a591f04e86d>>
+// @generated SignedSource<<48697de1f55638c3e384724c5a9e0f1a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -494,9 +494,6 @@ impl Bop {
     pub fn mk_question_question() -> Self {
         Bop::QuestionQuestion
     }
-    pub fn mk_eq(p0: Option<Box<Bop>>) -> Self {
-        Bop::Eq(p0)
-    }
     pub fn is_plus(&self) -> bool {
         match self {
             Bop::Plus => true,
@@ -639,30 +636,6 @@ impl Bop {
         match self {
             Bop::QuestionQuestion => true,
             _ => false,
-        }
-    }
-    pub fn is_eq(&self) -> bool {
-        match self {
-            Bop::Eq(..) => true,
-            _ => false,
-        }
-    }
-    pub fn as_eq(&self) -> Option<&Option<Box<Bop>>> {
-        match self {
-            Bop::Eq(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_eq_mut(&mut self) -> Option<&mut Option<Box<Bop>>> {
-        match self {
-            Bop::Eq(p0) => Some(p0),
-            _ => None,
-        }
-    }
-    pub fn as_eq_into(self) -> Option<Option<Box<Bop>>> {
-        match self {
-            Bop::Eq(p0) => Some(p0),
-            _ => None,
         }
     }
 }

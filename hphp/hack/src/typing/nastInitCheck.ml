@@ -594,13 +594,14 @@ and expr_ env acc p e =
   | Cast (_, e)
   | Unop (_, e) ->
     expr acc e
-  | Binop Aast.{ bop = Ast_defs.Eq None; lhs = e1; rhs = e2 } ->
+  | Assign (e1, None, e2) ->
     let acc = expr acc e2 in
     assign_expr env acc e1
   | Binop Aast.{ bop = Ast_defs.Ampamp; lhs = e; _ }
   | Binop Aast.{ bop = Ast_defs.Barbar; lhs = e; _ } ->
     expr acc e
-  | Binop Aast.{ lhs = e1; rhs = e2; _ } ->
+  | Binop Aast.{ lhs = e1; rhs = e2; _ }
+  | Assign (e1, _, e2) ->
     let acc = expr acc e1 in
     expr acc e2
   | Pipe (_, e1, e2) ->

@@ -124,31 +124,29 @@
            [([17:3-22],
              (Expr
                 ((void), [17:3-21],
-                 (Binop
-                    { bop = (Eq None); lhs = ((void), [17:3-5], (Lplaceholder [17:3-5]));
-                      rhs =
-                      ((~I<int>), [17:8-21],
-                       (Call
-                          { func = (((function<T>(I<int> $_, I<int> $_): ~I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))); 
-                            targs = [((int), ([17:8-9], Hwildcard))];
-                            args =
-                            [(Anormal
-                                ((~E<int>), [17:10-14],
-                                 (Call
-                                    { func = (((function<T>(int $_): ~E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))); 
-                                      targs = [((int), ([17:10-11], Hwildcard))]; 
-                                      args = [(Anormal ((int), [17:12-13], (Int "1")))]; 
-                                      unpacked_arg = None })));
-                              (Anormal
-                                 ((~E<int>), [17:16-20],
-                                  (Call
-                                     { func = (((function<T>(int $_): ~E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))); 
-                                       targs = [((int), ([17:16-17], Hwildcard))]; 
-                                       args = [(Anormal ((int), [17:18-19], (Int "2")))]; 
-                                       unpacked_arg = None })))
-                              ];
-                            unpacked_arg = None }))
-                      }))))
+                 (Assign (((void), [17:3-5], (Lplaceholder [17:3-5])), None,
+                    ((~I<int>), [17:8-21],
+                     (Call
+                        { func = (((function<T>(I<int> $_, I<int> $_): ~I<int>)), [17:8-9], (Id ([17:8-9], "\\f"))); 
+                          targs = [((int), ([17:8-9], Hwildcard))];
+                          args =
+                          [(Anormal
+                              ((~E<int>), [17:10-14],
+                               (Call
+                                  { func = (((function<T>(int $_): ~E<int>)), [17:10-11], (Id ([17:10-11], "\\g"))); 
+                                    targs = [((int), ([17:10-11], Hwildcard))]; 
+                                    args = [(Anormal ((int), [17:12-13], (Int "1")))]; 
+                                    unpacked_arg = None })));
+                            (Anormal
+                               ((~E<int>), [17:16-20],
+                                (Call
+                                   { func = (((function<T>(int $_): ~E<int>)), [17:16-17], (Id ([17:16-17], "\\g"))); 
+                                     targs = [((int), ([17:16-17], Hwildcard))]; 
+                                     args = [(Anormal ((int), [17:18-19], (Int "2")))]; 
+                                     unpacked_arg = None })))
+                            ];
+                          unpacked_arg = None }))
+                    )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([16:10-14], "__SupportDynamicType"); ua_params = [] }]; 

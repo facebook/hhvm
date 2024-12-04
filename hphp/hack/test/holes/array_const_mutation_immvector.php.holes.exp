@@ -19,12 +19,10 @@
           [([5:3-19],
             (Expr
                ((float), [5:3-18],
-                (Binop
-                   { bop = (Eq None);
-                     lhs =
-                     ((float), [5:3-12],
-                      (Array_get (((ImmVector<int>), [5:3-5], (Hole (((ImmVector<int>), [5:3-5], (Lvar ([5:3-5], $x))), (ImmVector<int>), (Vector<int>), Typing))), (Some ((bool), [5:6-11], False)))));
-                     rhs = ((float), [5:15-18], (Float "1.0")) }))))
+                (Assign (
+                   ((float), [5:3-12],
+                    (Array_get (((ImmVector<int>), [5:3-5], (Hole (((ImmVector<int>), [5:3-5], (Lvar ([5:3-5], $x))), (ImmVector<int>), (Vector<int>), Typing))), (Some ((bool), [5:6-11], False))))),
+                   None, ((float), [5:15-18], (Float "1.0")))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-40], "__SupportDynamicType"); ua_params = [] }]; 

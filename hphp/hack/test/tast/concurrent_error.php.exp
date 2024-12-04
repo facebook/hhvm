@@ -38,21 +38,16 @@ Errors:
                 [([9:5-27],
                   (Expr
                      ((int), [9:5-27],
-                      (Binop
-                         { bop = (Eq None); lhs = ((int), [9:5-8], (Lvar ([9:5-8], $v1)));
-                           rhs =
-                           ((int), [9:11-26],
-                            (Await
-                               ((Awaitable<int>), [9:17-26], (Call { func = (((function(): Awaitable<int>)), [9:17-24], (Id ([9:17-24], "\\gen_int"))); targs = []; args = []; unpacked_arg = None }))))
-                           }))));
+                      (Assign (((int), [9:5-8], (Lvar ([9:5-8], $v1))), None,
+                         ((int), [9:11-26],
+                          (Await
+                             ((Awaitable<int>), [9:17-26], (Call { func = (((function(): Awaitable<int>)), [9:17-24], (Id ([9:17-24], "\\gen_int"))); targs = []; args = []; unpacked_arg = None }))))
+                         )))));
                   ([10:5-21],
                    (Expr
                       ((Awaitable<int>), [10:5-21],
-                       (Binop
-                          { bop = (Eq None); lhs = ((Awaitable<int>), [10:5-8], (Lvar ([10:5-8], $v2)));
-                            rhs =
-                            ((Awaitable<int>), [10:11-20], (Call { func = (((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))); targs = []; args = []; unpacked_arg = None }))
-                            }))))
+                       (Assign (((Awaitable<int>), [10:5-8], (Lvar ([10:5-8], $v2))), None,
+                          ((Awaitable<int>), [10:11-20], (Call { func = (((function(): Awaitable<int>)), [10:11-18], (Id ([10:11-18], "\\gen_int"))); targs = []; args = []; unpacked_arg = None })))))))
                   ]));
              ([12:3-20],
               (Return

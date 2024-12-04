@@ -211,7 +211,7 @@ and pp_shape_field_name ppf = function
 and pp_contexts ppf (_, ctxts) =
   Fmt.(brackets @@ list ~sep:comma @@ pp_hint ~is_ctx:true) ppf ctxts
 
-let rec pp_binop ppf = function
+let pp_binop ppf = function
   | Ast_defs.Plus -> Fmt.string ppf "+"
   | Ast_defs.Minus -> Fmt.string ppf "-"
   | Ast_defs.Star -> Fmt.string ppf "*"
@@ -236,8 +236,10 @@ let rec pp_binop ppf = function
   | Ast_defs.Xor -> Fmt.string ppf "^"
   | Ast_defs.Cmp -> Fmt.string ppf "<=>"
   | Ast_defs.QuestionQuestion -> Fmt.string ppf "??"
-  | Ast_defs.Eq (Some op) -> Fmt.(suffix (const string "=") pp_binop) ppf op
-  | Ast_defs.Eq _ -> Fmt.string ppf "="
+
+let pp_assign ppf = function
+  | Some op -> Fmt.(suffix (const string "=") pp_binop) ppf op
+  | None -> Fmt.string ppf "="
 
 let pp_unop ppf op =
   match op with
@@ -396,6 +398,10 @@ and pp_expr_ ppf = function
     Fmt.(pair ~sep:nop pp_unop pp_expr) ppf (unop, expr)
   | Aast.(Binop { bop; lhs; rhs }) ->
     Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_binop pp_expr)
+      ppf
+      (lhs, (bop, rhs))
+  | Aast.Assign (lhs, bop, rhs) ->
+    Fmt.(pair ~sep:sp pp_expr @@ pair ~sep:sp pp_assign pp_expr)
       ppf
       (lhs, (bop, rhs))
   | Aast.Pipe (_lid, e1, e2) ->

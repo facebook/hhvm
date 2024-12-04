@@ -1537,8 +1537,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         Unop(&(_op, expr)) => expr_to_ty(arena, expr),
                         Hole(&(expr, _, _, _)) => expr_to_ty(arena, expr),
 
-                        ArrayGet(_) | As(_) | Await(_) | Binop(_) | Call(_) | Cast(_)
-                        | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)
+                        ArrayGet(_) | As(_) | Await(_) | Binop(_) | Assign(_) | Call(_)
+                        | Cast(_) | ClassConst(_) | ClassGet(_) | Clone(_) | Collection(_)
                         | Dollardollar(_) | Efun(_) | Eif(_) | EnumClassLabel(_) | ETSplice(_)
                         | ExpressionTree(_) | FunctionPointer(_) | Id(_) | Import(_) | Is(_)
                         | KeyValCollection(_) | Lfun(_) | List(_) | Lplaceholder(_) | Lvar(_)
@@ -3444,33 +3444,37 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         op_node: Self::Output,
         rhs: Self::Output,
     ) -> Self::Output {
-        let op = match op_node.token_kind() {
-            Some(TokenKind::Plus) => Bop::Plus,
-            Some(TokenKind::Minus) => Bop::Minus,
-            Some(TokenKind::Star) => Bop::Star,
-            Some(TokenKind::Slash) => Bop::Slash,
-            Some(TokenKind::Equal) => Bop::Eq(None),
-            Some(TokenKind::EqualEqual) => Bop::Eqeq,
-            Some(TokenKind::EqualEqualEqual) => Bop::Eqeqeq,
-            Some(TokenKind::StarStar) => Bop::Starstar,
-            Some(TokenKind::AmpersandAmpersand) => Bop::Ampamp,
-            Some(TokenKind::BarBar) => Bop::Barbar,
-            Some(TokenKind::LessThan) => Bop::Lt,
-            Some(TokenKind::LessThanEqual) => Bop::Lte,
-            Some(TokenKind::LessThanLessThan) => Bop::Ltlt,
-            Some(TokenKind::GreaterThan) => Bop::Gt,
-            Some(TokenKind::GreaterThanEqual) => Bop::Gte,
-            Some(TokenKind::GreaterThanGreaterThan) => Bop::Gtgt,
-            Some(TokenKind::Dot) => Bop::Dot,
-            Some(TokenKind::Ampersand) => Bop::Amp,
-            Some(TokenKind::Bar) => Bop::Bar,
-            Some(TokenKind::Percent) => Bop::Percent,
-            Some(TokenKind::QuestionQuestion) => Bop::QuestionQuestion,
-            _ => return Node::Ignored(SK::BinaryExpression),
+        let t = op_node.token_kind();
+        let op = if matches!(t, Some(TokenKind::Equal)) {
+            None
+        } else {
+            Some(match op_node.token_kind() {
+                Some(TokenKind::Plus) => Bop::Plus,
+                Some(TokenKind::Minus) => Bop::Minus,
+                Some(TokenKind::Star) => Bop::Star,
+                Some(TokenKind::Slash) => Bop::Slash,
+                Some(TokenKind::EqualEqual) => Bop::Eqeq,
+                Some(TokenKind::EqualEqualEqual) => Bop::Eqeqeq,
+                Some(TokenKind::StarStar) => Bop::Starstar,
+                Some(TokenKind::AmpersandAmpersand) => Bop::Ampamp,
+                Some(TokenKind::BarBar) => Bop::Barbar,
+                Some(TokenKind::LessThan) => Bop::Lt,
+                Some(TokenKind::LessThanEqual) => Bop::Lte,
+                Some(TokenKind::LessThanLessThan) => Bop::Ltlt,
+                Some(TokenKind::GreaterThan) => Bop::Gt,
+                Some(TokenKind::GreaterThanEqual) => Bop::Gte,
+                Some(TokenKind::GreaterThanGreaterThan) => Bop::Gtgt,
+                Some(TokenKind::Dot) => Bop::Dot,
+                Some(TokenKind::Ampersand) => Bop::Amp,
+                Some(TokenKind::Bar) => Bop::Bar,
+                Some(TokenKind::Percent) => Bop::Percent,
+                Some(TokenKind::QuestionQuestion) => Bop::QuestionQuestion,
+                _ => return Node::Ignored(SK::BinaryExpression),
+            })
         };
 
         match (&op, rhs.is_token(TokenKind::Yield)) {
-            (Bop::Eq(_), true) => return rhs,
+            (None, true) => return rhs,
             _ => {}
         }
 
@@ -3484,12 +3488,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(rhs) => rhs,
             None => return Node::Ignored(SK::BinaryExpression),
         };
-
-        Node::Expr(self.alloc(aast::Expr(
-            (),
-            pos,
-            aast::Expr_::Binop(self.alloc(aast::Binop { bop: op, lhs, rhs })),
-        )))
+        match op {
+            None => Node::Expr(self.alloc(aast::Expr(
+                (),
+                pos,
+                aast::Expr_::Assign(self.alloc((lhs, op, rhs))),
+            ))),
+            Some(op) => Node::Expr(self.alloc(aast::Expr(
+                (),
+                pos,
+                aast::Expr_::Binop(self.alloc(aast::Binop { bop: op, lhs, rhs })),
+            ))),
+        }
     }
 
     fn make_parenthesized_expression(

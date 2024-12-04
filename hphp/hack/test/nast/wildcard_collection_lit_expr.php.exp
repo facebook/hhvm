@@ -10,11 +10,7 @@
         f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
         f_body =
         { fb_ast =
-          [([4:3-17],
-            (Expr
-               ((), [4:3-16], (Binop { bop = (Eq None); lhs = ((), [4:3-5], (Lvar ([4:3-5], $x))); rhs = ((), [4:8-16], (ValCollection (([4:8-11], Vec), (Some ((), ([4:12-13], Hwildcard))), []))) }))))
-            ]
-          };
+          [([4:3-17], (Expr ((), [4:3-16], (Assign (((), [4:3-5], (Lvar ([4:3-5], $x))), None, ((), [4:8-16], (ValCollection (([4:8-11], Vec), (Some ((), ([4:12-13], Hwildcard))), []))))))))] };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-22], "__SupportDynamicType"); ua_params = [] }]; 
         f_external = false; f_doc_comment = None };
       fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
@@ -31,12 +27,7 @@
          f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
          f_body =
          { fb_ast =
-           [([8:3-20],
-             (Expr
-                ((), [8:3-19],
-                 (Binop { bop = (Eq None); lhs = ((), [8:3-5], (Lvar ([8:3-5], $x))); rhs = ((), [8:8-19], (ValCollection (([8:8-14], Keyset), (Some ((), ([8:15-16], Hwildcard))), []))) }))))
-             ]
-           };
+           [([8:3-20], (Expr ((), [8:3-19], (Assign (((), [8:3-5], (Lvar ([8:3-5], $x))), None, ((), [8:8-19], (ValCollection (([8:8-14], Keyset), (Some ((), ([8:15-16], Hwildcard))), []))))))))] };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-25], "__SupportDynamicType"); ua_params = [] }]; 
          f_external = false; f_doc_comment = None };
        fd_internal = false; fd_module = None; fd_tparams = []; fd_where_constraints = []; 
@@ -56,9 +47,8 @@
            [([12:3-21],
              (Expr
                 ((), [12:3-20],
-                 (Binop
-                    { bop = (Eq None); lhs = ((), [12:3-5], (Lvar ([12:3-5], $x)));
-                      rhs = ((), [12:8-20], (KeyValCollection (([12:8-12], Dict), (Some (((), ([12:13-14], Hwildcard)), ((), ([12:16-17], Hwildcard)))), []))) }))))
+                 (Assign (((), [12:3-5], (Lvar ([12:3-5], $x))), None,
+                    ((), [12:8-20], (KeyValCollection (([12:8-12], Dict), (Some (((), ([12:13-14], Hwildcard)), ((), ([12:16-17], Hwildcard)))), []))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([11:10-23], "__SupportDynamicType"); ua_params = [] }]; 

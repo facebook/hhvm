@@ -190,7 +190,7 @@ let index_visitor =
           array_get ~array_pos:p1 ~expr_pos:p ~index_pos:p2 env ty1 ty2;
         this#on_expr (env, false) e1;
         this#on_expr (env, false) e2
-      | Binop { bop = Ast_defs.Eq _; lhs; rhs } ->
+      | Assign (lhs, _, rhs) ->
         this#on_expr (env, true) lhs;
         this#on_expr (env, false) rhs
       | List el -> List.iter ~f:(this#on_expr (env, is_lvalue)) el

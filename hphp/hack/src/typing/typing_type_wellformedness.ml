@@ -644,6 +644,7 @@ let expr tenv ((), _p, e) =
   | List _
   | Unop _
   | Binop _
+  | Assign _
   | Pipe _
   | Eif _
   | Xml _

@@ -2910,15 +2910,9 @@ fn p_bop<'a>(
 ) -> Result<Expr_> {
     use ast::Bop::*;
     let mk = |bop, lhs, rhs| Ok(Expr_::mk_binop(Binop { bop, lhs, rhs }));
-    let mk_eq = |op, lhs, rhs| {
-        Ok(Expr_::mk_binop(Binop {
-            bop: Eq(Some(Box::new(op))),
-            lhs,
-            rhs,
-        }))
-    };
+    let mk_eq = |op, lhs, rhs| Ok(Expr_::mk_assign(lhs, Some(op), rhs));
     match token_kind(node) {
-        Some(TK::Equal) => mk(Eq(None), lhs, rhs),
+        Some(TK::Equal) => Ok(Expr_::mk_assign(lhs, None, rhs)),
         Some(TK::Bar) => mk(Bar, lhs, rhs),
         Some(TK::Ampersand) => mk(Amp, lhs, rhs),
         Some(TK::Plus) => mk(Plus, lhs, rhs),
@@ -5248,16 +5242,16 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 (
                     ast::Stmt::new(
                         p.clone(),
-                        ast::Stmt_::mk_expr(e(Expr_::mk_binop(Binop {
-                            bop: ast::Bop::Eq(None),
-                            lhs: e(Expr_::mk_obj_get(
+                        ast::Stmt_::mk_expr(e(Expr_::mk_assign(
+                            e(Expr_::mk_obj_get(
                                 e(Expr_::mk_lvar(lid(special_idents::THIS))),
                                 e(Expr_::mk_id(ast::Id(p.clone(), cvname.to_string()))),
                                 ast::OgNullFlavor::OGNullthrows,
                                 ast::PropOrMethod::IsProp,
                             )),
-                            rhs: e(Expr_::mk_lvar(lid(&param.name))),
-                        }))),
+                            None,
+                            e(Expr_::mk_lvar(lid(&param.name))),
+                        ))),
                     ),
                     ast::ClassVar {
                         final_: false,

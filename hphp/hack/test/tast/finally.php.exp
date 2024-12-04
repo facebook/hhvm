@@ -40,14 +40,12 @@ Errors:
                 [([13:5-34],
                   (Expr
                      ((~shape()), [13:5-33],
-                      (Binop
-                         { bop = (Eq None); lhs = ((~shape()), [13:5-7], (Lvar ([13:5-7], $s)));
-                           rhs =
-                           ((~shape()), [13:10-33],
-                            (Await
-                               ((Awaitable<~shape()>), [13:16-33],
-                                (Call { func = (((function(): Awaitable<~shape()>)), [13:16-31], (Id ([13:16-31], "\\gen_empty_shape"))); targs = []; args = []; unpacked_arg = None }))))
-                           }))));
+                      (Assign (((~shape()), [13:5-7], (Lvar ([13:5-7], $s))), None,
+                         ((~shape()), [13:10-33],
+                          (Await
+                             ((Awaitable<~shape()>), [13:16-33],
+                              (Call { func = (((function(): Awaitable<~shape()>)), [13:16-31], (Id ([13:16-31], "\\gen_empty_shape"))); targs = []; args = []; unpacked_arg = None }))))
+                         )))));
                   ([14:5-28],
                    (Expr
                       ((~?nothing), [14:5-27],

@@ -25,15 +25,13 @@ Errors:
             ([13:1-23],
              (Expr
                 ((), [13:1-22],
-                 (Binop
-                    { bop = (Eq None); lhs = ((), [13:1-3], (Lvar ([13:1-3], $x)));
-                      rhs =
-                      ((), [13:6-22],
-                       (Call
-                          { func = ((), [13:6-15], (Id ([13:6-15], "\\Vec\\range"))); 
-                            targs = []; args = [(Anormal ((), [13:16-17], (Int "1"))); (Anormal ((), [13:19-21], (Int "99")))]; 
-                            unpacked_arg = None }))
-                      }))));
+                 (Assign (((), [13:1-3], (Lvar ([13:1-3], $x))), None,
+                    ((), [13:6-22],
+                     (Call
+                        { func = ((), [13:6-15], (Id ([13:6-15], "\\Vec\\range"))); 
+                          targs = []; args = [(Anormal ((), [13:16-17], (Int "1"))); (Anormal ((), [13:19-21], (Int "99")))]; 
+                          unpacked_arg = None }))
+                    )))));
             ([15:1-12], (Expr ((), [15:1-11], (Call { func = ((), [15:1-9], (Id ([15:1-9], "\\func_foo"))); targs = []; args = []; unpacked_arg = None }))))]
           };
         f_fun_kind = FAsync; f_user_attributes = [{ ua_name = ([5:1-15:12], "__SupportDynamicType"); ua_params = [] }]; 

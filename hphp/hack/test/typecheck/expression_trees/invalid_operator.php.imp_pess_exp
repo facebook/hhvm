@@ -44,7 +44,9 @@ Invalid return type (Typing[4110])
     resulting from expanding the type constant `ExampleDsl::TAst`
   File "invalid_operator.php", line 19, characters 19-42:
   But got `(function(): int)`
-ERROR: File "invalid_operator.php", line 32, characters 34-40:
-You are trying to access the method `__unsupported` but this is an int (Typing[4062])
-  File "invalid_operator.php", line 32, characters 20-22:
-  Definition is here
+ERROR: File "invalid_operator.php", line 32, characters 40-40:
+Typing error (Typing[4429])
+  File "invalid_operator.php", line 32, characters 34-40:
+  Expected `num` because this is used in an arithmetic operation
+  File "expr_tree.php", line 79, characters 39-48:
+  But got `ExampleInt`

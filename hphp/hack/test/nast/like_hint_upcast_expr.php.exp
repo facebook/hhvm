@@ -49,9 +49,8 @@
            [([7:3-21],
              (Expr
                 ((), [7:3-20],
-                 (Binop
-                    { bop = (Eq None); lhs = ((), [7:3-5], (Lplaceholder [7:3-5]));
-                      rhs = ((), [7:8-20], (Upcast (((), [7:8-10], (Lvar ([7:8-10], $x))), ([7:18-20], (Hlike ([7:19-20], (Happly (([7:19-20], "\\A"), [])))))))) }))))
+                 (Assign (((), [7:3-5], (Lplaceholder [7:3-5])), None,
+                    ((), [7:8-20], (Upcast (((), [7:8-10], (Lvar ([7:8-10], $x))), ([7:18-20], (Hlike ([7:19-20], (Happly (([7:19-20], "\\A"), [])))))))))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([6:10-31], "__SupportDynamicType"); ua_params = [] }]; 

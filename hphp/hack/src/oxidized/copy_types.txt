@@ -49,6 +49,7 @@ aast::Visibility
 aast::XhpAttrTag
 aast::XhpChildOp
 ast_defs::Abstraction
+ast_defs::Bop
 ast_defs::ClassishKind
 ast_defs::ConstraintKind
 ast_defs::FunKind

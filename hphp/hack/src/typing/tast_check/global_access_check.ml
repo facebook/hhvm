@@ -733,7 +733,8 @@ let rec get_data_srcs_from_expr env ctx (tp, _, te) =
     get_data_srcs_of_expr_list el
   | Cast (_, e) -> get_data_srcs_from_expr env ctx e
   | Unop (_, e) -> get_data_srcs_from_expr env ctx e
-  | Binop { lhs; rhs; _ } ->
+  | Binop { lhs; rhs; _ }
+  | Assign (lhs, _, rhs) ->
     DataSourceSet.union
       (get_data_srcs_from_expr env ctx lhs)
       (get_data_srcs_from_expr env ctx rhs)
@@ -1054,7 +1055,7 @@ let visitor =
                 (GlobalAccessPatternSet.singleton NoPattern)
                 GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall);
         super#on_expr (env, (ctx, fun_name)) te
-      | Binop { bop = Ast_defs.Eq bop_opt; lhs; rhs } ->
+      | Assign (lhs, bop_opt, rhs) ->
         let () = self#on_expr (env, (ctx, fun_name)) rhs in
         let re_ty = Tast_env.print_ty env (Tast.get_type rhs) in
         let le_global_opt = get_global_vars_from_expr env ctx lhs in

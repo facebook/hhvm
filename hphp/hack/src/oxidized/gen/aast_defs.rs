@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<94005c2a929bb1e0e978cdbb22fb2b6b>>
+// @generated SignedSource<<234ceba63fc3a09cb4f5acb3ce24c376>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -945,6 +945,8 @@ pub enum Expr_<Ex, En> {
     ///
     ///     $foo + $bar
     Binop(Box<Binop<Ex, En>>),
+    #[rust_to_ocaml(inline_tuple)]
+    Assign(Box<(Expr<Ex, En>, Option<ast_defs::Bop>, Expr<Ex, En>)>),
     /// Pipe expression. The lid is the ID of the $$ that is implicitly
     /// declared by this pipe.
     ///

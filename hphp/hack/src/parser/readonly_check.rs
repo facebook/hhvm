@@ -291,6 +291,7 @@ fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
                 _ => Rty::Mutable,
             }
         }
+        Assign(_) => Rty::Mutable,
         // Unary operators are all primitive in result
         Unop(_) => Rty::Mutable,
         Pipe(p) => {
@@ -685,15 +686,9 @@ impl<'ast> VisitorMut<'ast> for Checker {
             p.recurse(context, self.object())?;
         }
         match &mut p.2 {
-            aast::Expr_::Binop(x) => {
-                let aast::Binop {
-                    bop,
-                    lhs: e_lhs,
-                    rhs: e_rhs,
-                } = x.as_mut();
-                if let Bop::Eq(_) = bop {
-                    check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
-                }
+            aast::Expr_::Assign(x) => {
+                let (e_lhs, _, e_rhs) = x.as_mut();
+                check_assignment_validity(context, self, &p.1, e_lhs, e_rhs);
             }
             aast::Expr_::Unop(x) => {
                 let (operator, operand) = x.as_mut();

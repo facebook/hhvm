@@ -47,9 +47,7 @@
            [([8:3-22],
              (Expr
                 ((), [8:3-21],
-                 (Binop
-                    { bop = (Eq None); lhs = ((), [8:3-5], (Lplaceholder [8:3-5]));
-                      rhs = ((), [8:8-21], (Call { func = ((), [8:8-19], (Id ([8:8-19], "\\returns_int"))); targs = []; args = []; unpacked_arg = None })) }))))
+                 (Assign (((), [8:3-5], (Lplaceholder [8:3-5])), None, ((), [8:8-21], (Call { func = ((), [8:8-19], (Id ([8:8-19], "\\returns_int"))); targs = []; args = []; unpacked_arg = None })))))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([7:10-27], "__SupportDynamicType"); ua_params = [] }]; 

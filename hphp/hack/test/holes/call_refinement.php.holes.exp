@@ -96,9 +96,8 @@
            [([13:3-16],
              (Expr
                 ((dynamic), [13:3-15],
-                 (Binop
-                    { bop = (Eq None); lhs = ((dynamic), [13:3-7], (Lvar ([13:3-7], $arr)));
-                      rhs = ((dynamic), [13:10-15], (Call { func = (((function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))); targs = []; args = []; unpacked_arg = None })) }))));
+                 (Assign (((dynamic), [13:3-7], (Lvar ([13:3-7], $arr))), None,
+                    ((dynamic), [13:10-15], (Call { func = (((function(): dynamic)), [13:10-13], (Id ([13:10-13], "\\bar"))); targs = []; args = []; unpacked_arg = None })))))));
              ([15:3-17:4],
               (If (
                  ((dynamic), [15:7-22],
@@ -111,16 +110,14 @@
              ([18:3-25],
               (Expr
                  ((~nothing), [18:3-24],
-                  (Binop
-                     { bop = (Eq None); lhs = ((~nothing), [18:3-12], (Lvar ([18:3-12], $whatever)));
-                       rhs =
-                       ((~nothing), [18:15-24],
-                        (Call
-                           { func = (((function<T as ?Container<nothing>, Tv>(nothing $arr): ~nothing)), [18:15-18], (Id ([18:15-18], "\\qux")));
-                             targs = [((nothing), ([18:15-18], Hwildcard)); ((nothing), ([18:15-18], Hwildcard))]; 
-                             args = [(Anormal ((~nothing), [18:19-23], (Lvar ([18:19-23], $arr))))]; 
-                             unpacked_arg = None }))
-                       }))))
+                  (Assign (((~nothing), [18:3-12], (Lvar ([18:3-12], $whatever))), None,
+                     ((~nothing), [18:15-24],
+                      (Call
+                         { func = (((function<T as ?Container<nothing>, Tv>(nothing $arr): ~nothing)), [18:15-18], (Id ([18:15-18], "\\qux")));
+                           targs = [((nothing), ([18:15-18], Hwildcard)); ((nothing), ([18:15-18], Hwildcard))]; 
+                           args = [(Anormal ((~nothing), [18:19-23], (Lvar ([18:19-23], $arr))))]; 
+                           unpacked_arg = None }))
+                     )))))
              ]
            };
          f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([12:10-25], "__SupportDynamicType"); ua_params = [] }]; 

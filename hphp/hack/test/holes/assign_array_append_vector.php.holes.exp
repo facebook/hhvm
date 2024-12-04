@@ -19,9 +19,8 @@
           [([5:3-17],
             (Expr
                ((bool), [5:3-16],
-                (Binop
-                   { bop = (Eq None); lhs = ((bool), [5:3-8], (Array_get (((Vector<arraykey>), [5:3-6], (Lvar ([5:3-6], $xs))), None)));
-                     rhs = ((bool), [5:11-16], (Hole (((bool), [5:11-16], False), (bool), (~arraykey), Typing))) }))))
+                (Assign (((bool), [5:3-8], (Array_get (((Vector<arraykey>), [5:3-6], (Lvar ([5:3-6], $xs))), None))), None,
+                   ((bool), [5:11-16], (Hole (((bool), [5:11-16], False), (bool), (~arraykey), Typing))))))))
             ]
           };
         f_fun_kind = FSync; f_user_attributes = [{ ua_name = ([3:10-36], "__SupportDynamicType"); ua_params = [] }]; 

@@ -6,7 +6,6 @@
 use std::borrow::Cow;
 
 use crate::aast::*;
-use crate::ast_defs;
 use crate::pos::Pos;
 
 macro_rules! vec_wrapper {
@@ -249,10 +248,8 @@ impl<Ex, En> Stmt<Ex, En> {
     }
 
     pub fn is_assign_expr(&self) -> bool {
-        if let Some(Expr(_, _, Expr_::Binop(binop))) = &self.1.as_expr() {
-            if let ast_defs::Bop::Eq(_) = binop.as_ref().bop {
-                return true;
-            }
+        if let Some(Expr(_, _, Expr_::Assign(_))) = &self.1.as_expr() {
+            return true;
         }
         false
     }

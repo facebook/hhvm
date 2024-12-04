@@ -605,11 +605,11 @@ fn create_temp_statement_parallel(
         Stmt_::Expr(Box::new(Expr::new(
             (),
             pos.clone(),
-            Expr_::Binop(Box::new(aast::Binop {
-                bop: Bop::Eq(None),
-                lhs: Expr::new((), pos.clone(), Expr_::List(lhss)),
-                rhs: Expr::new((), pos.clone(), Expr_::Tuple(exprs)),
-            })),
+            Expr_::Assign(Box::new((
+                Expr::new((), pos.clone(), Expr_::List(lhss)),
+                None,
+                Expr::new((), pos.clone(), Expr_::Tuple(exprs)),
+            ))),
         ))),
     )]
 }
@@ -624,11 +624,7 @@ fn create_temp_statements(exprs: Vec<Expr>, mk_lvar: fn(&Pos, usize) -> Expr) ->
                 Stmt_::Expr(Box::new(Expr::new(
                     (),
                     expr.1.clone(),
-                    Expr_::Binop(Box::new(aast::Binop {
-                        bop: Bop::Eq(None),
-                        lhs: mk_lvar(&expr.1, i),
-                        rhs: expr,
-                    })),
+                    Expr_::Assign(Box::new((mk_lvar(&expr.1, i), None, expr))),
                 ))),
             )
         })
@@ -840,119 +836,117 @@ impl RewriteState {
                 let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
                 let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
 
-                if bop == Bop::Eq(None) {
-                    // Source: MyDsl`$x = ...`
-                    // Virtualized: $x = ...
-                    // Desugared: $0v->visitAssign(new ExprPos(...), $0v->visitLocal(...), ...)
-                    let desugar_expr = v_meth_call(
-                        et::VISIT_ASSIGN,
-                        vec![
-                            pos_expr,
-                            rewritten_lhs.desugar_expr,
-                            rewritten_rhs.desugar_expr,
-                        ],
-                        &pos,
-                    );
-                    let virtual_expr = Expr(
-                        (),
-                        pos.clone(),
-                        Binop(Box::new(aast::Binop {
-                            bop,
-                            lhs: rewritten_lhs.virtual_expr,
-                            rhs: rewritten_rhs.virtual_expr,
-                        })),
-                    );
-                    RewriteResult {
-                        virtual_expr,
-                        desugar_expr,
+                // Source: MyDsl`... + ...`
+                // Virtualized: ...->__plus(...)
+                // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
+                let binop_str = match bop {
+                    Bop::Plus => "__plus",
+                    Bop::Minus => "__minus",
+                    Bop::Star => "__star",
+                    Bop::Slash => "__slash",
+                    Bop::Percent => "__percent",
+                    // Convert boolean &&, ||
+                    Bop::Ampamp => "__ampamp",
+                    Bop::Barbar => "__barbar",
+                    // Convert comparison operators, <, <=, >, >=, ===, !==
+                    Bop::Lt => "__lessThan",
+                    Bop::Lte => "__lessThanEqual",
+                    Bop::Gt => "__greaterThan",
+                    Bop::Gte => "__greaterThanEqual",
+                    Bop::Eqeqeq => "__tripleEquals",
+                    Bop::Diff2 => "__notTripleEquals",
+                    // Convert string concatenation
+                    Bop::Dot => "__dot",
+                    // Convert bitwise operators, &, |, ^, <<, >>
+                    Bop::Amp => "__amp",
+                    Bop::Bar => "__bar",
+                    Bop::Xor => "__caret",
+                    Bop::Ltlt => "__lessThanLessThan",
+                    Bop::Gtgt => "__greaterThanGreaterThan",
+                    // Explicit list of unsupported operators and error messages
+                    Bop::Starstar => {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees do not support the exponent operator `**`.".into(),
+                        ));
+                        "__unsupported"
                     }
-                } else {
-                    // Source: MyDsl`... + ...`
-                    // Virtualized: ...->__plus(...)
-                    // Desugared: $0v->visitBinop(new ExprPos(...), ..., '__plus', ...)
-                    let binop_str = match bop {
-                        Bop::Plus => "__plus",
-                        Bop::Minus => "__minus",
-                        Bop::Star => "__star",
-                        Bop::Slash => "__slash",
-                        Bop::Percent => "__percent",
-                        // Convert boolean &&, ||
-                        Bop::Ampamp => "__ampamp",
-                        Bop::Barbar => "__barbar",
-                        // Convert comparison operators, <, <=, >, >=, ===, !==
-                        Bop::Lt => "__lessThan",
-                        Bop::Lte => "__lessThanEqual",
-                        Bop::Gt => "__greaterThan",
-                        Bop::Gte => "__greaterThanEqual",
-                        Bop::Eqeqeq => "__tripleEquals",
-                        Bop::Diff2 => "__notTripleEquals",
-                        // Convert string concatenation
-                        Bop::Dot => "__dot",
-                        // Convert bitwise operators, &, |, ^, <<, >>
-                        Bop::Amp => "__amp",
-                        Bop::Bar => "__bar",
-                        Bop::Xor => "__caret",
-                        Bop::Ltlt => "__lessThanLessThan",
-                        Bop::Gtgt => "__greaterThanGreaterThan",
-                        // Explicit list of unsupported operators and error messages
-                        Bop::Starstar => {
-                            self.errors.push((
-                                pos.clone(),
-                                "Expression trees do not support the exponent operator `**`."
-                                    .into(),
-                            ));
-                            "__unsupported"
-                        }
-                        Bop::Eqeq | Bop::Diff => {
-                            self.errors.push((
+                    Bop::Eqeq | Bop::Diff => {
+                        self.errors.push((
                             pos.clone(),
                             "Expression trees only support strict equality operators `===` and `!==`".into(),
                         ));
-                            "__unsupported"
-                        }
-                        Bop::Cmp => {
-                            self.errors.push((
+                        "__unsupported"
+                    }
+                    Bop::Cmp => {
+                        self.errors.push((
                             pos.clone(),
                             "Expression trees do not support the spaceship operator `<=>`. Try comparison operators like `<` and `>=`".into(),
                         ));
-                            "__unsupported"
-                        }
-                        Bop::QuestionQuestion => {
-                            self.errors.push((
-                                pos.clone(),
-                                "Expression trees do not support the null coalesce operator `??`."
-                                    .into(),
-                            ));
-                            "__unsupported"
-                        }
-                        Bop::Eq(_) => {
-                            self.errors.push((
-                            pos.clone(),
-                            "Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead.".into(),
-                        ));
-                            "__unsupported"
-                        }
-                    };
-                    let virtual_expr = meth_call(
-                        rewritten_lhs.virtual_expr,
-                        binop_str,
-                        vec![rewritten_rhs.virtual_expr],
-                        &pos,
-                    );
-                    let desugar_expr = v_meth_call(
-                        et::VISIT_BINOP,
-                        vec![
-                            pos_expr,
-                            rewritten_lhs.desugar_expr,
-                            string_literal(pos.clone(), binop_str),
-                            rewritten_rhs.desugar_expr,
-                        ],
-                        &pos,
-                    );
-                    RewriteResult {
-                        virtual_expr,
-                        desugar_expr,
+                        "__unsupported"
                     }
+                    Bop::QuestionQuestion => {
+                        self.errors.push((
+                            pos.clone(),
+                            "Expression trees do not support the null coalesce operator `??`."
+                                .into(),
+                        ));
+                        "__unsupported"
+                    }
+                };
+                let virtual_expr = meth_call(
+                    rewritten_lhs.virtual_expr,
+                    binop_str,
+                    vec![rewritten_rhs.virtual_expr],
+                    &pos,
+                );
+                let desugar_expr = v_meth_call(
+                    et::VISIT_BINOP,
+                    vec![
+                        pos_expr,
+                        rewritten_lhs.desugar_expr,
+                        string_literal(pos.clone(), binop_str),
+                        rewritten_rhs.desugar_expr,
+                    ],
+                    &pos,
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
+                }
+            }
+            Assign(assign) => {
+                let (lhs, bop, rhs) = *assign;
+                let rewritten_lhs = self.rewrite_expr(lhs, visitor_name);
+                let rewritten_rhs = self.rewrite_expr(rhs, visitor_name);
+
+                if bop.is_some() {
+                    self.errors.push((pos.clone(), "Expression trees do not support compound assignments. Try the long form style `$foo = $foo + $bar` instead.".into(),));
+                };
+                // Source: MyDsl`$x = ...`
+                // Virtualized: $x = ...
+                // Desugared: $0v->visitAssign(new ExprPos(...), $0v->visitLocal(...), ...)
+                let desugar_expr = v_meth_call(
+                    et::VISIT_ASSIGN,
+                    vec![
+                        pos_expr,
+                        rewritten_lhs.desugar_expr,
+                        rewritten_rhs.desugar_expr,
+                    ],
+                    &pos,
+                );
+                let virtual_expr = Expr(
+                    (),
+                    pos.clone(),
+                    Assign(Box::new((
+                        rewritten_lhs.virtual_expr,
+                        bop,
+                        rewritten_rhs.virtual_expr,
+                    ))),
+                );
+                RewriteResult {
+                    virtual_expr,
+                    desugar_expr,
                 }
             }
             // Source: MyDsl`!...`

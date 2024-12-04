@@ -50,6 +50,7 @@ let rec can_be_captured = function
   | Cast _
   | Unop _
   | Binop _
+  | Assign _
   | Pipe _
   | Eif _
   | Is _
@@ -105,7 +106,7 @@ let get_virtual_expr_from_et et =
 
 let is_assign (s : ('a, 'b) stmt) =
   match s with
-  | (_, Expr (_, _, Binop { bop = Eq None; _ })) -> true
+  | (_, Expr (_, _, Assign (_, None, _))) -> true
   | _ -> false
 
 let get_splices_from_fun e =
@@ -165,7 +166,7 @@ let rec is_const_expr (_, _, expr_) =
   | Call _
   | New _
   | Await _
-  | Binop { bop = Eq _; lhs = _; rhs = _ }
+  | Assign _
   | ExpressionTree _
   | ET_Splice _
   | Xml _ ->

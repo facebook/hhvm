@@ -75,9 +75,8 @@
              ([15:3-27],
               (Expr
                  ((exact TestKeyset), [15:3-26],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestKeyset), [15:3-7], (Lvar ([15:3-7], $foo)));
-                       rhs = ((exact TestKeyset), [15:10-26], (New (((exact TestKeyset), [15:14-24], (CI ([15:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestKeyset), [15:3-7], (Lvar ([15:3-7], $foo))), None,
+                     ((exact TestKeyset), [15:10-26], (New (((exact TestKeyset), [15:14-24], (CI ([15:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))))))));
              ([18:3-15],
               (Expr
                  ((void), [18:3-14],
@@ -130,9 +129,8 @@
              ([27:3-27],
               (Expr
                  ((exact TestKeyset), [27:3-26],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestKeyset), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestKeyset), [27:10-26], (New (((exact TestKeyset), [27:14-24], (CI ([27:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestKeyset), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestKeyset), [27:10-26], (New (((exact TestKeyset), [27:14-24], (CI ([27:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))))))));
              ([30:3-66],
               (Expr
                  ((~void), [30:3-65],
@@ -243,9 +241,8 @@
              ([27:3-27],
               (Expr
                  ((exact TestKeyset), [27:3-26],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestKeyset), [27:3-7], (Lvar ([27:3-7], $foo)));
-                       rhs = ((exact TestKeyset), [27:10-26], (New (((exact TestKeyset), [27:14-24], (CI ([27:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))) }))));
+                  (Assign (((exact TestKeyset), [27:3-7], (Lvar ([27:3-7], $foo))), None,
+                     ((exact TestKeyset), [27:10-26], (New (((exact TestKeyset), [27:14-24], (CI ([27:14-24], "\\TestKeyset"))), [], [], None, ((function(): void))))))))));
              ([30:3-66],
               (Expr
                  ((~void), [30:3-65],

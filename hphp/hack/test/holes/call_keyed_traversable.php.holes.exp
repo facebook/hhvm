@@ -101,11 +101,8 @@
              ([18:3-37],
               (Expr
                  ((exact TestKeyedTraversable), [18:3-36],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestKeyedTraversable), [18:3-7], (Lvar ([18:3-7], $foo)));
-                       rhs =
-                       ((exact TestKeyedTraversable), [18:10-36], (New (((exact TestKeyedTraversable), [18:14-34], (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void)))))
-                       }))));
+                  (Assign (((exact TestKeyedTraversable), [18:3-7], (Lvar ([18:3-7], $foo))), None,
+                     ((exact TestKeyedTraversable), [18:10-36], (New (((exact TestKeyedTraversable), [18:14-34], (CI ([18:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))))))));
              ([21:3-16],
               (Expr
                  ((void), [21:3-15],
@@ -201,11 +198,8 @@
              ([35:3-37],
               (Expr
                  ((exact TestKeyedTraversable), [35:3-36],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo)));
-                       rhs =
-                       ((exact TestKeyedTraversable), [35:10-36], (New (((exact TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void)))))
-                       }))));
+                  (Assign (((exact TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo))), None,
+                     ((exact TestKeyedTraversable), [35:10-36], (New (((exact TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))))))));
              ([38:3-95],
               (Expr
                  ((~void), [38:3-94],
@@ -359,11 +353,8 @@
              ([35:3-37],
               (Expr
                  ((exact TestKeyedTraversable), [35:3-36],
-                  (Binop
-                     { bop = (Eq None); lhs = ((exact TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo)));
-                       rhs =
-                       ((exact TestKeyedTraversable), [35:10-36], (New (((exact TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void)))))
-                       }))));
+                  (Assign (((exact TestKeyedTraversable), [35:3-7], (Lvar ([35:3-7], $foo))), None,
+                     ((exact TestKeyedTraversable), [35:10-36], (New (((exact TestKeyedTraversable), [35:14-34], (CI ([35:14-34], "\\TestKeyedTraversable"))), [], [], None, ((function(): void))))))))));
              ([38:3-95],
               (Expr
                  ((~void), [38:3-94],

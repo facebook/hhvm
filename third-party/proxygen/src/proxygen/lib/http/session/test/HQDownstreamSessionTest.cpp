@@ -604,6 +604,49 @@ TEST_P(HQDownstreamSessionTest, SimplePostWithPadding) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQDownstreamSessionTest, PaddingSM) {
+  auto id = nextStreamId();
+  auto res = requests_.emplace(std::piecewise_construct,
+                               std::forward_as_tuple(id),
+                               std::forward_as_tuple(makeCodec(id)));
+  auto& request = res.first->second;
+  request.id = request.codec->createStream();
+  request.readEOF = false;
+  request.codec->generatePadding(request.buf, request.id, 1'000);
+  request.codec->generateHeader(
+      request.buf, request.id, getPostRequest(100), false);
+  request.codec->generatePadding(request.buf, request.id, 2'000);
+  request.codec->generateBody(
+      request.buf, request.id, makeBuf(100), HTTPCodec::NoPadding, true);
+  request.codec->generatePadding(request.buf, request.id, 4'000);
+  request.readEOF = true;
+
+  auto handler = addSimpleStrictHandler();
+  handler->expectHeaders();
+  handler->expectBody([](uint64_t, std::shared_ptr<folly::IOBuf> body) {
+    EXPECT_EQ(body->computeChainDataLength(), 100);
+  });
+  handler->expectEOM([&handler] {
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendHeaders(getResponse(200));
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendChunkHeader(10);
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendBody(makeBuf(10));
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendChunkTerminator();
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendEOM();
+    handler->txn_->sendPadding(100);
+  });
+  handler->expectDetachTransaction();
+  flushRequestsAndLoop();
+  EXPECT_GT(socketDriver_->streams_[id].readOffset, 7'100);
+  EXPECT_GT(socketDriver_->streams_[id].writeBuf.chainLength(), 610);
+  EXPECT_TRUE(socketDriver_->streams_[id].writeEOF);
+  hqSession_->closeWhenIdle();
+}
+
 TEST_P(HQDownstreamSessionTest, SimpleGetEofDelay) {
   auto idh = checkRequest();
   flushRequestsAndLoop(false, std::chrono::milliseconds(10));

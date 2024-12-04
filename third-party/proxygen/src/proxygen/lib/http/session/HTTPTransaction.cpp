@@ -1447,11 +1447,7 @@ size_t HTTPTransaction::maybeSendDeferredNoError() {
 
 void HTTPTransaction::sendPadding(uint16_t bytes) {
   VLOG(4) << "egress padding=" << bytes << " on " << *this;
-  if (!validateEgressStateTransition(
-          // Sending padding is valid only when you can send body
-          HTTPTransactionEgressSM::Event::sendBody)) {
-    return;
-  }
+  // Padding is allowed at any time, even before headers and after EOM
   transport_.sendPadding(this, bytes);
 }
 

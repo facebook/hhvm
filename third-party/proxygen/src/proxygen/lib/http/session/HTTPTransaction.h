@@ -1239,7 +1239,7 @@ class HTTPTransaction
    * is currently implemented only for HTTP/2 and HTTP/3 and will do nothing on
    * HTTP/1 connections.
    *
-   * sendPadding() may be called only when sendBody() is also valid to call.
+   * sendPadding() may be called at any time, even before headers and after EOM.
    *
    * @param bytes The number of bytes of padding to send on this transaction.
    * The actual serialized size of the padding will be greater than this number

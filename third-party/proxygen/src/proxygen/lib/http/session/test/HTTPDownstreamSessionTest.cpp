@@ -1114,11 +1114,33 @@ TEST_F(HTTPDownstreamSessionTest, BadContentLength) {
 TEST_F(HTTP2DownstreamSessionTest, FrameBasedPadding) {
   // Send a request with padding. Padding should not affect anything.
   auto handler = addSimpleStrictHandler();
-  auto id = sendHeader();
-  clientCodec_->generatePadding(requests_, id, 123);
-  clientCodec_->generateEOM(requests_, id);
+
+  const auto streamID = clientCodec_->createStream();
+  clientCodec_->generatePadding(requests_, streamID, 100);
+  clientCodec_->generateHeader(
+      requests_, streamID, getPostRequest(1'000), false);
+  clientCodec_->generatePadding(requests_, streamID, 200);
+  clientCodec_->generateBody(
+      requests_, streamID, makeBuf(1'000), HTTPCodec::NoPadding, false);
+  clientCodec_->generatePadding(requests_, streamID, 400);
+  clientCodec_->generateEOM(requests_, streamID);
+  clientCodec_->generatePadding(requests_, streamID, 800);
+
   handler->expectHeaders();
-  handler->expectEOM([&handler] { handler->sendReplyWithBody(200, 100); });
+  handler->expectBody();
+  handler->expectEOM([&handler] {
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendHeaders(getResponse(200));
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendChunkHeader(10);
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendBody(makeBuf(10));
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendChunkTerminator();
+    handler->txn_->sendPadding(100);
+    handler->txn_->sendEOM();
+    handler->txn_->sendPadding(100);
+  });
   handler->expectGoaway();
   flushRequestsAndLoopN(1);
   handler->expectDetachTransaction();
@@ -1130,6 +1152,12 @@ TEST_F(HTTP2DownstreamSessionTest, FrameBasedPadding) {
 
   InSequence enforceOrder;
   EXPECT_CALL(callbacks, onHeadersComplete(_, _));
+  // No chunk header received, since it is not allowed in HTTP/2
+  // EXPECT_CALL(callbacks, onChunkHeader(_, 10));
+  EXPECT_CALL(callbacks, onBody(_, _, 0));
+  // No chunk terminator received, since it is not allowed in HTTP/2
+  // EXPECT_CALL(callbacks, onChunkComplete(_));
+  EXPECT_CALL(callbacks, onMessageComplete(_, _));
   parseOutput(*clientCodec_);
 }
 

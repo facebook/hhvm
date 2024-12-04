@@ -173,7 +173,7 @@ class TaggedPatchRef<type::map<K, V>> {
         badge, asValueStruct<K>(key), asValueStruct<V>(value));
   }
 
-  void add(const type::native_type<Map>& map) {
+  void tryPutMulti(const type::native_type<Map>& map) {
     patch_.get().tryPutMulti(badge, asValueStruct<Map>(map).as_map());
   }
 
@@ -187,7 +187,7 @@ class TaggedPatchRef<type::map<K, V>> {
   }
 
   auto& ensureAndPatchByKey(const type::native_type<K>& key) {
-    add({{key, {}}});
+    tryPutMulti({{key, {}}});
     return patchByKey(key);
   }
 

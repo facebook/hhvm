@@ -312,10 +312,6 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
       }
     }
   }
-  template <typename C = T>
-  [[deprecated("Use tryPutMulti(...) method instead.")]] void add(C&& entries) {
-    tryPutMulti(std::forward<C>(entries));
-  }
 
   /// Removes keys.
   template <typename C = std::unordered_set<typename T::key_type>>

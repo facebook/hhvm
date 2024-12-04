@@ -90,3 +90,25 @@ func BenchmarkStructWrite(b *testing.B) {
 		}
 	}
 }
+
+func BenchmarkStructToString(b *testing.B) {
+	// TODO: field51 and field53 result in non-buildable code.
+	// Use manual workaround below for now.
+	// ....
+	// "field51": {{"field1": 123}: "value1"},
+	// "field53": {["hello1", "hello2", "hello3"]: "value1"},
+	// ....
+
+	originalStruct := reflecttest.VariousFieldsStructConst1
+	originalStruct.Field51 = map[reflecttest.ComparableStruct]string{
+		{Field1: 123}: "value1",
+	}
+	originalStruct.Field53 = map[*[]string]string{
+		{"hello1", "hello2", "hello3"}: "value1",
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = originalStruct.String()
+	}
+}

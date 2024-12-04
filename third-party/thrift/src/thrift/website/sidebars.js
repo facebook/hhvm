@@ -624,6 +624,7 @@ module.exports = {
         'contributions/adapter',
         'contributions/fd-passing',
         'contributions/patch',
+        'contributions/whisker',
         {
           type: 'category',
           label: 'Documentation',

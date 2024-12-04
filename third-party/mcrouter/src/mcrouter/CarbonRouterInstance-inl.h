@@ -18,6 +18,8 @@
 #include <folly/io/async/EventBase.h>
 #include <folly/json/DynamicConverter.h>
 
+#include <common/logging/logging.h>
+
 #include "mcrouter/AsyncWriter.h"
 #include "mcrouter/CarbonRouterInstanceBase.h"
 #include "mcrouter/ExecutorObserver.h"
@@ -127,7 +129,15 @@ CarbonRouterInstance<RouterInfo>* CarbonRouterInstance<RouterInfo>::createRaw(
     initFailureLogger();
   }
 
-  auto router = new CarbonRouterInstance<RouterInfo>(std::move(input_options));
+  // Deleter is only called if unique_ptr::get() returns non-null.
+  auto deleter = [](CarbonRouterInstance<RouterInfo>* inst) {
+    LOG_EVERY_MS(WARNING, 10000) << "Destroying CarbonRouterInstance";
+    delete inst;
+  };
+  auto router =
+      std::unique_ptr<CarbonRouterInstance<RouterInfo>, decltype(deleter)>(
+          new CarbonRouterInstance<RouterInfo>(std::move(input_options)),
+          deleter);
 
   folly::Expected<folly::Unit, std::string> result;
   try {
@@ -141,7 +151,7 @@ CarbonRouterInstance<RouterInfo>* CarbonRouterInstance<RouterInfo>::createRaw(
 
     result = router->spinUp();
     if (result.hasValue()) {
-      return router;
+      return router.release();
     }
   } catch (...) {
     result = folly::makeUnexpected(
@@ -161,10 +171,20 @@ CarbonRouterInstance<RouterInfo>* CarbonRouterInstance<RouterInfo>::createRaw(
   // can be released.
   // We schedule the deletion on auxiliary thread pool
   // to avoid potential deadlock with the current thread.
-  auxThreadPool->add([router, auxThreadPool]() mutable {
-    router->resetMetadata();
-    router->resetAxonProxyClientFactory();
-  });
+  auxThreadPool->add(
+      [router = std::move(router),
+       auxThreadPool,
+       deleteRouter =
+           input_options.delete_carbon_instance_upon_init_failure]() mutable {
+        router->resetMetadata();
+        router->resetAxonProxyClientFactory();
+        if (!deleteRouter) {
+          // Leak it. unique_ptr::get() is guaranteed to return nullptr after
+          // this.
+          router.release();
+        }
+        // router gets destroyed here, unless configuration asks to leak it.
+      });
 
   throw std::runtime_error(std::move(result.error()));
 }

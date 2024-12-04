@@ -958,6 +958,13 @@ MCROUTER_OPTION_INTEGER(
     "Measure proxy CPU utilization every proxy_cpu_interval_s seconds. "
     "0 means disabled.")
 
+MCROUTER_OPTION_TOGGLE(
+    delete_carbon_instance_upon_init_failure,
+    true,
+    "delete-carbon-instance-upon-init-failure",
+    no_short,
+    "Controls whether we delete the carbon instance upon failures or leak it")
+
 #ifdef ADDITIONAL_OPTIONS_FILE
 #include ADDITIONAL_OPTIONS_FILE
 #endif

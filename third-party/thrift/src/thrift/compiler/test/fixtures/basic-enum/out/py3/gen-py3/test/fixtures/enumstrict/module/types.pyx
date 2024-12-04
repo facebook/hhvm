@@ -220,5 +220,5 @@ cdef object Map__MyEnum_string__from_cpp(const cmap[_test_fixtures_enumstrict_mo
     return Map__MyEnum_string(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 
-kOne = MyEnum(<int> (_test_fixtures_enumstrict_module_cbindings.ckOne()))
+kOne = MyEnum.ONE
 enumNames = Map__MyEnum_string__from_cpp(_test_fixtures_enumstrict_module_cbindings.cenumNames())

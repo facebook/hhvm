@@ -53,10 +53,10 @@ file.
 }}{{/constant:value}}
 {{/type:float?}}
 {{#type:string?}}
-{{constant:name}} = {{> types/current_module_cbindings}}.{{> types/c_constant }}().decode('UTF-8')
+{{constant:name}} = {{#constant:value}}"{{value:string_value}}"{{/constant:value}}
 {{/type:string?}}
 {{#type:binary?}}
-{{constant:name}} = <bytes> {{> types/current_module_cbindings}}.{{> types/c_constant }}()
+{{constant:name}} = {{#constant:value}}b"{{value:string_value}}"{{/constant:value}}
 {{/type:binary?}}
 {{! We take the constant structs/containers and build a non-const shared_ptr
     as required by the thrift-py3 wrapper api, generally this is a terrible
@@ -71,7 +71,11 @@ file.
 {{constant:name}} = {{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}())
 {{/type:container?}}
 {{#type:enum}}
-{{constant:name}} = {{#type:need_module_path?}}{{type:modulePath}}.{{!
-    }}{{/type:need_module_path?}}{{enum:name}}(<int> ({{> types/current_module_cbindings}}.{{> types/c_constant }}()))
+{{constant:name}} = {{#constant:value}}{{!
+    }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
+    }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
+    }}{{value:enum_name}}{{#value:enum_value}}.{{enum_value:py_name}}{{/value:enum_value}}{{!
+    }}{{^value:enum_value?}}, {{value:integer_value}}){{/value:enum_value?}}{{!
+}}{{/constant:value}}
 {{/type:enum}}
 {{/constant:type}}

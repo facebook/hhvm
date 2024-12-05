@@ -16,66 +16,49 @@
 
 }}{{!
 
-Definitions for constant values. These are included from the struct.pyx file
+Definitions for constant values. These are included from the types.pyx file
 and define Python objects that can be imported from the end-user's Python
 file.
 
-}}
-{{#constant:type}}{{!
-}}
-{{#type:bool?}}
-{{constant:name}} = {{#constant:value}}{{!
+}}{{#value:bool?}}{{!
   }}{{#value:nonzero?}}True{{/value:nonzero?}}{{!
-  }}{{^value:nonzero?}}False{{/value:nonzero?}}{{/constant:value}}
-{{/type:bool?}}
-{{#type:byte?}}
-{{constant:name}} = {{#constant:value}}{{value:integer_value}}{{/constant:value}}
-{{/type:byte?}}
-{{#type:i16?}}
-{{constant:name}} = {{#constant:value}}{{value:integer_value}}{{/constant:value}}
-{{/type:i16?}}
-{{#type:i32?}}
-{{constant:name}} = {{#constant:value}}{{value:integer_value}}{{/constant:value}}
-{{/type:i32?}}
-{{#type:i64?}}
-{{constant:name}} = {{#constant:value}}{{value:integer_value}}{{/constant:value}}
-{{/type:i64?}}
-{{#type:double?}}
-{{constant:name}} = {{#constant:value}}{{!
-}}{{#value:integer?}}{{value:integer_value}}.0{{/value:integer?}}{{!
+  }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
+}}{{/value:bool?}}{{!
+}}{{#value:integer?}}{{!
+    }}{{#value:value_for_bool?}}{{!
+        }}{{#value:nonzero?}}True{{/value:nonzero?}}{{!
+        }}{{^value:nonzero?}}False{{/value:nonzero?}}{{!
+    }}{{/value:value_for_bool?}}{{!
+    }}{{^value:value_for_bool?}}{{!
+    }}{{value:integer_value}}{{#value:value_for_floating_point?}}.0{{/value:value_for_floating_point?}}{{!
+    }}{{/value:value_for_bool?}}{{!
+}}{{/value:integer?}}{{!
 }}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
-}}{{/constant:value}}
-{{/type:double?}}
-{{#type:float?}}
-{{constant:name}} = {{#constant:value}}{{!
-}}{{#value:integer?}}{{value:integer_value}}.0{{/value:integer?}}{{!
-}}{{#value:double?}}{{value:double_value}}{{/value:double?}}{{!
-}}{{/constant:value}}
-{{/type:float?}}
-{{#type:string?}}
-{{constant:name}} = {{#constant:value}}"{{value:string_value}}"{{/constant:value}}
-{{/type:string?}}
-{{#type:binary?}}
-{{constant:name}} = {{#constant:value}}b"{{value:string_value}}"{{/constant:value}}
-{{/type:binary?}}
-{{! We take the constant structs/containers and build a non-const shared_ptr
-    as required by the thrift-py3 wrapper api, generally this is a terrible
-    idea as constant() is an r-value, and removing the const qualifier is dangerous
-    but we *promise* in the thrift-py3 api to never change objects.
-}}
-{{#type:struct?}}
-{{constant:name}} = {{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
-    }}{{> types/current_module_cbindings}}.{{> types/c_constant }}()))
-{{/type:struct?}}
-{{#type:container?}}
-{{constant:name}} = {{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}())
-{{/type:container?}}
-{{#type:enum}}
-{{constant:name}} = {{#constant:value}}{{!
+}}{{#value:const_struct?}}{{!
+    }}{{#value:const_struct_type}}{{!
+    }}{{> types/cython_python_type}}._create_FBTHRIFT_ONLY_DO_NOT_USE(constant_shared_ptr({{!
+        }}{{> types/current_module_cbindings}}.{{> types/c_constant }}())){{!
+    }}{{/value:const_struct_type}}{{!
+}}{{/value:const_struct?}}{{!
+}}{{^value:const_struct?}}{{!
+}}{{#value:string?}}{{!
+    }}{{#value:py3_binary?}}b{{/value:py3_binary?}}"{{value:string_value}}"{{!
+}}{{/value:string?}}{{!
+}}{{#value:map?}}{{!
+    }}{{#value:const_container_type}}{{!
+    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}()){{!
+    }}{{/value:const_container_type}}{{!
+}}{{/value:map?}}{{!
+}}{{#value:list?}}{{!
+    }}{{#value:const_container_type}}{{!
+    }}{{> types/container_from_cpp }}({{> types/current_module_cbindings}}.{{> types/c_constant }}()){{!
+    }}{{/value:const_container_type}}{{!
+}}{{/value:list?}}{{!
+}}{{/value:const_struct?}}{{!
+}}{{#value:enum?}}{{!
     }}{{^value:enum_value?}}__BadEnum({{/value:enum_value?}}{{!
-    }}{{#type:need_module_path?}}{{type:modulePath}}.{{/type:need_module_path?}}{{!
-    }}{{value:enum_name}}{{#value:enum_value}}.{{enum_value:py_name}}{{/value:enum_value}}{{!
+    }}{{#value:const_enum_type}}{{#type:need_module_path?}}{{type:modulePath}}.{{!
+    }}{{/type:need_module_path?}}{{/value:const_enum_type}}{{!
+    }}{{value:enum_name}}{{#value:enum_value?}}.{{value:py3_enum_value_name}}{{/value:enum_value?}}{{!
     }}{{^value:enum_value?}}, {{value:integer_value}}){{/value:enum_value?}}{{!
-}}{{/constant:value}}
-{{/type:enum}}
-{{/constant:type}}
+}}{{/value:enum?}}

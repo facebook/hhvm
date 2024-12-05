@@ -17,8 +17,8 @@
   // Note: terse_writes is mutually exclusive with optional.
 }}
 {{#struct:union?}}
-    case {{struct:cpp_underlying_name}}::Type::{{field:cpp_name}}:
-    {
+  case {{struct:cpp_underlying_name}}::Type::{{field:cpp_name}}:
+  {
 {{/struct:union?}}
 {{^struct:union?}}
   {{!

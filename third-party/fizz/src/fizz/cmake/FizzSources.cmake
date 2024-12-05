@@ -1,4 +1,4 @@
-# @generated SignedSource<<6739c8027c4f0f51ab7bf5dcb36c5d96>>
+# @generated SignedSource<<9637ef5067835d0574a6b268d63b71f1>>
 #
 # This file is generated file from `fizz/facebook/boilerplate.sh`.
 # All manual changes will be lost.
@@ -91,6 +91,7 @@ set(
         server/CookieCipher.cpp
         server/FizzServer.cpp
         server/FizzServerContext.cpp
+        server/HandshakeLogging.cpp
         server/MultiServerExtensions.cpp
         server/ReplayCache.cpp
         server/ServerProtocol.cpp
@@ -252,6 +253,7 @@ set(
         server/FizzServer-inl.h
         server/FizzServer.h
         server/FizzServerContext.h
+        server/HandshakeLogging.h
         server/MultiServerExtensions.h
         server/Negotiator.h
         server/ReplayCache.h

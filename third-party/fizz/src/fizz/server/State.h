@@ -18,6 +18,7 @@
 #include <fizz/record/RecordLayer.h>
 #include <fizz/server/Actions.h>
 #include <fizz/server/FizzServerContext.h>
+#include <fizz/server/HandshakeLogging.h>
 #include <fizz/server/ResumptionState.h>
 #include <fizz/server/ServerExtensions.h>
 
@@ -49,26 +50,6 @@ struct ECHState {
   mutable std::unique_ptr<hpke::HpkeContext> hpkeContext;
   // Sni of the outer client hello, for logging.
   folly::Optional<std::string> outerSni;
-};
-
-struct HandshakeLogging {
-  folly::Optional<ProtocolVersion> clientLegacyVersion;
-  std::vector<ProtocolVersion> clientSupportedVersions;
-  std::vector<CipherSuite> clientCiphers;
-  std::vector<ExtensionType> clientExtensions;
-  folly::Optional<ProtocolVersion> clientRecordVersion;
-  folly::Optional<std::string> clientSni;
-  std::vector<NamedGroup> clientSupportedGroups;
-  folly::Optional<std::vector<NamedGroup>> clientKeyShares;
-  std::vector<PskKeyExchangeMode> clientKeyExchangeModes;
-  std::vector<SignatureScheme> clientSignatureAlgorithms;
-  folly::Optional<bool> clientSessionIdSent;
-  folly::Optional<Random> clientRandom;
-  folly::Optional<uint8_t> testExtensionByte;
-  std::vector<std::string> clientAlpns;
-  size_t originalChloSize{0};
-
-  void populateFromClientHello(const ClientHello& chlo);
 };
 
 /**

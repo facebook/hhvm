@@ -17,11 +17,11 @@
 #pragma once
 
 #include <algorithm>
-#include <initializer_list>
 #include <variant>
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBufQueue.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/protocol/detail/CursorBasedSerialization.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
@@ -70,6 +70,7 @@ class CursorSerializationWrapper {
   static_assert(
       std::is_same_v<ProtocolWriter, BinaryProtocolWriter>,
       "ProtocolWriter must be BinaryProtocolReader");
+  using Serializer = Serializer<ProtocolReader, ProtocolWriter>;
 
  public:
   CursorSerializationWrapper() = default;
@@ -100,12 +101,13 @@ class CursorSerializationWrapper {
    * Object read path (traditional Thrift deserialization)
    * Deserializes into a (returned) Thrift object.
    */
-  T deserialize() {
+  T deserialize() const {
+    if (std::holds_alternative<ProtocolWriter>(protocol_)) {
+      folly::throw_exception<std::runtime_error>(
+          "Concurrent reads/writes not supported");
+    }
     checkHasData();
-    T ret;
-    ret.read(reader());
-    done();
-    return ret;
+    return Serializer::template deserialize<T>(serializedData_.get());
   }
 
   /**

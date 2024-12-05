@@ -16,7 +16,6 @@
 
 #include <thrift/lib/cpp2/protocol/CursorBasedSerializer.h>
 
-#include <ranges>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/protocol/test/gen-cpp2/cursor_clients.h>
@@ -685,4 +684,19 @@ TEST(CursorBasedSerializer, CursorReadRemainingEndOne) {
 
 TEST(CursorBasedSerializer, CursorReadRemainingEndMany) {
   doCursorReadRemainEndTest(10);
+}
+
+TEST(CursorBasedSerializer, ConcurrentAccess) {
+  EmptyWrapper wrapper;
+  auto writer = wrapper.beginWrite();
+  EXPECT_THROW(wrapper.beginRead(), std::runtime_error);
+  EXPECT_THROW(wrapper.deserialize(), std::runtime_error);
+  EXPECT_THROW(wrapper.beginWrite(), std::runtime_error);
+  wrapper.endWrite(std::move(writer));
+
+  auto reader = wrapper.beginRead();
+  EXPECT_THROW(wrapper.beginRead(), std::runtime_error);
+  EXPECT_EQ(wrapper.deserialize(), Empty{});
+  EXPECT_THROW(wrapper.beginWrite(), std::runtime_error);
+  wrapper.endRead(std::move(reader));
 }

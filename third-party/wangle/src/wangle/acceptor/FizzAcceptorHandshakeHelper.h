@@ -116,12 +116,12 @@ class FizzLoggingCallback {
    *
    * @param server   A valid, non-owning reference to the Fizz server side
    *                 connection object that handled the connection.
-   * @param ew       The exception object containing details on the cause of
+   * @param ex       The exception object containing details on the cause of
    *                 the handshake failure.
    */
   virtual void logFizzHandshakeError(
       const fizz::server::AsyncFizzServer& /*server*/,
-      const folly::exception_wrapper& /*ew*/) noexcept {}
+      const folly::exception_wrapper& /*ex*/) noexcept {}
 
   /**
    * logFallbackHandshakeError is invoked when the fallback OpenSSL
@@ -134,12 +134,14 @@ class FizzLoggingCallback {
    *
    * @param server   A valid, non-owning reference to AsyncSSLSocket
    *                 connection object that handled the connection.
-   * @param ew       The exception object containing details on the cause of
+   * @param ex       The exception object containing details on the cause of
    *                 the handshake failure.
+   * @param logging  If set, contains parsed ClientHello fields.
    */
   virtual void logFallbackHandshakeError(
       const folly::AsyncSSLSocket& /*server*/,
-      const folly::AsyncSocketException& /*ex*/) noexcept {}
+      const folly::AsyncSocketException& /*ex*/,
+      const fizz::server::HandshakeLogging* /*logging*/) noexcept {}
 };
 
 class FizzAcceptorHandshakeHelper;

@@ -235,7 +235,9 @@ class MockFizzLoggingCallback : public FizzLoggingCallback {
   MOCK_METHOD(
       void,
       logFallbackHandshakeError,
-      (const folly::AsyncSSLSocket&, const folly::AsyncSocketException&),
+      (const folly::AsyncSSLSocket&,
+       const folly::AsyncSocketException&,
+       const fizz::server::HandshakeLogging*),
       (noexcept));
 };
 

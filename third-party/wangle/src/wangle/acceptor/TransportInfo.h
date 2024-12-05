@@ -26,6 +26,12 @@
 #include <folly/SocketAddress.h>
 #include <folly/portability/Sockets.h>
 
+namespace fizz {
+namespace server {
+struct HandshakeLogging;
+} // namespace server
+} // namespace fizz
+
 namespace folly {
 
 class AsyncSocket;
@@ -316,6 +322,13 @@ struct TransportInfo {
    * sometimes concatenated with raw fingerprint (that gives the hash).
    */
   std::shared_ptr<std::string> tcpFingerprint{nullptr};
+
+  /*
+   * Additional handshake logging information parsed from the ClientHello by
+   * Fizz. This data is only used for logging and is not guaranteed to be
+   * present.
+   */
+  std::shared_ptr<fizz::server::HandshakeLogging> handshakeLogging;
 
   /*
    * Whether or not TCP fast open succeded on this connection. Failure can occur

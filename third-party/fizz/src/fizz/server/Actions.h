@@ -11,6 +11,7 @@
 #include <boost/variant.hpp>
 
 #include <fizz/protocol/Actions.h>
+#include <fizz/server/HandshakeLogging.h>
 #include <fizz/util/Variant.h>
 #include <folly/Optional.h>
 #include <folly/futures/Future.h>
@@ -38,6 +39,11 @@ struct AttemptVersionFallback {
    * for processing the ClientHello.
    */
   folly::Optional<std::string> sni;
+
+  /**
+   * Parsed fields from the ClientHello for logging purposes.
+   */
+  std::unique_ptr<HandshakeLogging> handshakeLogging;
 };
 
 /**

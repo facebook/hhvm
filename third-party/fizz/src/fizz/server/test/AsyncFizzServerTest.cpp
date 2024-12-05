@@ -299,7 +299,8 @@ TEST_F(AsyncFizzServerTest, TestAttemptVersionFallback) {
                 [](State& newState) { newState.state() = StateEnum::Error; }),
             AttemptVersionFallback{
                 IOBuf::copyBuffer("ClientHello"),
-                folly::Optional<std::string>("www.hostname.com")});
+                folly::Optional<std::string>("www.hostname.com"),
+                std::make_unique<HandshakeLogging>()});
       }));
   EXPECT_CALL(handshakeCallback_, _fizzHandshakeAttemptFallback(_))
       .WillOnce(Invoke([&](AttemptVersionFallback& fallback) {

@@ -1257,6 +1257,12 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
                            .hostname->to<std::string>();
       }
 
+      auto logging = state.handshakeLogging();
+      if (logging) {
+        fallback.handshakeLogging =
+            std::make_unique<HandshakeLogging>(*logging);
+      }
+
       return actions(
           MutateState(&Transition<StateEnum::Error>), std::move(fallback));
     } else {

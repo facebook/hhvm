@@ -40,21 +40,8 @@ file.
     }}{{#type:struct}}{{> structs/unadapted_name}}{{/type:struct}}{{!
     }}{{/value:const_struct_type}}{{!
     }}({{#value:const_struct}}{{!
-        }}{{!
-            There might a bug somewhere causing that:
-            For some enum field of a const struct, `value:enum?` yields false.
-            Below is a temporary workaround using `type:enum?` which correctly yields true.
-            Ideally we should fix the `value:enum?` behavior and get rid of this hack.
-        }}{{!
         }}{{constant:name}}={{#constant:type}}{{#constant:value}}{{!
-            }}{{#type:enum?}}{{!
-                }}{{#value:enum?}}{{ >types/constant_value }}{{/value:enum?}}{{!
-                }}{{^value:enum?}}{{!
-                    }}{{#type:need_module_path?}}{{type:module_name}}.{{/type:need_module_path?}}{{type:name}}{{!
-                    }}({{#constant:value}}{{value:integer_value}}{{/constant:value}}){{!
-                }}{{/value:enum?}}{{!
-            }}{{/type:enum?}}{{!
-            }}{{^type:enum?}}{{ >types/constant_value }}{{/type:enum?}}{{!
+            }}{{ >types/constant_value }}{{!
         }}{{/constant:value}}{{/constant:type}}{{^last?}}, {{/last?}}{{!
     }}{{/value:const_struct}}){{!
 }}{{/value:const_struct?}}{{!

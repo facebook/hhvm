@@ -271,17 +271,37 @@ module ErrorsFile = struct
         log_message: string;
       }
 
-  let max_payload_size = 20_000_000
+  let max_payload_size = 200_000_000
 
-  let assert_payload_size_ok size direction =
+  let assert_payload_size_ok size direction (message : message option) =
     if size >= max_payload_size then (
       let msg =
         Printf.sprintf
-          "%s error payload with size %d, which is too big."
+          "%s error payload with size %d, which is too big.%s"
           (match direction with
           | `Read -> "Reading"
           | `Write -> "Writing")
           size
+          (match message with
+          | None -> ""
+          | Some message ->
+            Printf.sprintf
+              " Message is %s."
+              (match message with
+              | VersionHeader _ -> "the version header"
+              | Header _ -> "the header"
+              | Item (Errors { errors; timestamp = _ }) ->
+                let error_count =
+                  Relative_path.Map.fold
+                    errors
+                    ~init:0
+                    ~f:(fun _path errors cnt -> cnt + List.length errors)
+                in
+                Printf.sprintf "some %d errors" error_count
+              | Item (Telemetry telemetry) ->
+                let nchar = Telemetry.to_string telemetry |> String.length in
+                Printf.sprintf "some telemetry of %d characters" nchar
+              | End _ -> "the end sentinel"))
       in
       HackEventLogger.invariant_violation_bug msg;
       failwith msg
@@ -295,7 +315,7 @@ module ErrorsFile = struct
     (* Since we do this assertion when reading (to avoid creating buffers that are too big),
        we also do the same assertion when writing, just in case we ever write very big
        messages by mistake. *)
-    assert_payload_size_ok size `Write;
+    assert_payload_size_ok size `Write (Some message);
     let preamble = Marshal_tools.make_preamble size in
     Sys_utils.with_lock fd Unix.F_LOCK ~f:(fun () ->
         Sys_utils.write_non_intr fd preamble 0 (Bytes.length preamble);
@@ -313,7 +333,7 @@ module ErrorsFile = struct
           let size = Marshal_tools.parse_preamble preamble in
           (* This assert is in case the file is garbled, and we read a crazy-big size,
              to avoid allocating say a 20gb bytes array and having the machine get stuck. *)
-          assert_payload_size_ok size `Read;
+          assert_payload_size_ok size `Read None;
           (match Sys_utils.read_non_intr fd size with
           | None -> Error Malformed
           | Some payload ->

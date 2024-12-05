@@ -482,18 +482,18 @@ TEST_F(ParserTest, basic_partial_apply) {
 }
 
 TEST_F(ParserTest, partial_apply_single_id) {
-  auto ast = parse_ast("{{ > foo }}");
+  auto ast = parse_ast("{{> foo }}");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- partial-apply <line:1:1, col:12> 'foo'\n"
+      "|- partial-apply <line:1:1, col:11> 'foo'\n"
       "| `- standalone-offset ''\n");
 }
 
 TEST_F(ParserTest, partial_apply_in_section) {
   auto ast = parse_ast(
       "{{#news.has-update?}}\n"
-      "  {{ > print/news}}\n"
+      "  {{> print/news}}\n"
       "{{/news.has-update?}}");
   EXPECT_EQ(
       to_string(*ast),
@@ -501,17 +501,17 @@ TEST_F(ParserTest, partial_apply_in_section) {
       "|- section-block <line:1:1, line:3:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
       "| |- text <line:2:1, col:3> '  '\n"
-      "| |- partial-apply <line:2:3, col:20> 'print/news'\n"
+      "| |- partial-apply <line:2:3, col:19> 'print/news'\n"
       "| | `- standalone-offset '  '\n");
 }
 
 TEST_F(ParserTest, partial_apply_preserves_whitespace_offset) {
-  auto ast = parse_ast(" \t {{ > print/news}}\n");
+  auto ast = parse_ast(" \t {{> print/news}}\n");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- text <line:1:1, col:4> ' \\t '\n"
-      "|- partial-apply <line:1:4, col:21> 'print/news'\n"
+      "|- partial-apply <line:1:4, col:20> 'print/news'\n"
       "| `- standalone-offset ' \\t '\n");
 }
 
@@ -528,7 +528,7 @@ TEST_F(ParserTest, partial_apply_no_id) {
 }
 
 TEST_F(ParserTest, partial_apply_extra_stuff) {
-  auto ast = parse_ast("{{ > foo ! }}");
+  auto ast = parse_ast("{{> foo ! }}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,

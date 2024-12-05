@@ -634,10 +634,6 @@ lexer::state_text::result lexer::state_text::next(lexer& lex) {
         if (scan_within.peek() == '!') {
           return ptr(std::make_unique<lexer::state_comment>());
         }
-        // While Mustache does not technically support spaces between "{{" and
-        // ">" for partial applications, mstch does so we skip whitespace *only*
-        // in this case for backward compatibility.
-        skip_whitespace(&scan_within);
         return scan_within.peek() == '>'
             ? ptr(std::make_unique<lexer::state_partial_application>())
             : ptr(std::make_unique<lexer::state_template>());

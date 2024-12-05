@@ -274,7 +274,7 @@ TEST_F(LexerTest, partial_apply) {
 }
 
 TEST_F(LexerTest, partial_apply_single_component) {
-  auto lexer = make_lexer("{{ > foo }}");
+  auto lexer = make_lexer("{{> foo }}");
   const std::vector<token_description> expected = {
       {tok::open, {}},
       {tok::gt, {}},
@@ -299,7 +299,7 @@ TEST_F(LexerTest, partial_apply_no_path) {
 }
 
 TEST_F(LexerTest, partial_apply_keyword_and_dots) {
-  auto lexer = make_lexer("{{ > foo-bar / true /source.cpp }}");
+  auto lexer = make_lexer("{{> foo-bar / true /source.cpp }}");
   const std::vector<token_description> expected = {
       {tok::open, {}},
       {tok::gt, {}},

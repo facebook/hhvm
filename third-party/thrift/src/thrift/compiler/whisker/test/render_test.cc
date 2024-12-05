@@ -1034,7 +1034,7 @@ TEST_F(
   auto result = render(
       "| This Is\n"
       "  {{#boolean\n"
-      "       .condition}} {{ > ineligible}} \n"
+      "       .condition}} {{> ineligible}} \n"
       "|\n"
       "  {{/boolean.condition}}\n"
       "| A Line\n",

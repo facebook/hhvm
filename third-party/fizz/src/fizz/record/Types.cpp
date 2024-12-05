@@ -236,6 +236,25 @@ std::string toString(SignatureScheme sigScheme) {
     case SignatureScheme::rsa_pss_sha256_batch:
       return "rsa_pss_sha256_batch";
   }
+  // Handle legacy/compatibility algorithms
+  uint16_t val = static_cast<uint16_t>(sigScheme);
+  switch (val) {
+    // RSASSA-PKCS1-v1_5 algorithms
+    case 0x0401:
+      return "rsa_pkcs1_sha256";
+    case 0x0501:
+      return "rsa_pkcs1_sha384";
+    case 0x0601:
+      return "rsa_pkcs1_sha512";
+    // Fizz does not support these algorithms. They are listed
+    // here solely to aid in debugging when printing non-TLS 1.3
+    // ClientHellos (for example, in the fizzHandshakeFallback
+    // path)
+    case 0x0201:
+      return "rsa_pkcs1_sha1";
+    case 0x0203:
+      return "ecdsa_sha1";
+  }
   return enumToHex(sigScheme);
 }
 

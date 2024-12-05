@@ -47,7 +47,7 @@ class ChecksumPayloadSerializerStrategy final
           ChecksumPayloadSerializerStrategy<DelegateStrategy>> {
  public:
   ChecksumPayloadSerializerStrategy(
-      ChecksumPayloadSerializerStrategyOptions options = {[] {}, [] {}, [] {}})
+      ChecksumPayloadSerializerStrategyOptions options = {})
       : PayloadSerializerStrategy<
             ChecksumPayloadSerializerStrategy<DelegateStrategy>>(*this),
         delegate_(DelegateStrategy()),
@@ -162,7 +162,7 @@ class ChecksumPayloadSerializerStrategy final
     checksum.algorithm() = ChecksumAlgo;
     checksum.checksum() = ret.checksum;
     checksum.salt() = ret.salt;
-    recordChecksumCalculated_();
+    tryRecordChecksumCalculated();
     return checksum;
   }
 
@@ -194,9 +194,9 @@ class ChecksumPayloadSerializerStrategy final
     bool ret = generator.validateChecksumFromIOBuf(
         *checksum.checksum(), *checksum.salt(), buf);
     if (FOLLY_LIKELY(ret)) {
-      recordChecksumSuccess_();
+      tryRecordChecksumSuccess();
     } else {
-      recordChecksumFailure_();
+      tryRecordChecksumFailure();
     }
     return ret;
   }
@@ -230,17 +230,17 @@ class ChecksumPayloadSerializerStrategy final
    */
   void validateInvalidChecksum(const Checksum& c) {
     auto value = c.checksum().value();
-    auto salt = c.salt().value();
 
-    if (salt == 0 && value == 0) {
+    if (value == 0) {
       XLOG_EVERY_MS(ERR, 1'000)
-          << "Received a request to checksum the payload but received a checksum and salt that are zero. "
+          << "Received a request to checksum the payload but received a checksumt that is zero. "
           << "Please make sure that the ChecksumPayloadSerializerStrategy is enabled on both the client and server.";
     }
   }
 
   template <typename T, typename DelegateFunc>
-  FOLLY_ERASE folly::Try<T> unpackImpl(Payload&& payload, DelegateFunc func) {
+  FOLLY_ALWAYS_INLINE folly::Try<T> unpackImpl(
+      Payload&& payload, DelegateFunc func) {
     if (payload.hasNonemptyMetadata()) {
       folly::Try<T> t = func(std::move(payload));
       bool compressed = isDataCompressed(&t.value().metadata);
@@ -259,6 +259,24 @@ class ChecksumPayloadSerializerStrategy final
       }
     } else {
       return func(std::move(payload));
+    }
+  }
+
+  FOLLY_ERASE void tryRecordChecksumFailure() {
+    if (recordChecksumFailure_ != nullptr) {
+      recordChecksumFailure_();
+    }
+  }
+
+  FOLLY_ERASE void tryRecordChecksumSuccess() {
+    if (recordChecksumSuccess_ != nullptr) {
+      recordChecksumSuccess_();
+    }
+  }
+
+  FOLLY_ERASE void tryRecordChecksumCalculated() {
+    if (recordChecksumCalculated_ != nullptr) {
+      recordChecksumCalculated_();
     }
   }
 };

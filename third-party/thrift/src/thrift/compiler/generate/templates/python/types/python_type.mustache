@@ -27,8 +27,8 @@ in a different thrift file, or defined in the same thrift file.
 }}{{#type:string?}}str{{/type:string?}}{{!
 }}{{#type:binary?}}{{#type:iobuf?}}_fbthrift_iobuf.IOBuf{{/type:iobuf?}}{{^type:iobuf?}}bytes{{/type:iobuf?}}{{/type:binary?}}{{!
 }}{{#type:struct}}{{!
-  }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{struct:py_name}}{{!
+  }}{{#type:need_module_path?}}{{type:module_mangle}}{{/type:need_module_path?}}{{!
+  }}{{^type:need_module_path?}}_fbthrift_current_module{{/type:need_module_path?}}.{{struct:py_name}}{{!
 }}{{/type:struct}}{{!
 }}{{#type:list?}}{{!
   }}_fbthrift_python_types.ListTypeFactory({{!
@@ -46,7 +46,7 @@ in a different thrift file, or defined in the same thrift file.
     }}{{#type:value_type}}{{ >types/typeinfo }}{{/type:value_type}}){{!
 }}{{/type:map?}}{{!
 }}{{#type:enum}}{{!
-  }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
-  }}{{enum:name}}{{!
+  }}{{#type:need_module_path?}}{{type:module_mangle}}{{/type:need_module_path?}}{{!
+  }}{{^type:need_module_path?}}_fbthrift_current_module{{/type:need_module_path?}}.{{enum:name}}{{!
 }}{{/type:enum}}{{!
 }}{{#type:void?}}None{{/type:void?}}

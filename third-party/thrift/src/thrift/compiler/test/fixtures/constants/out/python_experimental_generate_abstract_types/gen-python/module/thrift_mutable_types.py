@@ -12,6 +12,8 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+
+import module.thrift_mutable_types as _fbthrift_current_module
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
@@ -842,7 +844,7 @@ I2B = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_
 
 I2B_REF = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_bool, { 0: False, 1: True, 2: True, 3: False})
 
-MyCompany = Company
+MyCompany = _fbthrift_current_module.Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)

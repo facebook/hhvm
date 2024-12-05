@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import typing as _typing
 
+import module.thrift_mutable_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
@@ -47,9 +48,9 @@ class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
 
 
     @property
-    def result(self) -> Result: ...
+    def result(self) -> _fbthrift_current_module.Result: ...
     @result.setter
-    def result(self, value: Result): ...
+    def result(self, value: _fbthrift_current_module.Result): ...
 
     def __init__(
         self, *,
@@ -57,7 +58,7 @@ class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
         result: _typing.Optional[_fbthrift_compatible_with_Result]=...
     ) -> None: ...
 
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, Result]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_current_module.Result]]]: ...
     def _to_python(self) -> "module.thrift_types.CustomException": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.CustomException": ...  # type: ignore
@@ -108,18 +109,18 @@ class _fbthrift_PrimitivesService_method_that_throws_args(_fbthrift_python_types
 
 
 class _fbthrift_PrimitivesService_method_that_throws_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[Result]
-    e: _typing.Final[CustomException]
+    success: _typing.Final[_fbthrift_current_module.Result]
+    e: _typing.Final[_fbthrift_current_module.CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[Result] = ..., e: _typing.Optional[CustomException]=...
+        self, *, success: _typing.Optional[_fbthrift_current_module.Result] = ..., e: _typing.Optional[_fbthrift_current_module.CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            Result,
-            CustomException,
+            _fbthrift_current_module.Result,
+            _fbthrift_current_module.CustomException,
         ]]]: ...
 
 

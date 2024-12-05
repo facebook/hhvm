@@ -20,6 +20,8 @@ Generated Python classes for Thrift types
 {{> common/auto_generated_py}}
 
 import folly.iobuf as _fbthrift_iobuf
+{{> types/set_current_module}}
+
 {{#program:enable_abstract_types?}}
 import {{program:module_path}}.thrift_abstract_types as _fbthrift_abstract_types
 {{/program:enable_abstract_types?}}

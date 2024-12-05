@@ -12,6 +12,8 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+
+import module.thrift_mutable_types as _fbthrift_current_module
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types

@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+
+import python_module_root.my.namespacing.test.hsmodule.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 

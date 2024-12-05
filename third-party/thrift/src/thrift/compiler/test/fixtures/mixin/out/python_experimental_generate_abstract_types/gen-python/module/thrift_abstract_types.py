@@ -14,12 +14,12 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
-
 
 from module.thrift_enums import *
 class Mixin1(_abc.ABC):
@@ -40,12 +40,12 @@ class Mixin1(_abc.ABC):
 class Mixin2(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def m1(self) -> Mixin1: ...
+    def m1(self) -> _fbthrift_current_module.Mixin1: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def field2(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[Mixin1, str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_current_module.Mixin1, str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin2": ...  # type: ignore
     @_abc.abstractmethod
@@ -76,12 +76,12 @@ class Foo(_abc.ABC):
     def field4(self) -> str: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def m2(self) -> Mixin2: ...
+    def m2(self) -> _fbthrift_current_module.Mixin2: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def m3(self) -> Mixin3Base: ...
+    def m3(self) -> _fbthrift_current_module.Mixin3Base: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, Mixin2, Mixin3Base]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_current_module.Mixin2, _fbthrift_current_module.Mixin3Base]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Foo": ...  # type: ignore
     @_abc.abstractmethod
@@ -91,4 +91,4 @@ class Foo(_abc.ABC):
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Foo": ...  # type: ignore
 
-Mixin3 = Mixin3Base
+Mixin3 = _fbthrift_current_module.Mixin3Base

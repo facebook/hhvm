@@ -14,6 +14,7 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 import enum as _enum
@@ -21,7 +22,6 @@ import enum as _enum
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
-
 
 from module.thrift_enums import *
 class ComplexUnion(_abc.ABC):
@@ -145,10 +145,10 @@ class Val(_abc.ABC):
 class ValUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def v1(self) -> Val: ...
+    def v1(self) -> _fbthrift_current_module.Val: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def v2(self) -> Val: ...
+    def v2(self) -> _fbthrift_current_module.Val: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ValUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -165,7 +165,7 @@ class ValUnion(_abc.ABC):
 
     FbThriftUnionFieldEnum.__name__ = "ValUnion"
 
-    fbthrift_current_value: _typing.Final[_typing.Union[None, Val, Val]]
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.Val, _fbthrift_current_module.Val]]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
 
 
@@ -214,7 +214,7 @@ class NonCopyableStruct(_abc.ABC):
 class NonCopyableUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def s(self) -> NonCopyableStruct: ...
+    def s(self) -> _fbthrift_current_module.NonCopyableStruct: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.NonCopyableUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -230,7 +230,7 @@ class NonCopyableUnion(_abc.ABC):
 
     FbThriftUnionFieldEnum.__name__ = "NonCopyableUnion"
 
-    fbthrift_current_value: _typing.Final[_typing.Union[None, NonCopyableStruct]]
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.NonCopyableStruct]]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
 
 

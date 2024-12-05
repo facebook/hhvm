@@ -12,6 +12,8 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+
+import test.fixtures.basic.module.thrift_mutable_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -694,8 +696,8 @@ ASet = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_string, ("foo"
 
 AMap = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32), { "foo": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (1, 2, 3, 4, )), "bar": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (10, 32, 54, ))})
 
-MyEnumAlias = MyEnum
-MyDataItemAlias = MyDataItem
+MyEnumAlias = _fbthrift_current_module.MyEnum
+MyDataItemAlias = _fbthrift_current_module.MyDataItem
 
 
 

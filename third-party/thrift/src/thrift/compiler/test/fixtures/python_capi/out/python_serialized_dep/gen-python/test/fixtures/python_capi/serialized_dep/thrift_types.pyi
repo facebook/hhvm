@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import typing as _typing
 
+import test.fixtures.python_capi.serialized_dep.thrift_types as _fbthrift_current_module
 import enum
 
 import folly.iobuf as _fbthrift_iobuf

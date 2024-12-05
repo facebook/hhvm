@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import typing as _typing
 
+import module.thrift_mutable_types as _fbthrift_current_module
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
@@ -208,15 +209,15 @@ class _fbthrift_compatible_with_ValUnion:
 class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ValUnion, _fbthrift_python_abstract_types.ValUnion):
 
     @property
-    def v1(self) -> Val: ...
+    def v1(self) -> _fbthrift_current_module.Val: ...
     @v1.setter
-    def v1(self, value: Val): ...
+    def v1(self, value: _fbthrift_current_module.Val): ...
 
 
     @property
-    def v2(self) -> Val: ...
+    def v2(self) -> _fbthrift_current_module.Val: ...
     @v2.setter
-    def v2(self, value: Val): ...
+    def v2(self, value: _fbthrift_current_module.Val): ...
 
     def __init__(
         self, *,
@@ -299,9 +300,9 @@ class _fbthrift_compatible_with_NonCopyableUnion:
 class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_NonCopyableUnion, _fbthrift_python_abstract_types.NonCopyableUnion):
 
     @property
-    def s(self) -> NonCopyableStruct: ...
+    def s(self) -> _fbthrift_current_module.NonCopyableStruct: ...
     @s.setter
-    def s(self, value: NonCopyableStruct): ...
+    def s(self, value: _fbthrift_current_module.NonCopyableStruct): ...
 
     def __init__(
         self, *,

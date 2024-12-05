@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import typing as _typing
 
+import meta.example.thrift.service.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -79,29 +80,29 @@ class WhisperException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_com
 
 
 class _fbthrift_EchoService_echo_args(_fbthrift_python_types.Struct):
-    request: _typing.Final[EchoRequest] = ...
+    request: _typing.Final[_fbthrift_current_module.EchoRequest] = ...
 
     def __init__(
         self, *,
-        request: _typing.Optional[EchoRequest]=...
+        request: _typing.Optional[_fbthrift_current_module.EchoRequest]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
-        _typing.Union[None, EchoRequest]]]: ...
+        _typing.Union[None, _fbthrift_current_module.EchoRequest]]]: ...
 
 
 class _fbthrift_EchoService_echo_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[EchoResponse]
-    ex: _typing.Final[WhisperException]
+    success: _typing.Final[_fbthrift_current_module.EchoResponse]
+    ex: _typing.Final[_fbthrift_current_module.WhisperException]
 
     def __init__(
-        self, *, success: _typing.Optional[EchoResponse] = ..., ex: _typing.Optional[WhisperException]=...
+        self, *, success: _typing.Optional[_fbthrift_current_module.EchoResponse] = ..., ex: _typing.Optional[_fbthrift_current_module.WhisperException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            EchoResponse,
-            WhisperException,
+            _fbthrift_current_module.EchoResponse,
+            _fbthrift_current_module.WhisperException,
         ]]]: ...

@@ -25,6 +25,7 @@ Generated Python classes for abstract thrift-python types.
 
 import abc as _abc
 import typing as _typing
+{{> types/set_current_module}}
 
 {{!
     If any type has a field named property, then the use of the built-in property will conflict
@@ -48,7 +49,6 @@ import {{included_module_path}}.thrift_abstract_types as {{included_module_mangl
 {{#program:adapter_type_hint_modules}}
 import {{module_path}}
 {{/program:adapter_type_hint_modules}}
-
 {{> types/import_enums}}
 {{#program:structs}}
 
@@ -66,9 +66,7 @@ class {{> structs/unadapted_name}}({{!
     {{/struct:fields_ordered_by_id}}
     {{^struct:union?}}
 {{> fields/maybe_abstract_method_annotation}}
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
-        }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{> fields/adapted_type}}{{!
-        }}{{/struct:fields_ordered_by_id}}]]]: ...
+    def __iter__(self) -> {{> types/iter_return_type}}: ...
     {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{#program:generate_to_mutable_python_conversion_methods?}}

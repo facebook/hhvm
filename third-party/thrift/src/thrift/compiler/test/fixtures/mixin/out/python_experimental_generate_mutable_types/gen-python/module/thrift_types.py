@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
+
+import module.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -289,4 +291,4 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
-Mixin3 = Mixin3Base
+Mixin3 = _fbthrift_current_module.Mixin3Base

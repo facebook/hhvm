@@ -14,6 +14,7 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 import enum as _enum
@@ -21,7 +22,6 @@ import enum as _enum
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
-
 from module.thrift_enums import _fbthrift_compatible_with_EmptyEnum
 from module.thrift_enums import _fbthrift_compatible_with_City
 from module.thrift_enums import _fbthrift_compatible_with_Company
@@ -36,7 +36,7 @@ class Internship(_abc.ABC):
     def title(self) -> str: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def employer(self) -> _typing.Optional[Company]: ...
+    def employer(self) -> _typing.Optional[_fbthrift_current_module.Company]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def compensation(self) -> _typing.Optional[float]: ...
@@ -44,7 +44,7 @@ class Internship(_abc.ABC):
     @_abc.abstractmethod
     def school(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, Company, float, str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.Company, float, str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Internship": ...  # type: ignore
     @_abc.abstractmethod
@@ -99,12 +99,12 @@ class struct2(_abc.ABC):
     def b(self) -> str: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def c(self) -> struct1: ...
+    def c(self) -> _fbthrift_current_module.struct1: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def d(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, struct1, _typing.Sequence[int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.struct1, _typing.Sequence[int]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct2": ...  # type: ignore
     @_abc.abstractmethod
@@ -123,9 +123,9 @@ class struct3(_abc.ABC):
     def b(self) -> int: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def c(self) -> struct2: ...
+    def c(self) -> _fbthrift_current_module.struct2: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, struct2]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _fbthrift_current_module.struct2]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct3": ...  # type: ignore
     @_abc.abstractmethod
@@ -192,10 +192,10 @@ class union2(_abc.ABC):
     def d(self) -> float: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def s(self) -> struct1: ...
+    def s(self) -> _fbthrift_current_module.struct1: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def u(self) -> union1: ...
+    def u(self) -> _fbthrift_current_module.union1: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.union2": ...  # type: ignore
     @_abc.abstractmethod
@@ -214,11 +214,11 @@ class union2(_abc.ABC):
 
     FbThriftUnionFieldEnum.__name__ = "union2"
 
-    fbthrift_current_value: _typing.Final[_typing.Union[None, int, float, struct1, union1]]
+    fbthrift_current_value: _typing.Final[_typing.Union[None, int, float, _fbthrift_current_module.struct1, _fbthrift_current_module.union1]]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
 
 
-MyCompany = Company
+MyCompany = _fbthrift_current_module.Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _typing.Mapping[str, str]

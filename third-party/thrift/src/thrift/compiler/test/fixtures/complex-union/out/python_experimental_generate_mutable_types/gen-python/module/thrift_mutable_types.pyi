@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import typing as _typing
 
+import module.thrift_mutable_types as _fbthrift_current_module
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
@@ -232,15 +233,15 @@ class _fbthrift_compatible_with_ValUnion:
 class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ValUnion):
 
     @property
-    def v1(self) -> Val: ...
+    def v1(self) -> _fbthrift_current_module.Val: ...
     @v1.setter
-    def v1(self, value: Val): ...
+    def v1(self, value: _fbthrift_current_module.Val): ...
 
 
     @property
-    def v2(self) -> Val: ...
+    def v2(self) -> _fbthrift_current_module.Val: ...
     @v2.setter
-    def v2(self, value: Val): ...
+    def v2(self, value: _fbthrift_current_module.Val): ...
 
     def __init__(
         self, *,
@@ -255,7 +256,7 @@ class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible
         v2: ValUnion.FbThriftUnionFieldEnum = ...
 
 
-    fbthrift_current_value: _typing.Final[_typing.Union[None, Val, Val]]
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.Val, _fbthrift_current_module.Val]]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "module.thrift_types.ValUnion": ...  # type: ignore
@@ -337,9 +338,9 @@ class _fbthrift_compatible_with_NonCopyableUnion:
 class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_NonCopyableUnion):
 
     @property
-    def s(self) -> NonCopyableStruct: ...
+    def s(self) -> _fbthrift_current_module.NonCopyableStruct: ...
     @s.setter
-    def s(self, value: NonCopyableStruct): ...
+    def s(self, value: _fbthrift_current_module.NonCopyableStruct): ...
 
     def __init__(
         self, *,
@@ -352,7 +353,7 @@ class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_co
         s: NonCopyableUnion.FbThriftUnionFieldEnum = ...
 
 
-    fbthrift_current_value: _typing.Final[_typing.Union[None, NonCopyableStruct]]
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.NonCopyableStruct]]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "module.thrift_types.NonCopyableUnion": ...  # type: ignore

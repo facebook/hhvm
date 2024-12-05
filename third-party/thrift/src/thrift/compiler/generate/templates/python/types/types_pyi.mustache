@@ -20,6 +20,7 @@ Generated Python typestubs for Thrift types
 {{> common/auto_generated_py}}
 
 import typing as _typing
+{{> types/set_current_module}}
 
 {{#program:unions?}}
 import enum
@@ -144,9 +145,7 @@ class {{> structs/unadapted_name}}({{!
 {{/program:generate_mutable_types}}
     {{/struct:union?}}
     {{^struct:union?}}
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[{{^struct:fields_ordered_by_id}}None{{/struct:fields_ordered_by_id}}{{!
-        }}{{#struct:fields_ordered_by_id}}{{^first?}}, {{/first?}}{{> fields/adapted_type}}{{!
-        }}{{/struct:fields_ordered_by_id}}]]]: ...
+    def __iter__(self) -> {{> types/iter_return_type}}: ...
     {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{#program:generate_immutable_types}}

@@ -14,12 +14,12 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
+import test.namespace_from_package_without_module_name.module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
-
 
 from test.namespace_from_package_without_module_name.module.thrift_enums import *
 class Foo(_abc.ABC):

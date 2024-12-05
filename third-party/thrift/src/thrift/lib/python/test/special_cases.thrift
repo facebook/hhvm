@@ -23,3 +23,30 @@ struct TestPropertyAsField {
   1: string property;
   2: string break_unless_used_with_renamed_built_in_property;
 }
+
+struct TestStruct {
+  1: bool placeholder;
+}
+
+// Reproduces the use-cases where field names in structured types are the same
+// as the typenames that appear in the failures. Once the type-checker
+// encounters the field, it sees that name as the name of the field and not a
+// typename.
+struct TestFieldNameSameAsTypeName {
+  // The comments below show the errors these use-cases exposed.
+  // thrift_abstract_types.py:47:39 Undefined or invalid type [11]:
+  // Annotation `TestFieldNameSameAsTypeName.TestStruct` is not defined as a
+  // type.
+  // thrift_mutable_types.pyi:71:32 Undefined or invalid type [11]: Annotation
+  // `TestFieldNameSameAsTypeName.TestStruct` is not defined as a type.
+  // thrift_types.pyi:60:4 Inconsistent override [15]:
+  // `thrift.test.thrift_python.type_check_special_cases_test.thrift_types.
+  // TestFieldNameSameAsTypeName.__iter__` overrides method defined in
+  // `_typing.Iterable` inconsistently. Returned type `unknown` is not a
+  // subtype of the overridden return `_typing.Iterator[_typing.Tuple[str,
+  // typing.Any]]`.
+  1: TestStruct TestStruct;
+  // thrift_types.pyi:48:27 Undefined or invalid type [11]: Annotation
+  // `TestFieldNameSameAsTypeName.TestStruct` is not defined as a type.
+  2: TestStruct typeMaybeReinterpretedAsField;
+}

@@ -10,6 +10,8 @@ from __future__ import annotations
 import __static__
 
 import folly.iobuf as _fbthrift_iobuf
+
+import module.thrift_types as _fbthrift_current_module
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -1186,9 +1188,9 @@ ANOTHER_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.EnumTypeIn
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
-AdaptedTypeDef = SimpleStruct
-HiddenTypeDef = SimpleStruct
-ImplicitlyHiddenTypeDef = AdaptedUnion
+AdaptedTypeDef = _fbthrift_current_module.SimpleStruct
+HiddenTypeDef = _fbthrift_current_module.SimpleStruct
+ImplicitlyHiddenTypeDef = _fbthrift_current_module.AdaptedUnion
 foo_bar = bytes
 CustomBool = bool
 CustomInteger = int
@@ -1198,7 +1200,7 @@ CustomBinary = bytes
 CustomList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
-CustomStruct = SimpleStruct
+CustomStruct = _fbthrift_current_module.SimpleStruct
 AdaptedBool = bool
 AdaptedInteger = int
 AdaptedDouble = float
@@ -1207,7 +1209,7 @@ AdaptedBinary = bytes
 AdaptedList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 AdaptedSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 AdaptedMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
-AdaptedStruct = SimpleStruct
+AdaptedStruct = _fbthrift_current_module.SimpleStruct
 
 
 

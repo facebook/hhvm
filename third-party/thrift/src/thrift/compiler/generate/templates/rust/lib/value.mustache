@@ -89,7 +89,10 @@
             }}{{#value:mapEntries}}
             {{value:indent}}{
                 {{value:indent}}#[inline(never)]
-                {{value:indent}}fn __do_insert(map: &mut {{>lib/rawtype}}) {
+                {{value:indent}}fn __do_insert(map: &mut {{!
+                    }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::StandardType{{/type:has_adapter?}}{{!
+                    }}{{^type:has_adapter?}}{{>lib/type}}{{/type:has_adapter?}}{{!
+                }}) {
                     {{value:indent}}map.insert({{!
                         }}{{#entry:key}}{{!
                             }}{{#value:floatingPoint?}}{{!

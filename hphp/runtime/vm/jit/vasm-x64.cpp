@@ -245,7 +245,7 @@ struct Vgen {
   void emit(mulsd i) { commute(i); a.mulsd(i.s0, i.d); }
   void emit(neg i) { unary(i); a.neg(i.d); }
   void emit(const nop& /*i*/) { a.nop(); }
-  void emit(not i) { unary(i); a.not(i.d); }
+  void emit(not_ i) { unary(i); a.not_(i.d); }
   void emit(notb i) { unary(i); a.notb(i.d); }
   void emit(orbi i) { binary(i); a.orb(i.s0, i.d); }
   void emit(const orbim& i) { a.prefix(i.m.mr()).orb(i.s0, i.m); }

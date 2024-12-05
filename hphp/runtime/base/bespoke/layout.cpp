@@ -81,8 +81,8 @@ Optional<LayoutTest> compute2ByteTest(
   for (auto const live : liveVec) {
     imm &= ~live;
   }
-  auto const and = LayoutTest { imm, LayoutTest::And2Byte };
-  if (checkLayoutTest(liveVec, deadVec, and)) return and;
+  auto const and_ = LayoutTest { imm, LayoutTest::And2Byte };
+  if (checkLayoutTest(liveVec, deadVec, and_)) return and_;
 
   return std::nullopt;
 }

@@ -235,7 +235,7 @@ bool effectsImpl(const Vinstr& inst, bool pure) {
     case Vinstr::mulsd:
     case Vinstr::neg:
     case Vinstr::nop:
-    case Vinstr::not:
+    case Vinstr::not_:
     case Vinstr::notb:
     case Vinstr::orbi:
     case Vinstr::orwi:

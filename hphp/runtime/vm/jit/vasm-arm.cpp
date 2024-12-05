@@ -390,7 +390,7 @@ struct Vgen {
   void emit(const neg& i) { a->Neg(X(i.d), X(i.s), UF(i.fl)); }
   void emit(const nop& /*i*/) { a->Nop(); }
   void emit(const notb& i) { a->Mvn(W(i.d), W(i.s)); }
-  void emit(const not& i) { a->Mvn(X(i.d), X(i.s)); }
+  void emit(const not_& i) { a->Mvn(X(i.d), X(i.s)); }
   void emit(const orbi& i);
   void emit(const orq& i);
   void emit(const orwi& i);

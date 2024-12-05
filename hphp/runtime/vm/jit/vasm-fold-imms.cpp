@@ -304,7 +304,7 @@ struct ImmFolder {
       if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags
         out = copy{in.s1, in.d};
       } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags
-        out = not{in.s1, in.d};
+        out = not_{in.s1, in.d};
       } else {
         out = xorqi{val, in.s1, in.d, in.sf};
       }
@@ -312,7 +312,7 @@ struct ImmFolder {
       if (val == 0 && !uses[in.sf]) { // copy doesn't set any flags
         out = copy{in.s0, in.d};
       } else if (val == -1 && !uses[in.sf]) { // not doesn't set any flags
-        out = not{in.s0, in.d};
+        out = not_{in.s0, in.d};
       } else {
         out = xorqi{val, in.s0, in.d, in.sf};
       }

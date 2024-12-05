@@ -886,7 +886,7 @@ public:
   void decl(Reg32 r)  { instrR(instr_dec,  r); }
   void decw(Reg16 r)  { instrR(instr_dec,  r); }
   void notb(Reg8 r)   { instrR(instr_notb, r); }
-  void not(Reg64 r)   { instrR(instr_not,  r); }
+  void not_(Reg64 r)   { instrR(instr_not,  r); }
   void neg(Reg64 r)   { instrR(instr_neg,  r); }
   void negb(Reg8 r)   { instrR(instr_negb, r); }
   void ret()          { emit(instr_ret); }

@@ -151,7 +151,7 @@ struct conditional_block {
   variable_lookup variable;
   bodies body_elements;
 
-  // The {{else}} clause, if present.
+  // The {{#else}} clause, if present.
   struct else_block {
     source_range loc;
     bodies body_elements;

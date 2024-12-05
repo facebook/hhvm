@@ -20,7 +20,7 @@
 }}{{#function:creates_interaction?}}{{!
   }}{{#if function:stream?}}{{!
     }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{ > types/return_type_client_no_handle}}>{{!
-  }}{{else}}{{!
+  }}{{#else}}{{!
     }}{{#type:void?}}{{!
       }}apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}{{!
     }}{{/type:void?}}{{!

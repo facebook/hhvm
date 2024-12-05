@@ -496,7 +496,7 @@ TEST_F(RenderTest, if_else_block) {
     auto result = render(
         "{{#if news.has-update?}}\n"
         "Stuff is {{foo}} happening!\n"
-        "{{else}}\n"
+        "{{#else}}\n"
         "Nothing is happening!\n"
         "{{/if}}\n",
         w::map(
@@ -508,7 +508,7 @@ TEST_F(RenderTest, if_else_block) {
     auto result = render(
         "{{#if news.has-update?}}\n"
         "Stuff is {{foo}} happening!\n"
-        "{{else}}\n"
+        "{{#else}}\n"
         "Nothing is happening!\n"
         "{{/if}}\n",
         w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
@@ -521,7 +521,7 @@ TEST_F(RenderTest, unless_else_block) {
     auto result = render(
         "{{#unless news.has-update?}}\n"
         "Nothing is happening!\n"
-        "{{else}}\n"
+        "{{#else}}\n"
         "Stuff is {{foo}} happening!\n"
         "{{/unless}}\n",
         w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
@@ -531,7 +531,7 @@ TEST_F(RenderTest, unless_else_block) {
     auto result = render(
         "{{#unless news.has-update?}}\n"
         "Nothing is happening!\n"
-        "{{else}}\n"
+        "{{#else}}\n"
         "Stuff is {{foo}} happening!\n"
         "{{/unless}}\n",
         w::map(

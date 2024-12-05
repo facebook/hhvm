@@ -433,7 +433,6 @@ class standalone_lines_scanner {
   //   - "{{^ ... }}"
   //   - "{{/ ... }}"
   //   - "{{> ... }}"
-  //   - "{{else}}"
   // ..and ONLY those constructs are candidates for whitespace stripping. That's
   // because these kind of templates are invisible in the output — their purpose
   // is purely to express intent within the templating language.
@@ -443,7 +442,6 @@ class standalone_lines_scanner {
     comment, // "{{!"
     block, // "{{#", "{{^", or "{{"/"}
     partial_apply, // "{{>"
-    else_clause, // "{{else}}"
     ineligible // "{{variable}} for example
   };
   static parse_result<standalone_compatible_kind> parse_standalone_compatible(
@@ -465,9 +463,6 @@ class standalone_lines_scanner {
         break;
       case tok::gt:
         kind = standalone_compatible_kind::partial_apply;
-        break;
-      case tok::kw_else:
-        kind = standalone_compatible_kind::else_clause;
         break;
       default:
         kind = standalone_compatible_kind::ineligible;
@@ -578,7 +573,7 @@ class parser {
             bodies.emplace_back(std::move(*body));
           }
         } else if (auto else_clause = parse_else_clause(scan)) {
-          // "{{else}}" marks the end of a body and beginning of a new one,
+          // "{{#else}}" marks the end of a body and beginning of a new one,
           // which cannot happen at the root scope.
           report_fatal_error(
               scan,
@@ -596,12 +591,12 @@ class parser {
     }
   }
 
-  // Parses the "{{else}}" clause which is a special construct that looks like
-  // variable interpolation but is actually a separator between two ast::bodies.
+  // Parses the "{{#else}}" clause which is a separator between two ast::bodies.
   //
-  // else-clause → { "{{" ~ "else" ~ "}}" }
+  // else-clause → { "{{" ~ "#" ~ "else" ~ "}}" }
   parse_result<std::monostate> parse_else_clause(parser_scan_window scan) {
     if (!(try_consume_token(&scan, tok::open) &&
+          try_consume_token(&scan, tok::pound) &&
           try_consume_token(&scan, tok::kw_else) &&
           try_consume_token(&scan, tok::close))) {
       return no_parse_result();
@@ -629,10 +624,8 @@ class parser {
       } else if (parse_result maybe_newline = parse_newline(scan)) {
         body = std::move(maybe_newline).consume_and_advance(&scan);
       } else if (parse_result else_clause = parse_else_clause(scan)) {
-        // The "{{else}}" clause looks like variable interpolation so we should
-        // capture it first before recursing into parse_template. The else
-        // clause actually marks the end of the current block (and the beginning
-        // of the next one).
+        // The "{{#else}}" clause marks the end of the current block (and the
+        // beginning of the next one).
         break;
       } else if (parse_result templ = parse_template(scan)) {
         detail::variant_match(
@@ -974,7 +967,7 @@ class parser {
   //   { cond-block-open ~ body* ~ else-block? ~ cond-block-close }
   // cond-block-open →
   //   { "{{" ~ "#" ~ ("if" | "unless") ~ variable-lookup ~ "}}" }
-  // else-block → { "{{" ~ "else" ~ "}}" ~ body* }
+  // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
   // cond-block-close → { "{{" ~ "/" ~ ("if" | "unless") ~ "}}" }
   //
   // NOTE: the "if" or "unless" must match between open and close
@@ -1013,29 +1006,22 @@ class parser {
 
     ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
 
-    auto else_ = std::invoke(
-        [this,
-         scan]() mutable -> parse_result<ast::conditional_block::else_block> {
+    auto else_block =
+        std::invoke([&]() -> std::optional<ast::conditional_block::else_block> {
           const auto else_scan_start = scan.start;
           if (parse_result e = parse_else_clause(scan)) {
             std::ignore = std::move(e).consume_and_advance(&scan);
           } else {
-            return no_parse_result();
+            return std::nullopt;
           }
           scan = scan.make_fresh();
           auto else_bodies = parse_bodies(scan).consume_and_advance(&scan);
-          return {
+          return parse_result{
               ast::conditional_block::else_block{
                   scan.with_start(else_scan_start).range(),
                   std::move(else_bodies)},
-              scan};
-        });
-    auto else_block =
-        std::invoke([&]() -> std::optional<ast::conditional_block::else_block> {
-          if (else_.has_value()) {
-            return std::move(else_).consume_and_advance(&scan);
-          }
-          return std::nullopt;
+              scan}
+              .consume_and_advance(&scan);
         });
 
     const auto expect_on_close = [&](tok kind) {

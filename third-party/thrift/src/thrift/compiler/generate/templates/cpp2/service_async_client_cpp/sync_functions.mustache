@@ -19,11 +19,11 @@
   ::apache::thrift::RpcOptions rpcOptions;
   {{#if function:void?}}
   sync_{{function:cpp_name}}(rpcOptions{{function:comma}}{{ > service_common/param_list}});
-  {{else}}
+  {{#else}}
   return sync_{{function:cpp_name}}(rpcOptions{{function:comma}}{{ > service_common/param_list}});
   {{/if}}
 }
-{{else}}
+{{#else}}
 void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}({{function:cpp_return_type}}& _return{{function:comma}}{{ > service_common/function_param_list_client}}) {
   ::apache::thrift::RpcOptions rpcOptions;
   sync_{{function:cpp_name}}(rpcOptions, _return{{function:comma}}{{ > service_common/param_list}});
@@ -32,11 +32,11 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}({{funct
 
 {{#unless function:sync_returns_by_outparam?}}
 {{ > types/return_type_client}} {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{ > service_common/function_param_list_client}}) {
-{{else}}
+{{#else}}
 void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions, {{function:cpp_return_type}}& _return{{function:comma}}{{ > service_common/function_param_list_client}}) {
 {{/unless}}
   apache::thrift::ClientReceiveState returnState;
-  apache::thrift::ClientSyncCallback<{{#if function:oneway?}}true{{else}}false{{/if}}> callback(&returnState);
+  apache::thrift::ClientSyncCallback<{{#if function:oneway?}}true{{#else}}false{{/if}}> callback(&returnState);
 {{#unless function:oneway?}}
   auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
 {{/unless}}
@@ -44,7 +44,7 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
   auto ctxAndHeader = {{function:cpp_name}}Ctx(&rpcOptions);
 {{#unless function:stream?}}
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-{{else}}
+{{#else}}
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -82,29 +82,29 @@ void {{ > service_common/client_class_name}}::sync_{{function:cpp_name}}(apache:
   {{#unless function:sync_returns_by_outparam?}}
     {{#if function:void?}}
       recv_{{function:cpp_name}}(returnState);
-    {{else}}
+    {{#else}}
       {{#unless function:creates_interaction?}}
       return recv_{{function:cpp_name}}(returnState);
-      {{else}}
+      {{#else}}
         {{#if function:stream?}}
       return std::make_pair(
         std::move(interactionHandle),
         recv_{{function:cpp_name}}(returnState)
       );
-        {{else}}
+        {{#else}}
           {{#unless type:void?}}
       return std::make_pair(
         std::move(interactionHandle),
         recv_{{function:cpp_name}}(returnState)
       );
-          {{else}}
+          {{#else}}
       recv_{{function:cpp_name}}(returnState);
       return std::move(interactionHandle);
           {{/unless}}
         {{/if}}
       {{/unless}}
     {{/if}}
-  {{else}}
+  {{#else}}
       recv_{{function:cpp_name}}(_return, returnState);
   {{/unless}}
   });
@@ -124,7 +124,7 @@ folly::Try<apache::thrift::RpcResponseComplete<{{ > types/return_type_client}}>>
   auto* const evb = apache::thrift::GeneratedAsyncClient::getChannel()->getEventBase();
 {{#unless function:stream?}}
   auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(&callback);
-{{else}}
+{{#else}}
   auto wrappedCallback = apache::thrift::createStreamClientCallback(
     apache::thrift::RequestClientCallback::Ptr(&callback),
     rpcOptions.getBufferOptions());
@@ -159,10 +159,10 @@ folly::Try<apache::thrift::RpcResponseComplete<{{ > types/return_type_client}}>>
     auto ew = folly::fibers::runInMainContext([&] {
       {{#if function:stream?}}
       return recv_wrapped_{{function:cpp_name}}(tryResponse->response.value(), returnState);
-      {{else}}
+      {{#else}}
         {{#if type:void?}}
       return recv_wrapped_{{function:cpp_name}}(returnState);
-        {{else}}
+        {{#else}}
       return recv_wrapped_{{function:cpp_name}}(tryResponse->response.value(), returnState);
         {{/if}}
       {{/if}}

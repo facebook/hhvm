@@ -34,7 +34,7 @@
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
 
-  {{else}}
+  {{#else}}
   {{ > common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}} get_{{field:cpp_name}}() const {
@@ -48,7 +48,7 @@
     {{field:cpp_name}}_ref() = {{field:cpp_name}}_;
     return {{field:cpp_storage_name}};
   }
-{{else}}
+{{#else}}
   {{#if field:optional?}}
   {{ > common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
@@ -64,7 +64,7 @@
   {{ > common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
-  {{else}}
+  {{#else}}
   {{ > common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}& get_{{field:cpp_name}}() const& {
@@ -98,7 +98,7 @@
   {{ > common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
-  {{else}}
+  {{#else}}
   {{ > common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}& get_{{field:cpp_name}}() const&;

@@ -64,7 +64,7 @@ import {{included_module_path}}.thrift_patch
 {{#program:structs}}
 
 class {{struct:py_name}}Patch(
-    Base{{#if struct:union?}}Union{{else}}Struct{{/if}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
+    Base{{#if struct:union?}}Union{{#else}}Struct{{/if}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
 ):
     pass
 {{#struct:fields_ordered_by_id}}
@@ -88,7 +88,7 @@ class {{struct:py_name}}Patch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.{{struct:name}}SafePatch) -> {{struct:py_name}}Patch:
         patch = {{struct:py_name}}Patch()
-        DynamicPatch = Dynamic{{#if struct:union?}}Union{{else}}Struct{{/if}}Patch
+        DynamicPatch = Dynamic{{#if struct:union?}}Union{{#else}}Struct{{/if}}Patch
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
     {{/unless}}

@@ -306,7 +306,7 @@ Nice!
 ```
 if-block       → { if-block-open ~ body* ~ else-block? ~ if-block-close }
 if-block-open  → { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
-else-block     → { "{{" ~ "else" ~ "}}" ~ body* }
+else-block     → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
 if-block-close → { "{{" ~ "/" ~ "if" ~ "}}" }
 ```
 
@@ -444,7 +444,7 @@ There are no people.
 each-block         → { each-block-open ~ body* ~ else-block ~ each-block-close }
 each-block-open    → { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ "}}" }
 each-block-capture → { "as" ~ "|" ~ identifier ~ identifier? ~ "|" }
-else-block         → { "{{" ~ "else" ~ "}}" ~ body* }
+else-block         → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
 each-block-close   → { "{{" ~ "/" ~ "each" ~ "}}"  }
 ```
 

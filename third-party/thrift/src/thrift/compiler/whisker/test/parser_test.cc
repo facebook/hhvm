@@ -294,7 +294,7 @@ TEST_F(ParserTest, basic_if_else) {
   auto ast = parse_ast(
       "{{#if news.has-update?}}\n"
       "  Stuff is {{foo}} happening!\n"
-      "{{else}}\n"
+      "{{#else}}\n"
       "  Nothing is happening!\n"
       "{{/if}}");
   EXPECT_EQ(
@@ -315,9 +315,9 @@ TEST_F(ParserTest, unless_block_repeated_else) {
   auto ast = parse_ast(
       "{{#unless news.has-update?}}\n"
       "  Stuff is {{foo}} happening!\n"
-      "{{else}}\n"
+      "{{#else}}\n"
       "  Nothing is happening!\n"
-      "{{else}}\n"
+      "{{#else}}\n"
       "  Nothing is happening!\n"
       "{{/unless}}");
   EXPECT_FALSE(ast.has_value());
@@ -325,13 +325,13 @@ TEST_F(ParserTest, unless_block_repeated_else) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected `/` to close unless-block 'news.has-update?' but found `else`",
+          "expected `/` to close unless-block 'news.has-update?' but found `#`",
           path_to_file(1),
           5)));
 }
 
 TEST_F(ParserTest, if_block_else_by_itself) {
-  auto ast = parse_ast("{{else}}");
+  auto ast = parse_ast("{{#else}}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
@@ -343,7 +343,7 @@ TEST_F(ParserTest, if_block_else_by_itself) {
 }
 
 TEST_F(ParserTest, if_block_unclosed_with_else) {
-  auto ast = parse_ast("{{#if news.has-update?}}{{else}}");
+  auto ast = parse_ast("{{#if news.has-update?}}{{#else}}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
@@ -359,7 +359,7 @@ TEST_F(ParserTest, if_block_nested) {
       "{{#if news.has-update?}}\n"
       "  {{#if update.is-important?}}\n"
       "    Important stuff is {{foo}} happening!\n"
-      "  {{else}}\n"
+      "  {{#else}}\n"
       "    Boring stuff is happening!\n"
       "  {{/if}}\n"
       "{{/if}}");
@@ -425,7 +425,7 @@ TEST_F(ParserTest, conditional_block_mismatched_open_and_close) {
   auto ast = parse_ast(
       "{{#unless news.has-update?}}\n"
       "  Stuff is happening!\n"
-      "{{else}}\n"
+      "{{#else}}\n"
       "  Nothing is happening!\n"
       "{{/if}}");
   EXPECT_FALSE(ast.has_value());

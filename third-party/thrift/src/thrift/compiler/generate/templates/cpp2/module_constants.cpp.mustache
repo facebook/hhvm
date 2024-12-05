@@ -68,7 +68,7 @@ namespace {{program:name}}_constants {
     {{/program:transitive_schema_initializers}}
   };
   return ::folly::range(includes);
-{{else}}
+{{#else}}
   return {};
 {{/if}}
 }

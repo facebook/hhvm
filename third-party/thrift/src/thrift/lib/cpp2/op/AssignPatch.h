@@ -20,7 +20,7 @@
 
 #include <folly/json.h>
 #include <folly/logging/xlog.h>
-#include <thrift/lib/cpp2/op/detail/BasePatch.h>
+#include <thrift/lib/cpp2/op/Patch.h>
 #include <thrift/lib/cpp2/protocol/Patch.h>
 
 namespace apache::thrift {
@@ -136,6 +136,17 @@ class AssignPatch : public BaseAssignPatch<Patch, AssignPatch<Patch>> {
   void reset() {
     dynPatch_.reset();
     Base::reset();
+  }
+
+  template <class..., bool IsStructured = is_thrift_class_v<T>>
+  static auto fromSafePatch(
+      const typename std::enable_if_t<IsStructured, SafePatchType<Tag>>::type&
+          safePatch) {
+    return fromSafePatchImpl<AssignPatch>(safePatch);
+  }
+
+  auto toSafePatch() const {
+    return toSafePatchImpl<typename SafePatchType<Tag>::type>(*this);
   }
 
  private:

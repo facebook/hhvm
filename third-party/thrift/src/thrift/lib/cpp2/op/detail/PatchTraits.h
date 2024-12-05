@@ -107,6 +107,10 @@ template <class>
 constexpr inline bool is_any_patch_v = false;
 template <class Patch>
 constexpr inline bool is_any_patch_v<AnyPatch<Patch>> = true;
+template <class>
+constexpr inline bool is_assign_patch_v = false;
+template <class Patch>
+constexpr inline bool is_assign_patch_v<AssignPatch<Patch>> = true;
 
 class MinSafePatchVersionVisitor {
  public:
@@ -170,9 +174,13 @@ class MinSafePatchVersionVisitor {
 template <typename Patch>
 int32_t calculateMinSafePatchVersion(const Patch& patch) {
   // is_patch_v
-  MinSafePatchVersionVisitor visitor;
-  patch.customVisit(visitor);
-  return visitor.version;
+  if constexpr (is_assign_patch_v<Patch>) {
+    return 1;
+  } else {
+    MinSafePatchVersionVisitor visitor;
+    patch.customVisit(visitor);
+    return visitor.version;
+  }
 }
 
 } // namespace apache::thrift::op::detail

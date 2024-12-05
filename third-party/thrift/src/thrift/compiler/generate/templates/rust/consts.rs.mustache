@@ -18,9 +18,9 @@
 // This file is probably not the place you want to edit!
 
 //! Thrift constant definitions for `{{program:name}}`.
-{{#program:constants}}{{>lib/const}}{{/program:constants}}
+{{#program:constants}}{{> lib/const}}{{/program:constants}}
 {{#program:has_const_tests?}}
-    {{>lib/adapter/const_test}}
+    {{> lib/adapter/const_test}}
 {{/program:has_const_tests?}}
 
 {{!newline}}

@@ -39,14 +39,14 @@ class {{> types/function_args_type}}(_fbthrift_python_types.Struct):
 
 class _fbthrift_{{service:name}}_{{function:name}}_result(_fbthrift_python_types.Struct):
    {{#function:regular_response_type}}
-    success: _typing.Final[{{ >types/pep484_type }}]
+    success: _typing.Final[{{> types/pep484_type }}]
    {{/function:regular_response_type}}
     {{#function:exceptions}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
     {{/function:exceptions}}
 
     def __init__(
-        self, *, success: _typing.Optional[{{#function:regular_response_type}}{{ >types/pep484_type }}{{/function:regular_response_type}}] = ...{{!
+        self, *, success: _typing.Optional[{{#function:regular_response_type}}{{> types/pep484_type }}{{/function:regular_response_type}}] = ...{{!
         }}{{#function:exceptions}}{{!
         }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
         }}{{/function:exceptions}}
@@ -55,7 +55,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(_fbthrift_python_types
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            {{#function:regular_response_type}}{{ >types/pep484_type }}{{/function:regular_response_type}},
+            {{#function:regular_response_type}}{{> types/pep484_type }}{{/function:regular_response_type}},
             {{#function:exceptions}}
             {{#field:type}}{{> types/pep484_type}}{{/field:type}},
             {{/function:exceptions}}
@@ -64,13 +64,13 @@ class _fbthrift_{{service:name}}_{{function:name}}_result(_fbthrift_python_types
 {{#function:stream?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[{{#function:stream_elem_type}}{{ >types/pep484_type }}{{/function:stream_elem_type}}]):
+class _fbthrift_{{service:name}}_{{function:name}}_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[{{#function:stream_elem_type}}{{> types/pep484_type }}{{/function:stream_elem_type}}]):
     {{#function:stream_exceptions}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
     {{/function:stream_exceptions}}
 
     def __init__(
-        self, *, success: _typing.Optional[{{#function:stream_elem_type}}{{ >types/pep484_type }}{{/function:stream_elem_type}}] = ...{{!
+        self, *, success: _typing.Optional[{{#function:stream_elem_type}}{{> types/pep484_type }}{{/function:stream_elem_type}}] = ...{{!
         }}{{#function:stream_exceptions}}{{!
         }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
         }}{{/function:stream_exceptions}}
@@ -79,7 +79,7 @@ class _fbthrift_{{service:name}}_{{function:name}}_result_stream(_fbthrift_pytho
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            {{#function:stream_elem_type}}{{ >types/pep484_type }}{{/function:stream_elem_type}},
+            {{#function:stream_elem_type}}{{> types/pep484_type }}{{/function:stream_elem_type}},
             {{#function:stream_exceptions}}
             {{#field:type}}{{> types/pep484_type}}{{/field:type}},
             {{/function:stream_exceptions}}

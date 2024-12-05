@@ -336,7 +336,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
     };
   }
 
-  private com.facebook.thrift.payload.Writer _create{{function:javaName}}SinkWriter({{#function:return_type}}{{#function:sink_elem_type}}{{ >BoxedType}} _p{{/function:sink_elem_type}}{{/function:return_type}}) {
+  private com.facebook.thrift.payload.Writer _create{{function:javaName}}SinkWriter({{#function:return_type}}{{#function:sink_elem_type}}{{> BoxedType}} _p{{/function:sink_elem_type}}{{/function:return_type}}) {
     return oprot -> {
       try {
         oprot.writeFieldBegin(_{{function:javaName}}_SINK_TFIELD);
@@ -364,7 +364,7 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   {{/function:sink_has_first_response?}}{{/function:return_type}}
 
   @java.lang.Override
-  public {{#function:return_type}}{{> SinkWrapperReturnType}}{{/function:return_type}} {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{ >BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
+  public {{#function:return_type}}{{> SinkWrapperReturnType}}{{/function:return_type}} {{function:javaName}}Wrapper({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{> BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
     return _rpcClient
       .flatMapMany(_rpc -> getHeaders(rpcOptions).flatMapMany(headers -> {
         org.apache.thrift.RequestRpcMetadata _metadata = new org.apache.thrift.RequestRpcMetadata.Builder()
@@ -406,12 +406,12 @@ public class {{service:javaCapitalName}}ReactiveClient {{#service:extends}}exten
   }
 
   @java.lang.Override
-  public {{#function:return_type}}{{> SinkReturnType}}{{/function:return_type}} {{function:javaName}}({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{ >BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
+  public {{#function:return_type}}{{> SinkReturnType}}{{/function:return_type}} {{function:javaName}}({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{> BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads, com.facebook.thrift.client.RpcOptions rpcOptions) {
       return {{function:javaName}}Wrapper({{#function:args}}{{field:javaName}}, {{/function:args}} payloads, rpcOptions).map(_p -> _p.getData());
   }
 
   @java.lang.Override
-  public {{#function:return_type}}{{> SinkReturnType}}{{/function:return_type}} {{function:javaName}}({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{ >BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads) {
+  public {{#function:return_type}}{{> SinkReturnType}}{{/function:return_type}} {{function:javaName}}({{#function:args}}final {{#field:type}}{{> Type}}{{/field:type}} {{field:javaName}}, {{/function:args}} org.reactivestreams.Publisher<{{#function:return_type}}{{#function:sink_elem_type}}{{> BoxedType}}{{/function:sink_elem_type}}{{/function:return_type}}> payloads) {
       return {{function:javaName}}({{#function:args}}{{field:javaName}}, {{/function:args}} payloads, com.facebook.thrift.client.RpcOptions.EMPTY);
   }
 

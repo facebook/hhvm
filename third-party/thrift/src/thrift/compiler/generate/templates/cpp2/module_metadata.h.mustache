@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #pragma once
 
 #include <vector>
@@ -27,9 +27,9 @@
 {{/program:thrift_includes}}
 
 {{#program:services}}
-{{ > common/service_namespace_cpp2_begin }}
+{{> common/service_namespace_cpp2_begin }}
 class {{service:cpp_name}};
-{{ > common/service_namespace_cpp2_end }}
+{{> common/service_namespace_cpp2_end }}
 {{/program:services}}
 
 namespace apache {
@@ -40,14 +40,14 @@ namespace md {
 {{#program:enums}}
 {{^program:no_metadata?}}
 template <>
-class EnumMetadata<{{ > common/namespace_cpp2}}{{enum:cpp_name}}> {
+class EnumMetadata<{{> common/namespace_cpp2}}{{enum:cpp_name}}> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 {{/program:no_metadata?}}
 {{#program:no_metadata?}}
 template <>
-class EnumMetadata<{{ > common/namespace_cpp2}}{{enum:cpp_name}}>
+class EnumMetadata<{{> common/namespace_cpp2}}{{enum:cpp_name}}>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;
@@ -93,7 +93,7 @@ class ExceptionMetadata<{{struct:cpp_fullname}}>
 {{#program:services}}
 {{^program:no_metadata?}}
 template <>
-class ServiceMetadata<::{{ > service_common/service_class_name}}> {
+class ServiceMetadata<::{{> service_common/service_class_name}}> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
  private:
@@ -109,7 +109,7 @@ class ServiceMetadata<::{{ > service_common/service_class_name}}> {
 {{/program:no_metadata?}}
 {{#program:no_metadata?}}
 template <>
-class ServiceMetadata<::{{ > service_common/service_class_name}}>
+class ServiceMetadata<::{{> service_common/service_class_name}}>
     : private EmptyServiceMetadata {
  public:
   using EmptyServiceMetadata::gen;

@@ -125,14 +125,14 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}&) exc
 
 {{#program:stream_types}}
 cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
-    cdef unique_ptr[cClientBufferedStreamWrapper[{{ > types/cython_cpp_type}}]] _gen
+    cdef unique_ptr[cClientBufferedStreamWrapper[{{> types/cython_cpp_type}}]] _gen
 
     @staticmethod
-    cdef _fbthrift_create(cClientBufferedStream[{{ > types/cython_cpp_type}}]& c_obj, __RpcOptions rpc_options)
+    cdef _fbthrift_create(cClientBufferedStream[{{> types/cython_cpp_type}}]& c_obj, __RpcOptions rpc_options)
 
     @staticmethod
     cdef void callback(
-        cFollyTry[__cOptional[{{ > types/cython_cpp_type}}]]&& res,
+        cFollyTry[__cOptional[{{> types/cython_cpp_type}}]]&& res,
         PyObject* userdata,
     ) noexcept
 
@@ -144,12 +144,12 @@ cdef class ServerStream__{{type:flat_name}}(ServerStream):
 
 cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}(ResponseAndClientBufferedStream):
     cdef ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}} _stream
-    cdef {{#function:stream_first_response_type}}{{ > types/cython_python_type}}{{/function:stream_first_response_type}} _response
+    cdef {{#function:stream_first_response_type}}{{> types/cython_python_type}}{{/function:stream_first_response_type}} _response
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
-        }}{{#function:stream_first_response_type}}{{ > types/cython_cpp_type}}{{/function:stream_first_response_type}}, {{!
-        }}{{#function:stream_elem_type}}{{ > types/cython_cpp_type}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options)
+        }}{{#function:stream_first_response_type}}{{> types/cython_cpp_type}}{{/function:stream_first_response_type}}, {{!
+        }}{{#function:stream_elem_type}}{{> types/cython_cpp_type}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options)
 
 
 cdef class ResponseAndServerStream__{{> stream/response_class_name_suffix}}(ResponseAndServerStream):

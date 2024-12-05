@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #pragma once
 
 {{#program:thrift_includes}}
@@ -29,7 +29,7 @@
 #include <fatal/type/traits.h>
 #include <fatal/type/list.h>
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 
 namespace __fbthrift_refl {
@@ -155,4 +155,4 @@ class {{struct:cpp_name}}_struct_traits {
 {{#program:structs}}{{^struct:union?}}
 THRIFT_REGISTER_STRUCT_TRAITS({{#struct:extra_namespace}}{{struct:extra_namespace}}::{{/struct:extra_namespace}}{{struct:cpp_name}}, __fbthrift_refl::{{struct:cpp_name}}_struct_traits);
 {{/struct:union?}}{{/program:structs}}
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}

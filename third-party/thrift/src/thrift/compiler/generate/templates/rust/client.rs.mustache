@@ -42,10 +42,10 @@ pub mod errors;
 pub(crate) use {{program:crate}} as client;
 pub(crate) use {{program:types}}::services;
 
-{{#program:interactions}}{{>lib/client}}
+{{#program:interactions}}{{> lib/client}}
 {{/program:interactions}}
 
-{{#program:services}}{{>lib/client}}{{!
+{{#program:services}}{{> lib/client}}{{!
 }}{{/program:services}}
 {{/program:services?}}
 {{^program:services?}}

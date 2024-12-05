@@ -14,12 +14,12 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}class {{service:cpp_name}}AsyncProcessor : public {{#service:extends}}{{ > common/namespace_cpp2}}{{service:cpp_name}}AsyncProcessor{{/service:extends}}{{^service:extends}}::apache::thrift::GeneratedAsyncProcessorBase{{/service:extends}} {
+}}class {{service:cpp_name}}AsyncProcessor : public {{#service:extends}}{{> common/namespace_cpp2}}{{service:cpp_name}}AsyncProcessor{{/service:extends}}{{^service:extends}}::apache::thrift::GeneratedAsyncProcessorBase{{/service:extends}} {
  public:
   const char* getServiceName() override;
   void getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) override;
 {{#service:extends}}
-  using BaseAsyncProcessor = {{ > common/namespace_cpp2}}{{service:cpp_name}}AsyncProcessor;
+  using BaseAsyncProcessor = {{> common/namespace_cpp2}}{{service:cpp_name}}AsyncProcessor;
 {{/service:extends}}
 {{^service:extends}}
   using BaseAsyncProcessor = void;
@@ -48,15 +48,15 @@
 {{/service:interactions?}}
  private:
 {{#service:functions}}
-{{ > service_h/async_processor_per_function}}
+{{> service_h/async_processor_per_function}}
 {{/service:functions}}
 {{#service:interactions}}{{#service:functions}}
-{{ > service_h/async_processor_per_function}}
+{{> service_h/async_processor_per_function}}
 {{/service:functions}}{{/service:interactions}}
  public:
   {{service:cpp_name}}AsyncProcessor(::apache::thrift::ServiceHandler<{{service:qualified_name}}>* iface) :
 {{#service:extends}}
-      {{ > common/namespace_cpp2}}{{service:cpp_name}}AsyncProcessor(iface),
+      {{> common/namespace_cpp2}}{{service:cpp_name}}AsyncProcessor(iface),
 {{/service:extends}}
       iface_(iface) {}
   ~{{service:cpp_name}}AsyncProcessor() override {}

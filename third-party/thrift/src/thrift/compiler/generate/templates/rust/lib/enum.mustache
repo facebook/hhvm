@@ -25,7 +25,7 @@
 }})]
 pub struct {{enum:rust_name}}(pub ::std::primitive::i32);
 
-impl {{enum:rust_name}} {{>lib/block}}{{!
+impl {{enum:rust_name}} {{> lib/block}}{{!
     }}{{#enum:values}}
     {{#enum_value:docs?}}
     #[doc = {{enum_value:docs}}]
@@ -99,7 +99,7 @@ impl ::std::convert::From<::std::primitive::i32> for {{enum:rust_name}} {
 }
 
 impl ::std::fmt::Display for {{enum:rust_name}} {
-    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {{>lib/block}}
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {{> lib/block}}
         static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
             {{#enum:variants_by_number}}
             ("{{enum_value:name}}", {{enum_value:value}}),

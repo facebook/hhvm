@@ -64,35 +64,35 @@ pub mod services;
 pub(crate) use {{program:crate}} as types;
 {{!
 
-}}{{#program:typedefs}}{{>lib/typedef}}{{/program:typedefs}}{{!
+}}{{#program:typedefs}}{{> lib/typedef}}{{/program:typedefs}}{{!
 
 }}{{#program:structs}}{{!
     }}{{#struct:has_adapter?}}{{!
     }}{{!
     }}{{/struct:has_adapter?}}{{!
     }}{{^struct:has_adapter?}}{{!
-    }}{{>lib/struct}}{{!
+    }}{{> lib/struct}}{{!
     }}{{/struct:has_adapter?}}{{!
 }}{{/program:structs}}{{!
 
-}}{{#program:enums}}{{>lib/enum}}{{/program:enums}}{{!
+}}{{#program:enums}}{{> lib/enum}}{{/program:enums}}{{!
 
-}}{{#program:typedefs}}{{>lib/typedefimpl}}{{/program:typedefs}}{{!
+}}{{#program:typedefs}}{{> lib/typedefimpl}}{{/program:typedefs}}{{!
 
-}}{{#program:structs}}{{^struct:has_adapter?}}{{>lib/structimpl}}{{>lib/unionimpl}}{{/struct:has_adapter?}}{{/program:structs}}{{!
+}}{{#program:structs}}{{^struct:has_adapter?}}{{> lib/structimpl}}{{> lib/unionimpl}}{{/struct:has_adapter?}}{{/program:structs}}{{!
 
 }}{{#program:has_adapted_structs?}}{{!
-    }}{{>lib/mod.unadapted}}{{!
-    }}{{>lib/mod.adapted_types}}{{!
+    }}{{> lib/mod.unadapted}}{{!
+    }}{{> lib/mod.adapted_types}}{{!
 }}{{/program:has_adapted_structs?}}{{!
 
 }}{{#program:has_adapters?}}{{!
-    }}{{>lib/mod.adapters}}{{!
+    }}{{> lib/mod.adapters}}{{!
 }}{{/program:has_adapters?}}{{!
 
 }}{{#program:nonexhaustiveStructs?}}
 
-mod dot_dot {{>lib/block}}{{!
+mod dot_dot {{> lib/block}}{{!
     NOTE: intentionally no Default impl}}
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash{{#program:valuable?}}, ::valuable::Valuable{{/program:valuable?}})]
     pub struct OtherFields(pub(crate) ());
@@ -116,9 +116,9 @@ pub fn init_registry(registry: &mut ::fbthrift_conformance::AnyRegistry) -> ::an
 {{/program:any?}}{{!
 
 }}
-pub(crate) mod r#impl {{>lib/block}}{{>lib/mod.impl}}}
+pub(crate) mod r#impl {{> lib/block}}{{> lib/mod.impl}}}
 {{!
-}}{{#program:has_default_tests?}}{{>lib/adapter/default_test}}{{/program:has_default_tests?}}
+}}{{#program:has_default_tests?}}{{> lib/adapter/default_test}}{{/program:has_default_tests?}}
 {{#program:direct_dependencies?}}
 
 #[doc(hidden)]

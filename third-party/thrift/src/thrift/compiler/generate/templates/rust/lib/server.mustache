@@ -17,18 +17,18 @@
 }}
 
 {{#service:interactions?}}{{!
-}}pub mod {{service:snake}} {{>lib/block}}
+}}pub mod {{service:snake}} {{> lib/block}}
     use super::*;
 
     {{#service:interactions}}
-    {{>lib/server}}
+    {{> lib/server}}
     {{/service:interactions}}
 
 }
 {{/service:interactions?}}
 
 {{^service:interaction?}}
-{{>lib/server_trait}}
+{{> lib/server_trait}}
 {{/service:interaction?}}
 
 /// Processor for {{service:rust_name}}'s methods.
@@ -48,7 +48,7 @@ pub struct {{service:rust_name}}Processor<P, H, R, RS{{!
 }
 
 {{^service:interaction?}}
-{{>lib/server_arg}}
+{{> lib/server_arg}}
 {{/service:interaction?}}
 impl<P, H, R, RS{{!
     }}{{#service:extends?}}, SS{{/service:extends?}}{{!
@@ -69,7 +69,7 @@ where
     ::fbthrift::ProtocolEncodedFinal<P>: ::std::clone::Clone + ::fbthrift::BufExt,{{!
     }}{{#service:extends?}}
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: {{>lib/super}}{{!
+    SS::Handler: {{> lib/super}}{{!
     }}{{/service:extends?}}
 {
     pub fn new({{!
@@ -262,7 +262,7 @@ where
     }}{{#service:requestContext?}}<RequestContext = R>{{/service:requestContext?}},{{!
     }}{{#service:extends?}}
     SS: ::fbthrift::ThriftService<P::Frame>,
-    SS::Handler: {{>lib/super}},{{!
+    SS::Handler: {{> lib/super}},{{!
     }}{{/service:extends?}}
     P::Frame: ::std::marker::Send + 'static,
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -277,7 +277,7 @@ where
 
     #[inline]
     fn method_idx(&self, name: &[::std::primitive::u8]) -> ::std::result::Result<::std::primitive::usize, ::fbthrift::ApplicationException> {
-        match name {{>lib/block}}{{!
+        match name {{> lib/block}}{{!
             }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
             b"{{#service:interaction?}}{{service:name}}.{{/service:interaction?}}{{function:name}}" => ::std::result::Result::Ok({{function:index}}usize),{{!
             }}{{/function:sink?}}{{/function:starts_interaction?}}{{/service:rustFunctions}}
@@ -295,7 +295,7 @@ where
         _reply_state: ::std::sync::Arc<RS>,
         _seqid: ::std::primitive::u32,
     ) -> ::anyhow::Result<()> {
-        match idx {{>lib/block}}{{!
+        match idx {{> lib/block}}{{!
             }}{{#service:rustFunctions}}{{^function:starts_interaction?}}{{^function:sink?}}
             {{function:index}}usize => {
                 self.handle_{{function:name}}(_p, _req, _req_ctxt, _reply_state, _seqid).await
@@ -312,7 +312,7 @@ where
     #[allow(clippy::match_single_binding)]
     #[inline]
     fn create_interaction_idx(&self, name: &::std::primitive::str) -> ::anyhow::Result<::std::primitive::usize> {
-        match name {{>lib/block}}{{!
+        match name {{> lib/block}}{{!
             }}{{#service:rustFunctions}}{{#function:starts_interaction?}}
             "{{function:interaction_name}}" => ::std::result::Result::Ok({{function:index}}usize),{{!
             }}{{/function:starts_interaction?}}{{/service:rustFunctions}}
@@ -327,7 +327,7 @@ where
     ) -> ::anyhow::Result<
         ::std::sync::Arc<dyn ::fbthrift::ThriftService<P::Frame, Handler = (), RequestContext = Self::RequestContext, ReplyState = Self::ReplyState> + ::std::marker::Send + 'static>
     > {
-        match idx {{>lib/block}}{{!
+        match idx {{> lib/block}}{{!
             }}{{#service:rustFunctions}}{{#function:starts_interaction?}}
             {{function:index}}usize => {
                 let handler = self.handle_{{function:name}}()?;
@@ -364,7 +364,7 @@ where
     }}{{#service:requestContext?}}<RequestContext = R>{{/service:requestContext?}},{{!
     }}{{#service:extends?}}
     SS: ::fbthrift::ThriftService<P::Frame, RequestContext = R, ReplyState = RS>,
-    SS::Handler: {{>lib/super}},
+    SS::Handler: {{> lib/super}},
     P::Frame: ::std::marker::Send + 'static,{{!
     }}{{/service:extends?}}
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
@@ -431,7 +431,7 @@ where
 
     fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
         &[
-{{>lib/method_metadata}}
+{{> lib/method_metadata}}
         ]
     }
 
@@ -463,7 +463,7 @@ where
     }}{{#service:extends?}}
     SMAKE: ::std::ops::FnOnce(::fbthrift::ProtocolID) -> ::std::result::Result<SS, ::fbthrift::ApplicationException>,
     SS: ::fbthrift::ThriftService<F, RequestContext = R, ReplyState = RS>,
-    SS::Handler: {{>lib/super}},{{!
+    SS::Handler: {{> lib/super}},{{!
     }}{{/service:extends?}}
     R: ::fbthrift::RequestContext<Name = ::std::ffi::CStr> + ::std::marker::Send + ::std::marker::Sync + 'static,
     <R as ::fbthrift::RequestContext>::ContextStack: ::fbthrift::ContextStack<Name = R::Name, Frame = F> + ::std::marker::Send + ::std::marker::Sync + 'static,

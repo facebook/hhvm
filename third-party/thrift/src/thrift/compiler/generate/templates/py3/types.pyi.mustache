@@ -177,11 +177,11 @@ class {{type:flat_name}}({{> types/pep484_containers}}, _typing.Hashable):
 {{#program:has_stream?}}
 
 {{#program:stream_types}}
-class ClientBufferedStream__{{type:flat_name}}(thrift.py3.stream.ClientBufferedStream[{{ > types/pep484_type}}]):
-    def __aiter__(self) -> _typing.AsyncIterator[{{ > types/pep484_type}}]: ...
-    async def __anext__(self) -> {{ > types/pep484_type}}: ...
+class ClientBufferedStream__{{type:flat_name}}(thrift.py3.stream.ClientBufferedStream[{{> types/pep484_type}}]):
+    def __aiter__(self) -> _typing.AsyncIterator[{{> types/pep484_type}}]: ...
+    async def __anext__(self) -> {{> types/pep484_type}}: ...
 
-class ServerStream__{{type:flat_name}}(thrift.py3.stream.ServerStream[{{ > types/pep484_type}}]):
+class ServerStream__{{type:flat_name}}(thrift.py3.stream.ServerStream[{{> types/pep484_type}}]):
     pass
 
 class ServerPublisher_{{> types/cython_cpp_return_type_ident}}(thrift.py3.stream.ServerPublisher):

@@ -18,11 +18,11 @@
 Cython type for return_type in services
 }}{{#function:stream?}}{{!
   }}{{#function:stream_has_first_response?}}cResponseAndServerStream[{{!
-  }}{{#function:stream_first_response_type}}{{ >types/cython_cpp_type}}{{/function:stream_first_response_type}},{{!
+  }}{{#function:stream_first_response_type}}{{> types/cython_cpp_type}}{{/function:stream_first_response_type}},{{!
   }}{{/function:stream_has_first_response?}}{{!
   }}{{^function:stream_has_first_response?}}cServerStream[{{!
   }}{{/function:stream_has_first_response?}}{{!
-  }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type}}{{/function:stream_elem_type}}]{{!
+  }}{{#function:stream_elem_type}}{{> types/cython_cpp_type}}{{/function:stream_elem_type}}]{{!
 }}{{/function:stream?}}{{!
 }}{{^function:stream?}}{{!
 }}{{^function:stack_arguments?}}{{> services/cython_field_type}}{{/function:stack_arguments?}}{{!

@@ -20,11 +20,11 @@ pub mod {{service:snake}} {
 
     {{#service:rust_exceptions}}
     pub trait As{{#rust_exception:type}}{{type:rust_name}}{{/rust_exception:type}} {
-        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> ::std::option::Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}>;
+        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> ::std::option::Option<&{{#rust_exception:type}}{{> lib/type}}{{/rust_exception:type}}>;
     }
 
     impl As{{#rust_exception:type}}{{type:rust_name}}{{/rust_exception:type}} for ::anyhow::Error {
-        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> ::std::option::Option<&{{#rust_exception:type}}{{>lib/type}}{{/rust_exception:type}}> {
+        fn as_{{#rust_exception:type}}{{type:rust_name_snake}}{{/rust_exception:type}}(&self) -> ::std::option::Option<&{{#rust_exception:type}}{{> lib/type}}{{/rust_exception:type}}> {
             for cause in self.chain() {
             {{#rust_exception:functions}}
             {{#rust_exception_function:function}}
@@ -46,7 +46,7 @@ pub mod {{service:snake}} {
     #[derive(Debug)]
     pub enum {{function:upcamel}}Error {
         {{#function:exceptions}}
-        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),
+        {{field:rust_name}}({{#field:type}}{{> lib/type}}{{/field:type}}),
         {{/function:exceptions}}
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
@@ -108,14 +108,14 @@ pub mod {{service:snake}} {
     }
 
     {{#function:uniqueExceptions}}
-    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}Error {
-        fn from(e: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+    impl ::std::convert::From<{{#field:type}}{{> lib/type}}{{/field:type}}> for {{function:upcamel}}Error {
+        fn from(e: {{#field:type}}{{> lib/type}}{{/field:type}}) -> Self {
             Self::{{field:rust_name}}(e)
         }
     }
 
     impl As{{#field:type}}{{type:rust_name}}{{/field:type}} for {{function:upcamel}}Error {
-        fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> ::std::option::Option<&{{#field:type}}{{>lib/type}}{{/field:type}}> {
+        fn as_{{#field:type}}{{type:rust_name_snake}}{{/field:type}}(&self) -> ::std::option::Option<&{{#field:type}}{{> lib/type}}{{/field:type}}> {
             match self {
                 Self::{{field:rust_name}}(inner) => ::std::option::Option::Some(inner),
                 _ => ::std::option::Option::None,
@@ -173,10 +173,10 @@ pub mod {{service:snake}} {
 
     impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}Reader {
         type Success = {{!
-            }}{{^function:stream?}}{{>lib/server_ok_type}}{{/function:stream?}}{{!
+            }}{{^function:stream?}}{{> lib/server_ok_type}}{{/function:stream?}}{{!
             }}{{#function:stream?}}{{!
                 }}{{#function:stream_has_first_response?}}{{!
-                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
+                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
                 }}{{/function:stream_has_first_response?}}{{!
                 }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
             }}{{/function:stream?}}{{!
@@ -209,11 +209,11 @@ pub mod {{service:snake}} {
                     }
                     (({{!
                         }}{{^function:stream?}}{{!
-                            }}{{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}{{!
+                            }}{{#function:return_type}}{{> lib/ttype}}{{/function:return_type}}{{!
                         }}{{/function:stream?}}{{!
                         }}{{#function:stream?}}{{!
                             }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
-                            }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
+                            }}{{#function:stream_has_first_response?}}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{/function:stream_has_first_response?}}{{!
                         }}{{/function:stream?}}{{!
                     }}, 0i32), false) => {
                         once = true;
@@ -221,7 +221,7 @@ pub mod {{service:snake}} {
                             }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
                             }}::std::result::Result::Ok({{!
                                 }}{{^function:stream?}}{{#function:return_type}}{{!
-                                    }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{!
+                                    }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{!
                                     }}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{!
                                 }}{{/function:return_type}}{{/function:stream?}}{{!
                                 }}{{#function:stream?}}::fbthrift::Deserialize::read(p)?{{/function:stream?}}{{!
@@ -230,13 +230,13 @@ pub mod {{service:snake}} {
                         }};
                     }{{!
                     }}{{#function:exceptions}}
-                    (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                         once = true;
                         alt = {{!
                             }}{{^function:void_or_void_stream?}}::std::option::Option::Some({{/function:void_or_void_stream?}}{{!
                             }}::std::result::Result::Err(Self::Error::{{field:rust_name}}({{!
                                 }}{{^function:stream?}}{{#function:return_type}}{{!
-                                    }}{{#type:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{!
+                                    }}{{#type:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>(fbthrift::Deserialize::read(p)?, 0)?{{/type:has_adapter?}}{{!
                                     }}{{^type:has_adapter?}}::fbthrift::Deserialize::read(p)?{{/type:has_adapter?}}{{!
                                 }}{{/function:return_type}}{{/function:stream?}}{{!
                                 }}{{#function:stream?}}::fbthrift::Deserialize::read(p)?{{/function:stream?}}{{!
@@ -281,7 +281,7 @@ pub mod {{service:snake}} {
     #[derive(Debug)]
     pub enum {{function:upcamel}}StreamError {
         {{#function:stream_exceptions}}
-        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),
+        {{field:rust_name}}({{#field:type}}{{> lib/type}}{{/field:type}}),
         {{/function:stream_exceptions}}
         ApplicationException(::fbthrift::ApplicationException),
         ThriftError(::anyhow::Error),
@@ -343,8 +343,8 @@ pub mod {{service:snake}} {
     }
 
     {{#function:uniqueStreamExceptions}}
-    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}StreamError {
-        fn from(e: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+    impl ::std::convert::From<{{#field:type}}{{> lib/type}}{{/field:type}}> for {{function:upcamel}}StreamError {
+        fn from(e: {{#field:type}}{{> lib/type}}{{/field:type}}) -> Self {
             Self::{{field:rust_name}}(e)
         }
     }
@@ -383,7 +383,7 @@ pub mod {{service:snake}} {
     pub(crate) enum {{function:upcamel}}StreamReader {}
 
     impl ::fbthrift::help::DeserializeExn for {{function:upcamel}}StreamReader {
-        type Success = {{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}};
+        type Success = {{#function:stream_elem_type}}{{> lib/type}}{{/function:stream_elem_type}};
         type Error = {{function:upcamel}}StreamError;
 
         fn read_result<P>(p: &mut P) -> ::anyhow::Result<::std::result::Result<Self::Success, Self::Error>>
@@ -405,12 +405,12 @@ pub mod {{service:snake}} {
                         p.read_field_end()?;
                         break;
                     }
-                    (({{#function:stream_elem_type}}{{>lib/ttype}}{{/function:stream_elem_type}}, 0i32), false) => {
+                    (({{#function:stream_elem_type}}{{> lib/ttype}}{{/function:stream_elem_type}}, 0i32), false) => {
                         once = true;
                         alt = ::std::option::Option::Some(::std::result::Result::Ok(::fbthrift::Deserialize::read(p)?));
                     }{{!
                     }}{{#function:stream_exceptions}}
-                    (({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
+                    (({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}), false) => {
                         once = true;
                         alt = ::std::option::Option::Some(::std::result::Result::Err(Self::Error::{{field:rust_name}}(::fbthrift::Deserialize::read(p)?)));
                     }{{!

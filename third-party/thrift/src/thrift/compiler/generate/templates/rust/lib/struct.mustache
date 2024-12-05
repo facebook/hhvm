@@ -30,7 +30,7 @@
 #[doc = {{struct:docs}}]
 {{/struct:docs?}}{{!
 }}{{^struct:union?}}
-pub struct {{struct:rust_name}} {{>lib/block}}{{!
+pub struct {{struct:rust_name}} {{> lib/block}}{{!
 }}{{#struct:fields}}{{!
     }}{{#struct:serde?}}{{#field:rename?}}
     #[serde(rename = "{{field:name}}")]{{!
@@ -43,7 +43,7 @@ pub struct {{struct:rust_name}} {{>lib/block}}{{!
     }}{{/struct:serde?}}{{#field:docs?}}
     #[doc = {{field:docs}}]{{!
     }}{{/field:docs?}}
-    pub {{field:rust_name}}: {{>lib/fieldtype}},{{!
+    pub {{field:rust_name}}: {{> lib/fieldtype}},{{!
 }}{{/struct:fields}}{{!
 }}{{^struct:exhaustive?}}
     // This field forces `..Default::default()` when instantiating this
@@ -76,7 +76,7 @@ impl ::fbthrift::ExceptionInfo for {{struct:rust_name}} {
 
 impl ::std::error::Error for {{struct:rust_name}} {}
 
-impl ::std::fmt::Display for {{struct:rust_name}} {{>lib/block}}
+impl ::std::fmt::Display for {{struct:rust_name}} {{> lib/block}}
     fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         {{#struct:exception?}}
         write!(f, {{!
@@ -101,7 +101,7 @@ impl ::std::fmt::Display for {{struct:rust_name}} {{>lib/block}}
 {{/struct:exception?}}
 {{/struct:union?}}
 {{#struct:union?}}
-pub enum {{struct:rust_name}} {{>lib/block}}{{!
+pub enum {{struct:rust_name}} {{> lib/block}}{{!
 }}{{#struct:fields}}
     {{#field:docs?}}
     #[doc = {{field:docs}}]
@@ -109,7 +109,7 @@ pub enum {{struct:rust_name}} {{>lib/block}}{{!
     {{#struct:exception?}}
     #[error("{0:?}")]
     {{/struct:exception?}}
-    {{field:rust_name}}({{>lib/fieldtype}}),{{!
+    {{field:rust_name}}({{> lib/fieldtype}}),{{!
 }}{{/struct:fields}}
     UnknownField(::std::primitive::i32),
 }

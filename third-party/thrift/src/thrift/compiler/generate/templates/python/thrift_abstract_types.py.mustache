@@ -93,7 +93,7 @@ class {{> structs/unadapted_name}}({{!
         of the Union (sigh!)
     }}FbThriftUnionFieldEnum.__name__ = "{{struct:py_name}}"
 
-    fbthrift_current_value: _typing.Final[{{ > types/field_value_pep484_union_type}}]
+    fbthrift_current_value: _typing.Final[{{> types/field_value_pep484_union_type}}]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
 
     {{/struct:union?}}

@@ -19,7 +19,7 @@
 }}{{.}}{{!
 }}{{/adapter:name?}}{{!
 }}{{#adapter:is_generic?}}{{!
-}}<{{#adapter:underlying_type}}{{>lib/type}}{{/adapter:underlying_type}}>{{!
+}}<{{#adapter:underlying_type}}{{> lib/type}}{{/adapter:underlying_type}}>{{!
 }}{{/adapter:is_generic?}}{{!
 }}{{#adapter:layered?}}, {{/adapter:layered?}}{{!
 }}{{#adapter:transitive_type?}}{{!
@@ -33,30 +33,30 @@
         }}{{#type:list?}}{{!
             }}::fbthrift::adapter::ListMapAdapter<{{!
             }}{{#type:list_elem_type}}{{!
-                }}{{#type:has_adapter?}}{{>lib/adapter/name}}{{/type:has_adapter?}}{{!
+                }}{{#type:has_adapter?}}{{> lib/adapter/name}}{{/type:has_adapter?}}{{!
             }}{{/type:list_elem_type}}{{!
             }}>{{!
         }}{{/type:list?}}{{!
         }}{{#type:set?}}{{!
             }}::fbthrift::adapter::SetMapAdapter<{{!
             }}{{#type:set_elem_type}}{{!
-                }}{{#type:has_adapter?}}{{>lib/adapter/name}}{{/type:has_adapter?}}{{!
+                }}{{#type:has_adapter?}}{{> lib/adapter/name}}{{/type:has_adapter?}}{{!
             }}{{/type:set_elem_type}}{{!
             }}>{{!
         }}{{/type:set?}}{{!
         }}{{#type:map?}}{{!
             }}::fbthrift::adapter::MapMapAdapter<{{!
             }}{{#type:key_type}}{{!
-                }}{{#type:has_adapter?}}{{>lib/adapter/name}}{{/type:has_adapter?}}{{!
+                }}{{#type:has_adapter?}}{{> lib/adapter/name}}{{/type:has_adapter?}}{{!
                 }}{{^type:has_adapter?}}{{!
-                  }}::fbthrift::adapter::IdentityAdapter<{{>lib/type}}>{{!
+                  }}::fbthrift::adapter::IdentityAdapter<{{> lib/type}}>{{!
                 }}{{/type:has_adapter?}}{{!
             }}{{/type:key_type}}{{!
             }}, {{!
             }}{{#type:value_type}}{{!
-                }}{{#type:has_adapter?}}{{>lib/adapter/name}}{{/type:has_adapter?}}{{!
+                }}{{#type:has_adapter?}}{{> lib/adapter/name}}{{/type:has_adapter?}}{{!
                 }}{{^type:has_adapter?}}{{!
-                  }}::fbthrift::adapter::IdentityAdapter<{{>lib/type}}>{{!
+                  }}::fbthrift::adapter::IdentityAdapter<{{> lib/type}}>{{!
                 }}{{/type:has_adapter?}}{{!
             }}{{/type:value_type}}{{!
             }}>{{!

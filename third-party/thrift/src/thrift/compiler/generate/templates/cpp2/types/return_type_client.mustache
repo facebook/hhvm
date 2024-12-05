@@ -15,17 +15,17 @@
   limitations under the License.
 
 }}{{^function:creates_interaction?}}{{!
-  }}{{ > types/return_type_client_no_handle}}{{!
+  }}{{> types/return_type_client_no_handle}}{{!
 }}{{/function:creates_interaction?}}{{!
 }}{{#function:creates_interaction?}}{{!
   }}{{#if function:stream?}}{{!
-    }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{ > types/return_type_client_no_handle}}>{{!
+    }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{> types/return_type_client_no_handle}}>{{!
   }}{{#else}}{{!
     }}{{#type:void?}}{{!
       }}apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}{{!
     }}{{/type:void?}}{{!
     }}{{^type:void?}}{{!
-      }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{ > types/return_type_client_no_handle}}>{{!
+      }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{> types/return_type_client_no_handle}}>{{!
     }}{{/type:void?}}{{!
   }}{{/if function:stream?}}{{!
 }}{{/function:creates_interaction?}}

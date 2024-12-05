@@ -16,11 +16,11 @@
 
 }}// BEGIN declare_enums
 {{#program:enums?}}
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 {{#program:enums}}
 
-{{ > common/enum_docblock }}
+{{> common/enum_docblock }}
 enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{#enum:cpp_enum_type}} : {{enum:cpp_enum_type}}{{/enum:cpp_enum_type}} {
 {{#enum:values}}
   {{enum_value:cpp_name}} = {{enum_value:value}},
@@ -28,18 +28,18 @@ enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{
 };
 
 {{#enum:cpp_declare_bitwise_ops}}
-{{ > module_types_h/enum_bitwise_ops}}
+{{> module_types_h/enum_bitwise_ops}}
 {{/enum:cpp_declare_bitwise_ops}}
 
 {{/program:enums}}
 
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}
 
 
 namespace std {
 {{#program:enums}}
-template<> struct hash<{{ > common/namespace_cpp2}}{{enum:cpp_name}}> :
-  ::apache::thrift::detail::enum_hash<{{ > common/namespace_cpp2}}{{enum:cpp_name}}> {};
+template<> struct hash<{{> common/namespace_cpp2}}{{enum:cpp_name}}> :
+  ::apache::thrift::detail::enum_hash<{{> common/namespace_cpp2}}{{enum:cpp_name}}> {};
 {{/program:enums}}
 } // std
 
@@ -47,10 +47,10 @@ namespace apache { namespace thrift {
 
 {{#program:enums}}
 
-template <> struct TEnumDataStorage<{{ > common/namespace_cpp2}}{{enum:cpp_name}}>;
+template <> struct TEnumDataStorage<{{> common/namespace_cpp2}}{{enum:cpp_name}}>;
 
-template <> struct TEnumTraits<{{ > common/namespace_cpp2}}{{enum:cpp_name}}> {
-  using type = {{ > common/namespace_cpp2}}{{enum:cpp_name}};
+template <> struct TEnumTraits<{{> common/namespace_cpp2}}{{enum:cpp_name}}> {
+  using type = {{> common/namespace_cpp2}}{{enum:cpp_name}};
 
   static constexpr std::size_t const size = {{enum:size}};
   static folly::Range<type const*> const values;

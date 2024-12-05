@@ -34,7 +34,7 @@ from {{program:base_library_package}}.mutable_serializer import serialize_iobuf,
 {{/program:generate_mutable_types}}
 from {{program:base_library_package}}.server import ServiceInterface, RpcKind, PythonUserException
 
-import {{program:module_path}}.{{>types/types_import_path}} as {{program:module_mangle}}__{{> types/types_import_path}}
+import {{program:module_path}}.{{> types/types_import_path}} as {{program:module_mangle}}__{{> types/types_import_path}}
 import {{program:module_path}}.thrift_metadata
 {{#program:include_namespaces}}
 {{#has_services?}}

@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 
 {{#program}}
 #include "{{program:include_prefix}}{{program:name}}_clients.h"
@@ -24,7 +24,7 @@
 #include <thrift/lib/cpp2/gen/client_cpp.h>
 
 {{#services}}
-{{ > service_cpp/async_client_cpp}}
+{{> service_cpp/async_client_cpp}}
 
 
 {{/services}}

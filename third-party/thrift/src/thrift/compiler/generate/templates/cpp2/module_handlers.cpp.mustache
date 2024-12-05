@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 
 {{#program}}
 #include "{{program:include_prefix}}{{program:name}}_handlers.h"
@@ -29,7 +29,7 @@
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
 {{#services}}
-{{ > service_cpp/handlers_cpp}}
+{{> service_cpp/handlers_cpp}}
 
 
 {{/services}}

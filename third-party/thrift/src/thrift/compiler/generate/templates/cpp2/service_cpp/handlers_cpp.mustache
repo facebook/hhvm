@@ -15,21 +15,21 @@
   limitations under the License.
 
 }}
-std::unique_ptr<apache::thrift::AsyncProcessor> {{ > service_common/service_class_name}}::getProcessor() {
+std::unique_ptr<apache::thrift::AsyncProcessor> {{> service_common/service_class_name}}::getProcessor() {
   return std::make_unique<{{service:qualified_name}}AsyncProcessor>(this);
 }
 
-{{ > service_common/service_class_name}}::CreateMethodMetadataResult {{ > service_common/service_class_name}}::createMethodMetadata() {
+{{> service_common/service_class_name}}::CreateMethodMetadataResult {{> service_common/service_class_name}}::createMethodMetadata() {
   return ::apache::thrift::detail::ap::createMethodMetadataMap<{{service:qualified_name}}AsyncProcessor>(getServiceRequestInfoMap().value().get());
 }
 
 {{#service:has_service_schema}}
 #if defined(THRIFT_SCHEMA_AVAILABLE)
-std::optional<apache::thrift::schema::DefinitionsSchema> {{ > service_common/service_class_name}}::getServiceSchema() {
+std::optional<apache::thrift::schema::DefinitionsSchema> {{> service_common/service_class_name}}::getServiceSchema() {
 {{#program}}
 {{#program:has_schema?}}
   std::optional<apache::thrift::schema::DefinitionsSchema> ret = schema::DefinitionsSchema{};
-  ret->schema = ::apache::thrift::SchemaRegistry::mergeSchemas(::{{ > common/service_namespace_cpp2}}::{{program:name}}_constants::{{program:schema_name}}_includes());
+  ret->schema = ::apache::thrift::SchemaRegistry::mergeSchemas(::{{> common/service_namespace_cpp2}}::{{program:name}}_constants::{{program:schema_name}}_includes());
   ret->definitions = {"{{service:definition_key}}"};
   return ret;
 {{/program:has_schema?}}
@@ -41,24 +41,24 @@ std::optional<apache::thrift::schema::DefinitionsSchema> {{ > service_common/ser
 #endif
 {{/service:has_service_schema}}
 
-std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> {{ > service_common/service_class_name}}::getServiceRequestInfoMap() const {
+std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> {{> service_common/service_class_name}}::getServiceRequestInfoMap() const {
   return __fbthrift_serviceInfoHolder.requestInfoMap();
 }
 
 {{^service:interaction?}}
-{{service:qualified_name}}ServiceInfoHolder {{ > service_common/service_class_name}}::__fbthrift_serviceInfoHolder;
+{{service:qualified_name}}ServiceInfoHolder {{> service_common/service_class_name}}::__fbthrift_serviceInfoHolder;
 {{/service:interaction?}}
 
-{{ > service_cpp/service_interface_impl}}
+{{> service_cpp/service_interface_impl}}
 
 {{#service:interactions}}
-{{ > service_cpp/service_interface_impl}}
+{{> service_cpp/service_interface_impl}}
 {{/service:interactions}}
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 
-{{ > service_cpp/service_null_impl}}
+{{> service_cpp/service_null_impl}}
 
 const char* {{service:cpp_name}}AsyncProcessor::getServiceName() {
   return "{{service:name}}";
@@ -76,9 +76,9 @@ void {{service:cpp_name}}AsyncProcessor::executeRequest(apache::thrift::ServerRe
   apache::thrift::detail::ap::execute(this, std::move(request), apache::thrift::detail::ServerRequestHelper::protocol(request), methodMetadata);
 }
 
-{{ > service_cpp/processmap}}
+{{> service_cpp/processmap}}
 
 {{#service:interactions?}}
-{{ > service_cpp/interaction_constructor_map}}
+{{> service_cpp/interaction_constructor_map}}
 {{/service:interactions?}}
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}

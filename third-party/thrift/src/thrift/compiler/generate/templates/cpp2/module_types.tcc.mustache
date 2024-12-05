@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #pragma once
 
 #include "{{program:include_prefix}}{{program:name}}_types.h"
@@ -23,10 +23,10 @@
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
 
 {{^program:tablebased?}}
-{{ > module_types_tcc/tcc_struct_traits}}
+{{> module_types_tcc/tcc_struct_traits}}
 {{/program:tablebased?}}
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 {{#program:structs}}
 {{#struct:extra_namespace}}
@@ -37,15 +37,15 @@ extern const ::apache::thrift::detail::StructInfoN<{{struct:fields_size}}> __fbt
 {{/program:tablebased?}}
 
 {{^struct:union?}}
-{{ > module_types_tcc/deserialize_struct}}
+{{> module_types_tcc/deserialize_struct}}
 
-{{ > module_types_tcc/serialize_struct}}
+{{> module_types_tcc/serialize_struct}}
 {{/struct:union?}}
 {{#struct:union?}}
-{{ > module_types_tcc/union_setters}}
-{{ > module_types_tcc/deserialize_union}}
+{{> module_types_tcc/union_setters}}
+{{> module_types_tcc/deserialize_union}}
 
-{{ > module_types_tcc/serialize_union}}
+{{> module_types_tcc/serialize_union}}
 {{/struct:union?}}
 
 extern template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -68,4 +68,4 @@ extern template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apac
 
 {{/program:structs}}
 
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}

@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/frozen/Frozen.h>
@@ -36,11 +36,11 @@ FROZEN_EXCLUDE_TYPE({{struct:cpp_fullname}})
 {{^struct:union?}}
 FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_FIELD{{ > common/field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+  FROZEN_FIELD{{> common/field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
 }}{{/struct:fields}}
   FROZEN_VIEW({{!
 }}{{#struct:fields}}
-    FROZEN_VIEW_FIELD{{ > common/field_suffix}}({{field:cpp_name}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+    FROZEN_VIEW_FIELD{{> common/field_suffix}}({{field:cpp_name}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
 }}{{/struct:fields}})
   FROZEN_SAVE_INLINE({{!
 }}{{#struct:fields}}
@@ -56,9 +56,9 @@ FROZEN_TYPE({{struct:cpp_fullname}},{{!
 }}
   FROZEN_FIELD(type_, 0, {{struct:cpp_fullname}}::Type){{!
 }}{{#struct:fields}}
-  FROZEN_FIELD{{ > common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
+  FROZEN_FIELD{{> common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}, {{#field:type}}{{field:cpp_storage_type}}{{/field:type}}){{!
 }}{{/struct:fields}}
-{{ > module_layouts_h/frozen_view_union}}
+{{> module_layouts_h/frozen_view_union}}
   FROZEN_SAVE_INLINE({{!
 }}
     FROZEN_SAVE_FIELD(type_){{!

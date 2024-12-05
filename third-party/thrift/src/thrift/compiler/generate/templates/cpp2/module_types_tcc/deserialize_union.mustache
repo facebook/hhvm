@@ -33,9 +33,9 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   {{#struct:fields}}{{#field:type}}
       case {{field:key}}:
       {
-        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::{{ > module_types_tcc/struct_type}})) {
+        if (_readState.isCompatibleWithType(iprot, apache::thrift::protocol::{{> module_types_tcc/struct_type}})) {
           this->{{field:cpp_name}}_ref().emplace();
-          {{ > module_types_tcc/deserialize_field }}
+          {{> module_types_tcc/deserialize_field }}
         } else {
           _readState.skip(iprot);
         }
@@ -64,7 +64,7 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   ::apache::thrift::detail::read(
     iprot,
     ::apache::thrift::detail::toStructInfo(
-      {{ > common/namespace_cpp2}}__fbthrift_struct_info_{{struct:cpp_underlying_name}}
+      {{> common/namespace_cpp2}}__fbthrift_struct_info_{{struct:cpp_underlying_name}}
     ),
     this);
 }{{!

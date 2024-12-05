@@ -18,9 +18,9 @@
 }}{{#value:newtype?}}{{!
     }}{{type:package}}::{{type:rust_name}}({{!
         }}{{#value:type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
-        }}{{>lib/adapter/qualified}}::from_thrift({{!
+        }}{{> lib/adapter/qualified}}::from_thrift({{!
         }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:type}}{{!
-        }}{{#value:inner}}{{>lib/value}}{{/value:inner}}{{!
+        }}{{#value:inner}}{{> lib/value}}{{/value:inner}}{{!
         }}{{#value:type}}{{#type:typedef}}{{#typedef:has_adapter?}}{{!
         }}).expect("constant Thrift value should adapt without error"){{!
         }}{{/typedef:has_adapter?}}{{/type:typedef}}{{/value:type}}{{!
@@ -45,7 +45,7 @@
     }}{{^value:empty?}}{{!
         }}vec![{{!
         }}{{#value:list_elements}}
-        {{value:indent}}{{>lib/value}},{{!
+        {{value:indent}}{{> lib/value}},{{!
         }}{{/value:list_elements}}
         {{value:indent}}]{{!
     }}{{/value:empty?}}{{!
@@ -65,9 +65,9 @@
             }}{{#value:setMembers}}
         {{value:indent}}set.insert({{!
             }}{{#value:floatingPoint?}}{{!
-                }}::fbthrift::export::OrderedFloat({{>lib/value}}){{!
+                }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
             }}{{/value:floatingPoint?}}{{!
-            }}{{^value:floatingPoint?}}{{>lib/value}}{{/value:floatingPoint?}}{{!
+            }}{{^value:floatingPoint?}}{{> lib/value}}{{/value:floatingPoint?}}{{!
         }});{{!
             }}{{/value:setMembers}}
             {{value:indent}}set
@@ -93,11 +93,11 @@
                     {{value:indent}}map.insert({{!
                         }}{{#entry:key}}{{!
                             }}{{#value:floatingPoint?}}{{!
-                                }}::fbthrift::export::OrderedFloat({{>lib/value}}){{!
+                                }}::fbthrift::export::OrderedFloat({{> lib/value}}){{!
                             }}{{/value:floatingPoint?}}{{!
-                            }}{{^value:floatingPoint?}}{{>lib/value}}{{/value:floatingPoint?}}{{!
+                            }}{{^value:floatingPoint?}}{{> lib/value}}{{/value:floatingPoint?}}{{!
                         }}{{/entry:key}}, {{!
-                        }}{{#entry:value}}{{>lib/value}}{{/entry:value}}{{!
+                        }}{{#entry:value}}{{> lib/value}}{{/entry:value}}{{!
                     }});
                 {{value:indent}}}
                 {{value:indent}}__do_insert(&mut map);
@@ -108,10 +108,10 @@
     }}{{/value:empty?}}{{!
 }}{{/value:map?}}{{!
 }}{{#value:struct?}}{{!
-    }}{{>lib/type}} {{>lib/block}}{{!
+    }}{{> lib/type}} {{> lib/block}}{{!
         }}{{#value:structFields}}
             {{value:indent}}{{field:rust_name}}: {{!
-            }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_default::<{{!
+            }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_default::<{{!
                 }}{{#value:type}}{{#type:struct}}{{!
                     }}{{#struct:has_adapter?}}{{!
                         }}{{type:package}}::unadapted::{{struct:rust_name}}{{!
@@ -122,20 +122,20 @@
                 }}{{/type:struct}}{{/value:type}}{{!
             }}>({{/field:has_adapter?}}{{!
             }}{{#field:explicit_value}}{{!
-                }}{{>lib/fieldvalue}}{{!
+                }}{{> lib/fieldvalue}}{{!
             }}{{/field:explicit_value}}{{!
             }}{{^field:explicit_value}}{{!
                 }}{{#field:default}}{{!
                     }}{{#field:optional?}}{{!
                         }}{{#program:deprecated_optional_with_default_is_some?}}{{!
-                            }}{{>lib/fieldvalue}}{{!
+                            }}{{> lib/fieldvalue}}{{!
                         }}{{/program:deprecated_optional_with_default_is_some?}}{{!
                         }}{{^program:deprecated_optional_with_default_is_some?}}{{!
                             }}::std::option::Option::None{{!
                         }}{{/program:deprecated_optional_with_default_is_some?}}{{!
                     }}{{/field:optional?}}{{!
                     }}{{^field:optional?}}{{!
-                        }}{{>lib/fieldvalue}}{{!
+                        }}{{> lib/fieldvalue}}{{!
                     }}{{/field:optional?}}{{!
                 }}{{/field:default}}{{!
                 }}{{^field:default}}{{!
@@ -152,12 +152,12 @@
 }}{{/value:struct?}}{{!
 }}{{#value:union?}}{{!
     }}{{#value:unionVariant}}{{!
-        }}{{>lib/type}}::{{value:unionVariant}}({{!
-            }}{{#value:unionValue}}{{>lib/value}}{{/value:unionValue}}{{!
+        }}{{> lib/type}}::{{value:unionVariant}}({{!
+            }}{{#value:unionValue}}{{> lib/value}}{{/value:unionValue}}{{!
         }}){{!
     }}{{/value:unionVariant}}{{!
     }}{{^value:unionVariant}}{{!
-        }}{{>lib/type}}::default(){{!
+        }}{{> lib/type}}::default(){{!
     }}{{/value:unionVariant}}{{!
 }}{{/value:union?}}{{!
 }}{{#value:enum?}}{{!

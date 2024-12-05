@@ -33,7 +33,7 @@
 
         {{! Now use "mutable_field() = smart_pointer" setter to pass the real
         smart pointer}}
-        auto ref = {{ > module_types_h/smart_ptr_constructor}};
+        auto ref = {{> module_types_h/smart_ptr_constructor}};
         thawField(self, this->{{field:cpp_name}}Field, ref);
         out.mutable_{{field:cpp_name}}() = std::move(ref);
 {{/field:cpp_ref?}}

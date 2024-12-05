@@ -32,18 +32,18 @@ in a different thrift file, or defined in the same thrift file.
 }}{{/type:struct}}{{!
 }}{{#type:list?}}{{!
   }}_fbthrift_python_types.ListTypeFactory({{!
-    }}{{#type:list_elem_type}}{{ >types/typeinfo }}{{/type:list_elem_type}}{{!
+    }}{{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}{{!
   }}){{!
 }}{{/type:list?}}{{!
 }}{{#type:set?}}{{!
   }}_fbthrift_python_types.SetTypeFactory({{!
-    }}{{#type:set_elem_type}}{{ >types/typeinfo }}{{/type:set_elem_type}}{{!
+    }}{{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}{{!
   }}){{!
 }}{{/type:set?}}{{!
 }}{{#type:map?}}{{!
   }}_fbthrift_python_types.MapTypeFactory({{!
-    }}{{#type:key_type}}{{ >types/typeinfo }}{{/type:key_type}}, {{!
-    }}{{#type:value_type}}{{ >types/typeinfo }}{{/type:value_type}}){{!
+    }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
+    }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}){{!
 }}{{/type:map?}}{{!
 }}{{#type:enum}}{{!
   }}{{#type:need_module_path?}}{{type:module_mangle}}{{/type:need_module_path?}}{{!

@@ -14,7 +14,7 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{ > service_h/service_info_holder}}
+}}{{> service_h/service_info_holder}}
 
 
 class {{service:cpp_name}}If : public apache::thrift::{{#interaction:serial?}}SerialInteraction{{/interaction:serial?}}{{#interaction:eb?}}EventBase{{/interaction:eb?}}Tile, public apache::thrift::ServerInterface {
@@ -28,5 +28,5 @@ class {{service:cpp_name}}If : public apache::thrift::{{#interaction:serial?}}Se
   CreateMethodMetadataResult createMethodMetadata() override {
     std::terminate();
   }
-{{ > service_h/service_interface_functions}}
+{{> service_h/service_interface_functions}}
 };

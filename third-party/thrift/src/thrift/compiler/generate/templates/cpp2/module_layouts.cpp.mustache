@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #include "{{program:include_prefix}}{{program:name}}_layouts.h"
 
 namespace apache { namespace thrift { namespace frozen {
@@ -25,7 +25,7 @@ namespace apache { namespace thrift { namespace frozen {
 {{^struct:union?}}
 FROZEN_CTOR({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_CTOR_FIELD{{ > common/field_suffix}}({{field:cpp_name}}, {{field:key}}){{!
+  FROZEN_CTOR_FIELD{{> common/field_suffix}}({{field:cpp_name}}, {{field:key}}){{!
 }}{{/struct:fields}})
 FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
@@ -33,15 +33,15 @@ FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 )
 FROZEN_LAYOUT({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_LAYOUT_FIELD{{ > common/field_suffix}}({{field:cpp_name}}){{!
+  FROZEN_LAYOUT_FIELD{{> common/field_suffix}}({{field:cpp_name}}){{!
 }}{{/struct:fields}})
 FROZEN_FREEZE({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_FREEZE_FIELD{{ > common/field_suffix}}({{field:cpp_name}}){{!
+  FROZEN_FREEZE_FIELD{{> common/field_suffix}}({{field:cpp_name}}){{!
 }}{{/struct:fields}})
 FROZEN_THAW({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
-  FROZEN_THAW_FIELD{{ > common/field_suffix}}({{field:cpp_name}}){{!
+  FROZEN_THAW_FIELD{{> common/field_suffix}}({{field:cpp_name}}){{!
 }}{{/struct:fields}})
 FROZEN_DEBUG({{struct:cpp_fullname}},{{!
 }}{{#struct:fields}}
@@ -58,7 +58,7 @@ FROZEN_CTOR({{struct:cpp_fullname}},{{!
 }}
   FROZEN_CTOR_FIELD(type_, 0){{!
 }}{{#struct:fields}}
-  FROZEN_CTOR_FIELD{{ > common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}){{!
+  FROZEN_CTOR_FIELD{{> common/frozen2_union_field_suffix}}({{field:cpp_name}}, {{field:key}}){{!
 }}{{/struct:fields}})
 
 FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
@@ -69,11 +69,11 @@ FROZEN_MAXIMIZE({{struct:cpp_fullname}},{{!
 )
 
 
-{{ > module_layouts_cpp/frozen_layout_union}}
+{{> module_layouts_cpp/frozen_layout_union}}
 
-{{ > module_layouts_cpp/frozen_freeze_union}}
+{{> module_layouts_cpp/frozen_freeze_union}}
 
-{{ > module_layouts_cpp/frozen_thaw_union}}
+{{> module_layouts_cpp/frozen_thaw_union}}
 
 FROZEN_DEBUG({{struct:cpp_fullname}},{{!
 }}

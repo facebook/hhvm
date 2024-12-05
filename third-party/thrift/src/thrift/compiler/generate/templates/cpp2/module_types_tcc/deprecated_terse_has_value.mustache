@@ -17,28 +17,28 @@
 }}{{!
 // Must not be null.
 }}{{#field:cpp_ref?}}{{!
-  }}{{ > field/member}}{{!
+  }}{{> field/member}}{{!
 }}{{/field:cpp_ref?}}{{!
 
 // Must not be empty.
 }}{{#type:resolves_to_container?}}{{!
-  }}{{#field:cpp_ref?}} && {{/field:cpp_ref?}}!::apache::thrift::op::isEmpty<{{ > field/tag}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{ > field/member}}){{!
+  }}{{#field:cpp_ref?}} && {{/field:cpp_ref?}}!::apache::thrift::op::isEmpty<{{> field/tag}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}}){{!
 }}{{/type:resolves_to_container?}}{{!
 }}{{#field:raw_string_or_binary?}}{{!
-  }}{{#field:cpp_ref?}} && {{/field:cpp_ref?}}!::apache::thrift::op::isEmpty<{{ > field/tag}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{ > field/member}}){{!
+  }}{{#field:cpp_ref?}} && {{/field:cpp_ref?}}!::apache::thrift::op::isEmpty<{{> field/tag}}>({{#field:cpp_ref?}}*{{/field:cpp_ref?}}{{> field/member}}){{!
 }}{{/field:raw_string_or_binary?}}{{!
 
 }}{{^field:cpp_ref?}}{{^type:resolves_to_container?}}{{^field:raw_string_or_binary?}}{{!
   }}{{#field:cpp_first_adapter}}{{!
     // Must use == operator, and check against the default constructor (ignoring any IDL-specified default).
-    }}!({{ >  module_types_tcc/field_ref }} == {{type:cpp_type}}()){{!
+    }}!({{> module_types_tcc/field_ref }} == {{type:cpp_type}}()){{!
   }}{{/field:cpp_first_adapter}}{{!
   }}{{^field:cpp_first_adapter}}{{!
     // For all other cases, must not equal the default.
     // TODO(afuller): As with containers, binary, and string above, this should check for
     // the 'intrinsic' default so the behavior does not change when IDL-specified defaults
     // change.
-    }}{{ >  module_types_tcc/field_ref }} != {{ > field/default}}{{!
+    }}{{> module_types_tcc/field_ref }} != {{> field/default}}{{!
   }}{{/field:cpp_first_adapter}}{{!
 }}{{/field:raw_string_or_binary?}}{{/type:resolves_to_container?}}{{/field:cpp_ref?}}{{!
 }}

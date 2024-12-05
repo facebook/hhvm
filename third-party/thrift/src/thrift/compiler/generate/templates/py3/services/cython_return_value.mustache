@@ -69,10 +69,10 @@ to the client.
 }}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{!
   }}{{#function:stream_has_first_response?}}createResponseAndServerStream[{{!
-  }}{{#function:stream_first_response_type}}{{ >types/cython_cpp_type}}{{/function:stream_first_response_type}},{{!
-  }}{{#function:stream_elem_type}}{{ >types/cython_cpp_type}}{{/function:stream_elem_type}}]({{!
+  }}{{#function:stream_first_response_type}}{{> types/cython_cpp_type}}{{/function:stream_first_response_type}},{{!
+  }}{{#function:stream_elem_type}}{{> types/cython_cpp_type}}{{/function:stream_elem_type}}]({{!
   }}{{#function:stream_first_response_type}}(<{{> types/cython_cpp_type}}?> {{> types/cython_python_to_cpp_item}}){{/function:stream_first_response_type}}, {{!
   }}{{/function:stream_has_first_response?}}{{!
-  }}cmove(deref((<ServerStream_{{#function:stream_elem_type}}{{ >types/cython_cpp_type_ident }}{{/function:stream_elem_type}}?>result).cStream)){{!
+  }}cmove(deref((<ServerStream_{{#function:stream_elem_type}}{{> types/cython_cpp_type_ident }}{{/function:stream_elem_type}}?>result).cStream)){{!
   }}{{#function:stream_has_first_response?}}){{/function:stream_has_first_response?}}{{!
 }}{{/function:stream?}}

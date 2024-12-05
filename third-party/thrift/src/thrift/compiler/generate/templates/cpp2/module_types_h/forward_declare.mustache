@@ -16,7 +16,7 @@
 
 }}// BEGIN forward_declare
 {{#program:structs?}}
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 {{#program:structs}}
 {{#struct:extra_namespace}}
@@ -27,7 +27,7 @@ class {{struct:cpp_underlying_name}};
 } // namespace {{struct:extra_namespace}}
 {{/struct:extra_namespace}}
 {{/program:structs}}
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}
 {{/program:structs?}}
 
 // END forward_declare

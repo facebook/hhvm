@@ -23,7 +23,7 @@ size_t Freezer<{{struct:cpp_fullname}}, void>::extraSizeImpl(
 }}{{#struct:fields}}{{!
 }}{{#field:type}}{{!
 }}{{^type:bool?}}
-    + extraSize(src.{{ > module_types_cpp/field_value_ref}}){{!
+    + extraSize(src.{{> module_types_cpp/field_value_ref}}){{!
 }}{{/type:bool?}}{{!
 }}{{/field:type}}{{!
 }}{{/struct:fields}};
@@ -37,10 +37,10 @@ void Freezer<{{struct:cpp_fullname}}, void>::freezeImpl(
 {{#struct:fields}}
 {{#field:type}}
 {{#type:bool?}}
-  dst.{{field:cpp_name}} = src.{{ > module_types_cpp/field_value_ref}};
+  dst.{{field:cpp_name}} = src.{{> module_types_cpp/field_value_ref}};
 {{/type:bool?}}
 {{^type:bool?}}
-  freeze(src.{{ > module_types_cpp/field_value_ref}}, dst.{{field:cpp_name}}, buffer);
+  freeze(src.{{> module_types_cpp/field_value_ref}}, dst.{{field:cpp_name}}, buffer);
 {{/type:bool?}}
 {{^field:required?}}
 {{^field:cpp_ref?}}

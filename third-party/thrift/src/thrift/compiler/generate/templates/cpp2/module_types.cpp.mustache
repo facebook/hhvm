@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 #include "{{program:include_prefix}}{{program:name}}_types.tcc"
 
@@ -28,7 +28,7 @@
 [[maybe_unused]] static constexpr std::string_view kModuleName = "{{program:name}}";
 
 {{#program:any?}}
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 // Static-init time registration for dynamically-linked libraries.
 //
@@ -49,10 +49,10 @@ void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
 }
 {{/struct:any?}}
 {{/program:split_structs}}
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}
 
 {{/program:any?}}
-{{ > module_types_cpp/declare_enums}}
+{{> module_types_cpp/declare_enums}}
 {{#program:tablebased?}}
 namespace apache {
 namespace thrift {
@@ -66,7 +66,7 @@ constexpr ptrdiff_t fieldOffset<{{struct:cpp_fullname}}>(std::int16_t fieldIndex
   constexpr ptrdiff_t offsets[] = {
     {{#struct:fields_in_key_order}}
     offsetof({{struct:cpp_fullname}}, {{field:cpp_storage_name}}){{!
-    }}{{ > common/comma_newline}}{{/struct:fields_in_key_order}}};
+    }}{{> common/comma_newline}}{{/struct:fields_in_key_order}}};
   return offsets[fieldIndex];
 }
 
@@ -78,7 +78,7 @@ constexpr ptrdiff_t issetOffset<{{struct:cpp_fullname}}>(std::int16_t fieldIndex
     }}offsetof({{struct:cpp_fullname}}, __isset) + isset_bitset<{{struct:isset_fields_size}}>::get_offset() + {{field:isset_index}}{{!
     }}{{/field:has_isset?}}{{!
     }}{{^field:has_isset?}}{{!
-    }}0{{/field:has_isset?}}{{ > common/comma_newline}}{{/struct:fields_in_key_order}}};
+    }}0{{/field:has_isset?}}{{> common/comma_newline}}{{/struct:fields_in_key_order}}};
   return offsets[fieldIndex];
 }
 {{/struct:union?}}
@@ -95,14 +95,14 @@ FOLLY_POP_WARNING
 {{/program:tablebased?}}
 {{#program:split_structs}}{{!
 }}{{^program:tablebased?}}
-{{ > module_types_cpp/tcc_struct_traits}}
+{{> module_types_cpp/tcc_struct_traits}}
 {{/program:tablebased?}}
-{{ > module_types_cpp/frozen}}
+{{> module_types_cpp/frozen}}
 {{#struct:union?}}
-{{ > module_types_cpp/declare_union_types}}
+{{> module_types_cpp/declare_union_types}}
 {{/struct:union?}}
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
@@ -131,49 +131,49 @@ std::string_view {{struct:cpp_underlying_name}}::__fbthrift_get_class_name() {
 {{/struct:is_eligible_for_constexpr?}}
 {{/struct:nondefault_copy_ctor_and_assignment?}}
 {{#struct:nondefault_copy_ctor_and_assignment?}}
-{{ > module_types_cpp/copy_ctor}}
+{{> module_types_cpp/copy_ctor}}
 
 
-{{ > module_types_cpp/assign_overload}}
+{{> module_types_cpp/assign_overload}}
 
 
 {{/struct:nondefault_copy_ctor_and_assignment?}}
 {{/struct:cpp_noncopyable}}
-{{ > module_types_cpp/declare_members}}
+{{> module_types_cpp/declare_members}}
 
 
 {{^struct:cpp_noncomparable}}
-{{ > module_types_cpp/eq_overload}}
+{{> module_types_cpp/eq_overload}}
 {{#struct:is_struct_orderable?}}
 
 
-{{ > module_types_cpp/struct_operator_less}}
+{{> module_types_cpp/struct_operator_less}}
 {{/struct:is_struct_orderable?}}
 {{/struct:cpp_noncomparable}}
 
 
 {{#struct:legacy_api?}}
-{{ > module_types_cpp/getters_setters}}
+{{> module_types_cpp/getters_setters}}
 {{/struct:legacy_api?}}
 
-{{ > module_types_cpp/swap}}
+{{> module_types_cpp/swap}}
 {{/struct:union?}}
 {{#struct:union?}}
-{{ > module_types_cpp/union_declare_members}}
+{{> module_types_cpp/union_declare_members}}
 
-{{ > module_types_cpp/union_copy_ctor}}
+{{> module_types_cpp/union_copy_ctor}}
 
 {{^struct:cpp_noncomparable}}
-{{ > module_types_cpp/union_eq_overload}}
+{{> module_types_cpp/union_eq_overload}}
 {{#struct:is_struct_orderable?}}
 
 
-{{ > module_types_cpp/union_operator_less}}
+{{> module_types_cpp/union_operator_less}}
 {{/struct:is_struct_orderable?}}
 {{/struct:cpp_noncomparable}}
 
-{{ > module_types_cpp/union_setters}}
-{{ > module_types_cpp/union_swap}}
+{{> module_types_cpp/union_setters}}
+{{> module_types_cpp/union_swap}}
 {{/struct:union?}}
 
 template void {{struct:cpp_underlying_name}}::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -199,7 +199,7 @@ constexpr ::apache::thrift::detail::UnionExtN<{{struct:fields_size}}> {{struct:c
   /* .getActiveId */ nullptr,
   /* .setActiveId */ nullptr,
   /* .initMember */ {
-  {{#struct:fields_in_key_order}}{{#field:type}}::apache::thrift::detail::placementNewUnionValue<{{field:cpp_storage_type}}>{{ > common/comma_newline}}{{!
+  {{#struct:fields_in_key_order}}{{#field:type}}::apache::thrift::detail::placementNewUnionValue<{{field:cpp_storage_type}}>{{> common/comma_newline}}{{!
 }}{{/field:type}}{{/struct:fields_in_key_order}}},
 };
 {{/struct:union?}}
@@ -233,7 +233,7 @@ constexpr ::apache::thrift::detail::StructInfoN<{{struct:fields_size}}> __fbthri
     }}{{/struct:union?}}{{#field:type}}
     /* .typeInfo */ &::apache::thrift::detail::TypeToInfo<{{type:type_class_with_indirection}}, {{field:cpp_storage_type}}>::typeInfo,{{!
     }}{{/field:type}}
-  }{{ > common/comma_newline}}{{!
+  }{{> common/comma_newline}}{{!
   }}{{/struct:fields_in_key_order}}}
 };
 {{/program:tablebased?}}
@@ -255,13 +255,13 @@ static_assert(
 {{#struct:extra_namespace}}
 } // namespace {{struct:extra_namespace}}
 {{/struct:extra_namespace}}
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}
 
 {{/program:split_structs}}{{!
 
 }}{{! Validate adapters in typedefs and fields. }}
 
-{{ > common/namespace_cpp2_begin}} namespace {
+{{> common/namespace_cpp2_begin}} namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 {{#program:split_structs}}{{#struct:fields}}
 {{#field:cpp_first_adapter}}{{#field:type}}
@@ -275,7 +275,7 @@ static_assert(
 {{/type:cpp_adapter}}
 {{/typedef:type}}{{/program:typedefs}}
 }
-}{{ > common/namespace_cpp2_end}}
+}{{> common/namespace_cpp2_end}}
 {{!
 
 }}{{#program:tablebased?}}
@@ -286,10 +286,10 @@ namespace detail {
 {{#program:split_enums}}
 const ::apache::thrift::detail::TypeInfo TypeToInfo<
     apache::thrift::type_class::enumeration,
-    {{ > common/namespace_cpp2}}{{enum:cpp_name}}>::typeInfo = {
+    {{> common/namespace_cpp2}}{{enum:cpp_name}}>::typeInfo = {
   /* .type */ apache::thrift::protocol::TType::T_I32,
-  /* .get */ get<std::int32_t, {{ > common/namespace_cpp2}}{{enum:cpp_name}}>,
-  /* .set */ reinterpret_cast<VoidFuncPtr>(set<{{ > common/namespace_cpp2}}{{enum:cpp_name}}, std::int32_t>),
+  /* .get */ get<std::int32_t, {{> common/namespace_cpp2}}{{enum:cpp_name}}>,
+  /* .set */ reinterpret_cast<VoidFuncPtr>(set<{{> common/namespace_cpp2}}{{enum:cpp_name}}, std::int32_t>),
   /* .typeExt */ nullptr,
 };
 {{/program:split_enums}}
@@ -300,7 +300,7 @@ const ::apache::thrift::detail::TypeInfo TypeToInfo<
   /* .type */ ::apache::thrift::protocol::TType::T_STRUCT,
   /* .get */ nullptr,
   /* .set */ nullptr,
-  /* .typeExt */ &{{ > common/namespace_cpp2 }}__fbthrift_struct_info_{{struct:cpp_underlying_name}},
+  /* .typeExt */ &{{> common/namespace_cpp2 }}__fbthrift_struct_info_{{struct:cpp_underlying_name}},
 };
 {{/program:split_structs}}
 }}} // namespace apache::thrift::detail
@@ -318,7 +318,7 @@ template<> const std::vector<std::any>& field_annotation_values<{{struct:cpp_ful
 {{#structured_annotation:const}}
 {{#constant:cpp_runtime_annotation?}}
 {{#constant:type}}{{#constant:value}}{{#constant:field}}
-      values.emplace_back({{ > common/iterate_const_values}});
+      values.emplace_back({{> common/iterate_const_values}});
 {{/constant:field}}{{/constant:value}}{{/constant:type}}
 {{/constant:cpp_runtime_annotation?}}
 {{/structured_annotation:const}}

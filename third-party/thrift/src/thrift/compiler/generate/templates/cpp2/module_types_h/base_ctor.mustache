@@ -16,14 +16,14 @@
 
 
 }}{{#struct:cpp_allocator}}{{^struct:cpp_allocator_via}}{{!
-}}{{ > module_types_h/base_ctor_with_alloc_init_list}}{{!
+}}{{> module_types_h/base_ctor_with_alloc_init_list}}{{!
 }}{{/struct:cpp_allocator_via}}{{/struct:cpp_allocator}}{{!
   --------------- Empty constractor, else to the condition above (!alloc || alloc_via)
 }}{{^struct:cpp_allocator}}{{!
-}}{{ > module_types_h/base_ctor_no_alloc_init_list}}{{!
+}}{{> module_types_h/base_ctor_no_alloc_init_list}}{{!
 }}{{/struct:cpp_allocator}}{{!
 }}{{#struct:cpp_allocator_via}}{{!
-}}{{ > module_types_h/base_ctor_no_alloc_init_list}}{{!
+}}{{> module_types_h/base_ctor_no_alloc_init_list}}{{!
 }}{{/struct:cpp_allocator_via}}{{!
 }} {
   {{#struct:fields}}{{#field:cpp_first_adapter}}{{^field:opt_cpp_ref?}}{{^field:intern_boxed_ref?}}

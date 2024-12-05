@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #pragma once
 
 {{#program:thrift_includes}}
@@ -30,7 +30,7 @@
 
 #include <type_traits>
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 
 namespace __fbthrift_refl {
@@ -211,4 +211,4 @@ FATAL_REGISTER_VARIANT_TRAITS(
   >
 );
 {{/struct:union?}}{{/program:structs}}
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}

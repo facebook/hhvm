@@ -15,10 +15,10 @@
   limitations under the License.
 
 }}{{^type:void?}}{{!
-}}{{ > types/return_type_client_no_handle }}{{!
+}}{{> types/return_type_client_no_handle }}{{!
 }}{{/type:void?}}{{!
 
 }}{{#type:void?}}{{!
-}}{{#function:sink_or_stream?}}{{ > types/return_type_client_no_handle }}{{/function:sink_or_stream?}}{{!
+}}{{#function:sink_or_stream?}}{{> types/return_type_client_no_handle }}{{/function:sink_or_stream?}}{{!
 }}{{^function:sink_or_stream?}}folly::Unit{{/function:sink_or_stream?}}{{!
 }}{{/type:void?}}

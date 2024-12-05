@@ -17,7 +17,7 @@
 }}
 
 /// Service definitions for `{{service:rust_name}}`.
-pub mod {{service:snake}} {{>lib/block}}{{!
+pub mod {{service:snake}} {{> lib/block}}{{!
     }}{{#service:docs?}}
     #![doc = {{service:docs}}]
     {{/service:docs?}}{{!
@@ -26,7 +26,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}StreamExn {
         {{#function:stream_exceptions}}
-        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
+        {{field:rust_name}}({{#field:type}}{{> lib/type}}{{/field:type}}),{{!
         }}{{/function:stream_exceptions}}
         ApplicationException(::fbthrift::ApplicationException),
     }
@@ -72,8 +72,8 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     }{{!
     }}{{#function:uniqueStreamExceptions}}
 
-    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}StreamExn {
-        fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+    impl ::std::convert::From<{{#field:type}}{{> lib/type}}{{/field:type}}> for {{function:upcamel}}StreamExn {
+        fn from(exn: {{#field:type}}{{> lib/type}}{{/field:type}}) -> Self {
             Self::{{field:rust_name}}(exn)
         }
     }{{!
@@ -99,7 +99,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     {{/function:enable_anyhow_to_application_exn}}
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}StreamExn {
-        type Success = {{#function:stream_elem_type}}{{>lib/type}}{{/function:stream_elem_type}};
+        type Success = {{#function:stream_elem_type}}{{> lib/type}}{{/function:stream_elem_type}};
 
         fn write_result<P>(
             res: ::std::result::Result<&Self::Success, &Self>,
@@ -118,7 +118,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::std::result::Result::Ok(success) => {
                     p.write_field_begin(
                         "Success",
-                        {{#function:stream_elem_type}}{{>lib/ttype}}{{/function:stream_elem_type}},
+                        {{#function:stream_elem_type}}{{> lib/ttype}}{{/function:stream_elem_type}},
                         0i16,
                     );
                     ::fbthrift::Serialize::write(success, p);
@@ -128,7 +128,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::std::result::Result::Err(Self::{{field:rust_name}}(inner)) => {
                     p.write_field_begin(
                         "{{field:name}}",
-                        {{#field:type}}{{>lib/ttype}}{{/field:type}},
+                        {{#field:type}}{{> lib/ttype}}{{/field:type}},
                         {{field:key}},
                     );
                     ::fbthrift::Serialize::write(inner, p);
@@ -146,14 +146,14 @@ pub mod {{service:snake}} {{>lib/block}}{{!
     #[derive(Clone, Debug)]
     pub enum {{function:upcamel}}Exn {
         {{#function:exceptions}}
-        {{field:rust_name}}({{#field:type}}{{>lib/type}}{{/field:type}}),{{!
+        {{field:rust_name}}({{#field:type}}{{> lib/type}}{{/field:type}}),{{!
         }}{{/function:exceptions}}
         ApplicationException(::fbthrift::ApplicationException),
     }{{!
     }}{{#function:uniqueExceptions}}
 
-    impl ::std::convert::From<{{#field:type}}{{>lib/type}}{{/field:type}}> for {{function:upcamel}}Exn {
-        fn from(exn: {{#field:type}}{{>lib/type}}{{/field:type}}) -> Self {
+    impl ::std::convert::From<{{#field:type}}{{> lib/type}}{{/field:type}}> for {{function:upcamel}}Exn {
+        fn from(exn: {{#field:type}}{{> lib/type}}{{/field:type}}) -> Self {
             Self::{{field:rust_name}}(exn)
         }
     }{{!
@@ -242,10 +242,10 @@ pub mod {{service:snake}} {{>lib/block}}{{!
 
     impl ::fbthrift::help::SerializeExn for {{function:upcamel}}Exn {
         type Success = {{!
-            }}{{^function:stream?}}{{>lib/server_ok_type}}{{/function:stream?}}{{!
+            }}{{^function:stream?}}{{> lib/server_ok_type}}{{/function:stream?}}{{!
             }}{{#function:stream?}}{{!
                 }}{{#function:stream_has_first_response?}}{{!
-                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
+                    }}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/type}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
                 }}{{/function:stream_has_first_response?}}{{!
                 }}{{^function:stream_has_first_response?}}(){{/function:stream_has_first_response?}}{{!
             }}{{/function:stream?}}{{!
@@ -268,11 +268,11 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::std::result::Result::Ok(_success) => {
                     p.write_field_begin("Success", {{!
                         }}{{^function:stream?}}{{!
-                            }}{{#function:return_type}}{{>lib/ttype}}{{/function:return_type}}{{!
+                            }}{{#function:return_type}}{{> lib/ttype}}{{/function:return_type}}{{!
                         }}{{/function:stream?}}{{!
                         }}{{#function:stream?}}{{!
                             }}{{#function:stream_has_first_response?}}{{!
-                                }}{{#function:return_type}}{{#function:stream_first_response_type}}{{>lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
+                                }}{{#function:return_type}}{{#function:stream_first_response_type}}{{> lib/ttype}}{{/function:stream_first_response_type}}{{/function:return_type}}{{!
                             }}{{/function:stream_has_first_response?}}{{!
                             }}{{^function:stream_has_first_response?}}::fbthrift::TType::Void{{/function:stream_has_first_response?}}{{!
                         }}{{/function:stream?}}{{!
@@ -280,7 +280,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                     {{^function:stream?}}
                     ::fbthrift::Serialize::write({{#function:return_type}}{{!
                         }}{{#type:has_adapter?}}{{!
-                            }}&{{>lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
+                            }}&{{> lib/adapter/qualified}}::to_thrift_field::<::fbthrift::metadata::NoThriftAnnotations>(_success, 0){{!
                         }}{{/type:has_adapter?}}{{!
                         }}{{^type:has_adapter?}}_success{{/type:has_adapter?}}{{!
                     }}{{/function:return_type}}, p);
@@ -294,7 +294,7 @@ pub mod {{service:snake}} {{>lib/block}}{{!
                 ::std::result::Result::Err(Self::{{field:rust_name}}(inner)) => {
                     p.write_field_begin(
                         "{{field:name}}",
-                        {{#field:type}}{{>lib/ttype}}{{/field:type}},
+                        {{#field:type}}{{> lib/ttype}}{{/field:type}},
                         {{field:key}},
                     );
                     ::fbthrift::Serialize::write(inner, p);

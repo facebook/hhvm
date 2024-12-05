@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
 
@@ -25,7 +25,7 @@
 #include "{{program:include_prefix}}{{program:name}}_constants.h"
 {{/program:thrift_includes}}
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 namespace {{program:name}}_constants {
 
@@ -34,12 +34,12 @@ namespace {{program:name}}_constants {
   {{#value:enable_referencing}}
 {{constant:cpp_type}} const& {{constant:name}}() {
 {{^constant:cpp_adapter}}
-  static folly::Indestructible<{{type:cpp_type}}> const instance{ {{ > common/iterate_const_values_adapted}} };
+  static folly::Indestructible<{{type:cpp_type}}> const instance{ {{> common/iterate_const_values_adapted}} };
 {{/constant:cpp_adapter}}
 {{#constant:cpp_adapter}}
   static folly::Indestructible<{{constant:cpp_type}}> const instance{
-      folly::factory_constructor, [](){ return {{constant:cpp_adapter}}::fromThrift({{type:cpp_type}}({{ > common/iterate_const_values}}){{#constant:has_extra_arg?}},
-                                            {{#constant:extra_arg}}{{#constant:extra_arg_type}}{{ > common/iterate_const_values}}{{/constant:extra_arg_type}}{{/constant:extra_arg}},
+      folly::factory_constructor, [](){ return {{constant:cpp_adapter}}::fromThrift({{type:cpp_type}}({{> common/iterate_const_values}}){{#constant:has_extra_arg?}},
+                                            {{#constant:extra_arg}}{{#constant:extra_arg_type}}{{> common/iterate_const_values}}{{/constant:extra_arg_type}}{{/constant:extra_arg}},
                                             "{{constant:uri}}"{{/constant:has_extra_arg?}}); }};
 {{/constant:cpp_adapter}}
   return *instance;
@@ -74,4 +74,4 @@ namespace {{program:name}}_constants {
 }
 
 } // namespace {{program:name}}_constants
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}

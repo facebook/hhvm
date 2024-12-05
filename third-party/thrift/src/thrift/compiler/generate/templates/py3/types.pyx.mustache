@@ -671,7 +671,7 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ma
 cdef class ClientBufferedStream__{{type:flat_name}}(ClientBufferedStream):
 
     @staticmethod
-    cdef _fbthrift_create(cClientBufferedStream[{{ > types/cython_cpp_type}}]& c_obj, __RpcOptions rpc_options):
+    cdef _fbthrift_create(cClientBufferedStream[{{> types/cython_cpp_type}}]& c_obj, __RpcOptions rpc_options):
         __fbthrift_inst = ClientBufferedStream__{{type:flat_name}}(rpc_options)
         __fbthrift_inst._gen = make_unique[cClientBufferedStreamWrapper[{{> types/cython_cpp_type}}]](c_obj)
         return __fbthrift_inst
@@ -729,8 +729,8 @@ cdef class ResponseAndClientBufferedStream__{{> stream/response_class_name_suffi
 
     @staticmethod
     cdef _fbthrift_create(cResponseAndClientBufferedStream[{{!
-            }}{{#function:stream_first_response_type}}{{ > types/cython_cpp_type}}{{/function:stream_first_response_type}}, {{!
-            }}{{#function:stream_elem_type}}{{ > types/cython_cpp_type}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options):
+            }}{{#function:stream_first_response_type}}{{> types/cython_cpp_type}}{{/function:stream_first_response_type}}, {{!
+            }}{{#function:stream_elem_type}}{{> types/cython_cpp_type}}{{/function:stream_elem_type}}]& c_obj, __RpcOptions rpc_options):
         __fbthrift_inst = ResponseAndClientBufferedStream__{{> stream/response_class_name_suffix}}()
         __fbthrift_inst._stream = ClientBufferedStream__{{#function:stream_elem_type}}{{type:flat_name}}{{/function:stream_elem_type}}._fbthrift_create(
             c_obj.stream, rpc_options,

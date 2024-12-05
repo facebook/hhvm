@@ -16,7 +16,7 @@
 
 }}
 {{#service}}
-{{ > Autogen}}
+{{> Autogen}}
 
 #include "{{service:include_prefix}}{{service:name}}.h"
 #include "{{service:include_prefix}}{{service:name}}.tcc"
@@ -26,5 +26,5 @@
 {{/service:has_service_schema}}
 #include <thrift/lib/cpp2/gen/service_cpp.h>
 
-{{ > service_cpp/handlers_cpp}}
+{{> service_cpp/handlers_cpp}}
 {{/service}}

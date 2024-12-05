@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/reflection/reflection.h>
@@ -25,7 +25,7 @@
 #include <fatal/type/sequence.h>
 
 #include "{{program:include_prefix}}{{program:name}}_types.h"
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
 
 namespace __fbthrift_refl {
@@ -46,17 +46,17 @@ struct {{program:name}}_module_traits {
   >;
   using enums = ::fatal::list<
       {{#program:fatal_enums}}{{#fatal_strings:items}}
-      ::fatal::pair<{{ > common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      ::fatal::pair<{{> common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
       {{/fatal_strings:items}}{{/program:fatal_enums}}
   >;
   using unions = ::fatal::list<
       {{#program:fatal_unions}}{{#fatal_strings:items}}
-      ::fatal::pair<{{ > common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      ::fatal::pair<{{> common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
       {{/fatal_strings:items}}{{/program:fatal_unions}}
   >;
   using structs = ::fatal::list<
       {{#program:fatal_structs}}{{#fatal_strings:items}}
-      ::fatal::pair<{{ > common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
+      ::fatal::pair<{{> common/namespace_cpp2}}{{fatal_string:name}}, strings::{{fatal_string:name}}>{{^last?}},{{/last?}}
       {{/fatal_strings:items}}{{/program:fatal_structs}}
   >;
   using constants = ::fatal::list<
@@ -82,27 +82,27 @@ class {{program:name}}_tags {
   };
   struct __fbthrift_enums {
 {{#program:fatal_enums}}
-    {{ > fatal/fatal_using_string_declaration}}
+    {{> fatal/fatal_using_string_declaration}}
 {{/program:fatal_enums}}
   };
   struct __fbthrift_unions {
 {{#program:fatal_unions}}
-    {{ > fatal/fatal_using_string_declaration}}
+    {{> fatal/fatal_using_string_declaration}}
 {{/program:fatal_unions}}
   };
   struct __fbthrift_structs {
 {{#program:fatal_structs}}
-    {{ > fatal/fatal_using_string_declaration}}
+    {{> fatal/fatal_using_string_declaration}}
 {{/program:fatal_structs}}
   };
   struct __fbthrift_constants {
 {{#program:fatal_constants}}
-    {{ > fatal/fatal_using_string_declaration}}
+    {{> fatal/fatal_using_string_declaration}}
 {{/program:fatal_constants}}
   };
   struct __fbthrift_services {
 {{#program:fatal_services}}
-    {{ > fatal/fatal_using_string_declaration}}
+    {{> fatal/fatal_using_string_declaration}}
 {{/program:fatal_services}}
   };
  public:
@@ -117,4 +117,4 @@ class {{program:name}}_tags {
   using services = __fbthrift_services;
 };
 
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}

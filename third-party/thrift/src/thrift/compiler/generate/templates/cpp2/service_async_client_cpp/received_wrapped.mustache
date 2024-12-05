@@ -15,10 +15,10 @@
   limitations under the License.
 
 }}{{#function:cpp_void?}}{{!
-}}folly::exception_wrapper {{ > service_common/client_class_name}}::recv_wrapped_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
+}}folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:cpp_name}}(::apache::thrift::ClientReceiveState& state) {
 {{/function:cpp_void?}}
 {{^function:cpp_void?}}
-folly::exception_wrapper {{ > service_common/client_class_name}}::recv_wrapped_{{function:cpp_name}}({{ > types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state) {
+folly::exception_wrapper {{> service_common/client_class_name}}::recv_wrapped_{{function:cpp_name}}({{> types/return_type_client_no_handle}}& _return, ::apache::thrift::ClientReceiveState& state) {
 {{/function:cpp_void?}}
   if (state.isException()) {
     return std::move(state.exception());
@@ -27,7 +27,7 @@ folly::exception_wrapper {{ > service_common/client_class_name}}::recv_wrapped_{
     return folly::make_exception_wrapper<apache::thrift::TApplicationException>("recv_ called without result");
   }
 
-  using result = {{ > common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
+  using result = {{> common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult;
   {{#function:sink?}}
   {{^function:sink_exceptions?}}
   using ExMapType = apache::thrift::detail::ap::EmptyExMapType;
@@ -36,7 +36,7 @@ folly::exception_wrapper {{ > service_common/client_class_name}}::recv_wrapped_{
   struct ExMapType {
     bool operator()(typename result::SinkPResultType& res, folly::exception_wrapper ew) {
       {{#function:sink_exceptions}}
-      if (ew.with_exception([&]({{#field:type}}{{ > common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
+      if (ew.with_exception([&]({{#field:type}}{{> common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
             res.get<{{field:index_plus_one}}>().ref() = e;
             res.setIsSet({{field:index_plus_one}}, true);
           })) {

@@ -50,8 +50,8 @@ apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::sta
     {{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
   {"{{function:name}}",
     { {{#function:eb}}true{{/function:eb}}{{^function:eb}}false{{/function:eb}},
-     {{ > types/function_kind}},
-     "{{service:parent_service_name}}.{{ > common/function_name}}",
+     {{> types/function_kind}},
+     "{{service:parent_service_name}}.{{> common/function_name}}",
      std::nullopt,
      apache::thrift::concurrency::{{function:priority}},
      {{#function:creates_interaction?}}"{{function:created_interaction}}"{{/function:creates_interaction?}}{{^function:creates_interaction?}}std::nullopt{{/function:creates_interaction?}}}},
@@ -59,15 +59,15 @@ apache::thrift::ServiceRequestInfoMap {{service:cpp_name}}ServiceInfoHolder::sta
 {{#service:interactions}}{{#service:functions}}{{#function:return_type}}
   {"{{service:name}}.{{function:name}}",
     { {{#function:eb}}true{{/function:eb}}{{^function:eb}}false{{/function:eb}},
-     {{ > types/function_kind}},
-     "{{service:parent_service_name}}.{{ > common/function_name}}",
+     {{> types/function_kind}},
+     "{{service:parent_service_name}}.{{> common/function_name}}",
      "{{service:name}}",
      apache::thrift::concurrency::{{function:priority}},
      std::nullopt}},
 {{/function:return_type}}{{/service:functions}}{{/service:interactions}}
   };
 {{#service:extends}}
-  apache::thrift::ServiceRequestInfoMap parentMap = {{ > common/namespace_cpp2}}{{service:cpp_name}}ServiceInfoHolder::staticRequestInfoMap();
+  apache::thrift::ServiceRequestInfoMap parentMap = {{> common/namespace_cpp2}}{{service:cpp_name}}ServiceInfoHolder::staticRequestInfoMap();
   requestInfoMap.insert(std::begin(parentMap), std::end(parentMap));
 {{/service:extends}}
 

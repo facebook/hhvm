@@ -18,15 +18,15 @@
   // TODO(afuller): Merge with other impls and move to a shared location.
 }}{{#field:cpp_first_adapter}}{{!
   }}::apache::thrift::adapt_detail::fromThriftField<{{field:cpp_first_adapter}}, {{field:key}}>({{!
-}}{{^field:cpp_exactly_one_adapter?}}{{ > types/adapter_pre}}{{/field:cpp_exactly_one_adapter?}}{{!
+}}{{^field:cpp_exactly_one_adapter?}}{{> types/adapter_pre}}{{/field:cpp_exactly_one_adapter?}}{{!
 }}{{#field:cpp_exactly_one_adapter?}}{{type:cpp_standard_type}}({{/field:cpp_exactly_one_adapter?}}{{!
 }}{{/field:cpp_first_adapter}}{{!
 }}{{#field:value}}{{!
-    }}{{ > common/iterate_const_values}}{{!
+    }}{{> common/iterate_const_values}}{{!
 }}{{/field:value}}{{!
 }}{{^field:value}}{{!
   }}{{#type:string_or_binary?}}{{!
-    }}apache::thrift::StringTraits<{{ > types/indirected_string_type}}>::fromStringLiteral(""){{!
+    }}apache::thrift::StringTraits<{{> types/indirected_string_type}}>::fromStringLiteral(""){{!
   }}{{/type:string_or_binary?}}{{!
   }}{{^type:string_or_binary?}}{{!
     }}{{#type:cpp_indirection?}}0{{/type:cpp_indirection?}}{{!
@@ -34,7 +34,7 @@
   }}{{/type:string_or_binary?}}{{!
 }}{{/field:value}}{{!
 }}{{#field:cpp_first_adapter}}{{!
-}}{{^field:cpp_exactly_one_adapter?}}{{ > types/adapter_post}}{{/field:cpp_exactly_one_adapter?}}{{!
+}}{{^field:cpp_exactly_one_adapter?}}{{> types/adapter_post}}{{/field:cpp_exactly_one_adapter?}}{{!
 }}{{#field:cpp_exactly_one_adapter?}}){{/field:cpp_exactly_one_adapter?}}{{!
   }}, *this){{!
 }}{{/field:cpp_first_adapter}}

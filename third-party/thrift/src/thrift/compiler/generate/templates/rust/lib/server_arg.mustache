@@ -19,7 +19,7 @@
 
 struct Args_{{service:rust_name}}_{{function:name}} {
     {{#function:args}}
-    {{field:rust_name}}: {{>lib/fieldtype}},
+    {{field:rust_name}}: {{> lib/fieldtype}},
     {{/function:args}}
 }
 
@@ -29,7 +29,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static ARGS: &[::fbthrift::Field] = &[
             {{#function:args_by_name}}
-            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}),
             {{/function:args_by_name}}
         ];
         {{#function:args}}
@@ -41,10 +41,10 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,{{!
                 }}{{#function:args}}
-                ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
+                ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}) => {{!
                     }}field_{{field:name}} = ::std::option::Option::Some({{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
+                    }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<fbthrift::metadata::NoThriftAnnotations>({{/field:has_adapter?}}{{!
+                    }}{{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
                     }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
                     }}),{{!
                 }}{{/function:args}}
@@ -54,7 +54,7 @@ impl<P: ::fbthrift::ProtocolReader> ::fbthrift::Deserialize<P> for self::Args_{{
         }
         p.read_struct_end()?;
         {{! Use formatting in errors to try to maximize string sharing }}
-        ::std::result::Result::Ok(Self {{>lib/block}}{{!
+        ::std::result::Result::Ok(Self {{> lib/block}}{{!
             }}{{#function:args}}
             {{field:rust_name}}: field_{{field:name}}.ok_or_else(|| ::anyhow::anyhow!("`{}` missing arg `{}`", "{{service:name}}.{{function:name}}", "{{field:name}}"))?,{{!
             }}{{/function:args}}

@@ -27,6 +27,6 @@ Base Constant Values
 }}{{#value:string?}}"{{value:string_value}}"{{/value:string?}}{{!
 
 }}{{#value:enum?}}{{!
-  }}{{#value:enum_value?}}{{ > common/type_namespace_cpp2}}{{type:cpp_name}}::{{value:enum_value_cpp_name}}{{/value:enum_value?}}{{!
-  }}{{^value:enum_value?}}static_cast<{{ > common/type_namespace_cpp2}}{{type:cpp_name}}>({{value:integer_value}}){{/value:enum_value?}}{{!
+  }}{{#value:enum_value?}}{{> common/type_namespace_cpp2}}{{type:cpp_name}}::{{value:enum_value_cpp_name}}{{/value:enum_value?}}{{!
+  }}{{^value:enum_value?}}static_cast<{{> common/type_namespace_cpp2}}{{type:cpp_name}}>({{value:integer_value}}){{/value:enum_value?}}{{!
 }}{{/value:enum?}}

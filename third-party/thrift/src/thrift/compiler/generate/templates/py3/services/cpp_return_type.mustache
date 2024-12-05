@@ -18,10 +18,10 @@
 Cpp type for return_type in services
 }}{{#function:stream?}}{{!
   }}{{#function:stream_has_first_response?}}apache::thrift::ResponseAndServerStream<{{!
-    }}{{#function:stream_first_response_type}}{{ >types/cpp_value_type}}{{/function:stream_first_response_type}},{{!
+    }}{{#function:stream_first_response_type}}{{> types/cpp_value_type}}{{/function:stream_first_response_type}},{{!
   }}{{/function:stream_has_first_response?}}{{!
   }}{{^function:stream_has_first_response?}}apache::thrift::ServerStream<{{/function:stream_has_first_response?}}{{!
-  }}{{#function:stream_elem_type}}{{ >types/cpp_value_type}}{{/function:stream_elem_type}}>{{!
+  }}{{#function:stream_elem_type}}{{> types/cpp_value_type}}{{/function:stream_elem_type}}>{{!
 }}{{/function:stream?}}{{!
 }}{{^function:stream?}}{{!
   }}{{^function:stack_arguments?}}{{> types/cpp_arg_type}}{{/function:stack_arguments?}}{{!

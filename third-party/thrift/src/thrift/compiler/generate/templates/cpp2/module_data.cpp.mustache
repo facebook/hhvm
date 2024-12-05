@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 
 #include "{{program:include_prefix}}{{program:name}}_data.h"
 
@@ -59,7 +59,7 @@ THRIFT_DATA_MEMBER const std::array<int16_t, {{struct:fields_size}}> TStructData
 }};
 THRIFT_DATA_MEMBER const std::array<protocol::TType, {{struct:fields_size}}> TStructDataStorage<{{struct:cpp_fullname}}>::fields_types = { {
   {{#struct:fields}}{{#field:type}}
-  TType::{{ > module_types_tcc/struct_type}},
+  TType::{{> module_types_tcc/struct_type}},
   {{/field:type}}{{/struct:fields}}
 }};
 THRIFT_DATA_MEMBER const std::array<std::string_view, {{struct:fields_size}}> TStructDataStorage<{{struct:cpp_fullname}}>::storage_names = { {

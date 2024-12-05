@@ -19,7 +19,7 @@
 }}{{#field:cpp_ref?}}{{!
 // For references, check if the field is not null and whether there is lazily deserialized data
 }}{{#field:lazy?}}!(__fbthrift_isDeserialized_.{{field:cpp_name}} & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
-    {{/field:lazy?}}{{ > field/member}}{{!
+    {{/field:lazy?}}{{> field/member}}{{!
 }}{{/field:cpp_ref?}}{{!
 }}{{^field:cpp_ref?}}{{!
 // For other values, check __isset status. We don't use field access API

@@ -137,7 +137,7 @@ pub trait DynClient {
 {{/program:multifile?}}
 
 {{#program:services}}
-pub struct {{service:rust_name}}<'mock> {{>lib/block}}
+pub struct {{service:rust_name}}<'mock> {{> lib/block}}
     {{#service:extends}}
     pub parent: {{service:mock_package}}::{{service:rust_name}}<'mock>,
     {{/service:extends}}
@@ -167,19 +167,19 @@ impl crate::DynClient for dyn {{program:clients}}::{{service:rust_name}} {
     }
 }
 
-impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}<'mock> {{>lib/block}}{{!
+impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}<'mock> {{> lib/block}}{{!
     }}{{#service:rustFunctions}}
     {{^function:starts_interaction?}}{{^function:sink?}}{{^function:creates_interaction?}}
     fn {{function:rust_name}}(
         &self,{{!
         }}{{#function:args}}
-        arg_{{field:name}}: {{>lib/arg}},{{!
+        arg_{{field:name}}: {{> lib/arg}},{{!
         }}{{/function:args}}
-    ) -> {{>lib/client_return_type}} {
+    ) -> {{> lib/client_return_type}} {
         let mut closure = self.{{function:rust_name}}.closure.lock().unwrap();
         let closure: &mut dyn ::std::ops::FnMut({{!
             }}{{#function:args}}{{!
-            }}{{#field:type}}{{>lib/type}}{{/field:type}}{{!
+            }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
             }}{{^last?}}, {{/last?}}{{!
             }}{{/function:args}}{{!
         }}) -> _ = &mut **closure;
@@ -200,9 +200,9 @@ impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}
     fn {{function:rust_name}}(
         &self,{{!
         }}{{#function:args}}
-        _arg_{{field:name}}: {{>lib/arg}},{{!
+        _arg_{{field:name}}: {{> lib/arg}},{{!
         }}{{/function:args}}
-    ) -> {{>lib/client_return_type}} {
+    ) -> {{> lib/client_return_type}} {
         unimplemented!("Mocking interactions is not yet implemented");
     }{{!
     }}{{/function:creates_interaction?}}{{/function:sink?}}{{/function:starts_interaction?}}{{#function:starts_interaction?}}
@@ -219,16 +219,16 @@ impl<'mock> {{program:clients}}::{{service:rust_name}} for {{service:rust_name}}
 impl<'mock, T> {{program:clients}}::{{service:rust_name}}Ext<T> for {{service:rust_name}}<'mock>
 where
     T: ::fbthrift::Transport,
-{{>lib/block}}{{!
+{{> lib/block}}{{!
     }}{{#service:rustFunctions}}
     {{^function:starts_interaction?}}{{^function:sink?}}
     fn {{function:rust_name}}_with_rpc_opts(
         &self,{{!
         }}{{#function:args}}
-        arg_{{field:name}}: {{>lib/arg}},{{!
+        arg_{{field:name}}: {{> lib/arg}},{{!
         }}{{/function:args}}
         _rpc_options: T::RpcOptions,
-    ) -> {{>lib/client_return_type}} {
+    ) -> {{> lib/client_return_type}} {
         <Self as {{program:clients}}::{{service:rust_name}}>::{{function:rust_name}}(
             self,
             {{#function:args}}
@@ -288,9 +288,9 @@ where
 
 {{/service:extendedClients}}{{!
 }}{{/program:services}}
-pub mod r#impl {{>lib/block}}{{!
+pub mod r#impl {{> lib/block}}{{!
 }}{{#program:services}}
-    pub mod {{service:snake}} {{>lib/block}}{{!
+    pub mod {{service:snake}} {{> lib/block}}{{!
 
         }}{{#service:rustFunctions}}
         {{^function:starts_interaction?}}{{^function:sink?}}
@@ -299,11 +299,11 @@ pub mod r#impl {{>lib/block}}{{!
             pub(crate) closure: ::std::sync::Mutex<::std::boxed::Box<
                 dyn ::std::ops::FnMut({{!
                     }}{{#function:args}}{{!
-                    }}{{#field:type}}{{>lib/type}}{{/field:type}}{{!
+                    }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
                     }}{{^last?}}, {{/last?}}{{!
                     }}{{/function:args}}{{!
                 }}) -> ::std::result::Result<
-                    {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}},
+                    {{#function:return_type}}{{> lib/return_type}}{{/function:return_type}},
                     {{program:clients}}::errors::{{service:snake}}::{{function:upcamel}}Error,
                 > + ::std::marker::Send + ::std::marker::Sync + 'mock,
             >>,
@@ -315,7 +315,7 @@ pub mod r#impl {{>lib/block}}{{!
                 Self {
                     closure: ::std::sync::Mutex::new(::std::boxed::Box::new(|{{!
                         }}{{#function:args}}{{!
-                        }}_: {{#field:type}}{{>lib/type}}{{/field:type}}{{!
+                        }}_: {{#field:type}}{{> lib/type}}{{/field:type}}{{!
                         }}{{^last?}}, {{/last?}}{{!
                         }}{{/function:args}}{{!
                     }}| panic!(
@@ -328,14 +328,14 @@ pub mod r#impl {{>lib/block}}{{!
 
             pub fn ret({{!
                 }}&self, {{!
-                }}{{#function:stream?}}_{{/function:stream?}}value: {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}{{!
+                }}{{#function:stream?}}_{{/function:stream?}}value: {{#function:return_type}}{{> lib/return_type}}{{/function:return_type}}{{!
             }}) {
                 {{#function:stream?}}
                 unimplemented!("Mocking streams is not yet implemented, as value isn't cloneable")
                 {{/function:stream?}}{{^function:stream?}}
                 self.mock(move |{{!
                     }}{{#function:args}}{{!
-                    }}_: {{#field:type}}{{>lib/type}}{{/field:type}}{{!
+                    }}_: {{#field:type}}{{> lib/type}}{{/field:type}}{{!
                     }}{{^last?}}, {{/last?}}{{!
                     }}{{/function:args}}{{!
                 }}| value.clone());
@@ -344,10 +344,10 @@ pub mod r#impl {{>lib/block}}{{!
 
             pub fn mock(&self, mut mock: impl ::std::ops::FnMut({{!
                 }}{{#function:args}}{{!
-                }}{{#field:type}}{{>lib/type}}{{/field:type}}{{!
+                }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
                 }}{{^last?}}, {{/last?}}{{!
                 }}{{/function:args}}{{!
-            }}) -> {{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}{{!
+            }}) -> {{#function:return_type}}{{> lib/return_type}}{{/function:return_type}}{{!
                 }} + ::std::marker::Send + ::std::marker::Sync + 'mock) {{!
             }}{
                 let mut closure = self.closure.lock().unwrap();
@@ -366,11 +366,11 @@ pub mod r#impl {{>lib/block}}{{!
 
             pub fn mock_result(&self, mut mock: impl ::std::ops::FnMut({{!
                 }}{{#function:args}}{{!
-                }}{{#field:type}}{{>lib/type}}{{/field:type}}{{!
+                }}{{#field:type}}{{> lib/type}}{{/field:type}}{{!
                 }}{{^last?}}, {{/last?}}{{!
                 }}{{/function:args}}{{!
             }}) -> ::std::result::Result<{{!
-                    }}{{#function:return_type}}{{>lib/return_type}}{{/function:return_type}}, {{!
+                    }}{{#function:return_type}}{{> lib/return_type}}{{/function:return_type}}, {{!
                     }}{{program:clients}}::errors::{{service:snake}}::{{function:upcamel}}Error>{{!
                 }} + ::std::marker::Send + ::std::marker::Sync + 'mock) {{!
             }}{
@@ -396,7 +396,7 @@ pub mod r#impl {{>lib/block}}{{!
                 let mut closure = self.closure.lock().unwrap();
                 *closure = ::std::boxed::Box::new(move |{{!
                     }}{{#function:args}}{{!
-                    }}_: {{#field:type}}{{>lib/type}}{{/field:type}}{{!
+                    }}_: {{#field:type}}{{> lib/type}}{{/field:type}}{{!
                     }}{{^last?}}, {{/last?}}{{!
                     }}{{/function:args}}{{!
                 }}| ::std::result::Result::Err(exception.clone().into()));

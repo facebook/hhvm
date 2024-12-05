@@ -20,7 +20,7 @@ uint32_t {{struct:cpp_underlying_name}}::serializedSize(Protocol_ const* prot_) 
   xfer += prot_->serializedStructSize("{{struct:name}}");
   switch(this->getType()) {
   {{#struct:fields}}
-  {{ > module_types_tcc/serialize_field_size}}
+  {{> module_types_tcc/serialize_field_size}}
   {{/struct:fields}}
     case {{struct:cpp_underlying_name}}::Type::__EMPTY__:;
   }
@@ -34,7 +34,7 @@ uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC(Protocol_ const* prot_
   xfer += prot_->serializedStructSize("{{struct:name}}");
   switch(this->getType()) {
   {{#struct:fields}}
-  {{ > module_types_tcc/serialize_field_size_zc}}
+  {{> module_types_tcc/serialize_field_size_zc}}
   {{/struct:fields}}
     case {{struct:cpp_underlying_name}}::Type::__EMPTY__:;
   }
@@ -49,7 +49,7 @@ uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* prot_) const {
   xfer += prot_->writeStructBegin("{{struct:name}}");
   switch(this->getType()) {
   {{#struct:fields}}
-  {{ > module_types_tcc/serialize_field}}
+  {{> module_types_tcc/serialize_field}}
   {{/struct:fields}}
     case {{struct:cpp_underlying_name}}::Type::__EMPTY__:;
   }
@@ -64,7 +64,7 @@ uint32_t {{struct:cpp_underlying_name}}::write(Protocol_* iprot) const {
   return ::apache::thrift::detail::write(
     iprot,
     ::apache::thrift::detail::toStructInfo(
-      {{ > common/namespace_cpp2}}__fbthrift_struct_info_{{struct:cpp_underlying_name}}
+      {{> common/namespace_cpp2}}__fbthrift_struct_info_{{struct:cpp_underlying_name}}
     ),
     this);
 }

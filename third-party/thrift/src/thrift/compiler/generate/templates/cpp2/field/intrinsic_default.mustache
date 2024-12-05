@@ -16,7 +16,7 @@
 
   // Returns the intrinsic default value for base or enum fields.
 }}{{#type:string_or_binary?}}{{!
-  }}apache::thrift::StringTraits<{{ > types/indirected_string_type}}>::fromStringLiteral(""){{!
+  }}apache::thrift::StringTraits<{{> types/indirected_string_type}}>::fromStringLiteral(""){{!
 }}{{/type:string_or_binary?}}{{!
 }}{{^type:string_or_binary?}}{{!
   }}{{#type:cpp_indirection?}}0{{/type:cpp_indirection?}}{{!

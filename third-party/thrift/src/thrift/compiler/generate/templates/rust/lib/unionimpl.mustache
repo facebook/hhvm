@@ -49,16 +49,16 @@ where
     #[inline]
     fn write(&self, p: &mut P) {
         p.write_struct_begin("{{struct:name}}");
-        match self {{>lib/block}}{{!
+        match self {{> lib/block}}{{!
             }}{{#struct:fields}}
             Self::{{field:rust_name}}(inner) => {
                 p.write_field_begin({{!
                     }}"{{field:name}}", {{!
-                    }}{{#field:type}}{{>lib/ttype}}{{/field:type}}, {{!
+                    }}{{#field:type}}{{> lib/ttype}}{{/field:type}}, {{!
                     }}{{field:key}}{{!
                 }});
-                {{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldwrite}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/write}}{{/field:type_annotation?}}{{/field:type}}({{!
-                }}{{#field:has_adapter?}}&{{>lib/adapter/qualified}}::to_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
+                {{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldwrite}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/write}}{{/field:type_annotation?}}{{/field:type}}({{!
+                }}{{#field:has_adapter?}}&{{> lib/adapter/qualified}}::to_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
                 }}inner{{!
                 }}{{#field:has_adapter?}}, {{field:key}}){{/field:has_adapter?}}{{!
                 }}, p);
@@ -80,7 +80,7 @@ where
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
             {{#struct:fields_by_name}}
-            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}),
+            ::fbthrift::Field::new("{{field:name}}", {{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}),
             {{/struct:fields_by_name}}
         ];
         let _ = ::anyhow::Context::context(p.read_struct_begin(|_| ()), "Expected a {{struct:name}}")?;
@@ -91,11 +91,11 @@ where
             match (fty, fid as ::std::primitive::i32, once) {
                 (::fbthrift::TType::Stop, _, _) => break,{{!
                 }}{{#struct:fields}}
-                ({{#field:type}}{{>lib/ttype}}{{/field:type}}, {{field:key}}, false) => {
+                ({{#field:type}}{{> lib/ttype}}{{/field:type}}, {{field:key}}, false) => {
                     once = true;
                     alt = ::std::option::Option::Some(Self::{{field:rust_name}}({{!
-                    }}{{#field:has_adapter?}}{{>lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
-                    }}{{#field:type}}{{#field:type_annotation?}}{{>lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{>lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
+                    }}{{#field:has_adapter?}}{{> lib/adapter/qualified}}::from_thrift_field::<{{struct:rust_name}}>({{/field:has_adapter?}}{{!
+                    }}{{#field:type}}{{#field:type_annotation?}}{{> lib/annfieldread}}{{/field:type_annotation?}}{{^field:type_annotation?}}{{> lib/read}}{{/field:type_annotation?}}{{/field:type}}(p)?{{!
                     }}{{#field:has_adapter?}}, {{field:key}})?{{/field:has_adapter?}}{{!
                     }}));
                 }{{!
@@ -126,7 +126,7 @@ impl {{struct:rust_name}} {
     }
 }
 {{#program:rust_gen_native_metadata?}}
-{{>lib/metadata/struct}}
+{{> lib/metadata/struct}}
 {{/program:rust_gen_native_metadata?}}
 {{/struct:union?}}
 {{!newline}}

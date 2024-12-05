@@ -21,30 +21,30 @@
     }}{{/field:cpp_first_adapter}}{{!
     }}{{^field:cpp_first_adapter}}{{!
       TODO(dokwon): Replace special cases after replacing StringTraits and cpp.indirection with cpp.adapter.
-      }}  {{ > types/apply_indirection_pre}}{{ > field/member}}{{ > types/apply_indirection_post}} = {{!
-      }}{{#field:deprecated_clear?}}{{ > field/default}};{{/field:deprecated_clear?}}{{!
-      }}{{^field:deprecated_clear?}}{{ > field/intrinsic_default}};{{/field:deprecated_clear?}}{{!
+      }}  {{> types/apply_indirection_pre}}{{> field/member}}{{> types/apply_indirection_post}} = {{!
+      }}{{#field:deprecated_clear?}}{{> field/default}};{{/field:deprecated_clear?}}{{!
+      }}{{^field:deprecated_clear?}}{{> field/intrinsic_default}};{{/field:deprecated_clear?}}{{!
     }}{{/field:cpp_first_adapter}}{{!
   }}{{/field:cpp_ref?}}{{!
   }}{{#field:cpp_ref?}}{{!
     }}{{^field:optional?}}{{!
       }}{{#field:cpp_ref_not_boxed?}}{{!
-        }}  {{ > field/member}} = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_type}}>({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});{{!
+        }}  {{> field/member}} = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_type}}>({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});{{!
       }}{{/field:cpp_ref_not_boxed?}}{{!
       }}{{#field:boxed_ref?}}{{!
         }}{{#field:cpp_first_adapter}}{{!
           }}  ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>(*{{field:cpp_storage_name}}, *this);{{!
         }}{{/field:cpp_first_adapter}}{{!
         }}{{^field:cpp_first_adapter}}{{!
-          }}  {{ > field/member}} = {{ > field/default}};{{!
+          }}  {{> field/member}} = {{> field/default}};{{!
         }}{{/field:cpp_first_adapter}}{{!
       }}{{/field:boxed_ref?}}{{!
       }}{{#field:intern_boxed_ref?}}{{!
-        }}  {{ > field/member}} = {{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<{{ > field/tag}}>());{{!
+        }}  {{> field/member}} = {{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<{{> field/tag}}>());{{!
       }}{{/field:intern_boxed_ref?}}{{!
     }}{{/field:optional?}}{{!
     }}{{#field:optional?}}{{!
-      }}  {{ > field/member}}.reset();{{!
+      }}  {{> field/member}}.reset();{{!
     }}{{/field:optional?}}{{!
   }}{{/field:cpp_ref?}}
 {{/type:resolves_to_base_or_enum?}}
@@ -56,26 +56,26 @@
 {{#field:cpp_ref?}}
 {{^field:optional?}}
 {{#field:cpp_ref_not_boxed?}}
-  {{ > field/member}} = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_type}}>({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});
+  {{> field/member}} = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_type}}>({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});
 {{/field:cpp_ref_not_boxed?}}
 {{#field:boxed_ref?}}
 {{#field:cpp_first_adapter}}
   ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>(*{{field:cpp_storage_name}}, *this);
 {{/field:cpp_first_adapter}}
 {{^field:cpp_first_adapter}}
-  {{ > field/member}} = {{ > field/default}};
+  {{> field/member}} = {{> field/default}};
 {{/field:cpp_first_adapter}}
 {{/field:boxed_ref?}}
 {{#field:intern_boxed_ref?}}
-  {{ > field/member}} = {{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<{{ > field/tag}}>());
+  {{> field/member}} = {{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<{{> field/tag}}>());
 {{/field:intern_boxed_ref?}}
 {{/field:optional?}}
 {{#field:optional?}}
-  {{ > field/member}}.reset();
+  {{> field/member}}.reset();
 {{/field:optional?}}
 {{/field:cpp_ref?}}
 {{^field:cpp_ref?}}
-  {{ > field/member}}.clear();
+  {{> field/member}}.clear();
 {{/field:cpp_ref?}}
 {{/field:cpp_first_adapter}}
 {{/type:resolves_to_container?}}
@@ -85,33 +85,33 @@
   ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>({{field:cpp_storage_name}}, *this);
 {{/field:cpp_first_adapter}}
 {{^field:cpp_first_adapter}}
-  ::apache::thrift::clear({{ > field/member}});
+  ::apache::thrift::clear({{> field/member}});
 {{/field:cpp_first_adapter}}
 {{/field:cpp_ref?}}
 {{#field:cpp_ref?}}
 {{^field:optional?}}
 {{#field:cpp_ref_unique?}}
-  if ({{ > field/member}}) ::apache::thrift::clear(*{{ > field/member}});
+  if ({{> field/member}}) ::apache::thrift::clear(*{{> field/member}});
 {{/field:cpp_ref_unique?}}
 {{^field:cpp_ref_unique?}}
 {{#field:cpp_ref_not_boxed?}}
-  if ({{ > field/member}}) {{ > field/member}} = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_type}}>({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});
+  if ({{> field/member}}) {{> field/member}} = ::apache::thrift::detail::make_mutable_smart_ptr<{{field:cpp_storage_type}}>({{#type:cpp_use_allocator?}}this->get_allocator(){{/type:cpp_use_allocator?}});
 {{/field:cpp_ref_not_boxed?}}
 {{#field:boxed_ref?}}
 {{#field:cpp_first_adapter}}
   ::apache::thrift::adapt_detail::clear<{{field:cpp_first_adapter}}, {{field:key}}>(*{{field:cpp_storage_name}}, *this);
 {{/field:cpp_first_adapter}}
 {{^field:cpp_first_adapter}}
-  {{ > field/member}} = {{ > field/default}};
+  {{> field/member}} = {{> field/default}};
 {{/field:cpp_first_adapter}}
 {{/field:boxed_ref?}}
 {{#field:intern_boxed_ref?}}
-  {{ > field/member}} = {{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<{{ > field/tag}}>());
+  {{> field/member}} = {{field:cpp_storage_type}}::fromStaticConstant(&::apache::thrift::op::getIntrinsicDefault<{{> field/tag}}>());
 {{/field:intern_boxed_ref?}}
 {{/field:cpp_ref_unique?}}
 {{/field:optional?}}
 {{#field:optional?}}
-  {{ > field/member}}.reset();
+  {{> field/member}}.reset();
 {{/field:optional?}}
 {{/field:cpp_ref?}}
 {{/type:non_empty_struct?}}

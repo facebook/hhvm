@@ -25,7 +25,7 @@ List:
     }}{{type:cpp_type}}{{!
   }}>{ {{!
   }}{{#value:list_elements}}{{!
-    }}{{ > common/iterate_const_values_adapted}}{{!
+    }}{{> common/iterate_const_values_adapted}}{{!
     }}{{^last?}},
   {{/last?}}{{!
   }}{{/value:list_elements}}{{!
@@ -38,7 +38,7 @@ Set:
     }}{{type:cpp_type}}{{!
   }}>{ {{!
   }}{{#value:list_elements}}{{!
-    }}{{ > common/iterate_const_values_adapted}}{{!
+    }}{{> common/iterate_const_values_adapted}}{{!
     }}{{^last?}},
   {{/last?}}{{!
   }}{{/value:list_elements}}{{!
@@ -51,11 +51,11 @@ Map:
   }}{{#value:map_elements}}{{!
     }}{ {{!
       }}{{#element:key}}{{#type:key_type}}{{!
-        }}{{ > common/iterate_const_values_adapted}}{{!
+        }}{{> common/iterate_const_values_adapted}}{{!
       }}{{/type:key_type}}{{/element:key}}{{!
       }}, {{!
       }}{{#element:value}}{{#type:value_type}}{{!
-        }}{{ > common/iterate_const_values_adapted}}{{!
+        }}{{> common/iterate_const_values_adapted}}{{!
       }}{{/type:value_type}}{{/element:value}}{{!
     }} }{{!
     }}{{^last?}},
@@ -71,6 +71,6 @@ Struct:
         }}{{#value:const_struct}}{{#constant:type}}{{#constant:value}}{{#constant:field}}{{!
         }}::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::{{constant:cpp_name}}{{!
           }}{{#field:cpp_first_adapter}}, {{field:cpp_first_adapter}}, ::apache::thrift::FieldId{ {{field:key}} }{{/field:cpp_first_adapter}}>({{!
-            }}{{ > common/iterate_const_values}}){{^last?}}, {{/last?}}{{!
+            }}{{> common/iterate_const_values}}){{^last?}}, {{/last?}}{{!
         }}{{/constant:field}}{{/constant:value}}{{/constant:type}}{{/value:const_struct}}){{!
 }}{{/type:struct?}}

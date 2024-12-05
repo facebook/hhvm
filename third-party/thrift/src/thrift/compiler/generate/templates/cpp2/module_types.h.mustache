@@ -15,7 +15,7 @@
   limitations under the License.
 
 }}
-{{ > Autogen}}
+{{> Autogen}}
 #pragma once
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
@@ -55,9 +55,9 @@ APACHE_THRIFT_DEFINE_ACCESSOR({{field:cpp_name}});
 } // namespace apache
 
 {{/program:structs?}}
-{{ > module_types_h/declare_enums}}
+{{> module_types_h/declare_enums}}
 
-{{ > module_types_h/forward_declare}}
+{{> module_types_h/forward_declare}}
 
 namespace apache::thrift::detail::annotation {
 {{#program:structs}}
@@ -83,9 +83,9 @@ struct is_cpp_ref_field_terse<{{struct:cpp_fullname}},::apache::thrift::type::fi
 {{/program:structs}}
 } // namespace apache::thrift::detail::qualifier
 
-{{ > module_types_h/hash_and_equal_to}}
+{{> module_types_h/hash_and_equal_to}}
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 {{#program:structs}}
 {{#struct:is_directly_adapted?}}
 {{^struct:dependent_direct_adapter?}}
@@ -102,7 +102,7 @@ using ::apache::thrift::detail::operator>=;
 
 {{#program:structs_and_typedefs}}
 {{^is_struct?}}
-{{ > common/typedef_docblock }}
+{{> common/typedef_docblock }}
 typedef {{typedef:cpp_type}} {{typedef:name}};
 {{/is_struct?}}
 {{#is_struct?}}
@@ -110,7 +110,7 @@ typedef {{typedef:cpp_type}} {{typedef:name}};
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
-{{ > common/class_docblock }}
+{{> common/class_docblock }}
 class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_underlying_name}} {{!
 }}{{^struct:exception?}}{{^struct:virtual}}final {{/struct:virtual}}{{/struct:exception?}}{{!
 }}{{#struct:exception?}}: public virtual apache::thrift::TException{{/struct:exception?}} {
@@ -130,7 +130,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   FOLLY_ERASE static constexpr std::string_view __fbthrift_get_module_name() noexcept {
     return "{{program:name}}";
   }
-{{ > module_types_h/reflection}}
+{{> module_types_h/reflection}}
 
   void __fbthrift_clear();
 {{^struct:union?}}
@@ -175,33 +175,33 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 
  public:
 {{#struct:union?}}
-{{ > module_types_h/union_enum}}
+{{> module_types_h/union_enum}}
 
 
   {{struct:cpp_underlying_name}}()
       : type_(folly::to_underlying(Type::__EMPTY__)) {}
 
-{{ > module_types_h/union_copy_ctor}}
+{{> module_types_h/union_copy_ctor}}
 
-{{ > module_types_h/union_assign_overload}}
+{{> module_types_h/union_assign_overload}}
 
 {{^struct:is_trivially_destructible?}}
   {{#struct:virtual}}virtual {{/struct:virtual}}~{{struct:cpp_underlying_name}}();
 {{/struct:is_trivially_destructible?}}
 
-{{ > module_types_h/union_storage}}
+{{> module_types_h/union_storage}}
 
 {{^struct:cpp_noncomparable}}
 
   bool operator==(const {{struct:cpp_underlying_name}}&) const;
   bool operator<(const {{struct:cpp_underlying_name}}&) const;
 {{/struct:cpp_noncomparable}}
-{{ > module_types_h/union_setters}}
+{{> module_types_h/union_setters}}
 
-{{ > module_types_h/union_getters}}
-{{ > module_types_h/union_mutables}}
-{{ > module_types_h/union_moves}}
-{{ > module_types_h/union_field_ref}}
+{{> module_types_h/union_getters}}
+{{> module_types_h/union_mutables}}
+{{> module_types_h/union_moves}}
+{{> module_types_h/union_field_ref}}
   Type getType() const { return static_cast<Type>(type_); }
 
   template <class Protocol_>
@@ -225,13 +225,13 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   {{/struct:message}}
 {{/struct:is_large?}}
 {{^struct:is_large?}}
-  {{ > module_types_h/base_ctor}}
+  {{> module_types_h/base_ctor}}
 {{/struct:is_large?}}
 
 {{#struct:legacy_api?}}
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  {{struct:cpp_underlying_name}}(apache::thrift::FragileConstructor{{ > module_types_h/fragile_ctor_param_list}});
+  {{struct:cpp_underlying_name}}(apache::thrift::FragileConstructor{{> module_types_h/fragile_ctor_param_list}});
 {{/struct:legacy_api?}}
 
 {{#struct:is_eligible_for_constexpr?}}
@@ -257,7 +257,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{/struct:cpp_noncopyable}}
 
 {{#struct:cpp_allocator}}
-{{ > module_types_h/alloc_extended_ctors}}
+{{> module_types_h/alloc_extended_ctors}}
 {{/struct:cpp_allocator}}
 
 {{#struct:is_eligible_for_constexpr?}}
@@ -298,7 +298,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 
 {{/struct:virtual}}
 {{#struct:fields?}}
-{{ > module_types_h/declare_members}}
+{{> module_types_h/declare_members}}
 {{/struct:fields?}}
 
  public:
@@ -308,9 +308,9 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
   bool operator<(const {{struct:cpp_underlying_name}}&) const;
 {{/struct:cpp_noncomparable}}
 {{#struct:fields?}}
-{{ > module_types_h/field_ref}}
+{{> module_types_h/field_ref}}
 {{#struct:legacy_api?}}
-{{ > module_types_h/getters_setters}}
+{{> module_types_h/getters_setters}}
 {{/struct:legacy_api?}}
 {{/struct:fields?}}
 
@@ -340,7 +340,7 @@ class {{#struct:exception?}}FOLLY_EXPORT {{/struct:exception?}}{{struct:cpp_unde
 {{/struct:cpp_methods}}
 
  private:
-{{ > module_types_h/lazy_deserialization}}
+{{> module_types_h/lazy_deserialization}}
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
@@ -376,13 +376,13 @@ using {{struct:cpp_name}} = {{struct:cpp_underlying_type}};
 {{/is_struct?}}
 {{/program:structs_and_typedefs}}
 
-{{ > common/namespace_cpp2_end}}
+{{> common/namespace_cpp2_end}}
 
 {{#program:frozen?}}{{#program:structs}}
-{{ > module_types_h/frozen}}
+{{> module_types_h/frozen}}
 
 {{/program:structs}}{{/program:frozen?}}
-{{ > module_types_h/declare_union_types}}{{!
+{{> module_types_h/declare_union_types}}{{!
 
 }}{{#program:tablebased?}}
 namespace apache {
@@ -400,7 +400,7 @@ struct TypeToInfo<
   template <>
     struct TypeToInfo<
         ::apache::thrift::type_class::enumeration,
-        {{ > common/namespace_cpp2}}{{enum:cpp_name}}> {
+        {{> common/namespace_cpp2}}{{enum:cpp_name}}> {
     static const ::apache::thrift::detail::TypeInfo typeInfo;
   };
 {{/program:enums}}

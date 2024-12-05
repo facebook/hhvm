@@ -21,11 +21,11 @@ pub mod adapters {
   {{#program:adapters}}
   pub type {{type:rust_name}} = {{!
       }}{{#type:typedef}}{{!
-        }}{{#typedef:has_adapter?}}{{>lib/adapter/name}}{{/typedef:has_adapter?}}{{!
+        }}{{#typedef:has_adapter?}}{{> lib/adapter/name}}{{/typedef:has_adapter?}}{{!
       }}{{/type:typedef}}{{!
       }}{{^type:typedef}}{{!
           }}{{#type:struct}}{{!
-              }}{{#struct:has_adapter?}}{{>lib/adapter/name}}{{/struct:has_adapter?}}{{!
+              }}{{#struct:has_adapter?}}{{> lib/adapter/name}}{{/struct:has_adapter?}}{{!
           }}{{/type:struct}}{{!
       }}{{/type:typedef}}{{!
   }};

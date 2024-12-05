@@ -15,41 +15,41 @@
   limitations under the License.
 
 }}
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
-{{ > service_common/typedefs}}
-{{ > common/namespace_cpp2_end}}
+{{> service_common/typedefs}}
+{{> common/namespace_cpp2_end}}
 
-{{ > service_async_client_cpp/templated_received}}
+{{> service_async_client_cpp/templated_received}}
 
 
 {{#service:functions}}{{#function:return_type}}{{^function:starts_interaction?}}
-{{ > service_async_client_cpp/function_implementation}}
+{{> service_async_client_cpp/function_implementation}}
 
 
 {{^function:sink?}}
-{{ > service_async_client_cpp/sync_functions}}
+{{> service_async_client_cpp/sync_functions}}
 
-{{ > service_async_client_cpp/future_functions}}
+{{> service_async_client_cpp/future_functions}}
 
 {{^service:reduced_client?}}{{^function:creates_interaction?}}{{^function:stream?}}
-void apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{function:comma}}{{ > service_common/function_param_list_client}}) {
-  {{function:cpp_name}}(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)){{function:comma}}{{ > service_common/param_list}});
+void apache::thrift::Client<{{service:qualified_name}}>::{{function:cpp_name}}(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback{{function:comma}}{{> service_common/function_param_list_client}}) {
+  {{function:cpp_name}}(std::make_unique<apache::thrift::FunctionReplyCallback>(std::move(callback)){{function:comma}}{{> service_common/param_list}});
 }
 {{/function:stream?}}{{/function:creates_interaction?}}{{/service:reduced_client?}}
 {{/function:sink?}}
 
-{{ > service_async_client_cpp/coroutine_functions}}
+{{> service_async_client_cpp/coroutine_functions}}
 
 {{^function:oneway?}}
-{{ > service_async_client_cpp/received_wrapped}}
+{{> service_async_client_cpp/received_wrapped}}
 
 
-{{ > service_async_client_cpp/received}}
+{{> service_async_client_cpp/received}}
 
 
 {{^service:reduced_client?}}{{^function:creates_interaction?}}
-{{ > service_async_client_cpp/received_instance}}
+{{> service_async_client_cpp/received_instance}}
 {{/function:creates_interaction?}}{{/service:reduced_client?}}
 
 {{/function:oneway?}}
@@ -62,28 +62,28 @@ apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{type:name}}
 
 {{#service:interactions}}
 
-{{ > common/namespace_cpp2_begin}}
+{{> common/namespace_cpp2_begin}}
 
-{{ > service_common/typedefs}}
-{{ > common/namespace_cpp2_end}}
+{{> service_common/typedefs}}
+{{> common/namespace_cpp2_end}}
 
-{{ > service_async_client_cpp/templated_received}}
+{{> service_async_client_cpp/templated_received}}
 
 {{#service:functions}}{{#function:return_type}}
-{{ > service_async_client_cpp/function_implementation}}
+{{> service_async_client_cpp/function_implementation}}
 
 {{^function:sink?}}
-{{ > service_async_client_cpp/sync_functions}}
+{{> service_async_client_cpp/sync_functions}}
 
-{{ > service_async_client_cpp/future_functions}}
+{{> service_async_client_cpp/future_functions}}
 {{/function:sink?}}
 
-{{ > service_async_client_cpp/coroutine_functions}}
+{{> service_async_client_cpp/coroutine_functions}}
 
 {{^function:oneway?}}
-{{ > service_async_client_cpp/received_wrapped}}
+{{> service_async_client_cpp/received_wrapped}}
 
-{{ > service_async_client_cpp/received}}
+{{> service_async_client_cpp/received}}
 {{/function:oneway?}}
 
 {{/function:return_type}}{{/service:functions}}

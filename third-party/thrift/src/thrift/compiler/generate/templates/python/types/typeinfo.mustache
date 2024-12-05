@@ -38,11 +38,11 @@ in the client or server source rather than the type definition source.
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{> structs/unadapted_name}}){{!
 }}{{/type:struct}}{{!
-}}{{#type:list?}}_fbthrift_python_types.ListTypeInfo({{#type:list_elem_type}}{{ >types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
-}}{{#type:set?}}_fbthrift_python_types.SetTypeInfo({{#type:set_elem_type}}{{ >types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
+}}{{#type:list?}}_fbthrift_python_types.ListTypeInfo({{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
+}}{{#type:set?}}_fbthrift_python_types.SetTypeInfo({{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
 }}{{#type:map?}}_fbthrift_python_types.MapTypeInfo({{!
-  }}{{#type:key_type}}{{ >types/typeinfo }}{{/type:key_type}}, {{!
-  }}{{#type:value_type}}{{ >types/typeinfo }}{{/type:value_type}}{{!
+  }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
+  }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}{{!
 }}){{/type:map?}}{{!
 }}{{/program:generate_immutable_types}}{{!
 }}{{#program:generate_mutable_types}}{{!
@@ -50,11 +50,11 @@ in the client or server source rather than the type definition source.
   }}{{#type:need_module_path?}}{{type:module_mangle}}.{{/type:need_module_path?}}{{!
   }}{{> structs/unadapted_name}}){{!
 }}{{/type:struct}}{{!
-}}{{#type:list?}}_fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#type:list_elem_type}}{{ >types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
-}}{{#type:set?}}_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo({{#type:set_elem_type}}{{ >types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
+}}{{#type:list?}}_fbthrift_python_mutable_typeinfos.MutableListTypeInfo({{#type:list_elem_type}}{{> types/typeinfo }}{{/type:list_elem_type}}){{/type:list?}}{{!
+}}{{#type:set?}}_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo({{#type:set_elem_type}}{{> types/typeinfo }}{{/type:set_elem_type}}){{/type:set?}}{{!
 }}{{#type:map?}}_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo({{!
-  }}{{#type:key_type}}{{ >types/typeinfo }}{{/type:key_type}}, {{!
-  }}{{#type:value_type}}{{ >types/typeinfo }}{{/type:value_type}}{{!
+  }}{{#type:key_type}}{{> types/typeinfo }}{{/type:key_type}}, {{!
+  }}{{#type:value_type}}{{> types/typeinfo }}{{/type:value_type}}{{!
 }}){{/type:map?}}{{!
 }}{{/program:generate_mutable_types}}{{!
 }}{{#type:enum}}_fbthrift_python_types.EnumTypeInfo({{!

@@ -1992,7 +1992,7 @@ mstch::node mstch_rust_value::map_entries() {
         key_type,
         entry.second,
         value_type,
-        depth_ + 1,
+        depth_ + 3,
         context_,
         pos_,
         options_));

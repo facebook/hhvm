@@ -2004,7 +2004,13 @@ impl ::std::default::Default for self::ComplexNestedWithDefault {
                     a: "3".to_owned(),
                     b: {
                         let mut map = ::std::collections::BTreeMap::new();
-                        map.insert("a".to_owned(), 3);
+                        {
+                            #[inline(never)]
+                            fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>) {
+                                map.insert("a".to_owned(), 3);
+                            }
+                            __do_insert(&mut map);
+                        }
                         map
                     },
                     ..::std::default::Default::default()
@@ -2094,7 +2100,13 @@ where
                     a: "3".to_owned(),
                     b: {
                         let mut map = ::std::collections::BTreeMap::new();
-                        map.insert("a".to_owned(), 3);
+                        {
+                            #[inline(never)]
+                            fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::primitive::i32>) {
+                                map.insert("a".to_owned(), 3);
+                            }
+                            __do_insert(&mut map);
+                        }
                         map
                     },
                     ..::std::default::Default::default()

@@ -87,15 +87,21 @@
                 }}{{^type:rust}}::std::collections::BTreeMap{{/type:rust}}{{!
             }}::new();{{!
             }}{{#value:mapEntries}}
-            {{value:indent}}map.insert({{!
-                }}{{#entry:key}}{{!
-                    }}{{#value:floatingPoint?}}{{!
-                        }}::fbthrift::export::OrderedFloat({{>lib/value}}){{!
-                    }}{{/value:floatingPoint?}}{{!
-                    }}{{^value:floatingPoint?}}{{>lib/value}}{{/value:floatingPoint?}}{{!
-                }}{{/entry:key}}, {{!
-                }}{{#entry:value}}{{>lib/value}}{{/entry:value}}{{!
-            }});{{!
+            {{value:indent}}{
+                {{value:indent}}#[inline(never)]
+                {{value:indent}}fn __do_insert(map: &mut {{>lib/rawtype}}) {
+                    {{value:indent}}map.insert({{!
+                        }}{{#entry:key}}{{!
+                            }}{{#value:floatingPoint?}}{{!
+                                }}::fbthrift::export::OrderedFloat({{>lib/value}}){{!
+                            }}{{/value:floatingPoint?}}{{!
+                            }}{{^value:floatingPoint?}}{{>lib/value}}{{/value:floatingPoint?}}{{!
+                        }}{{/entry:key}}, {{!
+                        }}{{#entry:value}}{{>lib/value}}{{/entry:value}}{{!
+                    }});
+                {{value:indent}}}
+                {{value:indent}}__do_insert(&mut map);
+            {{value:indent}}}{{!
             }}{{/value:mapEntries}}
             {{value:indent}}map
         {{value:indent}}}{{!

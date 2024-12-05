@@ -971,7 +971,13 @@ impl ::fbthrift::metadata::ThriftAnnotations for SecretStruct {
                     let mut tmp = ::std::option::Option::Some(thrift__types::DeprecatedUnvalidatedAnnotations {
                         items: {
                             let mut map = ::std::collections::BTreeMap::new();
-                            map.insert("java.sensitive".to_owned(), "1".to_owned());
+                            {
+                                #[inline(never)]
+                                fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::string::String>) {
+                                    map.insert("java.sensitive".to_owned(), "1".to_owned());
+                                }
+                                __do_insert(&mut map);
+                            }
                             map
                         },
                         ..::std::default::Default::default()

@@ -1659,7 +1659,13 @@ impl ::std::default::Default for self::TerseStructWithCustomDefault {
                 },
             map_field: {
                     let mut map = ::std::collections::BTreeMap::new();
-                    map.insert(1, 1);
+                    {
+                        #[inline(never)]
+                        fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::primitive::i16, ::std::primitive::i16>) {
+                            map.insert(1, 1);
+                        }
+                        __do_insert(&mut map);
+                    }
                     map
                 },
             struct_field: ::std::default::Default::default(),
@@ -1847,7 +1853,13 @@ where
                 }),
             map_field: field_map_field.unwrap_or_else(|| {
                     let mut map = ::std::collections::BTreeMap::new();
-                    map.insert(1, 1);
+                    {
+                        #[inline(never)]
+                        fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::primitive::i16, ::std::primitive::i16>) {
+                            map.insert(1, 1);
+                        }
+                        __do_insert(&mut map);
+                    }
                     map
                 }),
             struct_field: field_struct_field.unwrap_or_default(),

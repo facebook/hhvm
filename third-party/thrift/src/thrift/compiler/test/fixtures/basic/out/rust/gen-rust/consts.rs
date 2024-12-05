@@ -32,17 +32,29 @@ pub static ASet: ::once_cell::sync::Lazy<::std::collections::BTreeSet<::std::str
 
 pub static AMap: ::once_cell::sync::Lazy<::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>> = ::once_cell::sync::Lazy::new(|| {
             let mut map = ::std::collections::BTreeMap::new();
-            map.insert("foo".to_owned(), vec![
-                1,
-                2,
-                3,
-                4,
-            ]);
-            map.insert("bar".to_owned(), vec![
-                10,
-                32,
-                54,
-            ]);
+            {
+                #[inline(never)]
+                fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>) {
+                    map.insert("foo".to_owned(), vec![
+                        1,
+                        2,
+                        3,
+                        4,
+                    ]);
+                }
+                __do_insert(&mut map);
+            }
+            {
+                #[inline(never)]
+                fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::string::String, ::std::vec::Vec<::std::primitive::i32>>) {
+                    map.insert("bar".to_owned(), vec![
+                        10,
+                        32,
+                        54,
+                    ]);
+                }
+                __do_insert(&mut map);
+            }
             map
         });
 

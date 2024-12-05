@@ -3686,7 +3686,13 @@ impl ::std::default::Default for self::AdaptTemplatedTestStruct {
                 }, 20),
             adaptedMapDefault: <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({
                     let mut map = ::std::collections::BTreeMap::new();
-                    map.insert(1, 1);
+                    {
+                        #[inline(never)]
+                        fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::primitive::i64, ::std::primitive::i64>) {
+                            map.insert(1, 1);
+                        }
+                        __do_insert(&mut map);
+                    }
                     map
                 }, 21),
             doubleTypedefBool: ::std::default::Default::default(),
@@ -3938,7 +3944,13 @@ where
                 }, 20)),
             adaptedMapDefault: field_adaptedMapDefault.unwrap_or_else(|| <::fbthrift_adapters::test::TestAdapter as ::fbthrift::adapter::ThriftAdapter>::from_thrift_default::<AdaptTemplatedTestStruct>({
                     let mut map = ::std::collections::BTreeMap::new();
-                    map.insert(1, 1);
+                    {
+                        #[inline(never)]
+                        fn __do_insert(map: &mut ::std::collections::BTreeMap<::std::primitive::i64, ::std::primitive::i64>) {
+                            map.insert(1, 1);
+                        }
+                        __do_insert(&mut map);
+                    }
                     map
                 }, 21)),
             doubleTypedefBool: field_doubleTypedefBool.unwrap_or_default(),

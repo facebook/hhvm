@@ -21,16 +21,18 @@
   {
 {{/struct:union?}}
 {{^struct:union?}}
-  {{!
-}}{{#field:optional?}}{{!
-}}if ({{ > module_types_tcc/optional_has_value}}) {{!
-}}{{/field:optional?}}{{!
-}}{{#field:deprecated_terse_writes?}}{{!
-}}if ({{#field:lazy?}}!(__fbthrift_isDeserialized_.{{field:cpp_name}} & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
-      {{/field:lazy?}}{{ > module_types_tcc/deprecated_terse_has_value }}) {{!
-}}{{/field:deprecated_terse_writes?}}{{!
-}}{{#field:terse?}}{{!
-}}if ({{#field:lazy?}}!(__fbthrift_isDeserialized_.{{field:cpp_name}} & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
-      {{/field:lazy?}}{{ > module_types_tcc/terse_has_value }}) {{!
-}}{{/field:terse?}}{
+{{#field:optional?}}
+  if ({{ > module_types_tcc/optional_has_value}}) {
+{{/field:optional?}}
+{{#field:deprecated_terse_writes?}}
+  if ({{#field:lazy?}}!(__fbthrift_isDeserialized_.{{field:cpp_name}} & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
+      {{/field:lazy?}}{{ > module_types_tcc/deprecated_terse_has_value }}) {
+{{/field:deprecated_terse_writes?}}
+{{#field:terse?}}
+  if ({{#field:lazy?}}!(__fbthrift_isDeserialized_.{{field:cpp_name}} & ::apache::thrift::detail::LazyDeserializationState::DESERIALIZED) ||
+      {{/field:lazy?}}{{ > module_types_tcc/terse_has_value }}) {
+{{/field:terse?}}
+{{#field:fill?}}
+  {
+{{/field:fill?}}
 {{/struct:union?}}

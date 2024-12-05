@@ -1894,6 +1894,7 @@ class cpp_mstch_field : public mstch_field {
             {"field:cpp_has_runtime_annotation?",
              &cpp_mstch_field::cpp_has_runtime_annotation},
             {"field:use_op_encode?", &cpp_mstch_field::use_op_encode},
+            {"field:fill?", &cpp_mstch_field::fill},
         });
     register_has_option("field:deprecated_clear?", "deprecated_clear");
   }
@@ -2139,6 +2140,13 @@ class cpp_mstch_field : public mstch_field {
   mstch::node use_op_encode() {
     assert(field_context_->strct);
     return needs_op_encode(*field_, *field_context_->strct);
+  }
+
+  // Not optional, terse, or deprecated terse.
+  mstch::node fill() {
+    return (field_->qualifier() == t_field_qualifier::none ||
+            field_->qualifier() == t_field_qualifier::required) &&
+        !std::get<bool>(deprecated_terse_writes());
   }
 
  private:

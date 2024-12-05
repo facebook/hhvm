@@ -10,13 +10,13 @@ from __future__ import annotations
 import folly.iobuf as _fbthrift_iobuf
 
 import module.thrift_types as _fbthrift_current_module
+from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
-@_fbthrift_abstract_types.Limits.register
 class Limits(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -145,6 +145,8 @@ class Limits(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Limits, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Limits, Limits)
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata

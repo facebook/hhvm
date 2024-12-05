@@ -24,6 +24,13 @@ struct TestPropertyAsField {
   2: string break_unless_used_with_renamed_built_in_property;
 }
 
+struct TestRegisterAsField {
+  # The presence of this field caused a failure due to the conflict
+  # with the register method in abc.ABC. Keep this test to ensure
+  # the fix continues to work.
+  1: string register;
+}
+
 struct TestStruct {
   1: bool placeholder;
 }

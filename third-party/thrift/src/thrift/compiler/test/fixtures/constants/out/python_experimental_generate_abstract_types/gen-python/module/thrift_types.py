@@ -10,13 +10,13 @@ from __future__ import annotations
 import folly.iobuf as _fbthrift_iobuf
 
 import module.thrift_types as _fbthrift_current_module
+from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
 
-@_fbthrift_abstract_types.Internship.register
 class Internship(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -113,8 +113,9 @@ class Internship(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Internship, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Internship, Internship)
 
-@_fbthrift_abstract_types.Range.register
+
 class Range(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -178,8 +179,9 @@ class Range(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Range, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Range, Range)
 
-@_fbthrift_abstract_types.struct1.register
+
 class struct1(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -243,8 +245,9 @@ class struct1(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct1, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct1, struct1)
 
-@_fbthrift_abstract_types.struct2.register
+
 class struct2(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -330,8 +333,9 @@ class struct2(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct2, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct2, struct2)
 
-@_fbthrift_abstract_types.struct3.register
+
 class struct3(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -406,8 +410,9 @@ class struct3(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct3, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct3, struct3)
 
-@_fbthrift_abstract_types.struct4.register
+
 class struct4(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -482,8 +487,9 @@ class struct4(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct4, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct4, struct4)
 
-@_fbthrift_abstract_types.union1.register
+
 class union1(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -550,8 +556,9 @@ class union1(metaclass=_fbthrift_python_types.UnionMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.union1, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.union1, union1)
 
-@_fbthrift_abstract_types.union2.register
+
 class union2(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -639,6 +646,8 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.union2, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.union2, union2)
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata

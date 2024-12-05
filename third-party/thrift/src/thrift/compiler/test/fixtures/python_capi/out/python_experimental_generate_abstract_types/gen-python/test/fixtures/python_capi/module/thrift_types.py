@@ -10,6 +10,7 @@ from __future__ import annotations
 import folly.iobuf as _fbthrift_iobuf
 
 import test.fixtures.python_capi.module.thrift_types as _fbthrift_current_module
+from abc import ABCMeta as _fbthrift_ABCMeta
 import test.fixtures.python_capi.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -28,7 +29,6 @@ import test.fixtures.python_capi.thrift_dep.thrift_types
 import test.fixtures.python_capi.thrift_dep.thrift_types as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types
 
 
-@_fbthrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -158,8 +158,9 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 
-@_fbthrift_abstract_types.MyDataItem.register
+
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -212,8 +213,9 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyDataItem, MyDataItem)
 
-@_fbthrift_abstract_types.TransitiveDoubler.register
+
 class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -255,8 +257,9 @@ class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TransitiveDoubler, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.TransitiveDoubler, TransitiveDoubler)
 
-@_fbthrift_abstract_types.DoubledPair.register
+
 class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -320,8 +323,9 @@ class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.DoubledPair, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.DoubledPair, DoubledPair)
 
-@_fbthrift_abstract_types.StringPair.register
+
 class StringPair(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -385,8 +389,9 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.StringPair, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.StringPair, StringPair)
 
-@_fbthrift_abstract_types.EmptyStruct.register
+
 class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
     )
@@ -428,8 +433,9 @@ class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.EmptyStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.EmptyStruct, EmptyStruct)
 
-@_fbthrift_abstract_types.PrimitiveStruct.register
+
 class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -647,8 +653,9 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.PrimitiveStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.PrimitiveStruct, PrimitiveStruct)
 
-@_fbthrift_abstract_types.AdaptedFields.register
+
 class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -734,8 +741,9 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedFields, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedFields, AdaptedFields)
 
-@_fbthrift_abstract_types.ListStruct.register
+
 class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -876,8 +884,9 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ListStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ListStruct, ListStruct)
 
-@_fbthrift_abstract_types.SetStruct.register
+
 class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -996,8 +1005,9 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SetStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.SetStruct, SetStruct)
 
-@_fbthrift_abstract_types.MapStruct.register
+
 class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1149,8 +1159,9 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MapStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MapStruct, MapStruct)
 
-@_fbthrift_abstract_types.ComposeStruct.register
+
 class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1302,8 +1313,9 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComposeStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ComposeStruct, ComposeStruct)
 
-@_fbthrift_abstract_types.Onion.register
+
 class Onion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1424,6 +1436,8 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Onion, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Onion, Onion)
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.module.thrift_metadata

@@ -14,6 +14,7 @@ from __future__ import annotations
 import folly.iobuf as _fbthrift_iobuf
 
 import module.thrift_mutable_types as _fbthrift_current_module
+from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
@@ -22,7 +23,6 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-@_fbthrift_abstract_types.MyStructFloatFieldThrowExp.register
 class MyStructFloatFieldThrowExp(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -109,8 +109,9 @@ class MyStructFloatFieldThrowExp(metaclass=_fbthrift_python_mutable_types.Mutabl
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructFloatFieldThrowExp, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructFloatFieldThrowExp, MyStructFloatFieldThrowExp)
 
-@_fbthrift_abstract_types.MyStructMapFloatThrowExp.register
+
 class MyStructMapFloatThrowExp(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -175,8 +176,9 @@ class MyStructMapFloatThrowExp(metaclass=_fbthrift_python_mutable_types.MutableS
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructMapFloatThrowExp, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructMapFloatThrowExp, MyStructMapFloatThrowExp)
 
-@_fbthrift_abstract_types.MyStruct.register
+
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -527,8 +529,9 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 
-@_fbthrift_abstract_types.SimpleStruct.register
+
 class SimpleStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -593,8 +596,9 @@ class SimpleStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SimpleStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.SimpleStruct, SimpleStruct)
 
-@_fbthrift_abstract_types.defaultStruct.register
+
 class defaultStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -879,8 +883,9 @@ class defaultStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.defaultStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.defaultStruct, defaultStruct)
 
-@_fbthrift_abstract_types.MyStructTypeDef.register
+
 class MyStructTypeDef(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1022,8 +1027,9 @@ class MyStructTypeDef(metaclass=_fbthrift_python_mutable_types.MutableStructMeta
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructTypeDef, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructTypeDef, MyStructTypeDef)
 
-@_fbthrift_abstract_types.MyDataItem.register
+
 class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
     )
@@ -1066,8 +1072,9 @@ class MyDataItem(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyDataItem, MyDataItem)
 
-@_fbthrift_abstract_types.MyUnion.register
+
 class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1179,8 +1186,9 @@ class MyUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnion, MyUnion)
 
-@_fbthrift_abstract_types.MyUnionFloatFieldThrowExp.register
+
 class MyUnionFloatFieldThrowExp(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1270,8 +1278,9 @@ class MyUnionFloatFieldThrowExp(metaclass=_fbthrift_python_mutable_types.Mutable
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnionFloatFieldThrowExp, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnionFloatFieldThrowExp, MyUnionFloatFieldThrowExp)
 
-@_fbthrift_abstract_types.ComplexNestedStruct.register
+
 class ComplexNestedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1512,8 +1521,9 @@ class ComplexNestedStruct(metaclass=_fbthrift_python_mutable_types.MutableStruct
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexNestedStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ComplexNestedStruct, ComplexNestedStruct)
 
-@_fbthrift_abstract_types.TypeRemapped.register
+
 class TypeRemapped(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -1599,6 +1609,8 @@ class TypeRemapped(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TypeRemapped, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.TypeRemapped, TypeRemapped)
 
 
 class emptyXcep(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):

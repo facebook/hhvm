@@ -27,3 +27,13 @@ class SpecialCasesTest(unittest.TestCase):
             # defined in a manner to cause the error above.
             TestPropertyAsField,  # noqa: F401
         )
+
+    def test_field_named_register(self) -> None:
+        # The purpose of this is to ensure that the Python parses the imported module
+        # below, which will cause the failure below, if not implemented appropriately.
+        #   TypeError: 'property' object is not callable
+        from thrift.python.test.special_cases.thrift_types import (  # noqa: F401
+            # Import TestRegisterAsField only to point to the thrift struct that is
+            # defined in a manner to cause the error above.
+            TestRegisterAsField,  # noqa: F401
+        )

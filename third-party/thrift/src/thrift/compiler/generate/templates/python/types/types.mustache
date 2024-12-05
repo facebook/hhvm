@@ -23,6 +23,7 @@ import folly.iobuf as _fbthrift_iobuf
 {{> types/set_current_module}}
 
 {{#program:enable_abstract_types?}}
+from abc import ABCMeta as _fbthrift_ABCMeta
 import {{program:module_path}}.thrift_abstract_types as _fbthrift_abstract_types
 {{/program:enable_abstract_types?}}
 import {{program:base_library_package}}.types as _fbthrift_python_types
@@ -48,18 +49,7 @@ import {{module_path}}
 {{#program:structs}}
 
 
-{{#program:enable_abstract_types?}}{{!
-TODO(T208096866)
-If the class uses the abstract class as a direct baseclass, it results in the error below.
-       TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict)
-       subclass of the metaclasses of all its bases
-
-Until we resolve the above error, register the class as virtual subclass of the abstract class.
-}}{{^struct:exception?}}
-@_fbthrift_abstract_types.{{> structs/unadapted_name}}.register
-{{/struct:exception?}}{{!
-}}{{/program:enable_abstract_types?}}{{!
-}}class {{> structs/unadapted_name}}{{!
+class {{> structs/unadapted_name}}{{!
 }}(metaclass={{!
         }}{{#struct:union?}}{{> types/union_metaclass}}{{/struct:union?}}{{!
         }}{{^struct:union?}}{{!
@@ -181,6 +171,21 @@ Until we resolve the above error, register the class as virtual subclass of the 
             py_asyncio_types = importlib.import_module("{{program:py_asyncio_module_path}}.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.{{> structs/unadapted_name}}, self)
     {{/struct:legacy_api?}}
+{{#program:enable_abstract_types?}}{{!
+TODO(T208096866)
+If the class uses the abstract class as a direct baseclass, it results in the error below.
+       TypeError: metaclass conflict: the metaclass of a derived class must be a (non-strict)
+       subclass of the metaclasses of all its bases
+
+Until we resolve the above error, register the class as virtual subclass of the abstract class.
+To workaround the problem that a thrift field named register will cause register to become a property
+on the abstract type and prevent the ability to use it to register a virtual subclass,
+use abc.ABCMeta.register(cls, subclass) to register.
+}}{{^struct:exception?}}
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.{{> structs/unadapted_name}}, {{> structs/unadapted_name}})
+{{/struct:exception?}}
+{{/program:enable_abstract_types?}}
 {{#struct:has_adapter?}}
 
 

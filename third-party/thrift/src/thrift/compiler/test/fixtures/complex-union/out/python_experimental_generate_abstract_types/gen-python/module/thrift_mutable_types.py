@@ -14,6 +14,7 @@ from __future__ import annotations
 import folly.iobuf as _fbthrift_iobuf
 
 import module.thrift_mutable_types as _fbthrift_current_module
+from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
@@ -22,7 +23,6 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-@_fbthrift_abstract_types.ComplexUnion.register
 class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -134,8 +134,9 @@ class ComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexUnion, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ComplexUnion, ComplexUnion)
 
-@_fbthrift_abstract_types.ListUnion.register
+
 class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -203,8 +204,9 @@ class ListUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ListUnion, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ListUnion, ListUnion)
 
-@_fbthrift_abstract_types.DataUnion.register
+
 class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -272,8 +274,9 @@ class DataUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.DataUnion, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.DataUnion, DataUnion)
 
-@_fbthrift_abstract_types.Val.register
+
 class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -349,8 +352,9 @@ class Val(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Val, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Val, Val)
 
-@_fbthrift_abstract_types.ValUnion.register
+
 class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -418,8 +422,9 @@ class ValUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ValUnion, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ValUnion, ValUnion)
 
-@_fbthrift_abstract_types.VirtualComplexUnion.register
+
 class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -487,8 +492,9 @@ class VirtualComplexUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionM
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.VirtualComplexUnion, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.VirtualComplexUnion, VirtualComplexUnion)
 
-@_fbthrift_abstract_types.NonCopyableStruct.register
+
 class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -542,8 +548,9 @@ class NonCopyableStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMe
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.NonCopyableStruct, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.NonCopyableStruct, NonCopyableStruct)
 
-@_fbthrift_abstract_types.NonCopyableUnion.register
+
 class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -599,6 +606,8 @@ class NonCopyableUnion(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.NonCopyableUnion, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.NonCopyableUnion, NonCopyableUnion)
 
 from module.thrift_enums import *
 

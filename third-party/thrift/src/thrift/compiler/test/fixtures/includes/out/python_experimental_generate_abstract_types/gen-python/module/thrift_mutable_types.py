@@ -14,6 +14,7 @@ from __future__ import annotations
 import folly.iobuf as _fbthrift_iobuf
 
 import module.thrift_mutable_types as _fbthrift_current_module
+from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
@@ -25,7 +26,6 @@ import includes.thrift_mutable_types
 import includes.thrift_mutable_types as _fbthrift__includes__thrift_mutable_types
 
 
-@_fbthrift_abstract_types.MyStruct.register
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
         _fbthrift_python_types.FieldInfo(
@@ -100,6 +100,8 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 
 from module.thrift_enums import *
 

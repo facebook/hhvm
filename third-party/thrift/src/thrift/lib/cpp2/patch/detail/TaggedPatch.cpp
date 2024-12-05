@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/patch/TaggedPatch.h>
 #include <thrift/lib/cpp2/patch/detail/PatchBadge.h>
+#include <thrift/lib/cpp2/patch/detail/TaggedPatch.h>
 
-namespace apache::thrift::protocol::detail {
+namespace apache::thrift::protocol::detail::experimental {
 Badge BadgeHolder::get() {
   return badge;
 }
-} // namespace apache::thrift::protocol::detail
+} // namespace apache::thrift::protocol::detail::experimental

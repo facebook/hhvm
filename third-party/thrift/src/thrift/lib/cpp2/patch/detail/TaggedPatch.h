@@ -17,11 +17,12 @@
 #pragma once
 #include <thrift/lib/cpp2/patch/DynamicPatch.h>
 
-namespace apache::thrift::protocol {
-
-namespace detail {
+namespace apache::thrift::protocol::detail {
 struct PatchBadgeFactory;
 using Badge = folly::badge<PatchBadgeFactory>;
+} // namespace apache::thrift::protocol::detail
+
+namespace apache::thrift::protocol::detail::experimental {
 
 // This is a wrapper of the underlying dynamic patch, with type safe APIs that
 // are deduced from Tag. The APIs in principle should be identical to static
@@ -374,12 +375,10 @@ class Owned : public Ref {
 
   std::unique_ptr<underlying_dynamic_patch> value_;
 };
-} // namespace detail
 
 // Tagged Patch works similar to op::patch_type, but it does not require the
 // generated patch struct
 template <class T>
-using tagged_patch =
-    typename detail::Owned<detail::TaggedPatchRef<type::infer_tag<T>>>;
+using tagged_patch = Owned<TaggedPatchRef<type::infer_tag<T>>>;
 
-} // namespace apache::thrift::protocol
+} // namespace apache::thrift::protocol::detail::experimental

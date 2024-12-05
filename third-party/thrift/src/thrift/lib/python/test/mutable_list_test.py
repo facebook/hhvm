@@ -278,6 +278,27 @@ class MutableListTest(unittest.TestCase):
         self.assertIsInstance(result, MutableList)
         self.assertIsNot(result, mutable_list)
 
+    def test_radd(self) -> None:
+        mutable_list = _create_MutableList_i32([])
+
+        result_1 = [] + mutable_list
+        self.assertIsInstance(result_1, MutableList)
+        self.assertEqual([], result_1)
+
+        mutable_list.extend(range(100, 200))
+        self.assertEqual([], result_1)
+
+        result_2 = list(range(100)) + mutable_list
+        self.assertIsInstance(result_2, MutableList)
+        self.assertEqual(list(range(200)), result_2)
+
+        # Left hand side with wrong type raises `TypeError`
+        with self.assertRaisesRegex(
+            TypeError, "is not a <class 'int'>, is actually of type <class 'str'>"
+        ):
+            # pyre-ignore[58]: Intentional for test
+            _ = ["1", "2"] + mutable_list
+
     def test_count(self) -> None:
         mutable_list = _create_MutableList_i32([1, 2, 1, 1, 3, 2])
 

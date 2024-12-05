@@ -140,6 +140,12 @@ cdef class MutableList:
         lst.extend(other)
         return lst
 
+    def __radd__(self, other):
+        lst = MutableList(self._val_typeinfo, [])
+        lst.extend(other)
+        lst._list_data.extend(self._list_data)
+        return lst
+
     def __deepcopy__(self, memo):
         return MutableList(self._val_typeinfo, copy.deepcopy(self._list_data, memo))
 

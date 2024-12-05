@@ -19,9 +19,9 @@ export const Example = (props) => {
   return <Collapse {...rest} title={title} open={true} />
 }
 
-Whisker is a **templating language** with a canonical implementation in C++. It draws inspiration from [Mustache](https://mustache.github.io/mustache.5.html), [Handlebars](https://handlebarsjs.com/), and [EmberJS templates](https://emberjs.com/), building upon the strengths of each.
+Whisker is a **templating language** with a canonical implementation in C++. It draws inspiration from [Mustache](https://mustache.github.io/mustache.5.html), [Handlebars](https://handlebarsjs.com/), and [EmberJS templates](https://emberjs.com/), and builds upon the strengths of each.
 
-Within the Thrift ecosystem, Whisker plays a crucial role in the compiler's backend infrastructur. It is utilized for generating code in multiple target languages, including C++, Python, Rust, and Go.
+Within the Thrift ecosystem, Whisker plays a crucial role in the compiler's backend infrastructure. It generates code in C++, Python, Rust, Go, and other languages.
 
 Whisker was developed to replace the open-source library, [`mstch`](https://github.com/no1msd/mstch), which did not scale to meet the needs of Thrift.
 

@@ -968,9 +968,11 @@ class parser {
   // cond-block-open →
   //   { "{{" ~ "#" ~ ("if" | "unless") ~ variable-lookup ~ "}}" }
   // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
-  // cond-block-close → { "{{" ~ "/" ~ ("if" | "unless") ~ "}}" }
+  // cond-block-close →
+  //   { "{{" ~ "/" ~ ("if" | "unless") ~ variable-lookup ~ "}}" }
   //
-  // NOTE: the "if" or "unless" must match between open and close
+  // NOTE: the "if" or "unless"  and the variable-lookup must match between open
+  // and close
   parse_result<ast::conditional_block> parse_conditional_block(
       parser_scan_window scan) {
     assert(scan.empty());
@@ -1035,9 +1037,28 @@ class parser {
                 open.chain_string()));
       }
     };
+
     expect_on_close(tok::open);
     expect_on_close(tok::slash);
     expect_on_close(inverted ? tok::kw_unless : tok::kw_if);
+    lookup = parse_variable_lookup(scan.make_fresh());
+    if (!lookup.has_value()) {
+      report_expected(
+          scan,
+          fmt::format(
+              "variable-lookup to close {}-block '{}'",
+              block_name,
+              open.chain_string()));
+    }
+    ast::variable_lookup close = std::move(lookup).consume_and_advance(&scan);
+    if (close.chain_string() != open.chain_string()) {
+      report_fatal_error(
+          scan,
+          "conditional-block opening '{}' does not match closing '{}'",
+          open.chain_string(),
+          close.chain_string());
+    }
+
     expect_on_close(tok::close);
 
     return {

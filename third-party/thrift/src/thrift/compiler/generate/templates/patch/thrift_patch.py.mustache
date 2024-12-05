@@ -51,7 +51,7 @@ import folly.iobuf as _fbthrift_iobuf
 import {{program:module_path}}.thrift_types as {{program:module_mangle}}__thrift_types
 {{#unless program:safe_patch?}}
 import {{program:safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_types
-{{/unless}}
+{{/unless program:safe_patch?}}
 
 {{#program:include_namespaces}}
 {{#has_types?}}
@@ -64,7 +64,7 @@ import {{included_module_path}}.thrift_patch
 {{#program:structs}}
 
 class {{struct:py_name}}Patch(
-    Base{{#if struct:union?}}Union{{#else}}Struct{{/if}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
+    Base{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
 ):
     pass
 {{#struct:fields_ordered_by_id}}
@@ -88,10 +88,10 @@ class {{struct:py_name}}Patch(
     @staticmethod
     def from_safe_patch(safe_patch: _fbthrift_safe_patch_types.{{struct:name}}SafePatch) -> {{struct:py_name}}Patch:
         patch = {{struct:py_name}}Patch()
-        DynamicPatch = Dynamic{{#if struct:union?}}Union{{#else}}Struct{{/if}}Patch
+        DynamicPatch = Dynamic{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
-    {{/unless}}
+    {{/unless program:safe_patch?}}
 
 
 {{/struct:fields_ordered_by_id}}

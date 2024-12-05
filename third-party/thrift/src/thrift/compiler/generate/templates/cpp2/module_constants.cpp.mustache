@@ -70,7 +70,7 @@ namespace {{program:name}}_constants {
   return ::folly::range(includes);
 {{#else}}
   return {};
-{{/if}}
+{{/if program:schema_includes_const?}}
 }
 
 } // namespace {{program:name}}_constants

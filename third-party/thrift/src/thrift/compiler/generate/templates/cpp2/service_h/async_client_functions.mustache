@@ -106,11 +106,11 @@
   }}
 {{ > common/fun_docblock}}
   folly::coro::Task<{{ > types/return_type_client}}> co_{{function:cpp_name}}({{ > service_common/function_param_list_client}}) {
-    {{#if function:stream?}}co_return {{#else}}{{#unless type:void?}}co_return {{/unless}}{{/if}}co_await folly::coro::detachOnCancel(semifuture_{{function:cpp_name}}({{ > service_common/param_list}}));
+    {{#if function:stream?}}co_return {{#else}}{{#unless type:void?}}co_return {{/unless type:void?}}{{/if function:stream?}}co_await folly::coro::detachOnCancel(semifuture_{{function:cpp_name}}({{ > service_common/param_list}}));
   }
 {{ > common/fun_docblock}}
   folly::coro::Task<{{ > types/return_type_client}}> co_{{function:cpp_name}}(apache::thrift::RpcOptions& rpcOptions{{function:comma}}{{ > service_common/function_param_list_client}}) {
-    {{#if function:stream?}}co_return {{#else}}{{#unless type:void?}}co_return {{/unless}}{{/if}}co_await folly::coro::detachOnCancel(semifuture_{{function:cpp_name}}(rpcOptions{{function:comma}}{{ > service_common/param_list}}));
+    {{#if function:stream?}}co_return {{#else}}{{#unless type:void?}}co_return {{/unless type:void?}}{{/if function:stream?}}co_await folly::coro::detachOnCancel(semifuture_{{function:cpp_name}}(rpcOptions{{function:comma}}{{ > service_common/param_list}}));
   }
 #endif
  private:
@@ -188,16 +188,16 @@
     if (auto ew = recv_wrapped_{{function:cpp_name}}(_return, returnState)) {
       co_yield folly::coro::co_error(std::move(ew));
     }
-      {{/if}}
-    {{/if}}
+      {{/if type:void?}}
+    {{/if function:stream?}}
   {{#unless function:creates_interaction?}}
     {{#if function:stream?}}
     co_return _return;
     {{#else}}
       {{#unless type:void?}}
     co_return _return;
-      {{/unless}}
-    {{/if}}
+      {{/unless type:void?}}
+    {{/if function:stream?}}
   {{#else}}
     {{#if function:stream?}}
     co_return std::make_pair(std::move(interactionHandle), std::move(_return));
@@ -206,9 +206,9 @@
     co_return std::make_pair(std::move(interactionHandle), std::move(_return));
       {{#else}}
     co_return interactionHandle;
-      {{/unless}}
-    {{/if}}
-  {{/unless}}
+      {{/unless type:void?}}
+    {{/if function:stream?}}
+  {{/unless function:creates_interaction?}}
   {{/function:oneway?}}
   }
  public:

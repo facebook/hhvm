@@ -27,5 +27,5 @@
     }}{{^type:void?}}{{!
       }}std::pair<apache::thrift::Client<{{service:parent_service_qualified_name}}>::{{function:created_interaction}}, {{ > types/return_type_client_no_handle}}>{{!
     }}{{/type:void?}}{{!
-  }}{{/if}}{{!
+  }}{{/if function:stream?}}{{!
 }}{{/function:creates_interaction?}}

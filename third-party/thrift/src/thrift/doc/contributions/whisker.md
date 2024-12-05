@@ -42,7 +42,7 @@ Hello {{name}}
 You have just won {{value}} dollars!
 {{#if in_ca}}
 Well, {{taxed_value}} dollars, after taxes.
-{{/if}}
+{{/if in_ca}}
 ```
 
 With the following input context:
@@ -241,12 +241,14 @@ Whisker supports a conditionally rendering block type: `{{#if}}`. A typical cond
 Greetings, {{person.name}}!
 {{#else}}
 I don't know who you are.
-{{/if}}
+{{/if person.hasName}}
 ```
 
 `{{#if}}` blocks can **optionally** include one `{{#else}}` statement. When omitted, the behavior matches an `{{#else}}` with an empty body.
 
 In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean`. If its value is `true`, then the body before the `{{#else}}` is rendered. Otherwise, the body after the `{{#else}}` is rendered.
+
+The closing tag must exactly replicate the `expression` of the matching opening tag. This serves to improve readability of complex nested conditions.
 
 <Example title="Example (positive)">
 
@@ -292,11 +294,11 @@ I don't know who you are.
 
 {{#unless failed?}}
 Nice!
-{{/unless}}
+{{/unless failed?}}
 
 {{#if (not failed?)}}
 Nice!
-{{/if}}
+{{/if (not failed?)}}
 ```
 
 </Example>
@@ -307,8 +309,10 @@ Nice!
 if-block       → { if-block-open ~ body* ~ else-block? ~ if-block-close }
 if-block-open  → { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
 else-block     → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
-if-block-close → { "{{" ~ "/" ~ "if" ~ "}}" }
+if-block-close → { "{{" ~ "/" ~ "if" ~ expression ~ "}}" }
 ```
+
+The `expression`s in `if-block-open` and `if-block-close` **must** be the same.
 
 </Grammar>
 

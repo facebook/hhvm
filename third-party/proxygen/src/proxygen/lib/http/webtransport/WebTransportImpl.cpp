@@ -60,6 +60,7 @@ WebTransportImpl::newWebTransportUniStream() {
   auto res = wtEgressStreams_.emplace(std::piecewise_construct,
                                       std::forward_as_tuple(*id),
                                       std::forward_as_tuple(*this, *id));
+  sp_.refreshTimeout();
   return &res.first->second;
 }
 
@@ -76,6 +77,7 @@ WebTransportImpl::newWebTransportBidiStream() {
                                 std::forward_as_tuple(*this, *id));
   auto readHandle = &ingressRes.first->second;
   tp_.initiateReadOnBidiStream(*id, readHandle);
+  sp_.refreshTimeout();
   auto egressRes = wtEgressStreams_.emplace(std::piecewise_construct,
                                             std::forward_as_tuple(*id),
                                             std::forward_as_tuple(*this, *id));
@@ -114,6 +116,7 @@ WebTransportImpl::sendWebTransportStreamData(HTTPCodec::StreamID id,
   if (eof || res.hasError()) {
     wtEgressStreams_.erase(id);
   }
+  sp_.refreshTimeout();
   return res;
 }
 
@@ -122,6 +125,7 @@ WebTransportImpl::resetWebTransportEgress(HTTPCodec::StreamID id,
                                           uint32_t errorCode) {
   auto res = tp_.resetWebTransportEgress(id, errorCode);
   wtEgressStreams_.erase(id);
+  sp_.refreshTimeout();
   return res;
 }
 
@@ -130,6 +134,7 @@ WebTransportImpl::stopReadingWebTransportIngress(HTTPCodec::StreamID id,
                                                  uint32_t errorCode) {
   auto res = tp_.stopReadingWebTransportIngress(id, errorCode);
   wtIngressStreams_.erase(id);
+  sp_.refreshTimeout();
   return res;
 }
 
@@ -142,6 +147,7 @@ WebTransportImpl::StreamWriteHandle::writeStreamData(
         folly::make_exception_wrapper<WebTransport::Exception>(
             *stopSendingErrorCode_));
   }
+  impl_.sp_.refreshTimeout();
   auto fcState =
       impl_.sendWebTransportStreamData(id_, std::move(data), fin, this);
   if (fcState.hasError()) {
@@ -213,6 +219,7 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
 
 void WebTransportImpl::StreamReadHandle::readAvailable(
     quic::StreamId id) noexcept {
+  impl_.sp_.refreshTimeout();
   auto readRes = impl_.tp_.readWebTransportData(id, 65535);
   if (readRes.hasError()) {
     LOG(ERROR) << "Got synchronous read error=" << uint32_t(readRes.error());
@@ -258,6 +265,7 @@ WebTransportImpl::StreamReadHandle::dataAvailable(
 void WebTransportImpl::StreamReadHandle::readError(
     quic::StreamId id, quic::QuicError error) noexcept {
   // Do I need to setReadCallback(id, nullptr);
+  impl_.sp_.refreshTimeout();
   auto quicAppErrorCode = error.code.asApplicationErrorCode();
   if (quicAppErrorCode) {
     auto appErrorCode =

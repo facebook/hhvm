@@ -70,6 +70,9 @@ class WebTransportImpl : public WebTransport {
    public:
     virtual ~SessionProvider() = default;
 
+    virtual void refreshTimeout() {
+    }
+
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(
         folly::Optional<uint32_t> /*error*/) = 0;
   };

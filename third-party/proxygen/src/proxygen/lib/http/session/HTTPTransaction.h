@@ -1582,7 +1582,7 @@ class HTTPTransaction
   /**
    * Schedule or refresh the idle timeout for this transaction
    */
-  void refreshTimeout() {
+  void refreshTimeout() override {
     // TODO(T121147568): Remove the zero-check after the experiment is complete.
     if (timer_ && hasIdleTimeout() &&
         idleTimeout_.value() != std::chrono::milliseconds::zero()) {

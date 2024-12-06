@@ -1948,7 +1948,7 @@ The format can be found in hphp/tools/configs/generate_configs.rs
 
 # Xenon
 
-- double Xenon.PeriodSeconds = 0.0, UNKNOWN
+- double Xenon.PeriodSeconds = 0.0, UNKNOWN, lookuppath(Xenon.Period)
 - uint32_t Xenon.RequestFreq = 1, UNKNOWN
 - bool Xenon.ForceAlwaysOn = false, UNKNOWN
 - bool Xenon.TrackActiveWorkers = false, UNKNOWN

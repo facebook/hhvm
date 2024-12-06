@@ -9,7 +9,6 @@
 #pragma once
 
 #include <fizz/client/CertManager.h>
-#include <fizz/client/ECHPolicy.h>
 #include <fizz/client/PskCache.h>
 #include <fizz/compression/CertDecompressionManager.h>
 #include <fizz/protocol/Certificate.h>
@@ -134,14 +133,6 @@ class FizzClientContext {
 
   std::shared_ptr<CertManager> getCertManager() const {
     return certManager_;
-  }
-
-  void setECHPolicy(std::shared_ptr<ECHPolicy> echPolicy) {
-    echPolicy_ = std::move(echPolicy);
-  }
-
-  ECHPolicy* getECHPolicy() const {
-    return echPolicy_.get();
   }
 
   /**
@@ -369,7 +360,6 @@ class FizzClientContext {
 
   SendKeyShare sendKeyShare_{SendKeyShare::WhenNecessary};
 
-  std::shared_ptr<ECHPolicy> echPolicy_;
   std::shared_ptr<PskCache> pskCache_;
   std::shared_ptr<CertManager> certManager_{nullptr};
   std::shared_ptr<CertDecompressionManager> certDecompressionManager_;

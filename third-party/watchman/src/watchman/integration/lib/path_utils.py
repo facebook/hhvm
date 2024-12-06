@@ -15,7 +15,6 @@ import platform
 if os.name == "nt":
 
     def open_file_win(path):
-
         create_file = ctypes.windll.kernel32.CreateFileW
 
         c_path = ctypes.create_unicode_buffer(path)

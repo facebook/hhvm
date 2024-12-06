@@ -19,7 +19,6 @@ def populate(repo):
 
 class TestEdenUnmount(WatchmanEdenTestCase.WatchmanEdenTestCase):
     def test_eden_unmount(self) -> None:
-
         root = self.makeEdenMount(populate)
         self.watchmanCommand("watch", root)
 

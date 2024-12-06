@@ -43,7 +43,6 @@ class AsyncWatchmanTestCase(unittest.TestCase):
         self.touch(fname, None)
 
     def watchman_command(self, *args):
-
         task = asyncio.wait_for(self.client.query(*args), 10)
         return self.loop.run_until_complete(task)
 

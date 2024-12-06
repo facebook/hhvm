@@ -137,8 +137,10 @@ class TestEdenGlobUpperBound(WatchmanEdenTestCase.WatchmanEdenTestCase):
             ["mixedCASE/file1", "MIXEDcase/file2"],
         )
         self.assertGlobUpperBound(
-            # We can't bound this query with a glob on a case-sensitive FS.
-            (None if self.isCaseSensitiveMount(root) else {"mixedcase/**"})
+            (
+                # We can't bound this query with a glob on a case-sensitive FS.
+                None if self.isCaseSensitiveMount(root) else {"mixedcase/**"}
+            )
         )
 
     def test_eden_since_upper_bound_includedotfiles(self) -> None:

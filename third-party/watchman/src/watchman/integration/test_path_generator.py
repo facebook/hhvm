@@ -48,7 +48,9 @@ class TestPathGenerator(WatchmanTestCase.WatchmanTestCase):
 
             self.assertFileListsEqual(
                 self.watchmanCommand(
-                    "query", root, {"fields": ["name"], "path": ["foo"]}  # not Foo!
+                    "query",
+                    root,
+                    {"fields": ["name"], "path": ["foo"]},  # not Foo!
                 )["files"],
                 [],
                 message="Case insensitive matching not implemented \
@@ -89,7 +91,9 @@ class TestPathGenerator(WatchmanTestCase.WatchmanTestCase):
 
             self.assertFileListsEqual(
                 self.watchmanCommand(
-                    "query", root, {"fields": ["name"], "path": ["foo"]}  # not Foo!
+                    "query",
+                    root,
+                    {"fields": ["name"], "path": ["foo"]},  # not Foo!
                 )["files"],
                 [],
                 message="Case insensitive matching not implemented \

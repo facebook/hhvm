@@ -38,7 +38,7 @@ if os.path.basename(bser.__file__) == "pybser.py":
         )
     )
 
-PILE_OF_POO = "\U0001F4A9"
+PILE_OF_POO = "\U0001f4a9"
 NON_UTF8_STRING = b"\xff\xff\xff"
 
 

@@ -4,20 +4,24 @@ ERROR: File "async_generator.php", line 6, characters 14-38:
 Expression trees only support simple lambdas, without features like `async`, generators or capabilities. (Parsing[1002])
 ERROR: File "async_generator.php", line 6, characters 29-35:
 `yield` is not supported in expression trees. (Parsing[1002])
-ERROR: File "async_generator.php", line 6, characters 14-38:
-You cannot return a value in a generator (a generator is a function that uses `yield`) (NastCheck[3019])
-ERROR: File "async_generator.php", line 6, characters 14-38:
+ERROR: File "async_generator.php", line 5, characters 18-21:
 Invalid return type (Typing[4110])
-  File "async_generator.php", line 6, characters 14-38:
-  Expected `AsyncGenerator<_, _, _>` (result of `async function` containing a `yield`)
-  File "expr_tree.php", line 94, characters 38-48:
-  But got `ExampleVoid`
+  File "async_generator.php", line 5, characters 18-21:
+  Expected `void`
+  File "async_generator.php", line 5, characters 18-21:
+  But got `Generator<_, _, _>` (result of function containing a `yield`)
 ERROR: File "async_generator.php", line 6, characters 29-35:
 Invalid `yield` (Typing[4110])
   File "expr_tree.php", line 60, characters 21-26:
   Expected `string`
   File "expr_tree.php", line 71, characters 28-43:
     resulting from expanding the type constant `ExampleDsl::TAst`
+  File "async_generator.php", line 6, characters 29-35:
+  But got `AsyncGenerator<?_, int, nothing>` (result of `async function` with `yield` in the body)
+ERROR: File "async_generator.php", line 6, characters 29-35:
+Invalid `yield` (Typing[4110])
+  File "async_generator.php", line 6, characters 14-38:
+  Expected `Awaitable<_>` (result of an `async` function)
   File "async_generator.php", line 6, characters 29-35:
   But got `AsyncGenerator<?_, int, nothing>` (result of `async function` with `yield` in the body)
 ERROR: File "async_generator.php", line 6, characters 29-35:

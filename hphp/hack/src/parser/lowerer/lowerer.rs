@@ -192,6 +192,8 @@ pub struct Env<'a> {
     found_await: bool,
     // Whether we are in the body of an async function
     pub in_async: bool,
+    // Whether we are in an expression tree
+    in_expr_tree: bool,
 
     pub indexed_source_text: &'a IndexedSourceText<'a>,
     pub parser_options: &'a ParserOptions,
@@ -229,6 +231,7 @@ impl<'a> Env<'a> {
             found_yield: false,
             found_await: false,
             in_async: false,
+            in_expr_tree: false,
             indexed_source_text,
             parser_options,
             pos_none: Pos::NONE,
@@ -369,18 +372,25 @@ impl<'a> Env<'a> {
     where
         F: FnOnce(S<'a>, &mut Env<'a>) -> Result<R>,
     {
-        let outer_found_yield = self.found_yield;
-        let outer_found_await = self.found_await;
-        let outer_in_async = self.in_async;
-        self.found_yield = false;
-        self.found_await = false;
-        self.in_async = matches!(async_, SuspensionKind::SKAsync);
-        let r = p(node, self);
-        let found_yield = self.found_yield;
-        self.found_yield = outer_found_yield;
-        self.found_await = outer_found_await;
-        self.in_async = outer_in_async;
-        Ok((r?, found_yield))
+        if self.in_expr_tree {
+            // Inside of an expression tree, we are going to lower a client
+            // lambda, which shouldn't disturb our tracking of hack-level
+            // await/yield/async
+            Ok((p(node, self)?, false))
+        } else {
+            let outer_found_yield = self.found_yield;
+            let outer_found_await = self.found_await;
+            let outer_in_async = self.in_async;
+            self.found_yield = false;
+            self.found_await = false;
+            self.in_async = matches!(async_, SuspensionKind::SKAsync);
+            let r = p(node, self);
+            let found_yield = self.found_yield;
+            self.found_yield = outer_found_yield;
+            self.found_await = outer_found_await;
+            self.in_async = outer_in_async;
+            Ok((r?, found_yield))
+        }
     }
 }
 
@@ -2371,6 +2381,7 @@ fn p_prefixed_code_expr<'a>(
         }
         (Err(e), _) => Err(e),
     }?;
+    env.in_expr_tree = true;
     let src_expr = if !c.body.is_compound_statement() {
         p_expr(&c.body, env)?
     } else {
@@ -2412,6 +2423,9 @@ fn p_prefixed_code_expr<'a>(
     if clear_et_class_at_end {
         env.expression_tree_class = None;
     }
+    // Since expression trees can't directly nest, we don't need to restore the
+    // old value, it must be false.
+    env.in_expr_tree = false;
 
     Ok(desugar_result.expr.2)
 }
@@ -2420,11 +2434,15 @@ fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) 
     // Clear out found awaits since we want to see if there is one in this splice expression.
     let old_found_await = env.found_await;
     env.found_await = false;
+    env.in_expr_tree = false;
     let inner_pos = p_pos(expr, env);
     let inner_expr_ = p_expr_recurse(location, expr, env, None)?;
     let spliced_expr = ast::Expr::new((), inner_pos, inner_expr_);
     let contains_await = env.found_await;
     env.found_await |= old_found_await;
+    // Since splices can't directly nest, we don't need to restore the old value,
+    // it must be true
+    env.in_expr_tree = true;
     Ok(Expr_::ETSplice(Box::new(aast::EtSplice {
         spliced_expr,
         contains_await,

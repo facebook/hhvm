@@ -26,11 +26,6 @@ type Serializer struct {
 	Protocol  types.Encoder
 }
 
-// Deprecated: use NewBinarySerializer instead.
-func NewSerializer() *Serializer {
-	return NewBinarySerializer()
-}
-
 // NewBinarySerializer create a new serializer using the binary format
 func NewBinarySerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)

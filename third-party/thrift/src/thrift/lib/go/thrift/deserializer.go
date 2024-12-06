@@ -25,11 +25,6 @@ type Deserializer struct {
 	Protocol  types.Decoder
 }
 
-// Deprecated: use NewBinaryDeserializer instead.
-func NewDeserializer() *Deserializer {
-	return NewBinaryDeserializer()
-}
-
 // NewBinaryDeserializer creates a new deserializer using the binary protocol
 func NewBinaryDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)

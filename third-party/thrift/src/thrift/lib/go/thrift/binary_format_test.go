@@ -34,7 +34,7 @@ func TestReadWriteBinaryFormat(t *testing.T) {
 func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
 	m := NewMyTestStruct()
 	m.Bin = nil
-	s := NewSerializer()
+	s := NewBinarySerializer()
 	transport := s.Transport
 	transport.Buffer = bytes.NewBuffer([]byte(nil))
 	if err := m.Write(s.Protocol); err != nil {

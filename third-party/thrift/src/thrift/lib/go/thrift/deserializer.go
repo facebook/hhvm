@@ -17,66 +17,75 @@
 package thrift
 
 import (
-	"io"
-
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
 type Deserializer struct {
-	Transport io.ReadWriteCloser
+	Transport *MemoryBuffer
 	Protocol  types.Decoder
 }
 
+// Deprecated: use NewBinaryDeserializer instead.
 func NewDeserializer() *Deserializer {
+	return NewBinaryDeserializer()
+}
+
+// NewBinaryDeserializer creates a new deserializer using the binary protocol
+func NewBinaryDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewBinaryFormat(transport)
-	return &Deserializer{transport, protocol}
+	return &Deserializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactDeserializer creates a new deserializer using the compact protocol
 func NewCompactDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewCompactFormat(transport)
-	return &Deserializer{transport, protocol}
-}
-
-func deserializeCompact(data []byte, msg types.Struct) error {
-	buffer := NewMemoryBufferWithData(data)
-	format := NewCompactFormat(buffer)
-	return msg.Read(format)
+	return &Deserializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactJSONDeserializer creates a new deserializer using the JSON protocol
 func NewCompactJSONDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewCompactJSONFormat(transport)
-	return &Deserializer{transport, protocol}
+	return &Deserializer{Transport: transport, Protocol: protocol}
 }
 
+// NewSimpleJSONDeserializer creates a new deserializer using the simple JSON protocol
 func NewSimpleJSONDeserializer() *Deserializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewSimpleJSONFormat(transport)
-	return &Deserializer{transport, protocol}
+	return &Deserializer{Transport: transport, Protocol: protocol}
 }
 
-func (t *Deserializer) ReadString(msg types.Struct, s string) (err error) {
-	err = nil
-	if _, err = t.Transport.Write([]byte(s)); err != nil {
-		return
-	}
-	if err = msg.Read(t.Protocol); err != nil {
-		return
-	}
-	return
+// DecodeCompact deserializes a compact protocol message
+func DecodeCompact(data []byte, msg types.Struct) error {
+	return NewCompactDeserializer().Read(msg, data)
 }
 
-func (t *Deserializer) Read(msg types.Struct, b []byte) (err error) {
-	err = nil
-	if _, err = t.Transport.Write(b); err != nil {
-		return
+// DecodeBinary deserializes a binary protocol message
+func DecodeBinary(data []byte, msg types.Struct) error {
+	return NewBinaryDeserializer().Read(msg, data)
+}
+
+// ReadString deserializes a Thrift struct from a string
+func (t *Deserializer) ReadString(msg types.Struct, s string) error {
+	if _, err := t.Transport.Write([]byte(s)); err != nil {
+		return err
 	}
-	if err = msg.Read(t.Protocol); err != nil {
-		return
+	if err := msg.Read(t.Protocol); err != nil {
+		return err
 	}
-	return
+	return nil
+}
+
+// Read deserializes a Thrift struct from a byte slice
+func (t *Deserializer) Read(msg types.Struct, b []byte) error {
+	if _, err := t.Transport.Write(b); err != nil {
+		return err
+	}
+	if err := msg.Read(t.Protocol); err != nil {
+		return err
+	}
+	return nil
 }

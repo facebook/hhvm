@@ -44,11 +44,11 @@ func TestWriteBinaryEmptyBinaryFormat(t *testing.T) {
 
 func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewDeserializer()
+	d := NewBinaryDeserializer()
 	// skip over a map with invalid key/value type and ~550M entries
 	data := make([]byte, 1100000000)
 	copy(data[:], []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tsl ce\x00"))
-	transport, _ := d.Transport.(*MemoryBuffer)
+	transport := d.Transport
 	transport.Buffer = bytes.NewBuffer(data)
 	start := time.Now()
 	err := m.Read(d.Protocol)
@@ -65,7 +65,7 @@ func TestSkipUnknownTypeBinaryFormat(t *testing.T) {
 
 func TestInitialAllocationMapBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewDeserializer()
+	d := NewBinaryDeserializer()
 	// attempts to allocate a map with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\r\n\tslice\x00")
 	err := d.Read(&m, data)
@@ -78,7 +78,7 @@ func TestInitialAllocationMapBinaryFormat(t *testing.T) {
 
 func TestInitialAllocationListBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewDeserializer()
+	d := NewBinaryDeserializer()
 	// attempts to allocate a list with 1.8B elements for a 20 byte message
 	data := []byte("\n\x10\rO\t6\x03\n\n\n\x10\x0f\n\tslice\x00")
 	err := d.Read(&m, data)
@@ -91,7 +91,7 @@ func TestInitialAllocationListBinaryFormat(t *testing.T) {
 
 func TestInitialAllocationSetBinaryFormat(t *testing.T) {
 	var m MyTestStruct
-	d := NewDeserializer()
+	d := NewBinaryDeserializer()
 	// attempts to allocate a set with 1.8B elements for a 20 byte message
 	data := []byte("\n\x12\rO\t6\x03\n\n\n\x10\x0e\n\tslice\x00")
 	err := d.Read(&m, data)

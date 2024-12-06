@@ -59,7 +59,7 @@ func decodeResponsePayload(msg payload.Payload) (*responsePayload, error) {
 	var err error
 	metadataBytes, ok := msg.Metadata()
 	if ok {
-		if err := deserializeCompact(metadataBytes, res.metadata); err != nil {
+		if err := DecodeCompact(metadataBytes, res.metadata); err != nil {
 			return nil, err
 		}
 		if res.Zstd() {
@@ -86,7 +86,7 @@ func encodeResponsePayload(name string, messageType types.MessageType, headers m
 		excpetionMetadata := newUnknownPayloadExceptionMetadataBase(name, string(dataBytes))
 		metadata.SetPayloadMetadata(rpcmetadata.NewPayloadMetadata().SetExceptionMetadata(excpetionMetadata))
 	}
-	metadataBytes, err := serializeCompact(metadata)
+	metadataBytes, err := EncodeCompact(metadata)
 	if err != nil {
 		return nil, err
 	}

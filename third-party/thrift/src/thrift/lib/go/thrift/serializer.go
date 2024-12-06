@@ -26,65 +26,75 @@ type Serializer struct {
 	Protocol  types.Encoder
 }
 
-// NewSerializer create a new serializer using the binary format
+// Deprecated: use NewBinarySerializer instead.
 func NewSerializer() *Serializer {
+	return NewBinarySerializer()
+}
+
+// NewBinarySerializer create a new serializer using the binary format
+func NewBinarySerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewBinaryFormat(transport)
-	return &Serializer{transport, protocol}
+	return &Serializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactSerializer creates a new serializer using the compact format
 func NewCompactSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewCompactFormat(transport)
-	return &Serializer{transport, protocol}
-}
-
-func serializeCompact(msg types.Struct) ([]byte, error) {
-	return NewCompactSerializer().Write(msg)
+	return &Serializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactJSONSerializer creates a new serializer using the compact JSON format
 func NewCompactJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewCompactJSONFormat(transport)
-	return &Serializer{transport, protocol}
+	return &Serializer{Transport: transport, Protocol: protocol}
 }
 
 // NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
 func NewSimpleJSONSerializer() *Serializer {
 	transport := NewMemoryBufferLen(1024)
 	protocol := NewSimpleJSONFormat(transport)
-	return &Serializer{transport, protocol}
+	return &Serializer{Transport: transport, Protocol: protocol}
+}
+
+// EncodeCompact serializes msg using the compact format
+func EncodeCompact(msg types.Struct) ([]byte, error) {
+	return NewCompactSerializer().Write(msg)
+}
+
+// EncodeBinary serializes msg using the binary format
+func EncodeBinary(msg types.Struct) ([]byte, error) {
+	return NewBinarySerializer().Write(msg)
 }
 
 // WriteString writes msg to the serializer and returns it as a string
-func (s *Serializer) WriteString(msg types.Struct) (str string, err error) {
+func (s *Serializer) WriteString(msg types.Struct) (string, error) {
 	s.Transport.Reset()
 
-	if err = msg.Write(s.Protocol); err != nil {
-		return
+	if err := msg.Write(s.Protocol); err != nil {
+		return "", err
 	}
 
-	if err = s.Protocol.Flush(); err != nil {
-		return
+	if err := s.Protocol.Flush(); err != nil {
+		return "", err
 	}
 
 	return s.Transport.String(), nil
 }
 
 // Write writes msg to the serializer and returns it as a byte array
-func (s *Serializer) Write(msg types.Struct) (b []byte, err error) {
+func (s *Serializer) Write(msg types.Struct) ([]byte, error) {
 	s.Transport.Reset()
 
-	if err = msg.Write(s.Protocol); err != nil {
-		return
+	if err := msg.Write(s.Protocol); err != nil {
+		return nil, err
 	}
 
-	if err = s.Protocol.Flush(); err != nil {
-		return
+	if err := s.Protocol.Flush(); err != nil {
+		return nil, err
 	}
 
-	b = append(b, s.Transport.Bytes()...)
-	return
+	return s.Transport.Bytes(), nil
 }

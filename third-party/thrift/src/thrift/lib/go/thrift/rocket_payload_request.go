@@ -51,7 +51,7 @@ func encodeRequestPayload(name string, protoID types.ProtocolID, typeID types.Me
 	}
 	metadata.OtherMetadata = make(map[string]string)
 	maps.Copy(metadata.OtherMetadata, headers)
-	metadataBytes, err := serializeCompact(metadata)
+	metadataBytes, err := EncodeCompact(metadata)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func decodeRequestPayload(msg payload.Payload) (*requestPayload, error) {
 	metadataBytes, ok := msg.Metadata()
 	if ok {
 		metadata := &rpcmetadata.RequestRpcMetadata{}
-		if err := deserializeCompact(metadataBytes, metadata); err != nil {
+		if err := DecodeCompact(metadataBytes, metadata); err != nil {
 			return nil, err
 		}
 		res.metadata = metadata

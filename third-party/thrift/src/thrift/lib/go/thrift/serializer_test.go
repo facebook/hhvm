@@ -130,11 +130,11 @@ func ProtocolTest2(test *testing.T, serial *Serializer, deserial *Deserializer) 
 func TestSerializer(t *testing.T) {
 
 	serializers := make(map[string]*Serializer)
-	serializers["Binary"] = NewSerializer()
+	serializers["Binary"] = NewBinarySerializer()
 	serializers["Compact"] = NewCompactSerializer()
 	serializers["JSON"] = NewCompactJSONSerializer()
 	deserializers := make(map[string]*Deserializer)
-	deserializers["Binary"] = NewDeserializer()
+	deserializers["Binary"] = NewBinaryDeserializer()
 	deserializers["Compact"] = NewCompactDeserializer()
 	deserializers["JSON"] = NewCompactJSONDeserializer()
 

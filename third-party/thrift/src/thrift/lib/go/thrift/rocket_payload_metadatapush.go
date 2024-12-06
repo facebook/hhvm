@@ -41,7 +41,7 @@ func decodeServerMetadataPushVersion8(msg payload.Payload) (*serverMetadataPaylo
 	}
 	// Use ServerPushMetadata{} and do not use &ServerPushMetadata{} to ensure stack and avoid heap allocation.
 	metadata := rpcmetadata.ServerPushMetadata{}
-	if err := deserializeCompact(metadataBytes, &metadata); err != nil {
+	if err := DecodeCompact(metadataBytes, &metadata); err != nil {
 		panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
 	}
 	if metadata.SetupResponse != nil {
@@ -67,7 +67,7 @@ func encodeServerMetadataPushVersion8(zstdSupported bool) (payload.Payload, erro
 		SetSetupResponse(rpcmetadata.NewSetupResponse().
 			SetVersion(&version).
 			SetZstdSupported(&zstdSupported))
-	metadataBytes, err := serializeCompact(res)
+	metadataBytes, err := EncodeCompact(res)
 	if err != nil {
 		return nil, fmt.Errorf("unable to serialize metadata push %w", err)
 	}
@@ -86,7 +86,7 @@ func decodeClientMetadataPush(msg payload.Payload) *clientMetadataPayload {
 	}
 	// Use ClientPushMetadata{} and do not use &ClientPushMetadata{} to ensure stack and avoid heap allocation.
 	metadata := rpcmetadata.ClientPushMetadata{}
-	if err := deserializeCompact(metadataBytes, &metadata); err != nil {
+	if err := DecodeCompact(metadataBytes, &metadata); err != nil {
 		panic(fmt.Errorf("unable to deserialize metadata push into ClientPushMetadata %w", err))
 	}
 	res := &clientMetadataPayload{}

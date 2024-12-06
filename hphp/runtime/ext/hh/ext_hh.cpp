@@ -1433,6 +1433,33 @@ TypedValue HHVM_FUNCTION(class_to_classname, TypedValue cls) {
   not_reached();
 }
 
+TypedValue HHVM_FUNCTION(get_class_from_object, const Object& object) {
+  return make_tv<KindOfClass>(object->getVMClass());
+}
+
+TypedValue HHVM_FUNCTION(get_parent_class_from_class, TypedValue cls_or_str) {
+  // When StringPassesClass=false, can kill the String case
+  const Class* cls = [&] {
+    switch (cls_or_str.m_type) {
+      case KindOfClass:
+        return cls_or_str.m_data.pclass;
+      case KindOfLazyClass:
+        return Class::load(cls_or_str.m_data.plazyclass.name());
+      case KindOfPersistentString:
+      case KindOfString:
+        return Class::load(cls_or_str.m_data.pstr);
+      default:
+        not_reached();
+    }
+  }();
+
+  if (!cls) return make_tv<KindOfNull>();
+
+  auto const parent = cls->parent();
+  if (!parent) return make_tv<KindOfNull>();
+  return make_tv<KindOfClass>(parent);
+}
+
 bool HHVM_FUNCTION(reflection_class_is_abstract, TypedValue cls) {
   auto const c = getClass(cls);
   return isAbstract(c);
@@ -1603,6 +1630,8 @@ static struct HHExtension final : Extension {
     X(dynamic_class_meth_force);
     X(classname_from_string_unsafe);
     X(class_to_classname);
+    X(get_class_from_object);
+    X(get_parent_class_from_class);
     X(enable_per_file_coverage);
     X(disable_per_file_coverage);
     X(get_files_with_coverage);

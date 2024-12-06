@@ -212,6 +212,12 @@ function classname_from_string_unsafe(string $classname)[]: mixed;
 <<__Native>>
 function class_to_classname(readonly classname<mixed> $cn)[]: classname<mixed>;
 
+<<__Native>>
+function get_class_from_object(readonly object $o)[]: class<mixed>;
+
+<<__Native>>
+function get_parent_class_from_class(readonly class<mixed> $c)[]: ?class<mixed>;
+
 /**
  * Begin collecting code coverage on all subsequent calls into files in $files
  * during this request.

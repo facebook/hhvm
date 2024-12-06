@@ -1,0 +1,4 @@
+called
+called
+
+Catchable fatal error: Argument 1 passed to HH\get_class_from_object() must be an instance of HH\object, float given in %s/get_class_from_object.php on line 34

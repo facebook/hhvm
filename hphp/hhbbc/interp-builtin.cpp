@@ -69,6 +69,22 @@ TypeOrReduced builtin_get_class(ISS& env, const php::Func* func,
   return sval(d.cls().name());
 }
 
+TypeOrReduced builtin_get_class_from_object(ISS& env, const php::Func* func,
+                                            const FCallArgs& fca) {
+  assertx(fca.numArgs() == 1);
+  auto const ty = getArg(env, func, fca, 0);
+
+  if (!ty.couldBe(BObj)) {
+    unreachable(env);
+    return TBottom;
+  }
+  if (ty.subtypeOf(BObj)) {
+    reduce(env, bc::ClassGetC { ClassGetCMode::Normal });
+    return Reduced{};
+  }
+  return TCls;
+}
+
 TypeOrReduced builtin_class_to_classname(ISS& env, const php::Func* func,
                                          const FCallArgs& fca) {
   assertx(fca.numArgs() == 1);
@@ -604,6 +620,7 @@ TypeOrReduced builtin_type_structure_classname(ISS& env, const php::Func* func,
   X(ceil, ceil)                                                         \
   X(floor, floor)                                                       \
   X(get_class, get_class)                                               \
+  X(get_class_from_object, HH\\get_class_from_object)                   \
   X(class_to_classname, HH\\class_to_classname)                         \
   X(max2, max2)                                                         \
   X(min2, min2)                                                         \

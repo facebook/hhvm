@@ -1609,6 +1609,11 @@ impl RewriteState {
                 ));
                 unchanged_result
             }
+            Yield(_) => {
+                self.errors
+                    .push((pos, "`yield` is not supported in expression trees.".into()));
+                unchanged_result
+            }
             _ => {
                 self.errors
                     .push((pos, "Unsupported expression tree syntax.".into()));

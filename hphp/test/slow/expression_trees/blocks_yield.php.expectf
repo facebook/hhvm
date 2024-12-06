@@ -1,1 +1,1 @@
-Fatal error: Expression trees only support simple lambdas, without features like `async`, generators or capabilities. in %s/blocks_yield.php on line 14
+Fatal error: `yield` is not supported in expression trees. in %s/blocks_yield.php on line 12

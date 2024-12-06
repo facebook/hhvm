@@ -3,7 +3,7 @@ Internal error: Return type is not a generator (Other[0000])
 ERROR: File "generator.php", line 6, characters 14-32:
 Expression trees only support simple lambdas, without features like `async`, generators or capabilities. (Parsing[1002])
 ERROR: File "generator.php", line 6, characters 23-29:
-Unsupported expression tree syntax. (Parsing[1002])
+`yield` is not supported in expression trees. (Parsing[1002])
 ERROR: File "generator.php", line 6, characters 14-32:
 You cannot return a value in a generator (a generator is a function that uses `yield`) (NastCheck[3019])
 ERROR: File "generator.php", line 6, characters 14-32:

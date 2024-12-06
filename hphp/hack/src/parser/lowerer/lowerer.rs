@@ -187,7 +187,7 @@ pub struct Env<'a> {
     pub empty_ns_env: Arc<NamespaceEnv>,
 
     // Whether we have encountered an yield expression
-    pub found_yield: bool,
+    found_yield: bool,
     // Whether we have encountered an await expression
     found_await: bool,
     // Whether we are in the body of an async function
@@ -2377,8 +2377,7 @@ fn p_prefixed_code_expr<'a>(
         let pos = p_pos(&c.body, env);
         let suspension_kind = SuspensionKind::SKSync;
         // Take the body and create a no argument lambda expression
-        let (body, yield_) =
-            env.reset_for_function_body(&c.body, suspension_kind, p_function_body)?;
+        let body = p_function_body(&c.body, env)?;
         let external = c.body.is_external();
         let fun = ast::Fun_ {
             span: pos.clone(),
@@ -2387,7 +2386,7 @@ fn p_prefixed_code_expr<'a>(
             readonly_ret: None,
             ret: ast::TypeHint((), None),
             body: ast::FuncBody { fb_ast: body },
-            fun_kind: mk_fun_kind(suspension_kind, yield_),
+            fun_kind: mk_fun_kind(suspension_kind, false),
             params: vec![],
             ctxs: None,
             unsafe_ctxs: None,

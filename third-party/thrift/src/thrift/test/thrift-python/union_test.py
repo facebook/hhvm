@@ -28,6 +28,7 @@ from thrift.python.mutable_types import MutableStructOrUnion
 from thrift.python.types import StructOrUnion as ImmutableStructOrUnion
 
 from thrift.test.thrift_python.union_test.thrift_mutable_types import (
+    TestStruct as TestStructMutable,
     TestUnion as TestUnionMutable,
     TestUnionAdaptedTypes as TestUnionAdaptedTypesMutable,
 )
@@ -496,6 +497,27 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             # pyre-ignore[16]: Intentional for test
             u.non_existent_field = 999
 
+    def test_union_field_enum_type_annotations(self) -> None:
+        u = TestUnionImmutable(string_field="Hello!")
+        u_fbthrift_current_field: TestUnionImmutable.FbThriftUnionFieldEnum = (
+            u.fbthrift_current_field
+        )
+        self.assertEqual(
+            u_fbthrift_current_field,
+            TestUnionImmutable.FbThriftUnionFieldEnum.string_field,
+        )
+        u_type: TestUnionImmutable.Type = u.type
+
+        u_value: typing.Union[None, TestStructImmutable, int, str] = u.value
+        u_fbthrift_current_value: typing.Union[None, TestStructImmutable, int, str] = (
+            u.fbthrift_current_value
+        )
+
+        self.assertEqual(u_type, TestUnionImmutable.Type.string_field)
+        self.assertEqual(u_type, u_fbthrift_current_field)
+        self.assertEqual(u_value, "Hello!")
+        self.assertEqual(u_fbthrift_current_value, "Hello!")
+
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def setUp(self) -> None:
@@ -845,3 +867,19 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
 
         with self.assertRaisesRegex(Exception, "underflow"):
             mutable_serializer.deserialize(TestUnionMutable, b"")
+
+    def test_union_field_enum_type_annotations(self) -> None:
+        u = TestUnionMutable(string_field="Hello!")
+        u_fbthrift_current_field: TestUnionMutable.FbThriftUnionFieldEnum = (
+            u.fbthrift_current_field
+        )
+        self.assertEqual(
+            u_fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
+        )
+
+        u_fbthrift_current_value: typing.Union[None, TestStructMutable, int, str] = (
+            u.fbthrift_current_value
+        )
+
+        self.assertEqual(u_fbthrift_current_value, "Hello!")

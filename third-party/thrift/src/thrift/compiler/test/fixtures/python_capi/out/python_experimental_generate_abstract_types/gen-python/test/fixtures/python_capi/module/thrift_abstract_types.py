@@ -423,9 +423,12 @@ class Onion(_abc.ABC):
         adapted_int = 10
 
     FbThriftUnionFieldEnum.__name__ = "Onion"
-
-    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.PrimitiveStruct, str, _typing.AbstractSet[int], _typing.Sequence[float], _typing.Mapping[bytes, str], int]]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.PrimitiveStruct, str, _typing.AbstractSet[int], _typing.Sequence[float], _typing.Mapping[bytes, str], int]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
 
 uint64 = int

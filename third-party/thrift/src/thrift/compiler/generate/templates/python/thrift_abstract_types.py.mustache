@@ -92,9 +92,12 @@ class {{> structs/unadapted_name}}({{!
         used in immutable thrift-python, which is the name
         of the Union (sigh!)
     }}FbThriftUnionFieldEnum.__name__ = "{{struct:py_name}}"
-
-    fbthrift_current_value: _typing.Final[{{> types/field_value_pep484_union_type}}]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+{{> fields/maybe_abstract_method_annotation}}
+    def fbthrift_current_value(self) -> _typing.Final[{{> types/field_value_pep484_union_type}}]: ...
+    @_fbthrift_property
+{{> fields/maybe_abstract_method_annotation}}
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
     {{/struct:union?}}
 {{#struct:has_adapter?}}

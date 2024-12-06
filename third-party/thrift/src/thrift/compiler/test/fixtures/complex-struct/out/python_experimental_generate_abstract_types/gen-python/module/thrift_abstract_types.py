@@ -348,9 +348,12 @@ class MyUnion(_abc.ABC):
         intValue = 6
 
     FbThriftUnionFieldEnum.__name__ = "MyUnion"
-
-    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _fbthrift_current_module.ComplexNestedStruct, int, int]]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _fbthrift_current_module.ComplexNestedStruct, int, int]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
 
 class MyUnionFloatFieldThrowExp(_abc.ABC):
@@ -383,9 +386,12 @@ class MyUnionFloatFieldThrowExp(_abc.ABC):
         complexNestedStruct = 4
 
     FbThriftUnionFieldEnum.__name__ = "MyUnionFloatFieldThrowExp"
-
-    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _typing.Sequence[_typing.Sequence[float]], _fbthrift_current_module.MyDataItem, _fbthrift_current_module.ComplexNestedStruct]]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _typing.Sequence[_typing.Sequence[float]], _fbthrift_current_module.MyDataItem, _fbthrift_current_module.ComplexNestedStruct]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
 
 class ComplexNestedStruct(_abc.ABC):

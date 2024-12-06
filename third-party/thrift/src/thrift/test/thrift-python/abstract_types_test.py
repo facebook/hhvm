@@ -148,6 +148,24 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         library_fn(TestUnionImmutable(string_field="hello"))
         self.assertTrue(issubclass(TestUnionImmutable, TestUnionAbstract))
 
+    def test_union_current_field_immutable(self) -> None:
+        def make_abstract(u: TestUnionAbstract) -> TestUnionAbstract:
+            return u
+
+        # GIVEN
+        u = make_abstract(TestUnionImmutable(string_field="hello"))
+        # This fixme is required due to the Pyre limitation that it does not recognize nested
+        # type aliases as types for type annotations.
+        # pyre-fixme[9]: expected has type `TestUnionAbstract.FbThriftUnionFieldEnum`; used as
+        #  `TestUnionImmutable.FbThriftUnionFieldEnum`.
+        expected: TestUnionAbstract.FbThriftUnionFieldEnum = (
+            TestUnionImmutable.FbThriftUnionFieldEnum.string_field
+        )
+
+        # WHEN
+        actual: TestUnionAbstract.FbThriftUnionFieldEnum = u.fbthrift_current_field
+        self.assertEqual(expected, actual)
+
     def test_fn_call_with_read_only_abstract_base_class_with_mutable_union(
         self,
     ) -> None:
@@ -166,6 +184,24 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
         # WHEN
         library_fn(TestUnionMutable(string_field="hello"))
         self.assertTrue(issubclass(TestUnionMutable, TestUnionAbstract))
+
+    def test_union_current_field_mutable(self) -> None:
+        def make_abstract(u: TestUnionAbstract) -> TestUnionAbstract:
+            return u
+
+        # GIVEN
+        u = make_abstract(TestUnionMutable(string_field="hello"))
+        # This fixme is required due to the Pyre limitation that it does not recognize nested
+        # type aliases as types for type annotations.
+        # pyre-fixme[9]: expected has type `TestUnionAbstract.FbThriftUnionFieldEnum`; used as
+        #  `TestUnionMutable.FbThriftUnionFieldEnum`.
+        expected: TestUnionAbstract.FbThriftUnionFieldEnum = (
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field
+        )
+
+        # WHEN
+        actual: TestUnionAbstract.FbThriftUnionFieldEnum = u.fbthrift_current_field
+        self.assertEqual(expected, actual)
 
     @parameterized.expand(
         [

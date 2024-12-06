@@ -128,9 +128,12 @@ class MyUnion(_abc.ABC):
         floatSet = 4
 
     FbThriftUnionFieldEnum.__name__ = "MyUnion"
-
-    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _typing.AbstractSet[float]]]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _typing.AbstractSet[float]]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
 
 class MyException(_fbthrift_python_abstract_types.AbstractGeneratedError):
@@ -196,9 +199,12 @@ class UnionToBeRenamed(_abc.ABC):
         reserved_field = 1
 
     FbThriftUnionFieldEnum.__name__ = "UnionToBeRenamed"
-
-    fbthrift_current_value: _typing.Final[_typing.Union[None, int]]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, int]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
 
 MyEnumAlias = _fbthrift_current_module.MyEnum

@@ -178,9 +178,12 @@ class union1(_abc.ABC):
         d = 2
 
     FbThriftUnionFieldEnum.__name__ = "union1"
-
-    fbthrift_current_value: _typing.Final[_typing.Union[None, int, float]]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, int, float]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
 
 class union2(_abc.ABC):
@@ -213,9 +216,12 @@ class union2(_abc.ABC):
         u = 4
 
     FbThriftUnionFieldEnum.__name__ = "union2"
-
-    fbthrift_current_value: _typing.Final[_typing.Union[None, int, float, _fbthrift_current_module.struct1, _fbthrift_current_module.union1]]
-    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, int, float, _fbthrift_current_module.struct1, _fbthrift_current_module.union1]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
 
 MyCompany = _fbthrift_current_module.Company

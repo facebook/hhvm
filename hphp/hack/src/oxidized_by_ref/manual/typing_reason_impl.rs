@@ -100,9 +100,10 @@ impl<'a> WitnessDecl<'a> {
             | WitnessDecl::DefaultCapability(p)
             | WitnessDecl::SupportDynamicType(p)
             | WitnessDecl::PessimisedInout(p)
-            | WitnessDecl::PessimisedReturn(p)
-            | WitnessDecl::PessimisedProp(p)
+            | WitnessDecl::PessimisedReturn((p, _))
+            | WitnessDecl::PessimisedProp((p, _))
             | WitnessDecl::IllegalRecursiveType((p, _))
+            | WitnessDecl::SupportDynamicTypeAssume(p)
             | WitnessDecl::PessimisedThis(p) => p,
         }
     }

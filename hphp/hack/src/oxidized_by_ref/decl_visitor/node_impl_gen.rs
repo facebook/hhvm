@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<55e2ca9f005835dd80514664646990a7>>
+// @generated SignedSource<<a9222348001b9fd41be8223c5d37ebeb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1302,6 +1302,7 @@ impl<'a> Node<'a> for WitnessDecl<'a> {
             WitnessDecl::PessimisedProp(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::PessimisedThis(ref __binding_0) => __binding_0.accept(v),
             WitnessDecl::IllegalRecursiveType(ref __binding_0) => __binding_0.accept(v),
+            WitnessDecl::SupportDynamicTypeAssume(ref __binding_0) => __binding_0.accept(v),
         }
     }
 }
@@ -1572,6 +1573,31 @@ impl<'a> Node<'a> for ArgPosition {
             ArgPosition::Aonly => {}
             ArgPosition::Afirst => {}
             ArgPosition::Asecond => {}
+        }
+    }
+}
+impl<'a> Node<'a> for PessimiseReason {
+    fn accept(&'a self, v: &mut dyn Visitor<'a>) {
+        v.visit_pessimise_reason(self)
+    }
+    fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
+        match self {
+            PessimiseReason::PRabstract => {}
+            PessimiseReason::PRgenericParam => {}
+            PessimiseReason::PRthis => {}
+            PessimiseReason::PRgenericApply => {}
+            PessimiseReason::PRtupleOrShape => {}
+            PessimiseReason::PRtypeconst => {}
+            PessimiseReason::PRcase => {}
+            PessimiseReason::PRenum => {}
+            PessimiseReason::PRopaque => {}
+            PessimiseReason::PRdynamic => {}
+            PessimiseReason::PRfun => {}
+            PessimiseReason::PRclassptr => {}
+            PessimiseReason::PRvoidOrNoreturn => {}
+            PessimiseReason::PRrefinement => {}
+            PessimiseReason::PRunionOrIntersection => {}
+            PessimiseReason::PRxhp => {}
         }
     }
 }

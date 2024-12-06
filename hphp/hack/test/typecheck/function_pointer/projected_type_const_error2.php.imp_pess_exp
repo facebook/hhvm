@@ -7,12 +7,12 @@ Invalid return type (Typing[4110])
 ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 20, characters 18-49:
-  Expected `dynamic` because the type of this return is implicitly a like-type
+  Expected `dynamic`
   File "projected_type_const_error2.php", line 13, characters 10-18:
   But got `(readonly function<TBox as MyBox with { type TInner = _ }, TVal>($b, $v): void)`
 ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 20, characters 18-49:
-  Expected `~(function(IntBox, string): ~void)` because the type of this return is implicitly a like-type
+  Expected `~(function(IntBox, string): ~void)`
   File "projected_type_const_error2.php", line 13, characters 10-18:
-  But got `(readonly function<TBox as MyBox with { type TInner = _ }, TVal>($b, $v): void)` because method must be callable in a dynamic context
+  But got `(readonly function<TBox as MyBox with { type TInner = _ }, TVal>($b, $v): void)` because method or function was called on dynamic or like-type

@@ -10,7 +10,7 @@ type enf =
   (* The type is fully enforced *)
   | Enforced of Typing_defs.decl_ty
   (* The type is not fully enforced, but is enforced at the given ty, if present *)
-  | Unenforced of Typing_defs.decl_ty option
+  | Unenforced of Typing_defs.decl_ty option * Typing_reason.pessimise_reason
 
 type 'a class_or_typedef_result =
   | ClassResult of 'a

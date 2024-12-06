@@ -14,7 +14,7 @@ type enf =
   (* The type is fully enforced *)
   | Enforced of decl_ty
   (* The type is not fully enforced, but is enforced at the given ty, if present *)
-  | Unenforced of decl_ty option
+  | Unenforced of decl_ty option * Reason.pessimise_reason
 
 type 'a class_or_typedef_result =
   | ClassResult of 'a
@@ -36,9 +36,9 @@ let noautodynamic (this_class : Shallow_decl_defs.shallow_class option) =
 let implicit_sdt_for_class tcopt this_class =
   TypecheckerOptions.everything_sdt tcopt && not (noautodynamic this_class)
 
-let make_unenforced ty =
+let make_unenforced ty pr =
   match ty with
-  | Enforced ty -> Unenforced (Some ty)
+  | Enforced ty -> Unenforced (Some ty, pr)
   | Unenforced _ -> ty
 
 let make_supportdyn_type p r ty =
@@ -168,6 +168,9 @@ end = struct
     in
     resolve_access ~this_class VisitedSet.empty ctx ty tcname
 
+  (* Unenforced type without an intersection *)
+  let unenforced pr = Unenforced (None, pr)
+
   let get_enforcement
       ~return_from_async ~this_class (ctx : ContextAccess.t) (ty : decl_ty) :
       enf =
@@ -187,7 +190,7 @@ end = struct
       match get_node ty with
       | Tthis -> begin
         match this_class with
-        | None -> Unenforced None
+        | None -> unenforced Reason.PRthis
         | Some c ->
           if
             ContextAccess.is_final c
@@ -195,7 +198,7 @@ end = struct
           then
             Enforced ty
           else
-            Unenforced None
+            unenforced Reason.PRthis
       end
       (* Look through supportdyn, just as we look through ~ *)
       | Tapply ((_, name), [ty])
@@ -205,7 +208,7 @@ end = struct
       | Tapply ((_, name), tyl) ->
         (* Cyclic type definition error will be produced elsewhere *)
         if SSet.mem name visited then
-          Unenforced None
+          unenforced Reason.PRopaque
         else begin
           (* The pessimised definition depends on the class or typedef being referenced,
              but we aren't adding any dependency edges here. It is therefore critical that
@@ -232,7 +235,7 @@ end = struct
               (SSet.add name visited)
               td_type
           | Some (TypedefResult { td_type_assignment = CaseType _; _ }) ->
-            Unenforced None
+            unenforced Reason.PRcase
           | Some
               (TypedefResult
                 {
@@ -285,16 +288,17 @@ end = struct
                * some type at least as large as `Q`.
                * *)
               match (exp_ty, td_as_constraint) with
-              | ((Enforced ty | Unenforced (Some ty)), Some cstr) ->
+              | ((Enforced ty | Unenforced (Some ty, _)), Some cstr) ->
                 Unenforced
-                  (Some (Typing_make_type.union (get_reason cstr) [cstr; ty]))
-              | _ -> Unenforced None
+                  ( Some (Typing_make_type.union (get_reason cstr) [cstr; ty]),
+                    Reason.PRopaque )
+              | _ -> unenforced Reason.PRopaque
             )
           | Some
               (TypedefResult
                 { td_type_assignment = SimpleTypeDef (Aast.OpaqueModule, _); _ })
             ->
-            Unenforced None
+            unenforced Reason.PRopaque
           | Some (ClassResult cls) ->
             (match ContextAccess.get_enum_type cls with
             | Some et ->
@@ -314,6 +318,7 @@ end = struct
                    ctx
                    (SSet.add name visited)
                    intersected_type)
+                Reason.PRenum
             | None ->
               List.Or_unequal_lengths.(
                 (match
@@ -344,9 +349,9 @@ end = struct
                  with
                 | Ok false
                 | Unequal_lengths ->
-                  Unenforced None
+                  unenforced Reason.PRgeneric_apply
                 | Ok true -> Enforced ty)))
-          | None -> Unenforced None
+          | None -> unenforced Reason.PRgeneric_apply
         end
       | Tgeneric _ ->
         (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,
@@ -360,17 +365,17 @@ end = struct
          * Additionally, higher kinded generics (i.e., with type arguments) cannot
          * be enforced at the moment; they are disallowed to have upper bounds.
          *)
-        Unenforced None
-      | Trefinement _ -> Unenforced None
+        unenforced Reason.PRgeneric_param
+      | Trefinement _ -> unenforced Reason.PRrefinement
       | Taccess (ty, (_, id)) when tc_enforced ->
         (match resolve_access ~this_class ctx ty id with
-        | None -> Unenforced None
+        | None -> unenforced Reason.PRtypeconst
         | Some ty -> enforcement ~is_dynamic_enforceable ctx visited ty)
-      | Taccess _ -> Unenforced None
+      | Taccess _ -> unenforced Reason.PRtypeconst
       | Tlike ty when enable_sound_dynamic ->
         enforcement ~is_dynamic_enforceable ctx visited ty
-      | Tlike _ -> Unenforced None
-      | Tprim Aast.(Tvoid | Tnoreturn) -> Unenforced None
+      | Tlike _ -> unenforced Reason.PRdynamic
+      | Tprim Aast.(Tvoid | Tnoreturn) -> unenforced Reason.PRvoid_or_noreturn
       | Tprim _ -> Enforced ty
       | Tany _ -> Enforced ty
       | Tnonnull -> Enforced ty
@@ -378,32 +383,35 @@ end = struct
         if (not enable_sound_dynamic) || is_dynamic_enforceable then
           Enforced ty
         else
-          Unenforced None
-      | Tfun _ -> Unenforced None
-      | Ttuple _ -> Unenforced None
+          unenforced Reason.PRdynamic
+      | Ttuple _
+      | Tshape _ ->
+        unenforced Reason.PRtuple_or_shape
       | Tunion [] -> Enforced ty
-      | Tunion _ -> Unenforced None
-      | Tintersection _ -> Unenforced None
-      | Tshape _ -> Unenforced None
+      (* Shouldn't happen *)
+      | Tunion _
+      | Tintersection _
+      | Twildcard ->
+        unenforced Reason.PRunion_or_intersection
+      | Tfun _ -> unenforced Reason.PRfun
       | Tmixed -> Enforced ty
-      | Twildcard -> Unenforced None
       (* With no parameters, we enforce varray_or_darray just like array *)
       | Tvec_or_dict (_, el_ty) ->
         if is_any el_ty then
           Enforced ty
         else
-          Unenforced None
+          unenforced Reason.PRgeneric_apply
       | Toption ty ->
         (match enforcement ~is_dynamic_enforceable ctx visited ty with
         | Enforced _ -> Enforced ty
-        | Unenforced (Some ety) ->
-          Unenforced (Some (mk (get_reason ty, Toption ety)))
-        | Unenforced None -> Unenforced None)
+        | Unenforced (Some ety, pr) ->
+          Unenforced (Some (mk (get_reason ty, Toption ety)), pr)
+        | Unenforced (None, pr) -> Unenforced (None, pr))
       | Tclass_ptr _ ->
         (* TODO(T199606542) See if it is necessary to mimic enforcement of classname<T>
          * Ultimately, all class<T> types will enforce that at least a class pointer
          * flowed through them, if not the specific class. *)
-        Unenforced None
+        unenforced Reason.PRclassptr
     in
 
     if return_from_async then
@@ -501,12 +509,6 @@ module Pessimize (Provider : ShallowProvider) = struct
 
   module E = Enforce (ShallowContextAccess (Provider))
 
-  let is_enforceable
-      ~return_from_async ~this_class (ctx : Provider.t) (ty : decl_ty) =
-    match E.get_enforcement ~return_from_async ~this_class ctx ty with
-    | Enforced _ -> true
-    | Unenforced _ -> false
-
   let make_like_type ~reason ~intersect_with ~return_from_async ty =
     let like_and_intersect r ty =
       let like_ty = Typing_make_type.like r ty in
@@ -523,9 +525,7 @@ module Pessimize (Provider : ShallowProvider) = struct
       match get_node ty with
       | Tapply ((pos, name), [ty])
         when String.equal Naming_special_names.Classes.cAwaitable name ->
-        mk
-          ( get_reason ty,
-            Tapply ((pos, name), [like_and_intersect (get_reason ty) ty]) )
+        mk (get_reason ty, Tapply ((pos, name), [like_and_intersect reason ty]))
       | _ -> like_if_not_void ty
     else
       like_if_not_void ty
@@ -540,18 +540,23 @@ module Pessimize (Provider : ShallowProvider) = struct
       (ctx : ctx)
       p
       ty =
-    let do_pessimise =
-      implicit_sdt_for_class ctx this_class
-      && (not no_auto_likes)
-      && (is_xhp_attr
-         || not (is_enforceable ~return_from_async:false ~this_class ctx ty))
-    in
-    if do_pessimise then
-      make_like_type
-        ~reason:(Typing_reason.pessimised_prop p)
-        ~intersect_with:None
-        ~return_from_async:false
-        ty
+    if implicit_sdt_for_class ctx this_class && not no_auto_likes then
+      match E.get_enforcement ~return_from_async:false ~this_class ctx ty with
+      | Enforced _ ->
+        if is_xhp_attr then
+          make_like_type
+            ~reason:(Typing_reason.pessimised_prop p Reason.PRxhp)
+            ~intersect_with:None
+            ~return_from_async:false
+            ty
+        else
+          ty
+      | Unenforced (_, pr) ->
+        make_like_type
+          ~reason:(Typing_reason.pessimised_prop p pr)
+          ~intersect_with:None
+          ~return_from_async:false
+          ty
     else
       ty
 
@@ -612,17 +617,26 @@ module Pessimize (Provider : ShallowProvider) = struct
         in
         (match fun_kind with
         | Abstract_method ->
+          let reason =
+            match
+              E.get_enforcement ~return_from_async ~this_class ctx ret_ty
+            with
+            | Enforced _ ->
+              Reason.pessimised_return (get_pos ret_ty) Reason.PRabstract
+            | Unenforced (_, pr) -> Reason.pessimised_return (get_pos ret_ty) pr
+          in
           mk
             ( get_reason ty,
               Tfun
                 (update_return_ty
                    ft
                    (make_like_type
-                      ~reason:(Reason.pessimised_return (get_pos ret_ty))
+                      ~reason
                       ~intersect_with:None
                       ~return_from_async
                       ret_ty)) )
-        | _ ->
+        | Concrete_method
+        | Function ->
           if optimistically_do_not_pessimise then
             mk (get_reason ty, Tfun ft)
           else (
@@ -630,7 +644,7 @@ module Pessimize (Provider : ShallowProvider) = struct
               E.get_enforcement ~return_from_async ~this_class ctx ret_ty
             with
             | Enforced _ -> mk (get_reason ty, Tfun ft)
-            | Unenforced enf_ty_opt ->
+            | Unenforced (enf_ty_opt, pr) ->
               (* For partially enforced type such as enums, we intersect with the
                * base type for concrete method return types in order to avoid
                * issues with hierarchies e.g. overriding a method that returns
@@ -647,7 +661,7 @@ module Pessimize (Provider : ShallowProvider) = struct
                     (update_return_ty
                        ft
                        (make_like_type
-                          ~reason:(Reason.pessimised_return (get_pos ret_ty))
+                          ~reason:(Reason.pessimised_return (get_pos ret_ty) pr)
                           ~intersect_with
                           ~return_from_async
                           ret_ty)) )

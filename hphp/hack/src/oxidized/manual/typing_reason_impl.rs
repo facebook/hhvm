@@ -97,10 +97,11 @@ impl WitnessDecl {
             | Self::DefaultCapability(pos_or_decl)
             | Self::SupportDynamicType(pos_or_decl)
             | Self::PessimisedInout(pos_or_decl)
-            | Self::PessimisedReturn(pos_or_decl)
-            | Self::PessimisedProp(pos_or_decl)
+            | Self::PessimisedReturn(pos_or_decl, _)
+            | Self::PessimisedProp(pos_or_decl, _)
             | Self::PessimisedThis(pos_or_decl)
             | Self::IllegalRecursiveType(pos_or_decl, _)
+            | Self::SupportDynamicTypeAssume(pos_or_decl)
             | Self::TupleFromSplat(pos_or_decl) => pos_or_decl,
         }
     }
@@ -122,8 +123,8 @@ impl Reason {
             | LambdaParam(pos, _)
             | Typeconst(box NoReason, (pos, _), _, _)
             | RigidTvarEscape(pos, _, _, _) => Some(pos),
-            DynamicPartialEnforcement(pos_or_decl, _, _)
-            | OpaqueTypeFromModule(pos_or_decl, _, _) => Some(pos_or_decl),
+            DynamicPartialEnforcement(pos_or_decl, _, _) => Some(pos_or_decl),
+            OpaqueTypeFromModule(pos_or_decl, _, _) => Some(pos_or_decl),
             LostInfo(_, t, _)
             | TypeAccess(t, _)
             | InvariantGeneric(t, _)

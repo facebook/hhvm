@@ -15,7 +15,7 @@ Invalid return type (Typing[4110])
   File "generic_fun_2.php", line 16, characters 41-66:
   Expected `~(function(string): ~string)`
   File "generic_fun_2.php", line 12, characters 10-11:
-  But got `(readonly function<T>($x): ~_)` because method must be callable in a dynamic context
+  But got `(readonly function<T>($x): ~_)` because method or function was called on dynamic or like-type
 ERROR: File "generic_fun_2.php", line 18, characters 10-22:
 Invalid return type (Typing[4110])
   File "generic_fun_2.php", line 16, characters 60-65:

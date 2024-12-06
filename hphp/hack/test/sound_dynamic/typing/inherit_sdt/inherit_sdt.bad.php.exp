@@ -1,7 +1,7 @@
 ERROR: File "inherit_sdt.bad.php", line 13, characters 41-52:
 Invalid return type (Typing[4110])
   File "inherit_sdt.bad.php", line 13, characters 25-30:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "inherit_sdt.bad.php", line 13, characters 45-50:
   Type `NonSDT` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "inherit_sdt.bad.php", line 18, characters 7-7:
@@ -16,6 +16,6 @@ Method  `bar` in class `E` is not dynamically callable. (Typing[4110])
   File "inherit_sdt.bad.php", line 21, characters 12-23:
   Invalid return type
   File "inherit_sdt.bad.php", line 20, characters 26-30:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "inherit_sdt.bad.php", line 21, characters 16-21:
   Type `NonSDT` is not a subtype of `dynamic` under dynamic-aware subtyping

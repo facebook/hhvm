@@ -156,12 +156,12 @@ let make_param_local_tys ~dynamic_mode ~no_auto_likes env decl_tys params =
   List.zip_exn params decl_tys
   |> List.map_env env ~f:(fun env (param, hint) ->
          let ty =
+           let reason =
+             Reason.support_dynamic_type_assume
+               (Pos_or_decl.of_raw_pos param.param_pos)
+           in
            if dynamic_mode then
-             let dyn_ty =
-               MakeType.dynamic
-                 (Reason.support_dynamic_type
-                    (Pos_or_decl.of_raw_pos param.param_pos))
-             in
+             let dyn_ty = MakeType.dynamic reason in
              match hint with
              | Some ty
                when Typing_enforceability.is_enforceable
@@ -169,10 +169,7 @@ let make_param_local_tys ~dynamic_mode ~no_auto_likes env decl_tys params =
                         (Env.get_self_class env |> Decl_entry.to_option)
                       env
                       ty ->
-               Some
-                 (MakeType.intersection
-                    (Reason.support_dynamic_type Pos_or_decl.none)
-                    [ty; dyn_ty])
+               Some (MakeType.intersection reason [ty; dyn_ty])
              | _ -> Some dyn_ty
            else
              hint

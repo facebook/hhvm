@@ -39,13 +39,13 @@ Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:
   Expected `int`
   File "instance_of_refinement.php", line 7, characters 19-21:
-  But got `(_ & T#2)` because method must be callable in a dynamic context
+  But got `(_ & T#2)` because method or function was called on dynamic or like-type
 ERROR: File "instance_of_refinement.php", line 52, characters 16-24:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:
   Expected `int`
   File "instance_of_refinement.php", line 7, characters 26-26:
-  But got `dynamic` because the type of this return is implicitly a like-type
+  But got `dynamic` because the type of this return is implicitly a like-type due to unenforced generic parameter
 ERROR: File "instance_of_refinement.php", line 52, characters 16-24:
 Invalid argument (Typing[4110])
   File "instance_of_refinement.php", line 17, characters 21-23:

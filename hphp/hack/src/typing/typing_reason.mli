@@ -23,6 +23,26 @@ type expr_dep_type_reason =
   | ERpu of string
 [@@deriving eq, show]
 
+(** Reason for pessimising this return or property type *)
+type pessimise_reason =
+  | PRabstract
+  | PRgeneric_param
+  | PRthis
+  | PRgeneric_apply
+  | PRtuple_or_shape
+  | PRtypeconst
+  | PRcase
+  | PRenum
+  | PRopaque
+  | PRdynamic
+  | PRfun
+  | PRclassptr
+  | PRvoid_or_noreturn
+  | PRrefinement
+  | PRunion_or_intersection
+  | PRxhp
+[@@deriving eq, hash, show]
+
 type blame_source =
   | BScall
   | BSlambda
@@ -334,7 +354,11 @@ val interp_operand : Pos.t -> t
 
 val dynamic_coercion : t -> t
 
+(* Propagation of dynamic through an  SDT call *)
 val support_dynamic_type : Pos_or_decl.t -> 'phase t_
+
+(* Checking an SDT function or method under dynamic assumptions *)
+val support_dynamic_type_assume : Pos_or_decl.t -> 'phase t_
 
 val dynamic_partial_enforcement : Pos_or_decl.t * string * t -> t
 
@@ -350,9 +374,9 @@ val captured_like : Pos.t -> t
 
 val pessimised_inout : Pos_or_decl.t -> 'phase t_
 
-val pessimised_return : Pos_or_decl.t -> 'phase t_
+val pessimised_return : Pos_or_decl.t -> pessimise_reason -> 'phase t_
 
-val pessimised_prop : Pos_or_decl.t -> 'phase t_
+val pessimised_prop : Pos_or_decl.t -> pessimise_reason -> 'phase t_
 
 val unsafe_cast : Pos.t -> t
 
@@ -611,4 +635,6 @@ module Predicates : sig
   val unpack_cstr_on_generics_opt : t -> (Pos_or_decl.t * pos_id) option
 
   val unpack_shape_literal_opt : t -> Pos.t option
+
+  val outer_constructor_string : t -> string
 end

@@ -1,6 +1,6 @@
 ERROR: File "ternary8.php", line 5, characters 10-11:
 Invalid return type (Typing[4110])
   File "ternary8.php", line 3, characters 22-24:
-  Expected `~int` because the type of this return is implicitly a like-type
+  Expected `~int`
   File "ternary8.php", line 3, characters 12-15:
   But got `?int`

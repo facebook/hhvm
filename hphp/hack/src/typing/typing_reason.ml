@@ -54,6 +54,25 @@ type expr_dep_type_reason =
   | ERpu of string
 [@@deriving eq, hash, show]
 
+type pessimise_reason =
+  | PRabstract
+  | PRgeneric_param
+  | PRthis
+  | PRgeneric_apply
+  | PRtuple_or_shape
+  | PRtypeconst
+  | PRcase
+  | PRenum
+  | PRopaque
+  | PRdynamic
+  | PRfun
+  | PRclassptr
+  | PRvoid_or_noreturn
+  | PRrefinement
+  | PRunion_or_intersection
+  | PRxhp
+[@@deriving eq, hash, show]
+
 let expr_dep_type_reason_to_json = function
   | ERexpr id ->
     Hh_json.(
@@ -1031,10 +1050,11 @@ type witness_decl =
   | Default_capability of (Pos_or_decl.t[@hash.ignore])
   | Support_dynamic_type of (Pos_or_decl.t[@hash.ignore])
   | Pessimised_inout of (Pos_or_decl.t[@hash.ignore])
-  | Pessimised_return of (Pos_or_decl.t[@hash.ignore])
-  | Pessimised_prop of (Pos_or_decl.t[@hash.ignore])
+  | Pessimised_return of (Pos_or_decl.t[@hash.ignore]) * pessimise_reason
+  | Pessimised_prop of (Pos_or_decl.t[@hash.ignore]) * pessimise_reason
   | Pessimised_this of (Pos_or_decl.t[@hash.ignore])
   | Illegal_recursive_type of (Pos_or_decl.t[@hash.ignore]) * string
+  | Support_dynamic_type_assume of (Pos_or_decl.t[@hash.ignore])
 [@@deriving hash]
 
 let witness_decl_to_raw_pos = function
@@ -1062,9 +1082,10 @@ let witness_decl_to_raw_pos = function
   | Default_capability pos_or_decl
   | Support_dynamic_type pos_or_decl
   | Pessimised_inout pos_or_decl
-  | Pessimised_return pos_or_decl
-  | Pessimised_prop pos_or_decl
-  | Illegal_recursive_type (pos_or_decl, _) ->
+  | Pessimised_return (pos_or_decl, _)
+  | Pessimised_prop (pos_or_decl, _)
+  | Illegal_recursive_type (pos_or_decl, _)
+  | Support_dynamic_type_assume pos_or_decl ->
     pos_or_decl
 
 let map_pos_witness_decl pos_or_decl witness =
@@ -1094,11 +1115,30 @@ let map_pos_witness_decl pos_or_decl witness =
   | Default_capability p -> Default_capability (pos_or_decl p)
   | Support_dynamic_type p -> Support_dynamic_type (pos_or_decl p)
   | Pessimised_inout p -> Pessimised_inout (pos_or_decl p)
-  | Pessimised_return p -> Pessimised_return (pos_or_decl p)
-  | Pessimised_prop p -> Pessimised_prop (pos_or_decl p)
+  | Pessimised_return (p, pr) -> Pessimised_return (pos_or_decl p, pr)
+  | Pessimised_prop (p, pr) -> Pessimised_prop (pos_or_decl p, pr)
   | Pessimised_this p -> Pessimised_this (pos_or_decl p)
   | Illegal_recursive_type (p, name) ->
     Illegal_recursive_type (pos_or_decl p, name)
+  | Support_dynamic_type_assume p -> Support_dynamic_type_assume (pos_or_decl p)
+
+let string_of_pessimise_reason = function
+  | PRabstract -> "abstract"
+  | PRgeneric_param -> "generic_param"
+  | PRgeneric_apply -> "generic_apply"
+  | PRtypeconst -> "typeconst"
+  | PRtuple_or_shape -> "tuple_or_shape"
+  | PRcase -> "case"
+  | PRenum -> "enum"
+  | PRthis -> "this"
+  | PRopaque -> "opaque"
+  | PRdynamic -> "dynamic"
+  | PRfun -> "function"
+  | PRclassptr -> "classptr"
+  | PRvoid_or_noreturn -> "void_or_noreturn"
+  | PRrefinement -> "type_refinement"
+  | PRunion_or_intersection -> "union_or_intersection"
+  | PRxhp -> "xhp"
 
 let constructor_string_of_witness_decl = function
   | Witness_from_decl _ -> "Rwitness_from_decl"
@@ -1124,10 +1164,13 @@ let constructor_string_of_witness_decl = function
   | Default_capability _ -> "Rdefault_capability"
   | Support_dynamic_type _ -> "Rsupport_dynamic_type"
   | Pessimised_inout _ -> "Rpessimised_inout"
-  | Pessimised_return _ -> "Rpessimised_return"
-  | Pessimised_prop _ -> "Rpessimised_prop"
+  | Pessimised_return (_, pr) ->
+    "Rpessimised_return_" ^ string_of_pessimise_reason pr
+  | Pessimised_prop (_, pr) ->
+    "Rpessimised_prop_" ^ string_of_pessimise_reason pr
   | Pessimised_this _ -> "Rpessimised_this"
   | Illegal_recursive_type _ -> "Rillegal_recursive_type"
+  | Support_dynamic_type_assume _ -> "Rsupport_dynamic_type_assume"
 
 let pp_witness_decl fmt witness =
   let comma_ fmt () = Format.fprintf fmt ",@ " in
@@ -1152,8 +1195,8 @@ let pp_witness_decl fmt witness =
     | Hint p
     | Witness_from_decl p
     | Pessimised_inout p
-    | Pessimised_return p
-    | Pessimised_prop p
+    | Pessimised_return (p, _)
+    | Pessimised_prop (p, _)
     | Pessimised_this p
     | Var_param_from_decl p
     | Tuple_from_splat p
@@ -1167,6 +1210,7 @@ let pp_witness_decl fmt witness =
     | Idx_vector_from_decl p
     | Inout_param p
     | Support_dynamic_type p
+    | Support_dynamic_type_assume p
     | Global_class_prop p ->
       Pos_or_decl.pp fmt p
     | Tconst_no_cstr pid -> pp_pos_id fmt pid
@@ -1294,15 +1338,22 @@ let witness_decl_to_json = function
     Hh_json.(
       JSON_Object
         [("Support_dynamic_type", JSON_Array [Pos_or_decl.json pos_or_decl])])
+  | Support_dynamic_type_assume pos_or_decl ->
+    Hh_json.(
+      JSON_Object
+        [
+          ( "Support_dynamic_type_assume",
+            JSON_Array [Pos_or_decl.json pos_or_decl] );
+        ])
   | Pessimised_inout pos_or_decl ->
     Hh_json.(
       JSON_Object
         [("Pessimised_inout", JSON_Array [Pos_or_decl.json pos_or_decl])])
-  | Pessimised_return pos_or_decl ->
+  | Pessimised_return (pos_or_decl, _) ->
     Hh_json.(
       JSON_Object
         [("Pessimised_return", JSON_Array [Pos_or_decl.json pos_or_decl])])
-  | Pessimised_prop pos_or_decl ->
+  | Pessimised_prop (pos_or_decl, _) ->
     Hh_json.(
       JSON_Object
         [("Pessimised_prop", JSON_Array [Pos_or_decl.json pos_or_decl])])
@@ -1317,6 +1368,25 @@ let witness_decl_to_json = function
           ( "Illegal_recursive_type",
             JSON_Array [Pos_or_decl.json pos_or_decl; JSON_String name] );
         ])
+
+let pessimise_reason_to_string pr =
+  match pr with
+  | PRabstract -> "unknown enforcement for abstract method"
+  | PRgeneric_param -> "unenforced generic parameter"
+  | PRgeneric_apply -> "unenforced generic type arguments"
+  | PRtypeconst -> "unenforced type constant"
+  | PRtuple_or_shape -> "unenforced tuple or shape"
+  | PRcase -> "unenforced case type"
+  | PRenum -> "enum enforced only at base type"
+  | PRthis -> "unenforced this"
+  | PRopaque -> "opaque type"
+  | PRdynamic -> "unenforced dynamic"
+  | PRfun -> "unenforced function type"
+  | PRclassptr -> "unenforced class pointer type"
+  | PRvoid_or_noreturn -> "unenforced void or noreturn type"
+  | PRrefinement -> "unenforced type refinement"
+  | PRunion_or_intersection -> "unenforced union or intersection"
+  | PRxhp -> "unenforced XHP attribute"
 
 let witness_decl_to_string prefix witness =
   match witness with
@@ -1389,17 +1459,25 @@ let witness_decl_to_string prefix witness =
       prefix ^ " because the function did not have an explicit context" )
   | Support_dynamic_type pos_or_decl ->
     ( pos_or_decl,
+      prefix ^ " because method or function was called on dynamic or like-type"
+    )
+  | Support_dynamic_type_assume pos_or_decl ->
+    ( pos_or_decl,
       prefix ^ " because method must be callable in a dynamic context" )
   | Pessimised_inout pos_or_decl ->
     ( pos_or_decl,
       prefix
       ^ " because the type of this inout parameter is implicitly a like-type" )
-  | Pessimised_return pos_or_decl ->
+  | Pessimised_return (pos_or_decl, pr) ->
     ( pos_or_decl,
-      prefix ^ " because the type of this return is implicitly a like-type" )
-  | Pessimised_prop pos_or_decl ->
+      prefix
+      ^ " because the type of this return is implicitly a like-type due to "
+      ^ pessimise_reason_to_string pr )
+  | Pessimised_prop (pos_or_decl, pr) ->
     ( pos_or_decl,
-      prefix ^ " because the type of this property is implicitly a like-type" )
+      prefix
+      ^ " because the type of this property is implicitly a like-type due to "
+      ^ pessimise_reason_to_string pr )
   | Pessimised_this pos_or_decl ->
     ( pos_or_decl,
       prefix
@@ -2580,6 +2658,9 @@ module Constructors = struct
 
   let support_dynamic_type p = from_witness_decl @@ Support_dynamic_type p
 
+  let support_dynamic_type_assume p =
+    from_witness_decl @@ Support_dynamic_type_assume p
+
   let dynamic_partial_enforcement (p, s, r) =
     Dynamic_partial_enforcement (p, s, r)
 
@@ -2595,9 +2676,9 @@ module Constructors = struct
 
   let pessimised_inout p = from_witness_decl @@ Pessimised_inout p
 
-  let pessimised_return p = from_witness_decl @@ Pessimised_return p
+  let pessimised_return p r = from_witness_decl @@ Pessimised_return (p, r)
 
-  let pessimised_prop p = from_witness_decl @@ Pessimised_prop p
+  let pessimised_prop p r = from_witness_decl @@ Pessimised_prop (p, r)
 
   let unsafe_cast p = from_witness_locl @@ Unsafe_cast p
 
@@ -2894,6 +2975,9 @@ module Predicates = struct
       | _ -> false
     in
     on_outermost r p
+
+  (* Should be used only for diagnostics *)
+  let outer_constructor_string r = on_outermost r to_constructor_string
 
   let is_hint r =
     let p r =
@@ -4101,9 +4185,9 @@ module Derivation = struct
       | Support_dynamic_type pos ->
         Explanation.Witness (pos, "function or method declaration")
       | Pessimised_inout pos -> Explanation.Witness (pos, "`inout` parameter")
-      | Pessimised_prop pos -> Explanation.Witness (pos, "property")
+      | Pessimised_prop (pos, _) -> Explanation.Witness (pos, "property")
       | Pessimised_this pos -> Explanation.Witness (pos, "`this` hint")
-      | Pessimised_return pos -> Explanation.Witness (pos, "return hint")
+      | Pessimised_return (pos, _) -> Explanation.Witness (pos, "return hint")
       | Var_param_from_decl pos ->
         Explanation.Witness (pos, "variadic parameter declaration")
       | Tuple_from_splat pos ->

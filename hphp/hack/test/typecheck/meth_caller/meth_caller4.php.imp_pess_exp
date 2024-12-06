@@ -9,15 +9,15 @@ Invalid return type (Typing[4110])
 ERROR: File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
   File "meth_caller4.php", line 20, characters 18-48:
-  Expected `dynamic` because the type of this return is implicitly a like-type
+  Expected `dynamic`
   File "meth_caller4.php", line 13, characters 19-21:
   But got `(readonly function(X<_>, $x): ~_)`
 ERROR: File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
   File "meth_caller4.php", line 20, characters 18-48:
-  Expected `~(function(X<bool>, bool): ~bool)` because the type of this return is implicitly a like-type
+  Expected `~(function(X<bool>, bool): ~bool)`
   File "meth_caller4.php", line 13, characters 19-21:
-  But got `(readonly function(X<_>, $x): ~_)` because method must be callable in a dynamic context
+  But got `(readonly function(X<_>, $x): ~_)` because method or function was called on dynamic or like-type
 ERROR: File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
   File "meth_caller4.php", line 20, characters 30-33:

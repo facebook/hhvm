@@ -114,6 +114,7 @@ oxidized::typing_reason::Direction
 oxidized::typing_reason::FieldKind
 oxidized::typing_reason::PathElem
 oxidized::typing_reason::PrjAsymm
+oxidized::typing_reason::PessimiseReason
 oxidized::typing_reason::Side
 oxidized::typing_reason::VarianceDir
 oxidized::user_error::Severity

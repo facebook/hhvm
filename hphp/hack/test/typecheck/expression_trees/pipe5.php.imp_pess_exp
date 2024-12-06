@@ -7,7 +7,7 @@ This value cannot be inserted (spliced) into a `ExampleDsl` expression tree (Typ
   File "expr_tree.php", line 320, characters 5-27:
   Expected `ExampleDslExpression<T>` because you are splicing into a `ExampleDsl` expression or block
   File "pipe5.php", line 9, characters 70-124:
-  But got `~ExampleDsl` because the type of this return is implicitly a like-type
+  But got `~ExampleDsl` because the type of this return is implicitly a like-type due to unenforced generic type arguments
   File "pipe5.php", line 17, characters 22-39:
   Hack values need to be converted (lifted) to compatible types before splicing. For more information see: https://docs.hhvm.com/hack/expression-trees/splicing
 ERROR: File "pipe5.php", line 17, characters 22-39:

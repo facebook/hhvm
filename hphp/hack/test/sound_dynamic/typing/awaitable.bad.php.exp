@@ -1,6 +1,6 @@
 ERROR: File "awaitable.bad.php", line 11, characters 12-22:
 Invalid return type (Typing[4110])
   File "awaitable.bad.php", line 10, characters 42-44:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "awaitable.bad.php", line 11, characters 16-18:
   Type `Box` is not a subtype of `dynamic` under dynamic-aware subtyping

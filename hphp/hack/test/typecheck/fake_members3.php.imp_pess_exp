@@ -1,7 +1,7 @@
 ERROR: File "fake_members3.php", line 22, characters 12-16:
 Invalid return type (Typing[4110])
   File "fake_members3.php", line 17, characters 27-29:
-  Expected `~int` because the type of this return is implicitly a like-type
+  Expected `~int`
   File "fake_members3.php", line 15, characters 18-21:
   But got `?int`
   File "fake_members3.php", line 21, characters 5-18:

@@ -185,7 +185,7 @@ let make_return_type
           | Tprim Aast.Tvoid when not wrap -> ty
           | _ ->
             if add_like then
-              TUtils.make_like ~reason:(Reason.pessimised_return pos) env ty
+              TUtils.make_like ~reason:(Reason.witness_from_decl pos) env ty
             else
               ty
         in

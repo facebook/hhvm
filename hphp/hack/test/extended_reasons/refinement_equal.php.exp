@@ -7,7 +7,7 @@ File refinement_equal.php, line 12, character 10 - line 12, character 11:
  12 |   return »$z«;
  13 | }
 
-Expected ~C because the type of this return is implicitly a like-type
+Expected ~C
 
 File refinement_equal.php, line 6, character 36 - line 6, character 36:
 
@@ -118,7 +118,7 @@ File refinement_equal.php, line 12, character 3 - line 12, character 12:
 
 because it is used in a return position
 
-The supertype comes from this return hint
+The supertype comes from this declaration
 
 File refinement_equal.php, line 6, character 36 - line 6, character 36:
 

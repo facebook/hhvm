@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d4d3ae5e8bc4721b490313db730102fd>>
+// @generated SignedSource<<edfac063dd5e2eb58d2ed2e9ce06dce7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -75,6 +75,51 @@ pub enum ExprDepTypeReason {
     ERself(String),
     ERpu(String),
 }
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving (eq, hash, show)")]
+#[repr(u8)]
+pub enum PessimiseReason {
+    PRabstract,
+    #[rust_to_ocaml(name = "PRgeneric_param")]
+    PRgenericParam,
+    PRthis,
+    #[rust_to_ocaml(name = "PRgeneric_apply")]
+    PRgenericApply,
+    #[rust_to_ocaml(name = "PRtuple_or_shape")]
+    PRtupleOrShape,
+    PRtypeconst,
+    PRcase,
+    PRenum,
+    PRopaque,
+    PRdynamic,
+    PRfun,
+    PRclassptr,
+    #[rust_to_ocaml(name = "PRvoid_or_noreturn")]
+    PRvoidOrNoreturn,
+    PRrefinement,
+    #[rust_to_ocaml(name = "PRunion_or_intersection")]
+    PRunionOrIntersection,
+    PRxhp,
+}
+impl TrivialDrop for PessimiseReason {}
+arena_deserializer::impl_deserialize_in_arena!(PessimiseReason);
 
 #[derive(
     Clone,
@@ -542,13 +587,15 @@ pub enum WitnessDecl {
     #[rust_to_ocaml(name = "Pessimised_inout")]
     PessimisedInout(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Pessimised_return")]
-    PessimisedReturn(pos_or_decl::PosOrDecl),
+    PessimisedReturn(pos_or_decl::PosOrDecl, PessimiseReason),
     #[rust_to_ocaml(name = "Pessimised_prop")]
-    PessimisedProp(pos_or_decl::PosOrDecl),
+    PessimisedProp(pos_or_decl::PosOrDecl, PessimiseReason),
     #[rust_to_ocaml(name = "Pessimised_this")]
     PessimisedThis(pos_or_decl::PosOrDecl),
     #[rust_to_ocaml(name = "Illegal_recursive_type")]
     IllegalRecursiveType(pos_or_decl::PosOrDecl, String),
+    #[rust_to_ocaml(name = "Support_dynamic_type_assume")]
+    SupportDynamicTypeAssume(pos_or_decl::PosOrDecl),
 }
 
 /// Axioms are information about types provided by the user in class or type

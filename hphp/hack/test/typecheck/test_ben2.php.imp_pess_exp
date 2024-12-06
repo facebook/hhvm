@@ -7,6 +7,6 @@ Invalid return type (Typing[4110])
 ERROR: File "test_ben2.php", line 16, characters 10-11:
 Invalid return type (Typing[4110])
   File "test_ben2.php", line 12, characters 25-28:
-  Expected `~bool` because the type of this return is implicitly a like-type
+  Expected `~bool`
   File "test_ben2.php", line 12, characters 14-18:
   But got `?(nonnull & not int)`

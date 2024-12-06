@@ -3,19 +3,19 @@ Function  `foo` is not dynamically callable. (Typing[4110])
   File "ret_nonsdt.bad.php", line 8, characters 10-16:
   Invalid return type
   File "ret_nonsdt.bad.php", line 7, characters 28-28:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "ret_nonsdt.bad.php", line 8, characters 14-14:
   Type `A` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "ret_nonsdt.bad.php", line 13, characters 34-40:
 Invalid return type (Typing[4110])
   File "ret_nonsdt.bad.php", line 13, characters 19-19:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "ret_nonsdt.bad.php", line 13, characters 38-38:
   Type `A` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "ret_nonsdt.bad.php", line 14, characters 30-36:
 Invalid return type (Typing[4110])
   File "ret_nonsdt.bad.php", line 14, characters 8-58:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "ret_nonsdt.bad.php", line 14, characters 34-34:
   Type `A` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "ret_nonsdt.bad.php", line 15, characters 35-41:
@@ -23,6 +23,6 @@ Function  `;anonymous` is not dynamically callable. (Typing[4110])
   File "ret_nonsdt.bad.php", line 15, characters 35-41:
   Invalid return type
   File "ret_nonsdt.bad.php", line 15, characters 8-44:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "ret_nonsdt.bad.php", line 15, characters 39-39:
   Type `A` is not a subtype of `dynamic` under dynamic-aware subtyping

@@ -3,6 +3,6 @@ Method  `bar` in class `C` is not dynamically callable. (Typing[4110])
   File "static_method_1.bad.php", line 13, characters 12-24:
   Invalid return type
   File "static_method_1.bad.php", line 12, characters 39-47:
-  Expected `dynamic` because method must be callable in a dynamic context
+  Expected `dynamic` because method or function was called on dynamic or like-type
   File "static_method_1.bad.php", line 8, characters 46-54:
   Type `Evil<int>` is not a subtype of `dynamic` under dynamic-aware subtyping

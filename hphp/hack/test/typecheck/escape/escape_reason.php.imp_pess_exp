@@ -3,7 +3,7 @@ Invalid return type (Typing[4110])
   File "escape_reason.php", line 12, characters 16-18:
   Expected `int`
   File "escape_reason.php", line 5, characters 34-40:
-  But got `dynamic` because the type of this return is implicitly a like-type
+  But got `dynamic` because the type of this return is implicitly a like-type due to unenforced type constant
 ERROR: File "escape_reason.php", line 15, characters 10-11:
 Invalid return type (Typing[4110])
   File "escape_reason.php", line 12, characters 16-18:

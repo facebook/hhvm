@@ -334,6 +334,13 @@ uint8_t writeVarintSlow(Cursor& c, T value) {
   uint8_t* p = c.writableData();
   uint8_t* orig_p = p;
   // precondition: (value & ~0x7f) != 0
+
+#ifdef __aarch64__
+  do {
+    *p++ = ((unval & 0x7f) | 0x80);
+    unval >>= 7;
+  } while (unval > 0x7f);
+#else
   do {
     // clang-format off
     *p++ = ((unval & 0x7f) | 0x80); unval = unval >> 7; if ((unval & ~0x7f) == 0) break;
@@ -347,10 +354,12 @@ uint8_t writeVarintSlow(Cursor& c, T value) {
     *p++ = ((unval & 0x7f) | 0x80); unval = unval >> 7;
     // clang-format on
   } while (false);
+#endif
 
   *p++ = static_cast<uint8_t>(unval);
-  c.append(p - orig_p);
-  return static_cast<uint8_t>(p - orig_p);
+  uint8_t res = static_cast<uint8_t>(p - orig_p);
+  c.append(res);
+  return res;
 }
 
 } // namespace detail

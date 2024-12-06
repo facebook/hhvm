@@ -31,22 +31,22 @@ bool makeInvalidBool() {
   return *reinterpret_cast<const volatile bool*>("\x42");
 }
 
-TEST(CompactProtocolTest, writeInvalidBool) {
+void writeInvalidBoolCheck() {
   auto w = CompactProtocolWriter();
   auto q = folly::IOBufQueue();
   w.setOutput(&q);
+  w.writeBool(makeInvalidBool());
+  auto s = std::string();
+  q.appendToString(s);
+  // Die on success.
+  CHECK(s != std::string(1, '\1') && s != std::string(1, '\2'))
+      << "invalid bool value";
+}
+
+TEST(CompactProtocolTest, writeInvalidBool) {
   // writeBool should either throw or write a valid bool. The exact value may
   // depend on the build mode because the optimizer can make use of the UB.
-  EXPECT_DEATH(
-      {
-        w.writeBool(makeInvalidBool());
-        auto s = std::string();
-        q.appendToString(s);
-        // Die on success.
-        CHECK(s != std::string(1, '\1') && s != std::string(1, '\2'))
-            << "invalid bool value";
-      },
-      "invalid bool value");
+  EXPECT_DEATH({ writeInvalidBoolCheck(); }, "invalid bool value");
 }
 
 TEST(CompactProtocolTest, writeStringExactly2GB) {

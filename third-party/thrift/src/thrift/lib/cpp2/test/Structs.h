@@ -36,5 +36,8 @@ void populateMap(F&& getter) {
   }
 }
 
+#if defined __has_include && \
+    __has_include(<thrift/lib/cpp2/test/ProtoBufBenchData.pb.h>)
 #include <thrift/lib/cpp2/test/ProtoBufStructs-inl.h>
+#endif
 #include <thrift/lib/cpp2/test/ThriftStructs-inl.h>

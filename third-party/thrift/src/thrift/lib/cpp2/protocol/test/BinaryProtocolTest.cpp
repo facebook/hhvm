@@ -45,20 +45,22 @@ bool makeInvalidBool() {
   return *reinterpret_cast<const volatile bool*>("\x42");
 }
 
-TEST_F(BinaryProtocolTest, writeInvalidBool) {
+void testWriteInvalidBool() {
   auto w = BinaryProtocolWriter();
   auto q = folly::IOBufQueue();
   w.setOutput(&q);
   // writeBool should either fail CHECK or write a valid bool.
-  EXPECT_DEATH(
-      {
-        w.writeBool(makeInvalidBool());
-        auto s = std::string();
-        q.appendToString(s);
-        // Die on success.
-        CHECK(s != std::string(1, '\0')) << "invalid bool value";
-      },
-      "invalid bool value");
+
+  w.writeBool(makeInvalidBool());
+  auto s = std::string();
+  q.appendToString(s);
+  // Die on success.
+
+  CHECK(s != std::string(1, '\0')) << "invalid bool value";
+}
+
+TEST_F(BinaryProtocolTest, writeInvalidBool) {
+  EXPECT_DEATH({ testWriteInvalidBool(); }, "invalid bool value");
 }
 
 TEST_F(BinaryProtocolTest, writeStringExactly2GB) {

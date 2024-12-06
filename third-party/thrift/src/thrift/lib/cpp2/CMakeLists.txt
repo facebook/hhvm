@@ -15,6 +15,10 @@
 # Set the cpp2 directory
 set(LIB_CPP2_HOME ${CMAKE_CURRENT_SOURCE_DIR})
 
+if (enable_tests)
+  add_subdirectory(protocol/test)
+endif ()
+add_subdirectory(test)
 
 #######
 # CMAKE variables only have local/subdirectory scope

@@ -57,12 +57,12 @@ func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error
 	if err != nil {
 		return err
 	}
-	clientBuilder := rsocket.Connect()
 	// See T182939211. This copies the keep alives from Java Rocket.
 	// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
-	clientBuilder = clientBuilder.KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1)
-	clientBuilder = clientBuilder.SetupPayload(setupPayload)
-	clientBuilder = clientBuilder.OnClose(func(error) {})
+	clientBuilder := rsocket.Connect().
+		KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1).
+		SetupPayload(setupPayload).
+		OnClose(func(error) {})
 	clientStarter := clientBuilder.Acceptor(acceptor(serverMetadataPush))
 	client, err := clientStarter.Transport(transporter(r.conn)).Start(context.Background())
 	r.client = client

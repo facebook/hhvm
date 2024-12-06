@@ -207,6 +207,9 @@ type MyNodeChannelClientInterface interface {
 
 type MyNodeClientInterface interface {
     thrift.ClientInterface
+    // Inherited/extended service
+    MyRootClientInterface
+
     DoMid() (error)
 }
 
@@ -363,6 +366,9 @@ type MyLeafChannelClientInterface interface {
 
 type MyLeafClientInterface interface {
     thrift.ClientInterface
+    // Inherited/extended service
+    MyNodeClientInterface
+
     DoLeaf() (error)
 }
 

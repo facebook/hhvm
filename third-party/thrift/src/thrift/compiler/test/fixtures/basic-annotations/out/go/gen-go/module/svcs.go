@@ -915,6 +915,9 @@ type MyServicePrioChildChannelClientInterface interface {
 
 type MyServicePrioChildClientInterface interface {
     thrift.ClientInterface
+    // Inherited/extended service
+    MyServicePrioParentClientInterface
+
     Pang() (error)
 }
 

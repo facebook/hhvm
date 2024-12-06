@@ -38,6 +38,9 @@ type ExtendTestServiceChannelClientInterface interface {
 
 type ExtendTestServiceClientInterface interface {
     thrift.ClientInterface
+    // Inherited/extended service
+    test0.HsTestServiceClientInterface
+
     Check(struct1 *test0.HsFoo) (bool, error)
 }
 

@@ -37,7 +37,6 @@ type {{service:go_name}}ChannelClientInterface interface {
 
 type {{service:go_name}}ClientInterface interface {
     thrift.ClientInterface
-    {{^program:compat?}}
     {{#service:extends?}}
     {{#service:extends}}
     // Inherited/extended service
@@ -45,7 +44,6 @@ type {{service:go_name}}ClientInterface interface {
 
     {{/service:extends}}
     {{/service:extends?}}
-    {{/program:compat?}}
     {{#service:functions}}
     {{#function:go_supported?}}
     {{> svc/func_signature_no_ctx}}

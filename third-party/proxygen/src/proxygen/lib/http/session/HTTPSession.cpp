@@ -1828,9 +1828,9 @@ void HTTPSession::ShutdownTransportCallback::runLoopCallback() noexcept {
 
 size_t HTTPSession::sendPadding(HTTPTransaction* txn, uint16_t bytes) noexcept {
   auto encodedSize = codec_->generatePadding(writeBuf_, txn->getID(), bytes);
-  LOG(ERROR) << *this << " sending " << bytes
-             << " bytes of padding, encodedSize=" << encodedSize
-             << " for streamID=" << txn->getID();
+  VLOG(4) << *this << " sending " << bytes
+          << " bytes of padding, encodedSize=" << encodedSize
+          << " for streamID=" << txn->getID();
   if (encodedSize > 0) {
     scheduleWrite();
   }

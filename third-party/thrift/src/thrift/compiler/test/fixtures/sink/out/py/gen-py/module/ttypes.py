@@ -157,6 +157,12 @@ class InitialResponse:
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.InitialResponse, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.InitialResponse, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -268,6 +274,12 @@ class FinalResponse:
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.FinalResponse, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.FinalResponse, self)
 
   def _to_py3(self):
     import importlib
@@ -381,6 +393,12 @@ class SinkPayload:
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.SinkPayload, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.SinkPayload, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -492,6 +510,12 @@ class CompatibleWithKeywordSink:
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompatibleWithKeywordSink, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CompatibleWithKeywordSink, self)
 
   def _to_py3(self):
     import importlib
@@ -612,6 +636,12 @@ class InitialException(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.InitialException, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.InitialException, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -731,6 +761,12 @@ class SinkException1(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.SinkException1, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.SinkException1, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -849,6 +885,12 @@ class SinkException2(TException):
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.SinkException2, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.SinkException2, self)
 
   def _to_py3(self):
     import importlib

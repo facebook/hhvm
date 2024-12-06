@@ -165,6 +165,12 @@ class FieldWrapper:
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.FieldWrapper, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.FieldWrapper, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -324,6 +330,12 @@ class Wrapper:
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Wrapper, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Wrapper, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -469,6 +481,12 @@ class Adapter:
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Adapter, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Adapter, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -580,6 +598,12 @@ class SkipCodegen:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.SkipCodegen, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.SkipCodegen, self)
 
   def _to_py3(self):
     import importlib
@@ -715,6 +739,12 @@ class Name:
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Name, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Name, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -844,6 +874,12 @@ class UnionEnumAttributes:
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.UnionEnumAttributes, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.UnionEnumAttributes, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -957,6 +993,12 @@ class StructTrait:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.StructTrait, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.StructTrait, self)
 
   def _to_py3(self):
     import importlib
@@ -1125,6 +1167,12 @@ class Attributes:
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Attributes, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Attributes, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1215,6 +1263,12 @@ class StructAsTrait:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.StructAsTrait, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.StructAsTrait, self)
 
   def _to_py3(self):
     import importlib
@@ -1309,6 +1363,12 @@ class ModuleInternal:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ModuleInternal, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.hack.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ModuleInternal, self)
 
   def _to_py3(self):
     import importlib

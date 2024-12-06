@@ -166,6 +166,12 @@ class empty_struct:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.empty_struct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.empty_struct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -256,6 +262,12 @@ class decorated_struct:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.decorated_struct, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.decorated_struct, self)
 
   def _to_py3(self):
     import importlib
@@ -563,6 +575,12 @@ class ContainerStruct:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ContainerStruct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ContainerStruct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -667,6 +685,12 @@ class CppTypeStruct:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CppTypeStruct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CppTypeStruct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -757,6 +781,12 @@ class VirtualStruct:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.VirtualStruct, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.VirtualStruct, self)
 
   def _to_py3(self):
     import importlib
@@ -864,6 +894,12 @@ class MyStructWithForwardRefEnum:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyStructWithForwardRefEnum, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyStructWithForwardRefEnum, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -969,6 +1005,12 @@ class TrivialNumeric:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TrivialNumeric, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TrivialNumeric, self)
 
   def _to_py3(self):
     import importlib
@@ -1076,6 +1118,12 @@ class TrivialNestedWithDefault:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TrivialNestedWithDefault, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TrivialNestedWithDefault, self)
 
   def _to_py3(self):
     import importlib
@@ -1199,6 +1247,12 @@ class ComplexString:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ComplexString, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ComplexString, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1305,6 +1359,12 @@ class ComplexNestedWithDefault:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ComplexNestedWithDefault, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ComplexNestedWithDefault, self)
 
   def _to_py3(self):
     import importlib
@@ -1457,6 +1517,12 @@ class MinPadding:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MinPadding, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MinPadding, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1608,6 +1674,12 @@ class MinPaddingWithCustomType:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MinPaddingWithCustomType, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MinPaddingWithCustomType, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1745,6 +1817,12 @@ class MyStruct:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyStruct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyStruct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1816,6 +1894,12 @@ class MyDataItem:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyDataItem, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyDataItem, self)
 
   def _to_py3(self):
     import importlib
@@ -1907,6 +1991,12 @@ class Renaming:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Renaming, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Renaming, self)
 
   def _to_py3(self):
     import importlib
@@ -2055,6 +2145,12 @@ class AnnotatedTypes:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AnnotatedTypes, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AnnotatedTypes, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2163,6 +2259,12 @@ class ForwardUsageRoot:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ForwardUsageRoot, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ForwardUsageRoot, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2255,6 +2357,12 @@ class ForwardUsageStruct:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ForwardUsageStruct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ForwardUsageStruct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2346,6 +2454,12 @@ class ForwardUsageByRef:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ForwardUsageByRef, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ForwardUsageByRef, self)
 
   def _to_py3(self):
     import importlib
@@ -2456,6 +2570,12 @@ class IncompleteMap:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteMap, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.IncompleteMap, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2527,6 +2647,12 @@ class IncompleteMapDep:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteMapDep, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.IncompleteMapDep, self)
 
   def _to_py3(self):
     import importlib
@@ -2637,6 +2763,12 @@ class CompleteMap:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteMap, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CompleteMap, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2708,6 +2840,12 @@ class CompleteMapDep:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteMapDep, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CompleteMapDep, self)
 
   def _to_py3(self):
     import importlib
@@ -2815,6 +2953,12 @@ class IncompleteList:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteList, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.IncompleteList, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2886,6 +3030,12 @@ class IncompleteListDep:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.IncompleteListDep, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.IncompleteListDep, self)
 
   def _to_py3(self):
     import importlib
@@ -2993,6 +3143,12 @@ class CompleteList:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteList, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CompleteList, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -3064,6 +3220,12 @@ class CompleteListDep:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CompleteListDep, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CompleteListDep, self)
 
   def _to_py3(self):
     import importlib
@@ -3171,6 +3333,12 @@ class AdaptedList:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptedList, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptedList, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -3262,6 +3430,12 @@ class AdaptedListDep:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptedListDep, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptedListDep, self)
 
   def _to_py3(self):
     import importlib
@@ -3369,6 +3543,12 @@ class DependentAdaptedList:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.DependentAdaptedList, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.DependentAdaptedList, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -3459,6 +3639,12 @@ class DependentAdaptedListDep:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.DependentAdaptedListDep, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.DependentAdaptedListDep, self)
 
   def _to_py3(self):
     import importlib
@@ -3683,6 +3869,12 @@ class AllocatorAware:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AllocatorAware, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AllocatorAware, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -3788,6 +3980,12 @@ class AllocatorAware2:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AllocatorAware2, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AllocatorAware2, self)
 
   def _to_py3(self):
     import importlib
@@ -3910,6 +4108,12 @@ class TypedefStruct:
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TypedefStruct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TypedefStruct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -4000,6 +4204,12 @@ class StructWithDoubleUnderscores:
     import thrift.python.converter
     python_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.StructWithDoubleUnderscores, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("apache.thrift.fixtures.types.module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.StructWithDoubleUnderscores, self)
 
   def _to_py3(self):
     import importlib

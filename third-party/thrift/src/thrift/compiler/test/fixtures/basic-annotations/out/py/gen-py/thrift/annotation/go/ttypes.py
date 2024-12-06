@@ -157,6 +157,12 @@ class Name:
     python_types = importlib.import_module("facebook.thrift.annotation.go.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Name, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.go.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Name, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -268,6 +274,12 @@ class Tag:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.go.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Tag, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.go.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Tag, self)
 
   def _to_py3(self):
     import importlib

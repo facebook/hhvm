@@ -157,6 +157,12 @@ class Name:
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Name, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Name, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -247,6 +253,12 @@ class Copy:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Copy, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Copy, self)
 
   def _to_py3(self):
     import importlib
@@ -339,6 +351,12 @@ class RequestContext:
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.RequestContext, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.RequestContext, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -429,6 +447,12 @@ class Arc:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Arc, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Arc, self)
 
   def _to_py3(self):
     import importlib
@@ -521,6 +545,12 @@ class Box:
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Box, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Box, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -611,6 +641,12 @@ class Exhaustive:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Exhaustive, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Exhaustive, self)
 
   def _to_py3(self):
     import importlib
@@ -703,6 +739,12 @@ class Ord:
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Ord, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Ord, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -793,6 +835,12 @@ class NewType:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.NewType, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.NewType, self)
 
   def _to_py3(self):
     import importlib
@@ -906,6 +954,12 @@ class Type:
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Type, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Type, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1017,6 +1071,12 @@ class Serde:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Serde, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Serde, self)
 
   def _to_py3(self):
     import importlib
@@ -1130,6 +1190,12 @@ class Mod:
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Mod, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Mod, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1241,6 +1307,12 @@ class Adapter:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Adapter, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Adapter, self)
 
   def _to_py3(self):
     import importlib
@@ -1369,6 +1441,12 @@ class Derive:
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Derive, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Derive, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -1480,6 +1558,12 @@ class ServiceExn:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ServiceExn, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.rust.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ServiceExn, self)
 
   def _to_py3(self):
     import importlib

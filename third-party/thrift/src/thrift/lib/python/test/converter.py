@@ -19,10 +19,13 @@ from __future__ import annotations
 
 import unittest
 
+import convertible.thrift_mutable_types as python_mutable_types
+
 import convertible.thrift_types as python_types
 import convertible.ttypes as py_deprecated_types
 import convertible.types as py3_types
 from thrift.python.converter import to_python_struct
+from thrift.python.mutable_converter import to_mutable_python_struct_or_union
 from thrift.python.types import BadEnum
 
 
@@ -327,6 +330,187 @@ class PyDeprecatedToPythonConverterTest(unittest.TestCase):
         )
         self.assertEqual(to.type, python_types.Potahto.Type.to)
         self.assertEqual(to.value, True)
+
+
+class PyDeprecatedToMutablePythonConverterTest(unittest.TestCase):
+    def test_simple(self) -> None:
+        simple = py_deprecated_types.Simple(
+            intField=42,
+            strField="simple",
+            intList=[1, 2, 3],
+            strSet={"hello", "world"},
+            strToIntMap={"one": 1, "two": 2},
+            color=py_deprecated_types.Color.GREEN,
+            name="myname",
+        )._to_mutable_python()
+        self.assertEqual(simple.intField, 42)
+        self.assertEqual(simple.strField, "simple")
+        self.assertEqual(simple.intList, [1, 2, 3])
+        self.assertEqual(simple.strSet, {"hello", "world"})
+        self.assertEqual(simple.strToIntMap, {"one": 1, "two": 2})
+        self.assertEqual(simple.color, python_mutable_types.Color.GREEN)
+        self.assertEqual(simple.name_, "myname")
+
+    def test_nested(self) -> None:
+        nested = py_deprecated_types.Nested(
+            simpleField=py_deprecated_types.Simple(
+                intField=42,
+                strField="simple",
+                intList=[1, 2, 3],
+                strSet={"hello", "world"},
+                strToIntMap={"one": 1, "two": 2},
+                color=py_deprecated_types.Color.NONE,
+                name="myname",
+            ),
+            simpleList=[
+                py_deprecated_types.Simple(
+                    intField=200,
+                    strField="face",
+                    intList=[4, 5, 6],
+                    strSet={"keep", "calm"},
+                    strToIntMap={"three": 3, "four": 4},
+                    color=py_deprecated_types.Color.RED,
+                    name="myname",
+                ),
+                py_deprecated_types.Simple(
+                    intField=404,
+                    strField="b00k",
+                    intList=[7, 8, 9],
+                    strSet={"carry", "on"},
+                    strToIntMap={"five": 5, "six": 6},
+                    color=py_deprecated_types.Color.GREEN,
+                    name="myname",
+                ),
+            ],
+            colorToSimpleMap={
+                py_deprecated_types.Color.BLUE: py_deprecated_types.Simple(
+                    intField=500,
+                    strField="internal",
+                    intList=[10],
+                    strSet={"server", "error"},
+                    strToIntMap={"seven": 7, "eight": 8, "nine": 9},
+                    color=py_deprecated_types.Color.BLUE,
+                    name="myname",
+                )
+            },
+        )._to_mutable_python()
+        self.assertEqual(nested.simpleField.intField, 42)
+        self.assertEqual(nested.simpleList[0].intList, [4, 5, 6])
+        self.assertEqual(nested.simpleList[1].strSet, {"carry", "on"})
+        self.assertEqual(
+            nested.colorToSimpleMap[python_mutable_types.Color.BLUE].color,
+            python_mutable_types.Color.BLUE,
+        )
+
+    def test_simple_union(self) -> None:
+        simple_union = py_deprecated_types.Union(intField=42)._to_mutable_python()
+        self.assertEqual(
+            simple_union.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.intField,
+        )
+        self.assertEqual(simple_union.fbthrift_current_value, 42)
+
+    def test_union_with_py3_name_annotation(self) -> None:
+        simple_union = py_deprecated_types.Union(name="myname")._to_mutable_python()
+        self.assertEqual(
+            simple_union.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.name_,
+        )
+        self.assertEqual(simple_union.fbthrift_current_value, "myname")
+
+    def test_union_with_containers(self) -> None:
+        union_with_list = py_deprecated_types.Union(
+            intList=[1, 2, 3]
+        )._to_mutable_python()
+        self.assertEqual(
+            union_with_list.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.intList,
+        )
+        self.assertEqual(union_with_list.fbthrift_current_value, [1, 2, 3])
+
+    def test_complex_union(self) -> None:
+        complex_union = py_deprecated_types.Union(
+            simpleField=py_deprecated_types.Simple(
+                intField=42,
+                strField="simple",
+                intList=[1, 2, 3],
+                strSet={"hello", "world"},
+                strToIntMap={"one": 1, "two": 2},
+                color=py_deprecated_types.Color.NONE,
+            )
+        )._to_mutable_python()
+        self.assertEqual(
+            complex_union.fbthrift_current_field,
+            python_mutable_types.Union.FbThriftUnionFieldEnum.simple_,
+        )
+        self.assertEqual(complex_union.simple_.intField, 42)
+
+    def test_struct_with_mismatching_field(self) -> None:
+        tomayto = py_deprecated_types.Tomayto(
+            to=42,
+            mayto="blah",
+        )
+        tomahto = to_mutable_python_struct_or_union(
+            python_mutable_types.Tomahto,
+            tomayto,
+        )
+        self.assertEqual(tomahto.to, 42)
+        self.assertEqual(tomahto.mahto, "mahto")
+
+    def test_py_bad_enum(self) -> None:
+        simple = py_deprecated_types.Simple(
+            intField=42,
+            strField="simple",
+            intList=[1, 2, 3],
+            strSet={"hello", "world"},
+            strToIntMap={"one": 1, "two": 2},
+            color=1234,  # pyre-ignore[6]: In call `py_deprecated_types.Simple.__init__`, for 6th parameter `color` expected `Optional[Color]` but got `int`.
+            name="myname",
+        )._to_mutable_python()
+        self.assertIsInstance(simple.color, BadEnum)
+        self.assertEqual(
+            # pyre-ignore[16]: `python_mutable_types.Color` has no attribute `enum`. It's actually a BadEnum.
+            simple.color.enum,
+            python_mutable_types.Color,
+        )
+
+        self.assertEqual(int(simple.color), 1234)
+
+    def test_union_with_mismatching_field(self) -> None:
+        po = to_mutable_python_struct_or_union(
+            python_mutable_types.Potahto,
+            py_deprecated_types.Potayto(
+                po=42,
+            ),
+        )
+        self.assertEqual(
+            po.fbthrift_current_field,
+            python_mutable_types.Potahto.FbThriftUnionFieldEnum.po,
+        )
+        self.assertEqual(po.fbthrift_current_value, 42)
+
+        tah = to_mutable_python_struct_or_union(
+            python_mutable_types.Potahto,
+            py_deprecated_types.Potayto(
+                tay="tay",
+            ),
+        )
+        self.assertEqual(
+            tah.fbthrift_current_field,
+            python_mutable_types.Potahto.FbThriftUnionFieldEnum.EMPTY,
+        )
+
+        to = to_mutable_python_struct_or_union(
+            python_mutable_types.Potahto,
+            py_deprecated_types.Potayto(
+                to=True,
+            ),
+        )
+        self.assertEqual(
+            to.fbthrift_current_field,
+            python_mutable_types.Potahto.FbThriftUnionFieldEnum.to,
+        )
+        self.assertEqual(to.fbthrift_current_value, True)
 
 
 class PythonToPythonConverterTest(unittest.TestCase):

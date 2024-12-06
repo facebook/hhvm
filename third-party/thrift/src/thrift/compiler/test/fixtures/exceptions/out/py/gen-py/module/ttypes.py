@@ -142,6 +142,12 @@ class Fiery(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Fiery, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Fiery, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -242,6 +248,12 @@ class Serious(TException):
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Serious, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Serious, self)
 
   def _to_py3(self):
     import importlib
@@ -359,6 +371,12 @@ class ComplexFieldNames(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ComplexFieldNames, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ComplexFieldNames, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -474,6 +492,12 @@ class CustomFieldNames(TException):
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.CustomFieldNames, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.CustomFieldNames, self)
 
   def _to_py3(self):
     import importlib
@@ -591,6 +615,12 @@ class ExceptionWithPrimitiveField(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ExceptionWithPrimitiveField, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ExceptionWithPrimitiveField, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -707,6 +737,12 @@ class ExceptionWithStructuredAnnotation(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.ExceptionWithStructuredAnnotation, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.ExceptionWithStructuredAnnotation, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -785,6 +821,12 @@ class Banal(TException):
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Banal, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Banal, self)
 
   def _to_py3(self):
     import importlib

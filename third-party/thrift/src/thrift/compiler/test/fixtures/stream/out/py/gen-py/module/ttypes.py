@@ -143,6 +143,12 @@ class FooStreamEx(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.FooStreamEx, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.FooStreamEx, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -241,6 +247,12 @@ class FooEx(TException):
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.FooEx, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.FooEx, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -338,6 +350,12 @@ class FooEx2(TException):
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.FooEx2, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.FooEx2, self)
 
   def _to_py3(self):
     import importlib

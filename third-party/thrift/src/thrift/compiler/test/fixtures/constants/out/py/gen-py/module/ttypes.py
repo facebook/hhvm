@@ -243,6 +243,12 @@ class Internship:
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Internship, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Internship, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -349,6 +355,12 @@ class Range:
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Range, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Range, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -454,6 +466,12 @@ class struct1:
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.struct1, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.struct1, self)
 
   def _to_py3(self):
     import importlib
@@ -605,6 +623,12 @@ class struct2:
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.struct2, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.struct2, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -727,6 +751,12 @@ class struct3:
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.struct3, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.struct3, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -847,6 +877,12 @@ class struct4:
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.struct4, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.struct4, self)
 
   def _to_py3(self):
     import importlib
@@ -976,6 +1012,12 @@ class union1(object):
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.union1, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.union1, self)
 
   def _to_py3(self):
     import importlib
@@ -1159,6 +1201,12 @@ class union2(object):
     import thrift.python.converter
     python_types = importlib.import_module("module.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.union2, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("module.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.union2, self)
 
   def _to_py3(self):
     import importlib

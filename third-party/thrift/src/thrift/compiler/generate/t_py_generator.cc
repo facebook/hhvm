@@ -2270,6 +2270,20 @@ void t_py_generator::generate_py_converter_helpers(
       << endl;
   indent_down();
 
+  out << indent() << "def _to_mutable_python(self):" << endl;
+  indent_up();
+  out << indent() << "import importlib" << endl
+      << indent() << "import thrift.python.mutable_converter" << endl
+      << indent() << "python_mutable_types = importlib.import_module(\""
+      << python_namespace << ".thrift_mutable_types\")" << endl
+      << indent() << "return "
+      << "thrift.python.mutable_converter.to_mutable_python_struct_or_union("
+      << "python_mutable_types."
+      << rename_reserved_keywords(tstruct->get_name()) << ", self" << ")"
+      << endl
+      << endl;
+  indent_down();
+
   auto py3_namespace = get_py3_namespace_with_name_and_prefix(program_, "");
   out << indent() << "def _to_py3(self):" << endl;
   indent_up();

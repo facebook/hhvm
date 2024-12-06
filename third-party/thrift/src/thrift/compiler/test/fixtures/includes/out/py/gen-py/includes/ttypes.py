@@ -150,6 +150,12 @@ class Included:
     python_types = importlib.import_module("includes.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.Included, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("includes.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.Included, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter

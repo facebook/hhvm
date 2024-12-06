@@ -150,6 +150,12 @@ class MyStruct:
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyStruct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyStruct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -730,6 +736,12 @@ class MyUnion(object):
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyUnion, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyUnion, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -841,6 +853,12 @@ class MyStructWithCustomDefault:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.MyStructWithCustomDefault, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.MyStructWithCustomDefault, self)
 
   def _to_py3(self):
     import importlib
@@ -1266,6 +1284,12 @@ class StructLevelTerseStruct:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.StructLevelTerseStruct, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.StructLevelTerseStruct, self)
 
   def _to_py3(self):
     import importlib
@@ -2022,6 +2046,12 @@ class FieldLevelTerseStruct:
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.FieldLevelTerseStruct, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.FieldLevelTerseStruct, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2428,6 +2458,12 @@ class TerseStructWithCustomDefault:
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TerseStructWithCustomDefault, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TerseStructWithCustomDefault, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2580,6 +2616,12 @@ class AdaptedFields:
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.AdaptedFields, self)
 
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AdaptedFields, self)
+
   def _to_py3(self):
     import importlib
     import thrift.py3.converter
@@ -2693,6 +2735,12 @@ class WrappedFields:
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.WrappedFields, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.WrappedFields, self)
 
   def _to_py3(self):
     import importlib
@@ -2815,6 +2863,12 @@ class TerseException(TException):
     import thrift.python.converter
     python_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_types")
     return thrift.python.converter.to_python_struct(python_types.TerseException, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.test.terse_write.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.TerseException, self)
 
   def _to_py3(self):
     import importlib

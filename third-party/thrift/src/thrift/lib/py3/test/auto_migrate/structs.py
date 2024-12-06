@@ -18,9 +18,12 @@ import copy
 import math
 import unittest
 
+from testing.dependency.types import IncludedStruct
+from testing.sub_dependency.types import Basic, IncludedColour
 from testing.types import (
     Color,
     easy,
+    FANCY_CONST,
     File,
     hard,
     Integers,
@@ -471,3 +474,18 @@ class NumericalConversionsTests(unittest.TestCase):
         with self.assertRaises(TypeError):
             # pyre-fixme[58]: Test to make sure that invalid comparison errors out
             z < y  # noqa: B015
+
+    def test_included_struct_const(self) -> None:
+        self.assertIsInstance(FANCY_CONST, IncludedStruct)
+        self.assertEqual(FANCY_CONST.val, Basic(nom="fancy", val=47, bin=b"01010101"))
+        self.assertEqual(FANCY_CONST.color, IncludedColour.red)
+        self.assertEqual(
+            FANCY_CONST.color_list, [IncludedColour.red, IncludedColour.blue]
+        )
+        self.assertEqual(
+            FANCY_CONST.color_set, {IncludedColour.red, IncludedColour.blue}
+        )
+        self.assertEqual(
+            FANCY_CONST.color_map,
+            {IncludedColour.red: Basic(), IncludedColour.blue: Basic(nom="b")},
+        )

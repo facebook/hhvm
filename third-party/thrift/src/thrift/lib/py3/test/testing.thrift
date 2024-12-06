@@ -17,6 +17,8 @@
 include "thrift/annotation/thrift.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/python.thrift"
+include "thrift/lib/py3/test/dependency.thrift"
+include "thrift/lib/py3/test/sub_dependency.thrift"
 
 cpp_include "<deque>"
 cpp_include "folly/container/F14Map.h"
@@ -31,6 +33,20 @@ namespace cpp2 cpp2
 const list<i16> int_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 const map<i16, map<i16, i16>> LocationMap = {1: {1: 1}};
+
+const sub_dependency.IncludedColour RedColour = sub_dependency.IncludedColour.red;
+const sub_dependency.IncludedColour BlueColour = sub_dependency.IncludedColour.blue;
+
+const dependency.IncludedStruct FANCY_CONST = dependency.IncludedStruct{
+  val = sub_dependency.Basic{nom = "fancy", val = 47, bin = "01010101"},
+  color = RedColour,
+  color_list = [RedColour, BlueColour],
+  color_set = [RedColour, BlueColour],
+  color_map = {
+    RedColour: sub_dependency.Basic{},
+    BlueColour: sub_dependency.Basic{nom = "b"},
+  },
+};
 
 typedef list<i32> I32List
 typedef list<list<string>> StrList2D

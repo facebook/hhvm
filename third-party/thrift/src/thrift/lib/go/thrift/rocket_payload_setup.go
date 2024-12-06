@@ -25,6 +25,9 @@ import (
 	"github.com/rsocket/rsocket-go/payload"
 )
 
+// RocketMetadataCompactMimeType is the mime type for the rocket metadata
+const RocketMetadataCompactMimeType = "application/x-rocket-metadata+compact"
+
 func checkRequestSetupMetadata8(pay payload.Payload) error {
 	pay = payload.Clone(pay)
 	metdataBytes, ok := pay.Metadata()

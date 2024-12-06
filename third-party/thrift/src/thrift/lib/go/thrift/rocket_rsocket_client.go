@@ -61,6 +61,7 @@ func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error
 	// KeepaliveLifetime = time.Duration(missedAcks = 1) * (ackTimeout = 3600000)
 	clientBuilder := rsocket.Connect().
 		KeepAlive(time.Millisecond*30000, time.Millisecond*3600000, 1).
+		MetadataMimeType(RocketMetadataCompactMimeType).
 		SetupPayload(setupPayload).
 		OnClose(func(error) {})
 	clientStarter := clientBuilder.Acceptor(acceptor(serverMetadataPush))

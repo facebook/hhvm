@@ -576,18 +576,13 @@ module Pessimize (Provider : ShallowProvider) = struct
       }
 
   (*
-    How we pessimise a function depends on how the type is enforced, where the
-    function is, and the experimental_always_pessimise_return option.
+    How we pessimise a function depends on how the type is enforced and where the
+    function is defined.
 
     The goal is to pessimise non-enforced return types to like types, while also
     avoiding hierarchy errors.
 
-    If experimental_always_pessimise_return is set, the all methods should get
-    like-types on their return to avoid hierarchy errors, but top-level functions should
-    only be pessimised when the type is not enforceable.
-
-    If experimental_always_pessimise_return is not set, we only pessimise the return of
-    non-enforced types. Abstract methods do not have bodies to enforce anything, so we
+    Abstract methods do not have bodies to enforce anything, so we
     always pessimise their returns. For Concrete methods, if the type is only partially
     enforced, we pessimise and also intersect with the partially enforced type to
     avoid hierarchy errors.
@@ -615,15 +610,8 @@ module Pessimize (Provider : ShallowProvider) = struct
           | Tthis -> true
           | _ -> false
         in
-        (match
-           ( fun_kind,
-             TypecheckerOptions.(
-               experimental_feature_enabled
-                 (Provider.get_tcopt ctx)
-                 experimental_always_pessimise_return) )
-         with
-        | (Concrete_method, true)
-        | (Abstract_method, _) ->
+        (match fun_kind with
+        | Abstract_method ->
           mk
             ( get_reason ty,
               Tfun

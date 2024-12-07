@@ -518,6 +518,117 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertEqual(u_value, "Hello!")
         self.assertEqual(u_fbthrift_current_value, "Hello!")
 
+    def test_match(self) -> None:
+        # Canonical case: union with a field set matches Class pattern with
+        # corresponding field keyword argument (but not a different keyword argument):
+        match TestUnionImmutable(string_field="Hello!"):
+            case TestUnionImmutable(int_field=int_field):
+                self.fail(f"Unexpected match: {int_field}")
+            case TestUnionImmutable(string_field=string_field):
+                self.assertEqual(string_field, "Hello!")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # A non-empty union will match a Class pattern with no argument (the
+        # specification explicitly says this checks isinstance() only).
+        match TestUnionImmutable(string_field="Hello!"):
+            case TestUnionImmutable():
+                pass  # Expected
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Positional parameters in class pattern are not supported
+        with self.assertRaisesRegex(
+            TypeError, r"TestUnion\(\) accepts 0 positional sub-patterns \(1 given\)"
+        ):
+            match TestUnionImmutable(string_field="Hello!"):
+                # pyre-ignore[16]: Intentional for test
+                case TestUnionImmutable(string_field):
+                    pass  # Should not be reached
+
+        # Matching with multiple (field) keywords arguments ???
+        match TestUnionImmutable(string_field="Hello!"):
+            case TestUnionImmutable(string_field=string_field, int_field=int_field):
+                self.fail(f"Unexpected match: {string_field}, {int_field}")
+            case TestUnionImmutable(string_field=string_field, int_field=None):
+                self.fail(f"Unexpected match: {string_field}")
+            case _:
+                pass  # Expected
+
+        # Matching with special attributes
+        match TestUnionImmutable(string_field="Hello!"):
+            case TestUnionImmutable(
+                fbthrift_current_field=x,
+                fbthrift_current_value=y,
+                string_field=string_field,
+            ):
+                self.assertEqual(
+                    x, TestUnionImmutable.FbThriftUnionFieldEnum.string_field
+                )
+                self.assertEqual(y, "Hello!")
+                self.assertEqual(string_field, "Hello!")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Matching empty union (using fbthrift_current_value)
+        match TestUnionImmutable():
+            case TestUnionImmutable(fbthrift_current_value=None):
+                pass
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Matching empty union (using fbthrift_current_field)
+        match TestUnionImmutable():
+            case TestUnionImmutable(
+                fbthrift_current_field=TestUnionImmutable.FbThriftUnionFieldEnum.EMPTY
+            ):
+                pass
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match nested struct data
+        match TestUnionImmutable(
+            struct_field=TestStructImmutable(unqualified_string="Hello!")
+        ):
+            case TestUnionImmutable(string_field=string_field):
+                self.fail(f"Unexpected match: {string_field}")
+            case TestUnionImmutable(fbthrift_current_value=None):
+                self.fail("Unexpected match: (union is not empty)")
+            case TestUnionImmutable(
+                struct_field=TestStructImmutable(
+                    unqualified_string=unqualified_string,
+                    optional_string=optional_string,
+                )
+            ):
+                self.assertEqual(unqualified_string, "Hello!")
+                self.assertIsNone(optional_string)
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match fields with adapted types
+        match TestUnionAdaptedTypesImmutable(
+            adapted_i32_to_datetime=datetime.fromtimestamp(1733507988)
+        ):
+            case TestUnionAdaptedTypesImmutable(adapted_i32_to_datetime=x):
+                self.assertIsInstance(x, datetime)
+                self.assertEqual(x, datetime.fromtimestamp(1733507988))
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match adapted types via fbthrift_current_value returns the underlying value!
+        # (see test_adapted_types() above).
+        match TestUnionAdaptedTypesImmutable(
+            adapted_i32_to_datetime=datetime.fromtimestamp(1733507988)
+        ):
+            case TestUnionAdaptedTypesImmutable(
+                fbthrift_current_field=TestUnionAdaptedTypesImmutable.FbThriftUnionFieldEnum.adapted_i32_to_datetime,
+                fbthrift_current_value=x,
+            ):
+                self.assertNotIsInstance(x, datetime)
+                self.assertEqual(x, 1733507988)
+            case _:
+                self.fail("Expected match, got none.")
+
 
 class ThriftPython_MutableUnion_Test(unittest.TestCase):
     def setUp(self) -> None:
@@ -915,3 +1026,127 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
         )
 
         self.assertEqual(u_fbthrift_current_value, "Hello!")
+
+    def test_match(self) -> None:
+        # Canonical case: union with a field set matches Class pattern with
+        # corresponding field keyword argument (but not a different keyword argument):
+        match TestUnionMutable(string_field="Hello!"):
+            case TestUnionMutable(int_field=int_field):
+                self.fail(f"Unexpected match: {int_field}")
+            case TestUnionMutable(string_field=string_field):
+                self.assertEqual(string_field, "Hello!")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # A non-empty union will match a Class pattern with no argument (the
+        # specification explicitly says this checks isinstance() only).
+        match TestUnionMutable(string_field="Hello!"):
+            case TestUnionMutable():
+                pass  # Expected
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Positional parameters in class pattern are not supported
+        with self.assertRaisesRegex(
+            TypeError, r"TestUnion\(\) accepts 0 positional sub-patterns \(1 given\)"
+        ):
+            match TestUnionMutable(string_field="Hello!"):
+                # pyre-ignore[16]: Intentional for test
+                case TestUnionMutable(string_field):
+                    pass  # Should not be reached
+
+        # Matching with multiple (field) keywords arguments ???
+        match TestUnionMutable(string_field="Hello!"):
+            case TestUnionMutable(string_field=string_field, int_field=int_field):
+                self.fail(f"Unexpected match: {string_field}, {int_field}")
+            case TestUnionMutable(string_field=string_field, int_field=None):
+                self.fail(f"Unexpected match: {string_field}")
+            case _:
+                pass  # Expected
+
+        # Matching with special attributes
+        match TestUnionMutable(string_field="Hello!"):
+            case TestUnionMutable(
+                fbthrift_current_field=x,
+                fbthrift_current_value=y,
+                string_field=string_field,
+            ):
+                self.assertEqual(
+                    x, TestUnionMutable.FbThriftUnionFieldEnum.string_field
+                )
+                self.assertEqual(y, "Hello!")
+                self.assertEqual(string_field, "Hello!")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Matching empty union (using fbthrift_current_value)
+        match TestUnionMutable():
+            case TestUnionMutable(fbthrift_current_value=None):
+                pass
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Matching empty union (using fbthrift_current_field)
+        match TestUnionMutable():
+            case TestUnionMutable(
+                fbthrift_current_field=TestUnionMutable.FbThriftUnionFieldEnum.EMPTY
+            ):
+                pass
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match nested struct data
+        match TestUnionMutable(
+            struct_field=TestStructMutable(unqualified_string="Hello!")
+        ):
+            case TestUnionMutable(string_field=string_field):
+                self.fail(f"Unexpected match: {string_field}")
+            case TestUnionMutable(fbthrift_current_value=None):
+                self.fail("Unexpected match: (union is not empty)")
+            case TestUnionMutable(
+                struct_field=TestStructMutable(
+                    unqualified_string=unqualified_string,
+                    optional_string=optional_string,
+                )
+            ):
+                self.assertEqual(unqualified_string, "Hello!")
+                self.assertIsNone(optional_string)
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match fields with adapted types
+        match TestUnionAdaptedTypesMutable(
+            adapted_i32_to_datetime=datetime.fromtimestamp(1733507988)
+        ):
+            case TestUnionAdaptedTypesMutable(adapted_i32_to_datetime=x):
+                self.assertIsInstance(x, datetime)
+                self.assertEqual(x, datetime.fromtimestamp(1733507988))
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match adapted types via fbthrift_current_value returns the underlying value!
+        # (see test_adapted_types() above).
+        match TestUnionAdaptedTypesMutable(
+            adapted_i32_to_datetime=datetime.fromtimestamp(1733507988)
+        ):
+            case TestUnionAdaptedTypesMutable(
+                fbthrift_current_field=TestUnionAdaptedTypesMutable.FbThriftUnionFieldEnum.adapted_i32_to_datetime,
+                fbthrift_current_value=x,
+            ):
+                self.assertNotIsInstance(x, datetime)
+                self.assertEqual(x, 1733507988)
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Cases above are similar to immutable union. Checking with mutations next...
+
+        # Similar to canonical case above, but field is changed after initialization.
+        u = TestUnionMutable(string_field="Hello!")
+        u.int_field = 42
+        match u:
+            case TestUnionMutable(string_field=string_field):
+                self.fail(f"Unexpected match: {string_field}")
+            case TestUnionMutable(int_field=int_field):
+                self.assertEqual(int_field, 42)
+            case _:
+                self.fail("Expected match, got none.")

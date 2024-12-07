@@ -46,25 +46,13 @@ class t_scope {
 
   // Returns the definition with the given name or nullptr if there is no such
   // definition.
-  const t_named* find(std::string_view name) const {
+  template <typename Node = t_named>
+  const Node* find(std::string_view name) const {
     auto it = definitions_.find(name);
-    return it != definitions_.end() ? it->second : nullptr;
-  }
-
-  const t_type* find_type(std::string_view name) const {
-    return dynamic_cast<const t_type*>(find(name));
-  }
-
-  const t_service* find_service(std::string_view name) const {
-    return dynamic_cast<const t_service*>(find(name));
-  }
-
-  const t_interaction* find_interaction(std::string_view name) const {
-    return dynamic_cast<const t_interaction*>(find(name));
-  }
-
-  const t_const* find_constant(std::string_view name) const {
-    return dynamic_cast<const t_const*>(find(name));
+    if (it == definitions_.end()) {
+      return nullptr;
+    }
+    return dynamic_cast<const Node*>(it->second);
   }
 
   // Returns an existing def, if one is already registered with the same uri, or

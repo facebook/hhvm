@@ -59,7 +59,7 @@ t_type_ref t_scope::ref_type(
       ? name
       : program.scope_name(name);
   // Try to resolve the type.
-  if (const t_type* type = find_type(scoped_name)) {
+  if (const t_type* type = find<t_type>(scoped_name)) {
     return {*type, range}; // We found the type!
   }
 

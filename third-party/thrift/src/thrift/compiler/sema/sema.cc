@@ -203,7 +203,7 @@ void match_type_with_const_value(
       }
       if (value->kind() == t_const_value::CV_IDENTIFIER) {
         const std::string& id = value->get_identifier();
-        const t_const* constant = program.scope()->find_constant(id);
+        const t_const* constant = program.scope()->find<t_const>(id);
         if (!constant) {
           ctx.error(
               value->ref_range().begin,
@@ -245,10 +245,10 @@ void match_type_with_const_value(
         } else if (value->kind() == t_const_value::CV_IDENTIFIER) {
           // Resolve enum values defined after use.
           const std::string& id = value->get_identifier();
-          const t_const* constant = program.scope()->find_constant(id);
+          const t_const* constant = program.scope()->find<t_const>(id);
           if (!constant) {
             constant =
-                program.scope()->find_constant(value->program().scope_name(id));
+                program.scope()->find<t_const>(value->program().scope_name(id));
           }
           if (!constant) {
             // Try to resolve enum values from typedefs.
@@ -379,7 +379,7 @@ void mutate_inject_metadata_fields(
     type_string = annotation->program()->name() + "." + type_string;
   }
 
-  const auto* ttype = node.program()->scope()->find_type(type_string);
+  const auto* ttype = node.program()->scope()->find<t_type>(type_string);
   if (!ttype) {
     ctx.error(
         "Can not find expected type `{}` specified in "

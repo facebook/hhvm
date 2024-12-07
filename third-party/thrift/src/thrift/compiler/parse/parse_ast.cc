@@ -587,11 +587,11 @@ class ast_builder : public parser_actions {
     auto find_base_service = [&]() -> const t_service* {
       if (base.str.size() != 0) {
         auto base_name = base.str;
-        if (const t_service* result = scope_->find_service(base_name)) {
+        if (const t_service* result = scope_->find<t_service>(base_name)) {
           return result;
         }
         if (const t_service* result =
-                scope_->find_service(program_.scope_name(base_name))) {
+                scope_->find<t_service>(program_.scope_name(base_name))) {
           return result;
         }
         diags_.error(
@@ -637,7 +637,7 @@ class ast_builder : public parser_actions {
         qualified_name = program_.scope_name(return_name);
         return_name = qualified_name;
       }
-      if (auto interaction_ptr = scope_->find_interaction(return_name)) {
+      if (auto interaction_ptr = scope_->find<t_interaction>(return_name)) {
         interaction = t_type_ref::from_ptr(
             interaction_ptr, {ret.name.loc, ret.name.loc + size});
       } else if (ret.type) {
@@ -887,11 +887,11 @@ class ast_builder : public parser_actions {
     auto find_const =
         [this](source_location loc, const std::string& name) -> const t_const* {
       validate_not_ambiguous_enum(loc, name);
-      if (const t_const* constant = scope_->find_constant(name)) {
+      if (const t_const* constant = scope_->find<t_const>(name)) {
         return constant;
       }
       if (const t_const* constant =
-              scope_->find_constant(program_.scope_name(name))) {
+              scope_->find<t_const>(program_.scope_name(name))) {
         validate_not_ambiguous_enum(loc, program_.scope_name(name));
         return constant;
       }

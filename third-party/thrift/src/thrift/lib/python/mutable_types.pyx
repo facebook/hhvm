@@ -289,20 +289,34 @@ cdef class MutableStruct(MutableStructOrUnion):
                  "Python value" representation, as opposed to "internal data"
                  representation (see `*TypeInfo` classes).
         """
+        self._fbthrift_reset_struct_field_state(kwargs)
+
+    def __init__(self, **kwargs):
+        pass
+
+    def fbthrift_reset(self):
+        """
+        Resets this Struct instance to its (standard) default values.
+
+        After a call to this method, this instance is equal to a newly initialized
+        instance of this Struct type (with no initialization argument).
+        """
+        self._fbthrift_reset_struct_field_state(kwargs={})
+
+    cdef _fbthrift_reset_struct_field_state(self, kwargs) except *:
+        """
+        Resets all state in this Struct instance related to its fields (including
+        any cached values).
+
+        Args:
+            kwargs (dict | None): see `__cinit__()`.
+        """
         self._initStructListWithValues(kwargs)
         cdef MutableStructInfo mutable_struct_info = type(self)._fbthrift_mutable_struct_info
         self._fbthrift_field_cache = [None] * len(mutable_struct_info.fields)
         # Append `MutableStruct` instance, see `_fbthrift_has_struct_instance()`
         self._fbthrift_data.append(self)
 
-    def __init__(self, **kwargs):
-        pass
-
-    def fbthrift_reset(self):
-        raise NotImplementedError(
-            "fbthrift_reset() is not (yet) implemented for mutable thrift-python "
-            "Struct types."
-        )
 
     def __call__(self, **kwargs):
         self_copy = copy.deepcopy(self)
@@ -321,9 +335,22 @@ cdef class MutableStruct(MutableStructOrUnion):
         assert self._fbthrift_has_struct_instance(self._fbthrift_data)
         return self._fbthrift_create(copy.deepcopy(self._fbthrift_data[:-1]))
 
-    cdef _initStructListWithValues(self, kwargs) except *:
-        cdef MutableStructInfo mutable_struct_info = self._fbthrift_mutable_struct_info
+        
 
+    cdef _initStructListWithValues(self, kwargs) except *:
+        """
+        Initializes the underlying "struct data container".
+
+        Assigns `self._fbthrift_data` to a "struct container" with `numFields + 1`
+        fields (initialized to the "isset" flags and values of the corresponding fields
+        - either the default ones or the ones provided by `kwargs`). Most notably, it
+        does NOT hold a reference to this struct instance at the end
+        (see `_fbthrift_has_struct_instance()`).
+
+        Args:
+            kwargs (dict | None): see `__cinit__()`.
+        """
+        cdef MutableStructInfo mutable_struct_info = type(self)._fbthrift_mutable_struct_info
         # If no keyword arguments are provided, initialize the Struct with
         # default values.
         if not kwargs:

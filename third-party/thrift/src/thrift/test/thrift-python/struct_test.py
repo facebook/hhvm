@@ -496,16 +496,9 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         w = TestStructWithDefaultValuesMutable(optional_integer=123)
         self.assertEqual(w.optional_integer, 123)
         self.assertEqual(w.unqualified_integer, 42)
-        with self.assertRaisesRegex(
-            NotImplementedError,
-            (
-                r"fbthrift_reset\(\) is not \(yet\) implemented for mutable "
-                "thrift-python Struct types."
-            ),
-        ):
-            w.fbthrift_reset()
-            # self.assertIsNone(w.optional_integer)
-            # self.assertEqual(w.unqualified_integer, 42)
+        w.fbthrift_reset()
+        self.assertIsNone(w.optional_integer)
+        self.assertEqual(w.unqualified_integer, 42)
 
     def test_equality_and_hashability(self) -> None:
         # Equality

@@ -111,6 +111,7 @@ cdef class MutableStruct(MutableStructOrUnion):
     cdef uint32_t _fbthrift_deserialize(
         MutableStruct self, IOBuf buf, Protocol proto
     ) except? 0
+    cdef _fbthrift_reset_struct_field_state(MutableStruct self, object kwargs) except *
     cdef _fbthrift_get_field_value(MutableStruct self, int16_t index)
     cdef _initStructListWithValues(MutableStruct self, object kwargs) except *
     cdef _fbthrift_set_field_value(self, int16_t index, object value) except *

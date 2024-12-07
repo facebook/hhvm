@@ -286,15 +286,22 @@ Actions handleError(
     newState.writeRecordLayer() = nullptr;
     newState.readRecordLayer() = nullptr;
   });
+
+  Actions actions;
+  actions.emplace_back(std::move(transition));
+
   if (alertDesc && state.writeRecordLayer()) {
-    Alert alert(*alertDesc);
-    WriteToSocket write;
-    write.contents.emplace_back(
-        state.writeRecordLayer()->writeAlert(std::move(alert)));
-    return actions(std::move(transition), std::move(write), std::move(error));
-  } else {
-    return actions(std::move(transition), std::move(error));
+    try {
+      Alert alert(*alertDesc);
+      WriteToSocket write;
+      write.contents.emplace_back(
+          state.writeRecordLayer()->writeAlert(std::move(alert)));
+      actions.emplace_back(std::move(write));
+    } catch (...) {
+    }
   }
+  actions.emplace_back(std::move(error));
+  return actions;
 }
 
 Actions handleAppCloseImmediate(const State& state) {

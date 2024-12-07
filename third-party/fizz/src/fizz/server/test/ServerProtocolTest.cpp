@@ -6743,6 +6743,21 @@ TEST_F(ServerProtocolTest, AsyncKeyExchangeTest) {
   EXPECT_TRUE(
       std::all_of(begin(cr), end(cr), [](auto c) { return c == 0x44; }));
 }
+
+TEST_F(ServerProtocolTest, HandleErrorDoesntThrow) {
+  setUpAcceptingData();
+  EXPECT_CALL(*appWrite_, _write(_, _))
+      .WillOnce(Throw(std::runtime_error("write error")));
+
+  ReportError error("some error");
+  AlertDescription ad = AlertDescription::internal_error;
+
+  auto shouldNotThrow = [&] {
+    auto actions = detail::handleError(state_, std::move(error), ad);
+    expectActions<MutateState, ReportError>(actions);
+  };
+  EXPECT_NO_THROW(shouldNotThrow());
+}
 } // namespace test
 } // namespace server
 } // namespace fizz

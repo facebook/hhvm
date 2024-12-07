@@ -5918,6 +5918,20 @@ TEST_F(ClientProtocolTest, TestPskWithoutCerts) {
   EXPECT_EQ(state_.clientAuthRequested().value(), ClientAuthType::NotRequested);
 }
 
+TEST_F(ClientProtocolTest, HandleErrorDoesntThrow) {
+  setupAcceptingData();
+  EXPECT_CALL(*mockWrite_, _write(_, _))
+      .WillOnce(Throw(std::runtime_error("write error")));
+
+  ReportError error("some error");
+  AlertDescription ad = AlertDescription::internal_error;
+
+  auto shouldNotThrow = [&] {
+    auto actions = detail::handleError(state_, std::move(error), ad);
+    expectActions<MutateState, ReportError>(actions);
+  };
+  EXPECT_NO_THROW(shouldNotThrow());
+}
 } // namespace test
 } // namespace client
 } // namespace fizz

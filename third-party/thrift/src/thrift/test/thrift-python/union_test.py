@@ -1150,3 +1150,21 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
                 self.assertEqual(int_field, 42)
             case _:
                 self.fail("Expected match, got none.")
+
+        # Match after resetting
+        u.fbthrift_reset()
+        match u:
+            case TestUnionMutable(fbthrift_current_value=None):
+                pass  # Expected
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Re-assign different field
+        u.string_field = "world!"
+        match u:
+            case TestUnionMutable(fbthrift_current_value=None):
+                self.fail("Unexpected match")
+            case TestUnionMutable(string_field=string_field):
+                self.assertEqual(string_field, "world!")
+            case _:
+                self.fail("Expected match, got none.")

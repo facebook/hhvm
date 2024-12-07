@@ -232,10 +232,18 @@ cdef void set_mutable_struct_field(list struct_list, int16_t index, value) excep
 
 
 cdef class MutableStructOrUnion:
+    def fbthrift_reset(self):
+        """
+        Resets this Thrift struct or union instance to its (standard) default values.
+        """
+        raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
+
     cdef IOBuf _fbthrift_serialize(self, Protocol proto):
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
+
     cdef uint32_t _fbthrift_deserialize(self, IOBuf buf, Protocol proto) except? 0:
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
+
     cdef _fbthrift_get_field_value(self, int16_t index):
         raise NotImplementedError("Not implemented on base MutableStructOrUnion class")
 
@@ -289,6 +297,12 @@ cdef class MutableStruct(MutableStructOrUnion):
 
     def __init__(self, **kwargs):
         pass
+
+    def fbthrift_reset(self):
+        raise NotImplementedError(
+            "fbthrift_reset() is not (yet) implemented for mutable thrift-python "
+            "Struct types."
+        )
 
     def __call__(self, **kwargs):
         self_copy = copy.deepcopy(self)
@@ -843,6 +857,17 @@ cdef class MutableUnion(MutableStructOrUnion):
 
         self._fbthrift_set_mutable_union_value(field_id, field_python_value)
 
+    def fbthrift_reset(self):
+        """
+        Resets (or "clears") this union, ensuring none of its fields are set.
+
+        Following this call, the following are true:
+            * the current value (`self.fbthrift_current_value`) is`None`
+            * the current field (`self.fbthrift_current_field`) is the (special)
+              `EMPTY` value.
+        """
+        self._fbthrift_set_mutable_union_value(field_id=0, field_python_value=None)
+
     cdef void _fbthrift_set_mutable_union_value(
         self, int field_id, object field_python_value
     ) except *:
@@ -943,7 +968,7 @@ cdef class MutableUnion(MutableStructOrUnion):
     ):
         """
         Returns the current value for this union, in "python" format (as opposed to
-        "internal data", see `TypeInfoBase`).
+        "internal data", see `TypeInfoBase`), or None if this union is empty.
 
         This method DOES NOT handle adapted fields, i.e. if the current field has an
         adapter, the returned value will NOT be the adapted value, but rather that of
@@ -952,7 +977,13 @@ cdef class MutableUnion(MutableStructOrUnion):
         Args:
             current_field_enum_value: the field ID of the current field, read from
                 `self._fbthrift_data[0]` and passed in to avoid unnecessarily reading it
-                again.
+                again. This can be 0 (for an empty union).
+
+        Returns:
+            Python-value of the current field, or None if `current_field_enum_value` is
+            0 (i.e., empty union). In the latter case, also asserts that
+            `self._fbthrift_data[1]` (i.e., the current value in internal data
+            representation) is None.
         """
         field_internal_data = self._fbthrift_data[1]
 

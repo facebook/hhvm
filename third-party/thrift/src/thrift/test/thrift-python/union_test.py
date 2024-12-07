@@ -795,6 +795,38 @@ class ThriftPython_MutableUnion_Test(unittest.TestCase):
             # pyre-ignore[16]: Intentional for test
             u.non_existent_field = 999
 
+    def test_reset(self) -> None:
+        u = TestUnionMutable(string_field="Hello!")
+        self.assertEqual(u.fbthrift_current_value, "Hello!")
+        self.assertIs(
+            u.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.string_field,
+        )
+
+        # Resetting union makes it empty
+        u.fbthrift_reset()
+        self.assertIsNone(u.fbthrift_current_value)
+        self.assertIs(
+            u.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.EMPTY,
+        )
+
+        # Union can be reset again, it's a no-op
+        u.fbthrift_reset()
+        self.assertIsNone(u.fbthrift_current_value)
+
+        # Union can then be set:
+        u.int_field = 42
+        self.assertEqual(u.fbthrift_current_value, 42)
+        self.assertIs(
+            u.fbthrift_current_field,
+            TestUnionMutable.FbThriftUnionFieldEnum.int_field,
+        )
+
+        # One last reset
+        u.fbthrift_reset()
+        self.assertIsNone(u.fbthrift_current_value)
+
     def test_del_field(self) -> None:
         u = TestUnionMutable(string_field="Hello!")
         self.assertEqual(u.string_field, "Hello!")

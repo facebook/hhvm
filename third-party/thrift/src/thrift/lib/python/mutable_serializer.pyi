@@ -17,11 +17,13 @@
 import typing
 
 from folly.iobuf import IOBuf
-from thrift.python.exceptions import GeneratedError
+from thrift.python.mutable_exceptions import MutableGeneratedError
 from thrift.python.mutable_types import MutableStructOrUnion
 from thrift.python.protocol import Protocol as _Protocol
 
-sT = typing.TypeVar("sT", bound=typing.Union[MutableStructOrUnion, GeneratedError])
+sT = typing.TypeVar(
+    "sT", bound=typing.Union[MutableStructOrUnion, MutableGeneratedError]
+)
 
 Protocol = _Protocol
 

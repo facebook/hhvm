@@ -4,7 +4,7 @@ MD5
 BLO
 
 Notice: crypt(): No salt parameter was specified. You must use a randomly generated salt and a strong hash function to produce a secure hash. in %s/crypt.php on line 18
-string(34) "$1$bJoWf/..$V6Bfi7.4Xu0zVFzgX/sY91"
+string(34) %s
 
 Warning: crypt() expects at least 1 parameter, 0 given in %s/crypt.php on line 19
 

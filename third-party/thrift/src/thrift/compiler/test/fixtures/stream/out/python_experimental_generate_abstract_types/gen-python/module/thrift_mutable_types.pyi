@@ -81,7 +81,7 @@ class FooEx2(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrif
     def _to_py_deprecated(self) -> "module.ttypes.FooEx2": ...  # type: ignore
 
 
-class _fbthrift_PubSubStreamingService_returnstream_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_returnstream_args(_fbthrift_python_mutable_types.MutableStruct):
     i32_from: _typing.Final[int] = ...
     i32_to: _typing.Final[int] = ...
 
@@ -96,7 +96,7 @@ class _fbthrift_PubSubStreamingService_returnstream_args(_fbthrift_python_types.
         _typing.Union[None, int, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_returnstream_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_returnstream_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -123,7 +123,7 @@ class _fbthrift_PubSubStreamingService_returnstream_result_stream(_fbthrift_pyth
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_streamthrows_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_streamthrows_args(_fbthrift_python_mutable_types.MutableStruct):
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -136,7 +136,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_args(_fbthrift_python_types.
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_streamthrows_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_streamthrows_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -165,7 +165,7 @@ class _fbthrift_PubSubStreamingService_streamthrows_result_stream(_fbthrift_pyth
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_servicethrows_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_servicethrows_args(_fbthrift_python_mutable_types.MutableStruct):
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -178,7 +178,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_args(_fbthrift_python_types
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_servicethrows_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_servicethrows_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
     e: _typing.Final[_fbthrift_current_module.FooEx]
 
@@ -207,7 +207,7 @@ class _fbthrift_PubSubStreamingService_servicethrows_result_stream(_fbthrift_pyt
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_servicethrows2_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_servicethrows2_args(_fbthrift_python_mutable_types.MutableStruct):
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -220,7 +220,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_args(_fbthrift_python_type
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_servicethrows2_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_servicethrows2_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
     e1: _typing.Final[_fbthrift_current_module.FooEx]
     e2: _typing.Final[_fbthrift_current_module.FooEx2]
@@ -251,7 +251,7 @@ class _fbthrift_PubSubStreamingService_servicethrows2_result_stream(_fbthrift_py
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_boththrows_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_boththrows_args(_fbthrift_python_mutable_types.MutableStruct):
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -264,7 +264,7 @@ class _fbthrift_PubSubStreamingService_boththrows_args(_fbthrift_python_types.St
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_boththrows_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_boththrows_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
     e: _typing.Final[_fbthrift_current_module.FooEx]
 
@@ -295,7 +295,7 @@ class _fbthrift_PubSubStreamingService_boththrows_result_stream(_fbthrift_python
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(_fbthrift_python_mutable_types.MutableStruct):
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -308,7 +308,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_args(_fbthr
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -337,7 +337,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stre
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(_fbthrift_python_mutable_types.MutableStruct):
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -350,7 +350,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_args(_fbth
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
     e: _typing.Final[_fbthrift_current_module.FooEx]
 
@@ -379,7 +379,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_str
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(_fbthrift_python_mutable_types.MutableStruct):
     foo: _typing.Final[int] = ...
 
     def __init__(
@@ -392,7 +392,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_args(_fbthrif
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
     e: _typing.Final[_fbthrift_current_module.FooEx]
 
@@ -423,7 +423,7 @@ class _fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream
         ]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_returnstreamFast_args(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_returnstreamFast_args(_fbthrift_python_mutable_types.MutableStruct):
     i32_from: _typing.Final[int] = ...
     i32_to: _typing.Final[int] = ...
 
@@ -438,7 +438,7 @@ class _fbthrift_PubSubStreamingService_returnstreamFast_args(_fbthrift_python_ty
         _typing.Union[None, int, int]]]: ...
 
 
-class _fbthrift_PubSubStreamingService_returnstreamFast_result(_fbthrift_python_types.Struct):
+class _fbthrift_PubSubStreamingService_returnstreamFast_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(

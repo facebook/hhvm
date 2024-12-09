@@ -18,6 +18,7 @@ from thrift.python.client import (
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
 from thrift.python.common import RpcOptions
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions

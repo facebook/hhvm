@@ -1219,7 +1219,7 @@ set_i32_7194 = _typing.Set[int]
 string_5252 = str
 
 
-class _fbthrift_SomeService_bounce_map_args(_fbthrift_python_types.Struct):
+class _fbthrift_SomeService_bounce_map_args(_fbthrift_python_mutable_types.MutableStruct):
     m: _typing.Final[_fbthrift_python_mutable_containers.MutableMap[int, str]] = ...
 
     def __init__(
@@ -1232,7 +1232,7 @@ class _fbthrift_SomeService_bounce_map_args(_fbthrift_python_types.Struct):
         _typing.Union[None, _fbthrift_python_mutable_containers.MutableMap[int, str]]]]: ...
 
 
-class _fbthrift_SomeService_bounce_map_result(_fbthrift_python_types.Struct):
+class _fbthrift_SomeService_bounce_map_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_python_mutable_containers.MutableMap[int, str]]
 
     def __init__(
@@ -1246,7 +1246,7 @@ class _fbthrift_SomeService_bounce_map_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_SomeService_binary_keyed_map_args(_fbthrift_python_types.Struct):
+class _fbthrift_SomeService_binary_keyed_map_args(_fbthrift_python_mutable_types.MutableStruct):
     r: _typing.Final[_fbthrift_python_mutable_containers.MutableList[int]] = ...
 
     def __init__(
@@ -1259,7 +1259,7 @@ class _fbthrift_SomeService_binary_keyed_map_args(_fbthrift_python_types.Struct)
         _typing.Union[None, _fbthrift_python_mutable_containers.MutableList[int]]]]: ...
 
 
-class _fbthrift_SomeService_binary_keyed_map_result(_fbthrift_python_types.Struct):
+class _fbthrift_SomeService_binary_keyed_map_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_python_mutable_containers.MutableMap[bytes, int]]
 
     def __init__(

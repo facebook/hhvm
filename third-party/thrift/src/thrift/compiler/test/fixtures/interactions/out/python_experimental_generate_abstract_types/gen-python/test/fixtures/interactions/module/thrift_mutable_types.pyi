@@ -85,7 +85,7 @@ class ShouldBeBoxed(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.ShouldBeBoxed": ...  # type: ignore
 
 
-class _fbthrift_MyService_foo_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_foo_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -96,7 +96,7 @@ class _fbthrift_MyService_foo_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyService_foo_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_foo_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -110,7 +110,7 @@ class _fbthrift_MyService_foo_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_interact_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_interact_args(_fbthrift_python_mutable_types.MutableStruct):
     arg: _typing.Final[int] = ...
 
     def __init__(
@@ -123,7 +123,7 @@ class _fbthrift_MyService_interact_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_MyService_interact_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_interact_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -137,7 +137,7 @@ class _fbthrift_MyService_interact_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_interactFast_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_interactFast_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -148,7 +148,7 @@ class _fbthrift_MyService_interactFast_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyService_interactFast_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_interactFast_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -162,7 +162,7 @@ class _fbthrift_MyService_interactFast_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_serialize_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_serialize_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -173,7 +173,7 @@ class _fbthrift_MyService_serialize_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyService_serialize_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_serialize_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -200,7 +200,7 @@ class _fbthrift_MyService_serialize_result_stream(_fbthrift_python_types._fbthri
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -211,7 +211,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
     ex: _typing.Final[_fbthrift_current_module.CustomException]
 
@@ -227,7 +227,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -238,7 +238,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -249,7 +249,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -276,7 +276,7 @@ class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbt
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -287,7 +287,7 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -301,7 +301,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struc
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -312,7 +312,7 @@ class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -323,7 +323,7 @@ class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -350,7 +350,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types.
         ]]]: ...
 
 
-class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -361,7 +361,7 @@ class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct)
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -375,7 +375,7 @@ class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struc
         ]]]: ...
 
 
-class _fbthrift_Factories_foo_args(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_foo_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -386,7 +386,7 @@ class _fbthrift_Factories_foo_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Factories_foo_result(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_foo_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -400,7 +400,7 @@ class _fbthrift_Factories_foo_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_Factories_interact_args(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_interact_args(_fbthrift_python_mutable_types.MutableStruct):
     arg: _typing.Final[int] = ...
 
     def __init__(
@@ -413,7 +413,7 @@ class _fbthrift_Factories_interact_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_Factories_interact_result(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_interact_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -427,7 +427,7 @@ class _fbthrift_Factories_interact_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_Factories_interactFast_args(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_interactFast_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -438,7 +438,7 @@ class _fbthrift_Factories_interactFast_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Factories_interactFast_result(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_interactFast_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -452,7 +452,7 @@ class _fbthrift_Factories_interactFast_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_Factories_serialize_args(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_serialize_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -463,7 +463,7 @@ class _fbthrift_Factories_serialize_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Factories_serialize_result(_fbthrift_python_types.Struct):
+class _fbthrift_Factories_serialize_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -490,7 +490,7 @@ class _fbthrift_Factories_serialize_result_stream(_fbthrift_python_types._fbthri
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -501,7 +501,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
     ex: _typing.Final[_fbthrift_current_module.CustomException]
 
@@ -517,7 +517,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -528,7 +528,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -539,7 +539,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -566,7 +566,7 @@ class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbt
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -577,7 +577,7 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -591,7 +591,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struc
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -602,7 +602,7 @@ class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -613,7 +613,7 @@ class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -640,7 +640,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types.
         ]]]: ...
 
 
-class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -651,7 +651,7 @@ class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct)
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -665,7 +665,7 @@ class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struc
         ]]]: ...
 
 
-class _fbthrift_Perform_foo_args(_fbthrift_python_types.Struct):
+class _fbthrift_Perform_foo_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -676,7 +676,7 @@ class _fbthrift_Perform_foo_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Perform_foo_result(_fbthrift_python_types.Struct):
+class _fbthrift_Perform_foo_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -690,7 +690,7 @@ class _fbthrift_Perform_foo_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -701,7 +701,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
     ex: _typing.Final[_fbthrift_current_module.CustomException]
 
@@ -717,7 +717,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -728,7 +728,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -739,7 +739,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -766,7 +766,7 @@ class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbt
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -777,7 +777,7 @@ class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct)
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -791,7 +791,7 @@ class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struc
         ]]]: ...
 
 
-class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -802,7 +802,7 @@ class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -813,7 +813,7 @@ class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -840,7 +840,7 @@ class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types.
         ]]]: ...
 
 
-class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -851,7 +851,7 @@ class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct)
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -865,7 +865,7 @@ class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struc
         ]]]: ...
 
 
-class _fbthrift_InteractWithShared_do_some_similar_things_args(_fbthrift_python_types.Struct):
+class _fbthrift_InteractWithShared_do_some_similar_things_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -876,7 +876,7 @@ class _fbthrift_InteractWithShared_do_some_similar_things_args(_fbthrift_python_
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_InteractWithShared_do_some_similar_things_result(_fbthrift_python_types.Struct):
+class _fbthrift_InteractWithShared_do_some_similar_things_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult]
 
     def __init__(
@@ -890,7 +890,7 @@ class _fbthrift_InteractWithShared_do_some_similar_things_result(_fbthrift_pytho
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -901,7 +901,7 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
     ex: _typing.Final[_fbthrift_current_module.CustomException]
 
@@ -917,7 +917,7 @@ class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -928,7 +928,7 @@ class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -939,7 +939,7 @@ class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -966,7 +966,7 @@ class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbt
         ]]]: ...
 
 
-class _fbthrift_SharedInteraction_init_args(_fbthrift_python_types.Struct):
+class _fbthrift_SharedInteraction_init_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -977,7 +977,7 @@ class _fbthrift_SharedInteraction_init_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_SharedInteraction_init_result(_fbthrift_python_types.Struct):
+class _fbthrift_SharedInteraction_init_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -991,7 +991,7 @@ class _fbthrift_SharedInteraction_init_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_SharedInteraction_do_something_args(_fbthrift_python_types.Struct):
+class _fbthrift_SharedInteraction_do_something_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -1002,7 +1002,7 @@ class _fbthrift_SharedInteraction_do_something_args(_fbthrift_python_types.Struc
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_SharedInteraction_do_something_result(_fbthrift_python_types.Struct):
+class _fbthrift_SharedInteraction_do_something_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift__test__fixtures__another_interactions__shared__thrift_mutable_types.DoSomethingResult]
 
     def __init__(
@@ -1016,7 +1016,7 @@ class _fbthrift_SharedInteraction_do_something_result(_fbthrift_python_types.Str
         ]]]: ...
 
 
-class _fbthrift_SharedInteraction_tear_down_args(_fbthrift_python_types.Struct):
+class _fbthrift_SharedInteraction_tear_down_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -1027,7 +1027,7 @@ class _fbthrift_SharedInteraction_tear_down_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_SharedInteraction_tear_down_result(_fbthrift_python_types.Struct):
+class _fbthrift_SharedInteraction_tear_down_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -1041,7 +1041,7 @@ class _fbthrift_SharedInteraction_tear_down_result(_fbthrift_python_types.Struct
         ]]]: ...
 
 
-class _fbthrift_BoxService_getABoxSession_args(_fbthrift_python_types.Struct):
+class _fbthrift_BoxService_getABoxSession_args(_fbthrift_python_mutable_types.MutableStruct):
     req: _typing.Final[_fbthrift_current_module.ShouldBeBoxed] = ...
 
     def __init__(
@@ -1054,7 +1054,7 @@ class _fbthrift_BoxService_getABoxSession_args(_fbthrift_python_types.Struct):
         _typing.Union[None, _fbthrift_current_module.ShouldBeBoxed]]]: ...
 
 
-class _fbthrift_BoxService_getABoxSession_result(_fbthrift_python_types.Struct):
+class _fbthrift_BoxService_getABoxSession_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_current_module.ShouldBeBoxed]
 
     def __init__(
@@ -1068,7 +1068,7 @@ class _fbthrift_BoxService_getABoxSession_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_BoxedInteraction_getABox_args(_fbthrift_python_types.Struct):
+class _fbthrift_BoxedInteraction_getABox_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -1079,7 +1079,7 @@ class _fbthrift_BoxedInteraction_getABox_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_BoxedInteraction_getABox_result(_fbthrift_python_types.Struct):
+class _fbthrift_BoxedInteraction_getABox_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_current_module.ShouldBeBoxed]
 
     def __init__(

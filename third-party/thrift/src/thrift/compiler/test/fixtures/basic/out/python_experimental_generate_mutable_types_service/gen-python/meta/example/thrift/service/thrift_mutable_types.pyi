@@ -109,7 +109,7 @@ class WhisperException(_fbthrift_python_mutable_exceptions.MutableGeneratedError
     def _to_py_deprecated(self) -> "service.ttypes.WhisperException": ...  # type: ignore
 
 
-class _fbthrift_EchoService_echo_args(_fbthrift_python_types.Struct):
+class _fbthrift_EchoService_echo_args(_fbthrift_python_mutable_types.MutableStruct):
     request: _typing.Final[_fbthrift_current_module.EchoRequest] = ...
 
     def __init__(
@@ -122,7 +122,7 @@ class _fbthrift_EchoService_echo_args(_fbthrift_python_types.Struct):
         _typing.Union[None, _fbthrift_current_module.EchoRequest]]]: ...
 
 
-class _fbthrift_EchoService_echo_result(_fbthrift_python_types.Struct):
+class _fbthrift_EchoService_echo_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_current_module.EchoResponse]
     ex: _typing.Final[_fbthrift_current_module.WhisperException]
 

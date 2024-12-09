@@ -68,7 +68,7 @@ class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
 _fbthrift_schema_b747839c13cb3aa5: bytes = ...
 
 
-class _fbthrift_PrimitivesService_init_args(_fbthrift_python_types.Struct):
+class _fbthrift_PrimitivesService_init_args(_fbthrift_python_mutable_types.MutableStruct):
     param0: _typing.Final[int] = ...
     param1: _typing.Final[int] = ...
 
@@ -83,7 +83,7 @@ class _fbthrift_PrimitivesService_init_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int, int]]]: ...
 
 
-class _fbthrift_PrimitivesService_init_result(_fbthrift_python_types.Struct):
+class _fbthrift_PrimitivesService_init_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(
@@ -97,7 +97,7 @@ class _fbthrift_PrimitivesService_init_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_PrimitivesService_method_that_throws_args(_fbthrift_python_types.Struct):
+class _fbthrift_PrimitivesService_method_that_throws_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -108,7 +108,7 @@ class _fbthrift_PrimitivesService_method_that_throws_args(_fbthrift_python_types
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_PrimitivesService_method_that_throws_result(_fbthrift_python_types.Struct):
+class _fbthrift_PrimitivesService_method_that_throws_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_current_module.Result]
     e: _typing.Final[_fbthrift_current_module.CustomException]
 
@@ -124,7 +124,7 @@ class _fbthrift_PrimitivesService_method_that_throws_result(_fbthrift_python_typ
         ]]]: ...
 
 
-class _fbthrift_PrimitivesService_return_void_method_args(_fbthrift_python_types.Struct):
+class _fbthrift_PrimitivesService_return_void_method_args(_fbthrift_python_mutable_types.MutableStruct):
     id: _typing.Final[int] = ...
 
     def __init__(
@@ -137,7 +137,7 @@ class _fbthrift_PrimitivesService_return_void_method_args(_fbthrift_python_types
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_PrimitivesService_return_void_method_result(_fbthrift_python_types.Struct):
+class _fbthrift_PrimitivesService_return_void_method_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(

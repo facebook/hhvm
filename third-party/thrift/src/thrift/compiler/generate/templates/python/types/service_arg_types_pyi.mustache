@@ -19,7 +19,7 @@ The argument and result types for functions on thrift services (and interactions
 }}{{#service:supported_functions}}
 
 
-class {{> types/function_args_type}}(_fbthrift_python_types.Struct):
+class {{> types/function_args_type}}({{> types/struct_base }}):
     {{#function:args}}
     {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}] = ...
     {{/function:args}}
@@ -37,7 +37,7 @@ class {{> types/function_args_type}}(_fbthrift_python_types.Struct):
 {{^function:oneway?}}
 
 
-class _fbthrift_{{service:name}}_{{function:name}}_result(_fbthrift_python_types.Struct):
+class _fbthrift_{{service:name}}_{{function:name}}_result({{> types/struct_base }}):
    {{#function:regular_response_type}}
     success: _typing.Final[{{> types/pep484_type }}]
    {{/function:regular_response_type}}

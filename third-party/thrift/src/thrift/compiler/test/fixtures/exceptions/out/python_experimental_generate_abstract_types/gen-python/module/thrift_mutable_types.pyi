@@ -215,7 +215,7 @@ class Banal(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift
     def _to_py_deprecated(self) -> "module.ttypes.Banal": ...  # type: ignore
 
 
-class _fbthrift_Raiser_doBland_args(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_doBland_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -226,7 +226,7 @@ class _fbthrift_Raiser_doBland_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Raiser_doBland_result(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_doBland_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -240,7 +240,7 @@ class _fbthrift_Raiser_doBland_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_Raiser_doRaise_args(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_doRaise_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -251,7 +251,7 @@ class _fbthrift_Raiser_doRaise_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Raiser_doRaise_result(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_doRaise_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
     b: _typing.Final[_fbthrift_current_module.Banal]
     f: _typing.Final[_fbthrift_current_module.Fiery]
@@ -271,7 +271,7 @@ class _fbthrift_Raiser_doRaise_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_Raiser_get200_args(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_get200_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -282,7 +282,7 @@ class _fbthrift_Raiser_get200_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Raiser_get200_result(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_get200_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[str]
 
     def __init__(
@@ -296,7 +296,7 @@ class _fbthrift_Raiser_get200_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_Raiser_get500_args(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_get500_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -307,7 +307,7 @@ class _fbthrift_Raiser_get500_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_Raiser_get500_result(_fbthrift_python_types.Struct):
+class _fbthrift_Raiser_get500_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[str]
     f: _typing.Final[_fbthrift_current_module.Fiery]
     b: _typing.Final[_fbthrift_current_module.Banal]

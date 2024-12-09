@@ -412,7 +412,7 @@ MyEnumAlias = _fbthrift_current_module.MyEnum
 MyDataItemAlias = _fbthrift_current_module.MyDataItem
 
 
-class _fbthrift_FooService_simple_rpc_args(_fbthrift_python_types.Struct):
+class _fbthrift_FooService_simple_rpc_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -423,7 +423,7 @@ class _fbthrift_FooService_simple_rpc_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_FooService_simple_rpc_result(_fbthrift_python_types.Struct):
+class _fbthrift_FooService_simple_rpc_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -437,7 +437,7 @@ class _fbthrift_FooService_simple_rpc_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_FB303Service_simple_rpc_args(_fbthrift_python_types.Struct):
+class _fbthrift_FB303Service_simple_rpc_args(_fbthrift_python_mutable_types.MutableStruct):
     int_parameter: _typing.Final[int] = ...
 
     def __init__(
@@ -450,7 +450,7 @@ class _fbthrift_FB303Service_simple_rpc_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_FB303Service_simple_rpc_result(_fbthrift_python_types.Struct):
+class _fbthrift_FB303Service_simple_rpc_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_current_module.ReservedKeyword]
 
     def __init__(
@@ -464,7 +464,7 @@ class _fbthrift_FB303Service_simple_rpc_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_ping_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_ping_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -475,7 +475,7 @@ class _fbthrift_MyService_ping_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyService_ping_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_ping_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -489,7 +489,7 @@ class _fbthrift_MyService_ping_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_getRandomData_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_getRandomData_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -500,7 +500,7 @@ class _fbthrift_MyService_getRandomData_args(_fbthrift_python_types.Struct):
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyService_getRandomData_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_getRandomData_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[str]
 
     def __init__(
@@ -514,7 +514,7 @@ class _fbthrift_MyService_getRandomData_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_sink_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_sink_args(_fbthrift_python_mutable_types.MutableStruct):
     sink: _typing.Final[int] = ...
 
     def __init__(
@@ -527,7 +527,7 @@ class _fbthrift_MyService_sink_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_MyService_sink_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_sink_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -541,7 +541,7 @@ class _fbthrift_MyService_sink_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_putDataById_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_putDataById_args(_fbthrift_python_mutable_types.MutableStruct):
     id: _typing.Final[int] = ...
     data: _typing.Final[str] = ...
 
@@ -556,7 +556,7 @@ class _fbthrift_MyService_putDataById_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int, str]]]: ...
 
 
-class _fbthrift_MyService_putDataById_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_putDataById_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -570,7 +570,7 @@ class _fbthrift_MyService_putDataById_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_hasDataById_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_hasDataById_args(_fbthrift_python_mutable_types.MutableStruct):
     id: _typing.Final[int] = ...
 
     def __init__(
@@ -583,7 +583,7 @@ class _fbthrift_MyService_hasDataById_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_MyService_hasDataById_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_hasDataById_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[bool]
 
     def __init__(
@@ -597,7 +597,7 @@ class _fbthrift_MyService_hasDataById_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_getDataById_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_getDataById_args(_fbthrift_python_mutable_types.MutableStruct):
     id: _typing.Final[int] = ...
 
     def __init__(
@@ -610,7 +610,7 @@ class _fbthrift_MyService_getDataById_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_MyService_getDataById_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_getDataById_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[str]
 
     def __init__(
@@ -624,7 +624,7 @@ class _fbthrift_MyService_getDataById_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_deleteDataById_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_deleteDataById_args(_fbthrift_python_mutable_types.MutableStruct):
     id: _typing.Final[int] = ...
 
     def __init__(
@@ -637,7 +637,7 @@ class _fbthrift_MyService_deleteDataById_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_MyService_deleteDataById_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_deleteDataById_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -651,7 +651,7 @@ class _fbthrift_MyService_deleteDataById_result(_fbthrift_python_types.Struct):
         ]]]: ...
 
 
-class _fbthrift_MyService_lobDataById_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_lobDataById_args(_fbthrift_python_mutable_types.MutableStruct):
     id: _typing.Final[int] = ...
     data: _typing.Final[str] = ...
 
@@ -666,7 +666,7 @@ class _fbthrift_MyService_lobDataById_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int, str]]]: ...
 
 
-class _fbthrift_MyService_invalid_return_for_hack_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_invalid_return_for_hack_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -677,7 +677,7 @@ class _fbthrift_MyService_invalid_return_for_hack_args(_fbthrift_python_types.St
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyService_invalid_return_for_hack_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_invalid_return_for_hack_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[_fbthrift_python_mutable_containers.MutableSet[float]]
 
     def __init__(
@@ -691,7 +691,7 @@ class _fbthrift_MyService_invalid_return_for_hack_result(_fbthrift_python_types.
         ]]]: ...
 
 
-class _fbthrift_MyService_rpc_skipped_codegen_args(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_rpc_skipped_codegen_args(_fbthrift_python_mutable_types.MutableStruct):
 
     def __init__(
         self,
@@ -702,7 +702,7 @@ class _fbthrift_MyService_rpc_skipped_codegen_args(_fbthrift_python_types.Struct
         _typing.Union[None]]]: ...
 
 
-class _fbthrift_MyService_rpc_skipped_codegen_result(_fbthrift_python_types.Struct):
+class _fbthrift_MyService_rpc_skipped_codegen_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
 
     def __init__(
@@ -716,7 +716,7 @@ class _fbthrift_MyService_rpc_skipped_codegen_result(_fbthrift_python_types.Stru
         ]]]: ...
 
 
-class _fbthrift_DbMixedStackArguments_getDataByKey0_args(_fbthrift_python_types.Struct):
+class _fbthrift_DbMixedStackArguments_getDataByKey0_args(_fbthrift_python_mutable_types.MutableStruct):
     key: _typing.Final[str] = ...
 
     def __init__(
@@ -729,7 +729,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey0_args(_fbthrift_python_types.
         _typing.Union[None, str]]]: ...
 
 
-class _fbthrift_DbMixedStackArguments_getDataByKey0_result(_fbthrift_python_types.Struct):
+class _fbthrift_DbMixedStackArguments_getDataByKey0_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[bytes]
 
     def __init__(
@@ -743,7 +743,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey0_result(_fbthrift_python_type
         ]]]: ...
 
 
-class _fbthrift_DbMixedStackArguments_getDataByKey1_args(_fbthrift_python_types.Struct):
+class _fbthrift_DbMixedStackArguments_getDataByKey1_args(_fbthrift_python_mutable_types.MutableStruct):
     key: _typing.Final[str] = ...
 
     def __init__(
@@ -756,7 +756,7 @@ class _fbthrift_DbMixedStackArguments_getDataByKey1_args(_fbthrift_python_types.
         _typing.Union[None, str]]]: ...
 
 
-class _fbthrift_DbMixedStackArguments_getDataByKey1_result(_fbthrift_python_types.Struct):
+class _fbthrift_DbMixedStackArguments_getDataByKey1_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[bytes]
 
     def __init__(

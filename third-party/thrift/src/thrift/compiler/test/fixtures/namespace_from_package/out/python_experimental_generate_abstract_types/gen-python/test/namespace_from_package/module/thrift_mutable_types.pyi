@@ -60,7 +60,7 @@ class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_wit
     def _to_py_deprecated(self) -> "namespace_from_package.module.ttypes.Foo": ...  # type: ignore
 
 
-class _fbthrift_TestService_init_args(_fbthrift_python_types.Struct):
+class _fbthrift_TestService_init_args(_fbthrift_python_mutable_types.MutableStruct):
     int1: _typing.Final[int] = ...
 
     def __init__(
@@ -73,7 +73,7 @@ class _fbthrift_TestService_init_args(_fbthrift_python_types.Struct):
         _typing.Union[None, int]]]: ...
 
 
-class _fbthrift_TestService_init_result(_fbthrift_python_types.Struct):
+class _fbthrift_TestService_init_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[int]
 
     def __init__(

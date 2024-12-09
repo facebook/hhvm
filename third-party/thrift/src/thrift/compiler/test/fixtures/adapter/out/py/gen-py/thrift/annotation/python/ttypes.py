@@ -784,6 +784,7 @@ class UseCAPI:
 class Py3EnableCppAdapter:
   r"""
   Enables C++ Adapter for thrift-py3. It treats C++ Adapter on typedef as cpp.Type.
+  It is only available for typedefs that resolve to binary, string, and container type.
   """
 
   thrift_spec = None

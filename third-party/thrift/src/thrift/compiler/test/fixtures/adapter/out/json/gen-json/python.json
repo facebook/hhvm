@@ -188,7 +188,7 @@
       }
     },
     "Py3EnableCppAdapter" : {
-      "lineno" : 100,
+      "lineno" : 101,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -196,11 +196,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 100,
+          "line" : 101,
           "column" : 1
         },
         "end" : {
-          "line" : 101,
+          "line" : 102,
           "column" : 30
         }
       }

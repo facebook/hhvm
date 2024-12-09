@@ -97,5 +97,6 @@ struct UseCAPI {
 }
 
 /// Enables C++ Adapter for thrift-py3. It treats C++ Adapter on typedef as cpp.Type.
+/// It is only available for typedefs that resolve to binary, string, and container type.
 @scope.Typedef
 struct Py3EnableCppAdapter {}

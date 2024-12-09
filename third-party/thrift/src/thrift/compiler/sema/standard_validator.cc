@@ -1333,9 +1333,14 @@ void validate_cursor_serialization_adapter_in_container(
 
 void validate_py3_enable_cpp_adapter(sema_context& ctx, const t_typedef& node) {
   if (node.find_structured_annotation_or_null(kPythonPy3EnableCppAdapterUri)) {
+    const auto& true_type = *node.get_true_type();
+    if (!true_type.is_container() && !true_type.is_string_or_binary()) {
+      ctx.error(
+          "The @python.Py3EnableCppAdapter annotation can only be used on containers and strings.");
+    }
     if (!node.find_structured_annotation_or_null(kCppAdapterUri)) {
       ctx.error(
-          "The @py3.EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.");
+          "The @python.Py3EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.");
     }
   }
 }

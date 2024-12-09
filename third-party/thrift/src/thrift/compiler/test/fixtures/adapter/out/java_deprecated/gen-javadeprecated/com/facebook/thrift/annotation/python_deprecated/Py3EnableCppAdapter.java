@@ -25,6 +25,7 @@ import com.facebook.thrift.protocol.*;
 
 /**
  * Enables C++ Adapter for thrift-py3. It treats C++ Adapter on typedef as cpp.Type.
+ * It is only available for typedefs that resolve to binary, string, and container type.
  */
 @SuppressWarnings({ "unused", "serial" })
 public class Py3EnableCppAdapter implements TBase, java.io.Serializable, Cloneable, Comparable<Py3EnableCppAdapter> {

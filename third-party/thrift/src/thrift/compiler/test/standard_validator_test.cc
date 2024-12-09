@@ -47,7 +47,7 @@ TEST(StandardValidatorTest, RepeatedNameInExtendedService) {
       void baz();
     }
 
-    service Derived extends Base { 
+    service Derived extends Base {
       void foo();
       void baz(); # expected-error: Function `Derived.baz` redefines `test.Base.baz`.
     }
@@ -80,7 +80,7 @@ TEST(StandardValidatorTest, ValidateExceptionMessage) {
 
     exception MyInvalidException { # expected-error: member specified as exception 'message' should be of type STRING, 'invalid_message' in 'MyInvalidException' is not
       @thrift.ExceptionMessage
-      1: i32 invalid_message; 
+      1: i32 invalid_message;
     }
 
     exception MyExceptionWithDuplicatedMessage {
@@ -95,8 +95,8 @@ TEST(StandardValidatorTest, ValidateExceptionMessage) {
       @thrift.ExceptionMessage
       1: string valid_message;
       2: string invalid_message;
-    } (message = "invalid_message") 
-        
+    } (message = "invalid_message")
+
   )");
 }
 
@@ -107,9 +107,17 @@ TEST(StandardValidatorTest, ValidatePy3EnableCppAdapter) {
 
     @python.Py3EnableCppAdapter
     @cpp.Adapter{name = "MyAdapter"}
+    typedef list<i32> MyIntList
+
+    @python.Py3EnableCppAdapter # expected-error: The @python.Py3EnableCppAdapter annotation can only be used on containers and strings.
+    @cpp.Adapter{name = "MyAdapter"}
     typedef i32 MyInt
 
-    @python.Py3EnableCppAdapter # expected-error: The @py3.EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.
+    @python.Py3EnableCppAdapter # expected-error: The @python.Py3EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.
+    typedef list<i32> MyIntList2
+
+    @python.Py3EnableCppAdapter # expected-error: The @python.Py3EnableCppAdapter annotation requires the @cpp.Adapter annotation to be present in the same typedef.
+      # expected-error@-1: The @python.Py3EnableCppAdapter annotation can only be used on containers and strings.
     typedef i32 MyInt2
   )");
 }

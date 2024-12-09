@@ -43,4 +43,11 @@ void ThreadManagerLoggingWrapper::recordStackTrace(std::string funcName) const {
   }
 }
 
+void ThreadManagerLoggingWrapper::checkResourcePoolsEnabled() const {
+  if (priorityThreadManager_ == nullptr && resourcePoolsEnabled_) {
+    LOG(FATAL)
+        << "This deprecated ThreadManager method, which is dependent on PriorityThreadManager, is not supported after migration to Resource Pools. "
+        << "Please migrate to ResourcePools API";
+  }
+}
 } // namespace apache::thrift

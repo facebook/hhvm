@@ -1042,8 +1042,8 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
     CHECK(configMutable());
     std::lock_guard lock(threadManagerMutex_);
     threadManager_ = threadManager;
-    tmLoggingWrapper_ =
-        std::make_shared<ThreadManagerLoggingWrapper>(threadManager_, this);
+    tmLoggingWrapper_ = std::make_shared<ThreadManagerLoggingWrapper>(
+        threadManager_, this, true, resourcePoolEnabled());
   }
 
  public:

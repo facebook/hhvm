@@ -32,33 +32,43 @@ class ThreadManagerLoggingWrapper : public concurrency::PriorityThreadManager {
   ThreadManagerLoggingWrapper(
       std::shared_ptr<concurrency::ThreadManager> tm,
       const ThriftServer* server,
-      bool shouldLog = true)
-      : tm_(std::move(tm)), server_(server), shouldLog_(shouldLog) {
+      bool shouldLog = true,
+      bool resourcePoolsEnabled = false)
+      : tm_(std::move(tm)),
+        server_(server),
+        shouldLog_(shouldLog),
+        resourcePoolsEnabled_(resourcePoolsEnabled) {
     priorityThreadManager_ = dynamic_cast<PriorityThreadManager*>(tm_.get());
   }
 
   // From PriorityThreadManager
   void addWorker(PRIORITY priority, size_t value) override {
+    checkResourcePoolsEnabled();
     CHECK(priorityThreadManager_);
     priorityThreadManager_->addWorker(priority, value);
   }
   void removeWorker(PRIORITY priority, size_t value) override {
+    checkResourcePoolsEnabled();
     CHECK(priorityThreadManager_);
     priorityThreadManager_->removeWorker(priority, value);
   }
   size_t workerCount(PRIORITY priority) override {
+    checkResourcePoolsEnabled();
     CHECK(priorityThreadManager_);
     return priorityThreadManager_->workerCount(priority);
   }
   size_t pendingTaskCount(PRIORITY priority) const override {
+    checkResourcePoolsEnabled();
     CHECK(priorityThreadManager_);
     return priorityThreadManager_->pendingTaskCount(priority);
   }
   size_t idleWorkerCount(PRIORITY priority) const override {
+    checkResourcePoolsEnabled();
     CHECK(priorityThreadManager_);
     return priorityThreadManager_->idleWorkerCount(priority);
   }
   folly::Codel* getCodel(PRIORITY priority) override {
+    checkResourcePoolsEnabled();
     CHECK(priorityThreadManager_);
     return priorityThreadManager_->getCodel(priority);
   }
@@ -200,6 +210,9 @@ class ThreadManagerLoggingWrapper : public concurrency::PriorityThreadManager {
   static folly::once_flag recordFlag_;
   // If the wrapped object is a PriorityThreadManager this will be non-null.
   concurrency::PriorityThreadManager* priorityThreadManager_{nullptr};
+
+  bool resourcePoolsEnabled_{false};
+  void checkResourcePoolsEnabled() const;
 
   void recordStackTrace(std::string) const;
 };

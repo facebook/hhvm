@@ -1381,13 +1381,16 @@ void t_mstch_python_generator::generate_types() {
       has_option("experimental_generate_mutable_types");
   const bool experimental_generate_abstract_types =
       has_option("experimental_generate_abstract_types");
+  const bool disable_abstract_types = has_option("disable_abstract_types");
+  const bool enable_abstract_types =
+      experimental_generate_abstract_types && !disable_abstract_types;
 
   mstch_context_.set_or_erase_option(
       experimental_generate_mutable_types,
       "generate_to_mutable_python_conversion_methods",
       "true");
   mstch_context_.set_or_erase_option(
-      experimental_generate_abstract_types, "enable_abstract_types", "true");
+      enable_abstract_types, "enable_abstract_types", "true");
   generate_file(
       "thrift_types.py",
       IsTypesFile::Yes,

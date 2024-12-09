@@ -22,5 +22,21 @@ import unittest
 class AbstractTypesFlagsTest(unittest.TestCase):
     def test_abstract_types_always_generated(self) -> None:
         from thrift.python.test.abstract_types_flags.thrift_abstract_types import (  # noqa
-            TestStruct,  # noqa
+            TestStruct,
         )
+
+    def test_abstract_types_disabled(self) -> None:
+        from thrift.python.test.abstract_types_flags.thrift_abstract_types import (
+            TestStruct as TestStructAbstract,
+        )
+        from thrift.python.test.abstract_types_flags.thrift_mutable_types import (
+            TestStruct as TestStructMutable,
+        )
+        from thrift.python.test.abstract_types_flags.thrift_types import (
+            TestStruct as TestStructImmutable,
+        )
+
+        self.assertFalse(issubclass(TestStructImmutable, TestStructAbstract))
+        self.assertFalse(issubclass(TestStructMutable, TestStructAbstract))
+        self.assertNotIsInstance(TestStructImmutable(), TestStructAbstract)
+        self.assertNotIsInstance(TestStructMutable(), TestStructAbstract)

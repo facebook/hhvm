@@ -98,7 +98,7 @@ class MyServiceInterface(
 
     async def _fbthrift__stream_wrapper_serialize(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
-            yield serialize_iobuf(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_MyService_serialize_result_stream(success=item), protocol)
+            yield serialize_iobuf(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyService_serialize_result_stream(success=item), protocol)
 
     async def _fbthrift__handler_serialize(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_MyService_serialize_args, args, protocol)
@@ -186,7 +186,7 @@ class FactoriesInterface(
 
     async def _fbthrift__stream_wrapper_serialize(self, stream_generator: _typing.AsyncIterator[int], protocol: Protocol) -> _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]:
         async for item in stream_generator:
-            yield serialize_iobuf(_fbthrift__test__fixtures__interactions__module__thrift_types._fbthrift_Factories_serialize_result_stream(success=item), protocol)
+            yield serialize_iobuf(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_Factories_serialize_result_stream(success=item), protocol)
 
     async def _fbthrift__handler_serialize(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _typing.Tuple[_fbthrift_iobuf.IOBuf, _typing.AsyncIterator[_fbthrift_iobuf.IOBuf]]:
         args_struct = deserialize(_fbthrift__test__fixtures__interactions__module__thrift_mutable_types._fbthrift_Factories_serialize_args, args, protocol)

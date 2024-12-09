@@ -24,10 +24,16 @@ from thrift.python.client.omni_client import (
 )
 
 from thrift.python.common import RpcOptions
+from thrift.python.mutable_types import (
+    _fbthrift_MutableResponseStreamResult,
+    MutableStructOrUnion,
+)
 from thrift.python.types import _fbthrift_ResponseStreamResult, StructOrUnion, TChunk
 
 TAsyncClient = typing.TypeVar("TAsyncClient", bound="AsyncClient")
-TResponse = typing.TypeVar("TResponse", bound=StructOrUnion)
+TResponse = typing.TypeVar(
+    "TResponse", bound=typing.Union[StructOrUnion, MutableStructOrUnion]
+)
 
 class AsyncClient:
     def __init__(self) -> None: ...
@@ -48,7 +54,7 @@ class AsyncClient:
         self,
         service_name: str,
         function_name: str,
-        args: StructOrUnion,
+        args: StructOrUnion | MutableStructOrUnion,
         response_cls: None,
         *,
         rpc_kind: RpcKind = ...,
@@ -58,13 +64,14 @@ class AsyncClient:
         created_interaction: AsyncClient = ...,
         uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
+        is_mutable_types: typing.Optional[bool] = False,
     ) -> None: ...
     @typing.overload
     async def _send_request(
         self,
         service_name: str,
         function_name: str,
-        args: StructOrUnion,
+        args: StructOrUnion | MutableStructOrUnion,
         response_cls: typing.Type[TResponse],
         rpc_kind: RpcKind = ...,
         qualifier: FunctionQualifier = ...,
@@ -73,16 +80,18 @@ class AsyncClient:
         created_interaction: AsyncClient = ...,
         uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
+        is_mutable_types: typing.Optional[bool] = False,
     ) -> TResponse: ...
     @typing.overload
     async def _send_request(
         self,
         service_name: str,
         function_name: str,
-        args: StructOrUnion,
+        args: StructOrUnion | MutableStructOrUnion,
         response_cls: typing.Tuple[
             typing.Type[TResponse],
-            typing.Type[_fbthrift_ResponseStreamResult[TChunk]],
+            typing.Type[_fbthrift_ResponseStreamResult[TChunk]]
+            | typing.Type[_fbthrift_MutableResponseStreamResult[TChunk]],
         ],
         rpc_kind: RpcKind = ...,
         qualifier: FunctionQualifier = ...,
@@ -91,6 +100,7 @@ class AsyncClient:
         created_interaction: AsyncClient = ...,
         uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
+        is_mutable_types: typing.Optional[bool] = False,
     ) -> typing.Tuple[TResponse, typing.AsyncGenerator[TChunk, None]]: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     # pyre-ignore[2]: callback returns are ignored, can be any type

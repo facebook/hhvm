@@ -19,10 +19,13 @@ import typing
 
 from thrift.python.client.request_channel import RequestChannel
 from thrift.python.common import RpcOptions
+from thrift.python.mutable_types import MutableStruct, MutableUnion
 from thrift.python.types import Struct, Union
 
 TSyncClient = typing.TypeVar("TSyncClient", bound="SyncClient")
-StructOrUnion = typing.TypeVar("StructOrUnion", bound=typing.Union[Struct, Union])
+StructOrUnion = typing.TypeVar(
+    "StructOrUnion", bound=typing.Union[Struct, Union, MutableStruct, MutableUnion]
+)
 
 class SyncClient:
     def __init__(self, channel: RequestChannel) -> None: ...
@@ -38,11 +41,12 @@ class SyncClient:
         self,
         service_name: str = ...,
         function_name: str = ...,
-        args: Struct = ...,
+        args: Struct | MutableStruct = ...,
         response_cls: typing.Optional[typing.Type[StructOrUnion]] = ...,
         *,
         uri_or_name: str = ...,
         rpc_options: typing.Optional[RpcOptions] = ...,
+        is_mutable_types: typing.Optional[bool] = False,
     ) -> StructOrUnion: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     # pyre-ignore[2]: callback returns are ignored, can be any type

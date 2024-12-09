@@ -32,12 +32,17 @@ val can_sub_type : env -> locl_ty -> locl_ty -> bool
  * coercion to or from dynamic. For coercion to dynamic, types that implement
  * dynamic are considered sub-types of dynamic. For coercion from dynamic,
  * dynamic is treated as a sub-type of all types.
+ * Similarly, the optional [class_sub_classname] argument indicates whether
+ * class<T> and classname<T> are distinct types, meaning the rewrite rules for
+ * class<T> <: U are not enabled when it is false. This is useful for preventing
+ * undesirable type hints like dict<class<C>, int> where dict's Tk as arraykey.
  *)
 val sub_type :
   env ->
   ?coerce:Typing_logic.coercion_direction option ->
   ?is_coeffect:bool ->
   ?ignore_readonly:bool ->
+  ?class_sub_classname:bool ->
   locl_ty ->
   locl_ty ->
   Typing_error.Reasons_callback.t option ->

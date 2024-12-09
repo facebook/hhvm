@@ -1,0 +1,20 @@
+ERROR: File "wellformedness.php", line 8, characters 3-13:
+Some type arguments violate their constraints (Typing[4323])
+  File "wellformedness.php", line 3, characters 9-9:
+  `T` is a constrained type parameter
+  File "wellformedness.php", line 3, characters 14-19:
+  This type constraint is violated
+  File "wellformedness.php", line 3, characters 14-19:
+  Expected `string`
+  File "wellformedness.php", line 8, characters 5-12:
+  But got `class<C>`
+ERROR: File "wellformedness.php", line 10, characters 3-26:
+Some type arguments violate their constraints (Typing[4323])
+  File "hackarray.hhi", line 33, characters 24-25:
+  `Tk` is a constrained type parameter
+  File "hackarray.hhi", line 33, characters 30-37:
+  This type constraint is violated
+  File "hackarray.hhi", line 33, characters 30-37:
+  Expected `arraykey`
+  File "wellformedness.php", line 10, characters 8-15:
+  But got `class<C>`

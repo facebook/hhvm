@@ -27,6 +27,7 @@ type sub_type =
   ?coerce:Typing_logic.coercion_direction option ->
   ?is_coeffect:bool ->
   ?ignore_readonly:bool ->
+  ?class_sub_classname:bool ->
   Typing_defs.locl_ty ->
   Typing_defs.locl_ty ->
   Typing_error.Reasons_callback.t option ->

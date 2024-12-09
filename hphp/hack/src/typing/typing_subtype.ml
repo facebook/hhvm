@@ -315,6 +315,11 @@ module Subtype_env = struct
     ignore_likes: bool;
         (** We're ignoring likes because we had a goal of the form `t <: ~u`
             for t <:D dynamic *)
+    class_sub_classname: bool;
+        (** When enabled, allow rewriting of class<T> <: U to classname<T> <: U
+            for a subset of U types. This is normally controlled by the
+            class_sub_classname typechecker option, but it is unconditionally
+            false for type well-formedness checks. *)
     recursion_tracker: Subtype_recursion_tracker.t;
   }
 
@@ -345,6 +350,7 @@ module Subtype_env = struct
       ?(is_coeffect = false)
       ?(in_transitive_closure = false)
       ?(ignore_likes = false)
+      ~class_sub_classname
       ~(log_level : int)
       on_error =
     {
@@ -361,6 +367,7 @@ module Subtype_env = struct
       log_level;
       in_transitive_closure;
       ignore_likes;
+      class_sub_classname;
       recursion_tracker = Subtype_recursion_tracker.empty;
     }
 
@@ -726,6 +733,10 @@ type lhs = {
   sub_supportdyn: Reason.t option;
   ty_sub: locl_ty;
 }
+
+(* Just some shorthand *)
+let should_cls_sub_cn env =
+  TypecheckerOptions.class_sub_classname env.genv.tcopt
 
 module type Constraint_handler = sig
   type rhs
@@ -3183,7 +3194,7 @@ end = struct
           ---> classname<T> <: C *)
     | ( (r_sub, Tclass_ptr ty_sub),
         (_r_super, Tclass ((_, class_nm_super), exact_super, _)) )
-      when TypecheckerOptions.class_sub_classname env.genv.tcopt
+      when subtype_env.Subtype_env.class_sub_classname
            && is_nonexact exact_super
            && (String.equal class_nm_super SN.Classes.cXHPChild
               || String.equal class_nm_super SN.Classes.cStringish) ->
@@ -3203,7 +3214,7 @@ end = struct
     | ((r_sub, Tclass_ptr ty_sub), (_r_super, Tnewtype _))
     (* -- Rewrite: class<T> <: prim ---> classname<T> <: prim *)
     | ((r_sub, Tclass_ptr ty_sub), (_r_super, Tprim _))
-      when TypecheckerOptions.class_sub_classname env.genv.tcopt ->
+      when subtype_env.Subtype_env.class_sub_classname ->
       let ty_classname = MakeType.classname r_sub [ty_sub] in
       let t =
         Typing_env.update_reason env ty_classname ~f:(fun r_sub_prj ->
@@ -7826,6 +7837,7 @@ end = struct
         ~require_completeness
         ~no_top_bottom
         ~coerce
+        ~class_sub_classname:(should_cls_sub_cn env)
         ~log_level:3
         None
     in
@@ -8056,6 +8068,7 @@ end = struct
         ~coerce
         ~log_level:2
         ~in_transitive_closure:true
+        ~class_sub_classname:(should_cls_sub_cn env)
         on_error
     in
     let (env, prop) =
@@ -8141,6 +8154,7 @@ end = struct
         ~coerce
         ~log_level:2
         ~in_transitive_closure:true
+        ~class_sub_classname:(should_cls_sub_cn env)
         on_error
     in
     let (env, prop) =
@@ -8226,6 +8240,7 @@ end = struct
         ~coerce
         ~log_level:2
         ~in_transitive_closure:true
+        ~class_sub_classname:(should_cls_sub_cn env)
         on_error
     in
     let (env, prop) =
@@ -8606,7 +8621,12 @@ end
 
 let sub_type_i env ?(is_coeffect = false) ty_sub ty_super on_error =
   let subtype_env =
-    Subtype_env.create ~log_level:2 ~is_coeffect ~coerce:None on_error
+    Subtype_env.create
+      ~log_level:2
+      ~is_coeffect
+      ~coerce:None
+      ~class_sub_classname:(should_cls_sub_cn env)
+      on_error
   in
   let old_env = env in
   let (env, ty_err_opt) =
@@ -8635,11 +8655,17 @@ let sub_type
     ?(coerce = None)
     ?(is_coeffect = false)
     ?(ignore_readonly = false)
+    ?(class_sub_classname = should_cls_sub_cn env)
     (ty_sub : locl_ty)
     (ty_super : locl_ty)
     on_error =
   let subtype_env =
-    Subtype_env.create ~log_level:2 ~is_coeffect ~coerce on_error
+    Subtype_env.create
+      ~log_level:2
+      ~is_coeffect
+      ~coerce
+      ~class_sub_classname
+      on_error
   in
   let subtype_env = Subtype_env.{ subtype_env with ignore_readonly } in
   let old_env = env in
@@ -8776,6 +8802,7 @@ let decompose_subtype
              ~require_soundness:false
              ~require_completeness:true
              ~log_level:2
+             ~class_sub_classname:(should_cls_sub_cn env)
              on_error)
         ~this_ty:None
         ~lhs:{ sub_supportdyn = None; ty_sub }
@@ -8910,7 +8937,11 @@ let add_constraints p env constraints =
 let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
   let old_env = env in
   let subtype_env =
-    Subtype_env.create ~coerce:(Some TL.CoerceFromDynamic) ~log_level:2 on_error
+    Subtype_env.create
+      ~coerce:(Some TL.CoerceFromDynamic)
+      ~log_level:2
+      ~class_sub_classname:(should_cls_sub_cn env)
+      on_error
   in
   let (env, ty_err) =
     Subtype_tell.sub_type_inner
@@ -8959,7 +8990,12 @@ let subtype_funs
   let old_env = env in
   let (env, prop) =
     Subtype.simplify_funs
-      ~subtype_env:(Subtype_env.create ~log_level:2 ~coerce:None on_error)
+      ~subtype_env:
+        (Subtype_env.create
+           ~log_level:2
+           ~coerce:None
+           ~class_sub_classname:(should_cls_sub_cn env)
+           on_error)
       ~check_return
       ~for_override
       ~super_like:false

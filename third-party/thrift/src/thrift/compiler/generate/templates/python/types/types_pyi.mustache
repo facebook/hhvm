@@ -20,7 +20,6 @@ Generated Python typestubs for Thrift types
 {{> common/auto_generated_py}}
 
 import typing as _typing
-{{> types/set_current_module}}
 
 {{#program:unions?}}
 import enum
@@ -137,7 +136,8 @@ class {{> structs/unadapted_name}}({{!
     {{/struct:legacy_api?}}
 {{#struct:has_adapter?}}
 {{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
-{{/struct:has_adapter?}}{{!
+{{/struct:has_adapter?}}
+{{> private/alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
 }}{{/program:structs}}
 {{#program:constants?}}
 

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import python_module_root.my.namespacing.test.hsmodule.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -36,6 +35,7 @@ class HsFoo(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HsFoo):
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "python_module_root.my.namespacing.test.hsmodule.types.HsFoo": ...  # type: ignore
     def _to_py_deprecated(self) -> "hsmodule.ttypes.HsFoo": ...  # type: ignore
+_fbthrift_HsFoo = HsFoo
 
 
 class _fbthrift_HsTestService_init_args(_fbthrift_python_types.Struct):

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import test.fixtures.basic.module.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -154,7 +153,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
-
+_fbthrift_MyStruct = MyStruct
 
 class Containers(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -229,7 +228,7 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Containers, self)
-
+_fbthrift_Containers = Containers
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -271,7 +270,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
-
+_fbthrift_MyDataItem = MyDataItem
 
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
@@ -357,7 +356,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
-
+_fbthrift_MyUnion = MyUnion
 
 class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -443,7 +442,7 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyException, self)
-
+_fbthrift_MyException = MyException
 
 class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -536,7 +535,7 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyExceptionWithMessage, self)
-
+_fbthrift_MyExceptionWithMessage = MyExceptionWithMessage
 
 class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -589,7 +588,7 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ReservedKeyword, self)
-
+_fbthrift_ReservedKeyword = ReservedKeyword
 
 class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
@@ -642,11 +641,16 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.UnionToBeRenamed, self)
+_fbthrift_UnionToBeRenamed = UnionToBeRenamed
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.basic.module.thrift_metadata
-from test.fixtures.basic.module.thrift_enums import *
+from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.basic.module.thrift_enums import MyEnum as _fbthrift_MyEnum
+from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_HackEnum
+from test.fixtures.basic.module.thrift_enums import HackEnum as _fbthrift_HackEnum
 
+from test.fixtures.basic.module.thrift_enums import *
 _fbthrift_all_enums = [
     MyEnum,
     HackEnum,
@@ -716,8 +720,8 @@ ASet = _fbthrift_python_types.Set(_fbthrift_python_types.typeinfo_string, ("foo"
 
 AMap = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32), { "foo": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (1, 2, 3, 4, )), "bar": _fbthrift_python_types.List(_fbthrift_python_types.typeinfo_i32, (10, 32, 54, ))})
 
-MyEnumAlias = _fbthrift_current_module.MyEnum
-MyDataItemAlias = _fbthrift_current_module.MyDataItem
+MyEnumAlias = _fbthrift_MyEnum
+MyDataItemAlias = _fbthrift_MyDataItem
 
 
 

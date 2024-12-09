@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import test.fixtures.basic.module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 import enum as _enum
@@ -23,7 +22,9 @@ import enum as _enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.basic.module.thrift_enums import MyEnum as _fbthrift_MyEnum
 from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_HackEnum
+from test.fixtures.basic.module.thrift_enums import HackEnum as _fbthrift_HackEnum
 
 from test.fixtures.basic.module.thrift_enums import *
 class MyStruct(_abc.ABC):
@@ -35,10 +36,10 @@ class MyStruct(_abc.ABC):
     def MyStringField(self) -> str: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def MyDataField(self) -> _fbthrift_current_module.MyDataItem: ...
+    def MyDataField(self) -> _fbthrift_MyDataItem: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myEnum(self) -> _fbthrift_current_module.MyEnum: ...
+    def myEnum(self) -> _fbthrift_MyEnum: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def oneway(self) -> bool: ...
@@ -55,7 +56,7 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def no_hack_codegen_field(self) -> str: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyDataItem, _fbthrift_current_module.MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyDataItem, _fbthrift_MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -64,7 +65,7 @@ class MyStruct(_abc.ABC):
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
-
+_fbthrift_MyStruct = MyStruct
 class Containers(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -85,7 +86,7 @@ class Containers(_abc.ABC):
     def _to_py3(self) -> "test.fixtures.basic.module.types.Containers": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
-
+_fbthrift_Containers = Containers
 class MyDataItem(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
@@ -97,17 +98,17 @@ class MyDataItem(_abc.ABC):
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
-
+_fbthrift_MyDataItem = MyDataItem
 class MyUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def myEnum(self) -> _fbthrift_current_module.MyEnum: ...
+    def myEnum(self) -> _fbthrift_MyEnum: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myStruct(self) -> _fbthrift_current_module.MyStruct: ...
+    def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myDataItem(self) -> _fbthrift_current_module.MyDataItem: ...
+    def myDataItem(self) -> _fbthrift_MyDataItem: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def floatSet(self) -> _typing.AbstractSet[float]: ...
@@ -130,42 +131,42 @@ class MyUnion(_abc.ABC):
     FbThriftUnionFieldEnum.__name__ = "MyUnion"
     @_fbthrift_property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _typing.AbstractSet[float]]]: ...
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_MyStruct, _fbthrift_MyDataItem, _typing.AbstractSet[float]]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_MyUnion = MyUnion
 class MyException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def MyIntField(self) -> int: ...
     @_fbthrift_property
     def MyStringField(self) -> str: ...
     @_fbthrift_property
-    def myStruct(self) -> _fbthrift_current_module.MyStruct: ...
+    def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
-    def myUnion(self) -> _fbthrift_current_module.MyUnion: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyUnion]]]: ...
+    def myUnion(self) -> _fbthrift_MyUnion: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyException": ...  # type: ignore
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyException": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
-
+_fbthrift_MyException = MyException
 class MyExceptionWithMessage(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def MyIntField(self) -> int: ...
     @_fbthrift_property
     def MyStringField(self) -> str: ...
     @_fbthrift_property
-    def myStruct(self) -> _fbthrift_current_module.MyStruct: ...
+    def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
-    def myUnion(self) -> _fbthrift_current_module.MyUnion: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyUnion]]]: ...
+    def myUnion(self) -> _fbthrift_MyUnion: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyExceptionWithMessage": ...  # type: ignore
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
-
+_fbthrift_MyExceptionWithMessage = MyExceptionWithMessage
 class ReservedKeyword(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -180,7 +181,7 @@ class ReservedKeyword(_abc.ABC):
     def _to_py3(self) -> "test.fixtures.basic.module.types.ReservedKeyword": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ReservedKeyword": ...  # type: ignore
-
+_fbthrift_ReservedKeyword = ReservedKeyword
 class UnionToBeRenamed(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -206,6 +207,7 @@ class UnionToBeRenamed(_abc.ABC):
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
+_fbthrift_UnionToBeRenamed = UnionToBeRenamed
 
-MyEnumAlias = _fbthrift_current_module.MyEnum
-MyDataItemAlias = _fbthrift_current_module.MyDataItem
+MyEnumAlias = _fbthrift_MyEnum
+MyDataItemAlias = _fbthrift_MyDataItem

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import includes.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -41,9 +40,10 @@ class Included(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Included
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "includes.types.Included": ...  # type: ignore
     def _to_py_deprecated(self) -> "includes.ttypes.Included": ...  # type: ignore
+_fbthrift_Included = Included
 
 
-ExampleIncluded: _fbthrift_current_module.Included = ...
+ExampleIncluded: _fbthrift_Included = ...
 
 IncludedConstant: int = ...
 

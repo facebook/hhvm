@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import service.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -21,6 +20,7 @@ import module.thrift_types as _fbthrift__module__thrift_types
 import transitive.thrift_types as _fbthrift__transitive__thrift_types
 
 from service.thrift_enums import *
+
 
 IncludesIncluded = _fbthrift__includes__thrift_types.Included
 IncludesTransitiveFoo = _fbthrift__transitive__thrift_types.Foo

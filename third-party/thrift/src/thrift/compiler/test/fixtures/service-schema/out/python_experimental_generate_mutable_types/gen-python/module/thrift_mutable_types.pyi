@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import module.thrift_mutable_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
@@ -31,6 +30,7 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import include.thrift_mutable_types as _fbthrift__include__thrift_mutable_types
 from module.thrift_enums import _fbthrift_compatible_with_Result
+from module.thrift_enums import Result as _fbthrift_Result
 
 from module.thrift_enums import *
 
@@ -48,9 +48,9 @@ class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
 
 
     @property
-    def result(self) -> _fbthrift_current_module.Result: ...
+    def result(self) -> _fbthrift_Result: ...
     @result.setter
-    def result(self, value: _fbthrift_current_module.Result) -> None: ...
+    def result(self, value: _fbthrift_Result) -> None: ...
 
     def __init__(
         self, *,
@@ -58,11 +58,12 @@ class CustomException(_fbthrift_python_mutable_exceptions.MutableGeneratedError,
         result: _typing.Optional[_fbthrift_compatible_with_Result]=...
     ) -> None: ...
 
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_current_module.Result]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_Result]]]: ...
     def _to_python(self) -> "module.thrift_types.CustomException": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.CustomException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CustomException": ...  # type: ignore
+_fbthrift_CustomException = CustomException
 
 
 _fbthrift_schema_b747839c13cb3aa5: bytes = ...
@@ -109,18 +110,18 @@ class _fbthrift_PrimitivesService_method_that_throws_args(_fbthrift_python_mutab
 
 
 class _fbthrift_PrimitivesService_method_that_throws_result(_fbthrift_python_mutable_types.MutableStruct):
-    success: _typing.Final[_fbthrift_current_module.Result]
-    e: _typing.Final[_fbthrift_current_module.CustomException]
+    success: _typing.Final[_fbthrift_Result]
+    e: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[_fbthrift_current_module.Result] = ..., e: _typing.Optional[_fbthrift_current_module.CustomException]=...
+        self, *, success: _typing.Optional[_fbthrift_Result] = ..., e: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            _fbthrift_current_module.Result,
-            _fbthrift_current_module.CustomException,
+            _fbthrift_Result,
+            _fbthrift_CustomException,
         ]]]: ...
 
 

@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import module.thrift_mutable_types as _fbthrift_current_module
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -121,7 +120,7 @@ class Internship(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Internship, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Internship, Internship)
-
+_fbthrift_Internship = Internship
 
 class Range(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -188,7 +187,7 @@ class Range(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Range, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Range, Range)
-
+_fbthrift_Range = Range
 
 class struct1(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -255,7 +254,7 @@ class struct1(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct1, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct1, struct1)
-
+_fbthrift_struct1 = struct1
 
 class struct2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -344,7 +343,7 @@ class struct2(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct2, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct2, struct2)
-
+_fbthrift_struct2 = struct2
 
 class struct3(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -422,7 +421,7 @@ class struct3(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct3, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct3, struct3)
-
+_fbthrift_struct3 = struct3
 
 class struct4(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -500,7 +499,7 @@ class struct4(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.struct4, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.struct4, struct4)
-
+_fbthrift_struct4 = struct4
 
 class union1(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
@@ -570,7 +569,7 @@ class union1(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.union1, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.union1, union1)
-
+_fbthrift_union1 = union1
 
 class union2(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
     _fbthrift_SPEC = (
@@ -662,9 +661,16 @@ class union2(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.union2, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.union2, union2)
+_fbthrift_union2 = union2
+
+from module.thrift_enums import _fbthrift_compatible_with_EmptyEnum
+from module.thrift_enums import EmptyEnum as _fbthrift_EmptyEnum
+from module.thrift_enums import _fbthrift_compatible_with_City
+from module.thrift_enums import City as _fbthrift_City
+from module.thrift_enums import _fbthrift_compatible_with_Company
+from module.thrift_enums import Company as _fbthrift_Company
 
 from module.thrift_enums import *
-
 _fbthrift_all_enums = [
     EmptyEnum,
     City,
@@ -853,7 +859,7 @@ I2B = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_
 
 I2B_REF = _fbthrift_python_types.Map(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_bool, { 0: False, 1: True, 2: True, 3: False})
 
-MyCompany = _fbthrift_current_module.Company
+MyCompany = _fbthrift_Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_string, _fbthrift_python_types.typeinfo_string)

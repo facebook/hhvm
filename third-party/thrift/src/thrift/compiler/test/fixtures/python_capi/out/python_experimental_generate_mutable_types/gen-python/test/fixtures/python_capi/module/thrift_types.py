@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import test.fixtures.python_capi.module.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -155,7 +154,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
-
+_fbthrift_MyStruct = MyStruct
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -208,7 +207,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
-
+_fbthrift_MyDataItem = MyDataItem
 
 class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -250,7 +249,7 @@ class TransitiveDoubler(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TransitiveDoubler, self)
-
+_fbthrift_TransitiveDoubler = TransitiveDoubler
 
 class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -314,7 +313,7 @@ class DoubledPair(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.DoubledPair, self)
-
+_fbthrift_DoubledPair = DoubledPair
 
 class StringPair(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -378,7 +377,7 @@ class StringPair(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.StringPair, self)
-
+_fbthrift_StringPair = StringPair
 
 class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -420,7 +419,7 @@ class EmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.EmptyStruct, self)
-
+_fbthrift_EmptyStruct = EmptyStruct
 
 class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -638,7 +637,7 @@ class PrimitiveStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.PrimitiveStruct, self)
-
+_fbthrift_PrimitiveStruct = PrimitiveStruct
 
 class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -724,7 +723,7 @@ class AdaptedFields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedFields, self)
-
+_fbthrift_AdaptedFields = AdaptedFields
 
 class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -865,7 +864,7 @@ class ListStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ListStruct, self)
-
+_fbthrift_ListStruct = ListStruct
 
 class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -984,7 +983,7 @@ class SetStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SetStruct, self)
-
+_fbthrift_SetStruct = SetStruct
 
 class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1136,7 +1135,7 @@ class MapStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MapStruct, self)
-
+_fbthrift_MapStruct = MapStruct
 
 class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1288,7 +1287,7 @@ class ComposeStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComposeStruct, self)
-
+_fbthrift_ComposeStruct = ComposeStruct
 
 class Onion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
@@ -1407,11 +1406,16 @@ class Onion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Onion, self)
+_fbthrift_Onion = Onion
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.module.thrift_metadata
-from test.fixtures.python_capi.module.thrift_enums import *
+from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.python_capi.module.thrift_enums import MyEnum as _fbthrift_MyEnum
+from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_AnnoyingEnum
+from test.fixtures.python_capi.module.thrift_enums import AnnoyingEnum as _fbthrift_AnnoyingEnum
 
+from test.fixtures.python_capi.module.thrift_enums import *
 _fbthrift_all_enums = [
     MyEnum,
     AnnoyingEnum,
@@ -1492,4 +1496,4 @@ ui64 = int
 signed_byte = int
 IOBuf = _fbthrift_iobuf.IOBuf
 IOBufPtr = _fbthrift_iobuf.IOBuf
-ListAlias = _fbthrift_current_module.ListStruct
+ListAlias = _fbthrift_ListStruct

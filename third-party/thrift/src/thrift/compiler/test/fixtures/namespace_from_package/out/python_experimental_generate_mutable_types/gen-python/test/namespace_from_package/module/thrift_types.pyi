@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import test.namespace_from_package.module.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -37,6 +36,7 @@ class Foo(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Foo):
     def _to_mutable_python(self) -> "test.namespace_from_package.module.thrift_mutable_types.Foo": ...  # type: ignore
     def _to_py3(self) -> "test.namespace_from_package.module.types.Foo": ...  # type: ignore
     def _to_py_deprecated(self) -> "namespace_from_package.module.ttypes.Foo": ...  # type: ignore
+_fbthrift_Foo = Foo
 
 
 class _fbthrift_TestService_init_args(_fbthrift_python_types.Struct):

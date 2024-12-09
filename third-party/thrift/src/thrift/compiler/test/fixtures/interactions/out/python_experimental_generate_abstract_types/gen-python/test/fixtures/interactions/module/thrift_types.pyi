@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import test.fixtures.interactions.module.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import test.fixtures.interactions.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -36,7 +35,7 @@ class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_mutable_python(self) -> "test.fixtures.interactions.module.thrift_mutable_types.CustomException": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.interactions.module.types.CustomException": ...  # type: ignore
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.CustomException": ...  # type: ignore
-
+_fbthrift_CustomException = CustomException
 
 class _fbthrift_compatible_with_ShouldBeBoxed:
     pass
@@ -58,6 +57,7 @@ class ShouldBeBoxed(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Sho
     def _to_mutable_python(self) -> "test.fixtures.interactions.module.thrift_mutable_types.ShouldBeBoxed": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.interactions.module.types.ShouldBeBoxed": ...  # type: ignore
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.ShouldBeBoxed": ...  # type: ignore
+_fbthrift_ShouldBeBoxed = ShouldBeBoxed
 
 
 class _fbthrift_MyService_foo_args(_fbthrift_python_types.Struct):
@@ -188,17 +188,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     success: _typing.Final[int]
-    ex: _typing.Final[_fbthrift_current_module.CustomException]
+    ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_current_module.CustomException]=...
+        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             int,
-            _fbthrift_current_module.CustomException,
+            _fbthrift_CustomException,
         ]]]: ...
 
 
@@ -478,17 +478,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     success: _typing.Final[int]
-    ex: _typing.Final[_fbthrift_current_module.CustomException]
+    ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_current_module.CustomException]=...
+        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             int,
-            _fbthrift_current_module.CustomException,
+            _fbthrift_CustomException,
         ]]]: ...
 
 
@@ -678,17 +678,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     success: _typing.Final[int]
-    ex: _typing.Final[_fbthrift_current_module.CustomException]
+    ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_current_module.CustomException]=...
+        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             int,
-            _fbthrift_current_module.CustomException,
+            _fbthrift_CustomException,
         ]]]: ...
 
 
@@ -878,17 +878,17 @@ class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
 
 class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
     success: _typing.Final[int]
-    ex: _typing.Final[_fbthrift_current_module.CustomException]
+    ex: _typing.Final[_fbthrift_CustomException]
 
     def __init__(
-        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_current_module.CustomException]=...
+        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[_fbthrift_CustomException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             int,
-            _fbthrift_current_module.CustomException,
+            _fbthrift_CustomException,
         ]]]: ...
 
 
@@ -1017,29 +1017,29 @@ class _fbthrift_SharedInteraction_tear_down_result(_fbthrift_python_types.Struct
 
 
 class _fbthrift_BoxService_getABoxSession_args(_fbthrift_python_types.Struct):
-    req: _typing.Final[_fbthrift_current_module.ShouldBeBoxed] = ...
+    req: _typing.Final[_fbthrift_ShouldBeBoxed] = ...
 
     def __init__(
         self, *,
-        req: _typing.Optional[_fbthrift_current_module.ShouldBeBoxed]=...
+        req: _typing.Optional[_fbthrift_ShouldBeBoxed]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
-        _typing.Union[None, _fbthrift_current_module.ShouldBeBoxed]]]: ...
+        _typing.Union[None, _fbthrift_ShouldBeBoxed]]]: ...
 
 
 class _fbthrift_BoxService_getABoxSession_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[_fbthrift_current_module.ShouldBeBoxed]
+    success: _typing.Final[_fbthrift_ShouldBeBoxed]
 
     def __init__(
-        self, *, success: _typing.Optional[_fbthrift_current_module.ShouldBeBoxed] = ...
+        self, *, success: _typing.Optional[_fbthrift_ShouldBeBoxed] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            _fbthrift_current_module.ShouldBeBoxed,
+            _fbthrift_ShouldBeBoxed,
         ]]]: ...
 
 
@@ -1055,14 +1055,14 @@ class _fbthrift_BoxedInteraction_getABox_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_BoxedInteraction_getABox_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[_fbthrift_current_module.ShouldBeBoxed]
+    success: _typing.Final[_fbthrift_ShouldBeBoxed]
 
     def __init__(
-        self, *, success: _typing.Optional[_fbthrift_current_module.ShouldBeBoxed] = ...
+        self, *, success: _typing.Optional[_fbthrift_ShouldBeBoxed] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            _fbthrift_current_module.ShouldBeBoxed,
+            _fbthrift_ShouldBeBoxed,
         ]]]: ...

@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 
@@ -37,7 +36,7 @@ class Fields(_abc.ABC):
     def _to_py3(self) -> "module.types.Fields": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
-
+_fbthrift_Fields = Fields
 class FieldsInjectedToEmptyStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -52,7 +51,7 @@ class FieldsInjectedToEmptyStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.FieldsInjectedToEmptyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
-
+_fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 class FieldsInjectedToStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -70,7 +69,7 @@ class FieldsInjectedToStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.FieldsInjectedToStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
-
+_fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 class FieldsInjectedWithIncludedStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -94,3 +93,4 @@ class FieldsInjectedWithIncludedStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithIncludedStruct": ...  # type: ignore
+_fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct

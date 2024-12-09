@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import module.thrift_mutable_types as _fbthrift_current_module
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -80,7 +79,7 @@ class Fields(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Fields, Fields)
-
+_fbthrift_Fields = Fields
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -136,7 +135,7 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_mutable_types.Mutab
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToEmptyStruct, FieldsInjectedToEmptyStruct)
-
+_fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -203,7 +202,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_mutable_types.MutableStr
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToStruct, FieldsInjectedToStruct)
-
+_fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -292,9 +291,10 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_mutable_types.
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithIncludedStruct, FieldsInjectedWithIncludedStruct)
+_fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
+
 
 from module.thrift_enums import *
-
 _fbthrift_all_enums = [
 ]
 

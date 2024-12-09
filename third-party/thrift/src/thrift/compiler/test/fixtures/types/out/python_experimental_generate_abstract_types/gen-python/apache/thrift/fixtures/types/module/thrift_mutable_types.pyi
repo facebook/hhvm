@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import apache.thrift.fixtures.types.module.thrift_mutable_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import apache.thrift.fixtures.types.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -32,8 +31,11 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import apache.thrift.fixtures.types.included.thrift_mutable_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_mutable_types
 from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_has_bitwise_ops
+from apache.thrift.fixtures.types.module.thrift_enums import has_bitwise_ops as _fbthrift_has_bitwise_ops
 from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_is_unscoped
+from apache.thrift.fixtures.types.module.thrift_enums import is_unscoped as _fbthrift_is_unscoped
 from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_MyForwardRefEnum
+from apache.thrift.fixtures.types.module.thrift_enums import MyForwardRefEnum as _fbthrift_MyForwardRefEnum
 
 from apache.thrift.fixtures.types.module.thrift_enums import *
 
@@ -55,7 +57,7 @@ class empty_struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.empty_struct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.empty_struct": ...  # type: ignore
-
+_fbthrift_empty_struct = empty_struct
 
 class _fbthrift_compatible_with_decorated_struct:
     pass
@@ -82,7 +84,7 @@ class decorated_struct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_c
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.decorated_struct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.decorated_struct": ...  # type: ignore
-
+_fbthrift_decorated_struct = decorated_struct
 
 class _fbthrift_compatible_with_ContainerStruct:
     pass
@@ -165,7 +167,7 @@ class ContainerStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.ContainerStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ContainerStruct": ...  # type: ignore
-
+_fbthrift_ContainerStruct = ContainerStruct
 
 class _fbthrift_compatible_with_CppTypeStruct:
     pass
@@ -192,7 +194,7 @@ class CppTypeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.CppTypeStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CppTypeStruct": ...  # type: ignore
-
+_fbthrift_CppTypeStruct = CppTypeStruct
 
 class _fbthrift_compatible_with_VirtualStruct:
     pass
@@ -219,7 +221,7 @@ class VirtualStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.VirtualStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.VirtualStruct": ...  # type: ignore
-
+_fbthrift_VirtualStruct = VirtualStruct
 
 class _fbthrift_compatible_with_MyStructWithForwardRefEnum:
     pass
@@ -228,15 +230,15 @@ class _fbthrift_compatible_with_MyStructWithForwardRefEnum:
 class MyStructWithForwardRefEnum(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStructWithForwardRefEnum, _fbthrift_python_abstract_types.MyStructWithForwardRefEnum):
 
     @property
-    def a(self) -> _fbthrift_current_module.MyForwardRefEnum: ...
+    def a(self) -> _fbthrift_MyForwardRefEnum: ...
     @a.setter
-    def a(self, value: _fbthrift_current_module.MyForwardRefEnum) -> None: ...
+    def a(self, value: _fbthrift_MyForwardRefEnum) -> None: ...
 
 
     @property
-    def b(self) -> _fbthrift_current_module.MyForwardRefEnum: ...
+    def b(self) -> _fbthrift_MyForwardRefEnum: ...
     @b.setter
-    def b(self, value: _fbthrift_current_module.MyForwardRefEnum) -> None: ...
+    def b(self, value: _fbthrift_MyForwardRefEnum) -> None: ...
 
     def __init__(
         self, *,
@@ -249,12 +251,12 @@ class MyStructWithForwardRefEnum(_fbthrift_python_mutable_types.MutableStruct, _
         a: _typing.Optional[_fbthrift_compatible_with_MyForwardRefEnum]=...,
         b: _typing.Optional[_fbthrift_compatible_with_MyForwardRefEnum]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_current_module.MyForwardRefEnum, _fbthrift_current_module.MyForwardRefEnum]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_MyForwardRefEnum, _fbthrift_MyForwardRefEnum]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.MyStructWithForwardRefEnum": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.MyStructWithForwardRefEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyStructWithForwardRefEnum": ...  # type: ignore
-
+_fbthrift_MyStructWithForwardRefEnum = MyStructWithForwardRefEnum
 
 class _fbthrift_compatible_with_TrivialNumeric:
     pass
@@ -289,7 +291,7 @@ class TrivialNumeric(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.TrivialNumeric": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNumeric": ...  # type: ignore
-
+_fbthrift_TrivialNumeric = TrivialNumeric
 
 class _fbthrift_compatible_with_TrivialNestedWithDefault:
     pass
@@ -304,9 +306,9 @@ class TrivialNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fb
 
 
     @property
-    def n(self) -> _fbthrift_current_module.TrivialNumeric: ...
+    def n(self) -> _fbthrift_TrivialNumeric: ...
     @n.setter
-    def n(self, value: _fbthrift_current_module.TrivialNumeric) -> None: ...
+    def n(self, value: _fbthrift_TrivialNumeric) -> None: ...
 
     def __init__(
         self, *,
@@ -319,12 +321,12 @@ class TrivialNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fb
         z: _typing.Optional[int]=...,
         n: _typing.Optional[_fbthrift_compatible_with_TrivialNumeric]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_current_module.TrivialNumeric]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_TrivialNumeric]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.TrivialNestedWithDefault": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.TrivialNestedWithDefault": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.TrivialNestedWithDefault": ...  # type: ignore
-
+_fbthrift_TrivialNestedWithDefault = TrivialNestedWithDefault
 
 class _fbthrift_compatible_with_ComplexString:
     pass
@@ -359,7 +361,7 @@ class ComplexString(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.ComplexString": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ComplexString": ...  # type: ignore
-
+_fbthrift_ComplexString = ComplexString
 
 class _fbthrift_compatible_with_ComplexNestedWithDefault:
     pass
@@ -374,9 +376,9 @@ class ComplexNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fb
 
 
     @property
-    def n(self) -> _fbthrift_current_module.ComplexString: ...
+    def n(self) -> _fbthrift_ComplexString: ...
     @n.setter
-    def n(self, value: _fbthrift_current_module.ComplexString) -> None: ...
+    def n(self, value: _fbthrift_ComplexString) -> None: ...
 
     def __init__(
         self, *,
@@ -389,12 +391,12 @@ class ComplexNestedWithDefault(_fbthrift_python_mutable_types.MutableStruct, _fb
         z: _typing.Optional[str]=...,
         n: _typing.Optional[_fbthrift_compatible_with_ComplexString]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_current_module.ComplexString]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_ComplexString]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ComplexNestedWithDefault": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.ComplexNestedWithDefault": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ComplexNestedWithDefault": ...  # type: ignore
-
+_fbthrift_ComplexNestedWithDefault = ComplexNestedWithDefault
 
 class _fbthrift_compatible_with_MinPadding:
     pass
@@ -453,7 +455,7 @@ class MinPadding(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.MinPadding": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MinPadding": ...  # type: ignore
-
+_fbthrift_MinPadding = MinPadding
 
 class _fbthrift_compatible_with_MinPaddingWithCustomType:
     pass
@@ -512,7 +514,7 @@ class MinPaddingWithCustomType(_fbthrift_python_mutable_types.MutableStruct, _fb
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.MinPaddingWithCustomType": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MinPaddingWithCustomType": ...  # type: ignore
-
+_fbthrift_MinPaddingWithCustomType = MinPaddingWithCustomType
 
 class _fbthrift_compatible_with_MyStruct:
     pass
@@ -539,9 +541,9 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
 
 
     @property
-    def data(self) -> _fbthrift_current_module.MyDataItem: ...
+    def data(self) -> _fbthrift_MyDataItem: ...
     @data.setter
-    def data(self, value: _fbthrift_current_module.MyDataItem) -> None: ...
+    def data(self, value: _fbthrift_MyDataItem) -> None: ...
 
     def __init__(
         self, *,
@@ -558,12 +560,12 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
         majorVer: _typing.Optional[int]=...,
         data: _typing.Optional[_fbthrift_compatible_with_MyDataItem]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, int, _fbthrift_current_module.MyDataItem]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, int, _fbthrift_MyDataItem]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.MyStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.MyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
-
+_fbthrift_MyStruct = MyStruct
 
 class _fbthrift_compatible_with_MyDataItem:
     pass
@@ -582,7 +584,7 @@ class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.MyDataItem": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
-
+_fbthrift_MyDataItem = MyDataItem
 
 class _fbthrift_compatible_with_Renaming:
     pass
@@ -609,7 +611,7 @@ class Renaming(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.Renaming": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Renaming": ...  # type: ignore
-
+_fbthrift_Renaming = Renaming
 
 class _fbthrift_compatible_with_AnnotatedTypes:
     pass
@@ -644,7 +646,7 @@ class AnnotatedTypes(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.AnnotatedTypes": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.AnnotatedTypes": ...  # type: ignore
-
+_fbthrift_AnnotatedTypes = AnnotatedTypes
 
 class _fbthrift_compatible_with_ForwardUsageRoot:
     pass
@@ -653,15 +655,15 @@ class _fbthrift_compatible_with_ForwardUsageRoot:
 class ForwardUsageRoot(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ForwardUsageRoot, _fbthrift_python_abstract_types.ForwardUsageRoot):
 
     @property
-    def ForwardUsageStruct(self) -> _typing.Optional[_fbthrift_current_module.ForwardUsageStruct]: ...
+    def ForwardUsageStruct(self) -> _typing.Optional[_fbthrift_ForwardUsageStruct]: ...
     @ForwardUsageStruct.setter
-    def ForwardUsageStruct(self, value: _typing.Optional[_fbthrift_current_module.ForwardUsageStruct]) -> None: ...
+    def ForwardUsageStruct(self, value: _typing.Optional[_fbthrift_ForwardUsageStruct]) -> None: ...
 
 
     @property
-    def ForwardUsageByRef(self) -> _typing.Optional[_fbthrift_current_module.ForwardUsageByRef]: ...
+    def ForwardUsageByRef(self) -> _typing.Optional[_fbthrift_ForwardUsageByRef]: ...
     @ForwardUsageByRef.setter
-    def ForwardUsageByRef(self, value: _typing.Optional[_fbthrift_current_module.ForwardUsageByRef]) -> None: ...
+    def ForwardUsageByRef(self, value: _typing.Optional[_fbthrift_ForwardUsageByRef]) -> None: ...
 
     def __init__(
         self, *,
@@ -674,12 +676,12 @@ class ForwardUsageRoot(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_c
         ForwardUsageStruct: _typing.Optional[_fbthrift_compatible_with_ForwardUsageStruct]=...,
         ForwardUsageByRef: _typing.Optional[_fbthrift_compatible_with_ForwardUsageByRef]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_current_module.ForwardUsageStruct, _fbthrift_current_module.ForwardUsageByRef]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_ForwardUsageStruct, _fbthrift_ForwardUsageByRef]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ForwardUsageRoot": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.ForwardUsageRoot": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageRoot": ...  # type: ignore
-
+_fbthrift_ForwardUsageRoot = ForwardUsageRoot
 
 class _fbthrift_compatible_with_ForwardUsageStruct:
     pass
@@ -688,9 +690,9 @@ class _fbthrift_compatible_with_ForwardUsageStruct:
 class ForwardUsageStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ForwardUsageStruct, _fbthrift_python_abstract_types.ForwardUsageStruct):
 
     @property
-    def foo(self) -> _typing.Optional[_fbthrift_current_module.ForwardUsageRoot]: ...
+    def foo(self) -> _typing.Optional[_fbthrift_ForwardUsageRoot]: ...
     @foo.setter
-    def foo(self, value: _typing.Optional[_fbthrift_current_module.ForwardUsageRoot]) -> None: ...
+    def foo(self, value: _typing.Optional[_fbthrift_ForwardUsageRoot]) -> None: ...
 
     def __init__(
         self, *,
@@ -701,12 +703,12 @@ class ForwardUsageStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift
         self, *,
         foo: _typing.Optional[_fbthrift_compatible_with_ForwardUsageRoot]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_current_module.ForwardUsageRoot]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_ForwardUsageRoot]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ForwardUsageStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.ForwardUsageStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageStruct": ...  # type: ignore
-
+_fbthrift_ForwardUsageStruct = ForwardUsageStruct
 
 class _fbthrift_compatible_with_ForwardUsageByRef:
     pass
@@ -715,9 +717,9 @@ class _fbthrift_compatible_with_ForwardUsageByRef:
 class ForwardUsageByRef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ForwardUsageByRef, _fbthrift_python_abstract_types.ForwardUsageByRef):
 
     @property
-    def foo(self) -> _typing.Optional[_fbthrift_current_module.ForwardUsageRoot]: ...
+    def foo(self) -> _typing.Optional[_fbthrift_ForwardUsageRoot]: ...
     @foo.setter
-    def foo(self, value: _typing.Optional[_fbthrift_current_module.ForwardUsageRoot]) -> None: ...
+    def foo(self, value: _typing.Optional[_fbthrift_ForwardUsageRoot]) -> None: ...
 
     def __init__(
         self, *,
@@ -728,12 +730,12 @@ class ForwardUsageByRef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
         self, *,
         foo: _typing.Optional[_fbthrift_compatible_with_ForwardUsageRoot]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_current_module.ForwardUsageRoot]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_ForwardUsageRoot]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ForwardUsageByRef": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.ForwardUsageByRef": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ForwardUsageByRef": ...  # type: ignore
-
+_fbthrift_ForwardUsageByRef = ForwardUsageByRef
 
 class _fbthrift_compatible_with_IncompleteMap:
     pass
@@ -742,9 +744,9 @@ class _fbthrift_compatible_with_IncompleteMap:
 class IncompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_IncompleteMap, _fbthrift_python_abstract_types.IncompleteMap):
 
     @property
-    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_current_module.IncompleteMapDep]]: ...
+    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_IncompleteMapDep]]: ...
     @field.setter
-    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_current_module.IncompleteMapDep]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_IncompleteMapDep]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
 
     def __init__(
         self, *,
@@ -755,12 +757,12 @@ class IncompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
         self, *,
         field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_IncompleteMapDep] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_current_module.IncompleteMapDep]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_IncompleteMapDep]]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.IncompleteMap": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.IncompleteMap": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMap": ...  # type: ignore
-
+_fbthrift_IncompleteMap = IncompleteMap
 
 class _fbthrift_compatible_with_IncompleteMapDep:
     pass
@@ -779,7 +781,7 @@ class IncompleteMapDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_c
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.IncompleteMapDep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMapDep": ...  # type: ignore
-
+_fbthrift_IncompleteMapDep = IncompleteMapDep
 
 class _fbthrift_compatible_with_CompleteMap:
     pass
@@ -788,9 +790,9 @@ class _fbthrift_compatible_with_CompleteMap:
 class CompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_CompleteMap, _fbthrift_python_abstract_types.CompleteMap):
 
     @property
-    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_current_module.CompleteMapDep]]: ...
+    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_CompleteMapDep]]: ...
     @field.setter
-    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_current_module.CompleteMapDep]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_CompleteMapDep]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
 
     def __init__(
         self, *,
@@ -801,12 +803,12 @@ class CompleteMap(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compat
         self, *,
         field: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_CompleteMapDep] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_current_module.CompleteMapDep]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_CompleteMapDep]]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.CompleteMap": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.CompleteMap": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMap": ...  # type: ignore
-
+_fbthrift_CompleteMap = CompleteMap
 
 class _fbthrift_compatible_with_CompleteMapDep:
     pass
@@ -825,7 +827,7 @@ class CompleteMapDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.CompleteMapDep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMapDep": ...  # type: ignore
-
+_fbthrift_CompleteMapDep = CompleteMapDep
 
 class _fbthrift_compatible_with_IncompleteList:
     pass
@@ -834,9 +836,9 @@ class _fbthrift_compatible_with_IncompleteList:
 class IncompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_IncompleteList, _fbthrift_python_abstract_types.IncompleteList):
 
     @property
-    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.IncompleteListDep]]: ...
+    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_IncompleteListDep]]: ...
     @field.setter
-    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.IncompleteListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_IncompleteListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
     def __init__(
         self, *,
@@ -847,12 +849,12 @@ class IncompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
         self, *,
         field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_IncompleteListDep] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.IncompleteListDep]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_IncompleteListDep]]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.IncompleteList": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.IncompleteList": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteList": ...  # type: ignore
-
+_fbthrift_IncompleteList = IncompleteList
 
 class _fbthrift_compatible_with_IncompleteListDep:
     pass
@@ -871,7 +873,7 @@ class IncompleteListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.IncompleteListDep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteListDep": ...  # type: ignore
-
+_fbthrift_IncompleteListDep = IncompleteListDep
 
 class _fbthrift_compatible_with_CompleteList:
     pass
@@ -880,9 +882,9 @@ class _fbthrift_compatible_with_CompleteList:
 class CompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_CompleteList, _fbthrift_python_abstract_types.CompleteList):
 
     @property
-    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.CompleteListDep]]: ...
+    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_CompleteListDep]]: ...
     @field.setter
-    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.CompleteListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_CompleteListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
     def __init__(
         self, *,
@@ -893,12 +895,12 @@ class CompleteList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compa
         self, *,
         field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_CompleteListDep] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.CompleteListDep]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_CompleteListDep]]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.CompleteList": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.CompleteList": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CompleteList": ...  # type: ignore
-
+_fbthrift_CompleteList = CompleteList
 
 class _fbthrift_compatible_with_CompleteListDep:
     pass
@@ -917,7 +919,7 @@ class CompleteListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.CompleteListDep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CompleteListDep": ...  # type: ignore
-
+_fbthrift_CompleteListDep = CompleteListDep
 
 class _fbthrift_compatible_with_AdaptedList:
     pass
@@ -926,9 +928,9 @@ class _fbthrift_compatible_with_AdaptedList:
 class AdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_AdaptedList, _fbthrift_python_abstract_types.AdaptedList):
 
     @property
-    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.AdaptedListDep]]: ...
+    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_AdaptedListDep]]: ...
     @field.setter
-    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.AdaptedListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_AdaptedListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
     def __init__(
         self, *,
@@ -939,12 +941,12 @@ class AdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compat
         self, *,
         field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_AdaptedListDep] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.AdaptedListDep]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_AdaptedListDep]]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.AdaptedList": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.AdaptedList": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedList": ...  # type: ignore
-
+_fbthrift_AdaptedList = AdaptedList
 
 class _fbthrift_compatible_with_AdaptedListDep:
     pass
@@ -953,9 +955,9 @@ class _fbthrift_compatible_with_AdaptedListDep:
 class AdaptedListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_AdaptedListDep, _fbthrift_python_abstract_types.AdaptedListDep):
 
     @property
-    def field(self) -> _fbthrift_current_module.AdaptedList: ...
+    def field(self) -> _fbthrift_AdaptedList: ...
     @field.setter
-    def field(self, value: _fbthrift_current_module.AdaptedList) -> None: ...
+    def field(self, value: _fbthrift_AdaptedList) -> None: ...
 
     def __init__(
         self, *,
@@ -966,12 +968,12 @@ class AdaptedListDep(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
         self, *,
         field: _typing.Optional[_fbthrift_compatible_with_AdaptedList]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_current_module.AdaptedList]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_AdaptedList]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.AdaptedListDep": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.AdaptedListDep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedListDep": ...  # type: ignore
-
+_fbthrift_AdaptedListDep = AdaptedListDep
 
 class _fbthrift_compatible_with_DependentAdaptedList:
     pass
@@ -980,9 +982,9 @@ class _fbthrift_compatible_with_DependentAdaptedList:
 class DependentAdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_DependentAdaptedList, _fbthrift_python_abstract_types.DependentAdaptedList):
 
     @property
-    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.DependentAdaptedListDep]]: ...
+    def field(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_DependentAdaptedListDep]]: ...
     @field.setter
-    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.DependentAdaptedListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+    def field(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_DependentAdaptedListDep]] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
 
     def __init__(
         self, *,
@@ -993,12 +995,12 @@ class DependentAdaptedList(_fbthrift_python_mutable_types.MutableStruct, _fbthri
         self, *,
         field: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_DependentAdaptedListDep] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_current_module.DependentAdaptedListDep]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_DependentAdaptedListDep]]]]: ...
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.DependentAdaptedList": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.DependentAdaptedList": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.DependentAdaptedList": ...  # type: ignore
-
+_fbthrift_DependentAdaptedList = DependentAdaptedList
 
 class _fbthrift_compatible_with_DependentAdaptedListDep:
     pass
@@ -1025,7 +1027,7 @@ class DependentAdaptedListDep(_fbthrift_python_mutable_types.MutableStruct, _fbt
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.DependentAdaptedListDep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.DependentAdaptedListDep": ...  # type: ignore
-
+_fbthrift_DependentAdaptedListDep = DependentAdaptedListDep
 
 class _fbthrift_compatible_with_AllocatorAware:
     pass
@@ -1100,7 +1102,7 @@ class AllocatorAware(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_com
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.AllocatorAware": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware": ...  # type: ignore
-
+_fbthrift_AllocatorAware = AllocatorAware
 
 class _fbthrift_compatible_with_AllocatorAware2:
     pass
@@ -1135,7 +1137,7 @@ class AllocatorAware2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.AllocatorAware2": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.AllocatorAware2": ...  # type: ignore
-
+_fbthrift_AllocatorAware2 = AllocatorAware2
 
 class _fbthrift_compatible_with_TypedefStruct:
     pass
@@ -1178,7 +1180,7 @@ class TypedefStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.TypedefStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.TypedefStruct": ...  # type: ignore
-
+_fbthrift_TypedefStruct = TypedefStruct
 
 class _fbthrift_compatible_with_StructWithDoubleUnderscores:
     pass
@@ -1205,6 +1207,7 @@ class StructWithDoubleUnderscores(_fbthrift_python_mutable_types.MutableStruct, 
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.StructWithDoubleUnderscores": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.StructWithDoubleUnderscores": ...  # type: ignore
+_fbthrift_StructWithDoubleUnderscores = StructWithDoubleUnderscores
 
 TBinary = bytes
 IntTypedef = int

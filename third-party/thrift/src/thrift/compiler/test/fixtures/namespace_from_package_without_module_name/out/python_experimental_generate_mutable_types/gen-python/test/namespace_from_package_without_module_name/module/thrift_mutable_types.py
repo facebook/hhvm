@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import test.namespace_from_package_without_module_name.module.thrift_mutable_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -73,9 +72,10 @@ class Foo(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("test.namespace_from_package_without_module_name.module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Foo, self)
+_fbthrift_Foo = Foo
+
 
 from test.namespace_from_package_without_module_name.module.thrift_enums import *
-
 _fbthrift_all_enums = [
 ]
 

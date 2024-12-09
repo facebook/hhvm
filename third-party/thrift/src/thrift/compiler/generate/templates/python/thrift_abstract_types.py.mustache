@@ -25,7 +25,6 @@ Generated Python classes for abstract thrift-python types.
 
 import abc as _abc
 import typing as _typing
-{{> types/set_current_module}}
 
 {{!
     If any type has a field named property, then the use of the built-in property will conflict
@@ -103,7 +102,8 @@ class {{> structs/unadapted_name}}({{!
 {{#struct:has_adapter?}}
 
 {{struct:py_name}} = {{adapter:type_hint}}{{#adapter:is_generic?}}[{{> structs/unadapted_name}}]{{/adapter:is_generic?}}
-{{/struct:has_adapter?}}{{!
+{{/struct:has_adapter?}}
+{{> private/alias_prefix}}{{struct:py_name}} = {{struct:py_name}}{{!
 }}{{/program:structs}}
 {{#program:typedefs?}}
 

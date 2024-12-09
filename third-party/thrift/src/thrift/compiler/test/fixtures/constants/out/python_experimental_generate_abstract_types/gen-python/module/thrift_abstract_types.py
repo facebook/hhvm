@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 import enum as _enum
@@ -23,8 +22,11 @@ import enum as _enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 from module.thrift_enums import _fbthrift_compatible_with_EmptyEnum
+from module.thrift_enums import EmptyEnum as _fbthrift_EmptyEnum
 from module.thrift_enums import _fbthrift_compatible_with_City
+from module.thrift_enums import City as _fbthrift_City
 from module.thrift_enums import _fbthrift_compatible_with_Company
+from module.thrift_enums import Company as _fbthrift_Company
 
 from module.thrift_enums import *
 class Internship(_abc.ABC):
@@ -36,7 +38,7 @@ class Internship(_abc.ABC):
     def title(self) -> str: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def employer(self) -> _typing.Optional[_fbthrift_current_module.Company]: ...
+    def employer(self) -> _typing.Optional[_fbthrift_Company]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def compensation(self) -> _typing.Optional[float]: ...
@@ -44,7 +46,7 @@ class Internship(_abc.ABC):
     @_abc.abstractmethod
     def school(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.Company, float, str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_Company, float, str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Internship": ...  # type: ignore
     @_abc.abstractmethod
@@ -53,7 +55,7 @@ class Internship(_abc.ABC):
     def _to_py3(self) -> "module.types.Internship": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Internship": ...  # type: ignore
-
+_fbthrift_Internship = Internship
 class Range(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -71,7 +73,7 @@ class Range(_abc.ABC):
     def _to_py3(self) -> "module.types.Range": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Range": ...  # type: ignore
-
+_fbthrift_Range = Range
 class struct1(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -89,7 +91,7 @@ class struct1(_abc.ABC):
     def _to_py3(self) -> "module.types.struct1": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.struct1": ...  # type: ignore
-
+_fbthrift_struct1 = struct1
 class struct2(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -99,12 +101,12 @@ class struct2(_abc.ABC):
     def b(self) -> str: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def c(self) -> _fbthrift_current_module.struct1: ...
+    def c(self) -> _fbthrift_struct1: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def d(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.struct1, _typing.Sequence[int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_struct1, _typing.Sequence[int]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct2": ...  # type: ignore
     @_abc.abstractmethod
@@ -113,7 +115,7 @@ class struct2(_abc.ABC):
     def _to_py3(self) -> "module.types.struct2": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.struct2": ...  # type: ignore
-
+_fbthrift_struct2 = struct2
 class struct3(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -123,9 +125,9 @@ class struct3(_abc.ABC):
     def b(self) -> int: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def c(self) -> _fbthrift_current_module.struct2: ...
+    def c(self) -> _fbthrift_struct2: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _fbthrift_current_module.struct2]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _fbthrift_struct2]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.struct3": ...  # type: ignore
     @_abc.abstractmethod
@@ -134,7 +136,7 @@ class struct3(_abc.ABC):
     def _to_py3(self) -> "module.types.struct3": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.struct3": ...  # type: ignore
-
+_fbthrift_struct3 = struct3
 class struct4(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -155,7 +157,7 @@ class struct4(_abc.ABC):
     def _to_py3(self) -> "module.types.struct4": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.struct4": ...  # type: ignore
-
+_fbthrift_struct4 = struct4
 class union1(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -185,7 +187,7 @@ class union1(_abc.ABC):
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_union1 = union1
 class union2(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -195,10 +197,10 @@ class union2(_abc.ABC):
     def d(self) -> float: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def s(self) -> _fbthrift_current_module.struct1: ...
+    def s(self) -> _fbthrift_struct1: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def u(self) -> _fbthrift_current_module.union1: ...
+    def u(self) -> _fbthrift_union1: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.union2": ...  # type: ignore
     @_abc.abstractmethod
@@ -218,13 +220,14 @@ class union2(_abc.ABC):
     FbThriftUnionFieldEnum.__name__ = "union2"
     @_fbthrift_property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, int, float, _fbthrift_current_module.struct1, _fbthrift_current_module.union1]]: ...
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, int, float, _fbthrift_struct1, _fbthrift_union1]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
+_fbthrift_union2 = union2
 
-MyCompany = _fbthrift_current_module.Company
+MyCompany = _fbthrift_Company
 MyStringIdentifier = str
 MyIntIdentifier = int
 MyMapIdentifier = _typing.Mapping[str, str]

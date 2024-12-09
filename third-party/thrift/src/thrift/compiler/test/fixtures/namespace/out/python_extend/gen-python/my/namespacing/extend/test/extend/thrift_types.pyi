@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import python_module_root.my.namespacing.extend.test.extend.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -17,6 +16,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_module_root__my__namespacing__test__hsmodule__thrift_types
 
 from python_module_root.my.namespacing.extend.test.extend.thrift_enums import *
+
 
 
 class _fbthrift_ExtendTestService_check_args(_fbthrift_python_types.Struct):

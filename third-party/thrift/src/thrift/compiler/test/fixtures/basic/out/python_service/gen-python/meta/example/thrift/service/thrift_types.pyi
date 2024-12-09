@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import meta.example.thrift.service.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -36,7 +35,7 @@ class EchoRequest(_fbthrift_python_types.Struct, _fbthrift_compatible_with_EchoR
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "meta.example.thrift.service.types.EchoRequest": ...  # type: ignore
     def _to_py_deprecated(self) -> "service.ttypes.EchoRequest": ...  # type: ignore
-
+_fbthrift_EchoRequest = EchoRequest
 
 class _fbthrift_compatible_with_EchoResponse:
     pass
@@ -57,7 +56,7 @@ class EchoResponse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Echo
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "meta.example.thrift.service.types.EchoResponse": ...  # type: ignore
     def _to_py_deprecated(self) -> "service.ttypes.EchoResponse": ...  # type: ignore
-
+_fbthrift_EchoResponse = EchoResponse
 
 class _fbthrift_compatible_with_WhisperException:
     pass
@@ -74,32 +73,33 @@ class WhisperException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_com
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "meta.example.thrift.service.types.WhisperException": ...  # type: ignore
     def _to_py_deprecated(self) -> "service.ttypes.WhisperException": ...  # type: ignore
+_fbthrift_WhisperException = WhisperException
 
 
 class _fbthrift_EchoService_echo_args(_fbthrift_python_types.Struct):
-    request: _typing.Final[_fbthrift_current_module.EchoRequest] = ...
+    request: _typing.Final[_fbthrift_EchoRequest] = ...
 
     def __init__(
         self, *,
-        request: _typing.Optional[_fbthrift_current_module.EchoRequest]=...
+        request: _typing.Optional[_fbthrift_EchoRequest]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
-        _typing.Union[None, _fbthrift_current_module.EchoRequest]]]: ...
+        _typing.Union[None, _fbthrift_EchoRequest]]]: ...
 
 
 class _fbthrift_EchoService_echo_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[_fbthrift_current_module.EchoResponse]
-    ex: _typing.Final[_fbthrift_current_module.WhisperException]
+    success: _typing.Final[_fbthrift_EchoResponse]
+    ex: _typing.Final[_fbthrift_WhisperException]
 
     def __init__(
-        self, *, success: _typing.Optional[_fbthrift_current_module.EchoResponse] = ..., ex: _typing.Optional[_fbthrift_current_module.WhisperException]=...
+        self, *, success: _typing.Optional[_fbthrift_EchoResponse] = ..., ex: _typing.Optional[_fbthrift_WhisperException]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            _fbthrift_current_module.EchoResponse,
-            _fbthrift_current_module.WhisperException,
+            _fbthrift_EchoResponse,
+            _fbthrift_WhisperException,
         ]]]: ...

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import with_containers.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -75,7 +74,7 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
 
 
 AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithContainers]
-
+_fbthrift_AnnotationWithContainers = AnnotationWithContainers
 
 class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -125,11 +124,12 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
 
 MyStruct = my.AdaptedType[_fbthrift_unadapted_MyStruct]
+_fbthrift_MyStruct = MyStruct
 
 # This unfortunately has to be down here to prevent circular imports
 import with_containers.thrift_metadata
-from with_containers.thrift_enums import *
 
+from with_containers.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

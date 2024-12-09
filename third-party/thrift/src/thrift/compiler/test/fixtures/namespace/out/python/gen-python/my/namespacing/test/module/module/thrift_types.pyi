@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import python_module_root.my.namespacing.test.module.module.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -36,6 +35,7 @@ class Foo(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Foo):
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "python_module_root.my.namespacing.test.module.module.types.Foo": ...  # type: ignore
     def _to_py_deprecated(self) -> "my.namespacing.test.module.ttypes.Foo": ...  # type: ignore
+_fbthrift_Foo = Foo
 
 
 class _fbthrift_TestService_init_args(_fbthrift_python_types.Struct):

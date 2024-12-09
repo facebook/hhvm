@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import with_containers.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -41,7 +40,7 @@ class _fbthrift_unadapted_AnnotationWithContainers(_fbthrift_python_types.Struct
     def _to_py3(self) -> "with_containers.types._fbthrift_unadapted_AnnotationWithContainers": ...  # type: ignore
     def _to_py_deprecated(self) -> "with_containers.ttypes._fbthrift_unadapted_AnnotationWithContainers": ...  # type: ignore
 AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithContainers]
-
+_fbthrift_AnnotationWithContainers = AnnotationWithContainers
 
 class _fbthrift_compatible_with__fbthrift_unadapted_MyStruct:
     pass
@@ -63,3 +62,4 @@ class _fbthrift_unadapted_MyStruct(_fbthrift_python_types.Struct, _fbthrift_comp
     def _to_py3(self) -> "with_containers.types._fbthrift_unadapted_MyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "with_containers.ttypes._fbthrift_unadapted_MyStruct": ...  # type: ignore
 MyStruct = my.AdaptedType[_fbthrift_unadapted_MyStruct]
+_fbthrift_MyStruct = MyStruct

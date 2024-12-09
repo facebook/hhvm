@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import a.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -91,11 +90,12 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("a.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
+_fbthrift_MyStruct = MyStruct
 
 # This unfortunately has to be down here to prevent circular imports
 import a.thrift_metadata
-from a.thrift_enums import *
 
+from a.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

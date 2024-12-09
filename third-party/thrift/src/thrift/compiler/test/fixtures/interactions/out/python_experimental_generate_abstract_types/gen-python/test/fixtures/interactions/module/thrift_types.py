@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import test.fixtures.interactions.module.thrift_types as _fbthrift_current_module
 from abc import ABCMeta as _fbthrift_ABCMeta
 import test.fixtures.interactions.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -74,7 +73,7 @@ class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomException, self)
-
+_fbthrift_CustomException = CustomException
 
 class ShouldBeBoxed(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -129,11 +128,12 @@ class ShouldBeBoxed(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.ShouldBeBoxed, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.ShouldBeBoxed, ShouldBeBoxed)
+_fbthrift_ShouldBeBoxed = ShouldBeBoxed
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.interactions.module.thrift_metadata
-from test.fixtures.interactions.module.thrift_enums import *
 
+from test.fixtures.interactions.module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

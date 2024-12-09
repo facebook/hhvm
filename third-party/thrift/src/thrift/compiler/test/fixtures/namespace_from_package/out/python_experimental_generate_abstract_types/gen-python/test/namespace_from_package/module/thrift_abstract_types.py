@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import test.namespace_from_package.module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 
@@ -36,3 +35,4 @@ class Foo(_abc.ABC):
     def _to_py3(self) -> "test.namespace_from_package.module.types.Foo": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "namespace_from_package.module.ttypes.Foo": ...  # type: ignore
+_fbthrift_Foo = Foo

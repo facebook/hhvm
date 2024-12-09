@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import test.fixtures.basic.module.thrift_types as _fbthrift_current_module
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
@@ -17,7 +16,9 @@ import test.fixtures.basic.module.thrift_abstract_types as _fbthrift_python_abst
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.basic.module.thrift_enums import MyEnum as _fbthrift_MyEnum
 from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_HackEnum
+from test.fixtures.basic.module.thrift_enums import HackEnum as _fbthrift_HackEnum
 
 from test.fixtures.basic.module.thrift_enums import *
 
@@ -29,8 +30,8 @@ class _fbthrift_compatible_with_MyStruct:
 class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
-    MyDataField: _typing.Final[_fbthrift_current_module.MyDataItem] = ...
-    myEnum: _typing.Final[_fbthrift_current_module.MyEnum] = ...
+    MyDataField: _typing.Final[_fbthrift_MyDataItem] = ...
+    myEnum: _typing.Final[_fbthrift_MyEnum] = ...
     oneway: _typing.Final[bool] = ...
     readonly: _typing.Final[bool] = ...
     idempotent: _typing.Final[bool] = ...
@@ -61,12 +62,12 @@ class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct
         floatSet: _typing.Optional[_typing.AbstractSet[float]]=...,
         no_hack_codegen_field: _typing.Optional[str]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyDataItem, _fbthrift_current_module.MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyDataItem, _fbthrift_MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyStruct": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
-
+_fbthrift_MyStruct = MyStruct
 
 class _fbthrift_compatible_with_Containers:
     pass
@@ -94,7 +95,7 @@ class Containers(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Contai
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.Containers": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.Containers": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
-
+_fbthrift_Containers = Containers
 
 class _fbthrift_compatible_with_MyDataItem:
     pass
@@ -113,16 +114,16 @@ class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyData
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyDataItem": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
-
+_fbthrift_MyDataItem = MyDataItem
 
 class _fbthrift_compatible_with_MyUnion:
     pass
 
 
 class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, _fbthrift_python_abstract_types.MyUnion):
-    myEnum: _typing.Final[_fbthrift_current_module.MyEnum] = ...
-    myStruct: _typing.Final[_fbthrift_current_module.MyStruct] = ...
-    myDataItem: _typing.Final[_fbthrift_current_module.MyDataItem] = ...
+    myEnum: _typing.Final[_fbthrift_MyEnum] = ...
+    myStruct: _typing.Final[_fbthrift_MyStruct] = ...
+    myDataItem: _typing.Final[_fbthrift_MyDataItem] = ...
     floatSet: _typing.Final[_typing.AbstractSet[float]] = ...
     def __init__(
         self, *,
@@ -147,18 +148,18 @@ class MyUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_MyUnion, _
         myDataItem: MyUnion.FbThriftUnionFieldEnum = ...
         floatSet: MyUnion.FbThriftUnionFieldEnum = ...
 
-    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _typing.AbstractSet[float]]]
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_MyStruct, _fbthrift_MyDataItem, _typing.AbstractSet[float]]]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     @classmethod
-    def fromValue(cls, value: _typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _typing.AbstractSet[float]]) -> MyUnion: ...
-    value: _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _typing.AbstractSet[float]]]
+    def fromValue(cls, value: _typing.Union[None, _fbthrift_MyEnum, _fbthrift_MyStruct, _fbthrift_MyDataItem, _typing.AbstractSet[float]]) -> MyUnion: ...
+    value: _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_MyStruct, _fbthrift_MyDataItem, _typing.AbstractSet[float]]]
     type: _typing.Final[Type]
     def get_type(self) -> Type: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyUnion": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyUnion": ...  # type: ignore
-
+_fbthrift_MyUnion = MyUnion
 
 class _fbthrift_compatible_with_MyException:
     pass
@@ -167,8 +168,8 @@ class _fbthrift_compatible_with_MyException:
 class MyException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MyException, _fbthrift_python_abstract_types.MyException):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
-    myStruct: _typing.Final[_fbthrift_current_module.MyStruct] = ...
-    myUnion: _typing.Final[_fbthrift_current_module.MyUnion] = ...
+    myStruct: _typing.Final[_fbthrift_MyStruct] = ...
+    myUnion: _typing.Final[_fbthrift_MyUnion] = ...
     def __init__(
         self, *,
         MyIntField: _typing.Optional[int]=...,
@@ -177,12 +178,12 @@ class MyException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatib
         myUnion: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...
     ) -> None: ...
 
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyUnion]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyException": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
-
+_fbthrift_MyException = MyException
 
 class _fbthrift_compatible_with_MyExceptionWithMessage:
     pass
@@ -191,8 +192,8 @@ class _fbthrift_compatible_with_MyExceptionWithMessage:
 class MyExceptionWithMessage(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_MyExceptionWithMessage, _fbthrift_python_abstract_types.MyExceptionWithMessage):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
-    myStruct: _typing.Final[_fbthrift_current_module.MyStruct] = ...
-    myUnion: _typing.Final[_fbthrift_current_module.MyUnion] = ...
+    myStruct: _typing.Final[_fbthrift_MyStruct] = ...
+    myUnion: _typing.Final[_fbthrift_MyUnion] = ...
     def __init__(
         self, *,
         MyIntField: _typing.Optional[int]=...,
@@ -201,12 +202,12 @@ class MyExceptionWithMessage(_fbthrift_python_exceptions.GeneratedError, _fbthri
         myUnion: _typing.Optional[_fbthrift_compatible_with_MyUnion]=...
     ) -> None: ...
 
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyUnion]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...
     def _to_python(self) -> _typing.Self: ...
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
-
+_fbthrift_MyExceptionWithMessage = MyExceptionWithMessage
 
 class _fbthrift_compatible_with_ReservedKeyword:
     pass
@@ -228,7 +229,7 @@ class ReservedKeyword(_fbthrift_python_types.Struct, _fbthrift_compatible_with_R
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.ReservedKeyword": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.ReservedKeyword": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ReservedKeyword": ...  # type: ignore
-
+_fbthrift_ReservedKeyword = ReservedKeyword
 
 class _fbthrift_compatible_with_UnionToBeRenamed:
     pass
@@ -261,6 +262,7 @@ class UnionToBeRenamed(_fbthrift_python_types.Union, _fbthrift_compatible_with_U
     def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.UnionToBeRenamed": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.UnionToBeRenamed": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.UnionToBeRenamed": ...  # type: ignore
+_fbthrift_UnionToBeRenamed = UnionToBeRenamed
 
 
 FLAG: bool = ...
@@ -281,8 +283,8 @@ ASet: _typing.Set[str] = ...
 
 AMap: _typing.Dict[str, _typing.Sequence[int]] = ...
 
-MyEnumAlias = _fbthrift_current_module.MyEnum
-MyDataItemAlias = _fbthrift_current_module.MyDataItem
+MyEnumAlias = _fbthrift_MyEnum
+MyDataItemAlias = _fbthrift_MyDataItem
 
 
 class _fbthrift_FooService_simple_rpc_args(_fbthrift_python_types.Struct):
@@ -324,16 +326,16 @@ class _fbthrift_FB303Service_simple_rpc_args(_fbthrift_python_types.Struct):
 
 
 class _fbthrift_FB303Service_simple_rpc_result(_fbthrift_python_types.Struct):
-    success: _typing.Final[_fbthrift_current_module.ReservedKeyword]
+    success: _typing.Final[_fbthrift_ReservedKeyword]
 
     def __init__(
-        self, *, success: _typing.Optional[_fbthrift_current_module.ReservedKeyword] = ...
+        self, *, success: _typing.Optional[_fbthrift_ReservedKeyword] = ...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
-            _fbthrift_current_module.ReservedKeyword,
+            _fbthrift_ReservedKeyword,
         ]]]: ...
 
 

@@ -9,15 +9,15 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import empty.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+
 # This unfortunately has to be down here to prevent circular imports
 import empty.thrift_metadata
-from empty.thrift_enums import *
 
+from empty.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

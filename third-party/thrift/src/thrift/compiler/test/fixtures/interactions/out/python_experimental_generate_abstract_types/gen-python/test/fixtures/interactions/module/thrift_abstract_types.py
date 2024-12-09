@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import test.fixtures.interactions.module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 
@@ -31,7 +30,7 @@ class CustomException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_python(self) -> "test.fixtures.interactions.module.thrift_types.CustomException": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.interactions.module.types.CustomException": ...  # type: ignore
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.CustomException": ...  # type: ignore
-
+_fbthrift_CustomException = CustomException
 class ShouldBeBoxed(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -46,3 +45,4 @@ class ShouldBeBoxed(_abc.ABC):
     def _to_py3(self) -> "test.fixtures.interactions.module.types.ShouldBeBoxed": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "test.fixtures.interactions.ttypes.ShouldBeBoxed": ...  # type: ignore
+_fbthrift_ShouldBeBoxed = ShouldBeBoxed

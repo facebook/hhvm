@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 import enum as _enum
@@ -69,7 +68,7 @@ class ComplexUnion(_abc.ABC):
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_ComplexUnion = ComplexUnion
 class ListUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -99,7 +98,7 @@ class ListUnion(_abc.ABC):
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_ListUnion = ListUnion
 class DataUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -129,7 +128,7 @@ class DataUnion(_abc.ABC):
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_DataUnion = DataUnion
 class Val(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -150,14 +149,14 @@ class Val(_abc.ABC):
     def _to_py3(self) -> "module.types.Val": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Val": ...  # type: ignore
-
+_fbthrift_Val = Val
 class ValUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def v1(self) -> _fbthrift_current_module.Val: ...
+    def v1(self) -> _fbthrift_Val: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def v2(self) -> _fbthrift_current_module.Val: ...
+    def v2(self) -> _fbthrift_Val: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ValUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -175,12 +174,12 @@ class ValUnion(_abc.ABC):
     FbThriftUnionFieldEnum.__name__ = "ValUnion"
     @_fbthrift_property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.Val, _fbthrift_current_module.Val]]: ...
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_Val, _fbthrift_Val]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_ValUnion = ValUnion
 class VirtualComplexUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -210,7 +209,7 @@ class VirtualComplexUnion(_abc.ABC):
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_VirtualComplexUnion = VirtualComplexUnion
 class NonCopyableStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -225,11 +224,11 @@ class NonCopyableStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.NonCopyableStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.NonCopyableStruct": ...  # type: ignore
-
+_fbthrift_NonCopyableStruct = NonCopyableStruct
 class NonCopyableUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def s(self) -> _fbthrift_current_module.NonCopyableStruct: ...
+    def s(self) -> _fbthrift_NonCopyableStruct: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.NonCopyableUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -246,10 +245,11 @@ class NonCopyableUnion(_abc.ABC):
     FbThriftUnionFieldEnum.__name__ = "NonCopyableUnion"
     @_fbthrift_property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.NonCopyableStruct]]: ...
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_NonCopyableStruct]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
+_fbthrift_NonCopyableUnion = NonCopyableUnion
 
 containerTypedef = _typing.Mapping[int, str]

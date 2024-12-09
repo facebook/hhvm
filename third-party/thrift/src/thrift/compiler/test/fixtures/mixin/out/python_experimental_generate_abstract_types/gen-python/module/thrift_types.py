@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import module.thrift_types as _fbthrift_current_module
 from abc import ABCMeta as _fbthrift_ABCMeta
 import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -70,7 +69,7 @@ class Mixin1(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin1, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Mixin1, Mixin1)
-
+_fbthrift_Mixin1 = Mixin1
 
 class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -136,7 +135,7 @@ class Mixin2(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin2, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Mixin2, Mixin2)
-
+_fbthrift_Mixin2 = Mixin2
 
 class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -191,7 +190,7 @@ class Mixin3Base(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Mixin3Base, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Mixin3Base, Mixin3Base)
-
+_fbthrift_Mixin3Base = Mixin3Base
 
 class Foo(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -268,11 +267,12 @@ class Foo(metaclass=_fbthrift_python_types.StructMeta):
             return thrift.util.converter.to_py_struct(py_asyncio_types.Foo, self)
 
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Foo, Foo)
+_fbthrift_Foo = Foo
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-from module.thrift_enums import *
 
+from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 
@@ -301,4 +301,4 @@ _fbthrift_all_structs = [
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
-Mixin3 = _fbthrift_current_module.Mixin3Base
+Mixin3 = _fbthrift_Mixin3Base

@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 
@@ -57,3 +56,4 @@ class Limits(_abc.ABC):
     def _to_py3(self) -> "module.types.Limits": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.Limits": ...  # type: ignore
+_fbthrift_Limits = Limits

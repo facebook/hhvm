@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import test.fixtures.python_capi.serialized_dep.thrift_types as _fbthrift_current_module
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
@@ -47,7 +46,7 @@ class SerializedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedStruct": ...  # type: ignore
-
+_fbthrift_SerializedStruct = SerializedStruct
 
 class _fbthrift_compatible_with_SerializedUnion:
     pass
@@ -77,7 +76,7 @@ class SerializedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Se
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedUnion": ...  # type: ignore
-
+_fbthrift_SerializedUnion = SerializedUnion
 
 class _fbthrift_compatible_with_SerializedError:
     pass
@@ -98,7 +97,7 @@ class SerializedError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedError": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedError": ...  # type: ignore
-
+_fbthrift_SerializedError = SerializedError
 
 class _fbthrift_compatible_with_MarshalStruct:
     pass
@@ -128,7 +127,7 @@ class MarshalStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Mar
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalStruct": ...  # type: ignore
-
+_fbthrift_MarshalStruct = MarshalStruct
 
 class _fbthrift_compatible_with_MarshalUnion:
     pass
@@ -158,7 +157,7 @@ class MarshalUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Marsh
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalUnion": ...  # type: ignore
-
+_fbthrift_MarshalUnion = MarshalUnion
 
 class _fbthrift_compatible_with_MarshalError:
     pass
@@ -179,3 +178,4 @@ class MarshalError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compati
     def _to_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalError": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalError": ...  # type: ignore
+_fbthrift_MarshalError = MarshalError

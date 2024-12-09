@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import module.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -49,7 +48,7 @@ class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FooStreamEx, self)
-
+_fbthrift_FooStreamEx = FooStreamEx
 
 class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -85,7 +84,7 @@ class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx, self)
-
+_fbthrift_FooEx = FooEx
 
 class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -121,11 +120,12 @@ class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FooEx2, self)
+_fbthrift_FooEx2 = FooEx2
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-from module.thrift_enums import *
 
+from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

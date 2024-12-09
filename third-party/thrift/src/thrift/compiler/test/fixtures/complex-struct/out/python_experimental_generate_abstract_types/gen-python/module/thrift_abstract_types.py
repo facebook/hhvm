@@ -14,7 +14,6 @@ from __future__ import annotations
 import abc as _abc
 import typing as _typing
 
-import module.thrift_abstract_types as _fbthrift_current_module
 _fbthrift_property = property
 
 import enum as _enum
@@ -23,6 +22,7 @@ import enum as _enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 from module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from module.thrift_enums import MyEnum as _fbthrift_MyEnum
 
 from module.thrift_enums import *
 class MyStructFloatFieldThrowExp(_abc.ABC):
@@ -48,7 +48,7 @@ class MyStructFloatFieldThrowExp(_abc.ABC):
     def _to_py3(self) -> "module.types.MyStructFloatFieldThrowExp": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyStructFloatFieldThrowExp": ...  # type: ignore
-
+_fbthrift_MyStructFloatFieldThrowExp = MyStructFloatFieldThrowExp
 class MyStructMapFloatThrowExp(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -66,7 +66,7 @@ class MyStructMapFloatThrowExp(_abc.ABC):
     def _to_py3(self) -> "module.types.MyStructMapFloatThrowExp": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyStructMapFloatThrowExp": ...  # type: ignore
-
+_fbthrift_MyStructMapFloatThrowExp = MyStructMapFloatThrowExp
 class MyStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -76,10 +76,10 @@ class MyStruct(_abc.ABC):
     def MyStringField(self) -> str: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def MyDataField(self) -> _fbthrift_current_module.MyDataItem: ...
+    def MyDataField(self) -> _fbthrift_MyDataItem: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myEnum(self) -> _fbthrift_current_module.MyEnum: ...
+    def myEnum(self) -> _fbthrift_MyEnum: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def MyBoolField(self) -> bool: ...
@@ -124,7 +124,7 @@ class MyStruct(_abc.ABC):
     def mIntegerString(self) -> _typing.Mapping[int, str]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def mStringMyStruct(self) -> _typing.Mapping[str, _fbthrift_current_module.MyStruct]: ...
+    def mStringMyStruct(self) -> _typing.Mapping[str, _fbthrift_MyStruct]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def mStringBool(self) -> _typing.Mapping[str, bool]: ...
@@ -139,7 +139,7 @@ class MyStruct(_abc.ABC):
     def sShort(self) -> _typing.AbstractSet[int]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def sMyStruct(self) -> _typing.AbstractSet[_fbthrift_current_module.MyStruct]: ...
+    def sMyStruct(self) -> _typing.AbstractSet[_fbthrift_MyStruct]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def sLong(self) -> _typing.AbstractSet[int]: ...
@@ -153,7 +153,7 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def mListList(self) -> _typing.Mapping[_typing.Sequence[int], _typing.Sequence[int]]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyDataItem, _fbthrift_current_module.MyEnum, bool, int, int, int, float, _typing.Sequence[float], _typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[str], _typing.Sequence[bool], _typing.Sequence[int], _typing.Mapping[int, str], _typing.Mapping[int, str], _typing.Mapping[str, _fbthrift_current_module.MyStruct], _typing.Mapping[str, bool], _typing.Mapping[int, int], _typing.Mapping[int, bool], _typing.AbstractSet[int], _typing.AbstractSet[_fbthrift_current_module.MyStruct], _typing.AbstractSet[int], _typing.AbstractSet[str], _typing.AbstractSet[int], _typing.Mapping[_typing.Sequence[int], _typing.Sequence[int]]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyDataItem, _fbthrift_MyEnum, bool, int, int, int, float, _typing.Sequence[float], _typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[str], _typing.Sequence[bool], _typing.Sequence[int], _typing.Mapping[int, str], _typing.Mapping[int, str], _typing.Mapping[str, _fbthrift_MyStruct], _typing.Mapping[str, bool], _typing.Mapping[int, int], _typing.Mapping[int, bool], _typing.AbstractSet[int], _typing.AbstractSet[_fbthrift_MyStruct], _typing.AbstractSet[int], _typing.AbstractSet[str], _typing.AbstractSet[int], _typing.Mapping[_typing.Sequence[int], _typing.Sequence[int]]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -162,7 +162,7 @@ class MyStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
-
+_fbthrift_MyStruct = MyStruct
 class SimpleStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -180,7 +180,7 @@ class SimpleStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.SimpleStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.SimpleStruct": ...  # type: ignore
-
+_fbthrift_SimpleStruct = SimpleStruct
 class defaultStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -220,25 +220,25 @@ class defaultStruct(_abc.ABC):
     def field3(self) -> _typing.Mapping[int, str]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myList(self) -> _typing.Sequence[_fbthrift_current_module.MyEnum]: ...
+    def myList(self) -> _typing.Sequence[_fbthrift_MyEnum]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def mySet(self) -> _typing.AbstractSet[str]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def simpleStruct(self) -> _fbthrift_current_module.SimpleStruct: ...
+    def simpleStruct(self) -> _fbthrift_SimpleStruct: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def listStructDFset(self) -> _typing.Sequence[_fbthrift_current_module.SimpleStruct]: ...
+    def listStructDFset(self) -> _typing.Sequence[_fbthrift_SimpleStruct]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myUnion(self) -> _fbthrift_current_module.MyUnion: ...
+    def myUnion(self) -> _fbthrift_MyUnion: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def listUnionDFset(self) -> _typing.Sequence[_fbthrift_current_module.MyUnion]: ...
+    def listUnionDFset(self) -> _typing.Sequence[_fbthrift_MyUnion]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def mapNestlistStructDfSet(self) -> _typing.Mapping[int, _typing.Sequence[_fbthrift_current_module.SimpleStruct]]: ...
+    def mapNestlistStructDfSet(self) -> _typing.Mapping[int, _typing.Sequence[_fbthrift_SimpleStruct]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def mapJavaTypeDFset(self) -> _typing.Mapping[int, str]: ...
@@ -247,9 +247,9 @@ class defaultStruct(_abc.ABC):
     def emptyMap(self) -> _typing.Mapping[int, int]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def enumMapDFset(self) -> _typing.Mapping[str, _typing.Mapping[int, _fbthrift_current_module.MyEnum]]: ...
+    def enumMapDFset(self) -> _typing.Mapping[str, _typing.Mapping[int, _fbthrift_MyEnum]]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int, int, bytes, bytes, int, int, float, float, float, _typing.Mapping[int, str], _typing.Sequence[_fbthrift_current_module.MyEnum], _typing.AbstractSet[str], _fbthrift_current_module.SimpleStruct, _typing.Sequence[_fbthrift_current_module.SimpleStruct], _fbthrift_current_module.MyUnion, _typing.Sequence[_fbthrift_current_module.MyUnion], _typing.Mapping[int, _typing.Sequence[_fbthrift_current_module.SimpleStruct]], _typing.Mapping[int, str], _typing.Mapping[int, int], _typing.Mapping[str, _typing.Mapping[int, _fbthrift_current_module.MyEnum]]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int, int, bytes, bytes, int, int, float, float, float, _typing.Mapping[int, str], _typing.Sequence[_fbthrift_MyEnum], _typing.AbstractSet[str], _fbthrift_SimpleStruct, _typing.Sequence[_fbthrift_SimpleStruct], _fbthrift_MyUnion, _typing.Sequence[_fbthrift_MyUnion], _typing.Mapping[int, _typing.Sequence[_fbthrift_SimpleStruct]], _typing.Mapping[int, str], _typing.Mapping[int, int], _typing.Mapping[str, _typing.Mapping[int, _fbthrift_MyEnum]]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.defaultStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -258,7 +258,7 @@ class defaultStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.defaultStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.defaultStruct": ...  # type: ignore
-
+_fbthrift_defaultStruct = defaultStruct
 class MyStructTypeDef(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -297,7 +297,7 @@ class MyStructTypeDef(_abc.ABC):
     def _to_py3(self) -> "module.types.MyStructTypeDef": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyStructTypeDef": ...  # type: ignore
-
+_fbthrift_MyStructTypeDef = MyStructTypeDef
 class MyDataItem(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
@@ -309,20 +309,20 @@ class MyDataItem(_abc.ABC):
     def _to_py3(self) -> "module.types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
-
+_fbthrift_MyDataItem = MyDataItem
 class MyUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def myEnum(self) -> _fbthrift_current_module.MyEnum: ...
+    def myEnum(self) -> _fbthrift_MyEnum: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myStruct(self) -> _fbthrift_current_module.MyStruct: ...
+    def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myDataItem(self) -> _fbthrift_current_module.MyDataItem: ...
+    def myDataItem(self) -> _fbthrift_MyDataItem: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def complexNestedStruct(self) -> _fbthrift_current_module.ComplexNestedStruct: ...
+    def complexNestedStruct(self) -> _fbthrift_ComplexNestedStruct: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def longValue(self) -> int: ...
@@ -350,25 +350,25 @@ class MyUnion(_abc.ABC):
     FbThriftUnionFieldEnum.__name__ = "MyUnion"
     @_fbthrift_property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyStruct, _fbthrift_current_module.MyDataItem, _fbthrift_current_module.ComplexNestedStruct, int, int]]: ...
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_MyStruct, _fbthrift_MyDataItem, _fbthrift_ComplexNestedStruct, int, int]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_MyUnion = MyUnion
 class MyUnionFloatFieldThrowExp(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
-    def myEnum(self) -> _fbthrift_current_module.MyEnum: ...
+    def myEnum(self) -> _fbthrift_MyEnum: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def setFloat(self) -> _typing.Sequence[_typing.Sequence[float]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def myDataItem(self) -> _fbthrift_current_module.MyDataItem: ...
+    def myDataItem(self) -> _fbthrift_MyDataItem: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def complexNestedStruct(self) -> _fbthrift_current_module.ComplexNestedStruct: ...
+    def complexNestedStruct(self) -> _fbthrift_ComplexNestedStruct: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.MyUnionFloatFieldThrowExp": ...  # type: ignore
     @_abc.abstractmethod
@@ -388,22 +388,22 @@ class MyUnionFloatFieldThrowExp(_abc.ABC):
     FbThriftUnionFieldEnum.__name__ = "MyUnionFloatFieldThrowExp"
     @_fbthrift_property
     @_abc.abstractmethod
-    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _typing.Sequence[_typing.Sequence[float]], _fbthrift_current_module.MyDataItem, _fbthrift_current_module.ComplexNestedStruct]]: ...
+    def fbthrift_current_value(self) -> _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _typing.Sequence[_typing.Sequence[float]], _fbthrift_MyDataItem, _fbthrift_ComplexNestedStruct]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def fbthrift_current_field(self) -> _typing.Final[FbThriftUnionFieldEnum]: ...
 
-
+_fbthrift_MyUnionFloatFieldThrowExp = MyUnionFloatFieldThrowExp
 class ComplexNestedStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def setOfSetOfInt(self) -> _typing.AbstractSet[_typing.AbstractSet[int]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def listofListOfListOfListOfEnum(self) -> _typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_current_module.MyEnum]]]]: ...
+    def listofListOfListOfListOfEnum(self) -> _typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_MyEnum]]]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def listOfListOfMyStruct(self) -> _typing.Sequence[_typing.Sequence[_fbthrift_current_module.MyStruct]]: ...
+    def listOfListOfMyStruct(self) -> _typing.Sequence[_typing.Sequence[_fbthrift_MyStruct]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def setOfListOfListOfLong(self) -> _typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]]: ...
@@ -412,16 +412,16 @@ class ComplexNestedStruct(_abc.ABC):
     def setOfSetOfsetOfLong(self) -> _typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def mapStructListOfListOfLong(self) -> _typing.Mapping[int, _typing.Sequence[_typing.Sequence[_fbthrift_current_module.MyStruct]]]: ...
+    def mapStructListOfListOfLong(self) -> _typing.Mapping[int, _typing.Sequence[_typing.Sequence[_fbthrift_MyStruct]]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def mKeyStructValInt(self) -> _typing.Mapping[_fbthrift_current_module.MyStruct, int]: ...
+    def mKeyStructValInt(self) -> _typing.Mapping[_fbthrift_MyStruct, int]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def listOfMapKeyIntValInt(self) -> _typing.Sequence[_typing.Mapping[int, int]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def listOfMapKeyStrValList(self) -> _typing.Sequence[_typing.Mapping[str, _typing.Sequence[_fbthrift_current_module.MyStruct]]]: ...
+    def listOfMapKeyStrValList(self) -> _typing.Sequence[_typing.Mapping[str, _typing.Sequence[_fbthrift_MyStruct]]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def mapKeySetValLong(self) -> _typing.Mapping[_typing.AbstractSet[int], int]: ...
@@ -439,18 +439,18 @@ class ComplexNestedStruct(_abc.ABC):
     def NestedMaps(self) -> _typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def mapKeyIntValList(self) -> _typing.Mapping[int, _typing.Sequence[_fbthrift_current_module.MyStruct]]: ...
+    def mapKeyIntValList(self) -> _typing.Mapping[int, _typing.Sequence[_fbthrift_MyStruct]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def mapKeyIntValSet(self) -> _typing.Mapping[int, _typing.AbstractSet[bool]]: ...
     @_fbthrift_property
     @_abc.abstractmethod
-    def mapKeySetValInt(self) -> _typing.Mapping[_typing.AbstractSet[bool], _fbthrift_current_module.MyEnum]: ...
+    def mapKeySetValInt(self) -> _typing.Mapping[_typing.AbstractSet[bool], _fbthrift_MyEnum]: ...
     @_fbthrift_property
     @_abc.abstractmethod
     def mapKeyListValSet(self) -> _typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.AbstractSet[_typing.AbstractSet[int]], _typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_current_module.MyEnum]]]], _typing.Sequence[_typing.Sequence[_fbthrift_current_module.MyStruct]], _typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]], _typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]], _typing.Mapping[int, _typing.Sequence[_typing.Sequence[_fbthrift_current_module.MyStruct]]], _typing.Mapping[_fbthrift_current_module.MyStruct, int], _typing.Sequence[_typing.Mapping[int, int]], _typing.Sequence[_typing.Mapping[str, _typing.Sequence[_fbthrift_current_module.MyStruct]]], _typing.Mapping[_typing.AbstractSet[int], int], _typing.Mapping[_typing.Sequence[str], int], _typing.Mapping[_typing.Mapping[int, str], _typing.Mapping[int, str]], _typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]], _typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]], _typing.Mapping[int, _typing.Sequence[_fbthrift_current_module.MyStruct]], _typing.Mapping[int, _typing.AbstractSet[bool]], _typing.Mapping[_typing.AbstractSet[bool], _fbthrift_current_module.MyEnum], _typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.AbstractSet[_typing.AbstractSet[int]], _typing.Sequence[_typing.Sequence[_typing.Sequence[_typing.Sequence[_fbthrift_MyEnum]]]], _typing.Sequence[_typing.Sequence[_fbthrift_MyStruct]], _typing.AbstractSet[_typing.Sequence[_typing.Sequence[int]]], _typing.AbstractSet[_typing.AbstractSet[_typing.AbstractSet[int]]], _typing.Mapping[int, _typing.Sequence[_typing.Sequence[_fbthrift_MyStruct]]], _typing.Mapping[_fbthrift_MyStruct, int], _typing.Sequence[_typing.Mapping[int, int]], _typing.Sequence[_typing.Mapping[str, _typing.Sequence[_fbthrift_MyStruct]]], _typing.Mapping[_typing.AbstractSet[int], int], _typing.Mapping[_typing.Sequence[str], int], _typing.Mapping[_typing.Mapping[int, str], _typing.Mapping[int, str]], _typing.Mapping[_typing.AbstractSet[_typing.Sequence[int]], _typing.Mapping[_typing.Sequence[_typing.AbstractSet[str]], str]], _typing.Mapping[_typing.Mapping[_typing.Mapping[int, str], str], _typing.Mapping[int, str]], _typing.Mapping[int, _typing.Sequence[_fbthrift_MyStruct]], _typing.Mapping[int, _typing.AbstractSet[bool]], _typing.Mapping[_typing.AbstractSet[bool], _fbthrift_MyEnum], _typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexNestedStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -459,7 +459,7 @@ class ComplexNestedStruct(_abc.ABC):
     def _to_py3(self) -> "module.types.ComplexNestedStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.ComplexNestedStruct": ...  # type: ignore
-
+_fbthrift_ComplexNestedStruct = ComplexNestedStruct
 class TypeRemapped(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
@@ -483,14 +483,14 @@ class TypeRemapped(_abc.ABC):
     def _to_py3(self) -> "module.types.TypeRemapped": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py_deprecated(self) -> "module.ttypes.TypeRemapped": ...  # type: ignore
-
+_fbthrift_TypeRemapped = TypeRemapped
 class emptyXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.emptyXcep": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.emptyXcep": ...  # type: ignore
     def _to_py3(self) -> "module.types.emptyXcep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.emptyXcep": ...  # type: ignore
-
+_fbthrift_emptyXcep = emptyXcep
 class reqXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def message(self) -> str: ...
@@ -501,7 +501,7 @@ class reqXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_python(self) -> "module.thrift_types.reqXcep": ...  # type: ignore
     def _to_py3(self) -> "module.types.reqXcep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.reqXcep": ...  # type: ignore
-
+_fbthrift_reqXcep = reqXcep
 class optXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def message(self) -> _typing.Optional[str]: ...
@@ -512,25 +512,26 @@ class optXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_python(self) -> "module.thrift_types.optXcep": ...  # type: ignore
     def _to_py3(self) -> "module.types.optXcep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.optXcep": ...  # type: ignore
-
+_fbthrift_optXcep = optXcep
 class complexException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def message(self) -> str: ...
     @_fbthrift_property
     def listStrings(self) -> _typing.Sequence[str]: ...
     @_fbthrift_property
-    def errorEnum(self) -> _fbthrift_current_module.MyEnum: ...
+    def errorEnum(self) -> _fbthrift_MyEnum: ...
     @_fbthrift_property
-    def unionError(self) -> _typing.Optional[_fbthrift_current_module.MyUnion]: ...
+    def unionError(self) -> _typing.Optional[_fbthrift_MyUnion]: ...
     @_fbthrift_property
-    def structError(self) -> _fbthrift_current_module.MyStruct: ...
+    def structError(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     def lsMap(self) -> _typing.Mapping[int, str]: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _typing.Sequence[str], _fbthrift_current_module.MyEnum, _fbthrift_current_module.MyUnion, _fbthrift_current_module.MyStruct, _typing.Mapping[int, str]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _typing.Sequence[str], _fbthrift_MyEnum, _fbthrift_MyUnion, _fbthrift_MyStruct, _typing.Mapping[int, str]]]]: ...
     def _to_mutable_python(self) -> "module.thrift_mutable_types.complexException": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.complexException": ...  # type: ignore
     def _to_py3(self) -> "module.types.complexException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.complexException": ...  # type: ignore
+_fbthrift_complexException = complexException
 
 stringTypedef = str
 longTypeDef = int

@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import module.thrift_mutable_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -60,7 +59,7 @@ class Fields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.Fields": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Fields": ...  # type: ignore
-
+_fbthrift_Fields = Fields
 
 class _fbthrift_compatible_with_FieldsInjectedToEmptyStruct:
     pass
@@ -87,7 +86,7 @@ class FieldsInjectedToEmptyStruct(_fbthrift_python_mutable_types.MutableStruct, 
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.FieldsInjectedToEmptyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToEmptyStruct": ...  # type: ignore
-
+_fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
 class _fbthrift_compatible_with_FieldsInjectedToStruct:
     pass
@@ -122,7 +121,7 @@ class FieldsInjectedToStruct(_fbthrift_python_mutable_types.MutableStruct, _fbth
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.FieldsInjectedToStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedToStruct": ...  # type: ignore
-
+_fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
 class _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct:
     pass
@@ -173,3 +172,4 @@ class FieldsInjectedWithIncludedStruct(_fbthrift_python_mutable_types.MutableStr
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.FieldsInjectedWithIncludedStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.FieldsInjectedWithIncludedStruct": ...  # type: ignore
+_fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct

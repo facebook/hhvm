@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import test.fixtures.python_capi.module.thrift_mutable_types as _fbthrift_current_module
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
@@ -40,7 +39,9 @@ import test.fixtures.python_capi.serialized_dep.thrift_mutable_types as _fbthrif
 
 import test.fixtures.python_capi.thrift_dep.thrift_mutable_types as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types
 from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_MyEnum
+from test.fixtures.python_capi.module.thrift_enums import MyEnum as _fbthrift_MyEnum
 from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_AnnoyingEnum
+from test.fixtures.python_capi.module.thrift_enums import AnnoyingEnum as _fbthrift_AnnoyingEnum
 
 from test.fixtures.python_capi.module.thrift_enums import *
 
@@ -64,15 +65,15 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
 
 
     @property
-    def myItemy(self) -> _fbthrift_current_module.MyDataItem: ...
+    def myItemy(self) -> _fbthrift_MyDataItem: ...
     @myItemy.setter
-    def myItemy(self, value: _fbthrift_current_module.MyDataItem) -> None: ...
+    def myItemy(self, value: _fbthrift_MyDataItem) -> None: ...
 
 
     @property
-    def myEnumy(self) -> _fbthrift_current_module.MyEnum: ...
+    def myEnumy(self) -> _fbthrift_MyEnum: ...
     @myEnumy.setter
-    def myEnumy(self, value: _fbthrift_current_module.MyEnum) -> None: ...
+    def myEnumy(self, value: _fbthrift_MyEnum) -> None: ...
 
 
     @property
@@ -121,12 +122,12 @@ class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatibl
         strMappy: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         intSetty: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_current_module.MyDataItem, _fbthrift_current_module.MyEnum, bool, _fbthrift_python_mutable_containers.MutableList[float], _fbthrift_python_mutable_containers.MutableMap[bytes, str], _fbthrift_python_mutable_containers.MutableSet[int]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyDataItem, _fbthrift_MyEnum, bool, _fbthrift_python_mutable_containers.MutableList[float], _fbthrift_python_mutable_containers.MutableMap[bytes, str], _fbthrift_python_mutable_containers.MutableSet[int]]]]: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.MyStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.MyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
-
+_fbthrift_MyStruct = MyStruct
 
 class _fbthrift_compatible_with_MyDataItem:
     pass
@@ -153,7 +154,7 @@ class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.MyDataItem": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
-
+_fbthrift_MyDataItem = MyDataItem
 
 class _fbthrift_compatible_with_TransitiveDoubler:
     pass
@@ -172,7 +173,7 @@ class TransitiveDoubler(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.TransitiveDoubler": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.TransitiveDoubler": ...  # type: ignore
-
+_fbthrift_TransitiveDoubler = TransitiveDoubler
 
 class _fbthrift_compatible_with_DoubledPair:
     pass
@@ -207,7 +208,7 @@ class DoubledPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compat
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.DoubledPair": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.DoubledPair": ...  # type: ignore
-
+_fbthrift_DoubledPair = DoubledPair
 
 class _fbthrift_compatible_with_StringPair:
     pass
@@ -242,7 +243,7 @@ class StringPair(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.StringPair": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.StringPair": ...  # type: ignore
-
+_fbthrift_StringPair = StringPair
 
 class _fbthrift_compatible_with_EmptyStruct:
     pass
@@ -261,7 +262,7 @@ class EmptyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compat
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.EmptyStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.EmptyStruct": ...  # type: ignore
-
+_fbthrift_EmptyStruct = EmptyStruct
 
 class _fbthrift_compatible_with_PrimitiveStruct:
     pass
@@ -336,15 +337,15 @@ class PrimitiveStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
 
 
     @property
-    def patched_struct(self) -> _fbthrift_current_module.MyStruct: ...
+    def patched_struct(self) -> _fbthrift_MyStruct: ...
     @patched_struct.setter
-    def patched_struct(self, value: _fbthrift_current_module.MyStruct) -> None: ...
+    def patched_struct(self, value: _fbthrift_MyStruct) -> None: ...
 
 
     @property
-    def empty_struct(self) -> _fbthrift_current_module.EmptyStruct: ...
+    def empty_struct(self) -> _fbthrift_EmptyStruct: ...
     @empty_struct.setter
-    def empty_struct(self, value: _fbthrift_current_module.EmptyStruct) -> None: ...
+    def empty_struct(self, value: _fbthrift_EmptyStruct) -> None: ...
 
 
     @property
@@ -403,12 +404,12 @@ class PrimitiveStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_co
         managed_string_view: _typing.Optional[str]=...,
         some_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types._fbthrift_compatible_with_SomeError]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, str, bytes, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, _fbthrift_current_module.MyStruct, _fbthrift_current_module.EmptyStruct, bytes, str, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.SomeError]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, str, bytes, _fbthrift_iobuf.IOBuf, _fbthrift_iobuf.IOBuf, _fbthrift_MyStruct, _fbthrift_EmptyStruct, bytes, str, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.SomeError]]]: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.PrimitiveStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.PrimitiveStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.PrimitiveStruct": ...  # type: ignore
-
+_fbthrift_PrimitiveStruct = PrimitiveStruct
 
 class _fbthrift_compatible_with_AdaptedFields:
     pass
@@ -459,7 +460,7 @@ class AdaptedFields(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.AdaptedFields": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.AdaptedFields": ...  # type: ignore
-
+_fbthrift_AdaptedFields = AdaptedFields
 
 class _fbthrift_compatible_with_ListStruct:
     pass
@@ -550,7 +551,7 @@ class ListStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compati
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.ListStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ListStruct": ...  # type: ignore
-
+_fbthrift_ListStruct = ListStruct
 
 class _fbthrift_compatible_with_SetStruct:
     pass
@@ -559,9 +560,9 @@ class _fbthrift_compatible_with_SetStruct:
 class SetStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SetStruct, _fbthrift_python_abstract_types.SetStruct):
 
     @property
-    def enumz(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_current_module.MyEnum]: ...
+    def enumz(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyEnum]: ...
     @enumz.setter
-    def enumz(self, value: _fbthrift_python_mutable_containers.MutableSet[_fbthrift_current_module.MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
+    def enumz(self, value: _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
 
 
     @property
@@ -620,12 +621,12 @@ class SetStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
         charz: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[int] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
         setz: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[int]] | _fbthrift_python_mutable_types._ThriftListWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_current_module.MyEnum], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableSet[bytes], _fbthrift_python_mutable_containers.MutableSet[bytes], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[int]]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyEnum], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableSet[bytes], _fbthrift_python_mutable_containers.MutableSet[bytes], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableSet[int]]]]]: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.SetStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.SetStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.SetStruct": ...  # type: ignore
-
+_fbthrift_SetStruct = SetStruct
 
 class _fbthrift_compatible_with_MapStruct:
     pass
@@ -634,9 +635,9 @@ class _fbthrift_compatible_with_MapStruct:
 class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MapStruct, _fbthrift_python_abstract_types.MapStruct):
 
     @property
-    def enumz(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_current_module.MyEnum, str]: ...
+    def enumz(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str]: ...
     @enumz.setter
-    def enumz(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_current_module.MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+    def enumz(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
 
 
     @property
@@ -646,9 +647,9 @@ class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
 
 
     @property
-    def binnaz(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_current_module.PrimitiveStruct]]: ...
+    def binnaz(self) -> _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_PrimitiveStruct]]: ...
     @binnaz.setter
-    def binnaz(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_current_module.PrimitiveStruct]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+    def binnaz(self, value: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_PrimitiveStruct]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
 
 
     @property
@@ -694,7 +695,7 @@ class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
 
     def __init__(
         self, *,
-        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_current_module.MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         intz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_compatible_with_PrimitiveStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         encoded: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[str, float] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
@@ -708,7 +709,7 @@ class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
 
     def __call__(
         self, *,
-        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_current_module.MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        enumz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         intz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, str] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         binnaz: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_compatible_with_PrimitiveStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         encoded: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[str, float] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
@@ -719,12 +720,12 @@ class MapStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatib
         buf_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_iobuf.IOBuf] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
         unsigned_list_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_current_module.MyEnum, str], _fbthrift_python_mutable_containers.MutableMap[int, str], _fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_current_module.PrimitiveStruct], _fbthrift_python_mutable_containers.MutableMap[str, float], _fbthrift_python_mutable_containers.MutableMap[int, float], _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[int, int]], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[float]], _fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_iobuf.IOBuf], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]]]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, str], _fbthrift_python_mutable_containers.MutableMap[int, str], _fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_PrimitiveStruct], _fbthrift_python_mutable_containers.MutableMap[str, float], _fbthrift_python_mutable_containers.MutableMap[int, float], _fbthrift_python_mutable_containers.MutableList[_fbthrift_python_mutable_containers.MutableMap[int, int]], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[float]], _fbthrift_python_mutable_containers.MutableMap[bytes, _fbthrift_iobuf.IOBuf], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]]]]]: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.MapStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.MapStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MapStruct": ...  # type: ignore
-
+_fbthrift_MapStruct = MapStruct
 
 class _fbthrift_compatible_with_ComposeStruct:
     pass
@@ -733,27 +734,27 @@ class _fbthrift_compatible_with_ComposeStruct:
 class ComposeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ComposeStruct, _fbthrift_python_abstract_types.ComposeStruct):
 
     @property
-    def enum_(self) -> _fbthrift_current_module.MyEnum: ...
+    def enum_(self) -> _fbthrift_MyEnum: ...
     @enum_.setter
-    def enum_(self, value: _fbthrift_current_module.MyEnum) -> None: ...
+    def enum_(self, value: _fbthrift_MyEnum) -> None: ...
 
 
     @property
-    def renamed_(self) -> _fbthrift_current_module.AnnoyingEnum: ...
+    def renamed_(self) -> _fbthrift_AnnoyingEnum: ...
     @renamed_.setter
-    def renamed_(self, value: _fbthrift_current_module.AnnoyingEnum) -> None: ...
+    def renamed_(self, value: _fbthrift_AnnoyingEnum) -> None: ...
 
 
     @property
-    def primitive(self) -> _fbthrift_current_module.PrimitiveStruct: ...
+    def primitive(self) -> _fbthrift_PrimitiveStruct: ...
     @primitive.setter
-    def primitive(self, value: _fbthrift_current_module.PrimitiveStruct) -> None: ...
+    def primitive(self, value: _fbthrift_PrimitiveStruct) -> None: ...
 
 
     @property
-    def aliased(self) -> _fbthrift_current_module.ListStruct: ...
+    def aliased(self) -> _fbthrift_ListStruct: ...
     @aliased.setter
-    def aliased(self, value: _fbthrift_current_module.ListStruct) -> None: ...
+    def aliased(self, value: _fbthrift_ListStruct) -> None: ...
 
 
     @property
@@ -818,12 +819,12 @@ class ComposeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_comp
         serial_union: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedUnion]=...,
         serial_error: _typing.Optional[_fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types._fbthrift_compatible_with_SerializedError]=...
     ) -> _typing.Self: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_current_module.MyEnum, _fbthrift_current_module.AnnoyingEnum, _fbthrift_current_module.PrimitiveStruct, _fbthrift_current_module.ListStruct, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepEnum, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct, _fbthrift_python_mutable_containers.MutableList[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct], _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedStruct, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedUnion, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedError]]]: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_MyEnum, _fbthrift_AnnoyingEnum, _fbthrift_PrimitiveStruct, _fbthrift_ListStruct, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepEnum, _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct, _fbthrift_python_mutable_containers.MutableList[_fbthrift__test__fixtures__python_capi__thrift_dep__thrift_mutable_types.DepStruct], _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedStruct, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedUnion, _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_mutable_types.SerializedError]]]: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.ComposeStruct": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.ComposeStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ComposeStruct": ...  # type: ignore
-
+_fbthrift_ComposeStruct = ComposeStruct
 
 class _fbthrift_compatible_with_Onion:
     pass
@@ -832,15 +833,15 @@ class _fbthrift_compatible_with_Onion:
 class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_Onion, _fbthrift_python_abstract_types.Onion):
 
     @property
-    def myEnum(self) -> _fbthrift_current_module.MyEnum: ...
+    def myEnum(self) -> _fbthrift_MyEnum: ...
     @myEnum.setter
-    def myEnum(self, value: _fbthrift_current_module.MyEnum) -> None: ...
+    def myEnum(self, value: _fbthrift_MyEnum) -> None: ...
 
 
     @property
-    def myStruct(self) -> _fbthrift_current_module.PrimitiveStruct: ...
+    def myStruct(self) -> _fbthrift_PrimitiveStruct: ...
     @myStruct.setter
-    def myStruct(self, value: _fbthrift_current_module.PrimitiveStruct) -> None: ...
+    def myStruct(self, value: _fbthrift_PrimitiveStruct) -> None: ...
 
 
     @property
@@ -895,17 +896,18 @@ class Onion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_wi
         strMap: Onion.FbThriftUnionFieldEnum = ...
         adapted_int: Onion.FbThriftUnionFieldEnum = ...
 
-    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_current_module.MyEnum, _fbthrift_current_module.PrimitiveStruct, str, _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableList[float], _fbthrift_python_mutable_containers.MutableMap[bytes, str], int]]
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_MyEnum, _fbthrift_PrimitiveStruct, str, _fbthrift_python_mutable_containers.MutableSet[int], _fbthrift_python_mutable_containers.MutableList[float], _fbthrift_python_mutable_containers.MutableMap[bytes, str], int]]
     fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     def get_type(self) -> FbThriftUnionFieldEnum: ...
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.Onion": ...  # type: ignore
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.Onion": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Onion": ...  # type: ignore
+_fbthrift_Onion = Onion
 
 uint64 = int
 ui64 = int
 signed_byte = int
 IOBuf = _fbthrift_iobuf.IOBuf
 IOBufPtr = _fbthrift_iobuf.IOBuf
-ListAlias = _fbthrift_current_module.ListStruct
+ListAlias = _fbthrift_ListStruct

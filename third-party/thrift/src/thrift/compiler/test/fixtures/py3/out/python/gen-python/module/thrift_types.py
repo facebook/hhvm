@@ -11,7 +11,6 @@ import __static__
 
 import folly.iobuf as _fbthrift_iobuf
 
-import module.thrift_types as _fbthrift_current_module
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -65,7 +64,7 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SimpleException, self)
-
+_fbthrift_SimpleException = SimpleException
 
 class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -115,7 +114,7 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.OptionalRefStruct, self)
-
+_fbthrift_OptionalRefStruct = OptionalRefStruct
 
 class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -253,7 +252,7 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SimpleStruct, self)
-
+_fbthrift_SimpleStruct = SimpleStruct
 
 class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -325,7 +324,7 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.HiddenTypeFieldsStruct, self)
-
+_fbthrift_HiddenTypeFieldsStruct = HiddenTypeFieldsStruct
 
 class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
@@ -375,7 +374,7 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedUnion, self)
-
+_fbthrift_AdaptedUnion = AdaptedUnion
 
 class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -425,7 +424,7 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.HiddenException, self)
-
+_fbthrift_HiddenException = HiddenException
 
 class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -563,7 +562,7 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexStruct, self)
-
+_fbthrift_ComplexStruct = ComplexStruct
 
 class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
     _fbthrift_SPEC = (
@@ -613,7 +612,7 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.BinaryUnion, self)
-
+_fbthrift_BinaryUnion = BinaryUnion
 
 class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -663,7 +662,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.BinaryUnionStruct, self)
-
+_fbthrift_BinaryUnionStruct = BinaryUnionStruct
 
 class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -801,7 +800,7 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomFields, self)
-
+_fbthrift_CustomFields = CustomFields
 
 class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -939,7 +938,7 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomTypedefFields, self)
-
+_fbthrift_CustomTypedefFields = CustomTypedefFields
 
 class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1077,11 +1076,18 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedTypedefFields, self)
+_fbthrift_AdaptedTypedefFields = AdaptedTypedefFields
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-from module.thrift_enums import *
+from module.thrift_enums import _fbthrift_compatible_with_AnEnum
+from module.thrift_enums import AnEnum as _fbthrift_AnEnum
+from module.thrift_enums import _fbthrift_compatible_with_AnEnumRenamed
+from module.thrift_enums import AnEnumRenamed as _fbthrift_AnEnumRenamed
+from module.thrift_enums import _fbthrift_compatible_with_Flags
+from module.thrift_enums import Flags as _fbthrift_Flags
 
+from module.thrift_enums import *
 _fbthrift_all_enums = [
     AnEnum,
     AnEnumRenamed,
@@ -1188,9 +1194,9 @@ ANOTHER_CONST_MAP = _fbthrift_python_types.Map(_fbthrift_python_types.EnumTypeIn
 
 IOBufPtr = _fbthrift_iobuf.IOBuf
 IOBuf = _fbthrift_iobuf.IOBuf
-AdaptedTypeDef = _fbthrift_current_module.SimpleStruct
-HiddenTypeDef = _fbthrift_current_module.SimpleStruct
-ImplicitlyHiddenTypeDef = _fbthrift_current_module.AdaptedUnion
+AdaptedTypeDef = _fbthrift_SimpleStruct
+HiddenTypeDef = _fbthrift_SimpleStruct
+ImplicitlyHiddenTypeDef = _fbthrift_AdaptedUnion
 foo_bar = bytes
 CustomBool = bool
 CustomInteger = int
@@ -1200,7 +1206,7 @@ CustomBinary = bytes
 CustomList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 CustomMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
-CustomStruct = _fbthrift_current_module.SimpleStruct
+CustomStruct = _fbthrift_SimpleStruct
 AdaptedBool = bool
 AdaptedInteger = int
 AdaptedDouble = float
@@ -1209,7 +1215,7 @@ AdaptedBinary = bytes
 AdaptedList = _fbthrift_python_types.ListTypeFactory(_fbthrift_python_types.typeinfo_i32)
 AdaptedSet = _fbthrift_python_types.SetTypeFactory(_fbthrift_python_types.typeinfo_i32)
 AdaptedMap = _fbthrift_python_types.MapTypeFactory(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)
-AdaptedStruct = _fbthrift_current_module.SimpleStruct
+AdaptedStruct = _fbthrift_SimpleStruct
 
 
 

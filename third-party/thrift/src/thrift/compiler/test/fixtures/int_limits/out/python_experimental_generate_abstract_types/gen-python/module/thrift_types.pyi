@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import module.thrift_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
@@ -59,6 +58,7 @@ class Limits(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Limits, _f
     def _to_mutable_python(self) -> "module.thrift_mutable_types.Limits": ...  # type: ignore
     def _to_py3(self) -> "module.types.Limits": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Limits": ...  # type: ignore
+_fbthrift_Limits = Limits
 
 
 max_i64_const: int = ...

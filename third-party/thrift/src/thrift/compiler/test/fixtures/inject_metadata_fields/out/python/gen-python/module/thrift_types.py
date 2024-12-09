@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import module.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -63,7 +62,7 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)
-
+_fbthrift_Fields = Fields
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -110,7 +109,7 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
-
+_fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -168,7 +167,7 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
-
+_fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -248,11 +247,12 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)
+_fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-from module.thrift_enums import *
 
+from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

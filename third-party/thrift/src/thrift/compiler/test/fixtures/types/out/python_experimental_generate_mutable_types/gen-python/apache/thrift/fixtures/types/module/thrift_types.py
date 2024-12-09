@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
-import apache.thrift.fixtures.types.module.thrift_types as _fbthrift_current_module
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -58,7 +57,7 @@ class empty_struct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.empty_struct, self)
-
+_fbthrift_empty_struct = empty_struct
 
 class decorated_struct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -111,7 +110,7 @@ class decorated_struct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.decorated_struct, self)
-
+_fbthrift_decorated_struct = decorated_struct
 
 class ContainerStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -241,7 +240,7 @@ class ContainerStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ContainerStruct, self)
-
+_fbthrift_ContainerStruct = ContainerStruct
 
 class CppTypeStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -294,7 +293,7 @@ class CppTypeStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CppTypeStruct, self)
-
+_fbthrift_CppTypeStruct = CppTypeStruct
 
 class VirtualStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -347,7 +346,7 @@ class VirtualStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.VirtualStruct, self)
-
+_fbthrift_VirtualStruct = VirtualStruct
 
 class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -411,7 +410,7 @@ class MyStructWithForwardRefEnum(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructWithForwardRefEnum, self)
-
+_fbthrift_MyStructWithForwardRefEnum = MyStructWithForwardRefEnum
 
 class TrivialNumeric(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -475,7 +474,7 @@ class TrivialNumeric(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TrivialNumeric, self)
-
+_fbthrift_TrivialNumeric = TrivialNumeric
 
 class TrivialNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -539,7 +538,7 @@ class TrivialNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TrivialNestedWithDefault, self)
-
+_fbthrift_TrivialNestedWithDefault = TrivialNestedWithDefault
 
 class ComplexString(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -603,7 +602,7 @@ class ComplexString(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexString, self)
-
+_fbthrift_ComplexString = ComplexString
 
 class ComplexNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -667,7 +666,7 @@ class ComplexNestedWithDefault(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexNestedWithDefault, self)
-
+_fbthrift_ComplexNestedWithDefault = ComplexNestedWithDefault
 
 class MinPadding(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -764,7 +763,7 @@ class MinPadding(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MinPadding, self)
-
+_fbthrift_MinPadding = MinPadding
 
 class MinPaddingWithCustomType(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -861,7 +860,7 @@ class MinPaddingWithCustomType(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MinPaddingWithCustomType, self)
-
+_fbthrift_MinPaddingWithCustomType = MinPaddingWithCustomType
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -947,7 +946,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
-
+_fbthrift_MyStruct = MyStruct
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -989,7 +988,7 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
-
+_fbthrift_MyDataItem = MyDataItem
 
 class Renaming(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1042,7 +1041,7 @@ class Renaming(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Renaming, self)
-
+_fbthrift_Renaming = Renaming
 
 class AnnotatedTypes(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1106,7 +1105,7 @@ class AnnotatedTypes(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AnnotatedTypes, self)
-
+_fbthrift_AnnotatedTypes = AnnotatedTypes
 
 class ForwardUsageRoot(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1170,7 +1169,7 @@ class ForwardUsageRoot(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageRoot, self)
-
+_fbthrift_ForwardUsageRoot = ForwardUsageRoot
 
 class ForwardUsageStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1223,7 +1222,7 @@ class ForwardUsageStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageStruct, self)
-
+_fbthrift_ForwardUsageStruct = ForwardUsageStruct
 
 class ForwardUsageByRef(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1276,7 +1275,7 @@ class ForwardUsageByRef(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ForwardUsageByRef, self)
-
+_fbthrift_ForwardUsageByRef = ForwardUsageByRef
 
 class IncompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1329,7 +1328,7 @@ class IncompleteMap(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteMap, self)
-
+_fbthrift_IncompleteMap = IncompleteMap
 
 class IncompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1371,7 +1370,7 @@ class IncompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteMapDep, self)
-
+_fbthrift_IncompleteMapDep = IncompleteMapDep
 
 class CompleteMap(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1424,7 +1423,7 @@ class CompleteMap(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteMap, self)
-
+_fbthrift_CompleteMap = CompleteMap
 
 class CompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1466,7 +1465,7 @@ class CompleteMapDep(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteMapDep, self)
-
+_fbthrift_CompleteMapDep = CompleteMapDep
 
 class IncompleteList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1519,7 +1518,7 @@ class IncompleteList(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteList, self)
-
+_fbthrift_IncompleteList = IncompleteList
 
 class IncompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1561,7 +1560,7 @@ class IncompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.IncompleteListDep, self)
-
+_fbthrift_IncompleteListDep = IncompleteListDep
 
 class CompleteList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1614,7 +1613,7 @@ class CompleteList(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteList, self)
-
+_fbthrift_CompleteList = CompleteList
 
 class CompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1656,7 +1655,7 @@ class CompleteListDep(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CompleteListDep, self)
-
+_fbthrift_CompleteListDep = CompleteListDep
 
 class AdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1709,7 +1708,7 @@ class AdaptedList(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedList, self)
-
+_fbthrift_AdaptedList = AdaptedList
 
 class AdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1762,7 +1761,7 @@ class AdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedListDep, self)
-
+_fbthrift_AdaptedListDep = AdaptedListDep
 
 class DependentAdaptedList(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1815,7 +1814,7 @@ class DependentAdaptedList(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.DependentAdaptedList, self)
-
+_fbthrift_DependentAdaptedList = DependentAdaptedList
 
 class DependentAdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1868,7 +1867,7 @@ class DependentAdaptedListDep(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.DependentAdaptedListDep, self)
-
+_fbthrift_DependentAdaptedListDep = DependentAdaptedListDep
 
 class AllocatorAware(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1987,7 +1986,7 @@ class AllocatorAware(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AllocatorAware, self)
-
+_fbthrift_AllocatorAware = AllocatorAware
 
 class AllocatorAware2(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -2051,7 +2050,7 @@ class AllocatorAware2(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AllocatorAware2, self)
-
+_fbthrift_AllocatorAware2 = AllocatorAware2
 
 class TypedefStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -2126,7 +2125,7 @@ class TypedefStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TypedefStruct, self)
-
+_fbthrift_TypedefStruct = TypedefStruct
 
 class StructWithDoubleUnderscores(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -2179,11 +2178,18 @@ class StructWithDoubleUnderscores(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.StructWithDoubleUnderscores, self)
+_fbthrift_StructWithDoubleUnderscores = StructWithDoubleUnderscores
 
 # This unfortunately has to be down here to prevent circular imports
 import apache.thrift.fixtures.types.module.thrift_metadata
-from apache.thrift.fixtures.types.module.thrift_enums import *
+from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_has_bitwise_ops
+from apache.thrift.fixtures.types.module.thrift_enums import has_bitwise_ops as _fbthrift_has_bitwise_ops
+from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_is_unscoped
+from apache.thrift.fixtures.types.module.thrift_enums import is_unscoped as _fbthrift_is_unscoped
+from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_MyForwardRefEnum
+from apache.thrift.fixtures.types.module.thrift_enums import MyForwardRefEnum as _fbthrift_MyForwardRefEnum
 
+from apache.thrift.fixtures.types.module.thrift_enums import *
 _fbthrift_all_enums = [
     has_bitwise_ops,
     is_unscoped,

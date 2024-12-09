@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import typing as _typing
 
-import module.thrift_mutable_types as _fbthrift_current_module
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
@@ -53,7 +52,7 @@ class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.Fiery": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Fiery": ...  # type: ignore
-
+_fbthrift_Fiery = Fiery
 
 class _fbthrift_compatible_with_Serious:
     pass
@@ -76,7 +75,7 @@ class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthri
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.Serious": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Serious": ...  # type: ignore
-
+_fbthrift_Serious = Serious
 
 class _fbthrift_compatible_with_ComplexFieldNames:
     pass
@@ -106,7 +105,7 @@ class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedErro
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.ComplexFieldNames": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ComplexFieldNames": ...  # type: ignore
-
+_fbthrift_ComplexFieldNames = ComplexFieldNames
 
 class _fbthrift_compatible_with_CustomFieldNames:
     pass
@@ -136,7 +135,7 @@ class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.CustomFieldNames": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CustomFieldNames": ...  # type: ignore
-
+_fbthrift_CustomFieldNames = CustomFieldNames
 
 class _fbthrift_compatible_with_ExceptionWithPrimitiveField:
     pass
@@ -166,7 +165,7 @@ class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGen
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.ExceptionWithPrimitiveField": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithPrimitiveField": ...  # type: ignore
-
+_fbthrift_ExceptionWithPrimitiveField = ExceptionWithPrimitiveField
 
 class _fbthrift_compatible_with_ExceptionWithStructuredAnnotation:
     pass
@@ -196,7 +195,7 @@ class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.Muta
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.ExceptionWithStructuredAnnotation": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.ExceptionWithStructuredAnnotation": ...  # type: ignore
-
+_fbthrift_ExceptionWithStructuredAnnotation = ExceptionWithStructuredAnnotation
 
 class _fbthrift_compatible_with_Banal:
     pass
@@ -212,6 +211,7 @@ class Banal(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift
     def _to_mutable_python(self) -> _typing.Self: ...
     def _to_py3(self) -> "module.types.Banal": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.Banal": ...  # type: ignore
+_fbthrift_Banal = Banal
 
 
 class _fbthrift_Raiser_doBland_args(_fbthrift_python_mutable_types.MutableStruct):
@@ -252,21 +252,21 @@ class _fbthrift_Raiser_doRaise_args(_fbthrift_python_mutable_types.MutableStruct
 
 class _fbthrift_Raiser_doRaise_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[None]
-    b: _typing.Final[_fbthrift_current_module.Banal]
-    f: _typing.Final[_fbthrift_current_module.Fiery]
-    s: _typing.Final[_fbthrift_current_module.Serious]
+    b: _typing.Final[_fbthrift_Banal]
+    f: _typing.Final[_fbthrift_Fiery]
+    s: _typing.Final[_fbthrift_Serious]
 
     def __init__(
-        self, *, success: _typing.Optional[None] = ..., b: _typing.Optional[_fbthrift_current_module.Banal]=..., f: _typing.Optional[_fbthrift_current_module.Fiery]=..., s: _typing.Optional[_fbthrift_current_module.Serious]=...
+        self, *, success: _typing.Optional[None] = ..., b: _typing.Optional[_fbthrift_Banal]=..., f: _typing.Optional[_fbthrift_Fiery]=..., s: _typing.Optional[_fbthrift_Serious]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             None,
-            _fbthrift_current_module.Banal,
-            _fbthrift_current_module.Fiery,
-            _fbthrift_current_module.Serious,
+            _fbthrift_Banal,
+            _fbthrift_Fiery,
+            _fbthrift_Serious,
         ]]]: ...
 
 
@@ -308,19 +308,19 @@ class _fbthrift_Raiser_get500_args(_fbthrift_python_mutable_types.MutableStruct)
 
 class _fbthrift_Raiser_get500_result(_fbthrift_python_mutable_types.MutableStruct):
     success: _typing.Final[str]
-    f: _typing.Final[_fbthrift_current_module.Fiery]
-    b: _typing.Final[_fbthrift_current_module.Banal]
-    s: _typing.Final[_fbthrift_current_module.Serious]
+    f: _typing.Final[_fbthrift_Fiery]
+    b: _typing.Final[_fbthrift_Banal]
+    s: _typing.Final[_fbthrift_Serious]
 
     def __init__(
-        self, *, success: _typing.Optional[str] = ..., f: _typing.Optional[_fbthrift_current_module.Fiery]=..., b: _typing.Optional[_fbthrift_current_module.Banal]=..., s: _typing.Optional[_fbthrift_current_module.Serious]=...
+        self, *, success: _typing.Optional[str] = ..., f: _typing.Optional[_fbthrift_Fiery]=..., b: _typing.Optional[_fbthrift_Banal]=..., s: _typing.Optional[_fbthrift_Serious]=...
     ) -> None: ...
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[
         str,
         _typing.Union[
             str,
-            _fbthrift_current_module.Fiery,
-            _fbthrift_current_module.Banal,
-            _fbthrift_current_module.Serious,
+            _fbthrift_Fiery,
+            _fbthrift_Banal,
+            _fbthrift_Serious,
         ]]]: ...

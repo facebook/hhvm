@@ -1,7 +1,7 @@
 File "tconst_bug.php", line 9, characters 5-30:
-  (readonly function(vec<StringType> $boxes): ~vec<string>)
+  HH\FunctionRef<(readonly function(vec<StringType> $boxes): ~vec<string>)>
 File "tconst_bug.php", line 10, characters 5-30:
-  (readonly function(vec<StringType> $boxes): ~vec<string>)
+  HH\FunctionRef<(readonly function(vec<StringType> $boxes): ~vec<string>)>
 File "tconst_bug.php", line 11, characters 5-52:
   (function(~vec<StringType> $boxes): ~vec<string>)
 File "tconst_bug.php", line 12, characters 5-47:

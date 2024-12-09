@@ -16,8 +16,8 @@ ERROR: File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
   File "meth_caller4.php", line 20, characters 18-48:
   Expected `~(function(X<bool>, bool): ~bool)`
-  File "meth_caller4.php", line 13, characters 19-21:
-  But got `(readonly function(X<_>, $x): ~_)` because method or function was called on dynamic or like-type
+  File "meth_caller4.php", line 21, characters 13-40:
+  But got `HH\FunctionRef<(readonly function(X<_>, $x): ~_)>`
 ERROR: File "meth_caller4.php", line 23, characters 10-16:
 Invalid return type (Typing[4110])
   File "meth_caller4.php", line 20, characters 30-33:

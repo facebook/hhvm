@@ -1,7 +1,7 @@
 File "class_meth11.php", line 10, characters 5-15:
-  (readonly function(): string)
+  HH\FunctionRef<(readonly function(): string)>
 File "class_meth11.php", line 18, characters 5-15:
-  (readonly function(): string)
+  HH\FunctionRef<(readonly function(): string)>
 File "class_meth11.php", line 35, characters 5-15:
-  (readonly function(): string)
+  HH\FunctionRef<(readonly function(): string)>
 No errors

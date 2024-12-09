@@ -80,7 +80,8 @@ let identify_tests =
       go_hover
         [
           {
-            HoverService.snippet = "function foo(string $s): string";
+            HoverService.snippet =
+              "HH\\FunctionRef<(readonly function(string $s): string)>";
             addendum = ["foo_docblock"];
             pos = pos_at (17, 8) (17, 10);
           };

@@ -1,7 +1,9 @@
-async function bar(ExampleContext $_): Awaitable<
-  ~ExprTree<
-    ExampleDsl,
-    string,
-    (function(ExampleString): ~ExampleInt)
-  >
+async HH\FunctionRef<
+  (readonly function(ExampleContext $_): Awaitable<
+    ~ExprTree<
+      ExampleDsl,
+      string,
+      (function(ExampleString): ~ExampleInt)
+    >
+  >)
 >

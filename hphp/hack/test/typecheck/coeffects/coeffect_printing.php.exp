@@ -1,11 +1,11 @@
 File "coeffect_printing.php", line 5, characters 3-13:
-  (readonly function()[]: void)
+  HH\FunctionRef<(readonly function()[]: void)>
 File "coeffect_printing.php", line 10, characters 3-13:
-  (readonly function()[HH\Capabilities\WriteProperty]: void)
+  HH\FunctionRef<(readonly function()[HH\Capabilities\WriteProperty]: void)>
 File "coeffect_printing.php", line 15, characters 3-13:
-  (readonly function()[(HH\Capabilities\ImplicitPolicy & HH\Capabilities\WriteProperty & HH\Capabilities\ReadGlobals & HH\Capabilities\System)]: void)
+  HH\FunctionRef<(readonly function()[(HH\Capabilities\ImplicitPolicy & HH\Capabilities\WriteProperty & HH\Capabilities\ReadGlobals & HH\Capabilities\System)]: void)>
 File "coeffect_printing.php", line 20, characters 3-13:
-  (readonly function(): void)
+  HH\FunctionRef<(readonly function(): void)>
 File "coeffect_printing.php", line 25, characters 3-13:
-  (readonly function(): void)
+  HH\FunctionRef<(readonly function(): void)>
 No errors

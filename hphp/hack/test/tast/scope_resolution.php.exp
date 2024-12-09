@@ -192,7 +192,8 @@ Errors:
                             hf_is_readonly_return = None }))
                        ]
                      )))));
-          cv_id = ([10:35-37], "_"); cv_expr = (Some (((readonly function(): int)), [10:40-53], (FunctionPointer ((FP_class_const (((Foo), [10:40-44], CIself), ([10:46-51], "class"))), []))));
+          cv_id = ([10:35-37], "_");
+          cv_expr = (Some ((HH\FunctionRef<(readonly function(): int)>), [10:40-53], (FunctionPointer ((FP_class_const (((Foo), [10:40-44], CIself), ([10:46-51], "class"))), []))));
           cv_user_attributes = []; cv_doc_comment = None; cv_is_static = true; 
           cv_span = [10:35-53] }
          ];

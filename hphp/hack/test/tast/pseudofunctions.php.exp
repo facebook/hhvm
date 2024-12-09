@@ -63,9 +63,10 @@ Errors:
                      { func = (((function(readonly arraykey $args...)[HH\Capabilities\IO]: void)), [10:3-15], (Id ([10:3-15], "echo"))); 
                        targs = []; args = [(Anormal ((string), [10:9-14], (String "foo")))]; 
                        unpacked_arg = None }))));
-             ([12:3-10], (Expr (((readonly function(C $c): void)), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [])))));
-             ([13:3-18], (Expr (((readonly function(): void)), [13:3-17], (FunctionPointer ((FP_class_const (((C), [13:3-4], (CI ([13:3-4], "\\C"))), ([13:6-15], "staticFoo"))), [])))));
-             ([14:3-40], (Expr (((readonly function(C): void)), [14:3-39], (Method_caller (([14:15-16], "\\C"), ([14:25-38], "instanceFoo"))))));
+             ([12:3-10], (Expr ((HH\FunctionRef<(readonly function(C $c): void)>), [12:3-9], (FunctionPointer ((FP_id ([12:3-7], "\\test")), [])))));
+             ([13:3-18],
+              (Expr ((HH\FunctionRef<(readonly function(): void)>), [13:3-17], (FunctionPointer ((FP_class_const (((C), [13:3-4], (CI ([13:3-4], "\\C"))), ([13:6-15], "staticFoo"))), [])))));
+             ([14:3-40], (Expr ((HH\FunctionRef<(readonly function(C): void)>), [14:3-39], (Method_caller (([14:15-16], "\\C"), ([14:25-38], "instanceFoo"))))));
              ([16:3-13],
               (Expr
                  ((bool), [16:3-12],

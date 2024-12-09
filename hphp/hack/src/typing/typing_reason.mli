@@ -366,6 +366,8 @@ val rigid_tvar_escape : Pos.t * string * string * t -> t
 
 val opaque_type_from_module : Pos_or_decl.t * string * t -> t
 
+val support_dynamic_type_call : Pos_or_decl.t * t -> t
+
 val missing_class : Pos.t -> t
 
 val invalid : 'phase t_

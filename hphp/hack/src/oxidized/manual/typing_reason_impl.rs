@@ -123,7 +123,9 @@ impl Reason {
             | LambdaParam(pos, _)
             | Typeconst(box NoReason, (pos, _), _, _)
             | RigidTvarEscape(pos, _, _, _) => Some(pos),
-            DynamicPartialEnforcement(pos_or_decl, _, _) => Some(pos_or_decl),
+            DynamicPartialEnforcement(pos_or_decl, _, _) | SDTCall(pos_or_decl, _) => {
+                Some(pos_or_decl)
+            }
             OpaqueTypeFromModule(pos_or_decl, _, _) => Some(pos_or_decl),
             LostInfo(_, t, _)
             | TypeAccess(t, _)

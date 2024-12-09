@@ -133,7 +133,9 @@ impl<'a> Reason<'a> {
             | LambdaParam((p, _))
             | RigidTvarEscape((p, _, _, _)) => Some(p),
 
-            DynamicPartialEnforcement((p, _, _)) | OpaqueTypeFromModule((p, _, _)) => Some(p),
+            DynamicPartialEnforcement((p, _, _))
+            | SDTCall((p, _))
+            | OpaqueTypeFromModule((p, _, _)) => Some(p),
             LostInfo((_, r, _)) | TypeAccess((r, _)) | InvariantGeneric((r, _)) => r.pos(),
 
             DynamicCoercion(r) => r.pos(),
@@ -195,6 +197,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
                 .field(s)
                 .field(t)
                 .finish(),
+            SDTCall((p, t)) => f.debug_tuple("RSDTCall").field(p).field(t).finish(),
             DynamicCoercion(p) => f.debug_tuple("RdynamicCoercion").field(p).finish(),
             Invalid => f.debug_tuple("Rinvalid").finish(),
             LowerBound { .. }

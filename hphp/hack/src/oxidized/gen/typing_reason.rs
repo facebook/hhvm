@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<edfac063dd5e2eb58d2ed2e9ce06dce7>>
+// @generated SignedSource<<674e43047a19afe874c881f81759d24e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -749,6 +749,8 @@ pub enum T_ {
     RigidTvarEscape(pos::Pos, String, String, Box<T_>),
     #[rust_to_ocaml(name = "Opaque_type_from_module")]
     OpaqueTypeFromModule(pos_or_decl::PosOrDecl, String, Box<T_>),
+    #[rust_to_ocaml(name = "SDT_call")]
+    SDTCall(pos_or_decl::PosOrDecl, Box<T_>),
 }
 
 pub type Reason = T_;

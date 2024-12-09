@@ -1619,6 +1619,7 @@ type _ t_ =
   | Opaque_type_from_module :
       (Pos_or_decl.t[@hash.ignore]) * string * locl_phase t_
       -> locl_phase t_
+  | SDT_call : (Pos_or_decl.t[@hash.ignore]) * locl_phase t_ -> locl_phase t_
 [@@deriving hash]
 
 let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
@@ -1641,8 +1642,9 @@ let rec to_raw_pos : type ph. ph t_ -> Pos_or_decl.t =
   | Dynamic_partial_enforcement (pos_or_decl, _, _)
   (* TODO(mjt) why are we putting [No_reason] here? *)
   | Typeconst (No_reason, (pos_or_decl, _), _, _)
-  | Opaque_type_from_module (pos_or_decl, _, _) ->
+  | SDT_call (pos_or_decl, _) ->
     pos_or_decl
+  | Opaque_type_from_module (pos_or_decl, _, _) -> pos_or_decl
   (* Recurse into flow-like reasons to find the position of the leftmost witness *)
   | Flow { from = t; _ }
   | Lower_bound { bound = t; _ }
@@ -1720,6 +1722,7 @@ let rec map_pos :
     Rigid_tvar_escape (pos p, v, w, map_pos pos pos_or_decl r)
   | Opaque_type_from_module (p, m, r) ->
     Opaque_type_from_module (pos_or_decl p, m, map_pos pos pos_or_decl r)
+  | SDT_call (p, r) -> SDT_call (pos_or_decl p, map_pos pos pos_or_decl r)
   | Invalid -> Invalid
   | Lower_bound { bound; of_ } ->
     Lower_bound
@@ -1793,6 +1796,7 @@ let to_constructor_string : type ph. ph t_ -> string = function
   | Dynamic_partial_enforcement _ -> "Rdynamic_partial_enforcement"
   | Rigid_tvar_escape _ -> "Rrigid_tvar_escape"
   | Opaque_type_from_module _ -> "Ropaque_type_from_module"
+  | SDT_call _ -> "RSDT_call"
   | Lambda_param _ -> "Rlambda_param"
 
 let rec pp_t_ : type ph. _ -> ph t_ -> unit =
@@ -1875,6 +1879,10 @@ let rec pp_t_ : type ph. _ -> ph t_ -> unit =
       Pos_or_decl.pp fmt p;
       comma ();
       Format.pp_print_string fmt s;
+      comma ();
+      pp_t_ fmt r
+    | SDT_call (p, r) ->
+      Pos_or_decl.pp fmt p;
       comma ();
       pp_t_ fmt r
     | Arith_ret_float (p, r, ap)
@@ -2088,6 +2096,11 @@ let rec to_json_help : type a. a t_ -> Hh_json.json list -> Hh_json.json list =
             JSON_Array
               [Pos_or_decl.json pos_or_decl; JSON_String str; to_json r] );
         ])
+    :: acc
+  | SDT_call (pos_or_decl, r) ->
+    Hh_json.(
+      JSON_Object
+        [("SDT_call", JSON_Array [Pos_or_decl.json pos_or_decl; to_json r])])
     :: acc
   | Flow { from; kind; into } ->
     Hh_json.(
@@ -2454,6 +2467,12 @@ let rec to_string_help :
     ( Pos_or_decl.of_raw_pos p,
       prefix ^ " because " ^ tvar ^ " escaped from " ^ what )
     :: to_string_help ("  where " ^ tvar ^ " originates from") solutions r_orig
+  | SDT_call (p, r_orig) ->
+    ( p,
+      prefix
+      ^ " because this dynamic or like type value passed through a function that supports dynamic calling"
+    )
+    :: to_string_help "The type originated from here" solutions r_orig
   | Opaque_type_from_module (p, module_, r_orig) ->
     ( p,
       prefix
@@ -2668,6 +2687,8 @@ module Constructors = struct
 
   let opaque_type_from_module (p, s, r) = Opaque_type_from_module (p, s, r)
 
+  let support_dynamic_type_call (p, r) = SDT_call (p, r)
+
   let missing_class p = from_witness_locl @@ Missing_class p
 
   let invalid = Invalid
@@ -2872,6 +2893,7 @@ module Visitor = struct
           Rigid_tvar_escape (x, y, z, this#on_reason r)
         | Opaque_type_from_module (x, y, r) ->
           Opaque_type_from_module (x, y, this#on_reason r)
+        | SDT_call (x, r) -> SDT_call (x, this#on_reason r)
         | No_reason -> No_reason
         | Invalid -> Invalid
         | Missing_field -> Missing_field
@@ -3568,7 +3590,8 @@ module Derivation = struct
     | Dynamic_coercion _
     | Dynamic_partial_enforcement _
     | Rigid_tvar_escape _
-    | Opaque_type_from_module _ ->
+    | Opaque_type_from_module _
+    | SDT_call _ ->
       t
 
   let rec extract_first t =
@@ -3600,7 +3623,8 @@ module Derivation = struct
     | Dynamic_coercion _
     | Dynamic_partial_enforcement _
     | Rigid_tvar_escape _
-    | Opaque_type_from_module _ ->
+    | Opaque_type_from_module _
+    | SDT_call _ ->
       t
 
   (** Reasons are constructed by keeping track of preceeding subtype propositions
@@ -3710,14 +3734,14 @@ module Derivation = struct
           | Typeconst _ | Type_access _ | Expr_dep_type _
           | Contravariant_generic _ | Invariant_generic _ | Lambda_param _
           | Dynamic_coercion _ | Dynamic_partial_enforcement _
-          | Rigid_tvar_escape _ | Opaque_type_from_module _ ),
+          | Rigid_tvar_escape _ | Opaque_type_from_module _ | SDT_call _ ),
           ( No_reason | From_witness_decl _ | From_witness_locl _
           | Instantiate _ | Flow _ | Def _ | Invalid | Missing_field | Idx _
           | Arith_ret_float _ | Arith_ret_num _ | Lost_info _ | Format _
           | Typeconst _ | Type_access _ | Expr_dep_type _
           | Contravariant_generic _ | Invariant_generic _ | Lambda_param _
           | Dynamic_coercion _ | Dynamic_partial_enforcement _
-          | Rigid_tvar_escape _ | Opaque_type_from_module _ ) ) ->
+          | Rigid_tvar_escape _ | Opaque_type_from_module _ | SDT_call _ ) ) ->
         let step =
           let sub = push_solutions sub ~solutions
           and super = push_solutions super ~solutions in
@@ -4126,6 +4150,7 @@ module Derivation = struct
         explain_rigid_tvar_escape (pos, str1, str2, r) ~st ~cfg ~ctxt
       | Opaque_type_from_module (pos, str, r) ->
         explain_opaque_type_from_module (pos, str, r) ~st ~cfg ~ctxt
+      | SDT_call (pos, r) -> explain_SDT_call (pos, r) ~st ~cfg ~ctxt
       (* Its possible that one of the following remains in the derivation
           since we can have `Prj_one` in both subtype and supertype or
          `Prj_both` as subtype and `Prj_one` in supertype and we will always
@@ -4342,6 +4367,9 @@ module Derivation = struct
       explain_reason r ~st ~cfg ~ctxt
 
     and explain_opaque_type_from_module (_pos, _str, r) ~st ~cfg ~ctxt =
+      explain_reason r ~st ~cfg ~ctxt
+
+    and explain_SDT_call (_pos, r) ~st ~cfg ~ctxt =
       explain_reason r ~st ~cfg ~ctxt
   end
 

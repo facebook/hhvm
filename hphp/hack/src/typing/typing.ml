@@ -1699,7 +1699,7 @@ let check_argument_type_against_parameter_type
         in
         (env, opt_e, true)
       else
-        let (env, opt_e, used_dynamic) =
+        let (env, opt_e, used_dynamic_info) =
           (* First try statically *)
           let (env1, e1opt) =
             check_argument_type_against_parameter_type_helper
@@ -1730,10 +1730,15 @@ let check_argument_type_against_parameter_type
               else
                 (env2, Some e2, true))
         in
-        (env, opt_e, used_dynamic)
+        (env, opt_e, used_dynamic_info)
   in
   Option.iter ~f:(Typing_error_utils.add_typing_error ~env) opt_e;
-  (env, mk_ty_mismatch_opt arg_ty param.fp_type opt_e, used_dynamic)
+  ( env,
+    mk_ty_mismatch_opt arg_ty param.fp_type opt_e,
+    if used_dynamic then
+      Some (param.fp_pos, arg_ty)
+    else
+      None )
 
 let bad_call env p ty =
   if not (TUtils.is_tyvar_error env ty) then
@@ -6456,7 +6461,7 @@ end = struct
                 let ty = Typing_env.update_reason env ty ~f:update_reason in
                 (ty, pos, e)
               in
-              let (env, ty_mismatch_opt, used_dynamic) =
+              let (env, ty_mismatch_opt, used_dynamic_info) =
                 check_argument_type_against_parameter_type
                   ~is_single_argument
                   ~dynamic_func
@@ -6472,7 +6477,7 @@ end = struct
                       param_kind
                       (hole_on_ty_mismatch ~ty_mismatch_opt te),
                     ty ),
-                used_dynamic )
+                used_dynamic_info )
             | None ->
               let (env, te, ty) =
                 expr ~expected:None ~ctxt:Context.default env e
@@ -6500,12 +6505,19 @@ end = struct
                 let ty = Typing_env.update_reason env ty ~f:update_reason in
                 (ty, pos, e)
               in
-              (env, Some (Aast_utils.expr_to_arg param_kind te, ty), false)
+              (env, Some (Aast_utils.expr_to_arg param_kind te, ty), None)
           in
           let open struct
             type arg_with_result =
               int * Nast.argument * (Tast.argument * locl_ty) option
           end in
+          (* We return the first position of a dynamic check that was used *)
+          let combine_dynamic_info d1 d2 =
+            if Option.is_some d1 then
+              d1
+            else
+              d2
+          in
           (* For a given pass number, check arguments from left-to-right that correspond
            * to this pass. If any arguments remain unprocessed, bump the pass number
            * and repeat. *)
@@ -6514,7 +6526,7 @@ end = struct
               env
               (args_with_result : arg_with_result list)
               paraml
-              used_dynamic
+              used_dynamic_acc
               acc =
             match args_with_result with
             (* We've got an argument *)
@@ -6523,7 +6535,7 @@ end = struct
               let (param_idx, (is_variadic, opt_param, paraml)) =
                 get_next_param_info paraml
               in
-              let (env, one_result, used_dynamic') =
+              let (env, one_result, used_dynamic_info) =
                 (* If we're on the pass appropriate for this argument
                  * expression, then check it
                  *)
@@ -6533,20 +6545,20 @@ end = struct
                 if check_on_this_pass then
                   check_arg env arg opt_param ~arg_idx ~param_idx ~is_variadic
                 else
-                  (env, opt_result, false)
+                  (env, opt_result, None)
               in
               check_args
                 pass
                 env
                 args_with_result
                 paraml
-                (used_dynamic || used_dynamic')
+                (combine_dynamic_info used_dynamic_acc used_dynamic_info)
                 ((arg_idx, arg, one_result) :: acc)
             | [] ->
               let rec collect_results
                   (reversed_res : arg_with_result list) tel argtys =
                 match reversed_res with
-                | [] -> (env, tel, argtys, used_dynamic, paraml)
+                | [] -> (env, tel, argtys, used_dynamic_acc, paraml)
                 (* We've still not finished, so bump pass and iterate *)
                 | (_, _, None) :: _ ->
                   check_args
@@ -6556,7 +6568,7 @@ end = struct
                     (List.mapi
                        ~f:(fun idx param -> (idx, param))
                        non_variadic_ft_params)
-                    used_dynamic
+                    used_dynamic_acc
                     []
                 | (_, _, Some (te, ty)) :: reversed_res ->
                   collect_results
@@ -6618,18 +6630,19 @@ end = struct
           let args_with_result =
             List.mapi el ~f:(fun idx e -> (idx, e, None))
           in
-          let (env, tel, argtys, used_dynamic1, paraml) =
+          let (env, tel, argtys, used_dynamic_info1, paraml) =
             let params =
               List.mapi non_variadic_ft_params ~f:(fun idx param ->
                   (idx, param))
             in
-            check_args 0 env args_with_result params false []
+            check_args 0 env args_with_result params None []
           in
           let (env, ty_err_opt) = check_implicit_args env in
           Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt;
-          let (env, typed_unpack_element, arity, did_unpack, used_dynamic2) =
+          let (env, typed_unpack_element, arity, did_unpack, used_dynamic_info2)
+              =
             match unpacked_element with
-            | None -> (env, None, List.length el, false, false)
+            | None -> (env, None, List.length el, false, None)
             | Some e ->
               (* Now that we're considering an splat (Some e) we need to construct a type that
                * represents the remainder of the function's parameters. `paraml` represents those
@@ -6679,7 +6692,7 @@ end = struct
                   destructure_ty
                   Typing_error.Callback.unify_error
               in
-              let (env, te, used_dynamic) =
+              let (env, te, used_dynamic_info) =
                 match ty_err_opt with
                 | Some _ ->
                   (* Our type cannot be destructured, add a hole with `nothing`
@@ -6688,17 +6701,17 @@ end = struct
                     MakeType.nothing
                     @@ Reason.solve_fail (Pos_or_decl.of_raw_pos expr_pos)
                   in
-                  (env, mk_hole te ~ty_have:ty ~ty_expect, false)
+                  (env, mk_hole te ~ty_have:ty ~ty_expect, None)
                 | None ->
                   (* We have a type that can be destructured so continue and use
                      the type variables for the remaining parameters *)
-                  let (env, err_opts, used_dynamic) =
+                  let (env, err_opts, used_dynamic_info) =
                     List.fold2_exn
-                      ~init:(env, [], false)
+                      ~init:(env, [], None)
                       d_required
                       required_params
                       ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
-                        let (env, err_opt, used_dynamic) =
+                        let (env, err_opt, used_dynamic_info) =
                           check_argument_type_against_parameter_type
                             ~dynamic_func
                             env
@@ -6707,15 +6720,19 @@ end = struct
                             (e, elt)
                             ~is_variadic:false
                         in
-                        (env, err_opt :: errs, used_dynamic_acc || used_dynamic))
+                        ( env,
+                          err_opt :: errs,
+                          combine_dynamic_info
+                            used_dynamic_acc
+                            used_dynamic_info ))
                   in
-                  let (env, err_opts, used_dynamic) =
+                  let (env, err_opts, used_dynamic_info) =
                     List.fold2_exn
-                      ~init:(env, err_opts, used_dynamic)
+                      ~init:(env, err_opts, used_dynamic_info)
                       d_optional
                       optional_params
                       ~f:(fun (env, errs, used_dynamic_acc) elt (_idx, param) ->
-                        let (env, err_opt, used_dynamic) =
+                        let (env, err_opt, used_dynamic_info) =
                           check_argument_type_against_parameter_type
                             ~dynamic_func
                             env
@@ -6724,9 +6741,13 @@ end = struct
                             (e, elt)
                             ~is_variadic:false
                         in
-                        (env, err_opt :: errs, used_dynamic_acc || used_dynamic))
+                        ( env,
+                          err_opt :: errs,
+                          combine_dynamic_info
+                            used_dynamic_acc
+                            used_dynamic_info ))
                   in
-                  let (env, var_err_opt, var_used_dynamic) =
+                  let (env, var_err_opt, var_used_dynamic_info) =
                     Option.map2 d_variadic var_param ~f:(fun v (_idx, vp) ->
                         check_argument_type_against_parameter_type
                           ~dynamic_func
@@ -6735,7 +6756,7 @@ end = struct
                           Ast_defs.Pnormal
                           (e, v)
                           ~is_variadic:true)
-                    |> Option.value ~default:(env, None, false)
+                    |> Option.value ~default:(env, None, None)
                   in
                   let subtyping_errs = (List.rev err_opts, var_err_opt) in
                   let te =
@@ -6748,7 +6769,10 @@ end = struct
                         ~ty_mismatch_opt:
                           (Some (ty, pack_errs pos ty subtyping_errs))
                   in
-                  (env, te, used_dynamic || var_used_dynamic)
+                  ( env,
+                    te,
+                    combine_dynamic_info used_dynamic_info var_used_dynamic_info
+                  )
               in
               Option.iter
                 ~f:(Typing_error_utils.add_typing_error ~env)
@@ -6757,16 +6781,18 @@ end = struct
                 Some te,
                 List.length el + List.length d_required,
                 Option.is_some d_variadic,
-                used_dynamic )
+                used_dynamic_info )
           in
-          let used_dynamic = used_dynamic1 || used_dynamic2 in
+          let used_dynamic_info =
+            combine_dynamic_info used_dynamic_info1 used_dynamic_info2
+          in
           (* If dynamic_func is set, then the function type is supportdyn<t1 ... tn -> t>
              or ~(t1 ... tn -> t)
              and we are trying to call it as though it were dynamic. Hence all of the
              arguments must be subtypes of dynamic, regardless of whether they have
              a like type. *)
           let env =
-            if used_dynamic then begin
+            if Option.is_some used_dynamic_info then begin
               let rec check_args_dynamic env argtys =
                 match argtys with
                 (* We've got an argument *)
@@ -6795,10 +6821,15 @@ end = struct
             wfold_left2 inout_write_back env non_variadic_ft_params el
           in
           let ret =
-            match dynamic_func with
-            | Some Like_function -> MakeType.locl_like r2 ft.ft_ret
-            | Some Supportdyn_function when used_dynamic ->
-              MakeType.locl_like r2 ft.ft_ret
+            match (dynamic_func, used_dynamic_info) with
+            | (Some Like_function, _) -> MakeType.locl_like r2 ft.ft_ret
+            | ( Some Supportdyn_function,
+                Some (dynamic_param_pos, dynamic_param_ty) ) ->
+              let reason =
+                Reason.support_dynamic_type_call
+                  (dynamic_param_pos, get_reason dynamic_param_ty)
+              in
+              MakeType.locl_like reason ft.ft_ret
             | _ -> ft.ft_ret
           in
           let ret =

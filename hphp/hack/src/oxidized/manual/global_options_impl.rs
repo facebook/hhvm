@@ -135,6 +135,7 @@ impl Default for GlobalOptions {
             warnings_default_all: false,
             tco_strict_switch: false,
             tco_allowed_files_for_ignore_readonly: vec![],
+            tco_package_v2_exclude_patterns: vec![String::from(".*/__tests__/.*")],
             tco_package_v2_bypass_package_check_for_class_const: true,
             re_no_cache: false,
             hh_distc_should_disable_trace_store: false,

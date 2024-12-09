@@ -261,6 +261,8 @@ type t = {
   tco_strict_switch: bool;
       (** Enable strict case checking in switch statements *)
   tco_allowed_files_for_ignore_readonly: string list;
+  tco_package_v2_exclude_patterns: string list;
+      (** Patterns for files excluded from the package boundary check. *)
   tco_package_v2_bypass_package_check_for_class_const: bool;
       (** Option for package v2 to bypass package boundary violation errors on ::class during
           the ::class to nameof migration to unblock V0 of intern-prod separation *)
@@ -377,6 +379,7 @@ val set :
   ?warnings_default_all:bool ->
   ?tco_strict_switch:bool ->
   ?tco_allowed_files_for_ignore_readonly:string list ->
+  ?tco_package_v2_exclude_patterns:string list ->
   ?tco_package_v2_bypass_package_check_for_class_const:bool ->
   ?re_no_cache:bool ->
   ?hh_distc_should_disable_trace_store:bool ->

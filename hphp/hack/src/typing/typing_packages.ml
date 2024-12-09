@@ -55,13 +55,13 @@ type packageV2_error_info = {
   target_package_name: string option;
 }
 
-let is_test (file : Relative_path.t) =
+let is_excluded env (file : Relative_path.t) =
   let filename = Relative_path.to_absolute file in
-  try
-    ignore (Str.search_forward (Str.regexp_string "__tests__") filename 0);
-    true
-  with
-  | _ -> false
+  let excluded_patterns =
+    Env.get_tcopt env |> TypecheckerOptions.package_v2_exclude_patterns
+  in
+  List.exists excluded_patterns ~f:(fun pattern ->
+      Str.(string_match (regexp pattern) filename 0))
 
 let can_access_by_package_v2_rules
     ~(env : Typing_env_types.env)
@@ -77,7 +77,10 @@ let can_access_by_package_v2_rules
   in
   let accessing_hhi = Pos_or_decl.is_hhi target_pos in
   if
-    in_same_file || accessing_hhi || is_test current_file || is_test target_file
+    in_same_file
+    || accessing_hhi
+    || is_excluded env current_file
+    || is_excluded env target_file
   then
     `Yes
   else

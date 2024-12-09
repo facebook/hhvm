@@ -6,7 +6,7 @@
 // is not in the same package by accident
 function foo(): void {}
 
-//// __tests__/bar.php
+//// /__tests__/bar.php
 <?hh
 // package test
 function test(): void {

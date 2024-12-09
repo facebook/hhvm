@@ -325,6 +325,9 @@ let package_v2_support_multifile_tests t =
 let package_v2_bypass_package_check_for_class_const t =
   t.GlobalOptions.tco_package_v2_bypass_package_check_for_class_const
 
+let package_v2_exclude_patterns t =
+  t.GlobalOptions.tco_package_v2_exclude_patterns
+
 let class_sub_classname t = t.GlobalOptions.class_sub_classname
 
 let enable_class_pointer_hint t =

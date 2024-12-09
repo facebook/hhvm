@@ -526,6 +526,9 @@ impl HhConfig {
                 "package_v2_bypass_package_check_for_class_const",
                 default.tco_package_v2_bypass_package_check_for_class_const,
             )?,
+            tco_package_v2_exclude_patterns: hhconfig
+                .get_str("package_v2_exclude_patterns")
+                .map_or(default.tco_package_v2_exclude_patterns, parse_svec),
             re_no_cache: hhconfig.get_bool_or("re_no_cache", default.re_no_cache)?,
             hh_distc_should_disable_trace_store: hhconfig.get_bool_or(
                 "hh_distc_should_disable_trace_store",

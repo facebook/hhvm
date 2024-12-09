@@ -122,4 +122,5 @@ let print_error_list
         end
       sl);
   Option.iter stale_msg ~f:(fun msg -> Out_channel.output_string oc msg);
-  Out_channel.flush oc
+  Out_channel.flush oc;
+  ()

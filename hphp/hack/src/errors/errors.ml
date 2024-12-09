@@ -488,12 +488,13 @@ let format_summary
     ~(warning_count : int)
     ~(dropped_count : int option)
     ~(max_errors : int option) : string option =
+  let no_errors_string = "No errors!" in
   match format with
   | Context
   | Highlighted ->
     let error_count_message =
       if Int.( = ) error_count 0 then
-        "No errors!"
+        no_errors_string
       else
         Printf.sprintf
           "%d error%s"
@@ -546,7 +547,10 @@ let format_summary
   | Extended
   | Raw
   | Plain ->
-    None
+    if Int.equal 0 (error_count + warning_count) then
+      Some (no_errors_string ^ "\n")
+    else
+      None
 
 let report_pos_from_reason = ref false
 

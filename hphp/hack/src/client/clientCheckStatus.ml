@@ -185,6 +185,10 @@ module ErrorPrinter : sig
 
   val print_extra_errors_if_any : t -> t
 
+  (** Whether we've been printing the counts of extra errors
+      after hitting the --max-error limit.
+      Used to skip printing the error summary
+      (e.g. "1 error, 2 warnings") if true. *)
   val has_printed_counts : t -> bool
 end = struct
   type t = {
@@ -193,6 +197,10 @@ end = struct
     extra_error_count: int;
     extra_warning_count: int;
     has_already_printed_extra: bool;
+        (** Whether we've been printing the counts of extra
+            errors after hitting the --max-error limit.
+            Used to skip printing the error summary
+            (e.g. "1 error, 2 warnings") if true. *)
   }
 
   let init ~max_errors =

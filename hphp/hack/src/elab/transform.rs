@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c316e9b317a31f816b424e5a080f1e99>>
+// @generated SignedSource<<37ff048d2395050fe48baee6b338d2f2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1314,6 +1314,9 @@ const _: () = {
 };
 const _: () = {
     impl Transform for EmitId {}
+};
+const _: () = {
+    impl Transform for PackageMembership {}
 };
 impl Transform for Class_ {
     fn transform(&mut self, env: &Env, pass: &mut (impl Pass + Clone)) {

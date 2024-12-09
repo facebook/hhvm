@@ -249,3 +249,8 @@ let expr_to_arg pk e =
   match pk with
   | Ast_defs.Pnormal -> Anormal e
   | Ast_defs.Pinout p -> Ainout (p, e)
+
+let get_package_name = function
+  | PackageConfigAssignment pkg
+  | PackageOverride (_, pkg) ->
+    pkg

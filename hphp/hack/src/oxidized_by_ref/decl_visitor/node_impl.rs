@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ae852b421df74b25827b73ee9d48536c>>
+// @generated SignedSource<<eabaa6239bdc562ce4ed940bd3d748ae>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -15,6 +15,7 @@ impl<'a> Node<'a> for bool {}
 impl<'a> Node<'a> for isize {}
 impl<'a> Node<'a> for str {}
 impl<'a> Node<'a> for bstr::BStr {}
+impl<'a> Node<'a> for crate::aast_defs::PackageMembership {}
 impl<'a> Node<'a> for crate::file_info::Mode {}
 impl<'a> Node<'a> for crate::local_id::LocalId<'a> {}
 impl<'a> Node<'a> for crate::method_flags::MethodFlags {}
@@ -23,6 +24,7 @@ impl<'a> Node<'a> for crate::prop_flags::PropFlags {}
 impl<'a> Node<'a> for crate::tany_sentinel::TanySentinel {}
 impl<'a> Node<'a> for crate::typing_defs_flags::FunParamFlags {}
 impl<'a> Node<'a> for crate::typing_defs_flags::FunTypeFlags {}
+impl<'a> Node<'a> for rc_pos::Pos {}
 impl<'a, T: Node<'a> + ?Sized> Node<'a> for &'a T {
     fn recurse(&'a self, v: &mut dyn Visitor<'a>) {
         (*self).accept(v)

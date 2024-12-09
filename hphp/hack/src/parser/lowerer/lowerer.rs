@@ -45,6 +45,7 @@ use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::ast::Expr;
 use oxidized::ast::Expr_;
+use oxidized::ast::PackageMembership;
 use oxidized::ast_defs::Id;
 use oxidized::errors::Error as HHError;
 use oxidized::errors::Naming;
@@ -205,7 +206,7 @@ pub struct Env<'a> {
 
     state: Rc<RefCell<State>>,
 
-    package: Option<String>,
+    package: Option<PackageMembership>,
 }
 
 impl<'a> Env<'a> {
@@ -5716,7 +5717,7 @@ fn p_const_value<'a>(node: S<'a>, env: &mut Env<'a>, default_pos: Pos) -> Result
     }
 }
 
-fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<String> {
+fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<PackageMembership> {
     if env.package.is_some() {
         return env.package.clone();
     }
@@ -5728,7 +5729,7 @@ fn get_current_package<'a>(env: &mut Env<'a>, node: S<'a>) -> Option<String> {
         parser_options
             .package_info
             .get_package_for_file(parser_options.package_v2_support_multifile_tests, filepath)
-            .map(String::from)
+            .map(|p| PackageMembership::PackageConfigAssignment(String::from(p)))
     } else {
         None
     };
@@ -6401,9 +6402,9 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             let user_attributes = p_user_attribute(node, env)?;
             for attr in &user_attributes {
                 if attr.name.1 == sn::user_attributes::PACKAGE_OVERRIDE {
-                    if let [aast::Expr(_, _, ast::Expr_::String(s))] = attr.params.as_slice() {
+                    if let [aast::Expr(_, pos, ast::Expr_::String(s))] = attr.params.as_slice() {
                         if let Ok(s) = String::from_utf8(s.to_vec()) {
-                            env.package = Some(s)
+                            env.package = Some(PackageMembership::PackageOverride(pos.clone(), s))
                         }
                     }
                 }

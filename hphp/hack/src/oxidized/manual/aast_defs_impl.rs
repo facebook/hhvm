@@ -2,6 +2,8 @@
 //
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
+use eq_modulo_pos::EqModuloPos;
+use serde::Deserialize;
 
 use crate::aast_defs::*;
 use crate::ast_defs::*;
@@ -101,5 +103,34 @@ impl AsRef<str> for Visibility {
 impl std::fmt::Display for Visibility {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.as_ref())
+    }
+}
+
+impl<'a> ocamlrep::FromOcamlRepIn<'a> for PackageMembership {
+    fn from_ocamlrep_in(
+        value: ocamlrep::Value<'_>,
+        _alloc: &'a bumpalo::Bump,
+    ) -> Result<Self, ocamlrep::FromError> {
+        use ocamlrep::FromOcamlRep;
+        Self::from_ocamlrep(value)
+    }
+}
+arena_deserializer::impl_deserialize_in_arena!(PackageMembership);
+
+impl EqModuloPos for PackageMembership {
+    fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        self == rhs
+    }
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
+        self == rhs
+    }
+}
+impl PackageMembership {
+    pub fn to_arena_allocated<'a>(&self, arena: &'a bumpalo::Bump) -> &'a PackageMembership {
+        use PackageMembership::*;
+        match self {
+            PackageConfigAssignment(x) => arena.alloc(PackageConfigAssignment(x.clone())),
+            PackageOverride(p, x) => arena.alloc(PackageOverride(p.clone(), x.clone())),
+        }
     }
 }

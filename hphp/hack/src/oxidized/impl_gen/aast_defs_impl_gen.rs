@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<35005f823a3eca166148242429a85327>>
+// @generated SignedSource<<c74dcdb1c7d558e9f15bfd68d653549f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2883,6 +2883,62 @@ impl EmitId {
     pub fn as_emit_id_into(self) -> Option<isize> {
         match self {
             EmitId::EmitId(p0) => Some(p0),
+            _ => None,
+        }
+    }
+}
+impl PackageMembership {
+    pub fn mk_package_override(p0: Pos, p1: String) -> Self {
+        PackageMembership::PackageOverride(p0, p1)
+    }
+    pub fn mk_package_config_assignment(p0: String) -> Self {
+        PackageMembership::PackageConfigAssignment(p0)
+    }
+    pub fn is_package_override(&self) -> bool {
+        match self {
+            PackageMembership::PackageOverride(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_package_config_assignment(&self) -> bool {
+        match self {
+            PackageMembership::PackageConfigAssignment(..) => true,
+            _ => false,
+        }
+    }
+    pub fn as_package_override(&self) -> Option<(&Pos, &String)> {
+        match self {
+            PackageMembership::PackageOverride(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_package_config_assignment(&self) -> Option<&String> {
+        match self {
+            PackageMembership::PackageConfigAssignment(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_package_override_mut(&mut self) -> Option<(&mut Pos, &mut String)> {
+        match self {
+            PackageMembership::PackageOverride(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_package_config_assignment_mut(&mut self) -> Option<&mut String> {
+        match self {
+            PackageMembership::PackageConfigAssignment(p0) => Some(p0),
+            _ => None,
+        }
+    }
+    pub fn as_package_override_into(self) -> Option<(Pos, String)> {
+        match self {
+            PackageMembership::PackageOverride(p0, p1) => Some((p0, p1)),
+            _ => None,
+        }
+    }
+    pub fn as_package_config_assignment_into(self) -> Option<String> {
+        match self {
+            PackageMembership::PackageConfigAssignment(p0) => Some(p0),
             _ => None,
         }
     }

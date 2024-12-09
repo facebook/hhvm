@@ -16,6 +16,7 @@ type packageV2_error_info = {
   current_package_pos: Pos.t;
   current_package_name: string option;
   target_package_name: string option;
+  target_package_pos: Pos.t;
 }
 
 (** Calculate the packages of the current and target symbols using their filenames.
@@ -28,7 +29,7 @@ type packageV2_error_info = {
   *)
 val can_access_by_package_v2_rules :
   env:Typing_env_types.env ->
-  target_package:string option ->
+  target_package_membership:Aast_defs.package_membership option ->
   target_pos:Pos_or_decl.t ->
   [ `Yes
   | `PackageNotSatisfied of packageV2_error_info

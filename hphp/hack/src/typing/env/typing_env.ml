@@ -595,11 +595,23 @@ let set_current_module env m =
 let get_current_module env = Option.map env.genv.current_module ~f:snd
 
 let get_current_package env =
-  let current_pkg_name = env.genv.current_package in
+  let current_pkg_name =
+    Option.map env.genv.current_package ~f:Aast_utils.get_package_name
+  in
   let info = get_tcopt env |> TypecheckerOptions.package_info in
   Option.bind current_pkg_name ~f:(PackageInfo.get_package info)
 
-let set_current_package env package =
+let get_current_package_def_pos env =
+  let current_pkg_name =
+    Option.map env.genv.current_package ~f:Aast_utils.get_package_name
+  in
+  let info = get_tcopt env |> TypecheckerOptions.package_info in
+  Option.bind current_pkg_name ~f:(fun p ->
+      PackageInfo.get_package info p |> Option.map ~f:Package.get_package_pos)
+
+let get_current_package_membership env = env.genv.current_package
+
+let set_current_package_membership env package =
   { env with genv = { env.genv with current_package = package } }
 
 (** Register the current top-level structure as being dependent on the current

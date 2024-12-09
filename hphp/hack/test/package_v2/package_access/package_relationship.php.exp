@@ -1,23 +1,34 @@
 error: Typing[4472] Cannot access an element which belongs to package pkg1 from package pkg3 [1]
--> This is from package_relationship.php--a.php, which belongs to package pkg1 [2]
--> But package_relationship.php--c.php is in package pkg3, and package pkg3 does not include package pkg1 [3]
+-> This is from package_relationship.php--a.php [2]
+-> package_relationship.php--a.php belongs to package pkg1 [3]
+-> But package_relationship.php--c.php is in package pkg3 [4]
+-> And package pkg3 does not include package pkg1 [5]
 
 package_relationship.php--c.php:6:13
-4 | function test(): void {
-5 |    $b = new B(); // ok
+     1 | <?hh
+[4]  2 | <<file: __PackageOverride('pkg3')>> // package pkg3 (include pkg2)
+     3 | <<__EntryPoint>>
+     4 | function test(): void {
+     5 |    $b = new B(); // ok
 [1]  6 |    $a = new A(); // error
-7 | }
+     7 | }
 
 package_relationship.php--a.php:3:7
-1 | <?hh
-2 | // package pkg1
+     1 | <?hh
+     2 | // package pkg1
 [2]  3 | class A {}
 
-PACKAGES.toml:13:11
-11 | includes = ["pkg1"]
-12 |
-[3] 13 | [packages.pkg3]
-14 | includes = ["pkg2"]
-15 |
+PACKAGES.toml:3:11
+     1 | [packages]
+     2 | 
+[3]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+       :
+    11 | includes = ["pkg1"]
+    12 | 
+[5] 13 | [packages.pkg3]
+    14 | includes = ["pkg2"]
+    15 | 
 
 1 error found

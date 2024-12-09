@@ -1577,16 +1577,18 @@ end = struct
     let cross_pkg_access
         (pos : Pos.t)
         (decl_pos : Pos_or_decl.t)
-        (package_pos : Pos.t)
-        (current_package_opt : string option)
-        (target_package_opt : string option)
+        (current_package_pos : Pos.t)
+        (current_package_def_pos : Pos.t)
+        (current_package_name : string option)
+        (target_package_pos : Pos.t)
+        (target_package_name : string option)
         (current_filename : Relative_path.t)
         (target_filename : Relative_path.t)
         (soft : bool) =
       let current_filename = Relative_path.suffix current_filename in
       let target_filename = Relative_path.suffix target_filename in
-      let current_package = get_package_str current_package_opt in
-      let target_package = get_package_str target_package_opt in
+      let current_package = get_package_str current_package_name in
+      let target_package = get_package_str target_package_name in
       let relationship =
         if soft then
           "only soft includes"
@@ -1603,16 +1605,16 @@ end = struct
       and reason =
         lazy
           [
-            ( decl_pos,
+            (decl_pos, Printf.sprintf "This is from %s" target_filename);
+            ( Pos_or_decl.of_raw_pos target_package_pos,
+              Printf.sprintf "%s belongs to %s" target_filename target_package
+            );
+            ( Pos_or_decl.of_raw_pos current_package_pos,
+              Printf.sprintf "But %s is in %s" current_filename current_package
+            );
+            ( Pos_or_decl.of_raw_pos current_package_def_pos,
               Printf.sprintf
-                "This is from %s, which belongs to %s"
-                target_filename
-                target_package );
-            ( Pos_or_decl.of_raw_pos package_pos,
-              Printf.sprintf
-                "But %s is in %s, and %s %s %s"
-                current_filename
-                current_package
+                "And %s %s %s"
                 current_package
                 relationship
                 target_package );
@@ -1676,18 +1678,22 @@ end = struct
           {
             pos;
             decl_pos;
-            package_pos;
-            current_package_opt;
-            target_package_opt;
+            current_package_pos;
+            current_package_def_pos;
+            current_package_name;
+            target_package_pos;
+            target_package_name;
             current_filename;
             target_filename;
           } ->
         cross_pkg_access
           pos
           decl_pos
-          package_pos
-          current_package_opt
-          target_package_opt
+          current_package_pos
+          current_package_def_pos
+          current_package_name
+          target_package_pos
+          target_package_name
           current_filename
           target_filename
           false (* Soft *)
@@ -1702,18 +1708,22 @@ end = struct
           {
             pos;
             decl_pos;
-            package_pos;
-            current_package_opt;
-            target_package_opt;
+            current_package_pos;
+            current_package_def_pos;
+            current_package_name;
+            target_package_pos;
+            target_package_name;
             current_filename;
             target_filename;
           } ->
         cross_pkg_access
           pos
           decl_pos
-          package_pos
-          current_package_opt
-          target_package_opt
+          current_package_pos
+          current_package_def_pos
+          current_package_name
+          target_package_pos
+          target_package_name
           current_filename
           target_filename
           true (* Soft *)

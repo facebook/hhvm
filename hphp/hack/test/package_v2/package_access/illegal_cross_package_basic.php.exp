@@ -1,6 +1,8 @@
 error: Typing[4472] Cannot access an element which belongs to package pkg2 from package pkg1 [1]
--> This is from illegal_cross_package_basic.php--illegal_cross_package_basic_foo.php, which belongs to package pkg2 [2]
--> But illegal_cross_package_basic.php--bar.php is in package pkg1, and package pkg1 does not include package pkg2 [3]
+-> This is from illegal_cross_package_basic.php--illegal_cross_package_basic_foo.php [2]
+-> illegal_cross_package_basic.php--illegal_cross_package_basic_foo.php belongs to package pkg2 [3]
+-> But illegal_cross_package_basic.php--bar.php is in package pkg1 [4]
+-> And package pkg1 does not include package pkg2 [4]
 
 illegal_cross_package_basic.php--bar.php:5:13
     3 | module bar;
@@ -14,11 +16,14 @@ illegal_cross_package_basic.php--illegal_cross_package_basic_foo.php:3:6
     2 | // package pkg2
 [2] 3 | type TFoo = int;
 
-PACKAGES.toml:3:11
+PACKAGES.toml:6:11
     1 | [packages]
     2 | 
-[3] 3 | [packages.pkg1]
+[4] 3 | [packages.pkg1]
     4 | include_paths=["//"]
     5 | 
+[3] 6 | [packages.pkg2]
+    7 | include_paths=[
+    8 |     "//cross_package_access_internal1_foo.php",
 
 1 error found

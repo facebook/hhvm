@@ -20,6 +20,7 @@ oxidized::aast_defs::MutableReturn
 oxidized::aast_defs::NsKind
 oxidized::aast_defs::OgNullFlavor
 oxidized::aast_defs::OptionalKind
+oxidized::aast_defs::PackageMembership
 oxidized::aast_defs::ParamMutability
 oxidized::aast_defs::PropOrMethod
 oxidized::aast_defs::ReadonlyKind

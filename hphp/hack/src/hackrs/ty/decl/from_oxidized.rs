@@ -480,7 +480,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             user_attributes: slice(user_attributes),
             enum_type: enum_type.map(Into::into),
             docs_url: docs_url.map(Into::into),
-            package: package.map(Into::into),
+            package: package.cloned(),
         }
     }
 }
@@ -497,7 +497,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::FunDecl<'_>> for shallow::FunDecl<
             support_dynamic_type: sf.support_dynamic_type,
             no_auto_dynamic: sf.no_auto_dynamic,
             no_auto_likes: sf.no_auto_likes,
-            package: sf.package.map(Into::into),
+            package: sf.package.cloned(),
         }
     }
 }
@@ -515,7 +515,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::TypedefDecl<'_>> for shallow::Type
             attributes: slice(x.attributes),
             internal: x.internal,
             docs_url: x.docs_url.map(Into::into),
-            package: x.package.map(Into::into),
+            package: x.package.cloned(),
         }
     }
 }
@@ -792,7 +792,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             docs_url: docs_url.map(Into::into),
             allow_multiple_instantiations: *allow_multiple_instantiations,
             sort_text: sort_text.map(Into::into),
-            package: package.map(Into::into),
+            package: package.cloned(),
         }
     }
 }

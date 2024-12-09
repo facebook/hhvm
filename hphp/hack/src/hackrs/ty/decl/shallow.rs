@@ -181,7 +181,7 @@ pub struct ShallowClass<R: Reason> {
     pub user_attributes: Box<[UserAttribute<R::Pos>]>,
     pub enum_type: Option<EnumType<R>>,
     pub docs_url: Option<String>,
-    pub package: Option<String>,
+    pub package: Option<oxidized::aast_defs::PackageMembership>,
 }
 
 walkable!(ShallowClass<R> as visit_shallow_class => [

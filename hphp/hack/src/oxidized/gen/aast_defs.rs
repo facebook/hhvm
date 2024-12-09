@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<234ceba63fc3a09cb4f5acb3ce24c376>>
+// @generated SignedSource<<bdd096b72661e6de32c88436a3a27283>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1755,6 +1755,30 @@ arena_deserializer::impl_deserialize_in_arena!(EmitId);
     ToOcamlRep
 )]
 #[rust_to_ocaml(and)]
+#[rust_to_ocaml(attr = "transform.opaque")]
+#[repr(C, u8)]
+pub enum PackageMembership {
+    /// Package membership derived from the file attribute __PackageOverride
+    PackageOverride(Pos, String),
+    /// Package membership derived from the package specification in PACKAGES.toml
+    PackageConfigAssignment(String),
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "c_")]
 #[repr(C)]
 pub struct Class_<Ex, En> {
@@ -1811,7 +1835,7 @@ pub struct Class_<Ex, En> {
     pub emit_id: Option<EmitId>,
     pub internal: bool,
     pub module: Option<Sid>,
-    pub package: Option<String>,
+    pub package: Option<PackageMembership>,
 }
 
 #[derive(
@@ -2261,7 +2285,7 @@ pub struct Typedef<Ex, En> {
     pub module: Option<Sid>,
     pub docs_url: Option<String>,
     pub doc_comment: Option<DocComment>,
-    pub package: Option<String>,
+    pub package: Option<PackageMembership>,
 }
 
 #[derive(
@@ -2326,7 +2350,7 @@ pub struct FunDef<Ex, En> {
     pub module: Option<Sid>,
     pub tparams: Vec<Tparam<Ex, En>>,
     pub where_constraints: Vec<WhereConstraintHint>,
-    pub package: Option<String>,
+    pub package: Option<PackageMembership>,
 }
 
 #[derive(

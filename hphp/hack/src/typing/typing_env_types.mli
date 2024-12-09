@@ -90,7 +90,7 @@ and genv = {
       (** The file containing the top-level definition that we are checking *)
   current_module: Ast_defs.id option;
       (** The module of the top-level definition that we are checking *)
-  current_package: string option;
+  current_package: Aast_defs.package_membership option;
       (** The package membership of a top-level definition that we're checking *)
   this_internal: bool;
       (** Is the definition that we are checking marked internal? *)

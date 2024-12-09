@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<704ca1d0606a1b8c0e55274a7dea6a02>>
+// @generated SignedSource<<2a7581fffb05e734c1f18b9fccff16ef>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1724,6 +1724,28 @@ impl<P: Params> Node<P> for OptionalKind {
     ) -> Result<(), P::Error> {
         match self {
             OptionalKind::Optional => Ok(()),
+        }
+    }
+}
+impl<P: Params> Node<P> for PackageMembership {
+    fn accept<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        v.visit_package_membership(c, self)
+    }
+    fn recurse<'node>(
+        &'node self,
+        c: &mut P::Context,
+        v: &mut dyn Visitor<'node, Params = P>,
+    ) -> Result<(), P::Error> {
+        match self {
+            PackageMembership::PackageOverride(a0, a1) => {
+                a0.accept(c, v)?;
+                a1.accept(c, v)
+            }
+            PackageMembership::PackageConfigAssignment(a0) => a0.accept(c, v),
         }
     }
 }

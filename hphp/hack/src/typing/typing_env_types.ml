@@ -65,7 +65,7 @@ and genv = {
   fun_is_ctor: bool;
   file: Relative_path.t;
   current_module: Ast_defs.id option;
-  current_package: string option;
+  current_package: Aast_defs.package_membership option;
   this_internal: bool;
   this_support_dynamic_type: bool;
   no_auto_likes: bool;

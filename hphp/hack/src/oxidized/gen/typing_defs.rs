@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bf1ead83cb3c0074d79fbc9128197e10>>
+// @generated SignedSource<<c54eb6b6a7167c588c19ddefd9f90a84>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -166,7 +166,7 @@ pub struct ClassElt {
 pub struct FunElt {
     pub deprecated: Option<String>,
     pub module: Option<ast_defs::Id>,
-    pub package: Option<String>,
+    pub package: Option<aast_defs::PackageMembership>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     pub type_: Ty,
@@ -514,7 +514,7 @@ pub struct TypedefType {
     pub attributes: Vec<UserAttribute>,
     pub internal: bool,
     pub docs_url: Option<String>,
-    pub package: Option<String>,
+    pub package: Option<aast_defs::PackageMembership>,
 }
 
 #[derive(

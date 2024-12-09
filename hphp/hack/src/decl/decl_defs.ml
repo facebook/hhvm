@@ -162,7 +162,7 @@ type decl_class_type = {
   dc_sort_text: string option;
       (** The string provided by the __AutocompleteSortText attribute used for sorting
           autocomplete results. *)
-  dc_package: string option;
+  dc_package: Aast_defs.package_membership option;
 }
 [@@deriving show]
 

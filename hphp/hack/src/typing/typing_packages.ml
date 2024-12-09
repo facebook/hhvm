@@ -53,6 +53,7 @@ type packageV2_error_info = {
   current_package_pos: Pos.t;
   current_package_name: string option;
   target_package_name: string option;
+  target_package_pos: Pos.t;
 }
 
 let is_excluded env (file : Relative_path.t) =
@@ -63,9 +64,27 @@ let is_excluded env (file : Relative_path.t) =
   List.exists excluded_patterns ~f:(fun pattern ->
       Str.(string_match (regexp pattern) filename 0))
 
+(* package, package name, package memeberhip position *)
+let get_package_profile
+    (env : Typing_env_types.env)
+    (pkg_membership : Aast_defs.package_membership option) :
+    Package.t option * string option * Pos.t =
+  match pkg_membership with
+  | Some (Aast_defs.PackageConfigAssignment pkg_name) ->
+    let pkg = Env.get_package_by_name env pkg_name in
+    let pos =
+      match pkg with
+      | Some p -> Package.get_package_pos p
+      | None -> Pos.none
+    in
+    (pkg, Some pkg_name, pos)
+  | Some (Aast_defs.PackageOverride (pkg_pos, pkg_name)) ->
+    (Env.get_package_by_name env pkg_name, Some pkg_name, pkg_pos)
+  | _ -> (None, None, Pos.none)
+
 let can_access_by_package_v2_rules
     ~(env : Typing_env_types.env)
-    ~(target_package : string option)
+    ~(target_package_membership : Aast_defs.package_membership option)
     ~(target_pos : Pos_or_decl.t) =
   let current_file = Env.get_file env in
   let target_file = Pos_or_decl.filename target_pos in
@@ -84,25 +103,21 @@ let can_access_by_package_v2_rules
   then
     `Yes
   else
-    let (current_pkg, target_pkg) =
-      ( Env.get_current_package env,
-        Option.bind target_package ~f:(Env.get_package_by_name env) )
+    let (current_pkg, current_package_name, current_package_pos) =
+      Env.get_current_package_membership env |> get_package_profile env
+    in
+    let (target_pkg, target_package_name, target_package_pos) =
+      get_package_profile env target_package_membership
     in
     match get_package_violation env current_pkg target_pkg with
     | None -> `Yes
     | Some pkg_relationship ->
-      let (current_package_pos, current_package_name) =
-        match current_pkg with
-        | Some pkg ->
-          (Package.get_package_pos pkg, Some (Package.get_package_name pkg))
-        | None -> (Pos.none, None)
-      in
       let err_info =
         {
           current_package_pos;
           current_package_name;
-          target_package_name =
-            Option.map ~f:Package.get_package_name target_pkg;
+          target_package_name;
+          target_package_pos;
         }
       in
       (match pkg_relationship with

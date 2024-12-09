@@ -11,6 +11,7 @@ use hcons::Hc;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::aast;
+pub use oxidized::aast_defs::PackageMembership;
 pub use oxidized::aast_defs::ReifyKind;
 pub use oxidized::aast_defs::Tprim as Prim;
 use oxidized::ast_defs;
@@ -659,13 +660,15 @@ pub struct ConstDecl<R: Reason> {
 
 walkable!(ConstDecl<R> => [ty]);
 
+walkable!(PackageMembership);
+
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
 pub struct FunElt<R: Reason> {
     pub deprecated: Option<Bytes>,
     pub module: Option<Positioned<ModuleName, R::Pos>>,
-    pub package: Option<String>,
+    pub package: Option<PackageMembership>,
     /// Top-level functions have limited visibilities
     pub internal: bool,
     pub ty: Ty<R>,
@@ -745,7 +748,7 @@ pub struct TypedefType<R: Reason> {
     pub attributes: Box<[UserAttribute<R::Pos>]>,
     pub internal: bool,
     pub docs_url: Option<String>,
-    pub package: Option<String>,
+    pub package: Option<PackageMembership>,
 }
 
 walkable!(TypedefType<R> => [tparams, as_constraint, super_constraint, type_assignment]);

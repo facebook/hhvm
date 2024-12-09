@@ -1,25 +1,33 @@
 error: Typing[4472] Cannot access an element which belongs to package pkg6 from package pkg1 [1]
--> This is from nested_package_path.php--pkg6/bar.php, which belongs to package pkg6 [2]
--> But nested_package_path.php--foo.php is in package pkg1, and package pkg1 does not include package pkg6 [3]
+-> This is from nested_package_path.php--pkg6/bar.php [2]
+-> nested_package_path.php--pkg6/bar.php belongs to package pkg6 [3]
+-> But nested_package_path.php--foo.php is in package pkg1 [4]
+-> And package pkg1 does not include package pkg6 [4]
 
 nested_package_path.php--foo.php:4:3
-2 |
-3 | function foo(): void {
-[1] 4 |   bar(); // this should be an error as pkg1 does not include pkg6
-5 | }
+     2 | 
+     3 | function foo(): void {
+[1]  4 |   bar(); // this should be an error as pkg1 does not include pkg6
+     5 | }
 
 nested_package_path.php--pkg6/bar.php:3:10
-1 | <?hh
-2 |
-[2] 3 | function bar(): void {}
-4 |
-5 | function zot(): void {
+     1 | <?hh
+     2 | 
+[2]  3 | function bar(): void {}
+     4 | 
+     5 | function zot(): void {
 
-PACKAGES.toml:3:11
-1 | [packages]
-2 |
-[3] 3 | [packages.pkg1]
-4 | include_paths=["//"]
-5 |
+PACKAGES.toml:21:11
+     1 | [packages]
+     2 | 
+[4]  3 | [packages.pkg1]
+     4 | include_paths=["//"]
+     5 | 
+       :
+    19 | include_paths=["//pkg5/"]
+    20 | 
+[3] 21 | [packages.pkg6]
+    22 | include_paths=["//pkg6/"]
+    23 | includes = ["pkg1"]
 
 1 error found

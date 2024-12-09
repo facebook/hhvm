@@ -152,16 +152,24 @@ let check_package_v2_access
   if ignore_package_errors then
     None
   else
+    let current_package_def_pos =
+      Env.get_current_package_def_pos env |> Option.value ~default:Pos.none
+    in
     match
       Typing_packages.can_access_by_package_v2_rules
         ~env
-        ~target_package
+        ~target_package_membership:target_package
         ~target_pos:def_pos
     with
     | `Yes -> None
     | `PackageNotSatisfied
         Typing_packages.
-          { current_package_pos; current_package_name; target_package_name } ->
+          {
+            current_package_pos;
+            current_package_name;
+            target_package_name;
+            target_package_pos;
+          } ->
       Some
         (Typing_error.package
            (Cross_pkg_access
@@ -170,13 +178,20 @@ let check_package_v2_access
                 decl_pos = def_pos;
                 current_filename = Pos.filename use_pos;
                 target_filename = Pos_or_decl.filename def_pos;
-                package_pos = current_package_pos;
-                current_package_opt = current_package_name;
-                target_package_opt = target_package_name;
+                current_package_pos;
+                current_package_def_pos;
+                current_package_name;
+                target_package_pos;
+                target_package_name;
               }))
     | `PackageSoftIncludes
         Typing_packages.
-          { current_package_pos; current_package_name; target_package_name } ->
+          {
+            current_package_pos;
+            current_package_name;
+            target_package_name;
+            target_package_pos;
+          } ->
       Some
         (Typing_error.package
            (Soft_included_access
@@ -185,9 +200,11 @@ let check_package_v2_access
                 decl_pos = def_pos;
                 current_filename = Pos.filename use_pos;
                 target_filename = Pos_or_decl.filename def_pos;
-                package_pos = current_package_pos;
-                current_package_opt = current_package_name;
-                target_package_opt = target_package_name;
+                current_package_pos;
+                current_package_def_pos;
+                current_package_name;
+                target_package_pos;
+                target_package_name;
               }))
 
 let check_package_v1_access env use_pos def_pos target_module =
@@ -443,7 +460,11 @@ let check_cross_package ~use_pos ~def_pos env (cross_package : string option) =
       if not is_package_v2 then
         Option.bind ~f:(Env.get_package_for_module env) current_module
       else
-        Env.get_current_package env
+        Env.get_current_package_membership env
+        |> Option.bind ~f:(function
+               | Aast_defs.PackageConfigAssignment pkg_name
+               | Aast_defs.PackageOverride (_, pkg_name)
+               -> Env.get_package_by_name env pkg_name)
     in
     let target_pkg = Env.get_package_by_name env target in
     (match Typing_packages.get_package_violation env current_pkg target_pkg with

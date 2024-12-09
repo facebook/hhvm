@@ -67,3 +67,5 @@ val arg_to_expr : ('a, 'b) Aast_defs.argument -> ('a, 'b) Aast_defs.expr
 (** Convert an an expression to an argument, using the supplied inout *)
 val expr_to_arg :
   Ast_defs.param_kind -> ('a, 'b) Aast_defs.expr -> ('a, 'b) Aast_defs.argument
+
+val get_package_name : Aast_defs.package_membership -> string

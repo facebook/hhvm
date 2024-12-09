@@ -6,6 +6,7 @@
 use std::cmp::Ordering;
 use std::ops::Range;
 use std::result::Result::*;
+use std::sync::Arc;
 
 use bumpalo::Bump;
 use eq_modulo_pos::EqModuloPos;
@@ -253,9 +254,7 @@ impl<'a> Pos<'a> {
 
         let start = if span1.start.is_dummy() {
             span2.start
-        } else if span2.start.is_dummy() {
-            span1.start
-        } else if span1.start.offset() < span2.start.offset() {
+        } else if span2.start.is_dummy() || span1.start.offset() < span2.start.offset() {
             span1.start
         } else {
             span2.start
@@ -468,6 +467,13 @@ impl std::fmt::Display for PosString<'_> {
 // NoPosHash is meant to be position-insensitive, so don't do anything!
 impl no_pos_hash::NoPosHash for Pos<'_> {
     fn hash<H: std::hash::Hasher>(&self, _state: &mut H) {}
+}
+
+impl From<Pos<'_>> for rc_pos::Pos {
+    fn from(pos: Pos<'_>) -> rc_pos::Pos {
+        let raw_span = pos.to_raw_span();
+        rc_pos::Pos::from_raw_span(Arc::new((*pos.filename()).into()), raw_span)
+    }
 }
 
 pub mod map {

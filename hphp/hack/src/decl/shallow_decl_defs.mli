@@ -149,7 +149,7 @@ type shallow_class = {
   sc_user_attributes: user_attribute list;
   sc_enum_type: enum_type option;
   sc_docs_url: string option;
-  sc_package: string option;
+  sc_package: Aast_defs.package_membership option;
 }
 [@@deriving eq, show]
 

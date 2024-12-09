@@ -551,8 +551,9 @@ let genv_as_value env genv =
         [("current_module", string_as_value @@ Ast_defs.show_id current_module)]
       | None -> [])
     @ (match current_package with
-      | Some current_package ->
-        [("current_package", string_as_value current_package)]
+      | Some Aast_defs.(PackageConfigAssignment pkg | PackageOverride (_, pkg))
+        ->
+        [("current_package", string_as_value pkg)]
       | None -> [])
     @ (match parent with
       | Some (parent_id, parent_ty) ->

@@ -283,7 +283,12 @@ val get_current_module : env -> string option
 
 val get_current_package : env -> Package.t option
 
-val set_current_package : env -> string option -> env
+val get_current_package_def_pos : env -> Pos.t option
+
+val get_current_package_membership : env -> Aast_defs.package_membership option
+
+val set_current_package_membership :
+  env -> Aast_defs.package_membership option -> env
 
 (** Register the current top-level structure as being dependent on the current
     module *)

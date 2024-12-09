@@ -11,6 +11,7 @@ use hash::IndexMap;
 use hash::IndexSet;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
+use oxidized::ast::PackageMembership;
 pub use oxidized::ast_defs::Abstraction;
 pub use oxidized::ast_defs::ClassishKind;
 use pos::Bytes;
@@ -223,7 +224,7 @@ pub struct FoldedClass<R: Reason> {
     pub allow_multiple_instantiations: bool,
     /// The string provided by the <<__AutocompleteSortText>> attribute.
     pub sort_text: Option<String>,
-    pub package: Option<String>,
+    pub package: Option<PackageMembership>,
 }
 
 impl<R: Reason> FoldedClass<R> {

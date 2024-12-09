@@ -3568,6 +3568,7 @@ dependencies = [
  "ocamlrep_caml_builtins",
  "oxidized",
  "pretty_assertions",
+ "rc_pos",
  "relative_path",
  "rust_to_ocaml_attr",
  "serde",

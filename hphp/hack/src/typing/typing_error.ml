@@ -337,9 +337,11 @@ module Primary = struct
       | Cross_pkg_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
-          package_pos: Pos.t;
-          current_package_opt: string option;
-          target_package_opt: string option;
+          current_package_pos: Pos.t;
+          current_package_def_pos: Pos.t;
+          current_package_name: string option;
+          target_package_pos: Pos.t;
+          target_package_name: string option;
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
         }
@@ -352,9 +354,11 @@ module Primary = struct
       | Soft_included_access of {
           pos: Pos.t;
           decl_pos: Pos_or_decl.t;
-          package_pos: Pos.t;
-          current_package_opt: string option;
-          target_package_opt: string option;
+          current_package_pos: Pos.t;
+          current_package_def_pos: Pos.t;
+          current_package_name: string option;
+          target_package_pos: Pos.t;
+          target_package_name: string option;
           current_filename: Relative_path.t;
           target_filename: Relative_path.t;
         }

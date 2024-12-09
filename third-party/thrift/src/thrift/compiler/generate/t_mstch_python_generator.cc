@@ -1409,13 +1409,12 @@ void t_mstch_python_generator::generate_types() {
       TypeKind::Immutable,
       generate_root_path_);
 
-  if (experimental_generate_abstract_types) {
-    generate_file(
-        "thrift_abstract_types.py",
-        IsTypesFile::Yes,
-        TypeKind::Abstract,
-        generate_root_path_);
-  }
+  generate_file(
+      "thrift_abstract_types.py",
+      IsTypesFile::Yes,
+      TypeKind::Abstract,
+      generate_root_path_);
+
   mstch_context_.options.erase("generate_to_mutable_python_conversion_methods");
 
   if (experimental_generate_mutable_types) {

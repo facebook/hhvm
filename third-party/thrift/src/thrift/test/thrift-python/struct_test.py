@@ -436,6 +436,93 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
         self.assertNotEqual(w_immutable_containers, w_mutable_containers)
         self.assertEqual(list(w_immutable_containers), list(w_mutable_containers))
 
+    def test_match(self) -> None:
+        # Canonical case: match fields
+        match TestStructImmutable(unqualified_string="Hello, world!"):
+            case TestStructImmutable(unqualified_string=x, optional_string=None):
+                self.assertEqual(x, "Hello, world!")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Any instance will match a Class pattern with no argument:
+        match TestStructImmutable(
+            unqualified_string="Hello, ", optional_string="world!"
+        ):
+            case TestStructImmutable():
+                pass  # Expected
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Capturing value of unset optional field (i.e., None):
+        match TestStructImmutable(unqualified_string="Hello, world!"):
+            case TestStructImmutable(optional_string=x):
+                self.assertIsNone(x)
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Do not match if values differ
+        match TestStructImmutable(unqualified_string="Hello"):
+            case TestStructImmutable(unqualified_string="world!", optional_string=x):
+                self.fail(f"Unexpected match: {x}")
+            case _:
+                pass  # Expected
+
+        # Match default values
+        match TestStructWithDefaultValuesImmutable():
+            case TestStructWithDefaultValuesImmutable(
+                unqualified_integer=x,
+                unqualified_list_i32=y,
+                optional_integer=None,
+            ):
+                self.assertEqual(x, 42)
+                self.assertEqual(y, [1, 2, 3])
+            case _:
+                self.fail("Expected match, got none.")
+
+        # DO_BEFORE(aristidis, 20250115): This should not raise AssertionError, but
+        # currently capturing *z fails.
+        with self.assertRaises(AssertionError):
+            # Same, but using sequence capture pattern
+            match TestStructWithDefaultValuesImmutable():
+                case TestStructWithDefaultValuesImmutable(
+                    unqualified_integer=x,
+                    unqualified_list_i32=[a, b, c],
+                    optional_integer=None,
+                ):
+                    self.assertEqual(x, 42)
+                    self.assertEqual(a, 1)
+                    self.assertEqual(b, 2)
+                    self.assertEqual(c, 3)
+
+                case _:
+                    self.fail("Expected match, got none.")
+
+        # Match nested struct
+        match TestStructWithDefaultValuesImmutable():
+            case TestStructWithDefaultValuesImmutable(unqualified_struct=x):
+                self.assertEqual(x, TestStructImmutable(unqualified_string="hello"))
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match nested struct, capture nested field
+        match TestStructWithDefaultValuesImmutable():
+            case TestStructWithDefaultValuesImmutable(
+                unqualified_struct=TestStructImmutable(unqualified_string=x)
+            ):
+                self.assertEqual(x, "hello")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match adapted types
+        match TestStructAdaptedTypesImmutable(
+            unqualified_adapted_i32_to_datetime=datetime.fromtimestamp(1733556290)
+        ):
+            case TestStructAdaptedTypesImmutable(unqualified_adapted_i32_to_datetime=x):
+                self.assertIsInstance(x, datetime)
+                self.assertEqual(x, datetime.fromtimestamp(1733556290))
+            case _:
+                self.fail("Expected match, got none.")
+
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):
     def setUp(self) -> None:
@@ -2018,3 +2105,137 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         s3.map_int_to_list_int = to_thrift_map({})
         self.assertEqual({2: [2, 3, 4]}, s2.map_int_to_list_int)
         self.assertEqual({}, s3.map_int_to_list_int)
+
+    def test_match(self) -> None:
+        # Canonical case: match fields
+        match TestStructMutable(unqualified_string="Hello, world!"):
+            case TestStructMutable(unqualified_string=x, optional_string=None):
+                self.assertEqual(x, "Hello, world!")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Any instance will match a Class pattern with no argument:
+        match TestStructMutable(unqualified_string="Hello, ", optional_string="world!"):
+            case TestStructMutable():
+                pass  # Expected
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Capturing value of unset optional field (i.e., None):
+        match TestStructMutable(unqualified_string="Hello, world!"):
+            case TestStructMutable(optional_string=x):
+                self.assertIsNone(x)
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Do not match if values differ
+        match TestStructMutable(unqualified_string="Hello"):
+            case TestStructMutable(unqualified_string="world!", optional_string=x):
+                self.fail(f"Unexpected match: {x}")
+            case _:
+                pass  # Expected
+
+        # Match default values
+        match TestStructWithDefaultValuesMutable():
+            case TestStructWithDefaultValuesMutable(
+                unqualified_integer=x,
+                unqualified_list_i32=y,
+                optional_integer=None,
+            ):
+                self.assertEqual(x, 42)
+                self.assertEqual(y, [1, 2, 3])
+            case _:
+                self.fail("Expected match, got none.")
+
+        # DO_BEFORE(aristidis, 20250115): This should not raise AssertionError, but
+        # currently capturing *z fails.
+        with self.assertRaises(AssertionError):
+            # Same, but using sequence capture pattern
+            match TestStructWithDefaultValuesMutable():
+                case TestStructWithDefaultValuesMutable(
+                    unqualified_integer=x,
+                    unqualified_list_i32=[a, b, c],
+                    optional_integer=None,
+                ):
+                    self.assertEqual(x, 42)
+                    self.assertEqual(a, 1)
+                    self.assertEqual(b, 2)
+                    self.assertEqual(c, 3)
+                case _:
+                    self.fail("Expected match, got none.")
+
+        # Match nested struct
+        match TestStructWithDefaultValuesMutable():
+            case TestStructWithDefaultValuesMutable(unqualified_struct=x):
+                self.assertEqual(x, TestStructMutable(unqualified_string="hello"))
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match nested struct, capture nested field
+        match TestStructWithDefaultValuesMutable():
+            case TestStructWithDefaultValuesMutable(
+                unqualified_struct=TestStructMutable(unqualified_string=x)
+            ):
+                self.assertEqual(x, "hello")
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match adapted types
+        match TestStructAdaptedTypesMutable(
+            unqualified_adapted_i32_to_datetime=datetime.fromtimestamp(1733556290)
+        ):
+            case TestStructAdaptedTypesMutable(unqualified_adapted_i32_to_datetime=x):
+                self.assertIsInstance(x, datetime)
+                self.assertEqual(x, datetime.fromtimestamp(1733556290))
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Cases above are similar to immutable structs. Checking with mutations next...
+
+        # Similar to canonical case above, but field is changed after initialization.
+        w = TestStructWithDefaultValuesMutable(
+            unqualified_integer=1, optional_integer=2
+        )
+        w.unqualified_integer = 3
+        w.optional_integer = None
+        match w:
+            case TestStructWithDefaultValuesMutable(
+                optional_integer=None, unqualified_integer=x
+            ):
+                self.assertEqual(x, 3)
+            case _:
+                self.fail("Expected match, got none.")
+
+        w.optional_integer = 4
+        match w:
+            case TestStructWithDefaultValuesMutable(
+                optional_integer=None, unqualified_integer=x
+            ):
+                self.fail(f"Unexpected match: {x}")
+            case TestStructWithDefaultValuesMutable(
+                optional_integer=y, unqualified_integer=x
+            ):
+                self.assertEqual(y, 4)
+                self.assertEqual(x, 3)
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Identity of captured struct field is the same as the field itself:
+        sub_w = TestStructMutable(optional_string="Lorem ipsum")
+        w.optional_struct = sub_w
+        match w:
+            case TestStructWithDefaultValuesMutable(optional_struct=x):
+                self.assertIs(x, sub_w)
+            case _:
+                self.fail("Expected match, got none.")
+
+        # Match after resetting
+        w.fbthrift_reset()
+        match w:
+            case TestStructWithDefaultValuesMutable(
+                unqualified_integer=x, optional_struct=y
+            ):
+                self.assertEqual(x, 42)
+                self.assertIsNone(y)
+            case _:
+                self.fail("Expected match, got none.")

@@ -7,8 +7,6 @@ package module
 
 
 import (
-    "sync"
-
     included "included"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -1979,114 +1977,110 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_empty_struct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_decorated_struct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ContainerStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CppTypeStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_VirtualStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructWithForwardRefEnum)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TrivialNumeric)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TrivialNestedWithDefault)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexString)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexNestedWithDefault)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MinPadding)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MinPaddingWithCustomType)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyDataItem)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Renaming)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AnnotatedTypes)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageRoot)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageByRef)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteMap)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteMapDep)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteMap)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteMapDep)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteList)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteListDep)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteList)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteListDep)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedList)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedListDep)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DependentAdaptedList)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DependentAdaptedListDep)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllocatorAware)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllocatorAware2)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TypedefStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructWithDoubleUnderscores)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_empty_struct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_decorated_struct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ContainerStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CppTypeStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_VirtualStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructWithForwardRefEnum)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TrivialNumeric)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TrivialNestedWithDefault)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexString)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexNestedWithDefault)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MinPadding)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MinPaddingWithCustomType)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyDataItem)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Renaming)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AnnotatedTypes)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageRoot)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageByRef)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteMap)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteMapDep)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteMap)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteMapDep)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteList)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteListDep)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteList)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteListDep)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedList)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedListDep)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DependentAdaptedList)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DependentAdaptedListDep)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllocatorAware)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllocatorAware2)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TypedefStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructWithDoubleUnderscores)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_has_bitwise_ops.FullName] = premadeCodecTypeSpec_module_has_bitwise_ops
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_is_unscoped.FullName] = premadeCodecTypeSpec_module_is_unscoped
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyForwardRefEnum.FullName] = premadeCodecTypeSpec_module_MyForwardRefEnum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_empty_struct.FullName] = premadeCodecTypeSpec_module_empty_struct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_decorated_struct.FullName] = premadeCodecTypeSpec_module_decorated_struct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_set_i32_7194.FullName] = premadeCodecTypeSpec_module_set_i32_7194
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_map_i32_string_1261.FullName] = premadeCodecTypeSpec_module_map_i32_string_1261
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ContainerStruct.FullName] = premadeCodecTypeSpec_module_ContainerStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CppTypeStruct.FullName] = premadeCodecTypeSpec_module_CppTypeStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_VirtualStruct.FullName] = premadeCodecTypeSpec_module_VirtualStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStructWithForwardRefEnum.FullName] = premadeCodecTypeSpec_module_MyStructWithForwardRefEnum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialNumeric.FullName] = premadeCodecTypeSpec_module_TrivialNumeric
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialNestedWithDefault.FullName] = premadeCodecTypeSpec_module_TrivialNestedWithDefault
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexString.FullName] = premadeCodecTypeSpec_module_ComplexString
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexNestedWithDefault.FullName] = premadeCodecTypeSpec_module_ComplexNestedWithDefault
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MinPadding.FullName] = premadeCodecTypeSpec_module_MinPadding
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MinPaddingWithCustomType.FullName] = premadeCodecTypeSpec_module_MinPaddingWithCustomType
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyDataItem.FullName] = premadeCodecTypeSpec_module_MyDataItem
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Renaming.FullName] = premadeCodecTypeSpec_module_Renaming
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TBinary.FullName] = premadeCodecTypeSpec_module_TBinary
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TBinary_8623.FullName] = premadeCodecTypeSpec_module_TBinary_8623
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SomeListOfTypeMap_2468.FullName] = premadeCodecTypeSpec_module_SomeListOfTypeMap_2468
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AnnotatedTypes.FullName] = premadeCodecTypeSpec_module_AnnotatedTypes
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ForwardUsageStruct.FullName] = premadeCodecTypeSpec_module_ForwardUsageStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ForwardUsageByRef.FullName] = premadeCodecTypeSpec_module_ForwardUsageByRef
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ForwardUsageRoot.FullName] = premadeCodecTypeSpec_module_ForwardUsageRoot
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteMapDep.FullName] = premadeCodecTypeSpec_module_IncompleteMapDep
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteMap.FullName] = premadeCodecTypeSpec_module_IncompleteMap
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteMapDep.FullName] = premadeCodecTypeSpec_module_CompleteMapDep
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteMap.FullName] = premadeCodecTypeSpec_module_CompleteMap
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteListDep.FullName] = premadeCodecTypeSpec_module_IncompleteListDep
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteList.FullName] = premadeCodecTypeSpec_module_IncompleteList
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteListDep.FullName] = premadeCodecTypeSpec_module_CompleteListDep
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteList.FullName] = premadeCodecTypeSpec_module_CompleteList
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedListDep.FullName] = premadeCodecTypeSpec_module_AdaptedListDep
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedList.FullName] = premadeCodecTypeSpec_module_AdaptedList
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DependentAdaptedListDep.FullName] = premadeCodecTypeSpec_module_DependentAdaptedListDep
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DependentAdaptedList.FullName] = premadeCodecTypeSpec_module_DependentAdaptedList
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_list_i32_9187.FullName] = premadeCodecTypeSpec_module_list_i32_9187
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_set_i32_7070.FullName] = premadeCodecTypeSpec_module_set_i32_7070
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_map_i32_i32_9565.FullName] = premadeCodecTypeSpec_module_map_i32_i32_9565
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_string_5252.FullName] = premadeCodecTypeSpec_module_string_5252
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_i32_9314.FullName] = premadeCodecTypeSpec_module_i32_9314
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AllocatorAware.FullName] = premadeCodecTypeSpec_module_AllocatorAware
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AllocatorAware2.FullName] = premadeCodecTypeSpec_module_AllocatorAware2
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IntTypedef.FullName] = premadeCodecTypeSpec_module_IntTypedef
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_UintTypedef.FullName] = premadeCodecTypeSpec_module_UintTypedef
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TypedefStruct.FullName] = premadeCodecTypeSpec_module_TypedefStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithDoubleUnderscores.FullName] = premadeCodecTypeSpec_module_StructWithDoubleUnderscores
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_has_bitwise_ops.FullName] = premadeCodecTypeSpec_module_has_bitwise_ops
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_is_unscoped.FullName] = premadeCodecTypeSpec_module_is_unscoped
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyForwardRefEnum.FullName] = premadeCodecTypeSpec_module_MyForwardRefEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_empty_struct.FullName] = premadeCodecTypeSpec_module_empty_struct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_decorated_struct.FullName] = premadeCodecTypeSpec_module_decorated_struct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_set_i32_7194.FullName] = premadeCodecTypeSpec_module_set_i32_7194
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_map_i32_string_1261.FullName] = premadeCodecTypeSpec_module_map_i32_string_1261
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ContainerStruct.FullName] = premadeCodecTypeSpec_module_ContainerStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CppTypeStruct.FullName] = premadeCodecTypeSpec_module_CppTypeStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_VirtualStruct.FullName] = premadeCodecTypeSpec_module_VirtualStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStructWithForwardRefEnum.FullName] = premadeCodecTypeSpec_module_MyStructWithForwardRefEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialNumeric.FullName] = premadeCodecTypeSpec_module_TrivialNumeric
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TrivialNestedWithDefault.FullName] = premadeCodecTypeSpec_module_TrivialNestedWithDefault
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexString.FullName] = premadeCodecTypeSpec_module_ComplexString
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexNestedWithDefault.FullName] = premadeCodecTypeSpec_module_ComplexNestedWithDefault
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MinPadding.FullName] = premadeCodecTypeSpec_module_MinPadding
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MinPaddingWithCustomType.FullName] = premadeCodecTypeSpec_module_MinPaddingWithCustomType
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyDataItem.FullName] = premadeCodecTypeSpec_module_MyDataItem
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Renaming.FullName] = premadeCodecTypeSpec_module_Renaming
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TBinary.FullName] = premadeCodecTypeSpec_module_TBinary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TBinary_8623.FullName] = premadeCodecTypeSpec_module_TBinary_8623
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SomeListOfTypeMap_2468.FullName] = premadeCodecTypeSpec_module_SomeListOfTypeMap_2468
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AnnotatedTypes.FullName] = premadeCodecTypeSpec_module_AnnotatedTypes
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ForwardUsageStruct.FullName] = premadeCodecTypeSpec_module_ForwardUsageStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ForwardUsageByRef.FullName] = premadeCodecTypeSpec_module_ForwardUsageByRef
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ForwardUsageRoot.FullName] = premadeCodecTypeSpec_module_ForwardUsageRoot
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteMapDep.FullName] = premadeCodecTypeSpec_module_IncompleteMapDep
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteMap.FullName] = premadeCodecTypeSpec_module_IncompleteMap
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteMapDep.FullName] = premadeCodecTypeSpec_module_CompleteMapDep
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteMap.FullName] = premadeCodecTypeSpec_module_CompleteMap
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteListDep.FullName] = premadeCodecTypeSpec_module_IncompleteListDep
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IncompleteList.FullName] = premadeCodecTypeSpec_module_IncompleteList
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteListDep.FullName] = premadeCodecTypeSpec_module_CompleteListDep
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CompleteList.FullName] = premadeCodecTypeSpec_module_CompleteList
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedListDep.FullName] = premadeCodecTypeSpec_module_AdaptedListDep
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedList.FullName] = premadeCodecTypeSpec_module_AdaptedList
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DependentAdaptedListDep.FullName] = premadeCodecTypeSpec_module_DependentAdaptedListDep
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DependentAdaptedList.FullName] = premadeCodecTypeSpec_module_DependentAdaptedList
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_list_i32_9187.FullName] = premadeCodecTypeSpec_module_list_i32_9187
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_set_i32_7070.FullName] = premadeCodecTypeSpec_module_set_i32_7070
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_map_i32_i32_9565.FullName] = premadeCodecTypeSpec_module_map_i32_i32_9565
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_string_5252.FullName] = premadeCodecTypeSpec_module_string_5252
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_i32_9314.FullName] = premadeCodecTypeSpec_module_i32_9314
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AllocatorAware.FullName] = premadeCodecTypeSpec_module_AllocatorAware
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AllocatorAware2.FullName] = premadeCodecTypeSpec_module_AllocatorAware2
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IntTypedef.FullName] = premadeCodecTypeSpec_module_IntTypedef
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_UintTypedef.FullName] = premadeCodecTypeSpec_module_UintTypedef
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TypedefStruct.FullName] = premadeCodecTypeSpec_module_TypedefStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithDoubleUnderscores.FullName] = premadeCodecTypeSpec_module_StructWithDoubleUnderscores
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

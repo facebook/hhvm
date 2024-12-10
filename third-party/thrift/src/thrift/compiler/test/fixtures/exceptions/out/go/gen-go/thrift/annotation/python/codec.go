@@ -7,8 +7,6 @@ package python
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -267,38 +265,34 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3Hidden)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_PyDeprecatedHidden)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Flags)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCAPI)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3EnableCppAdapter)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3Hidden)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_PyDeprecatedHidden)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Flags)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCAPI)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3EnableCppAdapter)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3Hidden.FullName] = premadeCodecTypeSpec_python_Py3Hidden
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_PyDeprecatedHidden.FullName] = premadeCodecTypeSpec_python_PyDeprecatedHidden
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Flags.FullName] = premadeCodecTypeSpec_python_Flags
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Name.FullName] = premadeCodecTypeSpec_python_Name
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Adapter.FullName] = premadeCodecTypeSpec_python_Adapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_UseCAPI.FullName] = premadeCodecTypeSpec_python_UseCAPI
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3EnableCppAdapter.FullName] = premadeCodecTypeSpec_python_Py3EnableCppAdapter
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3Hidden.FullName] = premadeCodecTypeSpec_python_Py3Hidden
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_PyDeprecatedHidden.FullName] = premadeCodecTypeSpec_python_PyDeprecatedHidden
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Flags.FullName] = premadeCodecTypeSpec_python_Flags
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Name.FullName] = premadeCodecTypeSpec_python_Name
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Adapter.FullName] = premadeCodecTypeSpec_python_Adapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_UseCAPI.FullName] = premadeCodecTypeSpec_python_UseCAPI
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3EnableCppAdapter.FullName] = premadeCodecTypeSpec_python_Py3EnableCppAdapter
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

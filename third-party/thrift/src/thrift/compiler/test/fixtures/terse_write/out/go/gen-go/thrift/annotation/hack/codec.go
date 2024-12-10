@@ -7,8 +7,6 @@ package hack
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -403,43 +401,39 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldWrapper)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Wrapper)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_SkipCodegen)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_UnionEnumAttributes)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructTrait)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Attributes)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructAsTrait)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ModuleInternal)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldWrapper)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Wrapper)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_SkipCodegen)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_UnionEnumAttributes)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructTrait)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Attributes)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructAsTrait)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ModuleInternal)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_FieldWrapper.FullName] = premadeCodecTypeSpec_hack_FieldWrapper
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Wrapper.FullName] = premadeCodecTypeSpec_hack_Wrapper
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Adapter.FullName] = premadeCodecTypeSpec_hack_Adapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_SkipCodegen.FullName] = premadeCodecTypeSpec_hack_SkipCodegen
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Name.FullName] = premadeCodecTypeSpec_hack_Name
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_UnionEnumAttributes.FullName] = premadeCodecTypeSpec_hack_UnionEnumAttributes
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_StructTrait.FullName] = premadeCodecTypeSpec_hack_StructTrait
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Attributes.FullName] = premadeCodecTypeSpec_hack_Attributes
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_StructAsTrait.FullName] = premadeCodecTypeSpec_hack_StructAsTrait
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_ModuleInternal.FullName] = premadeCodecTypeSpec_hack_ModuleInternal
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_FieldWrapper.FullName] = premadeCodecTypeSpec_hack_FieldWrapper
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Wrapper.FullName] = premadeCodecTypeSpec_hack_Wrapper
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Adapter.FullName] = premadeCodecTypeSpec_hack_Adapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_SkipCodegen.FullName] = premadeCodecTypeSpec_hack_SkipCodegen
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Name.FullName] = premadeCodecTypeSpec_hack_Name
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_UnionEnumAttributes.FullName] = premadeCodecTypeSpec_hack_UnionEnumAttributes
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_StructTrait.FullName] = premadeCodecTypeSpec_hack_StructTrait
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_Attributes.FullName] = premadeCodecTypeSpec_hack_Attributes
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_StructAsTrait.FullName] = premadeCodecTypeSpec_hack_StructAsTrait
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_ModuleInternal.FullName] = premadeCodecTypeSpec_hack_ModuleInternal
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

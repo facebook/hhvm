@@ -7,8 +7,6 @@ package module1
 
 
 import (
-    "sync"
-
     module0 "module0"
     module2 "module2"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -608,43 +606,39 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Automobile)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MapKey)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MapContainer)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Pair)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Collection)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Automobile)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MapKey)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MapContainer)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Pair)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Collection)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Plate.FullName] = premadeCodecTypeSpec_module1_Plate
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Year.FullName] = premadeCodecTypeSpec_module1_Year
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Drivers.FullName] = premadeCodecTypeSpec_module1_Drivers
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Accessory.FullName] = premadeCodecTypeSpec_module1_Accessory
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_PartName.FullName] = premadeCodecTypeSpec_module1_PartName
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Automobile.FullName] = premadeCodecTypeSpec_module1_Automobile
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapKey.FullName] = premadeCodecTypeSpec_module1_MapKey
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapContainer.FullName] = premadeCodecTypeSpec_module1_MapContainer
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Car.FullName] = premadeCodecTypeSpec_module1_Car
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Pair.FullName] = premadeCodecTypeSpec_module1_Pair
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Collection.FullName] = premadeCodecTypeSpec_module1_Collection
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_State.FullName] = premadeCodecTypeSpec_module1_State
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Enum.FullName] = premadeCodecTypeSpec_module1_Enum
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Plate.FullName] = premadeCodecTypeSpec_module1_Plate
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Year.FullName] = premadeCodecTypeSpec_module1_Year
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Drivers.FullName] = premadeCodecTypeSpec_module1_Drivers
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Accessory.FullName] = premadeCodecTypeSpec_module1_Accessory
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_PartName.FullName] = premadeCodecTypeSpec_module1_PartName
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Automobile.FullName] = premadeCodecTypeSpec_module1_Automobile
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapKey.FullName] = premadeCodecTypeSpec_module1_MapKey
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_MapContainer.FullName] = premadeCodecTypeSpec_module1_MapContainer
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Car.FullName] = premadeCodecTypeSpec_module1_Car
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Pair.FullName] = premadeCodecTypeSpec_module1_Pair
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Collection.FullName] = premadeCodecTypeSpec_module1_Collection
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_State.FullName] = premadeCodecTypeSpec_module1_State
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module1_Enum.FullName] = premadeCodecTypeSpec_module1_Enum
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

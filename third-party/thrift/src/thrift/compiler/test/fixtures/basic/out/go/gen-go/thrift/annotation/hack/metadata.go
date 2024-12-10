@@ -7,7 +7,6 @@ package hack
 
 import (
     "maps"
-    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -101,71 +100,61 @@ type thriftTypeWithFullName struct {
     thriftType *metadata.ThriftType
 }
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
-        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.FieldWrapper", premadeThriftType_hack_FieldWrapper })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Wrapper", premadeThriftType_hack_Wrapper })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Adapter", premadeThriftType_hack_Adapter })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.SkipCodegen", premadeThriftType_hack_SkipCodegen })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Name", premadeThriftType_hack_Name })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.UnionEnumAttributes", premadeThriftType_hack_UnionEnumAttributes })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.StructTrait", premadeThriftType_hack_StructTrait })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Attributes", premadeThriftType_hack_Attributes })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.StructAsTrait", premadeThriftType_hack_StructAsTrait })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.ModuleInternal", premadeThriftType_hack_ModuleInternal })
+var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
+    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.FieldWrapper", premadeThriftType_hack_FieldWrapper })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Wrapper", premadeThriftType_hack_Wrapper })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Adapter", premadeThriftType_hack_Adapter })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.SkipCodegen", premadeThriftType_hack_SkipCodegen })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Name", premadeThriftType_hack_Name })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.UnionEnumAttributes", premadeThriftType_hack_UnionEnumAttributes })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.StructTrait", premadeThriftType_hack_StructTrait })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.Attributes", premadeThriftType_hack_Attributes })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.StructAsTrait", premadeThriftType_hack_StructAsTrait })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "hack.ModuleInternal", premadeThriftType_hack_ModuleInternal })
 
-        fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-        for _, value := range thriftTypesWithFullName {
-            fbthriftThriftTypesMap[value.fullName] = value.thriftType
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+    for _, value := range thriftTypesWithFullName {
+        fbthriftThriftTypesMap[value.fullName] = value.thriftType
+    }
+    return fbthriftThriftTypesMap
+}()
+
+var structMetadatas = func() []*metadata.ThriftStruct {
+    fbthriftResults := make([]*metadata.ThriftStruct, 0)
+    for _, fbthriftStructSpec := range premadeStructSpecs {
+        if !fbthriftStructSpec.IsException {
+            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
         }
-        return fbthriftThriftTypesMap
-    },
-)
+    }
+    return fbthriftResults
+}()
 
-var structMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftStruct {
-        fbthriftResults := make([]*metadata.ThriftStruct, 0)
-        for _, fbthriftStructSpec := range premadeStructSpecsOnce() {
-            if !fbthriftStructSpec.IsException {
-                fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-            }
+var exceptionMetadatas = func() []*metadata.ThriftException {
+    fbthriftResults := make([]*metadata.ThriftException, 0)
+    for _, fbthriftStructSpec := range premadeStructSpecs {
+        if fbthriftStructSpec.IsException {
+            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
         }
-        return fbthriftResults
-    },
-)
+    }
+    return fbthriftResults
+}()
 
-var exceptionMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftException {
-        fbthriftResults := make([]*metadata.ThriftException, 0)
-        for _, fbthriftStructSpec := range premadeStructSpecsOnce() {
-            if fbthriftStructSpec.IsException {
-                fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-            }
-        }
-        return fbthriftResults
-    },
-)
+var enumMetadatas = func() []*metadata.ThriftEnum {
+    fbthriftResults := make([]*metadata.ThriftEnum, 0)
+    return fbthriftResults
+}()
 
-var enumMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftEnum {
-        fbthriftResults := make([]*metadata.ThriftEnum, 0)
-        return fbthriftResults
-    },
-)
-
-var serviceMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftService {
-        fbthriftResults := make([]*metadata.ThriftService, 0)
-        return fbthriftResults
-    },
-)
+var serviceMetadatas = func() []*metadata.ThriftService {
+    fbthriftResults := make([]*metadata.ThriftService, 0)
+    return fbthriftResults
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata ThriftType for a given full type name.
 func GetMetadataThriftType(fullName string) *metadata.ThriftType {
-    return premadeThriftTypesMapOnce()[fullName]
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
@@ -176,19 +165,19 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
     allServicesMap := make(map[string]*metadata.ThriftService)
 
     // Add enum metadatas from the current program...
-    for _, enumMetadata := range enumMetadatasOnce() {
+    for _, enumMetadata := range enumMetadatas {
         allEnumsMap[enumMetadata.GetName()] = enumMetadata
     }
     // Add struct metadatas from the current program...
-    for _, structMetadata := range structMetadatasOnce() {
+    for _, structMetadata := range structMetadatas {
         allStructsMap[structMetadata.GetName()] = structMetadata
     }
     // Add exception metadatas from the current program...
-    for _, exceptionMetadata := range exceptionMetadatasOnce() {
+    for _, exceptionMetadata := range exceptionMetadatas {
         allExceptionsMap[exceptionMetadata.GetName()] = exceptionMetadata
     }
     // Add service metadatas from the current program...
-    for _, serviceMetadata := range serviceMetadatasOnce() {
+    for _, serviceMetadata := range serviceMetadatas {
         allServicesMap[serviceMetadata.GetName()] = serviceMetadata
     }
 

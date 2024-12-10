@@ -7,8 +7,6 @@ package terse_write
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -1171,51 +1169,47 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyUnion)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructWithCustomDefault)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructLevelTerseStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldLevelTerseStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseStructWithCustomDefault)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedFields)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_WrappedFields)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseException)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructWithCustomDefault)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructLevelTerseStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldLevelTerseStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseStructWithCustomDefault)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedFields)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_WrappedFields)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseException)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyEnum.FullName] = premadeCodecTypeSpec_terse_write_MyEnum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStruct.FullName] = premadeCodecTypeSpec_terse_write_MyStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_float.FullName] = premadeCodecTypeSpec_float
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyUnion.FullName] = premadeCodecTypeSpec_terse_write_MyUnion
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault.FullName] = premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_StructLevelTerseStruct.FullName] = premadeCodecTypeSpec_terse_write_StructLevelTerseStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct.FullName] = premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault.FullName] = premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyInteger.FullName] = premadeCodecTypeSpec_terse_write_MyInteger
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_AdaptedFields.FullName] = premadeCodecTypeSpec_terse_write_AdaptedFields
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_WrappedFields.FullName] = premadeCodecTypeSpec_terse_write_WrappedFields
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_TerseException.FullName] = premadeCodecTypeSpec_terse_write_TerseException
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyEnum.FullName] = premadeCodecTypeSpec_terse_write_MyEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStruct.FullName] = premadeCodecTypeSpec_terse_write_MyStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_float.FullName] = premadeCodecTypeSpec_float
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyUnion.FullName] = premadeCodecTypeSpec_terse_write_MyUnion
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault.FullName] = premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_StructLevelTerseStruct.FullName] = premadeCodecTypeSpec_terse_write_StructLevelTerseStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct.FullName] = premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault.FullName] = premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyInteger.FullName] = premadeCodecTypeSpec_terse_write_MyInteger
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_AdaptedFields.FullName] = premadeCodecTypeSpec_terse_write_AdaptedFields
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_WrappedFields.FullName] = premadeCodecTypeSpec_terse_write_WrappedFields
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_TerseException.FullName] = premadeCodecTypeSpec_terse_write_TerseException
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

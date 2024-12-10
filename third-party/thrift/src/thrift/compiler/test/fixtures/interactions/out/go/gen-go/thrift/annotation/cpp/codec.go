@@ -7,8 +7,6 @@ package cpp
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -650,62 +648,58 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Type)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Ref)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Lazy)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DisableLazyChecksum)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_PackIsset)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MinimizePadding)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ScopedEnumAsUnionType)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldInterceptor)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_UseOpEncode)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_EnumType)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Frozen2Exclude)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Frozen2RequiresCompleteContainerParams)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ProcessInEbThreadUnsafe)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_RuntimeAnnotation)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCursorSerialization)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateDeprecatedHeaderClientMethods)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Type)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Ref)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Lazy)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DisableLazyChecksum)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_PackIsset)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MinimizePadding)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ScopedEnumAsUnionType)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldInterceptor)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_UseOpEncode)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_EnumType)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Frozen2Exclude)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Frozen2RequiresCompleteContainerParams)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ProcessInEbThreadUnsafe)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_RuntimeAnnotation)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCursorSerialization)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateDeprecatedHeaderClientMethods)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_RefType.FullName] = premadeCodecTypeSpec_cpp_RefType
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_EnumUnderlyingType.FullName] = premadeCodecTypeSpec_cpp_EnumUnderlyingType
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Name.FullName] = premadeCodecTypeSpec_cpp_Name
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Type.FullName] = premadeCodecTypeSpec_cpp_Type
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Ref.FullName] = premadeCodecTypeSpec_cpp_Ref
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Lazy.FullName] = premadeCodecTypeSpec_cpp_Lazy
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_DisableLazyChecksum.FullName] = premadeCodecTypeSpec_cpp_DisableLazyChecksum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Adapter.FullName] = premadeCodecTypeSpec_cpp_Adapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_PackIsset.FullName] = premadeCodecTypeSpec_cpp_PackIsset
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_MinimizePadding.FullName] = premadeCodecTypeSpec_cpp_MinimizePadding
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType.FullName] = premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_FieldInterceptor.FullName] = premadeCodecTypeSpec_cpp_FieldInterceptor
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_UseOpEncode.FullName] = premadeCodecTypeSpec_cpp_UseOpEncode
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_EnumType.FullName] = premadeCodecTypeSpec_cpp_EnumType
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Frozen2Exclude.FullName] = premadeCodecTypeSpec_cpp_Frozen2Exclude
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams.FullName] = premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe.FullName] = premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_RuntimeAnnotation.FullName] = premadeCodecTypeSpec_cpp_RuntimeAnnotation
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_UseCursorSerialization.FullName] = premadeCodecTypeSpec_cpp_UseCursorSerialization
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods.FullName] = premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_RefType.FullName] = premadeCodecTypeSpec_cpp_RefType
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_EnumUnderlyingType.FullName] = premadeCodecTypeSpec_cpp_EnumUnderlyingType
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Name.FullName] = premadeCodecTypeSpec_cpp_Name
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Type.FullName] = premadeCodecTypeSpec_cpp_Type
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Ref.FullName] = premadeCodecTypeSpec_cpp_Ref
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Lazy.FullName] = premadeCodecTypeSpec_cpp_Lazy
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_DisableLazyChecksum.FullName] = premadeCodecTypeSpec_cpp_DisableLazyChecksum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Adapter.FullName] = premadeCodecTypeSpec_cpp_Adapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_PackIsset.FullName] = premadeCodecTypeSpec_cpp_PackIsset
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_MinimizePadding.FullName] = premadeCodecTypeSpec_cpp_MinimizePadding
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType.FullName] = premadeCodecTypeSpec_cpp_ScopedEnumAsUnionType
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_FieldInterceptor.FullName] = premadeCodecTypeSpec_cpp_FieldInterceptor
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_UseOpEncode.FullName] = premadeCodecTypeSpec_cpp_UseOpEncode
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_EnumType.FullName] = premadeCodecTypeSpec_cpp_EnumType
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Frozen2Exclude.FullName] = premadeCodecTypeSpec_cpp_Frozen2Exclude
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams.FullName] = premadeCodecTypeSpec_cpp_Frozen2RequiresCompleteContainerParams
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe.FullName] = premadeCodecTypeSpec_cpp_ProcessInEbThreadUnsafe
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_RuntimeAnnotation.FullName] = premadeCodecTypeSpec_cpp_RuntimeAnnotation
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_UseCursorSerialization.FullName] = premadeCodecTypeSpec_cpp_UseCursorSerialization
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods.FullName] = premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

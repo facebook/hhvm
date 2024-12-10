@@ -7,8 +7,6 @@ package scope
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -474,58 +472,54 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Transitive)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Program)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Struct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Union)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Exception)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Field)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Typedef)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Service)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Interaction)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Function)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_EnumValue)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Const)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Enum)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Structured)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Interface)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_RootDefinition)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Definition)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DisableSchemaConst)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Transitive)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Program)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Struct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Union)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Exception)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Field)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Typedef)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Service)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Interaction)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Function)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_EnumValue)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Const)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Enum)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Structured)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Interface)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_RootDefinition)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Definition)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DisableSchemaConst)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Transitive.FullName] = premadeCodecTypeSpec_scope_Transitive
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Program.FullName] = premadeCodecTypeSpec_scope_Program
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Struct.FullName] = premadeCodecTypeSpec_scope_Struct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Union.FullName] = premadeCodecTypeSpec_scope_Union
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Exception.FullName] = premadeCodecTypeSpec_scope_Exception
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Field.FullName] = premadeCodecTypeSpec_scope_Field
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Typedef.FullName] = premadeCodecTypeSpec_scope_Typedef
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Service.FullName] = premadeCodecTypeSpec_scope_Service
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interaction.FullName] = premadeCodecTypeSpec_scope_Interaction
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Function.FullName] = premadeCodecTypeSpec_scope_Function
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_EnumValue.FullName] = premadeCodecTypeSpec_scope_EnumValue
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Const.FullName] = premadeCodecTypeSpec_scope_Const
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Enum.FullName] = premadeCodecTypeSpec_scope_Enum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Structured.FullName] = premadeCodecTypeSpec_scope_Structured
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interface.FullName] = premadeCodecTypeSpec_scope_Interface
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_RootDefinition.FullName] = premadeCodecTypeSpec_scope_RootDefinition
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Definition.FullName] = premadeCodecTypeSpec_scope_Definition
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_DisableSchemaConst.FullName] = premadeCodecTypeSpec_scope_DisableSchemaConst
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Transitive.FullName] = premadeCodecTypeSpec_scope_Transitive
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Program.FullName] = premadeCodecTypeSpec_scope_Program
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Struct.FullName] = premadeCodecTypeSpec_scope_Struct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Union.FullName] = premadeCodecTypeSpec_scope_Union
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Exception.FullName] = premadeCodecTypeSpec_scope_Exception
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Field.FullName] = premadeCodecTypeSpec_scope_Field
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Typedef.FullName] = premadeCodecTypeSpec_scope_Typedef
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Service.FullName] = premadeCodecTypeSpec_scope_Service
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interaction.FullName] = premadeCodecTypeSpec_scope_Interaction
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Function.FullName] = premadeCodecTypeSpec_scope_Function
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_EnumValue.FullName] = premadeCodecTypeSpec_scope_EnumValue
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Const.FullName] = premadeCodecTypeSpec_scope_Const
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Enum.FullName] = premadeCodecTypeSpec_scope_Enum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Structured.FullName] = premadeCodecTypeSpec_scope_Structured
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Interface.FullName] = premadeCodecTypeSpec_scope_Interface
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_RootDefinition.FullName] = premadeCodecTypeSpec_scope_RootDefinition
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_Definition.FullName] = premadeCodecTypeSpec_scope_Definition
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_scope_DisableSchemaConst.FullName] = premadeCodecTypeSpec_scope_DisableSchemaConst
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

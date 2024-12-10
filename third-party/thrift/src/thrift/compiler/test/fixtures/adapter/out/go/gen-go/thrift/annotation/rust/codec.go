@@ -7,8 +7,6 @@ package rust
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -472,52 +470,48 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Copy)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_RequestContext)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Arc)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Box)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Exhaustive)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Ord)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_NewType)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Type)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Serde)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Mod)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Derive)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ServiceExn)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Copy)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_RequestContext)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Arc)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Box)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Exhaustive)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Ord)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_NewType)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Type)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Serde)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Mod)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Adapter)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Derive)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ServiceExn)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Name.FullName] = premadeCodecTypeSpec_rust_Name
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Copy.FullName] = premadeCodecTypeSpec_rust_Copy
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_RequestContext.FullName] = premadeCodecTypeSpec_rust_RequestContext
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Arc.FullName] = premadeCodecTypeSpec_rust_Arc
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Box.FullName] = premadeCodecTypeSpec_rust_Box
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Exhaustive.FullName] = premadeCodecTypeSpec_rust_Exhaustive
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Ord.FullName] = premadeCodecTypeSpec_rust_Ord
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_NewType.FullName] = premadeCodecTypeSpec_rust_NewType
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Type.FullName] = premadeCodecTypeSpec_rust_Type
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Serde.FullName] = premadeCodecTypeSpec_rust_Serde
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Mod.FullName] = premadeCodecTypeSpec_rust_Mod
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Adapter.FullName] = premadeCodecTypeSpec_rust_Adapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Derive.FullName] = premadeCodecTypeSpec_rust_Derive
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_ServiceExn.FullName] = premadeCodecTypeSpec_rust_ServiceExn
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Name.FullName] = premadeCodecTypeSpec_rust_Name
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Copy.FullName] = premadeCodecTypeSpec_rust_Copy
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_RequestContext.FullName] = premadeCodecTypeSpec_rust_RequestContext
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Arc.FullName] = premadeCodecTypeSpec_rust_Arc
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Box.FullName] = premadeCodecTypeSpec_rust_Box
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Exhaustive.FullName] = premadeCodecTypeSpec_rust_Exhaustive
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Ord.FullName] = premadeCodecTypeSpec_rust_Ord
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_NewType.FullName] = premadeCodecTypeSpec_rust_NewType
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Type.FullName] = premadeCodecTypeSpec_rust_Type
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Serde.FullName] = premadeCodecTypeSpec_rust_Serde
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Mod.FullName] = premadeCodecTypeSpec_rust_Mod
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Adapter.FullName] = premadeCodecTypeSpec_rust_Adapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_Derive.FullName] = premadeCodecTypeSpec_rust_Derive
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_rust_ServiceExn.FullName] = premadeCodecTypeSpec_rust_ServiceExn
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

@@ -27,7 +27,6 @@
 
 import (
     "maps"
-    "sync"
 
     {{#program:thrift_imports}}
     {{program:go_package_alias}} "{{program:go_import_path}}"
@@ -65,71 +64,61 @@ type thriftTypeWithFullName struct {
     thriftType *{{program:metadata_qualifier}}ThriftType
 }
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*{{program:metadata_qualifier}}ThriftType {
-        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-        {{#program:thrift_metadata_types}}
-        {{#type:named?}}
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "{{type:full_name}}", {{type:metadata_name}} })
-        {{/type:named?}}
-        {{/program:thrift_metadata_types}}
+var premadeThriftTypesMap = func() map[string]*{{program:metadata_qualifier}}ThriftType {
+    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+    {{#program:thrift_metadata_types}}
+    {{#type:named?}}
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "{{type:full_name}}", {{type:metadata_name}} })
+    {{/type:named?}}
+    {{/program:thrift_metadata_types}}
 
-        fbthriftThriftTypesMap := make(map[string]*{{program:metadata_qualifier}}ThriftType, len(thriftTypesWithFullName))
-        for _, value := range thriftTypesWithFullName {
-            fbthriftThriftTypesMap[value.fullName] = value.thriftType
+    fbthriftThriftTypesMap := make(map[string]*{{program:metadata_qualifier}}ThriftType, len(thriftTypesWithFullName))
+    for _, value := range thriftTypesWithFullName {
+        fbthriftThriftTypesMap[value.fullName] = value.thriftType
+    }
+    return fbthriftThriftTypesMap
+}()
+
+var structMetadatas = func() []*{{program:metadata_qualifier}}ThriftStruct {
+    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
+    for _, fbthriftStructSpec := range premadeStructSpecs {
+        if !fbthriftStructSpec.IsException {
+            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
         }
-        return fbthriftThriftTypesMap
-    },
-)
+    }
+    return fbthriftResults
+}()
 
-var structMetadatasOnce = sync.OnceValue(
-    func() []*{{program:metadata_qualifier}}ThriftStruct {
-        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftStruct, 0)
-        for _, fbthriftStructSpec := range premadeStructSpecsOnce() {
-            if !fbthriftStructSpec.IsException {
-                fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-            }
+var exceptionMetadatas = func() []*{{program:metadata_qualifier}}ThriftException {
+    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftException, 0)
+    for _, fbthriftStructSpec := range premadeStructSpecs {
+        if fbthriftStructSpec.IsException {
+            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
         }
-        return fbthriftResults
-    },
-)
+    }
+    return fbthriftResults
+}()
 
-var exceptionMetadatasOnce = sync.OnceValue(
-    func() []*{{program:metadata_qualifier}}ThriftException {
-        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftException, 0)
-        for _, fbthriftStructSpec := range premadeStructSpecsOnce() {
-            if fbthriftStructSpec.IsException {
-                fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-            }
-        }
-        return fbthriftResults
-    },
-)
+var enumMetadatas = func() []*{{program:metadata_qualifier}}ThriftEnum {
+    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftEnum, 0)
+    {{#program:enums}}
+    fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_enum}})
+    {{/program:enums}}
+    return fbthriftResults
+}()
 
-var enumMetadatasOnce = sync.OnceValue(
-    func() []*{{program:metadata_qualifier}}ThriftEnum {
-        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftEnum, 0)
-        {{#program:enums}}
-        fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_enum}})
-        {{/program:enums}}
-        return fbthriftResults
-    },
-)
-
-var serviceMetadatasOnce = sync.OnceValue(
-    func() []*{{program:metadata_qualifier}}ThriftService {
-        fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftService, 0)
-        {{#program:services}}
-        fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_service}})
-        {{/program:services}}
-        return fbthriftResults
-    },
-)
+var serviceMetadatas = func() []*{{program:metadata_qualifier}}ThriftService {
+    fbthriftResults := make([]*{{program:metadata_qualifier}}ThriftService, 0)
+    {{#program:services}}
+    fbthriftResults = append(fbthriftResults, {{> metadata/thrift_metadata_service}})
+    {{/program:services}}
+    return fbthriftResults
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata ThriftType for a given full type name.
 func GetMetadataThriftType(fullName string) *{{program:metadata_qualifier}}ThriftType {
-    return premadeThriftTypesMapOnce()[fullName]
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
@@ -140,19 +129,19 @@ func GetThriftMetadata() *{{program:metadata_qualifier}}ThriftMetadata {
     allServicesMap := make(map[string]*{{program:metadata_qualifier}}ThriftService)
 
     // Add enum metadatas from the current program...
-    for _, enumMetadata := range enumMetadatasOnce() {
+    for _, enumMetadata := range enumMetadatas {
         allEnumsMap[enumMetadata.GetName()] = enumMetadata
     }
     // Add struct metadatas from the current program...
-    for _, structMetadata := range structMetadatasOnce() {
+    for _, structMetadata := range structMetadatas {
         allStructsMap[structMetadata.GetName()] = structMetadata
     }
     // Add exception metadatas from the current program...
-    for _, exceptionMetadata := range exceptionMetadatasOnce() {
+    for _, exceptionMetadata := range exceptionMetadatas {
         allExceptionsMap[exceptionMetadata.GetName()] = exceptionMetadata
     }
     // Add service metadatas from the current program...
-    for _, serviceMetadata := range serviceMetadatasOnce() {
+    for _, serviceMetadata := range serviceMetadatas {
         allServicesMap[serviceMetadata.GetName()] = serviceMetadata
     }
 

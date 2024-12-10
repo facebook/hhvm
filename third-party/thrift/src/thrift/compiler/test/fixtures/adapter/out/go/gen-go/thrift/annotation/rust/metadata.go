@@ -7,7 +7,6 @@ package rust
 
 import (
     "maps"
-    "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
     metadata "github.com/facebook/fbthrift/thrift/lib/thrift/metadata"
@@ -130,76 +129,66 @@ type thriftTypeWithFullName struct {
     thriftType *metadata.ThriftType
 }
 
-var premadeThriftTypesMapOnce = sync.OnceValue(
-    func() map[string]*metadata.ThriftType {
-        thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Name", premadeThriftType_rust_Name })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Copy", premadeThriftType_rust_Copy })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.RequestContext", premadeThriftType_rust_RequestContext })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Arc", premadeThriftType_rust_Arc })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Box", premadeThriftType_rust_Box })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Exhaustive", premadeThriftType_rust_Exhaustive })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Ord", premadeThriftType_rust_Ord })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.NewType", premadeThriftType_rust_NewType })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Type", premadeThriftType_rust_Type })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Serde", premadeThriftType_rust_Serde })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Mod", premadeThriftType_rust_Mod })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Adapter", premadeThriftType_rust_Adapter })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Derive", premadeThriftType_rust_Derive })
-        thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.ServiceExn", premadeThriftType_rust_ServiceExn })
+var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
+    thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Name", premadeThriftType_rust_Name })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Copy", premadeThriftType_rust_Copy })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.RequestContext", premadeThriftType_rust_RequestContext })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Arc", premadeThriftType_rust_Arc })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Box", premadeThriftType_rust_Box })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Exhaustive", premadeThriftType_rust_Exhaustive })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Ord", premadeThriftType_rust_Ord })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.NewType", premadeThriftType_rust_NewType })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Type", premadeThriftType_rust_Type })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "bool", premadeThriftType_bool })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Serde", premadeThriftType_rust_Serde })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Mod", premadeThriftType_rust_Mod })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Adapter", premadeThriftType_rust_Adapter })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Derive", premadeThriftType_rust_Derive })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.ServiceExn", premadeThriftType_rust_ServiceExn })
 
-        fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
-        for _, value := range thriftTypesWithFullName {
-            fbthriftThriftTypesMap[value.fullName] = value.thriftType
+    fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
+    for _, value := range thriftTypesWithFullName {
+        fbthriftThriftTypesMap[value.fullName] = value.thriftType
+    }
+    return fbthriftThriftTypesMap
+}()
+
+var structMetadatas = func() []*metadata.ThriftStruct {
+    fbthriftResults := make([]*metadata.ThriftStruct, 0)
+    for _, fbthriftStructSpec := range premadeStructSpecs {
+        if !fbthriftStructSpec.IsException {
+            fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
         }
-        return fbthriftThriftTypesMap
-    },
-)
+    }
+    return fbthriftResults
+}()
 
-var structMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftStruct {
-        fbthriftResults := make([]*metadata.ThriftStruct, 0)
-        for _, fbthriftStructSpec := range premadeStructSpecsOnce() {
-            if !fbthriftStructSpec.IsException {
-                fbthriftResults = append(fbthriftResults, getMetadataThriftStruct(fbthriftStructSpec))
-            }
+var exceptionMetadatas = func() []*metadata.ThriftException {
+    fbthriftResults := make([]*metadata.ThriftException, 0)
+    for _, fbthriftStructSpec := range premadeStructSpecs {
+        if fbthriftStructSpec.IsException {
+            fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
         }
-        return fbthriftResults
-    },
-)
+    }
+    return fbthriftResults
+}()
 
-var exceptionMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftException {
-        fbthriftResults := make([]*metadata.ThriftException, 0)
-        for _, fbthriftStructSpec := range premadeStructSpecsOnce() {
-            if fbthriftStructSpec.IsException {
-                fbthriftResults = append(fbthriftResults, getMetadataThriftException(fbthriftStructSpec))
-            }
-        }
-        return fbthriftResults
-    },
-)
+var enumMetadatas = func() []*metadata.ThriftEnum {
+    fbthriftResults := make([]*metadata.ThriftEnum, 0)
+    return fbthriftResults
+}()
 
-var enumMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftEnum {
-        fbthriftResults := make([]*metadata.ThriftEnum, 0)
-        return fbthriftResults
-    },
-)
-
-var serviceMetadatasOnce = sync.OnceValue(
-    func() []*metadata.ThriftService {
-        fbthriftResults := make([]*metadata.ThriftService, 0)
-        return fbthriftResults
-    },
-)
+var serviceMetadatas = func() []*metadata.ThriftService {
+    fbthriftResults := make([]*metadata.ThriftService, 0)
+    return fbthriftResults
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata ThriftType for a given full type name.
 func GetMetadataThriftType(fullName string) *metadata.ThriftType {
-    return premadeThriftTypesMapOnce()[fullName]
+    return premadeThriftTypesMap[fullName]
 }
 
 // GetThriftMetadata returns complete Thrift metadata for current and imported packages.
@@ -210,19 +199,19 @@ func GetThriftMetadata() *metadata.ThriftMetadata {
     allServicesMap := make(map[string]*metadata.ThriftService)
 
     // Add enum metadatas from the current program...
-    for _, enumMetadata := range enumMetadatasOnce() {
+    for _, enumMetadata := range enumMetadatas {
         allEnumsMap[enumMetadata.GetName()] = enumMetadata
     }
     // Add struct metadatas from the current program...
-    for _, structMetadata := range structMetadatasOnce() {
+    for _, structMetadata := range structMetadatas {
         allStructsMap[structMetadata.GetName()] = structMetadata
     }
     // Add exception metadatas from the current program...
-    for _, exceptionMetadata := range exceptionMetadatasOnce() {
+    for _, exceptionMetadata := range exceptionMetadatas {
         allExceptionsMap[exceptionMetadata.GetName()] = exceptionMetadata
     }
     // Add service metadatas from the current program...
-    for _, serviceMetadata := range serviceMetadatasOnce() {
+    for _, serviceMetadata := range serviceMetadatas {
         allServicesMap[serviceMetadata.GetName()] = serviceMetadata
     }
 

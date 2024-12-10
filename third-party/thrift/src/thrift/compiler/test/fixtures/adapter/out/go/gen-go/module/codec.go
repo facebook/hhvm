@@ -7,8 +7,6 @@ package module
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -2596,138 +2594,134 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyAnnotation)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Foo)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Baz)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Bar)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DirectlyAdapted)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_IndependentDirectlyAdapted)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructWithFieldAdapter)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseAdaptedFields)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_B)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_A)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Config)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTestStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTemplatedTestStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTemplatedNestedTestStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTestUnion)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DirectlyAdaptedStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructFieldAdaptedStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CircularAdaptee)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CircularStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ReorderedStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DeclaredAfterStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_RenamedStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_SameNamespaceStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_HeapAllocated)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_MoveOnly)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AlsoMoveOnly)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ApplyAdapter)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TransitiveAdapted)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_CountingStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Person)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Person2)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_RenamedStructWithStructAdapterAndFieldAdapter)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyAnnotation)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Foo)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Baz)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Bar)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DirectlyAdapted)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_IndependentDirectlyAdapted)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructWithFieldAdapter)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseAdaptedFields)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_B)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_A)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Config)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTestStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTemplatedTestStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTemplatedNestedTestStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTestUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DirectlyAdaptedStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_StructFieldAdaptedStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CircularAdaptee)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CircularStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ReorderedStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DeclaredAfterStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_RenamedStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_SameNamespaceStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_HeapAllocated)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_MoveOnly)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AlsoMoveOnly)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ApplyAdapter)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TransitiveAdapted)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_CountingStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Person)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Person2)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_RenamedStructWithStructAdapterAndFieldAdapter)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Color.FullName] = premadeCodecTypeSpec_module_Color
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ThriftAdaptedEnum.FullName] = premadeCodecTypeSpec_module_ThriftAdaptedEnum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyAnnotation.FullName] = premadeCodecTypeSpec_module_MyAnnotation
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_i32_5137.FullName] = premadeCodecTypeSpec_module_i32_5137
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SetWithAdapter.FullName] = premadeCodecTypeSpec_module_SetWithAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter.FullName] = premadeCodecTypeSpec_module_StringWithAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_map_string_ListWithElemAdapter_withAdapter_8454.FullName] = premadeCodecTypeSpec_module_map_string_ListWithElemAdapter_withAdapter_8454
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_binary_5673.FullName] = premadeCodecTypeSpec_module_binary_5673
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI64.FullName] = premadeCodecTypeSpec_module_MyI64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DoubleTypedefI64.FullName] = premadeCodecTypeSpec_module_DoubleTypedefI64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo.FullName] = premadeCodecTypeSpec_module_Foo
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Baz.FullName] = premadeCodecTypeSpec_module_Baz
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo_6868.FullName] = premadeCodecTypeSpec_module_Foo_6868
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo_3943.FullName] = premadeCodecTypeSpec_module_Foo_3943
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooWithAdapter.FullName] = premadeCodecTypeSpec_module_FooWithAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooWithAdapter_9317.FullName] = premadeCodecTypeSpec_module_FooWithAdapter_9317
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Baz_7352.FullName] = premadeCodecTypeSpec_module_Baz_7352
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DirectlyAdapted.FullName] = premadeCodecTypeSpec_module_DirectlyAdapted
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Bar.FullName] = premadeCodecTypeSpec_module_Bar
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IndependentDirectlyAdapted.FullName] = premadeCodecTypeSpec_module_IndependentDirectlyAdapted
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithFieldAdapter.FullName] = premadeCodecTypeSpec_module_StructWithFieldAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TerseAdaptedFields.FullName] = premadeCodecTypeSpec_module_TerseAdaptedFields
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_A.FullName] = premadeCodecTypeSpec_module_A
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedA.FullName] = premadeCodecTypeSpec_module_AdaptedA
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_B.FullName] = premadeCodecTypeSpec_module_B
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Config.FullName] = premadeCodecTypeSpec_module_Config
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DurationMs.FullName] = premadeCodecTypeSpec_module_DurationMs
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IOBuf.FullName] = premadeCodecTypeSpec_module_IOBuf
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CustomProtocolType.FullName] = premadeCodecTypeSpec_module_CustomProtocolType
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IndirectionString.FullName] = premadeCodecTypeSpec_module_IndirectionString
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedBool.FullName] = premadeCodecTypeSpec_module_AdaptedBool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedInteger.FullName] = premadeCodecTypeSpec_module_AdaptedInteger
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTestStruct.FullName] = premadeCodecTypeSpec_module_AdaptTestStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedByte.FullName] = premadeCodecTypeSpec_module_AdaptedByte
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedShort.FullName] = premadeCodecTypeSpec_module_AdaptedShort
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedLong.FullName] = premadeCodecTypeSpec_module_AdaptedLong
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedDouble.FullName] = premadeCodecTypeSpec_module_AdaptedDouble
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedString.FullName] = premadeCodecTypeSpec_module_AdaptedString
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedEnum.FullName] = premadeCodecTypeSpec_module_AdaptedEnum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DoubleTypedefBool.FullName] = premadeCodecTypeSpec_module_DoubleTypedefBool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTemplatedTestStruct.FullName] = premadeCodecTypeSpec_module_AdaptTemplatedTestStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTemplatedNestedTestStruct.FullName] = premadeCodecTypeSpec_module_AdaptTemplatedNestedTestStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTestUnion.FullName] = premadeCodecTypeSpec_module_AdaptTestUnion
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedStruct.FullName] = premadeCodecTypeSpec_module_AdaptedStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DirectlyAdaptedStruct.FullName] = premadeCodecTypeSpec_module_DirectlyAdaptedStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedTypedef.FullName] = premadeCodecTypeSpec_module_AdaptedTypedef
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TypedefOfDirect.FullName] = premadeCodecTypeSpec_module_TypedefOfDirect
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructFieldAdaptedStruct.FullName] = premadeCodecTypeSpec_module_StructFieldAdaptedStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CircularStruct.FullName] = premadeCodecTypeSpec_module_CircularStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CircularAdaptee.FullName] = premadeCodecTypeSpec_module_CircularAdaptee
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedCircularAdaptee.FullName] = premadeCodecTypeSpec_module_AdaptedCircularAdaptee
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DeclaredAfterStruct.FullName] = premadeCodecTypeSpec_module_DeclaredAfterStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ReorderedStruct.FullName] = premadeCodecTypeSpec_module_ReorderedStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_RenamedStruct.FullName] = premadeCodecTypeSpec_module_RenamedStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SameNamespaceStruct.FullName] = premadeCodecTypeSpec_module_SameNamespaceStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_HeapAllocated.FullName] = premadeCodecTypeSpec_module_HeapAllocated
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MoveOnly.FullName] = premadeCodecTypeSpec_module_MoveOnly
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AlsoMoveOnly.FullName] = premadeCodecTypeSpec_module_AlsoMoveOnly
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ApplyAdapter.FullName] = premadeCodecTypeSpec_module_ApplyAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TransitiveAdapted.FullName] = premadeCodecTypeSpec_module_TransitiveAdapted
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingInt.FullName] = premadeCodecTypeSpec_module_CountingInt
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingStruct.FullName] = premadeCodecTypeSpec_module_CountingStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Person.FullName] = premadeCodecTypeSpec_module_Person
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Person2.FullName] = premadeCodecTypeSpec_module_Person2
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter.FullName] = premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32.FullName] = premadeCodecTypeSpec_module_MyI32
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithAdapter.FullName] = premadeCodecTypeSpec_module_StructWithAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_UnionWithAdapter.FullName] = premadeCodecTypeSpec_module_UnionWithAdapter
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32_4873.FullName] = premadeCodecTypeSpec_module_MyI32_4873
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter_7208.FullName] = premadeCodecTypeSpec_module_StringWithAdapter_7208
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Color.FullName] = premadeCodecTypeSpec_module_Color
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ThriftAdaptedEnum.FullName] = premadeCodecTypeSpec_module_ThriftAdaptedEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyAnnotation.FullName] = premadeCodecTypeSpec_module_MyAnnotation
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_i32_5137.FullName] = premadeCodecTypeSpec_module_i32_5137
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SetWithAdapter.FullName] = premadeCodecTypeSpec_module_SetWithAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter.FullName] = premadeCodecTypeSpec_module_StringWithAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312.FullName] = premadeCodecTypeSpec_module_ListWithElemAdapter_withAdapter_2312
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_map_string_ListWithElemAdapter_withAdapter_8454.FullName] = premadeCodecTypeSpec_module_map_string_ListWithElemAdapter_withAdapter_8454
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_binary_5673.FullName] = premadeCodecTypeSpec_module_binary_5673
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI64.FullName] = premadeCodecTypeSpec_module_MyI64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DoubleTypedefI64.FullName] = premadeCodecTypeSpec_module_DoubleTypedefI64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo.FullName] = premadeCodecTypeSpec_module_Foo
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Baz.FullName] = premadeCodecTypeSpec_module_Baz
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo_6868.FullName] = premadeCodecTypeSpec_module_Foo_6868
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Foo_3943.FullName] = premadeCodecTypeSpec_module_Foo_3943
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooWithAdapter.FullName] = premadeCodecTypeSpec_module_FooWithAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_FooWithAdapter_9317.FullName] = premadeCodecTypeSpec_module_FooWithAdapter_9317
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Baz_7352.FullName] = premadeCodecTypeSpec_module_Baz_7352
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DirectlyAdapted.FullName] = premadeCodecTypeSpec_module_DirectlyAdapted
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Bar.FullName] = premadeCodecTypeSpec_module_Bar
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IndependentDirectlyAdapted.FullName] = premadeCodecTypeSpec_module_IndependentDirectlyAdapted
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithFieldAdapter.FullName] = premadeCodecTypeSpec_module_StructWithFieldAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TerseAdaptedFields.FullName] = premadeCodecTypeSpec_module_TerseAdaptedFields
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_A.FullName] = premadeCodecTypeSpec_module_A
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedA.FullName] = premadeCodecTypeSpec_module_AdaptedA
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_B.FullName] = premadeCodecTypeSpec_module_B
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Config.FullName] = premadeCodecTypeSpec_module_Config
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyStruct.FullName] = premadeCodecTypeSpec_module_MyStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DurationMs.FullName] = premadeCodecTypeSpec_module_DurationMs
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IOBuf.FullName] = premadeCodecTypeSpec_module_IOBuf
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CustomProtocolType.FullName] = premadeCodecTypeSpec_module_CustomProtocolType
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_IndirectionString.FullName] = premadeCodecTypeSpec_module_IndirectionString
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedBool.FullName] = premadeCodecTypeSpec_module_AdaptedBool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedInteger.FullName] = premadeCodecTypeSpec_module_AdaptedInteger
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTestStruct.FullName] = premadeCodecTypeSpec_module_AdaptTestStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_byte.FullName] = premadeCodecTypeSpec_byte
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedByte.FullName] = premadeCodecTypeSpec_module_AdaptedByte
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedShort.FullName] = premadeCodecTypeSpec_module_AdaptedShort
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedLong.FullName] = premadeCodecTypeSpec_module_AdaptedLong
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_double.FullName] = premadeCodecTypeSpec_double
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedDouble.FullName] = premadeCodecTypeSpec_module_AdaptedDouble
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedString.FullName] = premadeCodecTypeSpec_module_AdaptedString
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedEnum.FullName] = premadeCodecTypeSpec_module_AdaptedEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DoubleTypedefBool.FullName] = premadeCodecTypeSpec_module_DoubleTypedefBool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTemplatedTestStruct.FullName] = premadeCodecTypeSpec_module_AdaptTemplatedTestStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTemplatedNestedTestStruct.FullName] = premadeCodecTypeSpec_module_AdaptTemplatedNestedTestStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptTestUnion.FullName] = premadeCodecTypeSpec_module_AdaptTestUnion
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedStruct.FullName] = premadeCodecTypeSpec_module_AdaptedStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DirectlyAdaptedStruct.FullName] = premadeCodecTypeSpec_module_DirectlyAdaptedStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedTypedef.FullName] = premadeCodecTypeSpec_module_AdaptedTypedef
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TypedefOfDirect.FullName] = premadeCodecTypeSpec_module_TypedefOfDirect
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructFieldAdaptedStruct.FullName] = premadeCodecTypeSpec_module_StructFieldAdaptedStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CircularStruct.FullName] = premadeCodecTypeSpec_module_CircularStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CircularAdaptee.FullName] = premadeCodecTypeSpec_module_CircularAdaptee
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AdaptedCircularAdaptee.FullName] = premadeCodecTypeSpec_module_AdaptedCircularAdaptee
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DeclaredAfterStruct.FullName] = premadeCodecTypeSpec_module_DeclaredAfterStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ReorderedStruct.FullName] = premadeCodecTypeSpec_module_ReorderedStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_RenamedStruct.FullName] = premadeCodecTypeSpec_module_RenamedStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_SameNamespaceStruct.FullName] = premadeCodecTypeSpec_module_SameNamespaceStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_HeapAllocated.FullName] = premadeCodecTypeSpec_module_HeapAllocated
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MoveOnly.FullName] = premadeCodecTypeSpec_module_MoveOnly
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_AlsoMoveOnly.FullName] = premadeCodecTypeSpec_module_AlsoMoveOnly
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ApplyAdapter.FullName] = premadeCodecTypeSpec_module_ApplyAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_TransitiveAdapted.FullName] = premadeCodecTypeSpec_module_TransitiveAdapted
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingInt.FullName] = premadeCodecTypeSpec_module_CountingInt
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_CountingStruct.FullName] = premadeCodecTypeSpec_module_CountingStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Person.FullName] = premadeCodecTypeSpec_module_Person
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Person2.FullName] = premadeCodecTypeSpec_module_Person2
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter.FullName] = premadeCodecTypeSpec_module_RenamedStructWithStructAdapterAndFieldAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32.FullName] = premadeCodecTypeSpec_module_MyI32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StructWithAdapter.FullName] = premadeCodecTypeSpec_module_StructWithAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_UnionWithAdapter.FullName] = premadeCodecTypeSpec_module_UnionWithAdapter
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_MyI32_4873.FullName] = premadeCodecTypeSpec_module_MyI32_4873
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_StringWithAdapter_7208.FullName] = premadeCodecTypeSpec_module_StringWithAdapter_7208
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

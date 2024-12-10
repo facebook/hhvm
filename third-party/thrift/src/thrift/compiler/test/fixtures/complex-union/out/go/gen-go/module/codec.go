@@ -7,8 +7,6 @@ package module
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -501,44 +499,40 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexUnion)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ListUnion)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DataUnion)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Val)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ValUnion)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_VirtualComplexUnion)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_NonCopyableStruct)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_NonCopyableUnion)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ListUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DataUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Val)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ValUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_VirtualComplexUnion)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_NonCopyableStruct)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_NonCopyableUnion)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_containerTypedef.FullName] = premadeCodecTypeSpec_module_containerTypedef
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexUnion.FullName] = premadeCodecTypeSpec_module_ComplexUnion
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListUnion.FullName] = premadeCodecTypeSpec_module_ListUnion
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DataUnion.FullName] = premadeCodecTypeSpec_module_DataUnion
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Val.FullName] = premadeCodecTypeSpec_module_Val
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ValUnion.FullName] = premadeCodecTypeSpec_module_ValUnion
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_VirtualComplexUnion.FullName] = premadeCodecTypeSpec_module_VirtualComplexUnion
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonCopyableStruct.FullName] = premadeCodecTypeSpec_module_NonCopyableStruct
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonCopyableUnion.FullName] = premadeCodecTypeSpec_module_NonCopyableUnion
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i16.FullName] = premadeCodecTypeSpec_i16
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_containerTypedef.FullName] = premadeCodecTypeSpec_module_containerTypedef
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ComplexUnion.FullName] = premadeCodecTypeSpec_module_ComplexUnion
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ListUnion.FullName] = premadeCodecTypeSpec_module_ListUnion
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_binary.FullName] = premadeCodecTypeSpec_binary
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_DataUnion.FullName] = premadeCodecTypeSpec_module_DataUnion
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Val.FullName] = premadeCodecTypeSpec_module_Val
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_ValUnion.FullName] = premadeCodecTypeSpec_module_ValUnion
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_VirtualComplexUnion.FullName] = premadeCodecTypeSpec_module_VirtualComplexUnion
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonCopyableStruct.FullName] = premadeCodecTypeSpec_module_NonCopyableStruct
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_NonCopyableUnion.FullName] = premadeCodecTypeSpec_module_NonCopyableUnion
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

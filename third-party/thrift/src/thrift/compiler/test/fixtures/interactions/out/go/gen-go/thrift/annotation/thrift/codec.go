@@ -7,8 +7,6 @@ package thrift
 
 
 import (
-    "sync"
-
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
@@ -554,58 +552,54 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Experimental)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ReserveIds)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_RequiresBackwardCompatibility)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseWrite)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Box)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Mixin)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_SerializeInFieldIdOrder)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_BitmaskEnum)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_ExceptionMessage)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_InternBox)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Serial)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Uri)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Priority)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_DeprecatedUnvalidatedAnnotations)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedIdentifier)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedFilename)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Experimental)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ReserveIds)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_RequiresBackwardCompatibility)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseWrite)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Box)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Mixin)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_SerializeInFieldIdOrder)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_BitmaskEnum)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_ExceptionMessage)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_InternBox)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Serial)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Uri)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Priority)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_DeprecatedUnvalidatedAnnotations)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedIdentifier)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedFilename)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RpcPriority.FullName] = premadeCodecTypeSpec_thrift_RpcPriority
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Experimental.FullName] = premadeCodecTypeSpec_thrift_Experimental
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_ReserveIds.FullName] = premadeCodecTypeSpec_thrift_ReserveIds
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility.FullName] = premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_TerseWrite.FullName] = premadeCodecTypeSpec_thrift_TerseWrite
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Box.FullName] = premadeCodecTypeSpec_thrift_Box
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Mixin.FullName] = premadeCodecTypeSpec_thrift_Mixin
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder.FullName] = premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_BitmaskEnum.FullName] = premadeCodecTypeSpec_thrift_BitmaskEnum
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_ExceptionMessage.FullName] = premadeCodecTypeSpec_thrift_ExceptionMessage
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_InternBox.FullName] = premadeCodecTypeSpec_thrift_InternBox
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Serial.FullName] = premadeCodecTypeSpec_thrift_Serial
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Uri.FullName] = premadeCodecTypeSpec_thrift_Uri
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Priority.FullName] = premadeCodecTypeSpec_thrift_Priority
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations.FullName] = premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedIdentifier.FullName] = premadeCodecTypeSpec_thrift_AllowReservedIdentifier
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedFilename.FullName] = premadeCodecTypeSpec_thrift_AllowReservedFilename
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RpcPriority.FullName] = premadeCodecTypeSpec_thrift_RpcPriority
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Experimental.FullName] = premadeCodecTypeSpec_thrift_Experimental
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i32.FullName] = premadeCodecTypeSpec_i32
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_ReserveIds.FullName] = premadeCodecTypeSpec_thrift_ReserveIds
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_bool.FullName] = premadeCodecTypeSpec_bool
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility.FullName] = premadeCodecTypeSpec_thrift_RequiresBackwardCompatibility
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_TerseWrite.FullName] = premadeCodecTypeSpec_thrift_TerseWrite
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Box.FullName] = premadeCodecTypeSpec_thrift_Box
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Mixin.FullName] = premadeCodecTypeSpec_thrift_Mixin
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder.FullName] = premadeCodecTypeSpec_thrift_SerializeInFieldIdOrder
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_BitmaskEnum.FullName] = premadeCodecTypeSpec_thrift_BitmaskEnum
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_ExceptionMessage.FullName] = premadeCodecTypeSpec_thrift_ExceptionMessage
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_InternBox.FullName] = premadeCodecTypeSpec_thrift_InternBox
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Serial.FullName] = premadeCodecTypeSpec_thrift_Serial
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Uri.FullName] = premadeCodecTypeSpec_thrift_Uri
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_Priority.FullName] = premadeCodecTypeSpec_thrift_Priority
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations.FullName] = premadeCodecTypeSpec_thrift_DeprecatedUnvalidatedAnnotations
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedIdentifier.FullName] = premadeCodecTypeSpec_thrift_AllowReservedIdentifier
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_thrift_AllowReservedFilename.FullName] = premadeCodecTypeSpec_thrift_AllowReservedFilename
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

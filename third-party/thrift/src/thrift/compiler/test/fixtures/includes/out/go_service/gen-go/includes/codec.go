@@ -7,8 +7,6 @@ package includes
 
 
 import (
-    "sync"
-
     transitive "transitive"
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
@@ -100,27 +98,23 @@ var (
 )
 
 // Premade slice of all struct specs
-var premadeStructSpecsOnce = sync.OnceValue(
-    func() []*thrift.StructSpec {
-        fbthriftResults := make([]*thrift.StructSpec, 0)
-        fbthriftResults = append(fbthriftResults, premadeStructSpec_Included)
-        return fbthriftResults
-    },
-)
+var premadeStructSpecs = func() []*thrift.StructSpec {
+    fbthriftResults := make([]*thrift.StructSpec, 0)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_Included)
+    return fbthriftResults
+}()
 
-var premadeCodecSpecsMapOnce = sync.OnceValue(
-    func() map[string]*thrift.TypeSpec {
-        fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_includes_Included.FullName] = premadeCodecTypeSpec_includes_Included
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_includes_IncludedInt64.FullName] = premadeCodecTypeSpec_includes_IncludedInt64
-        fbthriftTypeSpecsMap[premadeCodecTypeSpec_includes_TransitiveFoo.FullName] = premadeCodecTypeSpec_includes_TransitiveFoo
-        return fbthriftTypeSpecsMap
-    },
-)
+var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
+    fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_includes_Included.FullName] = premadeCodecTypeSpec_includes_Included
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_includes_IncludedInt64.FullName] = premadeCodecTypeSpec_includes_IncludedInt64
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_includes_TransitiveFoo.FullName] = premadeCodecTypeSpec_includes_TransitiveFoo
+    return fbthriftTypeSpecsMap
+}()
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.
 func GetCodecTypeSpec(fullName string) *thrift.TypeSpec {
-    return premadeCodecSpecsMapOnce()[fullName]
+    return premadeCodecSpecsMap[fullName]
 }

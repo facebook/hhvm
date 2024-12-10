@@ -28,7 +28,14 @@ namespace apache::thrift::protocol::detail::experimental {
 // are deduced from Tag. The APIs in principle should be identical to static
 // patches.
 template <class Tag>
-class TaggedPatchRef;
+class TaggedPatchRef {
+ public:
+  using underlying_dynamic_patch = void;
+};
+
+template <class Tag>
+inline constexpr bool kHasTaggedPatchRef =
+    !std::is_void_v<typename TaggedPatchRef<Tag>::underlying_dynamic_patch>;
 
 class BadgeHolder {
   static Badge get();
@@ -49,9 +56,7 @@ class TaggedPatchRef<type::list<Tag>> {
 
   explicit TaggedPatchRef(DynamicListPatch& patch) : patch_(patch) {}
 
-  void assign(const value_type& v) {
-    patch_.get().assign(badge, asValueStruct<List>(v).as_list());
-  }
+  void assign(const value_type& v) { assign_impl(v); }
 
   void operator=(const value_type& v) { assign(v); }
 
@@ -61,17 +66,25 @@ class TaggedPatchRef<type::list<Tag>> {
     patch_.get().push_back(badge, asValueStruct<Tag>(v));
   }
 
-  void apply(value_type& v) {
-    auto l = asValueStruct<List>(v);
-    patch_.get().apply(badge, l.as_list());
-    v = protocol::fromValueStruct<List>(l);
-  }
+  void apply(value_type& v) { apply_impl(v); }
 
   void merge(const TaggedPatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
   }
 
   auto toObject() const { return patch_.get().toObject(); }
+
+ protected:
+  template <class Value>
+  void apply_impl(Value& v) {
+    auto l = asValueStruct<List>(v);
+    patch_.get().apply(badge, l.as_list());
+    v = protocol::fromValueStruct<List>(l);
+  }
+  template <class Value>
+  void assign_impl(const Value& v) {
+    patch_.get().assign(badge, asValueStruct<List>(v).as_list());
+  }
 
  private:
   static inline const auto badge = BadgeHolder::get();
@@ -89,9 +102,7 @@ class TaggedPatchRef<type::set<Tag>> {
 
   explicit TaggedPatchRef(DynamicSetPatch& patch) : patch_(patch) {}
 
-  void assign(const value_type& v) {
-    patch_.get().assign(badge, asValueStruct<Set>(v).as_set());
-  }
+  void assign(const value_type& v) { assign_impl(v); }
 
   void operator=(const value_type& v) { assign(v); }
 
@@ -105,17 +116,25 @@ class TaggedPatchRef<type::set<Tag>> {
     patch_.get().erase(badge, asValueStruct<Tag>(v));
   }
 
-  void apply(value_type& v) {
-    auto l = asValueStruct<Set>(v);
-    patch_.get().apply(badge, l.as_set());
-    v = protocol::fromValueStruct<Set>(l);
-  }
+  void apply(value_type& v) { apply_impl(v); }
 
   void merge(const TaggedPatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
   }
 
   auto toObject() const { return patch_.get().toObject(); }
+
+ protected:
+  template <class Value>
+  void apply_impl(Value& v) {
+    auto l = asValueStruct<Set>(v);
+    patch_.get().apply(badge, l.as_set());
+    v = protocol::fromValueStruct<Set>(l);
+  }
+  template <class Value>
+  void assign_impl(const Value& v) {
+    patch_.get().assign(badge, asValueStruct<Set>(v).as_set());
+  }
 
  private:
   static inline const auto badge = BadgeHolder::get();
@@ -132,7 +151,7 @@ class TaggedPatchAnyRef {
   template <class Tag>
   auto& bind(DynamicPatch& patch) {
     auto& stored = patch.getStoredPatchByTag<Tag>(BadgeHolder::get());
-    if constexpr (type::is_a_v<Tag, type::primitive_c>) {
+    if constexpr (!kHasTaggedPatchRef<Tag>) {
       // For primitive patches we return the stored patch directly.
       return stored;
     } else {
@@ -160,9 +179,7 @@ class TaggedPatchRef<type::map<K, V>> {
 
   explicit TaggedPatchRef(DynamicMapPatch& patch) : patch_(patch) {}
 
-  void assign(const value_type& v) {
-    patch_.get().assign(badge, asValueStruct<Map>(v).as_map());
-  }
+  void assign(const value_type& v) { assign_impl(v); }
 
   void operator=(const value_type& v) { assign(v); }
 
@@ -192,17 +209,25 @@ class TaggedPatchRef<type::map<K, V>> {
     return patchByKey(key);
   }
 
-  void apply(value_type& v) {
-    auto l = asValueStruct<Map>(v);
-    patch_.get().apply(badge, l.as_map());
-    v = protocol::fromValueStruct<Map>(l);
-  }
+  void apply(value_type& v) { apply_impl(v); }
 
   void merge(const TaggedPatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
   }
 
   auto toObject() const { return patch_.get().toObject(); }
+
+ protected:
+  template <class Value>
+  void apply_impl(Value& v) {
+    auto l = asValueStruct<Map>(v);
+    patch_.get().apply(badge, l.as_map());
+    v = protocol::fromValueStruct<Map>(l);
+  }
+  template <class Value>
+  void assign_impl(const Value& v) {
+    patch_.get().assign(badge, asValueStruct<Map>(v).as_map());
+  }
 
  private:
   static inline const auto badge = BadgeHolder::get();
@@ -225,9 +250,7 @@ class TaggedStructurePatchRef {
   explicit TaggedStructurePatchRef(underlying_dynamic_patch& patch)
       : patch_(patch) {}
 
-  void assign(const value_type& v) {
-    patch_.get().assign(badge, asValueStruct<Tag>(v).as_object());
-  }
+  void assign(const value_type& v) { assign_impl(v); }
 
   void operator=(const value_type& v) { assign(v); }
 
@@ -266,11 +289,7 @@ class TaggedStructurePatchRef {
     patch_.get().remove(badge, op::get_field_id_v<value_type, Id>);
   }
 
-  void apply(value_type& v) {
-    auto obj = asValueStruct<Tag>(v);
-    patch_.get().apply(badge, obj.as_object());
-    v = protocol::fromValueStruct<Tag>(obj);
-  }
+  void apply(value_type& v) { apply_impl(v); }
 
   void merge(const TaggedStructurePatchRef& other) {
     patch_.get().merge(badge, other.patch_.get());
@@ -292,6 +311,18 @@ class TaggedStructurePatchRef {
   }
 
   bool empty() { return patch_.get().empty(badge); }
+
+ protected:
+  template <class Value>
+  void apply_impl(Value& v) {
+    auto obj = asValueStruct<Tag>(v);
+    patch_.get().apply(badge, obj.as_object());
+    v = protocol::fromValueStruct<Tag>(obj);
+  }
+  template <class Value>
+  void assign_impl(const Value& v) {
+    patch_.get().assign(badge, asValueStruct<Tag>(v).as_object());
+  }
 
  private:
   static inline const auto badge = BadgeHolder::get();
@@ -323,6 +354,16 @@ class TaggedPatchRef<type::union_t<T>> : public TaggedStructurePatchRef<T> {
  public:
   using TaggedStructurePatchRef<T>::TaggedStructurePatchRef;
   using TaggedStructurePatchRef<T>::operator=;
+};
+
+template <class T, class Tag>
+class TaggedPatchRef<type::cpp_type<T, Tag>> : public TaggedPatchRef<Tag> {
+ public:
+  using TaggedPatchRef<Tag>::TaggedPatchRef;
+  using TaggedPatchRef<Tag>::operator=;
+
+  void apply(T& v) { this->template apply_impl(v); }
+  void assign(const T& v) { this->template assign_impl(v); }
 };
 
 // A wrapper to make unowned types own the underlying data

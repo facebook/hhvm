@@ -590,22 +590,40 @@ class DynamicPatch {
 
   template <class Tag>
   auto& getStoredPatchByTag(detail::Badge badge) {
-    if constexpr (type::is_a_v<Tag, type::list_c>) {
-      return getStoredPatch<DynamicListPatch>(badge);
-    } else if constexpr (type::is_a_v<Tag, type::set_c>) {
-      return getStoredPatch<DynamicSetPatch>(badge);
-    } else if constexpr (type::is_a_v<Tag, type::map_c>) {
-      return getStoredPatch<DynamicMapPatch>(badge);
-    } else if constexpr (type::is_a_v<Tag, type::struct_c>) {
-      return getStoredPatch<DynamicStructPatch>(badge);
-    } else if constexpr (type::is_a_v<Tag, type::union_c>) {
-      return getStoredPatch<DynamicUnionPatch>(badge);
-    } else {
-      return getStoredPatch<op::patch_type<Tag>>(badge);
-    }
+    return getStoredPatchByTag(Tag{}, badge);
   }
 
  private:
+  template <class Tag>
+  auto& getStoredPatchByTag(type::list<Tag>, detail::Badge badge) {
+    return getStoredPatch<DynamicListPatch>(badge);
+  }
+  template <class Tag>
+  auto& getStoredPatchByTag(type::set<Tag>, detail::Badge badge) {
+    return getStoredPatch<DynamicSetPatch>(badge);
+  }
+  template <class K, class V>
+  auto& getStoredPatchByTag(type::map<K, V>, detail::Badge badge) {
+    return getStoredPatch<DynamicMapPatch>(badge);
+  }
+  template <class T>
+  auto& getStoredPatchByTag(type::struct_t<T>, detail::Badge badge) {
+    return getStoredPatch<DynamicStructPatch>(badge);
+  }
+  template <class T>
+  auto& getStoredPatchByTag(type::union_t<T>, detail::Badge badge) {
+    return getStoredPatch<DynamicUnionPatch>(badge);
+  }
+  template <class T, class Tag>
+  auto& getStoredPatchByTag(type::cpp_type<T, Tag>, detail::Badge badge) {
+    return getStoredPatchByTag(Tag{}, badge);
+  }
+  template <class Tag>
+  auto& getStoredPatchByTag(Tag, detail::Badge badge) {
+    static_assert(type::is_a_v<Tag, type::primitive_c>);
+    return getStoredPatch<op::patch_type<Tag>>(badge);
+  }
+
   template <class Patch>
   Patch& getStoredPatch(detail::Badge badge) {
     // patch already has the correct type, return it directly.

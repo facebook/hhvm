@@ -22,35 +22,36 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string *metadata.ThriftType = nil
-    premadeThriftType_module_Fields *metadata.ThriftType = nil
-    premadeThriftType_module_FieldsInjectedToEmptyStruct *metadata.ThriftType = nil
-    premadeThriftType_module_FieldsInjectedToStruct *metadata.ThriftType = nil
-    premadeThriftType_module_FieldsInjectedWithIncludedStruct *metadata.ThriftType = nil
+    premadeThriftType_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_module_Fields = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.Fields"),
+        )
+    }()
+    premadeThriftType_module_FieldsInjectedToEmptyStruct = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.FieldsInjectedToEmptyStruct"),
+        )
+    }()
+    premadeThriftType_module_FieldsInjectedToStruct = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.FieldsInjectedToStruct"),
+        )
+    }()
+    premadeThriftType_module_FieldsInjectedWithIncludedStruct = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.FieldsInjectedWithIncludedStruct"),
+        )
+    }()
 )
-
-// Premade Thrift type initializer
-var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
-    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    )
-    premadeThriftType_module_Fields = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Fields"),
-    )
-    premadeThriftType_module_FieldsInjectedToEmptyStruct = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.FieldsInjectedToEmptyStruct"),
-    )
-    premadeThriftType_module_FieldsInjectedToStruct = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.FieldsInjectedToStruct"),
-    )
-    premadeThriftType_module_FieldsInjectedWithIncludedStruct = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.FieldsInjectedWithIncludedStruct"),
-    )
-})
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
 // and put them in a map at runtime. See comment at the top of template
@@ -62,9 +63,6 @@ type thriftTypeWithFullName struct {
 
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Fields", premadeThriftType_module_Fields })
@@ -106,9 +104,6 @@ var exceptionMetadatasOnce = sync.OnceValue(
 
 var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftEnum, 0)
         return fbthriftResults
     },
@@ -116,9 +111,6 @@ var enumMetadatasOnce = sync.OnceValue(
 
 var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftService, 0)
         return fbthriftResults
     },

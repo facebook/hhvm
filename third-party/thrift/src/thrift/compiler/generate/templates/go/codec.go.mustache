@@ -40,50 +40,34 @@ var _ = thrift.ZERO
 // Premade codec specs
 var (
     {{#program:thrift_metadata_types}}
-    {{type:codec_type_spec_name}} *thrift.TypeSpec = nil
+    {{type:codec_type_spec_name}} = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "{{type:full_name}}",
+            {{> spec/codec_type_spec_setter}}: {{> spec/codec_type_spec_instance}}
+        }
+    }()
     {{/program:thrift_metadata_types}}
 )
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    {{#program:thrift_metadata_types}}
-    {{type:codec_type_spec_name}} = &thrift.TypeSpec{
-        FullName: "{{type:full_name}}",
-        {{> spec/codec_type_spec_setter}}: {{> spec/codec_type_spec_instance}}
-    }
-    {{/program:thrift_metadata_types}}
-})
 
 // Premade struct specs
 var (
     {{#program:structs}}
-    {{struct:struct_spec_name}} *thrift.StructSpec = nil
+    {{struct:struct_spec_name}} = func() *thrift.StructSpec {
+        return {{> spec/codec_struct_spec}}
+    }()
     {{/program:structs}}
     {{#program:services}}
     {{#service:req_resp_structs}}
-    {{struct:struct_spec_name}} *thrift.StructSpec = nil
+    {{struct:struct_spec_name}} = func() *thrift.StructSpec {
+        return {{> spec/codec_struct_spec}}
+    }()
     {{/service:req_resp_structs}}
     {{/program:services}}
 )
 
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    {{#program:structs}}
-    {{struct:struct_spec_name}} = {{> spec/codec_struct_spec}}
-    {{/program:structs}}
-    {{#program:services}}
-    {{#service:req_resp_structs}}
-    {{struct:struct_spec_name}} = {{> spec/codec_struct_spec}}
-    {{/service:req_resp_structs}}
-    {{/program:services}}
-})
-
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         {{#program:structs}}
         fbthriftResults = append(fbthriftResults, {{struct:struct_spec_name}})
@@ -94,9 +78,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         {{#program:thrift_metadata_types}}
         {{#type:named?}}
@@ -106,11 +87,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

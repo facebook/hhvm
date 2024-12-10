@@ -19,56 +19,52 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_i64 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_includes_Included *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_includes_IncludedInt64 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_includes_TransitiveFoo *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
-        FullName: "i64",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_i64 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "i64",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
-    }
-    premadeCodecTypeSpec_includes_Included = &thrift.TypeSpec{
-        FullName: "includes.Included",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_includes_Included = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "includes.Included",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "includes.Included",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewIncluded() },
 },
 
-    }
-    premadeCodecTypeSpec_includes_IncludedInt64 = &thrift.TypeSpec{
-        FullName: "includes.IncludedInt64",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
+        }
+    }()
+    premadeCodecTypeSpec_includes_IncludedInt64 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "includes.IncludedInt64",
+            CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "includes.IncludedInt64",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i64,
 },
 
-    }
-    premadeCodecTypeSpec_includes_TransitiveFoo = &thrift.TypeSpec{
-        FullName: "includes.TransitiveFoo",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
+        }
+    }()
+    premadeCodecTypeSpec_includes_TransitiveFoo = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "includes.TransitiveFoo",
+            CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "includes.TransitiveFoo",
 	UnderlyingTypeSpec: transitive.GetCodecTypeSpec("transitive.Foo"),
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_Included *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_Included = &thrift.StructSpec{
+    premadeStructSpec_Included = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Included",
     ScopedName:           "includes.Included",
     IsUnion:              false,
@@ -100,14 +96,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "MyTransitiveField": 1,
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Included)
         return fbthriftResults
@@ -116,9 +110,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_i64.FullName] = premadeCodecTypeSpec_i64
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_includes_Included.FullName] = premadeCodecTypeSpec_includes_Included
@@ -127,11 +118,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

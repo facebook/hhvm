@@ -20,58 +20,64 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string *metadata.ThriftType = nil
-    premadeThriftType_module_Fiery *metadata.ThriftType = nil
-    premadeThriftType_module_Serious *metadata.ThriftType = nil
-    premadeThriftType_module_ComplexFieldNames *metadata.ThriftType = nil
-    premadeThriftType_module_CustomFieldNames *metadata.ThriftType = nil
-    premadeThriftType_i32 *metadata.ThriftType = nil
-    premadeThriftType_module_ExceptionWithPrimitiveField *metadata.ThriftType = nil
-    premadeThriftType_module_ExceptionWithStructuredAnnotation *metadata.ThriftType = nil
-    premadeThriftType_module_Banal *metadata.ThriftType = nil
-    premadeThriftType_void *metadata.ThriftType = nil
+    premadeThriftType_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_module_Fiery = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.Fiery"),
+        )
+    }()
+    premadeThriftType_module_Serious = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.Serious"),
+        )
+    }()
+    premadeThriftType_module_ComplexFieldNames = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.ComplexFieldNames"),
+        )
+    }()
+    premadeThriftType_module_CustomFieldNames = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.CustomFieldNames"),
+        )
+    }()
+    premadeThriftType_i32 = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_module_ExceptionWithPrimitiveField = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.ExceptionWithPrimitiveField"),
+        )
+    }()
+    premadeThriftType_module_ExceptionWithStructuredAnnotation = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.ExceptionWithStructuredAnnotation"),
+        )
+    }()
+    premadeThriftType_module_Banal = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.Banal"),
+        )
+    }()
+    premadeThriftType_void = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
+        )
+    }()
 )
-
-// Premade Thrift type initializer
-var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
-    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    )
-    premadeThriftType_module_Fiery = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Fiery"),
-    )
-    premadeThriftType_module_Serious = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Serious"),
-    )
-    premadeThriftType_module_ComplexFieldNames = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.ComplexFieldNames"),
-    )
-    premadeThriftType_module_CustomFieldNames = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.CustomFieldNames"),
-    )
-    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )
-    premadeThriftType_module_ExceptionWithPrimitiveField = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.ExceptionWithPrimitiveField"),
-    )
-    premadeThriftType_module_ExceptionWithStructuredAnnotation = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.ExceptionWithStructuredAnnotation"),
-    )
-    premadeThriftType_module_Banal = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.Banal"),
-    )
-    premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    )
-})
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
 // and put them in a map at runtime. See comment at the top of template
@@ -83,9 +89,6 @@ type thriftTypeWithFullName struct {
 
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.Fiery", premadeThriftType_module_Fiery })
@@ -132,9 +135,6 @@ var exceptionMetadatasOnce = sync.OnceValue(
 
 var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftEnum, 0)
         return fbthriftResults
     },
@@ -142,9 +142,6 @@ var enumMetadatasOnce = sync.OnceValue(
 
 var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftService, 0)
         fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.Raiser").

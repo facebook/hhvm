@@ -17,112 +17,107 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_python_Py3Hidden *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_string *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_python_PyDeprecatedHidden *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_python_Flags *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_python_Name *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_python_Adapter *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_bool *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_python_UseCAPI *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_python_Py3EnableCppAdapter *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_python_Py3Hidden = &thrift.TypeSpec{
-        FullName: "python.Py3Hidden",
-        CodecStructSpec: &thrift.CodecStructSpec{
+    premadeCodecTypeSpec_python_Py3Hidden = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.Py3Hidden",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Py3Hidden",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPy3Hidden() },
 },
 
-    }
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "string",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-    }
-    premadeCodecTypeSpec_python_PyDeprecatedHidden = &thrift.TypeSpec{
-        FullName: "python.PyDeprecatedHidden",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_python_PyDeprecatedHidden = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.PyDeprecatedHidden",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.PyDeprecatedHidden",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPyDeprecatedHidden() },
 },
 
-    }
-    premadeCodecTypeSpec_python_Flags = &thrift.TypeSpec{
-        FullName: "python.Flags",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_python_Flags = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.Flags",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Flags",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFlags() },
 },
 
-    }
-    premadeCodecTypeSpec_python_Name = &thrift.TypeSpec{
-        FullName: "python.Name",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_python_Name = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.Name",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Name",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewName() },
 },
 
-    }
-    premadeCodecTypeSpec_python_Adapter = &thrift.TypeSpec{
-        FullName: "python.Adapter",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_python_Adapter = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.Adapter",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Adapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
-    }
-    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
-        FullName: "bool",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "bool",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-    }
-    premadeCodecTypeSpec_python_UseCAPI = &thrift.TypeSpec{
-        FullName: "python.UseCAPI",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_python_UseCAPI = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.UseCAPI",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.UseCAPI",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewUseCAPI() },
 },
 
-    }
-    premadeCodecTypeSpec_python_Py3EnableCppAdapter = &thrift.TypeSpec{
-        FullName: "python.Py3EnableCppAdapter",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_python_Py3EnableCppAdapter = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "python.Py3EnableCppAdapter",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "python.Py3EnableCppAdapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewPy3EnableCppAdapter() },
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_Py3Hidden *thrift.StructSpec = nil
-    premadeStructSpec_PyDeprecatedHidden *thrift.StructSpec = nil
-    premadeStructSpec_Flags *thrift.StructSpec = nil
-    premadeStructSpec_Name *thrift.StructSpec = nil
-    premadeStructSpec_Adapter *thrift.StructSpec = nil
-    premadeStructSpec_UseCAPI *thrift.StructSpec = nil
-    premadeStructSpec_Py3EnableCppAdapter *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_Py3Hidden = &thrift.StructSpec{
+    premadeStructSpec_Py3Hidden = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Py3Hidden",
     ScopedName:           "python.Py3Hidden",
     IsUnion:              false,
@@ -134,7 +129,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_PyDeprecatedHidden = &thrift.StructSpec{
+    }()
+    premadeStructSpec_PyDeprecatedHidden = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "PyDeprecatedHidden",
     ScopedName:           "python.PyDeprecatedHidden",
     IsUnion:              false,
@@ -156,7 +153,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "reason": 0,
     },
 }
-    premadeStructSpec_Flags = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Flags = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Flags",
     ScopedName:           "python.Flags",
     IsUnion:              false,
@@ -168,7 +167,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_Name = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Name = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Name",
     ScopedName:           "python.Name",
     IsUnion:              false,
@@ -190,7 +191,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "name": 0,
     },
 }
-    premadeStructSpec_Adapter = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Adapter = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Adapter",
     ScopedName:           "python.Adapter",
     IsUnion:              false,
@@ -222,7 +225,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "typeHint": 1,
     },
 }
-    premadeStructSpec_UseCAPI = &thrift.StructSpec{
+    }()
+    premadeStructSpec_UseCAPI = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "UseCAPI",
     ScopedName:           "python.UseCAPI",
     IsUnion:              false,
@@ -244,7 +249,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "serialize": 0,
     },
 }
-    premadeStructSpec_Py3EnableCppAdapter = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Py3EnableCppAdapter = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Py3EnableCppAdapter",
     ScopedName:           "python.Py3EnableCppAdapter",
     IsUnion:              false,
@@ -256,14 +263,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Py3Hidden)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_PyDeprecatedHidden)
@@ -278,9 +283,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_python_Py3Hidden.FullName] = premadeCodecTypeSpec_python_Py3Hidden
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
@@ -294,11 +296,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

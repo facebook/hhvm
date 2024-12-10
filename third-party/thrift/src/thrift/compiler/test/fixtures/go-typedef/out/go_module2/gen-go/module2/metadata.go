@@ -20,16 +20,13 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module2_Enum *metadata.ThriftType = nil
+    premadeThriftType_module2_Enum = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTEnum(
+            metadata.NewThriftEnumType().
+                SetName("module2.Enum"),
+        )
+    }()
 )
-
-// Premade Thrift type initializer
-var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
-    premadeThriftType_module2_Enum = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module2.Enum"),
-    )
-})
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
 // and put them in a map at runtime. See comment at the top of template
@@ -41,9 +38,6 @@ type thriftTypeWithFullName struct {
 
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module2.Enum", premadeThriftType_module2_Enum })
 
@@ -81,9 +75,6 @@ var exceptionMetadatasOnce = sync.OnceValue(
 
 var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftEnum, 0)
         fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
     SetName("module2.Enum").
@@ -100,9 +91,6 @@ var enumMetadatasOnce = sync.OnceValue(
 
 var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftService, 0)
         return fbthriftResults
     },

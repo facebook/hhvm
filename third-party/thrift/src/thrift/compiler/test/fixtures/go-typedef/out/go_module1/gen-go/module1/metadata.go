@@ -24,128 +24,146 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string *metadata.ThriftType = nil
-    premadeThriftType_module1_Plate *metadata.ThriftType = nil
-    premadeThriftType_i32 *metadata.ThriftType = nil
-    premadeThriftType_module1_Year *metadata.ThriftType = nil
-    premadeThriftType_list_string *metadata.ThriftType = nil
-    premadeThriftType_module1_Drivers *metadata.ThriftType = nil
-    premadeThriftType_module1_Accessory *metadata.ThriftType = nil
-    premadeThriftType_list_module1_Accessory *metadata.ThriftType = nil
-    premadeThriftType_module1_PartName *metadata.ThriftType = nil
-    premadeThriftType_map_i32_module1_PartName *metadata.ThriftType = nil
-    premadeThriftType_module1_Automobile *metadata.ThriftType = nil
-    premadeThriftType_i64 *metadata.ThriftType = nil
-    premadeThriftType_module1_MapKey *metadata.ThriftType = nil
-    premadeThriftType_map_module1_MapKey_string *metadata.ThriftType = nil
-    premadeThriftType_module1_MapContainer *metadata.ThriftType = nil
-    premadeThriftType_module1_Car *metadata.ThriftType = nil
-    premadeThriftType_module1_Pair *metadata.ThriftType = nil
-    premadeThriftType_list_module1_Automobile *metadata.ThriftType = nil
-    premadeThriftType_list_module1_Car *metadata.ThriftType = nil
-    premadeThriftType_module1_Collection *metadata.ThriftType = nil
-    premadeThriftType_module1_State *metadata.ThriftType = nil
-    premadeThriftType_module1_Enum *metadata.ThriftType = nil
+    premadeThriftType_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_module1_Plate = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.Plate").
+                SetUnderlyingType(premadeThriftType_string),
+        )
+    }()
+    premadeThriftType_i32 = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_module1_Year = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.Year").
+                SetUnderlyingType(premadeThriftType_i32),
+        )
+    }()
+    premadeThriftType_list_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTList(
+            metadata.NewThriftListType().
+                SetValueType(premadeThriftType_string),
+        )
+    }()
+    premadeThriftType_module1_Drivers = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.Drivers").
+                SetUnderlyingType(premadeThriftType_list_string),
+        )
+    }()
+    premadeThriftType_module1_Accessory = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.Accessory").
+                SetUnderlyingType(module0.GetMetadataThriftType("module0.Accessory")),
+        )
+    }()
+    premadeThriftType_list_module1_Accessory = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTList(
+            metadata.NewThriftListType().
+                SetValueType(premadeThriftType_module1_Accessory),
+        )
+    }()
+    premadeThriftType_module1_PartName = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.PartName").
+                SetUnderlyingType(module0.GetMetadataThriftType("module0.PartName")),
+        )
+    }()
+    premadeThriftType_map_i32_module1_PartName = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTMap(
+            metadata.NewThriftMapType().
+                SetKeyType(premadeThriftType_i32).
+                SetValueType(premadeThriftType_module1_PartName),
+        )
+    }()
+    premadeThriftType_module1_Automobile = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module1.Automobile"),
+        )
+    }()
+    premadeThriftType_i64 = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_module1_MapKey = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module1.MapKey"),
+        )
+    }()
+    premadeThriftType_map_module1_MapKey_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTMap(
+            metadata.NewThriftMapType().
+                SetKeyType(premadeThriftType_module1_MapKey).
+                SetValueType(premadeThriftType_string),
+        )
+    }()
+    premadeThriftType_module1_MapContainer = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module1.MapContainer"),
+        )
+    }()
+    premadeThriftType_module1_Car = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.Car").
+                SetUnderlyingType(premadeThriftType_module1_Automobile),
+        )
+    }()
+    premadeThriftType_module1_Pair = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module1.Pair"),
+        )
+    }()
+    premadeThriftType_list_module1_Automobile = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTList(
+            metadata.NewThriftListType().
+                SetValueType(premadeThriftType_module1_Automobile),
+        )
+    }()
+    premadeThriftType_list_module1_Car = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTList(
+            metadata.NewThriftListType().
+                SetValueType(premadeThriftType_module1_Car),
+        )
+    }()
+    premadeThriftType_module1_Collection = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module1.Collection"),
+        )
+    }()
+    premadeThriftType_module1_State = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.State").
+                SetUnderlyingType(premadeThriftType_string),
+        )
+    }()
+    premadeThriftType_module1_Enum = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module1.Enum").
+                SetUnderlyingType(module2.GetMetadataThriftType("module2.Enum")),
+        )
+    }()
 )
-
-// Premade Thrift type initializer
-var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
-    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    )
-    premadeThriftType_module1_Plate = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.Plate").
-            SetUnderlyingType(premadeThriftType_string),
-    )
-    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )
-    premadeThriftType_module1_Year = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.Year").
-            SetUnderlyingType(premadeThriftType_i32),
-    )
-    premadeThriftType_list_string = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_string),
-    )
-    premadeThriftType_module1_Drivers = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.Drivers").
-            SetUnderlyingType(premadeThriftType_list_string),
-    )
-    premadeThriftType_module1_Accessory = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.Accessory").
-            SetUnderlyingType(module0.GetMetadataThriftType("module0.Accessory")),
-    )
-    premadeThriftType_list_module1_Accessory = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_module1_Accessory),
-    )
-    premadeThriftType_module1_PartName = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.PartName").
-            SetUnderlyingType(module0.GetMetadataThriftType("module0.PartName")),
-    )
-    premadeThriftType_map_i32_module1_PartName = metadata.NewThriftType().SetTMap(
-        metadata.NewThriftMapType().
-            SetKeyType(premadeThriftType_i32).
-            SetValueType(premadeThriftType_module1_PartName),
-    )
-    premadeThriftType_module1_Automobile = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module1.Automobile"),
-    )
-    premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    )
-    premadeThriftType_module1_MapKey = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module1.MapKey"),
-    )
-    premadeThriftType_map_module1_MapKey_string = metadata.NewThriftType().SetTMap(
-        metadata.NewThriftMapType().
-            SetKeyType(premadeThriftType_module1_MapKey).
-            SetValueType(premadeThriftType_string),
-    )
-    premadeThriftType_module1_MapContainer = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module1.MapContainer"),
-    )
-    premadeThriftType_module1_Car = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.Car").
-            SetUnderlyingType(premadeThriftType_module1_Automobile),
-    )
-    premadeThriftType_module1_Pair = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module1.Pair"),
-    )
-    premadeThriftType_list_module1_Automobile = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_module1_Automobile),
-    )
-    premadeThriftType_list_module1_Car = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_module1_Car),
-    )
-    premadeThriftType_module1_Collection = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module1.Collection"),
-    )
-    premadeThriftType_module1_State = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.State").
-            SetUnderlyingType(premadeThriftType_string),
-    )
-    premadeThriftType_module1_Enum = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module1.Enum").
-            SetUnderlyingType(module2.GetMetadataThriftType("module2.Enum")),
-    )
-})
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
 // and put them in a map at runtime. See comment at the top of template
@@ -157,9 +175,6 @@ type thriftTypeWithFullName struct {
 
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module1.Plate", premadeThriftType_module1_Plate })
@@ -212,9 +227,6 @@ var exceptionMetadatasOnce = sync.OnceValue(
 
 var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftEnum, 0)
         return fbthriftResults
     },
@@ -222,9 +234,6 @@ var enumMetadatasOnce = sync.OnceValue(
 
 var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftService, 0)
         fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module1.Finder").

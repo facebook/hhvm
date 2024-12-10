@@ -17,33 +17,21 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_void *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "void",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqMyRootDoRoot *thrift.StructSpec = nil
-    premadeStructSpec_respMyRootDoRoot *thrift.StructSpec = nil
-    premadeStructSpec_reqMyNodeDoMid *thrift.StructSpec = nil
-    premadeStructSpec_respMyNodeDoMid *thrift.StructSpec = nil
-    premadeStructSpec_reqMyLeafDoLeaf *thrift.StructSpec = nil
-    premadeStructSpec_respMyLeafDoLeaf *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_reqMyRootDoRoot = &thrift.StructSpec{
+    premadeStructSpec_reqMyRootDoRoot = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqMyRootDoRoot",
     ScopedName:           "module.reqMyRootDoRoot",
     IsUnion:              false,
@@ -55,7 +43,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_respMyRootDoRoot = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respMyRootDoRoot = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respMyRootDoRoot",
     ScopedName:           "module.respMyRootDoRoot",
     IsUnion:              false,
@@ -67,7 +57,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_reqMyNodeDoMid = &thrift.StructSpec{
+    }()
+    premadeStructSpec_reqMyNodeDoMid = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqMyNodeDoMid",
     ScopedName:           "module.reqMyNodeDoMid",
     IsUnion:              false,
@@ -79,7 +71,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_respMyNodeDoMid = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respMyNodeDoMid = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respMyNodeDoMid",
     ScopedName:           "module.respMyNodeDoMid",
     IsUnion:              false,
@@ -91,7 +85,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_reqMyLeafDoLeaf = &thrift.StructSpec{
+    }()
+    premadeStructSpec_reqMyLeafDoLeaf = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqMyLeafDoLeaf",
     ScopedName:           "module.reqMyLeafDoLeaf",
     IsUnion:              false,
@@ -103,7 +99,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_respMyLeafDoLeaf = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respMyLeafDoLeaf = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respMyLeafDoLeaf",
     ScopedName:           "module.respMyLeafDoLeaf",
     IsUnion:              false,
@@ -115,14 +113,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         return fbthriftResults
     },
@@ -130,19 +126,11 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_void.FullName] = premadeCodecTypeSpec_void
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

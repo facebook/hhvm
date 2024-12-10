@@ -20,84 +20,95 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_module_MyEnum *metadata.ThriftType = nil
-    premadeThriftType_string *metadata.ThriftType = nil
-    premadeThriftType_module_MyStructNestedAnnotation *metadata.ThriftType = nil
-    premadeThriftType_module_MyUnion *metadata.ThriftType = nil
-    premadeThriftType_i64 *metadata.ThriftType = nil
-    premadeThriftType_list_string *metadata.ThriftType = nil
-    premadeThriftType_module_list_string_6884 *metadata.ThriftType = nil
-    premadeThriftType_module_MyStruct *metadata.ThriftType = nil
-    premadeThriftType_module_SecretStruct *metadata.ThriftType = nil
-    premadeThriftType_module_MyException *metadata.ThriftType = nil
-    premadeThriftType_module_AwesomeStruct *metadata.ThriftType = nil
-    premadeThriftType_module_FantasticStruct *metadata.ThriftType = nil
-    premadeThriftType_void *metadata.ThriftType = nil
-    premadeThriftType_bool *metadata.ThriftType = nil
-    premadeThriftType_i32 *metadata.ThriftType = nil
+    premadeThriftType_module_MyEnum = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTEnum(
+            metadata.NewThriftEnumType().
+                SetName("module.MyEnum"),
+        )
+    }()
+    premadeThriftType_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_module_MyStructNestedAnnotation = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.MyStructNestedAnnotation"),
+        )
+    }()
+    premadeThriftType_module_MyUnion = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTUnion(
+            metadata.NewThriftUnionType().
+                SetName("module.MyUnion"),
+        )
+    }()
+    premadeThriftType_i64 = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_list_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTList(
+            metadata.NewThriftListType().
+                SetValueType(premadeThriftType_string),
+        )
+    }()
+    premadeThriftType_module_list_string_6884 = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module.list_string_6884").
+                SetUnderlyingType(premadeThriftType_list_string),
+        )
+    }()
+    premadeThriftType_module_MyStruct = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.MyStruct"),
+        )
+    }()
+    premadeThriftType_module_SecretStruct = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.SecretStruct"),
+        )
+    }()
+    premadeThriftType_module_MyException = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("module.MyException"),
+        )
+    }()
+    premadeThriftType_module_AwesomeStruct = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module.AwesomeStruct").
+                SetUnderlyingType(premadeThriftType_module_MyStruct),
+        )
+    }()
+    premadeThriftType_module_FantasticStruct = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTTypedef(
+            metadata.NewThriftTypedefType().
+                SetName("module.FantasticStruct").
+                SetUnderlyingType(premadeThriftType_module_MyStruct),
+        )
+    }()
+    premadeThriftType_void = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_bool = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_i32 = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
+        )
+    }()
 )
-
-// Premade Thrift type initializer
-var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
-    premadeThriftType_module_MyEnum = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("module.MyEnum"),
-    )
-    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    )
-    premadeThriftType_module_MyStructNestedAnnotation = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.MyStructNestedAnnotation"),
-    )
-    premadeThriftType_module_MyUnion = metadata.NewThriftType().SetTUnion(
-        metadata.NewThriftUnionType().
-            SetName("module.MyUnion"),
-    )
-    premadeThriftType_i64 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I64_TYPE.Ptr(),
-    )
-    premadeThriftType_list_string = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_string),
-    )
-    premadeThriftType_module_list_string_6884 = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.list_string_6884").
-            SetUnderlyingType(premadeThriftType_list_string),
-    )
-    premadeThriftType_module_MyStruct = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.MyStruct"),
-    )
-    premadeThriftType_module_SecretStruct = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.SecretStruct"),
-    )
-    premadeThriftType_module_MyException = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("module.MyException"),
-    )
-    premadeThriftType_module_AwesomeStruct = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.AwesomeStruct").
-            SetUnderlyingType(premadeThriftType_module_MyStruct),
-    )
-    premadeThriftType_module_FantasticStruct = metadata.NewThriftType().SetTTypedef(
-        metadata.NewThriftTypedefType().
-            SetName("module.FantasticStruct").
-            SetUnderlyingType(premadeThriftType_module_MyStruct),
-    )
-    premadeThriftType_void = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_VOID_TYPE.Ptr(),
-    )
-    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    )
-    premadeThriftType_i32 = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_I32_TYPE.Ptr(),
-    )
-})
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
 // and put them in a map at runtime. See comment at the top of template
@@ -109,9 +120,6 @@ type thriftTypeWithFullName struct {
 
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "module.MyEnum", premadeThriftType_module_MyEnum })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
@@ -162,9 +170,6 @@ var exceptionMetadatasOnce = sync.OnceValue(
 
 var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftEnum, 0)
         fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
     SetName("module.MyEnum").
@@ -181,9 +186,6 @@ var enumMetadatasOnce = sync.OnceValue(
 
 var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftService, 0)
         fbthriftResults = append(fbthriftResults, metadata.NewThriftService().
     SetName("module.MyService").

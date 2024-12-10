@@ -17,49 +17,43 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_go_Name *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_go_Tag *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "string",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-    }
-    premadeCodecTypeSpec_go_Name = &thrift.TypeSpec{
-        FullName: "go.Name",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_go_Name = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "go.Name",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "go.Name",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewName() },
 },
 
-    }
-    premadeCodecTypeSpec_go_Tag = &thrift.TypeSpec{
-        FullName: "go.Tag",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_go_Tag = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "go.Tag",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "go.Tag",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewTag() },
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_Name *thrift.StructSpec = nil
-    premadeStructSpec_Tag *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_Name = &thrift.StructSpec{
+    premadeStructSpec_Name = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Name",
     ScopedName:           "go.Name",
     IsUnion:              false,
@@ -81,7 +75,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "name": 0,
     },
 }
-    premadeStructSpec_Tag = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Tag = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Tag",
     ScopedName:           "go.Tag",
     IsUnion:              false,
@@ -103,14 +99,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "tag": 0,
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Name)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Tag)
@@ -120,9 +114,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_go_Name.FullName] = premadeCodecTypeSpec_go_Name
@@ -130,11 +121,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

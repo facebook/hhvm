@@ -17,41 +17,34 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_module_Empty *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_Nada *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_module_Empty = &thrift.TypeSpec{
-        FullName: "module.Empty",
-        CodecStructSpec: &thrift.CodecStructSpec{
+    premadeCodecTypeSpec_module_Empty = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.Empty",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Empty",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewEmpty() },
 },
 
-    }
-    premadeCodecTypeSpec_module_Nada = &thrift.TypeSpec{
-        FullName: "module.Nada",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_Nada = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.Nada",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Nada",
     IsUnion:    true,
     NewFunc:    func() thrift.Struct { return NewNada() },
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_Empty *thrift.StructSpec = nil
-    premadeStructSpec_Nada *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_Empty = &thrift.StructSpec{
+    premadeStructSpec_Empty = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Empty",
     ScopedName:           "module.Empty",
     IsUnion:              false,
@@ -63,7 +56,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_Nada = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Nada = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Nada",
     ScopedName:           "module.Nada",
     IsUnion:              true,
@@ -75,14 +70,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Empty)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Nada)
@@ -92,20 +85,12 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Empty.FullName] = premadeCodecTypeSpec_module_Empty
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Nada.FullName] = premadeCodecTypeSpec_module_Nada
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

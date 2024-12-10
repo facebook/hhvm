@@ -20,119 +20,137 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_cpp_RefType *metadata.ThriftType = nil
-    premadeThriftType_cpp_EnumUnderlyingType *metadata.ThriftType = nil
-    premadeThriftType_string *metadata.ThriftType = nil
-    premadeThriftType_cpp_Name *metadata.ThriftType = nil
-    premadeThriftType_cpp_Type *metadata.ThriftType = nil
-    premadeThriftType_cpp_Ref *metadata.ThriftType = nil
-    premadeThriftType_bool *metadata.ThriftType = nil
-    premadeThriftType_cpp_Lazy *metadata.ThriftType = nil
-    premadeThriftType_cpp_DisableLazyChecksum *metadata.ThriftType = nil
-    premadeThriftType_cpp_Adapter *metadata.ThriftType = nil
-    premadeThriftType_cpp_PackIsset *metadata.ThriftType = nil
-    premadeThriftType_cpp_MinimizePadding *metadata.ThriftType = nil
-    premadeThriftType_cpp_ScopedEnumAsUnionType *metadata.ThriftType = nil
-    premadeThriftType_cpp_FieldInterceptor *metadata.ThriftType = nil
-    premadeThriftType_cpp_UseOpEncode *metadata.ThriftType = nil
-    premadeThriftType_cpp_EnumType *metadata.ThriftType = nil
-    premadeThriftType_cpp_Frozen2Exclude *metadata.ThriftType = nil
-    premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams *metadata.ThriftType = nil
-    premadeThriftType_cpp_ProcessInEbThreadUnsafe *metadata.ThriftType = nil
-    premadeThriftType_cpp_RuntimeAnnotation *metadata.ThriftType = nil
-    premadeThriftType_cpp_UseCursorSerialization *metadata.ThriftType = nil
-    premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods *metadata.ThriftType = nil
+    premadeThriftType_cpp_RefType = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTEnum(
+            metadata.NewThriftEnumType().
+                SetName("cpp.RefType"),
+        )
+    }()
+    premadeThriftType_cpp_EnumUnderlyingType = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTEnum(
+            metadata.NewThriftEnumType().
+                SetName("cpp.EnumUnderlyingType"),
+        )
+    }()
+    premadeThriftType_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_cpp_Name = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.Name"),
+        )
+    }()
+    premadeThriftType_cpp_Type = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.Type"),
+        )
+    }()
+    premadeThriftType_cpp_Ref = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.Ref"),
+        )
+    }()
+    premadeThriftType_bool = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_cpp_Lazy = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.Lazy"),
+        )
+    }()
+    premadeThriftType_cpp_DisableLazyChecksum = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.DisableLazyChecksum"),
+        )
+    }()
+    premadeThriftType_cpp_Adapter = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.Adapter"),
+        )
+    }()
+    premadeThriftType_cpp_PackIsset = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.PackIsset"),
+        )
+    }()
+    premadeThriftType_cpp_MinimizePadding = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.MinimizePadding"),
+        )
+    }()
+    premadeThriftType_cpp_ScopedEnumAsUnionType = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.ScopedEnumAsUnionType"),
+        )
+    }()
+    premadeThriftType_cpp_FieldInterceptor = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.FieldInterceptor"),
+        )
+    }()
+    premadeThriftType_cpp_UseOpEncode = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.UseOpEncode"),
+        )
+    }()
+    premadeThriftType_cpp_EnumType = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.EnumType"),
+        )
+    }()
+    premadeThriftType_cpp_Frozen2Exclude = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.Frozen2Exclude"),
+        )
+    }()
+    premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.Frozen2RequiresCompleteContainerParams"),
+        )
+    }()
+    premadeThriftType_cpp_ProcessInEbThreadUnsafe = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.ProcessInEbThreadUnsafe"),
+        )
+    }()
+    premadeThriftType_cpp_RuntimeAnnotation = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.RuntimeAnnotation"),
+        )
+    }()
+    premadeThriftType_cpp_UseCursorSerialization = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.UseCursorSerialization"),
+        )
+    }()
+    premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.GenerateDeprecatedHeaderClientMethods"),
+        )
+    }()
 )
-
-// Premade Thrift type initializer
-var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
-    premadeThriftType_cpp_RefType = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("cpp.RefType"),
-    )
-    premadeThriftType_cpp_EnumUnderlyingType = metadata.NewThriftType().SetTEnum(
-        metadata.NewThriftEnumType().
-            SetName("cpp.EnumUnderlyingType"),
-    )
-    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    )
-    premadeThriftType_cpp_Name = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Name"),
-    )
-    premadeThriftType_cpp_Type = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Type"),
-    )
-    premadeThriftType_cpp_Ref = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Ref"),
-    )
-    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    )
-    premadeThriftType_cpp_Lazy = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Lazy"),
-    )
-    premadeThriftType_cpp_DisableLazyChecksum = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.DisableLazyChecksum"),
-    )
-    premadeThriftType_cpp_Adapter = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Adapter"),
-    )
-    premadeThriftType_cpp_PackIsset = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.PackIsset"),
-    )
-    premadeThriftType_cpp_MinimizePadding = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.MinimizePadding"),
-    )
-    premadeThriftType_cpp_ScopedEnumAsUnionType = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.ScopedEnumAsUnionType"),
-    )
-    premadeThriftType_cpp_FieldInterceptor = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.FieldInterceptor"),
-    )
-    premadeThriftType_cpp_UseOpEncode = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.UseOpEncode"),
-    )
-    premadeThriftType_cpp_EnumType = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.EnumType"),
-    )
-    premadeThriftType_cpp_Frozen2Exclude = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Frozen2Exclude"),
-    )
-    premadeThriftType_cpp_Frozen2RequiresCompleteContainerParams = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.Frozen2RequiresCompleteContainerParams"),
-    )
-    premadeThriftType_cpp_ProcessInEbThreadUnsafe = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.ProcessInEbThreadUnsafe"),
-    )
-    premadeThriftType_cpp_RuntimeAnnotation = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.RuntimeAnnotation"),
-    )
-    premadeThriftType_cpp_UseCursorSerialization = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.UseCursorSerialization"),
-    )
-    premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("cpp.GenerateDeprecatedHeaderClientMethods"),
-    )
-})
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
 // and put them in a map at runtime. See comment at the top of template
@@ -144,9 +162,6 @@ type thriftTypeWithFullName struct {
 
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.RefType", premadeThriftType_cpp_RefType })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.EnumUnderlyingType", premadeThriftType_cpp_EnumUnderlyingType })
@@ -205,9 +220,6 @@ var exceptionMetadatasOnce = sync.OnceValue(
 
 var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftEnum, 0)
         fbthriftResults = append(fbthriftResults, metadata.NewThriftEnum().
     SetName("cpp.RefType").
@@ -235,9 +247,6 @@ var enumMetadatasOnce = sync.OnceValue(
 
 var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftService, 0)
         return fbthriftResults
     },

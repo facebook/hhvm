@@ -20,94 +20,107 @@ var _ = metadata.GoUnusedProtection__
 
 // Premade Thrift types
 var (
-    premadeThriftType_string *metadata.ThriftType = nil
-    premadeThriftType_rust_Name *metadata.ThriftType = nil
-    premadeThriftType_rust_Copy *metadata.ThriftType = nil
-    premadeThriftType_rust_RequestContext *metadata.ThriftType = nil
-    premadeThriftType_rust_Arc *metadata.ThriftType = nil
-    premadeThriftType_rust_Box *metadata.ThriftType = nil
-    premadeThriftType_rust_Exhaustive *metadata.ThriftType = nil
-    premadeThriftType_rust_Ord *metadata.ThriftType = nil
-    premadeThriftType_rust_NewType *metadata.ThriftType = nil
-    premadeThriftType_rust_Type *metadata.ThriftType = nil
-    premadeThriftType_bool *metadata.ThriftType = nil
-    premadeThriftType_rust_Serde *metadata.ThriftType = nil
-    premadeThriftType_rust_Mod *metadata.ThriftType = nil
-    premadeThriftType_rust_Adapter *metadata.ThriftType = nil
-    premadeThriftType_list_string *metadata.ThriftType = nil
-    premadeThriftType_rust_Derive *metadata.ThriftType = nil
-    premadeThriftType_rust_ServiceExn *metadata.ThriftType = nil
+    premadeThriftType_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_rust_Name = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Name"),
+        )
+    }()
+    premadeThriftType_rust_Copy = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Copy"),
+        )
+    }()
+    premadeThriftType_rust_RequestContext = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.RequestContext"),
+        )
+    }()
+    premadeThriftType_rust_Arc = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Arc"),
+        )
+    }()
+    premadeThriftType_rust_Box = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Box"),
+        )
+    }()
+    premadeThriftType_rust_Exhaustive = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Exhaustive"),
+        )
+    }()
+    premadeThriftType_rust_Ord = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Ord"),
+        )
+    }()
+    premadeThriftType_rust_NewType = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.NewType"),
+        )
+    }()
+    premadeThriftType_rust_Type = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Type"),
+        )
+    }()
+    premadeThriftType_bool = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTPrimitive(
+            metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
+        )
+    }()
+    premadeThriftType_rust_Serde = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Serde"),
+        )
+    }()
+    premadeThriftType_rust_Mod = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Mod"),
+        )
+    }()
+    premadeThriftType_rust_Adapter = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Adapter"),
+        )
+    }()
+    premadeThriftType_list_string = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTList(
+            metadata.NewThriftListType().
+                SetValueType(premadeThriftType_string),
+        )
+    }()
+    premadeThriftType_rust_Derive = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.Derive"),
+        )
+    }()
+    premadeThriftType_rust_ServiceExn = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("rust.ServiceExn"),
+        )
+    }()
 )
-
-// Premade Thrift type initializer
-var premadeThriftTypesInitOnce = sync.OnceFunc(func() {
-    premadeThriftType_string = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_STRING_TYPE.Ptr(),
-    )
-    premadeThriftType_rust_Name = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Name"),
-    )
-    premadeThriftType_rust_Copy = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Copy"),
-    )
-    premadeThriftType_rust_RequestContext = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.RequestContext"),
-    )
-    premadeThriftType_rust_Arc = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Arc"),
-    )
-    premadeThriftType_rust_Box = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Box"),
-    )
-    premadeThriftType_rust_Exhaustive = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Exhaustive"),
-    )
-    premadeThriftType_rust_Ord = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Ord"),
-    )
-    premadeThriftType_rust_NewType = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.NewType"),
-    )
-    premadeThriftType_rust_Type = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Type"),
-    )
-    premadeThriftType_bool = metadata.NewThriftType().SetTPrimitive(
-        metadata.ThriftPrimitiveType_THRIFT_BOOL_TYPE.Ptr(),
-    )
-    premadeThriftType_rust_Serde = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Serde"),
-    )
-    premadeThriftType_rust_Mod = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Mod"),
-    )
-    premadeThriftType_rust_Adapter = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Adapter"),
-    )
-    premadeThriftType_list_string = metadata.NewThriftType().SetTList(
-        metadata.NewThriftListType().
-            SetValueType(premadeThriftType_string),
-    )
-    premadeThriftType_rust_Derive = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.Derive"),
-    )
-    premadeThriftType_rust_ServiceExn = metadata.NewThriftType().SetTStruct(
-        metadata.NewThriftStructType().
-            SetName("rust.ServiceExn"),
-    )
-})
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
 // and put them in a map at runtime. See comment at the top of template
@@ -119,9 +132,6 @@ type thriftTypeWithFullName struct {
 
 var premadeThriftTypesMapOnce = sync.OnceValue(
     func() map[string]*metadata.ThriftType {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         thriftTypesWithFullName := make([]thriftTypeWithFullName, 0)
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "string", premadeThriftType_string })
         thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "rust.Name", premadeThriftType_rust_Name })
@@ -174,9 +184,6 @@ var exceptionMetadatasOnce = sync.OnceValue(
 
 var enumMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftEnum {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftEnum, 0)
         return fbthriftResults
     },
@@ -184,9 +191,6 @@ var enumMetadatasOnce = sync.OnceValue(
 
 var serviceMetadatasOnce = sync.OnceValue(
     func() []*metadata.ThriftService {
-        // Relies on premade Thrift types initialization
-        premadeThriftTypesInitOnce()
-
         fbthriftResults := make([]*metadata.ThriftService, 0)
         return fbthriftResults
     },

@@ -17,38 +17,32 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_internal_InjectMetadataFields *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "string",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-    }
-    premadeCodecTypeSpec_internal_InjectMetadataFields = &thrift.TypeSpec{
-        FullName: "internal.InjectMetadataFields",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_internal_InjectMetadataFields = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "internal.InjectMetadataFields",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "internal.InjectMetadataFields",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewInjectMetadataFields() },
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_InjectMetadataFields *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_InjectMetadataFields = &thrift.StructSpec{
+    premadeStructSpec_InjectMetadataFields = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "InjectMetadataFields",
     ScopedName:           "internal.InjectMetadataFields",
     IsUnion:              false,
@@ -70,14 +64,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "type": 0,
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_InjectMetadataFields)
         return fbthriftResults
@@ -86,20 +78,12 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_internal_InjectMetadataFields.FullName] = premadeCodecTypeSpec_internal_InjectMetadataFields
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

@@ -17,128 +17,116 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_Fiery *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_Serious *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_ComplexFieldNames *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_CustomFieldNames *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_i32 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_ExceptionWithPrimitiveField *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_module_Banal *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_void *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "string",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-    }
-    premadeCodecTypeSpec_module_Fiery = &thrift.TypeSpec{
-        FullName: "module.Fiery",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_Fiery = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.Fiery",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Fiery",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFiery() },
 },
 
-    }
-    premadeCodecTypeSpec_module_Serious = &thrift.TypeSpec{
-        FullName: "module.Serious",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_Serious = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.Serious",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Serious",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewSerious() },
 },
 
-    }
-    premadeCodecTypeSpec_module_ComplexFieldNames = &thrift.TypeSpec{
-        FullName: "module.ComplexFieldNames",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_ComplexFieldNames = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.ComplexFieldNames",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.ComplexFieldNames",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewComplexFieldNames() },
 },
 
-    }
-    premadeCodecTypeSpec_module_CustomFieldNames = &thrift.TypeSpec{
-        FullName: "module.CustomFieldNames",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_CustomFieldNames = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.CustomFieldNames",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.CustomFieldNames",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewCustomFieldNames() },
 },
 
-    }
-    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
-        FullName: "i32",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "i32",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-    }
-    premadeCodecTypeSpec_module_ExceptionWithPrimitiveField = &thrift.TypeSpec{
-        FullName: "module.ExceptionWithPrimitiveField",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_ExceptionWithPrimitiveField = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.ExceptionWithPrimitiveField",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.ExceptionWithPrimitiveField",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewExceptionWithPrimitiveField() },
 },
 
-    }
-    premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation = &thrift.TypeSpec{
-        FullName: "module.ExceptionWithStructuredAnnotation",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_ExceptionWithStructuredAnnotation = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.ExceptionWithStructuredAnnotation",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.ExceptionWithStructuredAnnotation",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewExceptionWithStructuredAnnotation() },
 },
 
-    }
-    premadeCodecTypeSpec_module_Banal = &thrift.TypeSpec{
-        FullName: "module.Banal",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_module_Banal = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "module.Banal",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "module.Banal",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewBanal() },
 },
 
-    }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "void",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_Fiery *thrift.StructSpec = nil
-    premadeStructSpec_Serious *thrift.StructSpec = nil
-    premadeStructSpec_ComplexFieldNames *thrift.StructSpec = nil
-    premadeStructSpec_CustomFieldNames *thrift.StructSpec = nil
-    premadeStructSpec_ExceptionWithPrimitiveField *thrift.StructSpec = nil
-    premadeStructSpec_ExceptionWithStructuredAnnotation *thrift.StructSpec = nil
-    premadeStructSpec_Banal *thrift.StructSpec = nil
-    premadeStructSpec_reqRaiserDoBland *thrift.StructSpec = nil
-    premadeStructSpec_respRaiserDoBland *thrift.StructSpec = nil
-    premadeStructSpec_reqRaiserDoRaise *thrift.StructSpec = nil
-    premadeStructSpec_respRaiserDoRaise *thrift.StructSpec = nil
-    premadeStructSpec_reqRaiserGet200 *thrift.StructSpec = nil
-    premadeStructSpec_respRaiserGet200 *thrift.StructSpec = nil
-    premadeStructSpec_reqRaiserGet500 *thrift.StructSpec = nil
-    premadeStructSpec_respRaiserGet500 *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_Fiery = &thrift.StructSpec{
+    premadeStructSpec_Fiery = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Fiery",
     ScopedName:           "module.Fiery",
     IsUnion:              false,
@@ -160,7 +148,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "message": 0,
     },
 }
-    premadeStructSpec_Serious = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Serious = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Serious",
     ScopedName:           "module.Serious",
     IsUnion:              false,
@@ -182,7 +172,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "sonnet": 0,
     },
 }
-    premadeStructSpec_ComplexFieldNames = &thrift.StructSpec{
+    }()
+    premadeStructSpec_ComplexFieldNames = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "ComplexFieldNames",
     ScopedName:           "module.ComplexFieldNames",
     IsUnion:              false,
@@ -214,7 +206,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "internal_error_message": 1,
     },
 }
-    premadeStructSpec_CustomFieldNames = &thrift.StructSpec{
+    }()
+    premadeStructSpec_CustomFieldNames = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "CustomFieldNames",
     ScopedName:           "module.CustomFieldNames",
     IsUnion:              false,
@@ -246,7 +240,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "internal_error_message": 1,
     },
 }
-    premadeStructSpec_ExceptionWithPrimitiveField = &thrift.StructSpec{
+    }()
+    premadeStructSpec_ExceptionWithPrimitiveField = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "ExceptionWithPrimitiveField",
     ScopedName:           "module.ExceptionWithPrimitiveField",
     IsUnion:              false,
@@ -278,7 +274,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "error_code": 1,
     },
 }
-    premadeStructSpec_ExceptionWithStructuredAnnotation = &thrift.StructSpec{
+    }()
+    premadeStructSpec_ExceptionWithStructuredAnnotation = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "ExceptionWithStructuredAnnotation",
     ScopedName:           "module.ExceptionWithStructuredAnnotation",
     IsUnion:              false,
@@ -310,7 +308,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "error_code": 1,
     },
 }
-    premadeStructSpec_Banal = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Banal = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Banal",
     ScopedName:           "module.Banal",
     IsUnion:              false,
@@ -322,7 +322,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_reqRaiserDoBland = &thrift.StructSpec{
+    }()
+    premadeStructSpec_reqRaiserDoBland = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqRaiserDoBland",
     ScopedName:           "module.reqRaiserDoBland",
     IsUnion:              false,
@@ -334,7 +336,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_respRaiserDoBland = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respRaiserDoBland = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respRaiserDoBland",
     ScopedName:           "module.respRaiserDoBland",
     IsUnion:              false,
@@ -346,7 +350,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_reqRaiserDoRaise = &thrift.StructSpec{
+    }()
+    premadeStructSpec_reqRaiserDoRaise = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqRaiserDoRaise",
     ScopedName:           "module.reqRaiserDoRaise",
     IsUnion:              false,
@@ -358,7 +364,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_respRaiserDoRaise = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respRaiserDoRaise = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respRaiserDoRaise",
     ScopedName:           "module.respRaiserDoRaise",
     IsUnion:              false,
@@ -400,7 +408,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "s": 2,
     },
 }
-    premadeStructSpec_reqRaiserGet200 = &thrift.StructSpec{
+    }()
+    premadeStructSpec_reqRaiserGet200 = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqRaiserGet200",
     ScopedName:           "module.reqRaiserGet200",
     IsUnion:              false,
@@ -412,7 +422,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_respRaiserGet200 = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respRaiserGet200 = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respRaiserGet200",
     ScopedName:           "module.respRaiserGet200",
     IsUnion:              false,
@@ -434,7 +446,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "success": 0,
     },
 }
-    premadeStructSpec_reqRaiserGet500 = &thrift.StructSpec{
+    }()
+    premadeStructSpec_reqRaiserGet500 = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqRaiserGet500",
     ScopedName:           "module.reqRaiserGet500",
     IsUnion:              false,
@@ -446,7 +460,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_respRaiserGet500 = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respRaiserGet500 = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respRaiserGet500",
     ScopedName:           "module.respRaiserGet500",
     IsUnion:              false,
@@ -498,14 +514,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "s": 3,
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Fiery)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Serious)
@@ -520,9 +534,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_module_Fiery.FullName] = premadeCodecTypeSpec_module_Fiery
@@ -537,11 +548,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

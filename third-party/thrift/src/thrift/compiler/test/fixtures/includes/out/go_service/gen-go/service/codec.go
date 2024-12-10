@@ -21,49 +21,41 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_service_IncludesIncluded *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_service_IncludesTransitiveFoo *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_void *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_service_IncludesIncluded = &thrift.TypeSpec{
-        FullName: "service.IncludesIncluded",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
+    premadeCodecTypeSpec_service_IncludesIncluded = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "service.IncludesIncluded",
+            CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "service.IncludesIncluded",
 	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.Included"),
 },
 
-    }
-    premadeCodecTypeSpec_service_IncludesTransitiveFoo = &thrift.TypeSpec{
-        FullName: "service.IncludesTransitiveFoo",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
+        }
+    }()
+    premadeCodecTypeSpec_service_IncludesTransitiveFoo = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "service.IncludesTransitiveFoo",
+            CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "service.IncludesTransitiveFoo",
 	UnderlyingTypeSpec: includes.GetCodecTypeSpec("includes.TransitiveFoo"),
 },
 
-    }
-    premadeCodecTypeSpec_void = &thrift.TypeSpec{
-        FullName: "void",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_void = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "void",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_VOID,
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_reqMyServiceQuery *thrift.StructSpec = nil
-    premadeStructSpec_respMyServiceQuery *thrift.StructSpec = nil
-    premadeStructSpec_reqMyServiceHasArgDocs *thrift.StructSpec = nil
-    premadeStructSpec_respMyServiceHasArgDocs *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_reqMyServiceQuery = &thrift.StructSpec{
+    premadeStructSpec_reqMyServiceQuery = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqMyServiceQuery",
     ScopedName:           "service.reqMyServiceQuery",
     IsUnion:              false,
@@ -95,7 +87,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "i": 1,
     },
 }
-    premadeStructSpec_respMyServiceQuery = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respMyServiceQuery = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respMyServiceQuery",
     ScopedName:           "service.respMyServiceQuery",
     IsUnion:              false,
@@ -107,7 +101,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_reqMyServiceHasArgDocs = &thrift.StructSpec{
+    }()
+    premadeStructSpec_reqMyServiceHasArgDocs = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "reqMyServiceHasArgDocs",
     ScopedName:           "service.reqMyServiceHasArgDocs",
     IsUnion:              false,
@@ -139,7 +135,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "i": 1,
     },
 }
-    premadeStructSpec_respMyServiceHasArgDocs = &thrift.StructSpec{
+    }()
+    premadeStructSpec_respMyServiceHasArgDocs = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "respMyServiceHasArgDocs",
     ScopedName:           "service.respMyServiceHasArgDocs",
     IsUnion:              false,
@@ -151,14 +149,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         return fbthriftResults
     },
@@ -166,9 +162,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_service_IncludesIncluded.FullName] = premadeCodecTypeSpec_service_IncludesIncluded
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_service_IncludesTransitiveFoo.FullName] = premadeCodecTypeSpec_service_IncludesTransitiveFoo
@@ -176,11 +169,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

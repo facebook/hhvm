@@ -17,146 +17,141 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_string *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_FieldWrapper *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_Wrapper *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_Adapter *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_SkipCodegen *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_Name *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_list_string *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_UnionEnumAttributes *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_StructTrait *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_Attributes *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_StructAsTrait *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_hack_ModuleInternal *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "string",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-    }
-    premadeCodecTypeSpec_hack_FieldWrapper = &thrift.TypeSpec{
-        FullName: "hack.FieldWrapper",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_FieldWrapper = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.FieldWrapper",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.FieldWrapper",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFieldWrapper() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_Wrapper = &thrift.TypeSpec{
-        FullName: "hack.Wrapper",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_Wrapper = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.Wrapper",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Wrapper",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewWrapper() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_Adapter = &thrift.TypeSpec{
-        FullName: "hack.Adapter",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_Adapter = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.Adapter",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Adapter",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAdapter() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_SkipCodegen = &thrift.TypeSpec{
-        FullName: "hack.SkipCodegen",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_SkipCodegen = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.SkipCodegen",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.SkipCodegen",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewSkipCodegen() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_Name = &thrift.TypeSpec{
-        FullName: "hack.Name",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_Name = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.Name",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Name",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewName() },
 },
 
-    }
-    premadeCodecTypeSpec_list_string = &thrift.TypeSpec{
-        FullName: "list<string>",
-        CodecListSpec: &thrift.CodecListSpec{
+        }
+    }()
+    premadeCodecTypeSpec_list_string = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "list<string>",
+            CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.STRING,
 	ElementTypeSpec: premadeCodecTypeSpec_string,
 },
 
-    }
-    premadeCodecTypeSpec_hack_UnionEnumAttributes = &thrift.TypeSpec{
-        FullName: "hack.UnionEnumAttributes",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_UnionEnumAttributes = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.UnionEnumAttributes",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.UnionEnumAttributes",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewUnionEnumAttributes() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_StructTrait = &thrift.TypeSpec{
-        FullName: "hack.StructTrait",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_StructTrait = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.StructTrait",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.StructTrait",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructTrait() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_Attributes = &thrift.TypeSpec{
-        FullName: "hack.Attributes",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_Attributes = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.Attributes",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.Attributes",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAttributes() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_StructAsTrait = &thrift.TypeSpec{
-        FullName: "hack.StructAsTrait",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_StructAsTrait = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.StructAsTrait",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.StructAsTrait",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructAsTrait() },
 },
 
-    }
-    premadeCodecTypeSpec_hack_ModuleInternal = &thrift.TypeSpec{
-        FullName: "hack.ModuleInternal",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_hack_ModuleInternal = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "hack.ModuleInternal",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "hack.ModuleInternal",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewModuleInternal() },
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_FieldWrapper *thrift.StructSpec = nil
-    premadeStructSpec_Wrapper *thrift.StructSpec = nil
-    premadeStructSpec_Adapter *thrift.StructSpec = nil
-    premadeStructSpec_SkipCodegen *thrift.StructSpec = nil
-    premadeStructSpec_Name *thrift.StructSpec = nil
-    premadeStructSpec_UnionEnumAttributes *thrift.StructSpec = nil
-    premadeStructSpec_StructTrait *thrift.StructSpec = nil
-    premadeStructSpec_Attributes *thrift.StructSpec = nil
-    premadeStructSpec_StructAsTrait *thrift.StructSpec = nil
-    premadeStructSpec_ModuleInternal *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_FieldWrapper = &thrift.StructSpec{
+    premadeStructSpec_FieldWrapper = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "FieldWrapper",
     ScopedName:           "hack.FieldWrapper",
     IsUnion:              false,
@@ -178,7 +173,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "name": 0,
     },
 }
-    premadeStructSpec_Wrapper = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Wrapper = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Wrapper",
     ScopedName:           "hack.Wrapper",
     IsUnion:              false,
@@ -220,7 +217,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "extraNamespace": 2,
     },
 }
-    premadeStructSpec_Adapter = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Adapter = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Adapter",
     ScopedName:           "hack.Adapter",
     IsUnion:              false,
@@ -242,7 +241,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "name": 0,
     },
 }
-    premadeStructSpec_SkipCodegen = &thrift.StructSpec{
+    }()
+    premadeStructSpec_SkipCodegen = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "SkipCodegen",
     ScopedName:           "hack.SkipCodegen",
     IsUnion:              false,
@@ -264,7 +265,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "reason": 0,
     },
 }
-    premadeStructSpec_Name = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Name = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Name",
     ScopedName:           "hack.Name",
     IsUnion:              false,
@@ -296,7 +299,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "reason": 1,
     },
 }
-    premadeStructSpec_UnionEnumAttributes = &thrift.StructSpec{
+    }()
+    premadeStructSpec_UnionEnumAttributes = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "UnionEnumAttributes",
     ScopedName:           "hack.UnionEnumAttributes",
     IsUnion:              false,
@@ -318,7 +323,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "attributes": 0,
     },
 }
-    premadeStructSpec_StructTrait = &thrift.StructSpec{
+    }()
+    premadeStructSpec_StructTrait = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "StructTrait",
     ScopedName:           "hack.StructTrait",
     IsUnion:              false,
@@ -340,7 +347,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "name": 0,
     },
 }
-    premadeStructSpec_Attributes = &thrift.StructSpec{
+    }()
+    premadeStructSpec_Attributes = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "Attributes",
     ScopedName:           "hack.Attributes",
     IsUnion:              false,
@@ -362,7 +371,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "attributes": 0,
     },
 }
-    premadeStructSpec_StructAsTrait = &thrift.StructSpec{
+    }()
+    premadeStructSpec_StructAsTrait = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "StructAsTrait",
     ScopedName:           "hack.StructAsTrait",
     IsUnion:              false,
@@ -374,7 +385,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_ModuleInternal = &thrift.StructSpec{
+    }()
+    premadeStructSpec_ModuleInternal = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "ModuleInternal",
     ScopedName:           "hack.ModuleInternal",
     IsUnion:              false,
@@ -386,14 +399,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldWrapper)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_Wrapper)
@@ -411,9 +422,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_string.FullName] = premadeCodecTypeSpec_string
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_hack_FieldWrapper.FullName] = premadeCodecTypeSpec_hack_FieldWrapper
@@ -429,11 +437,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

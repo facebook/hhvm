@@ -17,236 +17,243 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_terse_write_MyEnum *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_MyStruct *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_bool *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_byte *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_i16 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_i32 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_i64 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_float *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_double *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_string *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_binary *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_list_i16 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_set_i16 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_map_i16_i16 *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_MyUnion *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_StructLevelTerseStruct *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_MyInteger *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_AdaptedFields *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_WrappedFields *thrift.TypeSpec = nil
-    premadeCodecTypeSpec_terse_write_TerseException *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_terse_write_MyEnum = &thrift.TypeSpec{
-        FullName: "terse_write.MyEnum",
-        CodecEnumSpec: &thrift.CodecEnumSpec{
+    premadeCodecTypeSpec_terse_write_MyEnum = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.MyEnum",
+            CodecEnumSpec: &thrift.CodecEnumSpec{
     ScopedName: "terse_write.MyEnum",
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_MyStruct = &thrift.TypeSpec{
-        FullName: "terse_write.MyStruct",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_MyStruct = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.MyStruct",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.MyStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewMyStruct() },
 },
 
-    }
-    premadeCodecTypeSpec_bool = &thrift.TypeSpec{
-        FullName: "bool",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_bool = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "bool",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BOOL,
 },
 
-    }
-    premadeCodecTypeSpec_byte = &thrift.TypeSpec{
-        FullName: "byte",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_byte = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "byte",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BYTE,
 },
 
-    }
-    premadeCodecTypeSpec_i16 = &thrift.TypeSpec{
-        FullName: "i16",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_i16 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "i16",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I16,
 },
 
-    }
-    premadeCodecTypeSpec_i32 = &thrift.TypeSpec{
-        FullName: "i32",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_i32 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "i32",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I32,
 },
 
-    }
-    premadeCodecTypeSpec_i64 = &thrift.TypeSpec{
-        FullName: "i64",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_i64 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "i64",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_I64,
 },
 
-    }
-    premadeCodecTypeSpec_float = &thrift.TypeSpec{
-        FullName: "float",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_float = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "float",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_FLOAT,
 },
 
-    }
-    premadeCodecTypeSpec_double = &thrift.TypeSpec{
-        FullName: "double",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_double = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "double",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_DOUBLE,
 },
 
-    }
-    premadeCodecTypeSpec_string = &thrift.TypeSpec{
-        FullName: "string",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_string = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "string",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_STRING,
 },
 
-    }
-    premadeCodecTypeSpec_binary = &thrift.TypeSpec{
-        FullName: "binary",
-        CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
+        }
+    }()
+    premadeCodecTypeSpec_binary = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "binary",
+            CodecPrimitiveSpec: &thrift.CodecPrimitiveSpec{
     PrimitiveType: thrift.CODEC_PRIMITIVE_TYPE_BINARY,
 },
 
-    }
-    premadeCodecTypeSpec_list_i16 = &thrift.TypeSpec{
-        FullName: "list<i16>",
-        CodecListSpec: &thrift.CodecListSpec{
+        }
+    }()
+    premadeCodecTypeSpec_list_i16 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "list<i16>",
+            CodecListSpec: &thrift.CodecListSpec{
     ElementWireType: thrift.I16,
 	ElementTypeSpec: premadeCodecTypeSpec_i16,
 },
 
-    }
-    premadeCodecTypeSpec_set_i16 = &thrift.TypeSpec{
-        FullName: "set<i16>",
-        CodecSetSpec: &thrift.CodecSetSpec{
+        }
+    }()
+    premadeCodecTypeSpec_set_i16 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "set<i16>",
+            CodecSetSpec: &thrift.CodecSetSpec{
     ElementWireType: thrift.I16,
 	ElementTypeSpec: premadeCodecTypeSpec_i16,
 },
 
-    }
-    premadeCodecTypeSpec_map_i16_i16 = &thrift.TypeSpec{
-        FullName: "map<i16, i16>",
-        CodecMapSpec: &thrift.CodecMapSpec{
+        }
+    }()
+    premadeCodecTypeSpec_map_i16_i16 = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "map<i16, i16>",
+            CodecMapSpec: &thrift.CodecMapSpec{
 	KeyTypeSpec:   premadeCodecTypeSpec_i16,
 	ValueTypeSpec: premadeCodecTypeSpec_i16,
     KeyWireType:   thrift.I16,
 	ValueWireType: thrift.I16,
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_MyUnion = &thrift.TypeSpec{
-        FullName: "terse_write.MyUnion",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_MyUnion = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.MyUnion",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.MyUnion",
     IsUnion:    true,
     NewFunc:    func() thrift.Struct { return NewMyUnion() },
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault = &thrift.TypeSpec{
-        FullName: "terse_write.MyStructWithCustomDefault",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_MyStructWithCustomDefault = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.MyStructWithCustomDefault",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.MyStructWithCustomDefault",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewMyStructWithCustomDefault() },
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_StructLevelTerseStruct = &thrift.TypeSpec{
-        FullName: "terse_write.StructLevelTerseStruct",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_StructLevelTerseStruct = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.StructLevelTerseStruct",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.StructLevelTerseStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewStructLevelTerseStruct() },
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct = &thrift.TypeSpec{
-        FullName: "terse_write.FieldLevelTerseStruct",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_FieldLevelTerseStruct = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.FieldLevelTerseStruct",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.FieldLevelTerseStruct",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewFieldLevelTerseStruct() },
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault = &thrift.TypeSpec{
-        FullName: "terse_write.TerseStructWithCustomDefault",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_TerseStructWithCustomDefault = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.TerseStructWithCustomDefault",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.TerseStructWithCustomDefault",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewTerseStructWithCustomDefault() },
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_MyInteger = &thrift.TypeSpec{
-        FullName: "terse_write.MyInteger",
-        CodecTypedefSpec: &thrift.CodecTypedefSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_MyInteger = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.MyInteger",
+            CodecTypedefSpec: &thrift.CodecTypedefSpec{
     ScopedName:         "terse_write.MyInteger",
 	UnderlyingTypeSpec: premadeCodecTypeSpec_i32,
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_AdaptedFields = &thrift.TypeSpec{
-        FullName: "terse_write.AdaptedFields",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_AdaptedFields = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.AdaptedFields",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.AdaptedFields",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewAdaptedFields() },
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_WrappedFields = &thrift.TypeSpec{
-        FullName: "terse_write.WrappedFields",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_WrappedFields = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.WrappedFields",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.WrappedFields",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewWrappedFields() },
 },
 
-    }
-    premadeCodecTypeSpec_terse_write_TerseException = &thrift.TypeSpec{
-        FullName: "terse_write.TerseException",
-        CodecStructSpec: &thrift.CodecStructSpec{
+        }
+    }()
+    premadeCodecTypeSpec_terse_write_TerseException = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "terse_write.TerseException",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "terse_write.TerseException",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewTerseException() },
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_MyStruct *thrift.StructSpec = nil
-    premadeStructSpec_MyUnion *thrift.StructSpec = nil
-    premadeStructSpec_MyStructWithCustomDefault *thrift.StructSpec = nil
-    premadeStructSpec_StructLevelTerseStruct *thrift.StructSpec = nil
-    premadeStructSpec_FieldLevelTerseStruct *thrift.StructSpec = nil
-    premadeStructSpec_TerseStructWithCustomDefault *thrift.StructSpec = nil
-    premadeStructSpec_AdaptedFields *thrift.StructSpec = nil
-    premadeStructSpec_WrappedFields *thrift.StructSpec = nil
-    premadeStructSpec_TerseException *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_MyStruct = &thrift.StructSpec{
+    premadeStructSpec_MyStruct = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "MyStruct",
     ScopedName:           "terse_write.MyStruct",
     IsUnion:              false,
@@ -258,7 +265,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
     FieldSpecNameToIndex: map[string]int{
     },
 }
-    premadeStructSpec_MyUnion = &thrift.StructSpec{
+    }()
+    premadeStructSpec_MyUnion = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "MyUnion",
     ScopedName:           "terse_write.MyUnion",
     IsUnion:              true,
@@ -410,7 +419,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "struct_field": 13,
     },
 }
-    premadeStructSpec_MyStructWithCustomDefault = &thrift.StructSpec{
+    }()
+    premadeStructSpec_MyStructWithCustomDefault = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "MyStructWithCustomDefault",
     ScopedName:           "terse_write.MyStructWithCustomDefault",
     IsUnion:              false,
@@ -432,7 +443,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "field1": 0,
     },
 }
-    premadeStructSpec_StructLevelTerseStruct = &thrift.StructSpec{
+    }()
+    premadeStructSpec_StructLevelTerseStruct = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "StructLevelTerseStruct",
     ScopedName:           "terse_write.StructLevelTerseStruct",
     IsUnion:              false,
@@ -594,7 +607,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "union_field": 14,
     },
 }
-    premadeStructSpec_FieldLevelTerseStruct = &thrift.StructSpec{
+    }()
+    premadeStructSpec_FieldLevelTerseStruct = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "FieldLevelTerseStruct",
     ScopedName:           "terse_write.FieldLevelTerseStruct",
     IsUnion:              false,
@@ -906,7 +921,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "union_field": 29,
     },
 }
-    premadeStructSpec_TerseStructWithCustomDefault = &thrift.StructSpec{
+    }()
+    premadeStructSpec_TerseStructWithCustomDefault = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "TerseStructWithCustomDefault",
     ScopedName:           "terse_write.TerseStructWithCustomDefault",
     IsUnion:              false,
@@ -1058,7 +1075,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "struct_field": 13,
     },
 }
-    premadeStructSpec_AdaptedFields = &thrift.StructSpec{
+    }()
+    premadeStructSpec_AdaptedFields = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "AdaptedFields",
     ScopedName:           "terse_write.AdaptedFields",
     IsUnion:              false,
@@ -1100,7 +1119,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "field3": 2,
     },
 }
-    premadeStructSpec_WrappedFields = &thrift.StructSpec{
+    }()
+    premadeStructSpec_WrappedFields = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "WrappedFields",
     ScopedName:           "terse_write.WrappedFields",
     IsUnion:              false,
@@ -1122,7 +1143,9 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "field1": 0,
     },
 }
-    premadeStructSpec_TerseException = &thrift.StructSpec{
+    }()
+    premadeStructSpec_TerseException = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "TerseException",
     ScopedName:           "terse_write.TerseException",
     IsUnion:              false,
@@ -1144,14 +1167,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "msg": 0,
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_MyUnion)
@@ -1168,9 +1189,6 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyEnum.FullName] = premadeCodecTypeSpec_terse_write_MyEnum
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_terse_write_MyStruct.FullName] = premadeCodecTypeSpec_terse_write_MyStruct
@@ -1195,11 +1213,6 @@ var premadeCodecSpecsMapOnce = sync.OnceValue(
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

@@ -19,30 +19,23 @@ var _ = thrift.ZERO
 
 // Premade codec specs
 var (
-    premadeCodecTypeSpec_matching_names_IncludesAlso *thrift.TypeSpec = nil
-)
-
-// Premade codec specs initializer
-var premadeCodecSpecsInitOnce = sync.OnceFunc(func() {
-    premadeCodecTypeSpec_matching_names_IncludesAlso = &thrift.TypeSpec{
-        FullName: "matching_names.IncludesAlso",
-        CodecStructSpec: &thrift.CodecStructSpec{
+    premadeCodecTypeSpec_matching_names_IncludesAlso = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "matching_names.IncludesAlso",
+            CodecStructSpec: &thrift.CodecStructSpec{
     ScopedName: "matching_names.IncludesAlso",
     IsUnion:    false,
     NewFunc:    func() thrift.Struct { return NewIncludesAlso() },
 },
 
-    }
-})
+        }
+    }()
+)
 
 // Premade struct specs
 var (
-    premadeStructSpec_IncludesAlso *thrift.StructSpec = nil
-)
-
-// Premade struct specs initializer
-var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
-    premadeStructSpec_IncludesAlso = &thrift.StructSpec{
+    premadeStructSpec_IncludesAlso = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
     Name:                 "IncludesAlso",
     ScopedName:           "matching_names.IncludesAlso",
     IsUnion:              false,
@@ -64,14 +57,12 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
         "also": 0,
     },
 }
-})
+    }()
+)
 
 // Premade slice of all struct specs
 var premadeStructSpecsOnce = sync.OnceValue(
     func() []*thrift.StructSpec {
-        // Relies on premade struct specs
-        premadeStructSpecsInitOnce()
-
         fbthriftResults := make([]*thrift.StructSpec, 0)
         fbthriftResults = append(fbthriftResults, premadeStructSpec_IncludesAlso)
         return fbthriftResults
@@ -80,19 +71,11 @@ var premadeStructSpecsOnce = sync.OnceValue(
 
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
-        // Relies on premade codec specs initialization
-        premadeCodecSpecsInitOnce()
-
         fbthriftTypeSpecsMap := make(map[string]*thrift.TypeSpec)
         fbthriftTypeSpecsMap[premadeCodecTypeSpec_matching_names_IncludesAlso.FullName] = premadeCodecTypeSpec_matching_names_IncludesAlso
         return fbthriftTypeSpecsMap
     },
 )
-
-func init() {
-    premadeCodecSpecsInitOnce()
-    premadeStructSpecsInitOnce()
-}
 
 // GetMetadataThriftType (INTERNAL USE ONLY).
 // Returns metadata TypeSpec for a given full type name.

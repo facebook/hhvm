@@ -1498,7 +1498,7 @@ cdef class AdaptedTypedefFields(thrift.py3.types.Struct):
         return self.string_field_impl()
 
     cdef inline binary_field_impl(self):
-        return deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().value()
+        return (<const char*>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().value().data())[:deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).binary_field_ref().value().size()]
 
     @property
     def binary_field(self):

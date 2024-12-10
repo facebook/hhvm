@@ -595,6 +595,7 @@ class py3_mstch_type : public mstch_type {
   struct context {
     const t_program* program;
     std::unordered_map<const t_type*, cached_properties>* cache;
+    cpp_name_resolver* name_resolver;
   };
 
   cached_properties& get_cached_props(const t_type* type, const context& c);
@@ -1225,7 +1226,15 @@ std::string py3_mstch_program::visit_type_impl(
       customTemplates_.push_back(trueType);
     }
     if (type->has_custom_cpp_type()) {
-      customTypes_.push_back(trueType);
+      if (orig_type->find_structured_annotation_or_null(
+              kPythonPy3EnableCppAdapterUri)) {
+        // TODO(dokwon): Remove this once we also support containers.
+        if (trueType->is_string_or_binary()) {
+          customTypes_.push_back(orig_type);
+        }
+      } else {
+        customTypes_.push_back(trueType);
+      }
     }
   }
   return flatName;
@@ -1396,11 +1405,27 @@ class t_mstch_py3_generator : public t_mstch_generator {
   std::filesystem::path generateRootPath_;
   std::unordered_map<const t_type*, py3_mstch_type::cached_properties>
       type_props_cache_;
+  cpp_name_resolver cpp_name_resolver_;
 };
 
 py3_mstch_type::cached_properties& py3_mstch_type::get_cached_props(
     const t_type* type, const py3_mstch_type::context& c) {
+  // @python.Py3EnableCppAdapter treats C++ Adapter on typedef as a custom
+  // cpp.type.
   auto true_type = type->get_true_type();
+  if (type->find_structured_annotation_or_null(kPythonPy3EnableCppAdapterUri)) {
+    // TODO(dokwon): Remove this once we also support containers.
+    if (true_type->is_string_or_binary()) {
+      return c.cache
+          ->emplace(
+              type,
+              py3_mstch_type::cached_properties{
+                  get_cpp_template(*true_type),
+                  c.name_resolver->get_native_type(*type),
+                  {}})
+          .first->second;
+    }
+  }
   auto it = c.cache->find(true_type);
   if (it == c.cache->end()) {
     it = c.cache
@@ -1420,8 +1445,8 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_service>(program_);
   mstch_context_.add<py3_mstch_interaction>(program_);
   mstch_context_.add<py3_mstch_function>();
-  mstch_context_.add<py3_mstch_type>(
-      py3_mstch_type::context{program_, &type_props_cache_});
+  mstch_context_.add<py3_mstch_type>(py3_mstch_type::context{
+      program_, &type_props_cache_, &cpp_name_resolver_});
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();
   mstch_context_.add<py3_mstch_enum>();

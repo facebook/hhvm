@@ -98,3 +98,55 @@ class CustomTests(unittest.TestCase):
         self.assertEqual(c.list_of_uint32, [1, 2, 3])
         self.assertNotIsInstance(c.list_of_uint32, list)
         self.roundTrip(c)
+
+    def test_adapted_string(self) -> None:
+        c = customized(adapted_string="hello")
+        self.assertEqual(c.adapted_string, "hello")
+        self.roundTrip(c)
+
+    def test_adapted_binary(self) -> None:
+        c = customized(adapted_binary=b"hello")
+        self.assertEqual(c.adapted_binary, b"hello")
+        self.roundTrip(c)
+
+    def test_adapted_string_list(self) -> None:
+        c = customized(adapted_string_list=["hello"])
+        self.assertEqual(c.adapted_string_list, ["hello"])
+        self.assertNotIsInstance(c.list_of_uint32, list)
+        self.roundTrip(c)
+
+    def test_adapted_string_set(self) -> None:
+        c = customized(adapted_string_set={"1", "2", "3"})
+        res = set()
+        for v in c.adapted_string_set:
+            res.add(v)
+        self.assertEqual(res, {"1", "2", "3"})
+        self.assertNotIsInstance(c.adapted_string_set, set)
+        self.roundTrip(c)
+
+    def test_adapted_string_key_map(self) -> None:
+        c = customized(adapted_string_key_map={"1": "2", "3": "6", "5": "10"})
+        res = {}
+        for k, v in c.adapted_string_key_map.items():
+            res[k] = v
+        self.assertEqual(res, {"1": "2", "3": "6", "5": "10"})
+        self.assertNotIsInstance(c.adapted_string_key_map, dict)
+        self.roundTrip(c)
+
+    def test_adapted_string_value_map(self) -> None:
+        c = customized(adapted_string_value_map={"1": "2", "3": "6", "5": "10"})
+        res = {}
+        for k, v in c.adapted_string_value_map.items():
+            res[k] = v
+        self.assertEqual(res, {"1": "2", "3": "6", "5": "10"})
+        self.assertNotIsInstance(c.adapted_string_value_map, dict)
+        self.roundTrip(c)
+
+    def test_adapted_string_map(self) -> None:
+        c = customized(adapted_string_map={"1": "2", "3": "6", "5": "10"})
+        res = {}
+        for k, v in c.adapted_string_map.items():
+            res[k] = v
+        self.assertEqual(res, {"1": "2", "3": "6", "5": "10"})
+        self.assertNotIsInstance(c.adapted_string_map, dict)
+        self.roundTrip(c)

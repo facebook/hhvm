@@ -200,6 +200,10 @@ cdef extern from * nogil:
         void clear()
         bint empty()
 
+cdef extern from *:
+    ctypedef string _py3_simple_AdaptedString "::py3::simple::AdaptedString"
+cdef extern from *:
+    ctypedef bstring _py3_simple_AdaptedBinary "::py3::simple::AdaptedBinary"
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -344,8 +348,8 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types_custom
         __field_ref[cbool] bool_field_ref "bool_field_ref" ()
         __field_ref[cint64_t] integer_field_ref "integer_field_ref" ()
         __field_ref[double] double_field_ref "double_field_ref" ()
-        __field_ref[string] string_field_ref "string_field_ref" ()
-        __field_ref[string] binary_field_ref "binary_field_ref" ()
+        __field_ref[_py3_simple_AdaptedString] string_field_ref "string_field_ref" ()
+        __field_ref[_py3_simple_AdaptedBinary] binary_field_ref "binary_field_ref" ()
         __field_ref[vector[cint32_t]] list_field_ref "list_field_ref" ()
         __field_ref[cset[cint32_t]] set_field_ref "set_field_ref" ()
         __field_ref[cmap[cint32_t,cint32_t]] map_field_ref "map_field_ref" ()

@@ -24,6 +24,7 @@ cpp_include "<deque>"
 cpp_include "folly/container/F14Map.h"
 cpp_include "folly/FBString.h"
 cpp_include "folly/io/IOBuf.h"
+cpp_include "thrift/test/AdapterTest.h"
 
 package "facebook.com/testing"
 
@@ -73,6 +74,18 @@ typedef i32 ui32
 typedef map<string, string> F14MapFollyString
 @cpp.Type{name = "std::vector<uint32_t>"}
 typedef list<i32> Uint32List
+
+@cpp.Adapter{name = "::apache::thrift::test::FBStringAdapter"}
+@python.Py3EnableCppAdapter
+typedef binary AdaptedBinary
+@cpp.Adapter{name = "::apache::thrift::test::FBStringAdapter"}
+@python.Py3EnableCppAdapter
+typedef string AdaptedString
+typedef list<AdaptedString> AdaptedStringList
+typedef set<AdaptedString> AdaptedStringSet
+typedef map<AdaptedString, string> AdaptedStringKeyMap
+typedef map<string, AdaptedString> AdaptedStringValueMap
+typedef map<AdaptedString, AdaptedString> AdaptedStringMap
 
 exception UnusedError {
   @thrift.ExceptionMessage
@@ -306,6 +319,14 @@ struct customized {
   @cpp.Name{value = "bar"}
   8: i32 foo;
   9: list<ui32> list_of_uint32;
+
+  10: AdaptedBinary adapted_binary;
+  11: AdaptedString adapted_string;
+  12: AdaptedStringList adapted_string_list;
+  13: AdaptedStringSet adapted_string_set;
+  14: AdaptedStringKeyMap adapted_string_key_map;
+  15: AdaptedStringValueMap adapted_string_value_map;
+  16: AdaptedStringMap adapted_string_map;
 }
 
 struct Reserved {

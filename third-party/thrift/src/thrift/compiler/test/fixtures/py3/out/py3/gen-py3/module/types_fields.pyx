@@ -639,7 +639,7 @@ cdef class __AdaptedTypedefFields_FieldsSetter(__StructFieldsSetter):
             return
         if not isinstance(_fbthrift_value, bytes):
             raise TypeError(f'binary_field is not a { bytes !r}.')
-        deref(self._struct_cpp_obj).binary_field_ref().assign(cmove(bytes_to_string(_fbthrift_value)))
+        deref(self._struct_cpp_obj).binary_field_ref().assign(_module_cbindings._py3_simple_AdaptedBinary(cmove(<string>_fbthrift_value)))
 
     cdef void _set_field_5(self, _fbthrift_value) except *:
         # for field list_field

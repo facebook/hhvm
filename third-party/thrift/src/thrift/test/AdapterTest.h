@@ -22,6 +22,7 @@
 #include <string>
 
 #include <folly/Conv.h>
+#include <folly/FBString.h>
 #include <folly/io/IOBuf.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
@@ -576,6 +577,14 @@ struct WrappedMyStruct : type::detail::Wrap<T> {
   }
 
   mutable size_t encodeCount = 0, decodeCount = 0;
+};
+
+struct FBStringAdapter {
+  static folly::fbstring fromThrift(std::string value) { return value; }
+
+  static std::string toThrift(folly::fbstring value) {
+    return value.toStdString();
+  }
 };
 
 } // namespace apache::thrift::test

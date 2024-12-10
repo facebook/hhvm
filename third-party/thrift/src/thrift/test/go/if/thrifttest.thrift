@@ -98,6 +98,11 @@ struct CrazyNesting {
   2: optional set<Insanity> set_field;
 }
 
+struct CyclicStruct {
+  1: CyclicStruct self;
+  2: optional CyclicStruct optional_self;
+}
+
 exception Xception {
   1: i32 errorCode;
   2: string message;

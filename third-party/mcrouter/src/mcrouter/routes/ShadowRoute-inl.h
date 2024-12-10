@@ -31,6 +31,8 @@ void ShadowRoute<RouterInfo, ShadowPolicy>::dispatchShadowRequest(
         // we don't want to spool shadow requests
         fiber_local<RouterInfo>::clearAsynclogName();
         fiber_local<RouterInfo>::addRequestClass(RequestClass::kShadow);
+        // pin shadow requests to specific threads based on destination
+        fiber_local<RouterInfo>::enableJumpThreads();
         const auto shadowReply = shadow->route(*adjustedReq);
         if (postShadowReplyFn) {
           postShadowReplyFn(shadowReply);

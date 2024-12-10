@@ -18,11 +18,16 @@
 
 #include <chrono>
 #include <cstdint>
+#include <map>
+#include <set>
 #include <stdexcept>
 #include <string>
 
 #include <folly/Conv.h>
 #include <folly/FBString.h>
+#include <folly/container/F14Map.h>
+#include <folly/container/F14Set.h>
+#include <folly/container/FBVector.h>
 #include <folly/io/IOBuf.h>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
@@ -584,6 +589,42 @@ struct FBStringAdapter {
 
   static std::string toThrift(folly::fbstring value) {
     return value.toStdString();
+  }
+};
+
+struct FBVectorAdapter {
+  template <typename T>
+  static folly::fbvector<T> fromThrift(std::vector<T> value) {
+    return {value.begin(), value.end()};
+  }
+
+  template <typename T>
+  static std::vector<T> toThrift(folly::fbvector<T> value) {
+    return {value.begin(), value.end()};
+  }
+};
+
+struct F14FastSetAdapter {
+  template <typename T>
+  static folly::F14FastSet<T> fromThrift(std::set<T> value) {
+    return {value.begin(), value.end()};
+  }
+
+  template <typename T>
+  static std::set<T> toThrift(folly::F14FastSet<T> value) {
+    return {value.begin(), value.end()};
+  }
+};
+
+struct F14FastMapAdapter {
+  template <typename K, typename V>
+  static folly::F14FastMap<K, V> fromThrift(std::map<K, V> value) {
+    return {value.begin(), value.end()};
+  }
+
+  template <typename K, typename V>
+  static std::map<K, V> toThrift(folly::F14FastMap<K, V> value) {
+    return {value.begin(), value.end()};
   }
 };
 

@@ -792,7 +792,17 @@ class py3_mstch_typedef : public mstch_typedef {
  public:
   py3_mstch_typedef(
       const t_typedef* type, mstch_context& ctx, mstch_element_position pos)
-      : mstch_typedef(type, ctx, pos) {}
+      : mstch_typedef(type, ctx, pos) {
+    register_cached_methods(
+        this,
+        {
+            {"typedef:asType", &py3_mstch_typedef::asType},
+        });
+  }
+
+  mstch::node asType() {
+    return context_.type_factory->make_mstch_object(typedef_, context_);
+  }
 };
 
 class py3_mstch_struct : public mstch_struct {
@@ -1175,6 +1185,9 @@ class py3_mstch_deprecated_annotation : public mstch_deprecated_annotation {
 
 std::string py3_mstch_program::visit_type_impl(
     const t_type* orig_type, bool fromTypeDef) {
+  bool hasPy3EnableCppAdapterAnnot =
+      orig_type->find_structured_annotation_or_null(
+          kPythonPy3EnableCppAdapterUri);
   auto trueType = orig_type->get_true_type();
   auto baseType = context_.type_factory->make_mstch_object(orig_type, context_);
   py3_mstch_type* type = dynamic_cast<py3_mstch_type*>(baseType.get());
@@ -1211,21 +1224,14 @@ std::string py3_mstch_program::visit_type_impl(
   bool inserted = seenTypeNames_.insert(flatName).second;
   if (inserted) {
     if (trueType->is_container()) {
-      containers_.push_back(trueType);
+      containers_.push_back(hasPy3EnableCppAdapterAnnot ? orig_type : trueType);
     }
     if (!type->is_default_template()) {
       customTemplates_.push_back(trueType);
     }
     if (type->is_custom_cpp_type()) {
-      if (orig_type->find_structured_annotation_or_null(
-              kPythonPy3EnableCppAdapterUri)) {
-        // TODO(dokwon): Remove this once we also support containers.
-        if (trueType->is_string_or_binary()) {
-          customTypes_.push_back(orig_type);
-        }
-      } else {
-        customTypes_.push_back(trueType);
-      }
+      customTypes_.push_back(
+          hasPy3EnableCppAdapterAnnot ? orig_type : trueType);
     }
   }
   return flatName;
@@ -1405,17 +1411,14 @@ py3_mstch_type::cached_properties& py3_mstch_type::get_cached_props(
   // cpp.type.
   auto true_type = type->get_true_type();
   if (type->find_structured_annotation_or_null(kPythonPy3EnableCppAdapterUri)) {
-    // TODO(dokwon): Remove this once we also support containers.
-    if (true_type->is_string_or_binary()) {
-      return c.cache
-          ->emplace(
-              type,
-              py3_mstch_type::cached_properties{
-                  get_cpp_template(*true_type),
-                  c.name_resolver->get_native_type(*type),
-                  {}})
-          .first->second;
-    }
+    return c.cache
+        ->emplace(
+            type,
+            py3_mstch_type::cached_properties{
+                get_cpp_template(*true_type),
+                c.name_resolver->get_native_type(*type),
+                {}})
+        .first->second;
   }
   auto it = c.cache->find(true_type);
   if (it == c.cache->end()) {

@@ -138,3 +138,24 @@ class CustomTests(unittest.TestCase):
         )
         self.assertNotIsInstance(c.adapted_string_map, dict)
         self.roundTrip(c)
+
+    def test_adapted_list(self) -> None:
+        c = customized(adapted_list=[1, 2, 3])
+        self.assertEqual(c.adapted_list, [1, 2, 3])
+        self.assertEqual(list(c.adapted_list), [1, 2, 3])
+        self.assertNotIsInstance(c.adapted_list, list)
+        self.roundTrip(c)
+
+    def test_adapted_set(self) -> None:
+        c = customized(adapted_set={1, 2, 3})
+        self.assertEqual(c.adapted_set, {1, 2, 3})
+        self.assertEqual(set(c.adapted_set), {1, 2, 3})
+        self.assertNotIsInstance(c.adapted_set, set)
+        self.roundTrip(c)
+
+    def test_adapted_map(self) -> None:
+        c = customized(adapted_map={1: 2, 3: 6, 5: 10})
+        self.assertEqual(c.adapted_map, {1: 2, 3: 6, 5: 10})
+        self.assertEqual(dict(c.adapted_map.items()), {1: 2, 3: 6, 5: 10})
+        self.assertNotIsInstance(c.adapted_map, dict)
+        self.roundTrip(c)

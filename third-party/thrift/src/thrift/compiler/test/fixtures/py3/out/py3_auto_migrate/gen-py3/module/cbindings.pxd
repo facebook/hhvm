@@ -204,6 +204,120 @@ cdef extern from *:
     ctypedef string _py3_simple_AdaptedString "::py3::simple::AdaptedString"
 cdef extern from *:
     ctypedef bstring _py3_simple_AdaptedBinary "::py3::simple::AdaptedBinary"
+cdef extern from * nogil:
+    cdef cppclass _py3_simple_AdaptedList "::py3::simple::AdaptedList":
+        ctypedef cint32_t value_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _py3_simple_AdaptedList() except +
+        _py3_simple_AdaptedList(_py3_simple_AdaptedList&) except +
+
+        cint32_t& operator[](size_type)
+        void push_back(cint32_t&) except +
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
+cdef extern from * nogil:
+    cdef cppclass _py3_simple_AdaptedSet "::py3::simple::AdaptedSet":
+        ctypedef cint32_t value_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cint32_t& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _py3_simple_AdaptedSet() except +
+        _py3_simple_AdaptedSet(_py3_simple_AdaptedSet&) except +
+
+        cpair[iterator, bint] insert(const cint32_t&) except +
+        size_type size()
+        size_type count(const cint32_t&)
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
+cdef extern from * nogil:
+    cdef cppclass _py3_simple_AdaptedMap "::py3::simple::AdaptedMap":
+        ctypedef cint32_t key_type
+        ctypedef cint32_t mapped_type
+        ctypedef size_t size_type
+
+        cppclass iterator:
+            cpair[cint32_t, cint32_t]& operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
+        cppclass reverse_iterator:
+            cpair[cint32_t, cint32_t]& operator*()
+            iterator operator++()
+            bint operator==(reverse_iterator)
+            bint operator!=(reverse_iterator)
+        cppclass const_iterator(iterator):
+            pass
+        cppclass const_reverse_iterator(reverse_iterator):
+            pass
+
+        _py3_simple_AdaptedMap() except +
+        _py3_simple_AdaptedMap(_py3_simple_AdaptedMap&) except +
+
+        cint32_t& operator[](cint32_t&)
+        iterator find(const cint32_t&)
+        const_iterator const_find "find"(const cint32_t&)
+        size_type count(const cint32_t&)
+        size_type size()
+        iterator begin()
+        const_iterator const_begin "begin"()
+        iterator end()
+        const_iterator const_end "end"()
+        reverse_iterator rbegin()
+        const_reverse_iterator const_rbegin "rbegin"()
+        reverse_iterator rend()
+        const_reverse_iterator const_rend "rend"()
+        void clear()
+        bint empty()
+
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -350,9 +464,9 @@ cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_types_custom
         __field_ref[double] double_field_ref "double_field_ref" ()
         __field_ref[_py3_simple_AdaptedString] string_field_ref "string_field_ref" ()
         __field_ref[_py3_simple_AdaptedBinary] binary_field_ref "binary_field_ref" ()
-        __field_ref[vector[cint32_t]] list_field_ref "list_field_ref" ()
-        __field_ref[cset[cint32_t]] set_field_ref "set_field_ref" ()
-        __field_ref[cmap[cint32_t,cint32_t]] map_field_ref "map_field_ref" ()
+        __field_ref[_py3_simple_AdaptedList] list_field_ref "list_field_ref" ()
+        __field_ref[_py3_simple_AdaptedSet] set_field_ref "set_field_ref" ()
+        __field_ref[_py3_simple_AdaptedMap] map_field_ref "map_field_ref" ()
         __field_ref[cSimpleStruct] struct_field_ref "struct_field_ref" ()
 
 cdef extern from "thrift/compiler/test/fixtures/py3/gen-cpp2/module_constants.h" namespace "::py3::simple":

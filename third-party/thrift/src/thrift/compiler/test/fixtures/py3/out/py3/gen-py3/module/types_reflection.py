@@ -680,7 +680,7 @@ def get_reflection__AdaptedTypedefFields() -> __StructSpec:
             id=6,
             name="list_field",
             py_name="list_field",
-            type=_module_types.List__i32,
+            type=_module_types._py3_simple_AdaptedList__List__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -693,7 +693,7 @@ def get_reflection__AdaptedTypedefFields() -> __StructSpec:
             id=7,
             name="set_field",
             py_name="set_field",
-            type=_module_types.Set__i32,
+            type=_module_types._py3_simple_AdaptedSet__Set__i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -706,7 +706,7 @@ def get_reflection__AdaptedTypedefFields() -> __StructSpec:
             id=8,
             name="map_field",
             py_name="map_field",
-            type=_module_types.Map__i32_i32,
+            type=_module_types._py3_simple_AdaptedMap__Map__i32_i32,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -894,7 +894,19 @@ def get_reflection___MyType__Map__i32_i32() -> __MapSpec:
         value_kind=__NumberType.I32,
     )
 
-def get_reflection__Map__i32_i32() -> __MapSpec:
+def get_reflection___py3_simple_AdaptedList__List__i32() -> __ListSpec :
+    return __ListSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+    )
+
+def get_reflection___py3_simple_AdaptedSet__Set__i32() -> __SetSpec:
+    return __SetSpec._fbthrift_create(
+        value=int,
+        kind=__NumberType.I32,
+     )
+
+def get_reflection___py3_simple_AdaptedMap__Map__i32_i32() -> __MapSpec:
     return __MapSpec._fbthrift_create(
         key=int,
         key_kind=__NumberType.I32,

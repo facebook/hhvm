@@ -85,7 +85,9 @@ from module.containers_FBTHRIFT_ONLY_DO_NOT_USE import (
     _MyType__List__i32,
     _MyType__Set__i32,
     _MyType__Map__i32_i32,
-    Map__i32_i32,
+    _py3_simple_AdaptedList__List__i32,
+    _py3_simple_AdaptedSet__Set__i32,
+    _py3_simple_AdaptedMap__Map__i32_i32,
     Map__i32_double,
     List__Map__i32_double,
     Map__AnEnumRenamed_i32,
@@ -1506,7 +1508,7 @@ cdef class AdaptedTypedefFields(thrift.py3.types.Struct):
 
     cdef inline list_field_impl(self):
         if self.__fbthrift_cached_list_field is None:
-            self.__fbthrift_cached_list_field = List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().ref())
+            self.__fbthrift_cached_list_field = _py3_simple_AdaptedList__List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).list_field_ref().ref())
         return self.__fbthrift_cached_list_field
 
     @property
@@ -1515,7 +1517,7 @@ cdef class AdaptedTypedefFields(thrift.py3.types.Struct):
 
     cdef inline set_field_impl(self):
         if self.__fbthrift_cached_set_field is None:
-            self.__fbthrift_cached_set_field = Set__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().ref())
+            self.__fbthrift_cached_set_field = _py3_simple_AdaptedSet__Set__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).set_field_ref().ref())
         return self.__fbthrift_cached_set_field
 
     @property
@@ -1524,7 +1526,7 @@ cdef class AdaptedTypedefFields(thrift.py3.types.Struct):
 
     cdef inline map_field_impl(self):
         if self.__fbthrift_cached_map_field is None:
-            self.__fbthrift_cached_map_field = Map__i32_i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().ref())
+            self.__fbthrift_cached_map_field = _py3_simple_AdaptedMap__Map__i32_i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).map_field_ref().ref())
         return self.__fbthrift_cached_map_field
 
     @property
@@ -2132,8 +2134,46 @@ cdef object _MyType__Map__i32_i32__from_cpp(const _module_cbindings._MyType& c_m
         py_items[ckey] = cval
     return _MyType__Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
-cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *:
-    cdef cmap[cint32_t,cint32_t] c_inst
+cdef _module_cbindings._py3_simple_AdaptedList _py3_simple_AdaptedList__List__i32__make_instance(object items) except *:
+    cdef _module_cbindings._py3_simple_AdaptedList c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.push_back(item)
+    return cmove(c_inst)
+
+cdef object _py3_simple_AdaptedList__List__i32__from_cpp(const _module_cbindings._py3_simple_AdaptedList& c_vec) except *:
+    cdef list py_list = []
+    cdef int idx = 0
+    for idx in range(c_vec.size()):
+        py_list.append(c_vec[idx])
+    return _py3_simple_AdaptedList__List__i32(py_list, thrift.py3.types._fbthrift_list_private_ctor)
+
+cdef _module_cbindings._py3_simple_AdaptedSet _py3_simple_AdaptedSet__Set__i32__make_instance(object items) except *:
+    cdef _module_cbindings._py3_simple_AdaptedSet c_inst
+    if items is None:
+        return cmove(c_inst)
+    for item in items:
+        if not isinstance(item, int):
+            raise TypeError(f"{item!r} is not of type int")
+        item = <cint32_t> item
+        c_inst.insert(item)
+    return cmove(c_inst)
+
+cdef object _py3_simple_AdaptedSet__Set__i32__from_cpp(const _module_cbindings._py3_simple_AdaptedSet& c_set) except *:
+    cdef list py_items = []
+    cdef __set_iter[_module_cbindings._py3_simple_AdaptedSet] iter = __set_iter[_module_cbindings._py3_simple_AdaptedSet](c_set)
+    cdef cint32_t citem = 0
+    for i in range(c_set.size()):
+        iter.genNextItem(citem)
+        py_items.append(citem)
+    return _py3_simple_AdaptedSet__Set__i32(frozenset(py_items), thrift.py3.types._fbthrift_set_private_ctor)
+
+cdef _module_cbindings._py3_simple_AdaptedMap _py3_simple_AdaptedMap__Map__i32_i32__make_instance(object items) except *:
+    cdef _module_cbindings._py3_simple_AdaptedMap c_inst
     if items is None:
         return cmove(c_inst)
     for key, item in items.items():
@@ -2147,15 +2187,15 @@ cdef cmap[cint32_t,cint32_t] Map__i32_i32__make_instance(object items) except *:
         c_inst[key] = item
     return cmove(c_inst)
 
-cdef object Map__i32_i32__from_cpp(const cmap[cint32_t,cint32_t]& c_map) except *:
+cdef object _py3_simple_AdaptedMap__Map__i32_i32__from_cpp(const _module_cbindings._py3_simple_AdaptedMap& c_map) except *:
     cdef dict py_items = {}
-    cdef __map_iter[cmap[cint32_t,cint32_t]] iter = __map_iter[cmap[cint32_t,cint32_t]](c_map)
+    cdef __map_iter[_module_cbindings._py3_simple_AdaptedMap] iter = __map_iter[_module_cbindings._py3_simple_AdaptedMap](c_map)
     cdef cint32_t ckey = 0
     cdef cint32_t cval = 0
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)
         py_items[ckey] = cval
-    return Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
+    return _py3_simple_AdaptedMap__Map__i32_i32(py_items, private_ctor_token=thrift.py3.types._fbthrift_map_private_ctor)
 
 cdef cmap[cint32_t,double] Map__i32_double__make_instance(object items) except *:
     cdef cmap[cint32_t,double] c_inst
@@ -2259,7 +2299,7 @@ AdaptedInteger = int
 AdaptedDouble = float
 AdaptedString = str
 AdaptedBinary = bytes
-AdaptedList = List__i32
-AdaptedSet = Set__i32
-AdaptedMap = Map__i32_i32
+AdaptedList = _py3_simple_AdaptedList__List__i32
+AdaptedSet = _py3_simple_AdaptedSet__Set__i32
+AdaptedMap = _py3_simple_AdaptedMap__Map__i32_i32
 AdaptedStruct = SimpleStruct

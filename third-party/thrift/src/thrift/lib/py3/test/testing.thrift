@@ -86,6 +86,15 @@ typedef set<AdaptedString> AdaptedStringSet
 typedef map<AdaptedString, string> AdaptedStringKeyMap
 typedef map<string, AdaptedString> AdaptedStringValueMap
 typedef map<AdaptedString, AdaptedString> AdaptedStringMap
+@cpp.Adapter{name = "::apache::thrift::test::FBVectorAdapter"}
+@python.Py3EnableCppAdapter
+typedef list<i32> AdaptedList
+@cpp.Adapter{name = "::apache::thrift::test::F14FastSetAdapter"}
+@python.Py3EnableCppAdapter
+typedef set<i32> AdaptedSet
+@cpp.Adapter{name = "::apache::thrift::test::F14FastMapAdapter"}
+@python.Py3EnableCppAdapter
+typedef map<i32, i32> AdaptedMap
 
 exception UnusedError {
   @thrift.ExceptionMessage
@@ -327,6 +336,9 @@ struct customized {
   14: AdaptedStringKeyMap adapted_string_key_map;
   15: AdaptedStringValueMap adapted_string_value_map;
   16: AdaptedStringMap adapted_string_map;
+  17: AdaptedList adapted_list;
+  18: AdaptedSet adapted_set;
+  19: AdaptedMap adapted_map;
 }
 
 struct Reserved {

@@ -660,7 +660,7 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ma
 {{constant:name}} = {{> types/constant_value}}
 {{/constant:value}}{{/program:constants}}
 {{#program:filtered_typedefs}}
-{{typedef:name}} = {{#typedef:type}}{{> types/python_type}}{{/typedef:type}}
+{{typedef:name}} = {{#typedef:asType}}{{> types/python_type}}{{/typedef:asType}}
 {{/program:filtered_typedefs}}
 {{#program:has_stream?}}
 

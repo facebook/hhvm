@@ -906,7 +906,6 @@ class mstch_typedef : public mstch_base {
         this,
         {
             {"typedef:type", &mstch_typedef::type},
-            {"typedef:is_same_type", &mstch_typedef::is_same_type},
             {"typedef:name", &mstch_typedef::name},
             {"typedef:structured_annotations?",
              &mstch_typedef::has_structured_annotations},
@@ -916,9 +915,6 @@ class mstch_typedef : public mstch_base {
   }
   mstch::node type();
   mstch::node name() { return typedef_->name(); }
-  mstch::node is_same_type() {
-    return typedef_->get_name() == typedef_->get_type()->get_name();
-  }
   mstch::node has_structured_annotations() {
     return !typedef_->structured_annotations().empty();
   }

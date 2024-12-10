@@ -12,5 +12,4 @@ python: mstch_python:experimental_generate_abstract_types src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
 rust: mstch_rust src/module.thrift
 py: py:json src/module.thrift
-python_experimental_generate_abstract_types: mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types src/module.thrift
 python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types,experimental_generate_abstract_types src/module.thrift

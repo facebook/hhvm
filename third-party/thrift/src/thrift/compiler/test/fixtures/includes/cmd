@@ -26,5 +26,4 @@ py3_auto_migrate_service: mstch_py3:auto_migrate src/service.thrift
 py3_auto_migrate: mstch_py3:auto_migrate src/module.thrift
 py3_auto_migrate_transitive: mstch_py3:auto_migrate src/transitive.thrift
 py3_auto_migrate_includes: mstch_py3:auto_migrate src/includes.thrift
-python_experimental_generate_abstract_types: mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types src/module.thrift
 python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types,experimental_generate_abstract_types src/module.thrift

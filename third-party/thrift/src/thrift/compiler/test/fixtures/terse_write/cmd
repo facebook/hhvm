@@ -12,5 +12,4 @@ java: mstch_java src/terse_write.thrift
 py: py:json src/terse_write.thrift
 python: mstch_python:experimental_generate_abstract_types src/terse_write.thrift
 python_capi: mstch_python_capi src/terse_write.thrift
-python_experimental_generate_abstract_types: mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types src/terse_write.thrift
 python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types,experimental_generate_abstract_types src/terse_write.thrift

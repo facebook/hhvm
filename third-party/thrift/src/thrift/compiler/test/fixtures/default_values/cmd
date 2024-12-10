@@ -3,5 +3,4 @@ go: mstch_go src/module.thrift
 hack: hack src/module.thrift
 py3: mstch_py3 src/module.thrift
 python: mstch_python:experimental_generate_abstract_types src/module.thrift
-python_experimental_generate_abstract_types: mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types src/module.thrift
 python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types,experimental_generate_abstract_types src/module.thrift

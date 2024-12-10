@@ -347,6 +347,18 @@ class MutableListTest(unittest.TestCase):
         self.assertIsInstance(mutable_list_unpickled, MutableList)
         self.assertEqual(mutable_list, mutable_list_unpickled)
 
+    def test_match(self) -> None:
+        mutable_list = _create_MutableList_i32([1, 2, 1, 1, 3, 2])
+        match mutable_list:
+            case [1, 2, 1, 2]:
+                self.fail("shouldn't happen")
+            case [1, 2, 1, 1]:
+                self.fail("shouldn't happen")
+            case [1, 2, 1, 1, *rest]:
+                self.assertEqual([3, 2], rest)
+            case _:
+                self.fail("shouldn't happen")
+
 
 def create_MutableList_List_i32(lst: list[list[int]]) -> MutableList[MutableList[int]]:
     """Converts the given (built-in) nested int list to a nested MutableList."""

@@ -875,3 +875,33 @@ class MutableMapTest(unittest.TestCase):
             mutable_map.update({"B": 66}, x="Not an Integer")
 
         self.assertEqual({"A": 65, "a": 97, "B": 66}, mutable_map)
+
+    def test_match(self) -> None:
+        mutable_map = _create_MutableMap_str_i32({})
+
+        mutable_map["A"] = 65
+        mutable_map["a"] = 97
+
+        match mutable_map:
+            case {"A": 65, "B": 97}:
+                self.fail("shouldn't happen")
+            case {"B": 65}:
+                self.fail("shouldn't happen")
+            case {"A": 66, **rest}:
+                self.fail("shouldn't happen")
+            case {"A": 65, **rest}:
+                self.assertEqual({"a": 97}, rest)
+            case _:
+                self.fail("shouldn't happen")
+
+        match mutable_map:
+            case {"A": 65, "B": 97}:
+                self.fail("shouldn't happen")
+            case {"B": 65}:
+                self.fail("shouldn't happen")
+            case {"A": 66, **rest}:
+                self.fail("shouldn't happen")
+            case {"A": 65, "a": x}:
+                self.assertEqual(x, 97)
+            case _:
+                self.fail("shouldn't happen")

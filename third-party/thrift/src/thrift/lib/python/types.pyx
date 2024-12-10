@@ -2001,6 +2001,7 @@ cdef class List(Container):
     def count(self, item):
         return self._fbthrift_elements.count(item)
 
+tag_object_as_sequence(<PyTypeObject*>List)
 Sequence.register(List)
 
 
@@ -2192,6 +2193,7 @@ cdef class Map(Container):
             return default
 
 
+tag_object_as_mapping(<PyTypeObject*>Map)
 Mapping.register(Map)
 
 

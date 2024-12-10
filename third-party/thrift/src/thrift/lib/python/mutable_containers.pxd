@@ -12,7 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from cpython.object cimport PyTypeObject
 from thrift.python.types cimport TypeInfoBase
+
+cdef extern from "<thrift/lib/python/types.h>" namespace "::apache::thrift::python":
+    cdef void tag_object_as_sequence(PyTypeObject*)
+    cdef void tag_object_as_mapping(PyTypeObject*)
 
 cdef class MutableList:
     cdef TypeInfoBase _val_typeinfo

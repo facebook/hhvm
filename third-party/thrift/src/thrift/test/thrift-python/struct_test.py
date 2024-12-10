@@ -479,23 +479,20 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
             case _:
                 self.fail("Expected match, got none.")
 
-        # DO_BEFORE(aristidis, 20250115): This should not raise AssertionError, but
-        # currently capturing *z fails.
-        with self.assertRaises(AssertionError):
-            # Same, but using sequence capture pattern
-            match TestStructWithDefaultValuesImmutable():
-                case TestStructWithDefaultValuesImmutable(
-                    unqualified_integer=x,
-                    unqualified_list_i32=[a, b, c],
-                    optional_integer=None,
-                ):
-                    self.assertEqual(x, 42)
-                    self.assertEqual(a, 1)
-                    self.assertEqual(b, 2)
-                    self.assertEqual(c, 3)
+        # Same, but using sequence capture pattern
+        match TestStructWithDefaultValuesImmutable():
+            case TestStructWithDefaultValuesImmutable(
+                unqualified_integer=x,
+                unqualified_list_i32=[a, b, c],
+                optional_integer=None,
+            ):
+                self.assertEqual(x, 42)
+                self.assertEqual(a, 1)
+                self.assertEqual(b, 2)
+                self.assertEqual(c, 3)
 
-                case _:
-                    self.fail("Expected match, got none.")
+            case _:
+                self.fail("Expected match, got none.")
 
         # Match nested struct
         match TestStructWithDefaultValuesImmutable():
@@ -2147,22 +2144,19 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
             case _:
                 self.fail("Expected match, got none.")
 
-        # DO_BEFORE(aristidis, 20250115): This should not raise AssertionError, but
-        # currently capturing *z fails.
-        with self.assertRaises(AssertionError):
-            # Same, but using sequence capture pattern
-            match TestStructWithDefaultValuesMutable():
-                case TestStructWithDefaultValuesMutable(
-                    unqualified_integer=x,
-                    unqualified_list_i32=[a, b, c],
-                    optional_integer=None,
-                ):
-                    self.assertEqual(x, 42)
-                    self.assertEqual(a, 1)
-                    self.assertEqual(b, 2)
-                    self.assertEqual(c, 3)
-                case _:
-                    self.fail("Expected match, got none.")
+        # Same, but using sequence capture pattern
+        match TestStructWithDefaultValuesMutable():
+            case TestStructWithDefaultValuesMutable(
+                unqualified_integer=x,
+                unqualified_list_i32=[a, b, c],
+                optional_integer=None,
+            ):
+                self.assertEqual(x, 42)
+                self.assertEqual(a, 1)
+                self.assertEqual(b, 2)
+                self.assertEqual(c, 3)
+            case _:
+                self.fail("Expected match, got none.")
 
         # Match nested struct
         match TestStructWithDefaultValuesMutable():

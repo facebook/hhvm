@@ -1702,6 +1702,15 @@ PyObject* getStandardMutableDefaultValuePtrForType(
   auto ret = getStandardMutableDefaultValueForType(typeInfo);
   return std::get<0>(ret).release();
 }
+
+void tag_object_as_sequence(PyTypeObject* type_object) {
+  DCHECK(PyType_Check(type_object));
+  type_object->tp_flags |= Py_TPFLAGS_SEQUENCE;
+}
+void tag_object_as_mapping(PyTypeObject* type_object) {
+  DCHECK(PyType_Check(type_object));
+  type_object->tp_flags |= Py_TPFLAGS_MAPPING;
+}
 } // namespace apache::thrift::python
 
 namespace apache::thrift::python::capi {

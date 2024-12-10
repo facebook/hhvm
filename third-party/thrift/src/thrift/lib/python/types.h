@@ -877,6 +877,19 @@ PyObject* getStandardImmutableDefaultValuePtrForType(
 PyObject* getStandardMutableDefaultValuePtrForType(
     const detail::TypeInfo& typeInfo);
 
+/*
+ * Python introduced structural pattern matching. A type is treated as a
+ * sequence if it has the Py_TPFLAGS_SEQUENCE flag, and as a mapping if it has
+ * the Py_TPFLAGS_MAPPING flag. For regular classes, you can register them with
+ * collections.abc.Sequence or collections.abc.Mapping to enable this behavior.
+ * However, this doesn't work for Cython extension types. Cython implemented
+ * decorators like cython.collection_type("sequence") or
+ * cython.collection_type("mapping"), but these decorators are not publicly
+ * available yet. The functions below are helper functions to set the flags to
+ * enable structural pattern matching.
+ */
+void tag_object_as_sequence(PyTypeObject* type_object);
+void tag_object_as_mapping(PyTypeObject* type_object);
 } // namespace apache::thrift::python
 
 namespace apache::thrift::python::capi {

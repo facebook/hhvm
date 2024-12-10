@@ -47,15 +47,14 @@ const int64_t k_JSON_PARTIAL_OUTPUT_ON_ERROR = 1ll << 9;
 const int64_t k_JSON_PRESERVE_ZERO_FRACTION  = 1ll << 10;
 
 // FB json_encode() options
-// intentionally higher so when PHP adds more options we're fine
+// WARNING: Add new values to "json_decode() and/or json_encode()" section below
 const int64_t k_JSON_FB_SORT_KEYS  = 1ll << 19;
-const int64_t k_JSON_FB_FULL_FLOAT_PRECISION  = 1ll << 20;
 
 // json_decode() options
 const int64_t k_JSON_OBJECT_AS_ARRAY   = 1ll << 0;
 const int64_t k_JSON_BIGINT_AS_STRING  = 1ll << 1;
 
-// FB json_decode() options
+// FB json_decode() and/or json_encode() options
 // intentionally higher so when PHP adds more options we're fine
 const int64_t k_JSON_FB_DARRAYS        = 1ll << 19;
 const int64_t k_JSON_FB_LOOSE          = 1ll << 20;
@@ -75,6 +74,7 @@ const int64_t k_JSON_FB_IGNORE_LATEINIT = 1ll << 33;
 const int64_t k_JSON_FB_THRIFT_SIMPLE_JSON = 1ll << 34;
 const int64_t k_JSON_FB_WARN_KEYSETS       = 1ll << 36;
 const int64_t k_JSON_FB_FORCE_HACK_ARRAYS  = 1ll << 37;
+const int64_t k_JSON_FB_FULL_FLOAT_PRECISION  = 1ll << 38;
 
 const int64_t k_JSON_ERROR_NONE
   = json_error_codes::JSON_ERROR_NONE;

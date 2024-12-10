@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import module.thrift_enums as _fbthrift_current_module_enums
+import module.thrift_enums
 
+
+import foo.thrift_enums
 import foo.thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
@@ -124,7 +128,6 @@ def _fbthrift_gen_metadata_struct_FieldsInjectedWithIncludedStruct(metadata_stru
     return new_struct
 def gen_metadata_struct_FieldsInjectedWithIncludedStruct() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_FieldsInjectedWithIncludedStruct(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-
 
 
 

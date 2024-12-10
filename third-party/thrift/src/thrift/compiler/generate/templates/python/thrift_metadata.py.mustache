@@ -21,9 +21,13 @@ Metadata for Thrift types
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import {{program:module_path}}.thrift_enums as _fbthrift_current_module_enums
+import {{program:module_path}}.thrift_enums
+
 {{#program:include_namespaces}}
 {{#has_types?}}
 
+import {{included_module_path}}.thrift_enums
 import {{included_module_path}}.thrift_metadata
 {{/has_types?}}
 {{/program:include_namespaces}}
@@ -104,39 +108,10 @@ def _fbthrift_metadata_service_response_{{service:name}}() -> _fbthrift_metadata
 
 {{/program:services}}
 
-{{#program:enums}}
-def _fbthrift_gen_metadata_enum_{{enum:name}}({{!
-}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "{{program:name}}.{{enum:name}}"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        {{#enum:values}}
-        {{enum_value:value}}: "{{enum_value:name}}",
-        {{/enum:values}}
-    }
-    structured_annotations = [
-        {{#enum:structured_annotations}}
-        {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
-        {{> metadata/const_struct }},
-        {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
-        {{/enum:structured_annotations}}
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_{{enum:name}}() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_{{enum:name}}(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-{{/program:enums}}
-
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
     {{#program:enums}}
-    meta = _fbthrift_gen_metadata_enum_{{enum:name}}(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_{{enum:name}}(meta)
     {{/program:enums}}
     {{#program:structs}}
     {{#struct:exception?}}

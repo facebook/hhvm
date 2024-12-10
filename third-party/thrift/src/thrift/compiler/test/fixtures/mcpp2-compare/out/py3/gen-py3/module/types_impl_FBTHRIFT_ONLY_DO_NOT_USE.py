@@ -7,7 +7,6 @@
 
 import enum
 import thrift.py3.types
-import module.thrift_metadata as _fbthrift_python_metadata
 import module.thrift_enums as _fbthrift_python_enums
 
 _fbthrift__module_name__ = "module.types"
@@ -24,7 +23,7 @@ class MyEnumA(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_MyEnumA()
+        return _fbthrift_python_enums.gen_metadata_enum_MyEnumA()
 
     @staticmethod
     def __get_thrift_name__():
@@ -66,7 +65,7 @@ class AnnotatedEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_AnnotatedEnum()
+        return _fbthrift_python_enums.gen_metadata_enum_AnnotatedEnum()
 
     @staticmethod
     def __get_thrift_name__():
@@ -108,7 +107,7 @@ class AnnotatedEnum2(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_AnnotatedEnum2()
+        return _fbthrift_python_enums.gen_metadata_enum_AnnotatedEnum2()
 
     @staticmethod
     def __get_thrift_name__():
@@ -148,7 +147,7 @@ class MyEnumB(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_MyEnumB()
+        return _fbthrift_python_enums.gen_metadata_enum_MyEnumB()
 
     @staticmethod
     def __get_thrift_name__():

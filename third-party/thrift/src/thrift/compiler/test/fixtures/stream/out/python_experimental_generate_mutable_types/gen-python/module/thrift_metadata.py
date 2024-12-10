@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import module.thrift_enums as _fbthrift_current_module_enums
+import module.thrift_enums
+
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -237,7 +240,6 @@ def _fbthrift_metadata_service_response_PubSubStreamingService() -> _fbthrift_me
     context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["module.PubSubStreamingService"], module=_fbthrift_metadata.ThriftModuleContext(name="module"))
     services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
     return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
-
 
 
 

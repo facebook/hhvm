@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import test.fixtures.basic.module.thrift_enums as _fbthrift_current_module_enums
+import test.fixtures.basic.module.thrift_enums
+
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -50,7 +53,7 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         # MyStringField
         # MyDataField
     new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # myEnum
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # oneway
+    new_struct = test.fixtures.basic.module.thrift_enums._fbthrift_gen_metadata_enum_MyEnum(new_struct)    # oneway
         # readonly
         # idempotent
         # floatSet
@@ -138,7 +141,7 @@ def _fbthrift_gen_metadata_struct_MyUnion(metadata_struct: _fbthrift_metadata.Th
     new_struct = metadata_struct(structs=struct_dict)
 
     # myEnum
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # myStruct
+    new_struct = test.fixtures.basic.module.thrift_enums._fbthrift_gen_metadata_enum_MyEnum(new_struct)    # myStruct
     new_struct = _fbthrift_gen_metadata_struct_MyStruct(new_struct)    # myDataItem
     new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # floatSet
     
@@ -533,50 +536,10 @@ def _fbthrift_metadata_service_response_DbMixedStackArguments() -> _fbthrift_met
 
 
 
-def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.MyEnum"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "MyValue1",
-        1: "MyValue2",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_MyEnum() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_MyEnum(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-def _fbthrift_gen_metadata_enum_HackEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.HackEnum"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "Value1",
-        1: "Value2",
-    }
-    structured_annotations = [
-        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RenamedEnum"),  }),
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_HackEnum() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_HackEnum(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
-    meta = _fbthrift_gen_metadata_enum_MyEnum(meta)
-    meta = _fbthrift_gen_metadata_enum_HackEnum(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_MyEnum(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_HackEnum(meta)
     meta = _fbthrift_gen_metadata_struct_MyStruct(meta)
     meta = _fbthrift_gen_metadata_struct_Containers(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItem(meta)

@@ -20,6 +20,7 @@ Generated Python typestubs for Thrift enums
 {{> common/auto_generated_py}}
 
 import {{program:base_library_package}}.types as _fbthrift_python_types
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 {{#program:enums}}
 
 class _fbthrift_compatible_with_{{enum:name}}:
@@ -38,4 +39,9 @@ class {{enum:name}}(_fbthrift_python_types.{{!
     def _to_py3(self) -> "{{program:module_path}}.types.{{enum:name}}": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
     {{/enum:legacy_api?}}
+
+
+def _fbthrift_gen_metadata_enum_{{enum:name}}({{!
+}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_{{enum:name}}() -> _fbthrift_metadata.ThriftMetadata: ...
 {{/program:enums}}

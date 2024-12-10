@@ -9,11 +9,17 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import service.thrift_enums as _fbthrift_current_module_enums
+import service.thrift_enums
 
+
+import includes.thrift_enums
 import includes.thrift_metadata
 
+import module.thrift_enums
 import module.thrift_metadata
 
+import transitive.thrift_enums
 import transitive.thrift_metadata
 
 
@@ -71,7 +77,6 @@ def _fbthrift_metadata_service_response_MyService() -> _fbthrift_metadata.Thrift
     context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["service.MyService"], module=_fbthrift_metadata.ThriftModuleContext(name="service"))
     services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
     return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
-
 
 
 

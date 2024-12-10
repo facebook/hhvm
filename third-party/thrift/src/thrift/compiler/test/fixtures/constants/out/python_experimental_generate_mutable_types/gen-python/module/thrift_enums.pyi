@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import thrift.python.types as _fbthrift_python_types
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 class _fbthrift_compatible_with_EmptyEnum:
     pass
@@ -17,6 +18,10 @@ class EmptyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Empt
     def _to_python(self) -> EmptyEnum: ...
     def _to_py3(self) -> "module.types.EmptyEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
+
+
+def _fbthrift_gen_metadata_enum_EmptyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_EmptyEnum() -> _fbthrift_metadata.ThriftMetadata: ...
 
 class _fbthrift_compatible_with_City:
     pass
@@ -31,6 +36,10 @@ class City(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_City):
     def _to_py3(self) -> "module.types.City": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+
+def _fbthrift_gen_metadata_enum_City(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_City() -> _fbthrift_metadata.ThriftMetadata: ...
+
 class _fbthrift_compatible_with_Company:
     pass
 
@@ -44,3 +53,7 @@ class Company(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Compan
     def _to_python(self) -> Company: ...
     def _to_py3(self) -> "module.types.Company": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
+
+
+def _fbthrift_gen_metadata_enum_Company(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_Company() -> _fbthrift_metadata.ThriftMetadata: ...

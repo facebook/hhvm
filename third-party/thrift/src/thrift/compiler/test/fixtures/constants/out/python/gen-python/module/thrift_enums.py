@@ -7,8 +7,8 @@
 
 from __future__ import annotations
 
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
-import module.thrift_metadata
 
 class _fbthrift_compatible_with_EmptyEnum:
     pass
@@ -25,7 +25,7 @@ class EmptyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Empt
 
     @staticmethod
     def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_EmptyEnum()
+        return gen_metadata_enum_EmptyEnum()
 
     def _to_python(self):
         return self
@@ -57,7 +57,7 @@ class City(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_City):
 
     @staticmethod
     def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_City()
+        return gen_metadata_enum_City()
 
     def _to_python(self):
         return self
@@ -90,7 +90,7 @@ class Company(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Compan
 
     @staticmethod
     def __get_metadata__():
-        return module.thrift_metadata.gen_metadata_enum_Company()
+        return gen_metadata_enum_Company()
 
     def _to_python(self):
         return self
@@ -102,3 +102,73 @@ class Company(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_Compan
 
     def _to_py_deprecated(self):
         return self.value
+
+def _fbthrift_gen_metadata_enum_EmptyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.EmptyEnum"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_EmptyEnum() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_EmptyEnum(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_City(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.City"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        0: "NYC",
+        1: "MPK",
+        2: "SEA",
+        3: "LON",
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_City() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_City(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_Company(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.Company"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        0: "FACEBOOK",
+        1: "WHATSAPP",
+        2: "OCULUS",
+        3: "INSTAGRAM",
+        4: "__FRIEND__FEED",
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_Company() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_Company(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+

@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import test.fixtures.python_capi.containers.thrift_enums as _fbthrift_current_module_enums
+import test.fixtures.python_capi.containers.thrift_enums
+
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -253,7 +256,6 @@ def _fbthrift_gen_metadata_struct_IndirectionC(metadata_struct: _fbthrift_metada
     return new_struct
 def gen_metadata_struct_IndirectionC() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_IndirectionC(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-
 
 
 

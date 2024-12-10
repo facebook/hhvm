@@ -7,8 +7,8 @@
 
 from __future__ import annotations
 
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
-import test.fixtures.enums.module.thrift_metadata
 
 class _fbthrift_compatible_with_Metasyntactic:
     pass
@@ -29,7 +29,7 @@ class Metasyntactic(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_Metasyntactic()
+        return gen_metadata_enum_Metasyntactic()
 
     def _to_python(self):
         return self
@@ -63,7 +63,7 @@ class MyEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum1()
+        return gen_metadata_enum_MyEnum1()
 
     def _to_python(self):
         return self
@@ -94,7 +94,7 @@ class MyEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum2()
+        return gen_metadata_enum_MyEnum2()
 
     def _to_python(self):
         return self
@@ -128,7 +128,7 @@ class MyEnum3(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum3()
+        return gen_metadata_enum_MyEnum3()
 
     def _to_python(self):
         return self
@@ -160,7 +160,7 @@ class MyEnum4(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyEnum4()
+        return gen_metadata_enum_MyEnum4()
 
     def _to_python(self):
         return self
@@ -191,7 +191,7 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyBitmaskEnum1()
+        return gen_metadata_enum_MyBitmaskEnum1()
 
     def _to_python(self):
         return self
@@ -222,7 +222,7 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with
 
     @staticmethod
     def __get_metadata__():
-        return test.fixtures.enums.module.thrift_metadata.gen_metadata_enum_MyBitmaskEnum2()
+        return gen_metadata_enum_MyBitmaskEnum2()
 
     def _to_python(self):
         return self
@@ -234,3 +234,175 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with
 
     def _to_py_deprecated(self):
         return self.value
+
+def _fbthrift_gen_metadata_enum_Metasyntactic(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.Metasyntactic"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        1: "FOO",
+        2: "BAR",
+        3: "BAZ",
+        4: "BAX",
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_Metasyntactic() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_Metasyntactic(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_MyEnum1(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyEnum1"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        0: "ME1_0",
+        1: "ME1_1",
+        2: "ME1_2",
+        3: "ME1_3",
+        5: "ME1_5",
+        6: "ME1_6",
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_MyEnum1() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_MyEnum1(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_MyEnum2(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyEnum2"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        0: "ME2_0",
+        1: "ME2_1",
+        2: "ME2_2",
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_MyEnum2() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_MyEnum2(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_MyEnum3(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyEnum3"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        0: "ME3_0",
+        1: "ME3_1",
+        -2: "ME3_N2",
+        -1: "ME3_N1",
+        9: "ME3_9",
+        10: "ME3_10",
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_MyEnum3() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_MyEnum3(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_MyEnum4(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyEnum4"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        2147483645: "ME4_A",
+        2147483646: "ME4_B",
+        2147483647: "ME4_C",
+        -2147483648: "ME4_D",
+    }
+    structured_annotations = [
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_MyEnum4() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_MyEnum4(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_MyBitmaskEnum1(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyBitmaskEnum1"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        1: "ONE",
+        2: "TWO",
+        4: "FOUR",
+    }
+    structured_annotations = [
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.BitmaskEnum"), fields= {  }),
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_MyBitmaskEnum1() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_MyBitmaskEnum1(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
+def _fbthrift_gen_metadata_enum_MyBitmaskEnum2(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyBitmaskEnum2"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        1: "ONE",
+        2: "TWO",
+        4: "FOUR",
+    }
+    structured_annotations = [
+        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.BitmaskEnum"), fields= {  }),
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_MyBitmaskEnum2() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_MyBitmaskEnum2(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+

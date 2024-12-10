@@ -10,6 +10,7 @@ from __future__ import annotations
 import __static__
 
 import fbcode.thrift.python.types as _fbthrift_python_types
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 class _fbthrift_compatible_with_AnEnum:
     pass
@@ -25,6 +26,10 @@ class AnEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_AnEnum)
     def _to_py3(self) -> "module.types.AnEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+
+def _fbthrift_gen_metadata_enum_AnEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_AnEnum() -> _fbthrift_metadata.ThriftMetadata: ...
+
 class _fbthrift_compatible_with_AnEnumRenamed:
     pass
 
@@ -36,6 +41,10 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_
     def _to_python(self) -> AnEnumRenamed: ...
     def _to_py3(self) -> "module.types.AnEnumRenamed": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
+
+
+def _fbthrift_gen_metadata_enum_AnEnumRenamed(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_AnEnumRenamed() -> _fbthrift_metadata.ThriftMetadata: ...
 
 class _fbthrift_compatible_with_Flags:
     pass
@@ -49,3 +58,7 @@ class Flags(_fbthrift_python_types.Flag, _fbthrift_compatible_with_Flags):
     def _to_python(self) -> Flags: ...
     def _to_py3(self) -> "module.types.Flags": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
+
+
+def _fbthrift_gen_metadata_enum_Flags(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_Flags() -> _fbthrift_metadata.ThriftMetadata: ...

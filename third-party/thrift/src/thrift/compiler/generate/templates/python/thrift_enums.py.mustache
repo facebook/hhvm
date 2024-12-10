@@ -19,8 +19,8 @@ Generated Python enums for Thrift types
 }}
 {{> common/auto_generated_py}}
 
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import {{program:base_library_package}}.types as _fbthrift_python_types
-import {{program:module_path}}.thrift_metadata
 {{#program:enums}}
 
 {{!
@@ -52,7 +52,7 @@ class {{enum:name}}(_fbthrift_python_types.{{!
 
     @staticmethod
     def __get_metadata__():
-        return {{program:module_path}}.thrift_metadata.gen_metadata_enum_{{enum:name}}()
+        return gen_metadata_enum_{{enum:name}}()
 
     {{#enum:legacy_api?}}
     def _to_python(self):
@@ -66,4 +66,36 @@ class {{enum:name}}(_fbthrift_python_types.{{!
     def _to_py_deprecated(self):
         return self.value
     {{/enum:legacy_api?}}
+{{/program:enums}}
+
+{{#program:enums}}
+def _fbthrift_gen_metadata_enum_{{enum:name}}({{!
+}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "{{program:name}}.{{enum:name}}"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        {{#enum:values}}
+        {{enum_value:value}}: "{{enum_value:name}}",
+        {{/enum:values}}
+    }
+    structured_annotations = [
+        {{#enum:structured_annotations}}
+        {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
+        {{> metadata/const_struct }},
+        {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
+        {{/enum:structured_annotations}}
+    ]
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_{{enum:name}}() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_{{enum:name}}(
+        _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
+    )
+
 {{/program:enums}}

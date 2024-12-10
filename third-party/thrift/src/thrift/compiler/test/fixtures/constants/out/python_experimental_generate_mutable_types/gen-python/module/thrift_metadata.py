@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import module.thrift_enums as _fbthrift_current_module_enums
+import module.thrift_enums
+
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
 # instead of re-generating thrift structs
@@ -39,7 +42,7 @@ def _fbthrift_gen_metadata_struct_Internship(metadata_struct: _fbthrift_metadata
     # weeks
         # title
         # employer
-    new_struct = _fbthrift_gen_metadata_enum_Company(new_struct)    # compensation
+    new_struct = module.thrift_enums._fbthrift_gen_metadata_enum_Company(new_struct)    # compensation
         # school
     
     return new_struct
@@ -255,72 +258,11 @@ def gen_metadata_struct_union2() -> _fbthrift_metadata.ThriftMetadata:
 
 
 
-def _fbthrift_gen_metadata_enum_EmptyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.EmptyEnum"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_EmptyEnum() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_EmptyEnum(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-def _fbthrift_gen_metadata_enum_City(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.City"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "NYC",
-        1: "MPK",
-        2: "SEA",
-        3: "LON",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_City() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_City(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-def _fbthrift_gen_metadata_enum_Company(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.Company"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "FACEBOOK",
-        1: "WHATSAPP",
-        2: "OCULUS",
-        3: "INSTAGRAM",
-        4: "__FRIEND__FEED",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_Company() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_Company(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
-    meta = _fbthrift_gen_metadata_enum_EmptyEnum(meta)
-    meta = _fbthrift_gen_metadata_enum_City(meta)
-    meta = _fbthrift_gen_metadata_enum_Company(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_EmptyEnum(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_City(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_Company(meta)
     meta = _fbthrift_gen_metadata_struct_Internship(meta)
     meta = _fbthrift_gen_metadata_struct_Range(meta)
     meta = _fbthrift_gen_metadata_struct_struct1(meta)

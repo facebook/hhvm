@@ -9,13 +9,20 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import test.fixtures.python_capi.module.thrift_enums as _fbthrift_current_module_enums
+import test.fixtures.python_capi.module.thrift_enums
 
+
+import apache.thrift.type.id.thrift_enums
 import apache.thrift.type.id.thrift_metadata
 
+import apache.thrift.type.schema.thrift_enums
 import apache.thrift.type.schema.thrift_metadata
 
+import test.fixtures.python_capi.serialized_dep.thrift_enums
 import test.fixtures.python_capi.serialized_dep.thrift_metadata
 
+import test.fixtures.python_capi.thrift_dep.thrift_enums
 import test.fixtures.python_capi.thrift_dep.thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
@@ -55,7 +62,7 @@ def _fbthrift_gen_metadata_struct_MyStruct(metadata_struct: _fbthrift_metadata.T
         # stringy
         # myItemy
     new_struct = _fbthrift_gen_metadata_struct_MyDataItem(new_struct)    # myEnumy
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # booly
+    new_struct = test.fixtures.python_capi.module.thrift_enums._fbthrift_gen_metadata_enum_MyEnum(new_struct)    # booly
         # floatListy
         # strMappy
      # key
@@ -389,7 +396,7 @@ def _fbthrift_gen_metadata_struct_SetStruct(metadata_struct: _fbthrift_metadata.
     new_struct = metadata_struct(structs=struct_dict)
 
     # enumz
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # intz
+    new_struct = test.fixtures.python_capi.module.thrift_enums._fbthrift_gen_metadata_enum_MyEnum(new_struct)    # intz
         # binnaz
         # encoded
         # uidz
@@ -441,7 +448,7 @@ def _fbthrift_gen_metadata_struct_MapStruct(metadata_struct: _fbthrift_metadata.
     new_struct = metadata_struct(structs=struct_dict)
 
     # enumz
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct) # key
+    new_struct = test.fixtures.python_capi.module.thrift_enums._fbthrift_gen_metadata_enum_MyEnum(new_struct) # key
      # val     # intz
      # key
      # val     # binnaz
@@ -503,12 +510,12 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
     new_struct = metadata_struct(structs=struct_dict)
 
     # enum_
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # renamed_
-    new_struct = _fbthrift_gen_metadata_enum_AnnoyingEnum(new_struct)    # primitive
+    new_struct = test.fixtures.python_capi.module.thrift_enums._fbthrift_gen_metadata_enum_MyEnum(new_struct)    # renamed_
+    new_struct = test.fixtures.python_capi.module.thrift_enums._fbthrift_gen_metadata_enum_AnnoyingEnum(new_struct)    # primitive
     new_struct = _fbthrift_gen_metadata_struct_PrimitiveStruct(new_struct)    # aliased
     new_struct = _fbthrift_gen_metadata_struct_ListStruct(new_struct)    # xstruct
     new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct)    # xenum
-    new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_enum_DepEnum(new_struct)    # serial_struct
+    new_struct = test.fixtures.python_capi.thrift_dep.thrift_enums._fbthrift_gen_metadata_enum_DepEnum(new_struct)    # serial_struct
     new_struct = test.fixtures.python_capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedStruct(new_struct)    # friends
     new_struct = test.fixtures.python_capi.thrift_dep.thrift_metadata._fbthrift_gen_metadata_struct_DepStruct(new_struct)    # serial_union
     new_struct = test.fixtures.python_capi.serialized_dep.thrift_metadata._fbthrift_gen_metadata_struct_SerializedUnion(new_struct)    # serial_error
@@ -552,7 +559,7 @@ def _fbthrift_gen_metadata_struct_Onion(metadata_struct: _fbthrift_metadata.Thri
     new_struct = metadata_struct(structs=struct_dict)
 
     # myEnum
-    new_struct = _fbthrift_gen_metadata_enum_MyEnum(new_struct)    # myStruct
+    new_struct = test.fixtures.python_capi.module.thrift_enums._fbthrift_gen_metadata_enum_MyEnum(new_struct)    # myStruct
     new_struct = _fbthrift_gen_metadata_struct_PrimitiveStruct(new_struct)    # intSet
         # myString
         # doubleList
@@ -566,50 +573,10 @@ def gen_metadata_struct_Onion() -> _fbthrift_metadata.ThriftMetadata:
 
 
 
-def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.MyEnum"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "MyValue1",
-        1: "MyValue2",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_MyEnum() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_MyEnum(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-def _fbthrift_gen_metadata_enum_AnnoyingEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.AnnoyingEnum"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        1: "FOO",
-        2: "BAR",
-    }
-    structured_annotations = [
-        _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Name"), fields= { "value": _fbthrift_metadata.ThriftConstValue(cv_string="NormalDecentEnum"),  }),
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_AnnoyingEnum() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_AnnoyingEnum(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
-    meta = _fbthrift_gen_metadata_enum_MyEnum(meta)
-    meta = _fbthrift_gen_metadata_enum_AnnoyingEnum(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_MyEnum(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_AnnoyingEnum(meta)
     meta = _fbthrift_gen_metadata_struct_MyStruct(meta)
     meta = _fbthrift_gen_metadata_struct_MyDataItem(meta)
     meta = _fbthrift_gen_metadata_struct_TransitiveDoubler(meta)

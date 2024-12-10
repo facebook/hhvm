@@ -9,9 +9,12 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import b.thrift_enums as _fbthrift_current_module_enums
+import b.thrift_enums
 
+
+import c.thrift_enums
 import c.thrift_metadata
-
 
 
 

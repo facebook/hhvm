@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import apache.thrift.fixtures.types.module.thrift_enums as _fbthrift_current_module_enums
+import apache.thrift.fixtures.types.module.thrift_enums
 
+
+import apache.thrift.fixtures.types.included.thrift_enums
 import apache.thrift.fixtures.types.included.thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
@@ -179,8 +183,8 @@ def _fbthrift_gen_metadata_struct_MyStructWithForwardRefEnum(metadata_struct: _f
     new_struct = metadata_struct(structs=struct_dict)
 
     # a
-    new_struct = _fbthrift_gen_metadata_enum_MyForwardRefEnum(new_struct)    # b
-    new_struct = _fbthrift_gen_metadata_enum_MyForwardRefEnum(new_struct)
+    new_struct = apache.thrift.fixtures.types.module.thrift_enums._fbthrift_gen_metadata_enum_MyForwardRefEnum(new_struct)    # b
+    new_struct = apache.thrift.fixtures.types.module.thrift_enums._fbthrift_gen_metadata_enum_MyForwardRefEnum(new_struct)
     return new_struct
 def gen_metadata_struct_MyStructWithForwardRefEnum() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_MyStructWithForwardRefEnum(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -1023,72 +1027,11 @@ def _fbthrift_metadata_service_response_SomeService() -> _fbthrift_metadata.Thri
 
 
 
-def _fbthrift_gen_metadata_enum_has_bitwise_ops(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.has_bitwise_ops"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "none",
-        1: "zero",
-        2: "one",
-        4: "two",
-        8: "three",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_has_bitwise_ops() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_has_bitwise_ops(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-def _fbthrift_gen_metadata_enum_is_unscoped(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.is_unscoped"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "hello",
-        1: "world",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_is_unscoped() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_is_unscoped(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-def _fbthrift_gen_metadata_enum_MyForwardRefEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.MyForwardRefEnum"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "ZERO",
-        12: "NONZERO",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_MyForwardRefEnum() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_MyForwardRefEnum(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
-    meta = _fbthrift_gen_metadata_enum_has_bitwise_ops(meta)
-    meta = _fbthrift_gen_metadata_enum_is_unscoped(meta)
-    meta = _fbthrift_gen_metadata_enum_MyForwardRefEnum(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_has_bitwise_ops(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_is_unscoped(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_MyForwardRefEnum(meta)
     meta = _fbthrift_gen_metadata_struct_empty_struct(meta)
     meta = _fbthrift_gen_metadata_struct_decorated_struct(meta)
     meta = _fbthrift_gen_metadata_struct_ContainerStruct(meta)

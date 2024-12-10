@@ -9,6 +9,9 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import empty.thrift_enums as _fbthrift_current_module_enums
+import empty.thrift_enums
+
 
 
 def gen_metadata_service_NullService() -> _fbthrift_metadata.ThriftMetadata:
@@ -35,7 +38,6 @@ def _fbthrift_metadata_service_response_NullService() -> _fbthrift_metadata.Thri
     context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["empty.NullService"], module=_fbthrift_metadata.ThriftModuleContext(name="empty"))
     services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
     return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
-
 
 
 

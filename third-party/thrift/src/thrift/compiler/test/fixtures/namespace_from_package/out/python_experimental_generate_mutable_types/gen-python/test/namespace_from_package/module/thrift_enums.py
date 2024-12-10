@@ -7,5 +7,6 @@
 
 from __future__ import annotations
 
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
-import test.namespace_from_package.module.thrift_metadata
+

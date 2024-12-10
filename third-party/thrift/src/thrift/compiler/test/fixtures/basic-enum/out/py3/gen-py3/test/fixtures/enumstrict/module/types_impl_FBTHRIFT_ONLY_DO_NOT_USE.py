@@ -7,7 +7,6 @@
 
 import enum
 import thrift.py3.types
-import test.fixtures.enumstrict.module.thrift_metadata as _fbthrift_python_metadata
 import test.fixtures.enumstrict.module.thrift_enums as _fbthrift_python_enums
 
 _fbthrift__module_name__ = "test.fixtures.enumstrict.module.types"
@@ -21,7 +20,7 @@ class EmptyEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_EmptyEnum()
+        return _fbthrift_python_enums.gen_metadata_enum_EmptyEnum()
 
     @staticmethod
     def __get_thrift_name__():
@@ -62,7 +61,7 @@ class MyEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_MyEnum()
+        return _fbthrift_python_enums.gen_metadata_enum_MyEnum()
 
     @staticmethod
     def __get_thrift_name__():
@@ -104,7 +103,7 @@ class MyUseIntrinsicDefaultEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_MyUseIntrinsicDefaultEnum()
+        return _fbthrift_python_enums.gen_metadata_enum_MyUseIntrinsicDefaultEnum()
 
     @staticmethod
     def __get_thrift_name__():
@@ -163,7 +162,7 @@ class MyBigEnum(thrift.py3.types.CompiledEnum):
 
     @staticmethod
     def __get_metadata__():
-        return _fbthrift_python_metadata.gen_metadata_enum_MyBigEnum()
+        return _fbthrift_python_enums.gen_metadata_enum_MyBigEnum()
 
     @staticmethod
     def __get_thrift_name__():

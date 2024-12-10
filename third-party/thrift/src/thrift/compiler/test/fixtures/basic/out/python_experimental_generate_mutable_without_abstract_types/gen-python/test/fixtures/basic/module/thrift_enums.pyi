@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import thrift.python.types as _fbthrift_python_types
+import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 class _fbthrift_compatible_with_MyEnum:
     pass
@@ -20,6 +21,10 @@ class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum)
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
 
+
+def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_MyEnum() -> _fbthrift_metadata.ThriftMetadata: ...
+
 class _fbthrift_compatible_with_HackEnum:
     pass
 
@@ -30,3 +35,7 @@ class HackEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_HackE
     def _to_python(self) -> HackEnum: ...
     def _to_py3(self) -> "test.fixtures.basic.module.types.HackEnum": ...  # type: ignore
     def _to_py_deprecated(self) -> int: ...
+
+
+def _fbthrift_gen_metadata_enum_HackEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata: ...
+def gen_metadata_enum_HackEnum() -> _fbthrift_metadata.ThriftMetadata: ...

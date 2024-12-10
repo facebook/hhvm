@@ -9,7 +9,11 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
+import module.thrift_enums as _fbthrift_current_module_enums
+import module.thrift_enums
 
+
+import include.thrift_enums
 import include.thrift_metadata
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
@@ -33,7 +37,7 @@ def _fbthrift_gen_metadata_exception_CustomException(metadata_struct: _fbthrift_
 
     # name
         # result
-    new_struct = _fbthrift_gen_metadata_enum_Result(new_struct)
+    new_struct = module.thrift_enums._fbthrift_gen_metadata_enum_Result(new_struct)
     return new_struct
 def gen_metadata_exception_CustomException() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_exception_CustomException(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -86,7 +90,7 @@ def _fbthrift_gen_metadata_service_PrimitivesService(metadata_struct: _fbthrift_
     
     new_struct = _fbthrift_gen_metadata_exception_CustomException(new_struct) # e
     
-    new_struct = _fbthrift_gen_metadata_enum_Result(new_struct) # return value
+    new_struct = module.thrift_enums._fbthrift_gen_metadata_enum_Result(new_struct) # return value
     
     
      # id
@@ -105,30 +109,9 @@ def _fbthrift_metadata_service_response_PrimitivesService() -> _fbthrift_metadat
 
 
 
-def _fbthrift_gen_metadata_enum_Result(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "module.Result"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "OK",
-        1: "SO_SO",
-        2: "GOOD",
-    }
-    structured_annotations = [
-    ]
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=structured_annotations)
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_Result() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_Result(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
-    meta = _fbthrift_gen_metadata_enum_Result(meta)
+    meta = _fbthrift_current_module_enums._fbthrift_gen_metadata_enum_Result(meta)
     meta = _fbthrift_gen_metadata_exception_CustomException(meta)
     meta = _fbthrift_gen_metadata_service_PrimitivesService(meta)
     return meta

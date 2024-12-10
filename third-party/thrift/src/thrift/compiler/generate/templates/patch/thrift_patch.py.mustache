@@ -43,6 +43,7 @@ from common.thrift.patch.detail.py_bindings.DynamicPatch import (
     BinaryPatch,
     StructPatch as DynamicStructPatch,
     UnionPatch as DynamicUnionPatch,
+    DynamicPatch
 )
 
 import thrift.python.types as _fbthrift_python_types
@@ -73,8 +74,14 @@ class {{struct:py_name}}Patch(
             {{#field:type}}{{> ../python/types/unadapted_pep484_type}}{{/field:type}},
             {{#field:type}}{{> ../python/types/unadapted_pep484_patch_type}}{{/field:type}}]:
 
+        {{#field:type}}
+        {{! e.g., if field is an i32, this function convert DynamicPatch --> I32Patch }}
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> {{#field:type}}{{> ../python/types/unadapted_pep484_patch_type}}{{/field:type}}:
+            {{> ../python/common/thrift_patch_callback}}
+        {{/field:type}}
+
         return {{> types/field_patch_type}}(
-            {{#field:type}}{{> ../python/common/thrift_patch_callback}}{{/field:type}},
+            cast_dynamic_patch_to_typed_field_patch,
             self._patch,
             {{field:key}},
             {{#field:type}}{{> ../python/types/typeinfo }}{{/field:type}})

@@ -24,7 +24,7 @@ provides a typedef instead of a full class definition.
 }}
 {{#type:list?}}
 cdef extern from * nogil:
-    cdef cppclass {{type:cythonCustomType}} "{{type:cppCustomType}}":
+    cdef cppclass {{type:cythonCustomType}} "{{type:customCppType}}":
         ctypedef {{#type:list_elem_type}}{{> types/cython_cpp_type}}{{/type:list_elem_type}} value_type
         {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
            for context on why this is size_t }}
@@ -65,7 +65,7 @@ cdef extern from * nogil:
 {{/type:list?}}
 {{#type:set?}}
 cdef extern from * nogil:
-    cdef cppclass {{type:cythonCustomType}} "{{type:cppCustomType}}":
+    cdef cppclass {{type:cythonCustomType}} "{{type:customCppType}}":
         ctypedef {{#type:set_elem_type}}{{> types/cython_cpp_type}}{{/type:set_elem_type}} value_type
         {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
            for context on why this is size_t }}
@@ -106,7 +106,7 @@ cdef extern from * nogil:
 {{/type:set?}}
 {{#type:map?}}
 cdef extern from * nogil:
-    cdef cppclass {{type:cythonCustomType}} "{{type:cppCustomType}}":
+    cdef cppclass {{type:cythonCustomType}} "{{type:customCppType}}":
         ctypedef {{#type:key_type}}{{> types/cython_cpp_type}}{{/type:key_type}} key_type
         ctypedef {{#type:value_type}}{{> types/cython_cpp_type}}{{/type:value_type}} mapped_type
         {{! see comment in https://github.com/cython/cython/blob/master/Cython/Includes/libcpp/vector.pxd
@@ -153,5 +153,5 @@ cdef extern from *:
     ctypedef {{!
     }}{{#type:flexibleBinary?}}bstring{{/type:flexibleBinary?}}{{!
     }}{{^type:flexibleBinary?}}{{> types/cython_cpp_basic_type}}{{/type:flexibleBinary?}}{{!
-    }} {{type:cythonCustomType}} "{{type:cppCustomType}}"
+    }} {{type:cythonCustomType}} "{{type:customCppType}}"
 {{/type:iobufWrapper?}}{{/type:container?}}

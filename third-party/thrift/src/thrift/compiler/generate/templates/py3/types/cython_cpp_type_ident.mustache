@@ -19,15 +19,15 @@
 This is the equivalent of CythonCpp[Basic]Type, for use as part of an identifier
 (like in the name of a Promise class), not as a standalone type
 
-}}{{#type:hasCustomType?}}{{!
+}}{{#type:customCppType?}}{{!
   }}{{#type:iobuf?}}__iobuf_cIOBuf{{/type:iobuf?}}{{!
   }}{{#type:iobufRef?}}unique_ptr__iobuf_cIOBuf{{/type:iobufRef?}}{{!
   }}{{^type:iobuf?}}{{^type:iobufRef?}}{{!
     }}{{#type:need_cbinding_path?}}{{type:cbinding_path}}_{{/type:need_cbinding_path?}}{{!
     }}{{type:cythonCustomType}}{{!
   }}{{/type:iobufRef?}}{{/type:iobuf?}}{{!
-}}{{/type:hasCustomType?}}{{!
-}}{{^type:hasCustomType?}}{{!
+}}{{/type:customCppType?}}{{!
+}}{{^type:customCppType?}}{{!
 }}{{#type:bool?}}cbool{{/type:bool?}}{{!
 }}{{#type:byte?}}cint8_t{{/type:byte?}}{{!
 }}{{#type:i16?}}cint16_t{{/type:i16?}}{{!
@@ -59,4 +59,4 @@ This is the equivalent of CythonCpp[Basic]Type, for use as part of an identifier
   }}{{> types/c_enum }}{{!
 }}{{/type:enum}}{{!
 }}{{#type:void?}}cFollyUnit{{/type:void?}}{{!
-}}{{/type:hasCustomType?}}
+}}{{/type:customCppType?}}

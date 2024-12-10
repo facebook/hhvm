@@ -607,9 +607,9 @@ class py3_mstch_type : public mstch_type {
             {"type:cppTemplate", &py3_mstch_type::cppTemplate},
             {"type:cythonTemplate", &py3_mstch_type::cythonTemplate},
             {"type:defaultTemplate?", &py3_mstch_type::isDefaultTemplate},
-            {"type:cppCustomType", &py3_mstch_type::cppType},
+            {"type:customCppType", &py3_mstch_type::customCppType},
+            {"type:customCppType?", &py3_mstch_type::isCustomCppType},
             {"type:cythonCustomType", &py3_mstch_type::cythonType},
-            {"type:hasCustomType?", &py3_mstch_type::hasCustomType},
             {"type:number?", &py3_mstch_type::isNumber},
             {"type:integer?", &py3_mstch_type::isInteger},
             {"type:containerOfString?", &py3_mstch_type::isContainerOfString},
@@ -663,11 +663,11 @@ class py3_mstch_type : public mstch_type {
 
   mstch::node isDefaultTemplate() { return is_default_template(); }
 
-  mstch::node cppType() { return cached_props_.cpp_type(); }
+  mstch::node customCppType() { return cached_props_.cpp_type(); }
 
   mstch::node cythonType() { return to_cython_type(); }
 
-  mstch::node hasCustomType() { return has_custom_cpp_type(); }
+  mstch::node isCustomCppType() { return is_custom_cpp_type(); }
 
   mstch::node isNumber() { return is_number(); }
 
@@ -713,7 +713,7 @@ class py3_mstch_type : public mstch_type {
     return cached_props_.is_default_template(type_);
   }
 
-  bool has_custom_cpp_type() const { return cached_props_.cpp_type() != ""; }
+  bool is_custom_cpp_type() const { return cached_props_.cpp_type() != ""; }
 
  protected:
   const t_program* get_type_program() const {
@@ -772,7 +772,7 @@ class py3_mstch_type : public mstch_type {
   }
 
   bool is_flexible_binary() const {
-    return type_->is_binary() && has_custom_cpp_type() && !is_iobuf() &&
+    return type_->is_binary() && is_custom_cpp_type() && !is_iobuf() &&
         !is_iobuf_ref() &&
         // We know that folly::fbstring is completely substitutable for
         // std::string and it's a common-enough type to special-case:
@@ -1209,7 +1209,7 @@ std::string py3_mstch_program::visit_type_impl(
     if (!type->is_default_template()) {
       customTemplates_.push_back(trueType);
     }
-    if (type->has_custom_cpp_type()) {
+    if (type->is_custom_cpp_type()) {
       if (orig_type->find_structured_annotation_or_null(
               kPythonPy3EnableCppAdapterUri)) {
         // TODO(dokwon): Remove this once we also support containers.

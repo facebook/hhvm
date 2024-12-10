@@ -19,8 +19,8 @@
 Included in cpp files to define the type of a simple or contained struct, or
 anywhere else the type is used as a value directly.
 
-}}{{#type:hasCustomType?}}{{type:cppCustomType}}{{/type:hasCustomType?}}{{!
-}}{{^type:hasCustomType?}}{{!
+}}{{#type:customCppType?}}{{type:customCppType}}{{/type:customCppType?}}{{!
+}}{{^type:customCppType?}}{{!
 }}{{#type:bool?}}bool{{/type:bool?}}{{!
 }}{{#type:byte?}}int8_t{{/type:byte?}}{{!
 }}{{#type:i16?}}int16_t{{/type:i16?}}{{!
@@ -53,4 +53,4 @@ anywhere else the type is used as a value directly.
   }}>{{!
 }}{{/type:map?}}{{!
 }}{{#type:void?}}folly::Unit{{/type:void?}}{{!
-}}{{/type:hasCustomType?}}
+}}{{/type:customCppType?}}

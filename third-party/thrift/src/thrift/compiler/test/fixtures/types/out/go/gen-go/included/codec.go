@@ -87,6 +87,17 @@ var (
 var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 })
 
+// Premade slice of all struct specs
+var premadeStructSpecsOnce = sync.OnceValue(
+    func() []*thrift.StructSpec {
+        // Relies on premade struct specs
+        premadeStructSpecsInitOnce()
+
+        fbthriftResults := make([]*thrift.StructSpec, 0)
+        return fbthriftResults
+    },
+)
+
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization

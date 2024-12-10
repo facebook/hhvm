@@ -1148,6 +1148,26 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
+// Premade slice of all struct specs
+var premadeStructSpecsOnce = sync.OnceValue(
+    func() []*thrift.StructSpec {
+        // Relies on premade struct specs
+        premadeStructSpecsInitOnce()
+
+        fbthriftResults := make([]*thrift.StructSpec, 0)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyUnion)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructWithCustomDefault)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructLevelTerseStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_FieldLevelTerseStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseStructWithCustomDefault)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedFields)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_WrappedFields)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseException)
+        return fbthriftResults
+    },
+)
+
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization

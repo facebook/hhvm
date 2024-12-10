@@ -2470,6 +2470,51 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
+// Premade slice of all struct specs
+var premadeStructSpecsOnce = sync.OnceValue(
+    func() []*thrift.StructSpec {
+        // Relies on premade struct specs
+        premadeStructSpecsInitOnce()
+
+        fbthriftResults := make([]*thrift.StructSpec, 0)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyAnnotation)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Foo)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Baz)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Bar)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_DirectlyAdapted)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_IndependentDirectlyAdapted)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructWithFieldAdapter)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseAdaptedFields)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_B)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_A)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Config)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTestStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTemplatedTestStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTemplatedNestedTestStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptTestUnion)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_DirectlyAdaptedStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructFieldAdaptedStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CircularAdaptee)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CircularStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ReorderedStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_DeclaredAfterStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_RenamedStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_SameNamespaceStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_HeapAllocated)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MoveOnly)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AlsoMoveOnly)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ApplyAdapter)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TransitiveAdapted)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CountingStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Person)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Person2)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_RenamedStructWithStructAdapterAndFieldAdapter)
+        return fbthriftResults
+    },
+)
+
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization

@@ -524,6 +524,33 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
+// Premade slice of all struct specs
+var premadeStructSpecsOnce = sync.OnceValue(
+    func() []*thrift.StructSpec {
+        // Relies on premade struct specs
+        premadeStructSpecsInitOnce()
+
+        fbthriftResults := make([]*thrift.StructSpec, 0)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Experimental)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ReserveIds)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_RequiresBackwardCompatibility)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TerseWrite)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Box)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Mixin)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_SerializeInFieldIdOrder)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_BitmaskEnum)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ExceptionMessage)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_InternBox)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Serial)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Uri)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Priority)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_DeprecatedUnvalidatedAnnotations)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedIdentifier)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowReservedFilename)
+        return fbthriftResults
+    },
+)
+
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization

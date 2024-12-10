@@ -485,6 +485,25 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
+// Premade slice of all struct specs
+var premadeStructSpecsOnce = sync.OnceValue(
+    func() []*thrift.StructSpec {
+        // Relies on premade struct specs
+        premadeStructSpecsInitOnce()
+
+        fbthriftResults := make([]*thrift.StructSpec, 0)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexUnion)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ListUnion)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_DataUnion)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Val)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ValUnion)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_VirtualComplexUnion)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_NonCopyableStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_NonCopyableUnion)
+        return fbthriftResults
+    },
+)
+
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization

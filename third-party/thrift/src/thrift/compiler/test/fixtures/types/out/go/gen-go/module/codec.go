@@ -1879,6 +1879,52 @@ var premadeStructSpecsInitOnce = sync.OnceFunc(func() {
 }
 })
 
+// Premade slice of all struct specs
+var premadeStructSpecsOnce = sync.OnceValue(
+    func() []*thrift.StructSpec {
+        // Relies on premade struct specs
+        premadeStructSpecsInitOnce()
+
+        fbthriftResults := make([]*thrift.StructSpec, 0)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_empty_struct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_decorated_struct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ContainerStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CppTypeStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_VirtualStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStructWithForwardRefEnum)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TrivialNumeric)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TrivialNestedWithDefault)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexString)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ComplexNestedWithDefault)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MinPadding)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MinPaddingWithCustomType)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_MyDataItem)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_Renaming)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AnnotatedTypes)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageRoot)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_ForwardUsageByRef)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteMap)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteMapDep)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteMap)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteMapDep)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteList)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_IncompleteListDep)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteList)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_CompleteListDep)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedList)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AdaptedListDep)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_DependentAdaptedList)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_DependentAdaptedListDep)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllocatorAware)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_AllocatorAware2)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_TypedefStruct)
+        fbthriftResults = append(fbthriftResults, premadeStructSpec_StructWithDoubleUnderscores)
+        return fbthriftResults
+    },
+)
+
 var premadeCodecSpecsMapOnce = sync.OnceValue(
     func() map[string]*thrift.TypeSpec {
         // Relies on premade codec specs initialization

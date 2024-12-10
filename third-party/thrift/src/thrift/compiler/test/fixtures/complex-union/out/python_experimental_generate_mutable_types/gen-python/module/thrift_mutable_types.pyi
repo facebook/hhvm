@@ -25,6 +25,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -37,7 +38,7 @@ class _fbthrift_compatible_with_ComplexUnion:
     pass
 
 
-class ComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ComplexUnion):
+class ComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ComplexUnion, _fbthrift_python_abstract_types.ComplexUnion):
 
     @property
     def intValue(self) -> int: ...
@@ -108,7 +109,7 @@ class _fbthrift_compatible_with_ListUnion:
     pass
 
 
-class ListUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ListUnion):
+class ListUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ListUnion, _fbthrift_python_abstract_types.ListUnion):
 
     @property
     def intListValue(self) -> _fbthrift_python_mutable_containers.MutableList[int]: ...
@@ -147,7 +148,7 @@ class _fbthrift_compatible_with_DataUnion:
     pass
 
 
-class DataUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_DataUnion):
+class DataUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_DataUnion, _fbthrift_python_abstract_types.DataUnion):
 
     @property
     def binaryData(self) -> bytes: ...
@@ -186,7 +187,7 @@ class _fbthrift_compatible_with_Val:
     pass
 
 
-class Val(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Val):
+class Val(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Val, _fbthrift_python_abstract_types.Val):
 
     @property
     def strVal(self) -> str: ...
@@ -229,7 +230,7 @@ class _fbthrift_compatible_with_ValUnion:
     pass
 
 
-class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ValUnion):
+class ValUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_ValUnion, _fbthrift_python_abstract_types.ValUnion):
 
     @property
     def v1(self) -> _fbthrift_Val: ...
@@ -268,7 +269,7 @@ class _fbthrift_compatible_with_VirtualComplexUnion:
     pass
 
 
-class VirtualComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_VirtualComplexUnion):
+class VirtualComplexUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_VirtualComplexUnion, _fbthrift_python_abstract_types.VirtualComplexUnion):
 
     @property
     def thingOne(self) -> str: ...
@@ -307,7 +308,7 @@ class _fbthrift_compatible_with_NonCopyableStruct:
     pass
 
 
-class NonCopyableStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_NonCopyableStruct):
+class NonCopyableStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_NonCopyableStruct, _fbthrift_python_abstract_types.NonCopyableStruct):
 
     @property
     def num(self) -> int: ...
@@ -334,7 +335,7 @@ class _fbthrift_compatible_with_NonCopyableUnion:
     pass
 
 
-class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_NonCopyableUnion):
+class NonCopyableUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_NonCopyableUnion, _fbthrift_python_abstract_types.NonCopyableUnion):
 
     @property
     def s(self) -> _fbthrift_NonCopyableStruct: ...

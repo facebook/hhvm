@@ -23,6 +23,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import test.fixtures.enums.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -49,7 +50,7 @@ class _fbthrift_compatible_with_SomeStruct:
     pass
 
 
-class SomeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SomeStruct):
+class SomeStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SomeStruct, _fbthrift_python_abstract_types.SomeStruct):
 
     @property
     def reasonable(self) -> _fbthrift_Metasyntactic: ...
@@ -100,7 +101,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct):
+class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
 
     @property
     def me2_3(self) -> _fbthrift_MyEnum2: ...

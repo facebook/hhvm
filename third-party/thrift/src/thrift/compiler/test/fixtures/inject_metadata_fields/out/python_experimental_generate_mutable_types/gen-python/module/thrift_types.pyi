@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -22,7 +23,7 @@ class _fbthrift_compatible_with_Fields:
     pass
 
 
-class Fields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Fields):
+class Fields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Fields, _fbthrift_python_abstract_types.Fields):
     injected_field: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -44,7 +45,7 @@ class _fbthrift_compatible_with_FieldsInjectedToEmptyStruct:
     pass
 
 
-class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct):
+class FieldsInjectedToEmptyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToEmptyStruct, _fbthrift_python_abstract_types.FieldsInjectedToEmptyStruct):
     injected_field: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -66,7 +67,7 @@ class _fbthrift_compatible_with_FieldsInjectedToStruct:
     pass
 
 
-class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToStruct):
+class FieldsInjectedToStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedToStruct, _fbthrift_python_abstract_types.FieldsInjectedToStruct):
     injected_field: _typing.Final[str] = ...
     string_field: _typing.Final[str] = ...
     def __init__(
@@ -91,7 +92,7 @@ class _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct:
     pass
 
 
-class FieldsInjectedWithIncludedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct):
+class FieldsInjectedWithIncludedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_FieldsInjectedWithIncludedStruct, _fbthrift_python_abstract_types.FieldsInjectedWithIncludedStruct):
     injected_unstructured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_structured_annotation_field: _typing.Final[_typing.Optional[str]] = ...
     injected_field: _typing.Final[str] = ...

@@ -23,6 +23,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -35,7 +36,7 @@ class _fbthrift_compatible_with_Mixin1:
     pass
 
 
-class Mixin1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin1):
+class Mixin1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin1, _fbthrift_python_abstract_types.Mixin1):
 
     @property
     def field1(self) -> str: ...
@@ -62,7 +63,7 @@ class _fbthrift_compatible_with_Mixin2:
     pass
 
 
-class Mixin2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin2):
+class Mixin2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin2, _fbthrift_python_abstract_types.Mixin2):
 
     @property
     def m1(self) -> _fbthrift_Mixin1: ...
@@ -97,7 +98,7 @@ class _fbthrift_compatible_with_Mixin3Base:
     pass
 
 
-class Mixin3Base(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin3Base):
+class Mixin3Base(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Mixin3Base, _fbthrift_python_abstract_types.Mixin3Base):
 
     @property
     def field3(self) -> str: ...
@@ -124,7 +125,7 @@ class _fbthrift_compatible_with_Foo:
     pass
 
 
-class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Foo):
+class Foo(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Foo, _fbthrift_python_abstract_types.Foo):
 
     @property
     def field4(self) -> str: ...

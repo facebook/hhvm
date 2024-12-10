@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import includes.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -22,7 +23,7 @@ class _fbthrift_compatible_with_Included:
     pass
 
 
-class Included(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Included):
+class Included(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Included, _fbthrift_python_abstract_types.Included):
     MyIntField: _typing.Final[int] = ...
     MyTransitiveField: _typing.Final[_fbthrift__transitive__thrift_types.Foo] = ...
     def __init__(

@@ -8,8 +8,8 @@ java: mstch_java src/module.thrift
 pyi: mstch_pyi src/module.thrift
 py3: mstch_py3 src/module.thrift
 json: json src/module.thrift
-python: mstch_python src/module.thrift
+python: mstch_python:experimental_generate_abstract_types src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
 starlark: starlark src/module.thrift
 python_experimental_generate_abstract_types: mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types src/module.thrift
-python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types src/module.thrift
+python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types,experimental_generate_abstract_types src/module.thrift

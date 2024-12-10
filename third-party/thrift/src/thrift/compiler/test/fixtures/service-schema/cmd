@@ -1,8 +1,8 @@
 cpp2: thrift2ast-mstch_cpp2 src/module.thrift
 cpp2_sinit: thrift2ast-mstch_cpp2:any src/module.thrift
 java: thrift2ast-mstch_java src/module.thrift
-python: thrift2ast-mstch_python src/module.thrift
+python: thrift2ast-mstch_python:experimental_generate_abstract_types src/module.thrift
 python_capi: thrift2ast-mstch_python_capi src/module.thrift
-python_experimental_generate_mutable_types: thrift2ast-mstch_python:experimental_generate_mutable_types src/module.thrift
+python_experimental_generate_mutable_types: thrift2ast-mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types src/module.thrift
 hack: thrift2ast-hack src/module.thrift
 ast: thrift2ast-ast:protocol=debug,root_program_only,use_hash,no_backcompat src/module.thrift

@@ -11,6 +11,8 @@ import __static__
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -30,6 +32,9 @@ class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             3, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.SimpleException
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -114,6 +119,8 @@ class OptionalRefStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.OptionalRefStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.OptionalRefStruct, OptionalRefStruct)
 _fbthrift_OptionalRefStruct = OptionalRefStruct
 
 class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -252,6 +259,8 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SimpleStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.SimpleStruct, SimpleStruct)
 _fbthrift_SimpleStruct = SimpleStruct
 
 class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -324,6 +333,8 @@ class HiddenTypeFieldsStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.HiddenTypeFieldsStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.HiddenTypeFieldsStruct, HiddenTypeFieldsStruct)
 _fbthrift_HiddenTypeFieldsStruct = HiddenTypeFieldsStruct
 
 class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
@@ -340,6 +351,9 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
             3, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.AdaptedUnion
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -374,6 +388,8 @@ class AdaptedUnion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedUnion, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedUnion, AdaptedUnion)
 _fbthrift_AdaptedUnion = AdaptedUnion
 
 class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
@@ -390,6 +406,9 @@ class HiddenException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             3, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.HiddenException
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -562,6 +581,8 @@ class ComplexStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ComplexStruct, ComplexStruct)
 _fbthrift_ComplexStruct = ComplexStruct
 
 class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
@@ -578,6 +599,9 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
             9, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.BinaryUnion
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -612,6 +636,8 @@ class BinaryUnion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.BinaryUnion, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.BinaryUnion, BinaryUnion)
 _fbthrift_BinaryUnion = BinaryUnion
 
 class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -662,6 +688,8 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.BinaryUnionStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.BinaryUnionStruct, BinaryUnionStruct)
 _fbthrift_BinaryUnionStruct = BinaryUnionStruct
 
 class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
@@ -800,6 +828,8 @@ class CustomFields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomFields, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.CustomFields, CustomFields)
 _fbthrift_CustomFields = CustomFields
 
 class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
@@ -938,6 +968,8 @@ class CustomTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomTypedefFields, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.CustomTypedefFields, CustomTypedefFields)
 _fbthrift_CustomTypedefFields = CustomTypedefFields
 
 class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
@@ -1076,6 +1108,8 @@ class AdaptedTypedefFields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.AdaptedTypedefFields, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.AdaptedTypedefFields, AdaptedTypedefFields)
 _fbthrift_AdaptedTypedefFields = AdaptedTypedefFields
 
 # This unfortunately has to be down here to prevent circular imports

@@ -23,6 +23,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -35,7 +36,7 @@ class _fbthrift_compatible_with_Fiery:
     pass
 
 
-class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Fiery):
+class Fiery(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Fiery, _fbthrift_python_abstract_types.Fiery):
 
     @property
     def message(self) -> str: ...
@@ -58,7 +59,7 @@ class _fbthrift_compatible_with_Serious:
     pass
 
 
-class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Serious):
+class Serious(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Serious, _fbthrift_python_abstract_types.Serious):
 
     @property
     def not_sonnet(self) -> _typing.Optional[str]: ...
@@ -81,7 +82,7 @@ class _fbthrift_compatible_with_ComplexFieldNames:
     pass
 
 
-class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ComplexFieldNames):
+class ComplexFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ComplexFieldNames, _fbthrift_python_abstract_types.ComplexFieldNames):
 
     @property
     def error_message(self) -> str: ...
@@ -111,7 +112,7 @@ class _fbthrift_compatible_with_CustomFieldNames:
     pass
 
 
-class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomFieldNames):
+class CustomFieldNames(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_CustomFieldNames, _fbthrift_python_abstract_types.CustomFieldNames):
 
     @property
     def error_message(self) -> str: ...
@@ -141,7 +142,7 @@ class _fbthrift_compatible_with_ExceptionWithPrimitiveField:
     pass
 
 
-class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField):
+class ExceptionWithPrimitiveField(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField, _fbthrift_python_abstract_types.ExceptionWithPrimitiveField):
 
     @property
     def message(self) -> str: ...
@@ -171,7 +172,7 @@ class _fbthrift_compatible_with_ExceptionWithStructuredAnnotation:
     pass
 
 
-class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation):
+class ExceptionWithStructuredAnnotation(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation, _fbthrift_python_abstract_types.ExceptionWithStructuredAnnotation):
 
     @property
     def message_field(self) -> str: ...
@@ -201,7 +202,7 @@ class _fbthrift_compatible_with_Banal:
     pass
 
 
-class Banal(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Banal):
+class Banal(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_Banal, _fbthrift_python_abstract_types.Banal):
     def __init__(
         self,
     ) -> None: ...

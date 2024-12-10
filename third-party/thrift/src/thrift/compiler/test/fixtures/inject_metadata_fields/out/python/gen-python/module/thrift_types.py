@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -62,6 +64,8 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Fields, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Fields, Fields)
 _fbthrift_Fields = Fields
 
 class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -109,6 +113,8 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToEmptyStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToEmptyStruct, FieldsInjectedToEmptyStruct)
 _fbthrift_FieldsInjectedToEmptyStruct = FieldsInjectedToEmptyStruct
 
 class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -167,6 +173,8 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedToStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedToStruct, FieldsInjectedToStruct)
 _fbthrift_FieldsInjectedToStruct = FieldsInjectedToStruct
 
 class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -247,6 +255,8 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.FieldsInjectedWithIncludedStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithIncludedStruct, FieldsInjectedWithIncludedStruct)
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
 
 # This unfortunately has to be down here to prevent circular imports

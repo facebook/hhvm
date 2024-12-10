@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -28,6 +30,9 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.Fiery
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -82,6 +87,9 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.Serious
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -148,6 +156,9 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ComplexFieldNames
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.ComplexFieldNames"
@@ -212,6 +223,9 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             8, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.CustomFieldNames
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -278,6 +292,9 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ExceptionWithPrimitiveField
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.ExceptionWithPrimitiveField"
@@ -343,6 +360,9 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.ExceptionWithStructuredAnnotation
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.ExceptionWithStructuredAnnotation"
@@ -385,6 +405,9 @@ _fbthrift_ExceptionWithStructuredAnnotation = ExceptionWithStructuredAnnotation
 class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.Banal
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

@@ -25,6 +25,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -39,7 +40,7 @@ class _fbthrift_compatible_with_MyStructFloatFieldThrowExp:
     pass
 
 
-class MyStructFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStructFloatFieldThrowExp):
+class MyStructFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStructFloatFieldThrowExp, _fbthrift_python_abstract_types.MyStructFloatFieldThrowExp):
 
     @property
     def myLongField(self) -> int: ...
@@ -90,7 +91,7 @@ class _fbthrift_compatible_with_MyStructMapFloatThrowExp:
     pass
 
 
-class MyStructMapFloatThrowExp(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStructMapFloatThrowExp):
+class MyStructMapFloatThrowExp(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStructMapFloatThrowExp, _fbthrift_python_abstract_types.MyStructMapFloatThrowExp):
 
     @property
     def myLongField(self) -> int: ...
@@ -125,7 +126,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct):
+class MyStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
 
     @property
     def MyIntField(self) -> int: ...
@@ -368,7 +369,7 @@ class _fbthrift_compatible_with_SimpleStruct:
     pass
 
 
-class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SimpleStruct):
+class SimpleStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_SimpleStruct, _fbthrift_python_abstract_types.SimpleStruct):
 
     @property
     def age(self) -> int: ...
@@ -403,7 +404,7 @@ class _fbthrift_compatible_with_defaultStruct:
     pass
 
 
-class defaultStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_defaultStruct):
+class defaultStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_defaultStruct, _fbthrift_python_abstract_types.defaultStruct):
 
     @property
     def myLongDFset(self) -> int: ...
@@ -598,7 +599,7 @@ class _fbthrift_compatible_with_MyStructTypeDef:
     pass
 
 
-class MyStructTypeDef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStructTypeDef):
+class MyStructTypeDef(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyStructTypeDef, _fbthrift_python_abstract_types.MyStructTypeDef):
 
     @property
     def myLongField(self) -> int: ...
@@ -689,7 +690,7 @@ class _fbthrift_compatible_with_MyDataItem:
     pass
 
 
-class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyDataItem):
+class MyDataItem(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_MyDataItem, _fbthrift_python_abstract_types.MyDataItem):
     def __init__(
         self,
     ) -> None: ...
@@ -708,7 +709,7 @@ class _fbthrift_compatible_with_MyUnion:
     pass
 
 
-class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_MyUnion):
+class MyUnion(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_MyUnion, _fbthrift_python_abstract_types.MyUnion):
 
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
@@ -779,7 +780,7 @@ class _fbthrift_compatible_with_MyUnionFloatFieldThrowExp:
     pass
 
 
-class MyUnionFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_MyUnionFloatFieldThrowExp):
+class MyUnionFloatFieldThrowExp(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_MyUnionFloatFieldThrowExp, _fbthrift_python_abstract_types.MyUnionFloatFieldThrowExp):
 
     @property
     def myEnum(self) -> _fbthrift_MyEnum: ...
@@ -834,7 +835,7 @@ class _fbthrift_compatible_with_ComplexNestedStruct:
     pass
 
 
-class ComplexNestedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ComplexNestedStruct):
+class ComplexNestedStruct(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_ComplexNestedStruct, _fbthrift_python_abstract_types.ComplexNestedStruct):
 
     @property
     def setOfSetOfInt(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_python_mutable_containers.MutableSet[int]]: ...
@@ -997,7 +998,7 @@ class _fbthrift_compatible_with_TypeRemapped:
     pass
 
 
-class TypeRemapped(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_TypeRemapped):
+class TypeRemapped(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_TypeRemapped, _fbthrift_python_abstract_types.TypeRemapped):
 
     @property
     def lsMap(self) -> _fbthrift_python_mutable_containers.MutableMap[int, str]: ...
@@ -1048,7 +1049,7 @@ class _fbthrift_compatible_with_emptyXcep:
     pass
 
 
-class emptyXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_emptyXcep):
+class emptyXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_emptyXcep, _fbthrift_python_abstract_types.emptyXcep):
     def __init__(
         self,
     ) -> None: ...
@@ -1064,7 +1065,7 @@ class _fbthrift_compatible_with_reqXcep:
     pass
 
 
-class reqXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_reqXcep):
+class reqXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_reqXcep, _fbthrift_python_abstract_types.reqXcep):
 
     @property
     def message(self) -> str: ...
@@ -1094,7 +1095,7 @@ class _fbthrift_compatible_with_optXcep:
     pass
 
 
-class optXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_optXcep):
+class optXcep(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_optXcep, _fbthrift_python_abstract_types.optXcep):
 
     @property
     def message(self) -> _typing.Optional[str]: ...
@@ -1124,7 +1125,7 @@ class _fbthrift_compatible_with_complexException:
     pass
 
 
-class complexException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_complexException):
+class complexException(_fbthrift_python_mutable_exceptions.MutableGeneratedError, _fbthrift_compatible_with_complexException, _fbthrift_python_abstract_types.complexException):
 
     @property
     def message(self) -> str: ...

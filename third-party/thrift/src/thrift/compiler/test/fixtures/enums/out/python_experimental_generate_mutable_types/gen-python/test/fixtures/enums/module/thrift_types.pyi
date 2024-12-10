@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import test.fixtures.enums.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_Metasyntactic
@@ -34,7 +35,7 @@ class _fbthrift_compatible_with_SomeStruct:
     pass
 
 
-class SomeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SomeStruct):
+class SomeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SomeStruct, _fbthrift_python_abstract_types.SomeStruct):
     reasonable: _typing.Final[_fbthrift_Metasyntactic] = ...
     fine: _typing.Final[_fbthrift_Metasyntactic] = ...
     questionable: _typing.Final[_fbthrift_Metasyntactic] = ...
@@ -65,7 +66,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
     me2_3: _typing.Final[_fbthrift_MyEnum2] = ...
     me3_n3: _typing.Final[_fbthrift_MyEnum3] = ...
     me1_t1: _typing.Final[_fbthrift_MyEnum1] = ...

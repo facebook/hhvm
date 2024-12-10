@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import apache.thrift.fixtures.types.module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -28,7 +29,7 @@ class _fbthrift_compatible_with_empty_struct:
     pass
 
 
-class empty_struct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_empty_struct):
+class empty_struct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_empty_struct, _fbthrift_python_abstract_types.empty_struct):
     def __init__(
         self,
     ) -> None: ...
@@ -46,7 +47,7 @@ class _fbthrift_compatible_with_decorated_struct:
     pass
 
 
-class decorated_struct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_decorated_struct):
+class decorated_struct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_decorated_struct, _fbthrift_python_abstract_types.decorated_struct):
     field: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -67,7 +68,7 @@ class _fbthrift_compatible_with_ContainerStruct:
     pass
 
 
-class ContainerStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ContainerStruct):
+class ContainerStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ContainerStruct, _fbthrift_python_abstract_types.ContainerStruct):
     fieldB: _typing.Final[_typing.Sequence[int]] = ...
     fieldC: _typing.Final[_typing.Sequence[int]] = ...
     fieldD: _typing.Final[_typing.Sequence[int]] = ...
@@ -109,7 +110,7 @@ class _fbthrift_compatible_with_CppTypeStruct:
     pass
 
 
-class CppTypeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CppTypeStruct):
+class CppTypeStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CppTypeStruct, _fbthrift_python_abstract_types.CppTypeStruct):
     fieldA: _typing.Final[_typing.Sequence[int]] = ...
     def __init__(
         self, *,
@@ -130,7 +131,7 @@ class _fbthrift_compatible_with_VirtualStruct:
     pass
 
 
-class VirtualStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_VirtualStruct):
+class VirtualStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_VirtualStruct, _fbthrift_python_abstract_types.VirtualStruct):
     MyIntField: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -151,7 +152,7 @@ class _fbthrift_compatible_with_MyStructWithForwardRefEnum:
     pass
 
 
-class MyStructWithForwardRefEnum(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructWithForwardRefEnum):
+class MyStructWithForwardRefEnum(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStructWithForwardRefEnum, _fbthrift_python_abstract_types.MyStructWithForwardRefEnum):
     a: _typing.Final[_fbthrift_MyForwardRefEnum] = ...
     b: _typing.Final[_fbthrift_MyForwardRefEnum] = ...
     def __init__(
@@ -175,7 +176,7 @@ class _fbthrift_compatible_with_TrivialNumeric:
     pass
 
 
-class TrivialNumeric(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TrivialNumeric):
+class TrivialNumeric(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TrivialNumeric, _fbthrift_python_abstract_types.TrivialNumeric):
     a: _typing.Final[int] = ...
     b: _typing.Final[bool] = ...
     def __init__(
@@ -199,7 +200,7 @@ class _fbthrift_compatible_with_TrivialNestedWithDefault:
     pass
 
 
-class TrivialNestedWithDefault(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TrivialNestedWithDefault):
+class TrivialNestedWithDefault(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TrivialNestedWithDefault, _fbthrift_python_abstract_types.TrivialNestedWithDefault):
     z: _typing.Final[int] = ...
     n: _typing.Final[_fbthrift_TrivialNumeric] = ...
     def __init__(
@@ -223,7 +224,7 @@ class _fbthrift_compatible_with_ComplexString:
     pass
 
 
-class ComplexString(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexString):
+class ComplexString(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexString, _fbthrift_python_abstract_types.ComplexString):
     a: _typing.Final[str] = ...
     b: _typing.Final[_typing.Mapping[str, int]] = ...
     def __init__(
@@ -247,7 +248,7 @@ class _fbthrift_compatible_with_ComplexNestedWithDefault:
     pass
 
 
-class ComplexNestedWithDefault(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexNestedWithDefault):
+class ComplexNestedWithDefault(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexNestedWithDefault, _fbthrift_python_abstract_types.ComplexNestedWithDefault):
     z: _typing.Final[str] = ...
     n: _typing.Final[_fbthrift_ComplexString] = ...
     def __init__(
@@ -271,7 +272,7 @@ class _fbthrift_compatible_with_MinPadding:
     pass
 
 
-class MinPadding(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MinPadding):
+class MinPadding(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MinPadding, _fbthrift_python_abstract_types.MinPadding):
     small: _typing.Final[int] = ...
     big: _typing.Final[int] = ...
     medium: _typing.Final[int] = ...
@@ -304,7 +305,7 @@ class _fbthrift_compatible_with_MinPaddingWithCustomType:
     pass
 
 
-class MinPaddingWithCustomType(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MinPaddingWithCustomType):
+class MinPaddingWithCustomType(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MinPaddingWithCustomType, _fbthrift_python_abstract_types.MinPaddingWithCustomType):
     small: _typing.Final[int] = ...
     big: _typing.Final[int] = ...
     medium: _typing.Final[int] = ...
@@ -337,7 +338,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
     MyIntField: _typing.Final[int] = ...
     MyStringField: _typing.Final[str] = ...
     majorVer: _typing.Final[int] = ...
@@ -367,7 +368,7 @@ class _fbthrift_compatible_with_MyDataItem:
     pass
 
 
-class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem):
+class MyDataItem(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyDataItem, _fbthrift_python_abstract_types.MyDataItem):
     def __init__(
         self,
     ) -> None: ...
@@ -385,7 +386,7 @@ class _fbthrift_compatible_with_Renaming:
     pass
 
 
-class Renaming(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Renaming):
+class Renaming(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Renaming, _fbthrift_python_abstract_types.Renaming):
     foo: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -406,7 +407,7 @@ class _fbthrift_compatible_with_AnnotatedTypes:
     pass
 
 
-class AnnotatedTypes(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AnnotatedTypes):
+class AnnotatedTypes(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AnnotatedTypes, _fbthrift_python_abstract_types.AnnotatedTypes):
     binary_field: _typing.Final[bytes] = ...
     list_field: _typing.Final[_typing.Sequence[_typing.Mapping[int, str]]] = ...
     def __init__(
@@ -430,7 +431,7 @@ class _fbthrift_compatible_with_ForwardUsageRoot:
     pass
 
 
-class ForwardUsageRoot(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ForwardUsageRoot):
+class ForwardUsageRoot(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ForwardUsageRoot, _fbthrift_python_abstract_types.ForwardUsageRoot):
     ForwardUsageStruct: _typing.Final[_typing.Optional[_fbthrift_ForwardUsageStruct]] = ...
     ForwardUsageByRef: _typing.Final[_typing.Optional[_fbthrift_ForwardUsageByRef]] = ...
     def __init__(
@@ -454,7 +455,7 @@ class _fbthrift_compatible_with_ForwardUsageStruct:
     pass
 
 
-class ForwardUsageStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ForwardUsageStruct):
+class ForwardUsageStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ForwardUsageStruct, _fbthrift_python_abstract_types.ForwardUsageStruct):
     foo: _typing.Final[_typing.Optional[_fbthrift_ForwardUsageRoot]] = ...
     def __init__(
         self, *,
@@ -475,7 +476,7 @@ class _fbthrift_compatible_with_ForwardUsageByRef:
     pass
 
 
-class ForwardUsageByRef(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ForwardUsageByRef):
+class ForwardUsageByRef(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ForwardUsageByRef, _fbthrift_python_abstract_types.ForwardUsageByRef):
     foo: _typing.Final[_typing.Optional[_fbthrift_ForwardUsageRoot]] = ...
     def __init__(
         self, *,
@@ -496,7 +497,7 @@ class _fbthrift_compatible_with_IncompleteMap:
     pass
 
 
-class IncompleteMap(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteMap):
+class IncompleteMap(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteMap, _fbthrift_python_abstract_types.IncompleteMap):
     field: _typing.Final[_typing.Optional[_typing.Mapping[int, _fbthrift_IncompleteMapDep]]] = ...
     def __init__(
         self, *,
@@ -517,7 +518,7 @@ class _fbthrift_compatible_with_IncompleteMapDep:
     pass
 
 
-class IncompleteMapDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteMapDep):
+class IncompleteMapDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteMapDep, _fbthrift_python_abstract_types.IncompleteMapDep):
     def __init__(
         self,
     ) -> None: ...
@@ -535,7 +536,7 @@ class _fbthrift_compatible_with_CompleteMap:
     pass
 
 
-class CompleteMap(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteMap):
+class CompleteMap(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteMap, _fbthrift_python_abstract_types.CompleteMap):
     field: _typing.Final[_typing.Optional[_typing.Mapping[int, _fbthrift_CompleteMapDep]]] = ...
     def __init__(
         self, *,
@@ -556,7 +557,7 @@ class _fbthrift_compatible_with_CompleteMapDep:
     pass
 
 
-class CompleteMapDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteMapDep):
+class CompleteMapDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteMapDep, _fbthrift_python_abstract_types.CompleteMapDep):
     def __init__(
         self,
     ) -> None: ...
@@ -574,7 +575,7 @@ class _fbthrift_compatible_with_IncompleteList:
     pass
 
 
-class IncompleteList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteList):
+class IncompleteList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteList, _fbthrift_python_abstract_types.IncompleteList):
     field: _typing.Final[_typing.Optional[_typing.Sequence[_fbthrift_IncompleteListDep]]] = ...
     def __init__(
         self, *,
@@ -595,7 +596,7 @@ class _fbthrift_compatible_with_IncompleteListDep:
     pass
 
 
-class IncompleteListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteListDep):
+class IncompleteListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IncompleteListDep, _fbthrift_python_abstract_types.IncompleteListDep):
     def __init__(
         self,
     ) -> None: ...
@@ -613,7 +614,7 @@ class _fbthrift_compatible_with_CompleteList:
     pass
 
 
-class CompleteList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteList):
+class CompleteList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteList, _fbthrift_python_abstract_types.CompleteList):
     field: _typing.Final[_typing.Optional[_typing.Sequence[_fbthrift_CompleteListDep]]] = ...
     def __init__(
         self, *,
@@ -634,7 +635,7 @@ class _fbthrift_compatible_with_CompleteListDep:
     pass
 
 
-class CompleteListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteListDep):
+class CompleteListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CompleteListDep, _fbthrift_python_abstract_types.CompleteListDep):
     def __init__(
         self,
     ) -> None: ...
@@ -652,7 +653,7 @@ class _fbthrift_compatible_with_AdaptedList:
     pass
 
 
-class AdaptedList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedList):
+class AdaptedList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedList, _fbthrift_python_abstract_types.AdaptedList):
     field: _typing.Final[_typing.Optional[_typing.Sequence[_fbthrift_AdaptedListDep]]] = ...
     def __init__(
         self, *,
@@ -673,7 +674,7 @@ class _fbthrift_compatible_with_AdaptedListDep:
     pass
 
 
-class AdaptedListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedListDep):
+class AdaptedListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedListDep, _fbthrift_python_abstract_types.AdaptedListDep):
     field: _typing.Final[_fbthrift_AdaptedList] = ...
     def __init__(
         self, *,
@@ -694,7 +695,7 @@ class _fbthrift_compatible_with_DependentAdaptedList:
     pass
 
 
-class DependentAdaptedList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_DependentAdaptedList):
+class DependentAdaptedList(_fbthrift_python_types.Struct, _fbthrift_compatible_with_DependentAdaptedList, _fbthrift_python_abstract_types.DependentAdaptedList):
     field: _typing.Final[_typing.Optional[_typing.Sequence[_fbthrift_DependentAdaptedListDep]]] = ...
     def __init__(
         self, *,
@@ -715,7 +716,7 @@ class _fbthrift_compatible_with_DependentAdaptedListDep:
     pass
 
 
-class DependentAdaptedListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_DependentAdaptedListDep):
+class DependentAdaptedListDep(_fbthrift_python_types.Struct, _fbthrift_compatible_with_DependentAdaptedListDep, _fbthrift_python_abstract_types.DependentAdaptedListDep):
     field: _typing.Final[_typing.Optional[int]] = ...
     def __init__(
         self, *,
@@ -736,7 +737,7 @@ class _fbthrift_compatible_with_AllocatorAware:
     pass
 
 
-class AllocatorAware(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AllocatorAware):
+class AllocatorAware(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AllocatorAware, _fbthrift_python_abstract_types.AllocatorAware):
     aa_list: _typing.Final[_typing.Sequence[int]] = ...
     aa_set: _typing.Final[_typing.AbstractSet[int]] = ...
     aa_map: _typing.Final[_typing.Mapping[int, int]] = ...
@@ -775,7 +776,7 @@ class _fbthrift_compatible_with_AllocatorAware2:
     pass
 
 
-class AllocatorAware2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AllocatorAware2):
+class AllocatorAware2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AllocatorAware2, _fbthrift_python_abstract_types.AllocatorAware2):
     not_a_container: _typing.Final[int] = ...
     box_field: _typing.Final[_typing.Optional[int]] = ...
     def __init__(
@@ -799,7 +800,7 @@ class _fbthrift_compatible_with_TypedefStruct:
     pass
 
 
-class TypedefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TypedefStruct):
+class TypedefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TypedefStruct, _fbthrift_python_abstract_types.TypedefStruct):
     i32_field: _typing.Final[int] = ...
     IntTypedef_field: _typing.Final[int] = ...
     UintTypedef_field: _typing.Final[int] = ...
@@ -826,7 +827,7 @@ class _fbthrift_compatible_with_StructWithDoubleUnderscores:
     pass
 
 
-class StructWithDoubleUnderscores(_fbthrift_python_types.Struct, _fbthrift_compatible_with_StructWithDoubleUnderscores):
+class StructWithDoubleUnderscores(_fbthrift_python_types.Struct, _fbthrift_compatible_with_StructWithDoubleUnderscores, _fbthrift_python_abstract_types.StructWithDoubleUnderscores):
     _StructWithDoubleUnderscores__field: _typing.Final[int] = ...
     def __init__(
         self, *,

@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import meta.example.thrift.service.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -20,7 +21,7 @@ class _fbthrift_compatible_with_EchoRequest:
     pass
 
 
-class EchoRequest(_fbthrift_python_types.Struct, _fbthrift_compatible_with_EchoRequest):
+class EchoRequest(_fbthrift_python_types.Struct, _fbthrift_compatible_with_EchoRequest, _fbthrift_python_abstract_types.EchoRequest):
     text: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -41,7 +42,7 @@ class _fbthrift_compatible_with_EchoResponse:
     pass
 
 
-class EchoResponse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_EchoResponse):
+class EchoResponse(_fbthrift_python_types.Struct, _fbthrift_compatible_with_EchoResponse, _fbthrift_python_abstract_types.EchoResponse):
     text: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -62,7 +63,7 @@ class _fbthrift_compatible_with_WhisperException:
     pass
 
 
-class WhisperException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_WhisperException):
+class WhisperException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_WhisperException, _fbthrift_python_abstract_types.WhisperException):
     message: _typing.Final[str] = ...
     def __init__(
         self, *,

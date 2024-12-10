@@ -1,8 +1,8 @@
 py3_a: mstch_py3 src/a.thrift
 py3_s: mstch_py3 src/s.thrift
-python_s: mstch_python src/s.thrift
+python_s: mstch_python:experimental_generate_abstract_types src/s.thrift
 python_capi_s: mstch_python_capi src/s.thrift
-python_b: mstch_python src/b.thrift
+python_b: mstch_python:experimental_generate_abstract_types src/b.thrift
 python_capi_b: mstch_python_capi src/b.thrift
-python_c: mstch_python src/c.thrift
+python_c: mstch_python:experimental_generate_abstract_types src/c.thrift
 python_capi_c: mstch_python_capi src/c.thrift

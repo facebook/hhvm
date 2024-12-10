@@ -25,6 +25,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -43,7 +44,7 @@ class _fbthrift_compatible_with_Internship:
     pass
 
 
-class Internship(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Internship):
+class Internship(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Internship, _fbthrift_python_abstract_types.Internship):
 
     @property
     def weeks(self) -> int: ...
@@ -102,7 +103,7 @@ class _fbthrift_compatible_with_Range:
     pass
 
 
-class Range(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Range):
+class Range(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Range, _fbthrift_python_abstract_types.Range):
 
     @property
     def min(self) -> int: ...
@@ -137,7 +138,7 @@ class _fbthrift_compatible_with_struct1:
     pass
 
 
-class struct1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct1):
+class struct1(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct1, _fbthrift_python_abstract_types.struct1):
 
     @property
     def a(self) -> int: ...
@@ -172,7 +173,7 @@ class _fbthrift_compatible_with_struct2:
     pass
 
 
-class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct2):
+class struct2(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct2, _fbthrift_python_abstract_types.struct2):
 
     @property
     def a(self) -> int: ...
@@ -223,7 +224,7 @@ class _fbthrift_compatible_with_struct3:
     pass
 
 
-class struct3(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct3):
+class struct3(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct3, _fbthrift_python_abstract_types.struct3):
 
     @property
     def a(self) -> str: ...
@@ -266,7 +267,7 @@ class _fbthrift_compatible_with_struct4:
     pass
 
 
-class struct4(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct4):
+class struct4(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_struct4, _fbthrift_python_abstract_types.struct4):
 
     @property
     def a(self) -> int: ...
@@ -309,7 +310,7 @@ class _fbthrift_compatible_with_union1:
     pass
 
 
-class union1(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_union1):
+class union1(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_union1, _fbthrift_python_abstract_types.union1):
 
     @property
     def i(self) -> int: ...
@@ -348,7 +349,7 @@ class _fbthrift_compatible_with_union2:
     pass
 
 
-class union2(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_union2):
+class union2(_fbthrift_python_mutable_types.MutableUnion, _fbthrift_compatible_with_union2, _fbthrift_python_abstract_types.union2):
 
     @property
     def i(self) -> int: ...

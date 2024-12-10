@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import python_module_root.my.namespacing.test.hsmodule.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -20,7 +21,7 @@ class _fbthrift_compatible_with_HsFoo:
     pass
 
 
-class HsFoo(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HsFoo):
+class HsFoo(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HsFoo, _fbthrift_python_abstract_types.HsFoo):
     MyInt: _typing.Final[int] = ...
     def __init__(
         self, *,

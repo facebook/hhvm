@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import a.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -27,7 +28,7 @@ class _fbthrift_compatible_with_MyStruct:
     pass
 
 
-class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct):
+class MyStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_MyStruct, _fbthrift_python_abstract_types.MyStruct):
     a: _typing.Final[typeshed_one.AdapterOneType[_fbthrift__b__thrift_types.B]] = ...
     b: _typing.Final[typeshed_three.AdapterThreeType[_fbthrift__c__thrift_types.C1]] = ...
     c: _typing.Final[typeshed_two.AdapterTwoType[_fbthrift__c__thrift_types.C2]] = ...

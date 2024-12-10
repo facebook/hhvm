@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import test.fixtures.python_capi.containers.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -20,7 +21,7 @@ class _fbthrift_compatible_with_TemplateLists:
     pass
 
 
-class TemplateLists(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TemplateLists):
+class TemplateLists(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TemplateLists, _fbthrift_python_abstract_types.TemplateLists):
     std_string: _typing.Final[_typing.Optional[_typing.Sequence[str]]] = ...
     deque_string: _typing.Final[_typing.Sequence[bytes]] = ...
     small_vector_iobuf: _typing.Final[_typing.Sequence[_fbthrift_iobuf.IOBuf]] = ...
@@ -53,7 +54,7 @@ class _fbthrift_compatible_with_TemplateSets:
     pass
 
 
-class TemplateSets(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TemplateSets):
+class TemplateSets(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TemplateSets, _fbthrift_python_abstract_types.TemplateSets):
     std_set: _typing.Final[_typing.AbstractSet[str]] = ...
     std_unordered: _typing.Final[_typing.AbstractSet[str]] = ...
     folly_fast: _typing.Final[_typing.AbstractSet[str]] = ...
@@ -92,7 +93,7 @@ class _fbthrift_compatible_with_TemplateMaps:
     pass
 
 
-class TemplateMaps(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TemplateMaps):
+class TemplateMaps(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TemplateMaps, _fbthrift_python_abstract_types.TemplateMaps):
     std_map: _typing.Final[_typing.Mapping[str, str]] = ...
     std_unordered: _typing.Final[_typing.Mapping[str, str]] = ...
     folly_fast: _typing.Final[_typing.Mapping[str, str]] = ...
@@ -131,7 +132,7 @@ class _fbthrift_compatible_with_TWrapped:
     pass
 
 
-class TWrapped(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TWrapped):
+class TWrapped(_fbthrift_python_types.Struct, _fbthrift_compatible_with_TWrapped, _fbthrift_python_abstract_types.TWrapped):
     fieldA: _typing.Final[str] = ...
     fieldB: _typing.Final[bytes] = ...
     def __init__(
@@ -155,7 +156,7 @@ class _fbthrift_compatible_with_IndirectionA:
     pass
 
 
-class IndirectionA(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionA):
+class IndirectionA(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionA, _fbthrift_python_abstract_types.IndirectionA):
     lst: _typing.Final[_typing.Sequence[_fbthrift_TWrapped]] = ...
     def __init__(
         self, *,
@@ -176,7 +177,7 @@ class _fbthrift_compatible_with_IndirectionB:
     pass
 
 
-class IndirectionB(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionB):
+class IndirectionB(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionB, _fbthrift_python_abstract_types.IndirectionB):
     lst: _typing.Final[_typing.Sequence[_fbthrift_TWrapped]] = ...
     def __init__(
         self, *,
@@ -197,7 +198,7 @@ class _fbthrift_compatible_with_IndirectionC:
     pass
 
 
-class IndirectionC(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionC):
+class IndirectionC(_fbthrift_python_types.Struct, _fbthrift_compatible_with_IndirectionC, _fbthrift_python_abstract_types.IndirectionC):
     lst: _typing.Final[_typing.Sequence[_fbthrift_TWrapped]] = ...
     def __init__(
         self, *,

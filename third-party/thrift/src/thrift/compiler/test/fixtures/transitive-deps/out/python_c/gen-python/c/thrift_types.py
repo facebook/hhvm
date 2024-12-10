@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import c.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -59,11 +61,16 @@ class C(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("c.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.C, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.C, C)
 _fbthrift_C = C
 
 class E(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.E
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

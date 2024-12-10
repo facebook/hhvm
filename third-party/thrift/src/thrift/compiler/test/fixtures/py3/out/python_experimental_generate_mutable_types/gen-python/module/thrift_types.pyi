@@ -14,6 +14,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 from module.thrift_enums import _fbthrift_compatible_with_AnEnum
@@ -30,7 +31,7 @@ class _fbthrift_compatible_with_SimpleException:
     pass
 
 
-class SimpleException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_SimpleException):
+class SimpleException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_SimpleException, _fbthrift_python_abstract_types.SimpleException):
     err_code: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -47,7 +48,7 @@ class _fbthrift_compatible_with_OptionalRefStruct:
     pass
 
 
-class OptionalRefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_OptionalRefStruct):
+class OptionalRefStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_OptionalRefStruct, _fbthrift_python_abstract_types.OptionalRefStruct):
     optional_blob: _typing.Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
     def __init__(
         self, *,
@@ -68,7 +69,7 @@ class _fbthrift_compatible_with_SimpleStruct:
     pass
 
 
-class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SimpleStruct):
+class SimpleStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_SimpleStruct, _fbthrift_python_abstract_types.SimpleStruct):
     is_on: _typing.Final[bool] = ...
     tiny_int: _typing.Final[int] = ...
     small_int: _typing.Final[int] = ...
@@ -113,7 +114,7 @@ class _fbthrift_compatible_with_HiddenTypeFieldsStruct:
     pass
 
 
-class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HiddenTypeFieldsStruct):
+class HiddenTypeFieldsStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_HiddenTypeFieldsStruct, _fbthrift_python_abstract_types.HiddenTypeFieldsStruct):
     field1: _typing.Final[_fbthrift_SimpleStruct] = ...
     field2: _typing.Final[_typing.Sequence[_fbthrift_SimpleStruct]] = ...
     field3: _typing.Final[_typing.Mapping[int, _fbthrift_SimpleStruct]] = ...
@@ -140,7 +141,7 @@ class _fbthrift_compatible_with_AdaptedUnion:
     pass
 
 
-class AdaptedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_AdaptedUnion):
+class AdaptedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_AdaptedUnion, _fbthrift_python_abstract_types.AdaptedUnion):
     best: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -152,7 +153,12 @@ class AdaptedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Adapt
         EMPTY: AdaptedUnion.Type = ...
         best: AdaptedUnion.Type = ...
 
+    class FbThriftUnionFieldEnum(enum.Enum):
+        EMPTY: AdaptedUnion.FbThriftUnionFieldEnum = ...
+        best: AdaptedUnion.FbThriftUnionFieldEnum = ...
 
+    fbthrift_current_value: _typing.Final[_typing.Union[None, int]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     @classmethod
     def fromValue(cls, value: _typing.Union[None, int]) -> AdaptedUnion: ...
     value: _typing.Final[_typing.Union[None, int]]
@@ -167,7 +173,7 @@ class _fbthrift_compatible_with_HiddenException:
     pass
 
 
-class HiddenException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_HiddenException):
+class HiddenException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_HiddenException, _fbthrift_python_abstract_types.HiddenException):
     test: _typing.Final[int] = ...
     def __init__(
         self, *,
@@ -184,7 +190,7 @@ class _fbthrift_compatible_with_ComplexStruct:
     pass
 
 
-class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexStruct):
+class ComplexStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_ComplexStruct, _fbthrift_python_abstract_types.ComplexStruct):
     structOne: _typing.Final[_fbthrift_SimpleStruct] = ...
     structTwo: _typing.Final[_fbthrift_SimpleStruct] = ...
     an_integer: _typing.Final[int] = ...
@@ -229,7 +235,7 @@ class _fbthrift_compatible_with_BinaryUnion:
     pass
 
 
-class BinaryUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_BinaryUnion):
+class BinaryUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_BinaryUnion, _fbthrift_python_abstract_types.BinaryUnion):
     iobuf_val: _typing.Final[_fbthrift_iobuf.IOBuf] = ...
     def __init__(
         self, *,
@@ -241,7 +247,12 @@ class BinaryUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Binary
         EMPTY: BinaryUnion.Type = ...
         iobuf_val: BinaryUnion.Type = ...
 
+    class FbThriftUnionFieldEnum(enum.Enum):
+        EMPTY: BinaryUnion.FbThriftUnionFieldEnum = ...
+        iobuf_val: BinaryUnion.FbThriftUnionFieldEnum = ...
 
+    fbthrift_current_value: _typing.Final[_typing.Union[None, _fbthrift_iobuf.IOBuf]]
+    fbthrift_current_field: _typing.Final[FbThriftUnionFieldEnum]
     @classmethod
     def fromValue(cls, value: _typing.Union[None, _fbthrift_iobuf.IOBuf]) -> BinaryUnion: ...
     value: _typing.Final[_typing.Union[None, _fbthrift_iobuf.IOBuf]]
@@ -256,7 +267,7 @@ class _fbthrift_compatible_with_BinaryUnionStruct:
     pass
 
 
-class BinaryUnionStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BinaryUnionStruct):
+class BinaryUnionStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_BinaryUnionStruct, _fbthrift_python_abstract_types.BinaryUnionStruct):
     u: _typing.Final[_fbthrift_BinaryUnion] = ...
     def __init__(
         self, *,
@@ -277,7 +288,7 @@ class _fbthrift_compatible_with_CustomFields:
     pass
 
 
-class CustomFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomFields):
+class CustomFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomFields, _fbthrift_python_abstract_types.CustomFields):
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...
@@ -322,7 +333,7 @@ class _fbthrift_compatible_with_CustomTypedefFields:
     pass
 
 
-class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomTypedefFields):
+class CustomTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_CustomTypedefFields, _fbthrift_python_abstract_types.CustomTypedefFields):
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...
@@ -367,7 +378,7 @@ class _fbthrift_compatible_with_AdaptedTypedefFields:
     pass
 
 
-class AdaptedTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedTypedefFields):
+class AdaptedTypedefFields(_fbthrift_python_types.Struct, _fbthrift_compatible_with_AdaptedTypedefFields, _fbthrift_python_abstract_types.AdaptedTypedefFields):
     bool_field: _typing.Final[bool] = ...
     integer_field: _typing.Final[int] = ...
     double_field: _typing.Final[float] = ...

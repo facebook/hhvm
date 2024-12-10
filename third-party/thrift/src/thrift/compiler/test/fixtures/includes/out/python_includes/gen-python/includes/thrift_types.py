@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import includes.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -73,6 +75,8 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("includes.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Included, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Included, Included)
 _fbthrift_Included = Included
 
 # This unfortunately has to be down here to prevent circular imports

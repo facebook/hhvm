@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import test.fixtures.enums.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
@@ -105,6 +107,8 @@ class SomeStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SomeStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.SomeStruct, SomeStruct)
 _fbthrift_SomeStruct = SomeStruct
 
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
@@ -192,6 +196,8 @@ class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 from test.fixtures.enums.module.thrift_enums import _fbthrift_compatible_with_Metasyntactic

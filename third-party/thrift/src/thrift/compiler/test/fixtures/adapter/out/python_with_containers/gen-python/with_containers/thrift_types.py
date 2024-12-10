@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import with_containers.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -72,6 +74,8 @@ class _fbthrift_unadapted_AnnotationWithContainers(metaclass=_fbthrift_python_ty
             py_asyncio_types = importlib.import_module("with_containers.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_AnnotationWithContainers, self)
 
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types._fbthrift_unadapted_AnnotationWithContainers, _fbthrift_unadapted_AnnotationWithContainers)
+
 
 AnnotationWithContainers = my.AdaptedType[_fbthrift_unadapted_AnnotationWithContainers]
 _fbthrift_AnnotationWithContainers = AnnotationWithContainers
@@ -121,6 +125,8 @@ class _fbthrift_unadapted_MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("with_containers.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types._fbthrift_unadapted_MyStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types._fbthrift_unadapted_MyStruct, _fbthrift_unadapted_MyStruct)
 
 
 MyStruct = my.AdaptedType[_fbthrift_unadapted_MyStruct]

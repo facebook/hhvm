@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -98,6 +100,8 @@ class MyStructFloatFieldThrowExp(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructFloatFieldThrowExp, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructFloatFieldThrowExp, MyStructFloatFieldThrowExp)
 _fbthrift_MyStructFloatFieldThrowExp = MyStructFloatFieldThrowExp
 
 class MyStructMapFloatThrowExp(metaclass=_fbthrift_python_types.StructMeta):
@@ -162,6 +166,8 @@ class MyStructMapFloatThrowExp(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructMapFloatThrowExp, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructMapFloatThrowExp, MyStructMapFloatThrowExp)
 _fbthrift_MyStructMapFloatThrowExp = MyStructMapFloatThrowExp
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -512,6 +518,8 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -576,6 +584,8 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.SimpleStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.SimpleStruct, SimpleStruct)
 _fbthrift_SimpleStruct = SimpleStruct
 
 class defaultStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -860,6 +870,8 @@ class defaultStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.defaultStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.defaultStruct, defaultStruct)
 _fbthrift_defaultStruct = defaultStruct
 
 class MyStructTypeDef(metaclass=_fbthrift_python_types.StructMeta):
@@ -1001,6 +1013,8 @@ class MyStructTypeDef(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStructTypeDef, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStructTypeDef, MyStructTypeDef)
 _fbthrift_MyStructTypeDef = MyStructTypeDef
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
@@ -1043,6 +1057,8 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyDataItem, MyDataItem)
 _fbthrift_MyDataItem = MyDataItem
 
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
@@ -1115,6 +1131,9 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyUnion
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyUnion"
@@ -1151,6 +1170,8 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnion, MyUnion)
 _fbthrift_MyUnion = MyUnion
 
 class MyUnionFloatFieldThrowExp(metaclass=_fbthrift_python_types.UnionMeta):
@@ -1201,6 +1222,9 @@ class MyUnionFloatFieldThrowExp(metaclass=_fbthrift_python_types.UnionMeta):
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyUnionFloatFieldThrowExp
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyUnionFloatFieldThrowExp"
@@ -1237,6 +1261,8 @@ class MyUnionFloatFieldThrowExp(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnionFloatFieldThrowExp, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnionFloatFieldThrowExp, MyUnionFloatFieldThrowExp)
 _fbthrift_MyUnionFloatFieldThrowExp = MyUnionFloatFieldThrowExp
 
 class ComplexNestedStruct(metaclass=_fbthrift_python_types.StructMeta):
@@ -1477,6 +1503,8 @@ class ComplexNestedStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ComplexNestedStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ComplexNestedStruct, ComplexNestedStruct)
 _fbthrift_ComplexNestedStruct = ComplexNestedStruct
 
 class TypeRemapped(metaclass=_fbthrift_python_types.StructMeta):
@@ -1563,11 +1591,16 @@ class TypeRemapped(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.TypeRemapped, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.TypeRemapped, TypeRemapped)
 _fbthrift_TypeRemapped = TypeRemapped
 
 class emptyXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.emptyXcep
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -1633,6 +1666,9 @@ class reqXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.reqXcep
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.reqXcep"
@@ -1696,6 +1732,9 @@ class optXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             4, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.optXcep
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -1804,6 +1843,9 @@ class complexException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             16, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.complexException
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

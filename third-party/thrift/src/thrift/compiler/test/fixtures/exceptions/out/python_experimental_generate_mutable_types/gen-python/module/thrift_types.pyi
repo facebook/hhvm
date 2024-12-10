@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -20,7 +21,7 @@ class _fbthrift_compatible_with_Fiery:
     pass
 
 
-class Fiery(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Fiery):
+class Fiery(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Fiery, _fbthrift_python_abstract_types.Fiery):
     message: _typing.Final[str] = ...
     def __init__(
         self, *,
@@ -38,7 +39,7 @@ class _fbthrift_compatible_with_Serious:
     pass
 
 
-class Serious(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Serious):
+class Serious(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Serious, _fbthrift_python_abstract_types.Serious):
     not_sonnet: _typing.Final[_typing.Optional[str]] = ...
     def __init__(
         self, *,
@@ -56,7 +57,7 @@ class _fbthrift_compatible_with_ComplexFieldNames:
     pass
 
 
-class ComplexFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ComplexFieldNames):
+class ComplexFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ComplexFieldNames, _fbthrift_python_abstract_types.ComplexFieldNames):
     error_message: _typing.Final[str] = ...
     internal_error_message: _typing.Final[str] = ...
     def __init__(
@@ -76,7 +77,7 @@ class _fbthrift_compatible_with_CustomFieldNames:
     pass
 
 
-class CustomFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_CustomFieldNames):
+class CustomFieldNames(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_CustomFieldNames, _fbthrift_python_abstract_types.CustomFieldNames):
     error_message: _typing.Final[str] = ...
     internal_error_message: _typing.Final[str] = ...
     def __init__(
@@ -96,7 +97,7 @@ class _fbthrift_compatible_with_ExceptionWithPrimitiveField:
     pass
 
 
-class ExceptionWithPrimitiveField(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField):
+class ExceptionWithPrimitiveField(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ExceptionWithPrimitiveField, _fbthrift_python_abstract_types.ExceptionWithPrimitiveField):
     message: _typing.Final[str] = ...
     error_code: _typing.Final[int] = ...
     def __init__(
@@ -116,7 +117,7 @@ class _fbthrift_compatible_with_ExceptionWithStructuredAnnotation:
     pass
 
 
-class ExceptionWithStructuredAnnotation(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation):
+class ExceptionWithStructuredAnnotation(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_ExceptionWithStructuredAnnotation, _fbthrift_python_abstract_types.ExceptionWithStructuredAnnotation):
     message_field: _typing.Final[str] = ...
     error_code: _typing.Final[int] = ...
     def __init__(
@@ -136,7 +137,7 @@ class _fbthrift_compatible_with_Banal:
     pass
 
 
-class Banal(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Banal):
+class Banal(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_Banal, _fbthrift_python_abstract_types.Banal):
     def __init__(
         self,
     ) -> None: ...

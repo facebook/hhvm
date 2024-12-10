@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -17,6 +19,9 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 class FooStreamEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.FooStreamEx
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -54,6 +59,9 @@ class FooEx(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.FooEx
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.FooEx"
@@ -89,6 +97,9 @@ _fbthrift_FooEx = FooEx
 class FooEx2(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.FooEx2
+
 
     @staticmethod
     def __get_thrift_name__() -> str:

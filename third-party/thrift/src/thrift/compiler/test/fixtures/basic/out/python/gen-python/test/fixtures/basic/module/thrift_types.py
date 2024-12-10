@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import folly.iobuf as _fbthrift_iobuf
 
+from abc import ABCMeta as _fbthrift_ABCMeta
+import test.fixtures.basic.module.thrift_abstract_types as _fbthrift_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -147,6 +149,8 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyStruct, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 class Containers(metaclass=_fbthrift_python_types.StructMeta):
@@ -216,6 +220,8 @@ class Containers(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.Containers, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Containers, Containers)
 _fbthrift_Containers = Containers
 
 class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
@@ -252,6 +258,8 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyDataItem, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyDataItem, MyDataItem)
 _fbthrift_MyDataItem = MyDataItem
 
 class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
@@ -302,6 +310,9 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         ),
     )
 
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyUnion
+
+
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.MyUnion"
@@ -332,6 +343,8 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.MyUnion, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyUnion, MyUnion)
 _fbthrift_MyUnion = MyUnion
 
 class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
@@ -381,6 +394,9 @@ class MyException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
             11, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyException
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -461,6 +477,9 @@ class MyExceptionWithMessage(metaclass=_fbthrift_python_exceptions.GeneratedErro
             11, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.MyExceptionWithMessage
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -546,6 +565,8 @@ class ReservedKeyword(metaclass=_fbthrift_python_types.StructMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.ReservedKeyword, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.ReservedKeyword, ReservedKeyword)
 _fbthrift_ReservedKeyword = ReservedKeyword
 
 class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
@@ -562,6 +583,9 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
             4, # IDL type (see BaseTypeEnum)
         ),
     )
+
+    _fbthrift_abstract_base_class = _fbthrift_abstract_types.UnionToBeRenamed
+
 
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -593,6 +617,8 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
         except ModuleNotFoundError:
             py_asyncio_types = importlib.import_module("module.ttypes")
             return thrift.util.converter.to_py_struct(py_asyncio_types.UnionToBeRenamed, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.UnionToBeRenamed, UnionToBeRenamed)
 _fbthrift_UnionToBeRenamed = UnionToBeRenamed
 
 # This unfortunately has to be down here to prevent circular imports

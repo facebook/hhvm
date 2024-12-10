@@ -10,6 +10,7 @@ from __future__ import annotations
 import typing as _typing
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
@@ -20,7 +21,7 @@ class _fbthrift_compatible_with_FooStreamEx:
     pass
 
 
-class FooStreamEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooStreamEx):
+class FooStreamEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooStreamEx, _fbthrift_python_abstract_types.FooStreamEx):
     def __init__(
         self,
     ) -> None: ...
@@ -36,7 +37,7 @@ class _fbthrift_compatible_with_FooEx:
     pass
 
 
-class FooEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooEx):
+class FooEx(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooEx, _fbthrift_python_abstract_types.FooEx):
     def __init__(
         self,
     ) -> None: ...
@@ -52,7 +53,7 @@ class _fbthrift_compatible_with_FooEx2:
     pass
 
 
-class FooEx2(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooEx2):
+class FooEx2(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compatible_with_FooEx2, _fbthrift_python_abstract_types.FooEx2):
     def __init__(
         self,
     ) -> None: ...

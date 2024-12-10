@@ -12,6 +12,7 @@ import typing as _typing
 import enum
 
 import folly.iobuf as _fbthrift_iobuf
+import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 from module.thrift_enums import _fbthrift_compatible_with_EmptyEnum
@@ -28,7 +29,7 @@ class _fbthrift_compatible_with_Internship:
     pass
 
 
-class Internship(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Internship):
+class Internship(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Internship, _fbthrift_python_abstract_types.Internship):
     weeks: _typing.Final[int] = ...
     title: _typing.Final[str] = ...
     employer: _typing.Final[_typing.Optional[_fbthrift_Company]] = ...
@@ -62,7 +63,7 @@ class _fbthrift_compatible_with_Range:
     pass
 
 
-class Range(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Range):
+class Range(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Range, _fbthrift_python_abstract_types.Range):
     min: _typing.Final[int] = ...
     max: _typing.Final[int] = ...
     def __init__(
@@ -87,7 +88,7 @@ class _fbthrift_compatible_with_struct1:
     pass
 
 
-class struct1(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct1):
+class struct1(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct1, _fbthrift_python_abstract_types.struct1):
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
     def __init__(
@@ -112,7 +113,7 @@ class _fbthrift_compatible_with_struct2:
     pass
 
 
-class struct2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct2):
+class struct2(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct2, _fbthrift_python_abstract_types.struct2):
     a: _typing.Final[int] = ...
     b: _typing.Final[str] = ...
     c: _typing.Final[_fbthrift_struct1] = ...
@@ -143,7 +144,7 @@ class _fbthrift_compatible_with_struct3:
     pass
 
 
-class struct3(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct3):
+class struct3(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct3, _fbthrift_python_abstract_types.struct3):
     a: _typing.Final[str] = ...
     b: _typing.Final[int] = ...
     c: _typing.Final[_fbthrift_struct2] = ...
@@ -171,7 +172,7 @@ class _fbthrift_compatible_with_struct4:
     pass
 
 
-class struct4(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct4):
+class struct4(_fbthrift_python_types.Struct, _fbthrift_compatible_with_struct4, _fbthrift_python_abstract_types.struct4):
     a: _typing.Final[int] = ...
     b: _typing.Final[_typing.Optional[float]] = ...
     c: _typing.Final[_typing.Optional[int]] = ...
@@ -199,7 +200,7 @@ class _fbthrift_compatible_with_union1:
     pass
 
 
-class union1(_fbthrift_python_types.Union, _fbthrift_compatible_with_union1):
+class union1(_fbthrift_python_types.Union, _fbthrift_compatible_with_union1, _fbthrift_python_abstract_types.union1):
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
     def __init__(
@@ -236,7 +237,7 @@ class _fbthrift_compatible_with_union2:
     pass
 
 
-class union2(_fbthrift_python_types.Union, _fbthrift_compatible_with_union2):
+class union2(_fbthrift_python_types.Union, _fbthrift_compatible_with_union2, _fbthrift_python_abstract_types.union2):
     i: _typing.Final[int] = ...
     d: _typing.Final[float] = ...
     s: _typing.Final[_fbthrift_struct1] = ...

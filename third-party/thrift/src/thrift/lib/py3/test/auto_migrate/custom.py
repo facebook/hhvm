@@ -30,55 +30,43 @@ class CustomTests(unittest.TestCase):
 
     def test_list_template(self) -> None:
         c = customized(list_template=[1, 2, 3])
-        res = []
-        for v in c.list_template:
-            res.append(v)
-        self.assertEqual(res, [1, 2, 3])
+        self.assertEqual(c.list_template, [1, 2, 3])
+        self.assertEqual(list(c.list_template), [1, 2, 3])
         self.assertNotIsInstance(c.list_template, list)
         self.roundTrip(c)
 
     def test_set_template(self) -> None:
         c = customized(set_template={1, 2, 3})
-        res = set()
-        for v in c.set_template:
-            res.add(v)
-        self.assertEqual(res, {1, 2, 3})
+        self.assertEqual(c.set_template, {1, 2, 3})
+        self.assertEqual(set(c.set_template), {1, 2, 3})
         self.assertNotIsInstance(c.set_template, set)
         self.roundTrip(c)
 
     def test_map_template(self) -> None:
         c = customized(map_template={1: 2, 3: 6, 5: 10})
-        res = {}
-        for k, v in c.map_template.items():
-            res[k] = v
-        self.assertEqual(res, {1: 2, 3: 6, 5: 10})
+        self.assertEqual(c.map_template, {1: 2, 3: 6, 5: 10})
+        self.assertEqual(dict(c.map_template.items()), {1: 2, 3: 6, 5: 10})
         self.assertNotIsInstance(c.map_template, dict)
         self.roundTrip(c)
 
     def test_list_type(self) -> None:
         c = customized(list_type=[1, 2, 3])
-        res = []
-        for v in c.list_type:
-            res.append(v)
-        self.assertEqual(res, [1, 2, 3])
+        self.assertEqual(c.list_type, [1, 2, 3])
+        self.assertEqual(list(c.list_type), [1, 2, 3])
         self.assertNotIsInstance(c.list_type, list)
         self.roundTrip(c)
 
     def test_set_type(self) -> None:
         c = customized(set_type={1, 2, 3})
-        res = set()
-        for v in c.set_type:
-            res.add(v)
-        self.assertEqual(res, {1, 2, 3})
+        self.assertEqual(c.set_type, {1, 2, 3})
+        self.assertEqual(set(c.set_type), {1, 2, 3})
         self.assertNotIsInstance(c.set_type, set)
         self.roundTrip(c)
 
     def test_map_type(self) -> None:
         c = customized(map_type={1: 2, 3: 6, 5: 10})
-        res = {}
-        for k, v in c.map_type.items():
-            res[k] = v
-        self.assertEqual(res, {1: 2, 3: 6, 5: 10})
+        self.assertEqual(c.map_type, {1: 2, 3: 6, 5: 10})
+        self.assertEqual(dict(c.map_type.items()), {1: 2, 3: 6, 5: 10})
         self.assertNotIsInstance(c.map_type, dict)
         self.roundTrip(c)
 
@@ -96,6 +84,7 @@ class CustomTests(unittest.TestCase):
     def test_list_of_uint32(self) -> None:
         c = customized(list_of_uint32=[1, 2, 3])
         self.assertEqual(c.list_of_uint32, [1, 2, 3])
+        self.assertEqual(list(c.list_of_uint32), [1, 2, 3])
         self.assertNotIsInstance(c.list_of_uint32, list)
         self.roundTrip(c)
 
@@ -112,41 +101,40 @@ class CustomTests(unittest.TestCase):
     def test_adapted_string_list(self) -> None:
         c = customized(adapted_string_list=["hello"])
         self.assertEqual(c.adapted_string_list, ["hello"])
-        self.assertNotIsInstance(c.list_of_uint32, list)
+        self.assertEqual(list(c.adapted_string_list), ["hello"])
+        self.assertNotIsInstance(c.adapted_string_list, list)
         self.roundTrip(c)
 
     def test_adapted_string_set(self) -> None:
         c = customized(adapted_string_set={"1", "2", "3"})
-        res = set()
-        for v in c.adapted_string_set:
-            res.add(v)
-        self.assertEqual(res, {"1", "2", "3"})
+        self.assertEqual(c.adapted_string_set, {"1", "2", "3"})
+        self.assertEqual(set(c.adapted_string_set), {"1", "2", "3"})
         self.assertNotIsInstance(c.adapted_string_set, set)
         self.roundTrip(c)
 
     def test_adapted_string_key_map(self) -> None:
         c = customized(adapted_string_key_map={"1": "2", "3": "6", "5": "10"})
-        res = {}
-        for k, v in c.adapted_string_key_map.items():
-            res[k] = v
-        self.assertEqual(res, {"1": "2", "3": "6", "5": "10"})
+        self.assertEqual(c.adapted_string_key_map, {"1": "2", "3": "6", "5": "10"})
+        self.assertEqual(
+            dict(c.adapted_string_key_map.items()), {"1": "2", "3": "6", "5": "10"}
+        )
         self.assertNotIsInstance(c.adapted_string_key_map, dict)
         self.roundTrip(c)
 
     def test_adapted_string_value_map(self) -> None:
         c = customized(adapted_string_value_map={"1": "2", "3": "6", "5": "10"})
-        res = {}
-        for k, v in c.adapted_string_value_map.items():
-            res[k] = v
-        self.assertEqual(res, {"1": "2", "3": "6", "5": "10"})
+        self.assertEqual(c.adapted_string_value_map, {"1": "2", "3": "6", "5": "10"})
+        self.assertEqual(
+            dict(c.adapted_string_value_map.items()), {"1": "2", "3": "6", "5": "10"}
+        )
         self.assertNotIsInstance(c.adapted_string_value_map, dict)
         self.roundTrip(c)
 
     def test_adapted_string_map(self) -> None:
         c = customized(adapted_string_map={"1": "2", "3": "6", "5": "10"})
-        res = {}
-        for k, v in c.adapted_string_map.items():
-            res[k] = v
-        self.assertEqual(res, {"1": "2", "3": "6", "5": "10"})
+        self.assertEqual(c.adapted_string_map, {"1": "2", "3": "6", "5": "10"})
+        self.assertEqual(
+            dict(c.adapted_string_map.items()), {"1": "2", "3": "6", "5": "10"}
+        )
         self.assertNotIsInstance(c.adapted_string_map, dict)
         self.roundTrip(c)

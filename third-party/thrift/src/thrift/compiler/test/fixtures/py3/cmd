@@ -2,9 +2,9 @@ cpp2: mstch_cpp2:py3cpp src/module.thrift
 cpp2_empty: mstch_cpp2:py3cpp src/empty.thrift
 py3: mstch_py3:py3cpp,intercompatible src/module.thrift
 py3_empty: mstch_py3:py3cpp src/empty.thrift
-python_empty: mstch_python:experimental_generate_abstract_types src/empty.thrift
+python_empty: mstch_python src/empty.thrift
 python_capi: mstch_python_capi src/module.thrift
 python_capi_empty: mstch_python_capi src/empty.thrift
-python: mstch_python:experimental_generate_abstract_types,auto_migrate,base_library_package=fbcode.thrift.python,import_static src/module.thrift
+python: mstch_python:auto_migrate,base_library_package=fbcode.thrift.python,import_static src/module.thrift
 py3_auto_migrate: mstch_py3:auto_migrate src/module.thrift
-python_experimental_generate_mutable_types: mstch_python:experimental_generate_abstract_types,experimental_generate_mutable_types:auto_migrate,base_library_package=fbcode.thrift.python,import_static src/module.thrift
+python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types:auto_migrate,base_library_package=fbcode.thrift.python,import_static src/module.thrift

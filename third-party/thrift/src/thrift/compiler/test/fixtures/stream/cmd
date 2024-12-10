@@ -1,6 +1,6 @@
 cpp2: mstch_cpp2 src/module.thrift
 py3: mstch_py3 src/module.thrift
-python: mstch_python:experimental_generate_abstract_types src/module.thrift
+python: mstch_python src/module.thrift
 python_capi: mstch_python_capi src/module.thrift
 hack: hack:server src/module.thrift
 hack_server_stream: hack:server,server_stream src/module.thrift
@@ -9,4 +9,4 @@ pyi: mstch_pyi src/module.thrift
 rust: mstch_rust src/module.thrift
 py: py:json src/module.thrift
 json_experimental: json_experimental src/module.thrift
-python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types,experimental_generate_abstract_types src/module.thrift
+python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types src/module.thrift

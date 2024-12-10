@@ -788,6 +788,13 @@ class py3_mstch_type : public mstch_type {
   cached_properties& cached_props_;
 };
 
+class py3_mstch_typedef : public mstch_typedef {
+ public:
+  py3_mstch_typedef(
+      const t_typedef* type, mstch_context& ctx, mstch_element_position pos)
+      : mstch_typedef(type, ctx, pos) {}
+};
+
 class py3_mstch_struct : public mstch_struct {
  public:
   py3_mstch_struct(
@@ -1431,6 +1438,7 @@ void t_mstch_py3_generator::set_mstch_factories() {
   mstch_context_.add<py3_mstch_function>();
   mstch_context_.add<py3_mstch_type>(py3_mstch_type::context{
       program_, &type_props_cache_, &cpp_name_resolver_});
+  mstch_context_.add<py3_mstch_typedef>();
   mstch_context_.add<py3_mstch_struct>();
   mstch_context_.add<py3_mstch_field>();
   mstch_context_.add<py3_mstch_enum>();

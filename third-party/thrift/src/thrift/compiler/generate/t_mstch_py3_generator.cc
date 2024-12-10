@@ -159,8 +159,6 @@ class py3_mstch_program : public mstch_program {
             {"program:hasEnumTypes", &py3_mstch_program::hasEnumTypes},
             {"program:customTemplates", &py3_mstch_program::getCustomTemplates},
             {"program:customTypes", &py3_mstch_program::getCustomTypes},
-            {"program:moveContainerTypes",
-             &py3_mstch_program::getMoveContainerTypes},
             {"program:has_stream?", &py3_mstch_program::hasStream},
             {"program:python_capi_converter?",
              &py3_mstch_program::capi_converter},
@@ -240,14 +238,6 @@ class py3_mstch_program : public mstch_program {
   }
 
   mstch::node getCustomTypes() { return make_mstch_types(customTypes_); }
-
-  mstch::node getMoveContainerTypes() {
-    std::vector<const t_type*> types;
-    for (const auto& kvp : moveContainers_) {
-      types.push_back(kvp.second);
-    }
-    return make_mstch_types(types);
-  }
 
   mstch::node response_and_stream_functions() {
     return make_mstch_functions(response_and_stream_functions_, nullptr);
@@ -411,7 +401,6 @@ class py3_mstch_program : public mstch_program {
   mstch::node filtered_typedefs() { return make_mstch_typedefs(typedefs_); }
 
   std::vector<const t_type*> containers_;
-  std::map<std::string, const t_type*> moveContainers_;
   std::vector<const t_type*> customTemplates_;
   std::vector<const t_type*> customTypes_;
   std::unordered_set<std::string> seenTypeNames_;
@@ -1218,9 +1207,6 @@ std::string py3_mstch_program::visit_type_impl(
   if (inserted) {
     if (trueType->is_container()) {
       containers_.push_back(trueType);
-      moveContainers_.emplace(
-          boost::algorithm::replace_all_copy(flatName, "binary", "string"),
-          trueType);
     }
     if (!type->is_default_template()) {
       customTemplates_.push_back(trueType);

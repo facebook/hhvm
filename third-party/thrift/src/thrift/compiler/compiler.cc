@@ -102,19 +102,7 @@ Options:
   -r[ecurse]  Also generate included files
   -debug      Parse debug trace to stdout
   --allow-neg-keys
-              Allow negative field keys (DEPRECATED and IGNORED: this is now
-              enabled by default, and this flag is completely ignored. See
-              --ignore-non-positive-keys to disable).
-  --ignore-non-positive-keys
-              UNSAFE: ignores explicitly provided field ids that are
-              non-positive, and instead auto-generates (implicit) negative field
-              ids. This is strongly discouraged, and is only provided as a
-              temporary killswitch to effectively "undo" the deprecation of the
-              "--allow-neg-keys" option which is now always enabled by default.
-              Note that since --allow-neg-keys is ignored, if both of these
-              options are provided, only "--ignore-non-positive-keys" takes
-              effect, and non-positive field ids are ignored.
-              This option is temporary, and will be removed in H1'2025.
+              Allow negative field keys (IGNORED: always true).
   --allow-neg-enum-vals
               Allow negative enum vals (DEPRECATED)
   --allow-64bit-consts
@@ -333,9 +321,6 @@ std::string parse_args(
       gparams.gen_recurse = true;
     } else if (flag == "allow-neg-keys") {
       // no-op
-    } else if (flag == "ignore-non-positive-keys") {
-      // DO_BEFORE(aristidis,20250301): Remove --ignore-non-positive-keys
-      pparams.allow_neg_field_keys = false;
     } else if (flag == "allow-neg-enum-vals") {
       // no-op
     } else if (flag == "allow-64bit-consts") {

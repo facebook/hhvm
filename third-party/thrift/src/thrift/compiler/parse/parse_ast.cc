@@ -339,35 +339,18 @@ class ast_builder : public parser_actions {
     if (field.id() > 0) {
       return;
     }
-    if (params_.allow_neg_field_keys) {
-      // allow_neg_field_keys exists to allow users to add explicitly specified
-      // id values to old .thrift files without breaking protocol compatibility.
-      if (field.id() != next_id) {
-        // DO_BEFORE(aristidis,20250301): Remove when --ignore-non-positive-keys
-        // no longer exists.
-        diags_.warning(
-            field,
-            "Nonpositive field id ({}) differs from what would be "
-            "auto-assigned by thrift (if 'allow-neg-keys' was disabled): {}",
-            field.id(),
-            next_id);
-      }
-    } else if (field.id() == next_id) {
+
+    if (field.id() != next_id) {
+      // DO_BEFORE(aristidis,20250301): Remove when --ignore-non-positive-keys
+      // no longer exists.
       diags_.warning(
           field,
-          "Nonpositive value ({}) not allowed as a field id.",
-          field.id());
-    } else {
-      // TODO: Make ignoring the user provided value a failure.
-      diags_.warning(
-          field,
-          "Nonpositive field id ({}) differs from what is auto-assigned by "
-          "thrift. The id must be positive or {}.",
+          "Nonpositive field id ({}) differs from what would be "
+          "auto-assigned by thrift (if 'allow-neg-keys' was disabled): {}",
           field.id(),
           next_id);
-      // Ignore user provided value and auto assign an id.
-      allocate_field_id(next_id, field);
     }
+
     // Skip past any negative, manually assigned ids.
     if (field.id() < 0) {
       // Update the next field id to be one less than the value.
@@ -1022,12 +1005,6 @@ std::unique_ptr<t_program_bundle> parse_ast(
 
   auto circular_deps = std::set<std::string>{path};
 
-  // Always enable allow_neg_field_keys when parsing included files.
-  // This way if a Thrift file has negative keys, --allow-neg-keys doesn't
-  // have to be used by everyone that includes it.
-  auto include_params = params;
-  include_params.allow_neg_field_keys = true;
-
   include_handler on_include = [&](source_range range,
                                    const std::string& include_path,
                                    const t_program& parent) {
@@ -1084,7 +1061,7 @@ std::unique_ptr<t_program_bundle> parse_ast(
     programs->add_program(std::move(included_program));
 
     try {
-      ast_builder(diags, *program, include_params, on_include)
+      ast_builder(diags, *program, params, on_include)
           .parse_file(sm, range.begin);
     } catch (...) {
       if (!params.allow_missing_includes) {

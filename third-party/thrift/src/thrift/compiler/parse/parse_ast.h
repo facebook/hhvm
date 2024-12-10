@@ -37,21 +37,6 @@ struct parsing_params {
   int strict = 127;
 
   /**
-   * Whether or not negative field keys are accepted.
-   *
-   * When a field does not have a user-specified key, thrift automatically
-   * assigns a negative value.  However, this is fragile since changes to the
-   * file may unintentionally change the key numbering, resulting in a new
-   * protocol that is not backwards compatible.
-   *
-   * When allow_neg_field_keys is enabled, users can explicitly specify
-   * negative keys.  This way they can write a .thrift file with explicitly
-   * specified keys that is still backwards compatible with older .thrift files
-   * that did not specify key values.
-   */
-  bool allow_neg_field_keys = true;
-
-  /**
    * Whether or not 64-bit constants will generate a warning.
    *
    * Some languages don't support 64-bit constants, but many do, so we can

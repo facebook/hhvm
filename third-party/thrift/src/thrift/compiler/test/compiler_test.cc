@@ -104,20 +104,6 @@ TEST(CompilerTest, zero_as_field_id_neg_keys) {
       {"--allow-neg-keys"});
 }
 
-// Checks the "legacy" behavior, when "--allow-neg-keys" was not ignored (and
-// defaulted to "off").
-TEST(CompilerTest, zero_as_field_id_ignore_non_positive_keys) {
-  check_compile(
-      R"(
-    struct Foo {
-      0: i32 field; # expected-warning: Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.
-                    # expected-warning@-1:  No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!
-      1: list<i32> other;
-    }
-  )",
-      {"--ignore-non-positive-keys"});
-}
-
 TEST(CompilerTest, no_field_id) {
   check_compile(R"(
     struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
@@ -146,20 +132,6 @@ TEST(CompilerTest, no_field_id_with_validation) {
     }
   )",
       {"--extra-validation", "implicit_field_ids"});
-}
-
-TEST(CompilerTest, zero_as_field_id_annotation_ignore_non_positive_keys) {
-  check_compile(
-      R"(
-    struct Foo {
-      0: i32 field (cpp.deprecated_allow_zero_as_field_id);
-        # expected-warning@-1: Nonpositive field id (0) differs from what is auto-assigned by thrift. The id must be positive or -1.
-        # expected-warning@-2: No field id specified for `field`, resulting protocol may have conflicts or not be backwards compatible!
-
-      1: list<i32> other;
-    }
-  )",
-      {"--ignore-non-positive-keys"});
 }
 
 TEST(CompilerTest, zero_as_field_id_annotation) {
@@ -216,19 +188,6 @@ TEST(CompilerTest, exhausted_pos_field_ids) {
   check_compile(src);
 }
 
-TEST(CompilerTest, out_of_range_field_ids_overflow_ignore_non_positive_keys) {
-  check_compile(
-      R"(
-    struct Foo {
-      -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -1.
-      32767: i32 f2;
-      32768: i32 f3; # expected-error: Integer constant 32768 outside the range of field ids ([-32768, 32767]).
-                     # expected-warning@-1: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -2.
-    }
-  )",
-      {"--ignore-non-positive-keys"});
-}
-
 TEST(CompilerTest, out_of_range_field_ids_overflow) {
   check_compile(R"(
     struct Foo {
@@ -239,20 +198,6 @@ TEST(CompilerTest, out_of_range_field_ids_overflow) {
         # expected-warning@-2: Nonpositive field id (-32768) differs from what would be auto-assigned by thrift (if 'allow-neg-keys' was disabled): 32767
     }
   )");
-}
-
-TEST(CompilerTest, out_of_range_field_ids_underflow_ignore_non_positive_keys) {
-  check_compile(
-      R"(
-    struct Foo {
-      -32768: i32 f1; # expected-warning: Nonpositive field id (-32768) differs from what is auto-assigned by thrift. The id must be positive or -1.
-      32767: i32 f2;
-
-      -32769: i32 f3; # expected-error: Integer constant -32769 outside the range of field ids ([-32768, 32767]).
-                      # expected-error@-1: Field id 32767 for `f3` has already been used.
-    }
-  )",
-      {"--ignore-non-positive-keys"});
 }
 
 TEST(CompilerTest, out_of_range_field_ids_underflow) {

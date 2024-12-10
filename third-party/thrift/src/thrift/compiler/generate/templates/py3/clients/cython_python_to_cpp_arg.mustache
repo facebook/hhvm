@@ -28,7 +28,7 @@ This template assumes that the Python object is in a variable named <field>.
 }}{{#type:flexibleBinary?}}{{!
   }}{{> types/cython_cpp_type}}(cmove(<string>{{field:py_name}})){{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}{{field:py_name}}{{/type:bool?}}{{!
 }}{{#type:byte?}}{{field:py_name}}{{/type:byte?}}{{!
 }}{{#type:i16?}}{{field:py_name}}{{/type:i16?}}{{!
@@ -45,4 +45,4 @@ This template assumes that the Python object is in a variable named <field>.
   }}{{> types/container_to_cpp }}({{field:py_name}}){{!
 }}{{/type:container?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>{{field:py_name}}{{/type:enum?}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:customBinaryType?}}

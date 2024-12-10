@@ -33,7 +33,7 @@ citem.
 }}{{#type:flexibleBinary?}}{{!
   }}(<const char*>c_vec[idx].data())[:c_vec[idx].size()]{{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}c_vec[idx]{{/type:bool?}}{{!
 }}{{#type:byte?}}c_vec[idx]{{/type:byte?}}{{!
 }}{{#type:i16?}}c_vec[idx]{{/type:i16?}}{{!
@@ -50,4 +50,4 @@ citem.
 }}{{#type:container?}}{{> types/container_from_cpp }}(c_vec[idx]){{/type:container?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/python_type}}, <int> c_vec[idx]){{/type:enum}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:customBinaryType?}}

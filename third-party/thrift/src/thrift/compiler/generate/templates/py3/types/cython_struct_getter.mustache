@@ -39,7 +39,7 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
     }}.data())[:deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}{{!
     }}.size()]{{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#field:reference?}}{{!
 }}if self.__fbthrift_cached_{{field:py_name}} is None:
     if not deref(self.{{> types/cpp_obj}}).{{> types/cython_field_value_ref}}_ref():
@@ -83,4 +83,4 @@ return self.__fbthrift_cached_{{field:py_name}}{{!
 return self.__fbthrift_cached_{{field:py_name}}{{!
 }}{{/type:base?}}{{!
 }}{{/field:reference?}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:customBinaryType?}}

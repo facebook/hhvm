@@ -27,7 +27,7 @@ Used to convert C++ `ckey` to python object.
 }}{{#type:flexibleBinary?}}{{!
   }}(<const char*>ckey.data())[:ckey.size()]{{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}ckey{{/type:bool?}}{{!
 }}{{#type:byte?}}ckey{{/type:byte?}}{{!
 }}{{#type:i16?}}ckey{{/type:i16?}}{{!
@@ -43,4 +43,4 @@ Used to convert C++ `ckey` to python object.
 }}{{#type:container?}}{{> types/container_from_cpp }}(ckey){{/type:container?}}{{!
 }}{{#type:enum}}translate_cpp_enum_to_python({{!
     }}{{> types/python_type}}, <int> ckey){{/type:enum}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:customBinaryType?}}

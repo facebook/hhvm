@@ -28,7 +28,7 @@ on a struct.
 }}{{#type:flexibleBinary?}}{{!
   }}{{> types/cython_cpp_type}}(cmove(<string>_fbthrift_value)){{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#field:reference?}}{{!
 }}{{#type:container?}}{{!
 }}{{> types/lift_to_heap }}({{> types/container_to_cpp }}(_fbthrift_value)){{!
@@ -61,4 +61,4 @@ on a struct.
     }}{{> types/container_to_cpp }}(_fbthrift_value){{!
 }}{{/type:container?}}{{!
 }}{{/field:reference?}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:customBinaryType?}}

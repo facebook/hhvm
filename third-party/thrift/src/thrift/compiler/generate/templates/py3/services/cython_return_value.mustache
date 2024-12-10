@@ -35,7 +35,7 @@ to the client.
   }}cmove(<string>result)){{!
 }}{{/type:flexibleBinary?}}{{!
 }}{{^function:stream?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}<cbool> result{{/type:bool?}}{{!
 }}{{#type:byte?}}<cint8_t> result{{/type:byte?}}{{!
 }}{{#type:i16?}}<cint16_t> result{{/type:i16?}}{{!
@@ -65,7 +65,7 @@ to the client.
 }}{{/type:container?}}{{!
 }}{{#type:void?}}c_unit{{/type:void?}}{{!
 }}{{#type:enum?}}<{{> types/cython_cpp_type}}><int>result{{/type:enum?}}{{!
-}}{{/type:hasCustomTypeBehavior?}}{{!
+}}{{/type:customBinaryType?}}{{!
 }}{{/function:stream?}}{{!
 }}{{#function:stream?}}{{!
   }}{{#function:stream_has_first_response?}}createResponseAndServerStream[{{!

@@ -28,7 +28,7 @@ to a python type.
 }}{{#type:flexibleBinary?}}{{!
   }}(<const char*>_value.data())[:_value.size()]{{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}<bint>_value{{/type:bool?}}{{!
 }}{{#type:byte?}}_value{{/type:byte?}}{{!
 }}{{#type:i16?}}_value{{/type:i16?}}{{!
@@ -46,4 +46,4 @@ to a python type.
 }}{{/type:container?}}{{!
 }}{{#type:void?}}None{{/type:void?}}{{!
 }}{{#type:enum}}{{> types/python_type}}(<int> _value){{/type:enum}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:customBinaryType?}}

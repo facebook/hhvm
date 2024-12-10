@@ -26,7 +26,7 @@ to be converted from unicode to binary representation.
 }}{{#type:flexibleBinary?}}{{!
   }}(<const char*>{{field:py_name}}.data())[:{{field:py_name}}.size()]{{!
 }}{{/type:flexibleBinary?}}{{!
-}}{{^type:hasCustomTypeBehavior?}}{{!
+}}{{^type:customBinaryType?}}{{!
 }}{{#type:bool?}}{{field:py_name}}{{/type:bool?}}{{!
 }}{{#type:byte?}}{{field:py_name}}{{/type:byte?}}{{!
 }}{{#type:i16?}}{{field:py_name}}{{/type:i16?}}{{!
@@ -43,4 +43,4 @@ to be converted from unicode to binary representation.
   }}{{> types/container_from_cpp}}({{field:py_name}}){{!
 }}{{/type:container?}}{{!
 }}{{#type:enum?}}{{> types/python_type}}(<int> {{field:py_name}}){{/type:enum?}}{{!
-}}{{/type:hasCustomTypeBehavior?}}
+}}{{/type:customBinaryType?}}

@@ -619,8 +619,7 @@ class py3_mstch_type : public mstch_type {
             {"type:iobufRef?", &py3_mstch_type::isIOBufRef},
             {"type:iobufWrapper?", &py3_mstch_type::isIOBufWrapper},
             {"type:flexibleBinary?", &py3_mstch_type::isFlexibleBinary},
-            {"type:hasCustomTypeBehavior?",
-             &py3_mstch_type::hasCustomTypeBehavior},
+            {"type:customBinaryType?", &py3_mstch_type::isCustomBinaryType},
             {"type:simple?", &py3_mstch_type::isSimple},
             {"type:resolves_to_complex_return?",
              &py3_mstch_type::resolves_to_complex_return},
@@ -690,13 +689,13 @@ class py3_mstch_type : public mstch_type {
 
   mstch::node isFlexibleBinary() { return is_flexible_binary(); }
 
-  mstch::node hasCustomTypeBehavior() { return has_custom_type_behavior(); }
+  mstch::node isCustomBinaryType() { return is_custom_binary_type(); }
 
   // as used, non-simple types live in shared_ptr in container conversions
   mstch::node isSimple() {
     return (type_->is_primitive_type() || type_->is_enum() ||
             type_->is_container()) &&
-        !has_custom_type_behavior();
+        !is_custom_binary_type();
   }
 
   mstch::node resolves_to_complex_return() {
@@ -782,7 +781,7 @@ class py3_mstch_type : public mstch_type {
         cached_props_.cpp_type() != "::folly::fbstring";
   }
 
-  bool has_custom_type_behavior() const {
+  bool is_custom_binary_type() const {
     return is_iobuf() || is_iobuf_ref() || is_flexible_binary();
   }
 

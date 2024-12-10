@@ -691,7 +691,6 @@ class py3_mstch_type : public mstch_type {
 
   mstch::node isCustomBinaryType() { return is_custom_binary_type(); }
 
-  // as used, non-simple types live in shared_ptr in container conversions
   mstch::node isSimple() {
     return (type_->is_primitive_type() || type_->is_enum() ||
             type_->is_container()) &&

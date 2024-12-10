@@ -627,8 +627,7 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_se
     cdef list py_items = []
     cdef __set_iter[{{> types/cython_cpp_type}}] iter = __set_iter[{{> types/cython_cpp_type}}](c_set)
     {{#type:set_elem_type}}
-    cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-        }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} citem{{> types/type_default_value}}
+    cdef {{> types/cython_cpp_container_item_type}} citem{{> types/type_default_value}}
     for i in range(c_set.size()):
         iter.genNextItem(citem)
         py_items.append({{> types/set_cpp_to_python }})
@@ -640,12 +639,10 @@ cdef object {{type:flat_name}}__from_cpp(const {{> types/cython_cpp_type}}& c_ma
     cdef dict py_items = {}
     cdef __map_iter[{{> types/cython_cpp_type}}] iter = __map_iter[{{> types/cython_cpp_type}}](c_map)
     {{#type:key_type}}
-    cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-        }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} ckey{{> types/type_default_value}}
+    cdef {{> types/cython_cpp_container_item_type}} ckey{{> types/type_default_value}}
     {{/type:key_type}}
     {{#type:value_type}}
-    cdef {{^type:simple?}}shared_ptr[{{> types/cython_cpp_type}}]{{/type:simple?}}{{!
-        }}{{#type:simple?}}{{> types/cython_cpp_type}}{{/type:simple?}} cval{{> types/type_default_value}}
+    cdef {{> types/cython_cpp_container_item_type}} cval{{> types/type_default_value}}
     {{/type:value_type}}
     for i in range(c_map.size()):
         iter.genNextKeyVal(ckey, cval)

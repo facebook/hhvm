@@ -7,7 +7,6 @@ package test
 
 
 import (
-    "reflect"
     "sync"
 
     test0 "my/namespacing/test"
@@ -17,7 +16,6 @@ import (
 var _ = test0.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
-var _ = reflect.Ptr
 
 // Premade codec specs
 var (

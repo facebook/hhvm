@@ -7,7 +7,6 @@ package module1
 
 
 import (
-    "reflect"
     "sync"
 
     module0 "module0"
@@ -19,7 +18,6 @@ var _ = module0.GoUnusedProtection__
 var _ = module2.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
-var _ = reflect.Ptr
 
 // Premade codec specs
 var (

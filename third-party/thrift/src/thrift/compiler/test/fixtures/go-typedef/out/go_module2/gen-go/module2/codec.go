@@ -7,7 +7,6 @@ package module2
 
 
 import (
-    "reflect"
     "sync"
 
     thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
@@ -15,7 +14,6 @@ import (
 
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
-var _ = reflect.Ptr
 
 // Premade codec specs
 var (

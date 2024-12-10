@@ -7,7 +7,6 @@ package matching_names
 
 
 import (
-    "reflect"
     "sync"
 
     includesAlso "IncludesAlso"
@@ -17,7 +16,6 @@ import (
 var _ = includesAlso.GoUnusedProtection__
 // (needed to ensure safety because of naive import list construction)
 var _ = thrift.ZERO
-var _ = reflect.Ptr
 
 // Premade codec specs
 var (

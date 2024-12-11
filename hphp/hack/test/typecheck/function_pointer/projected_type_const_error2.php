@@ -17,6 +17,6 @@ function set_a_box<TBox as MyBox with { type TInner = TVal }, TVal>(
   $b->set($v);
 }
 
-function test(): (function(IntBox, string): void) {
+function test(): HH\FunctionRef<(readonly function(IntBox, string): void)> {
   return set_a_box<>;
 }

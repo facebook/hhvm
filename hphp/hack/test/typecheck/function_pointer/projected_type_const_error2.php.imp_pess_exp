@@ -2,17 +2,51 @@ ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 9, characters 23-25:
   Expected `int`
-  File "projected_type_const_error2.php", line 20, characters 36-41:
+  File "projected_type_const_error2.php", line 20, characters 60-65:
   But got `string`
 ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
-Invalid return type (Typing[4110])
-  File "projected_type_const_error2.php", line 20, characters 18-49:
-  Expected `dynamic`
+Invalid return type (Typing[4323])
+  File "projected_type_const_error2.php", line 13, characters 20-23:
+  `TBox` is a constrained type parameter
+  File "projected_type_const_error2.php", line 13, characters 28-60:
+  This type constraint is violated
+  File "projected_type_const_error2.php", line 20, characters 52-57:
+  Expected `IntBox`
+  File "projected_type_const_error2.php", line 13, characters 28-60:
+  But got `MyBox with { type TInner = TVal#1 }`
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4323])
+  File "projected_type_const_error2.php", line 13, characters 63-66:
+  `TVal` is a constrained type parameter
   File "projected_type_const_error2.php", line 13, characters 10-18:
-  But got `(readonly function<TBox as MyBox with { type TInner = _ }, TVal>($b, $v): void)`
+  This type constraint is violated
+  File "projected_type_const_error2.php", line 20, characters 60-65:
+  Expected `string`
+  File "projected_type_const_error2.php", line 13, characters 10-18:
+  But got `mixed`
 ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
-  File "projected_type_const_error2.php", line 20, characters 18-49:
-  Expected `~(function(IntBox, string): ~void)`
+  File "projected_type_const_error2.php", line 20, characters 33-73:
+  Expected `dynamic`
   File "projected_type_const_error2.php", line 13, characters 10-18:
-  But got `(readonly function<TBox as MyBox with { type TInner = _ }, TVal>($b, $v): void)` because method or function was called on dynamic or like-type
+  But got `(readonly function<TBox as MyBox with { type TInner = TVal }, TVal>(TBox $b, TVal $v): void)`
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4110])
+  File "projected_type_const_error2.php", line 20, characters 33-73:
+  Expected `~(readonly function(IntBox, string): ~void)`
+  File "projected_type_const_error2.php", line 13, characters 10-18:
+  But got `(readonly function<TBox as MyBox with { type TInner = TVal }, TVal>(TBox $b, TVal $v): void)` because method or function was called on dynamic or like-type
+  File "projected_type_const_error2.php", line 13, characters 10-18:
+  This type argument to `HH\FunctionRef` must match exactly (it is invariant)
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4110])
+  File "projected_type_const_error2.php", line 20, characters 52-57:
+  Expected `IntBox`
+  File "projected_type_const_error2.php", line 14, characters 3-6:
+  But got `TBox#1`
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4110])
+  File "projected_type_const_error2.php", line 20, characters 60-65:
+  Expected `string`
+  File "projected_type_const_error2.php", line 15, characters 3-6:
+  But got `TVal#1`

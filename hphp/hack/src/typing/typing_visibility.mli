@@ -20,6 +20,14 @@ val check_class_access :
   Decl_provider.class_decl ->
   Typing_error.t option
 
+val check_internal_access :
+  in_signature:bool ->
+  Typing_env_types.env ->
+  string option ->
+  Pos.t ->
+  Pos_or_decl.t ->
+  Typing_error.t option
+
 val check_obj_access :
   is_method:bool ->
   is_receiver_interface:bool ->

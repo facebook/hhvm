@@ -85,6 +85,17 @@ val add_constraint :
 val add_constraints :
   Pos.t -> env -> (locl_ty * Ast_defs.constraint_kind * locl_ty) list -> env
 
+(** Given type parameters and where constraints possibly referring to those
+    parameters, simplify the constraints such that they can be moved into the
+    bounds of the type parameters *)
+val apply_where_constraints :
+  Pos.t ->
+  Pos_or_decl.t ->
+  locl_ty Typing_defs_core.tparam list ->
+  locl_ty Typing_defs_core.where_constraint list ->
+  env:Typing_env_types.env ->
+  locl_ty Typing_defs_core.tparam list * Typing_error.t option
+
 (** Hack to allow for circular dependencies between Ocaml modules. *)
 val set_fun_refs : unit -> unit
 
@@ -100,3 +111,9 @@ val subtype_funs :
   env * Typing_error.t option
 
 val can_traverse_to_iface : can_traverse -> locl_ty
+
+val instantiate_fun_type :
+  Pos.t ->
+  Typing_defs.locl_fun_type ->
+  env:Typing_env_types.env ->
+  (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_fun_type

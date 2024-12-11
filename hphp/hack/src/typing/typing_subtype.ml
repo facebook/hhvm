@@ -2231,6 +2231,23 @@ end = struct
       (r_sub, ft_sub)
       (r_super, ft_super)
       env =
+    (* We should always have instantiated polymorphic function types by this point *)
+    let (_ : unit) =
+      let (_ : unit) =
+        if not ft_sub.ft_instantiated then
+          Errors.internal_error
+            (Pos_or_decl.unsafe_to_raw_pos @@ Typing_reason.to_pos r_sub)
+            "Unexpected polymorphic function type"
+        else
+          ()
+      in
+      if not ft_super.ft_instantiated then
+        Errors.internal_error
+          (Pos_or_decl.unsafe_to_raw_pos @@ Typing_reason.to_pos r_super)
+          "Unexpected polymorphic function type"
+      else
+        ()
+    in
     (* First apply checks on attributes and variadic arity *)
     let simplify_subtype_implicit_params_help =
       simplify_subtype_implicit_params ~subtype_env
@@ -4524,16 +4541,45 @@ end = struct
         (LoclType ty_sub)
         (LoclType ty_super)
     | (_, (_, Tany _)) -> valid env
-    (* -- C-Fun-R ----------------------------------------------------------- *)
+    (* -- C-Fun ------------------------------------------------------------- *)
     | ((r_sub, Tfun ft_sub), (r_super, Tfun ft_super)) ->
-      simplify_funs
-        ~subtype_env
-        ~check_return:true
-        ~for_override:false
-        ~super_like
-        (r_sub, ft_sub)
-        (r_super, ft_super)
-        env
+      let ((env, err_opt), ft_sub) =
+        if ft_sub.ft_instantiated then
+          ((env, None), ft_sub)
+        else
+          let pos =
+            Pos_or_decl.unsafe_to_raw_pos @@ Typing_reason.to_pos r_sub
+          in
+          (* Replace all quantifiers with fresh type variables adding any declared
+             bounds *)
+          Instantiate.instantiate_fun_type pos ft_sub ~env
+      in
+      (* Handle any error - we can fail to instantiate if the function type has
+         unsatisfiable bounds *)
+      if Option.is_some err_opt then
+        (env, TL.invalid ~fail:err_opt)
+      else
+        let (env, ft_super) =
+          if ft_super.ft_instantiated then
+            (env, ft_super)
+          else
+            (* Freshen all type parameters wrt to the enclosing context then
+               bind them *)
+            Instantiate.freshen_and_bind_fun_type_quantifiers
+              r_super
+              ft_super
+              ~env
+        in
+        (* Simplify the subtype proposition between the instantiated subtype
+           and the the supertype in the modified context *)
+        simplify_funs
+          ~subtype_env
+          ~check_return:true
+          ~for_override:false
+          ~super_like
+          (r_sub, ft_sub)
+          (r_super, ft_super)
+          env
     | ( ( _,
           ( Tany _ | Tunion _ | Toption _ | Tintersection _ | Tgeneric _
           | Taccess _ | Tnewtype _ | Tprim _ | Tnonnull | Tclass _
@@ -7886,7 +7932,7 @@ end = struct
     = Some true
 end
 
-module Subtype_simplify : sig
+and Subtype_simplify : sig
   (** Attempt to compute the intersection of a type with an existing list intersection.
     If try_intersect env t [t1;...;tn] = [u1; ...; um]
     then u1&...&um must be the greatest lower bound of t and t1&...&tn wrt subtyping.
@@ -8018,7 +8064,7 @@ end = struct
           failwith "The union of two locl type should always be a locl type.")
 end
 
-module Subtype_trans : sig
+and Subtype_trans : sig
   (** Given a subtype proposition, resolve conjunctions of subtype assertions
     of the form #v <: t or t <: #v by adding bounds to #v in env. Close env
     wrt transitivity i.e. if t <: #v and #v <: u then resolve t <: u which
@@ -8546,7 +8592,7 @@ end = struct
     (env, ty_err_opt)
 end
 
-module Subtype_tell : sig
+and Subtype_tell : sig
   (** Entry point asserting top-level subtype constraints and all implied constraints *)
   val sub_type_inner :
     Typing_env_types.env ->
@@ -8556,6 +8602,32 @@ module Subtype_tell : sig
     Typing_defs.internal_type ->
     Typing_defs.internal_type ->
     Typing_env_types.env * Typing_error.t option
+
+  val sub_type :
+    env ->
+    ?coerce:Typing_logic.coercion_direction option ->
+    ?is_coeffect:bool ->
+    ?ignore_readonly:bool ->
+    ?class_sub_classname:bool ->
+    locl_ty ->
+    locl_ty ->
+    Typing_error.Reasons_callback.t option ->
+    env * Typing_error.t option
+
+  val sub_type_or_fail :
+    env ->
+    locl_ty ->
+    locl_ty ->
+    Typing_error.Error.t option ->
+    env * Typing_error.t option
+
+  val sub_type_i :
+    env ->
+    ?is_coeffect:bool ->
+    internal_type ->
+    internal_type ->
+    Typing_error.Reasons_callback.t option ->
+    env * Typing_error.t option
 end = struct
   let sub_type_inner
       (env : env)
@@ -8611,87 +8683,289 @@ end = struct
       sub_type_inner env ~subtype_env ~sub_supportdyn ~this_ty ity_sub ity_super
     else
       sub_type_inner env ~subtype_env ~sub_supportdyn ~this_ty ity_sub ity_super
+
+  (* == Tell API ============================================================ *)
+
+  (* -- sub_type_i entry point ---------------------------------------------- *)
+
+  let sub_type_i env ?(is_coeffect = false) ty_sub ty_super on_error =
+    let subtype_env =
+      Subtype_env.create
+        ~log_level:2
+        ~is_coeffect
+        ~coerce:None
+        ~class_sub_classname:(should_cls_sub_cn env)
+        on_error
+    in
+    let old_env = env in
+    let (env, ty_err_opt) =
+      sub_type_inner
+        ~subtype_env
+        ~sub_supportdyn:None
+        ~this_ty:None
+        env
+        ty_sub
+        ty_super
+    in
+    let env =
+      Env.log_env_change "sub_type" old_env
+      @@
+      if Option.is_none ty_err_opt then
+        env
+      else
+        old_env
+    in
+    (env, ty_err_opt)
+
+  (* -- sub_type entry point -------------------------------------------------- *)
+
+  let sub_type
+      env
+      ?(coerce = None)
+      ?(is_coeffect = false)
+      ?(ignore_readonly = false)
+      ?(class_sub_classname = should_cls_sub_cn env)
+      (ty_sub : locl_ty)
+      (ty_super : locl_ty)
+      on_error =
+    let subtype_env =
+      Subtype_env.create
+        ~log_level:2
+        ~is_coeffect
+        ~coerce
+        ~class_sub_classname
+        on_error
+    in
+    let subtype_env = Subtype_env.{ subtype_env with ignore_readonly } in
+    let old_env = env in
+    let (env, ty_err_opt) =
+      sub_type_inner
+        ~subtype_env
+        ~sub_supportdyn:None
+        env
+        ~this_ty:None
+        (LoclType ty_sub)
+        (LoclType ty_super)
+    in
+    let env =
+      Env.log_env_change "sub_type" old_env
+      @@
+      if Option.is_none ty_err_opt then
+        env
+      else
+        old_env
+    in
+    (env, ty_err_opt)
+
+  (* Entry point *)
+  let sub_type_or_fail env ty1 ty2 err_opt =
+    sub_type env ty1 ty2
+    @@ Option.map ~f:Typing_error.Reasons_callback.always err_opt
+end
+
+and Instantiate : sig
+  val bind_tparams :
+    Typing_reason.t ->
+    Typing_defs.locl_ty Typing_defs.tparam list ->
+    Typing_env_types.env ->
+    Type_parameter_env.t ->
+    Typing_env_types.env * Type_parameter_env.t
+
+  val instantiate_fun_type :
+    Pos.t ->
+    Typing_defs.locl_fun_type ->
+    env:Typing_env_types.env ->
+    (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_fun_type
+
+  val freshen_and_bind_fun_type_quantifiers :
+    Typing_reason.t ->
+    Typing_defs.locl_fun_type ->
+    env:Typing_env_types.env ->
+    Typing_env_types.env * Typing_defs.locl_fun_type
+end = struct
+  let freshen_fun_ty fun_ty env =
+    let (env, ft_tparams_rev, subst) =
+      List.fold_left
+        fun_ty.ft_tparams
+        ~init:(env, [], SMap.empty)
+        ~f:(fun (env, acc, subst) ({ tp_name = (pos, old_name); _ } as tparam)
+           ->
+          let (env, new_name) = Typing_env.fresh_param_name env old_name in
+          let tparam = { tparam with tp_name = (pos, new_name) } in
+          let ty =
+            mk (Typing_reason.witness_from_decl pos, Tgeneric (new_name, []))
+          in
+          (env, tparam :: acc, SMap.add old_name ty subst))
+    in
+    let ft_tparams = List.rev ft_tparams_rev in
+    let combine_reasons ~src ~dest:_ = src in
+    ( env,
+      Locl_subst.apply_fun { fun_ty with ft_tparams } ~subst ~combine_reasons )
+
+  let bind_tparams r tparams env tp_env =
+    List.fold_left
+      tparams
+      ~init:(env, tp_env)
+      ~f:(fun
+           (env, tp_env)
+           {
+             tp_name = (def_pos, name);
+             tp_constraints;
+             tp_reified = reified;
+             tp_user_attributes;
+             _;
+           }
+         ->
+        let (lower_bounds, upper_bounds) =
+          List.fold_left
+            tp_constraints
+            ~init:(Typing_set.empty, Typing_set.empty)
+            ~f:(fun (lower, upper) (kind, ty) ->
+              let (is_mixed, is_nothing) =
+                Typing_utils.(is_mixed env ty, is_nothing env ty)
+              in
+              match kind with
+              | Ast_defs.Constraint_as when is_mixed -> (lower, upper)
+              | Ast_defs.Constraint_as -> (lower, Typing_set.add ty upper)
+              | Ast_defs.Constraint_super when is_nothing -> (lower, upper)
+              | Ast_defs.Constraint_super -> (Typing_set.add ty lower, upper)
+              | Ast_defs.Constraint_eq ->
+                (Typing_set.add ty lower, Typing_set.add ty upper))
+        in
+        let (enforceable, newable, require_dynamic) =
+          List.fold_left
+            tp_user_attributes
+            ~init:(false, false, false)
+            ~f:(fun
+                 ((enforceable, newable, require_dynamic) as acc)
+                 { ua_name = (_, name); _ }
+               ->
+              if String.equal name SN.UserAttributes.uaEnforceable then
+                (true, newable, require_dynamic)
+              else if String.equal name SN.UserAttributes.uaNewable then
+                (enforceable, true, require_dynamic)
+              else if String.equal name SN.UserAttributes.uaRequireDynamic then
+                (enforceable, newable, true)
+              else
+                acc)
+        in
+        let (env, lower_bounds) =
+          let (env, lower_bound) =
+            Typing_union.union_list env r @@ Typing_set.elements lower_bounds
+          in
+          ( env,
+            if Typing_utils.is_nothing env lower_bound then
+              Typing_set.empty
+            else
+              Typing_set.singleton lower_bound )
+        in
+        let (env, upper_bounds) =
+          let (env, upper_bound) =
+            Typing_intersection.intersect_list env r
+            @@ Typing_set.elements upper_bounds
+          in
+          ( env,
+            if Typing_utils.is_mixed env upper_bound then
+              Typing_set.empty
+            else
+              Typing_set.singleton upper_bound )
+        in
+        let info =
+          Typing_kinding_defs.
+            {
+              lower_bounds;
+              upper_bounds;
+              reified;
+              enforceable;
+              newable;
+              require_dynamic;
+              parameters = [];
+            }
+        in
+        (env, Type_parameter_env.add ~def_pos name info tp_env))
+
+  let bind_quantifiers r { ft_tparams; _ } env tp_env =
+    bind_tparams r ft_tparams env tp_env
+
+  let add_constraint (env, err_opts) pos (ty_subj, constraint_kind, ty_cstr) =
+    let callback = Some (Typing_error.Reasons_callback.unify_error_at pos) in
+    match constraint_kind with
+    | Ast_defs.Constraint_as ->
+      let (env, err) = Subtype_tell.sub_type env ty_subj ty_cstr callback in
+      (env, err :: err_opts)
+    | Ast_defs.Constraint_super ->
+      let (env, err) = Subtype_tell.sub_type env ty_cstr ty_subj callback in
+      (env, err :: err_opts)
+    | Ast_defs.Constraint_eq ->
+      let (env, err_cov) = Subtype_tell.sub_type env ty_subj ty_cstr callback in
+      let (env, err_contrav) =
+        Subtype_tell.sub_type env ty_cstr ty_subj callback
+      in
+      (env, Option.merge err_cov err_contrav ~f:Typing_error.both :: err_opts)
+
+  (** Instantiate a polymorphic function type with fresh type variables and
+    assert subtype constraints from type parameter bounds and where constraints*)
+  let instantiate_fun_type pos fun_ty ~env =
+    (* We need to build the substitution before generating constraints because
+       type parameters may appear as upper / lower bounds of other type
+       parameters, e.g.
+       function foo<T1 as T2,T2>(...)
+    *)
+    let (env, subst) =
+      let (env, name_tys) =
+        List.fold_left
+          fun_ty.ft_tparams
+          ~init:(env, [])
+          ~f:(fun (env, subst) { tp_name; _ } ->
+            let (_, name) = tp_name in
+            (* We don't want to solve these type variable so we create them as
+               invariant *)
+            let (env, ty) = Env.fresh_type_invariant env pos in
+            (env, (name, ty) :: subst))
+      in
+      (env, SMap.of_list name_tys)
+    in
+    (* TODO(mjt) add flow for polymorphic instantiation *)
+    let combine_reasons ~src ~dest:_ = src in
+    let fun_ty = Locl_subst.apply_fun fun_ty ~subst ~combine_reasons in
+    (* Accumulate constraints *)
+    let (env, err_opts) =
+      let acc =
+        List.fold_left
+          fun_ty.ft_tparams
+          ~init:(env, [])
+          ~f:(fun (env, err_opts) { tp_name = (_, id); tp_constraints; _ } ->
+            (* We know the substituion contains the name so use the unsafe [find] *)
+            let ty_subj = SMap.find id subst in
+            List.fold_left
+              tp_constraints
+              ~init:(env, err_opts)
+              ~f:(fun acc (cstr_kind, ty_cstr) ->
+                add_constraint acc pos (ty_subj, cstr_kind, ty_cstr)))
+      in
+      List.fold_left
+        fun_ty.ft_where_constraints
+        ~init:acc
+        ~f:(fun acc where_cstr -> add_constraint acc pos where_cstr)
+    in
+    let err_opt = Typing_error.multiple_opt @@ List.filter_opt err_opts in
+    ((env, err_opt), { fun_ty with ft_instantiated = true })
+
+  let freshen_and_bind_fun_type_quantifiers reason fun_ty ~env =
+    let (env, fun_ty) = freshen_fun_ty fun_ty env in
+    let fun_ty = { fun_ty with ft_instantiated = true } in
+    let env =
+      let (env, tpenv) = bind_quantifiers reason fun_ty env env.tpenv in
+      Typing_env_types.{ env with tpenv }
+    in
+    (env, fun_ty)
 end
 
 (* == API =================================================================== *)
 
 (* == Tell API ============================================================== *)
 
-(* -- sub_type_i entry point ------------------------------------------------ *)
-
-let sub_type_i env ?(is_coeffect = false) ty_sub ty_super on_error =
-  let subtype_env =
-    Subtype_env.create
-      ~log_level:2
-      ~is_coeffect
-      ~coerce:None
-      ~class_sub_classname:(should_cls_sub_cn env)
-      on_error
-  in
-  let old_env = env in
-  let (env, ty_err_opt) =
-    Subtype_tell.sub_type_inner
-      ~subtype_env
-      ~sub_supportdyn:None
-      ~this_ty:None
-      env
-      ty_sub
-      ty_super
-  in
-  let env =
-    Env.log_env_change "sub_type" old_env
-    @@
-    if Option.is_none ty_err_opt then
-      env
-    else
-      old_env
-  in
-  (env, ty_err_opt)
-
-(* -- sub_type entry point -------------------------------------------------- *)
-
-let sub_type
-    env
-    ?(coerce = None)
-    ?(is_coeffect = false)
-    ?(ignore_readonly = false)
-    ?(class_sub_classname = should_cls_sub_cn env)
-    (ty_sub : locl_ty)
-    (ty_super : locl_ty)
-    on_error =
-  let subtype_env =
-    Subtype_env.create
-      ~log_level:2
-      ~is_coeffect
-      ~coerce
-      ~class_sub_classname
-      on_error
-  in
-  let subtype_env = Subtype_env.{ subtype_env with ignore_readonly } in
-  let old_env = env in
-  let (env, ty_err_opt) =
-    Subtype_tell.sub_type_inner
-      ~subtype_env
-      ~sub_supportdyn:None
-      env
-      ~this_ty:None
-      (LoclType ty_sub)
-      (LoclType ty_super)
-  in
-  let env =
-    Env.log_env_change "sub_type" old_env
-    @@
-    if Option.is_none ty_err_opt then
-      env
-    else
-      old_env
-  in
-  (env, ty_err_opt)
-
-(* Entry point *)
-let sub_type_or_fail env ty1 ty2 err_opt =
-  sub_type env ty1 ty2
-  @@ Option.map ~f:Typing_error.Reasons_callback.always err_opt
+include Subtype_tell
 
 (* -- add_constraint(s) entry point ----------------------------------------- *)
 let decompose_subtype_add_bound
@@ -8771,6 +9045,83 @@ let rec decompose_subtype_add_prop env prop =
       ("Subtyping locl types in completeness mode should yield "
       ^ "propositions involving locl types only.")
 
+let decompose_subtype_add_bound_err
+    ~coerce (env : env) (ty_sub : locl_ty) (ty_super : locl_ty) =
+  let (env, ty_super) = Env.expand_type env ty_super in
+  let (env, ty_sub) = Env.expand_type env ty_sub in
+  match (get_node ty_sub, get_node ty_super) with
+  | (_, Tany _) -> (env, None)
+  (* name_sub <: ty_super so add an upper bound on name_sub *)
+  | (Tgeneric (name_sub, targs), _) when not (phys_equal ty_sub ty_super) ->
+    let ty_super = Sd.transform_dynamic_upper_bound ~coerce env ty_super in
+    (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
+       but the add_upper_bound call must be adapted *)
+    let tys = Env.get_upper_bounds env name_sub targs in
+    (* Don't add the same type twice! *)
+    if Typing_set.mem ty_super tys then
+      (env, None)
+    else
+      ( Env.add_upper_bound
+          ~intersect:(Subtype_simplify.try_intersect env)
+          env
+          name_sub
+          ty_super,
+        None )
+  (* ty_sub <: name_super so add a lower bound on name_super *)
+  | (_, Tgeneric (name_super, targs)) when not (phys_equal ty_sub ty_super) ->
+    (* TODO(T69551141) handle type arguments. Passing targs to get_lower_bounds,
+       but the add_lower_bound call must be adapted *)
+    let tys = Env.get_lower_bounds env name_super targs in
+    (* Don't add the same type twice! *)
+    if Typing_set.mem ty_sub tys then
+      (env, None)
+    else
+      ( Env.add_lower_bound
+          ~union:(Subtype_simplify.try_union env)
+          env
+          name_super
+          ty_sub,
+        None )
+  | (_, _) -> (env, None)
+
+let rec decompose_subtype_add_prop_err env prop =
+  match prop with
+  | TL.Conj props ->
+    let (env, errs) =
+      List.fold_left
+        ~f:(fun (env, errs) prop ->
+          let (env, err_opt) = decompose_subtype_add_prop_err env prop in
+          let errs =
+            Option.value_map err_opt ~default:errs ~f:(fun err -> err :: errs)
+          in
+          (env, errs))
+        ~init:(env, [])
+        props
+    in
+    let err_opt = Typing_error.multiple_opt errs in
+    (env, err_opt)
+  | TL.Disj (err_opt, []) -> (env, err_opt)
+  | TL.Disj (_, [prop']) -> decompose_subtype_add_prop_err env prop'
+  | TL.Disj _ ->
+    let callable_pos = env.genv.callable_pos in
+    Typing_log.log_prop
+      2
+      (Pos_or_decl.of_raw_pos callable_pos)
+      "decompose_subtype_add_prop"
+      env
+      prop;
+    (env, None)
+  | TL.IsSubtype (coerce, LoclType ty1, LoclType ty2) ->
+    decompose_subtype_add_bound_err ~coerce env ty1 ty2
+  | TL.IsSubtype _ ->
+    (* Subtyping queries between locl types are not creating
+       constraint types only if require_soundness is unset.
+       Otherwise type refinement subtyping queries may create
+       Thas_type_member() constraint types. *)
+    failwith
+      ("Subtyping locl types in completeness mode should yield "
+      ^ "propositions involving locl types only.")
+
 (* Given two types that we know are in a subtype relationship
  *   ty_sub <: ty_super
  * add to env.tpenv any bounds on generic type parameters that must
@@ -8829,6 +9180,28 @@ let decompose_subtype
   else
     decompose_subtype env ty_sub ty_super on_error
 
+let decompose_subtype_err
+    (env : env)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    (on_error : Typing_error.Reasons_callback.t option) =
+  let (env, prop) =
+    Subtype.(
+      simplify
+        ~subtype_env:
+          (Subtype_env.create
+             ~require_soundness:false
+             ~require_completeness:true
+             ~log_level:2
+             ~class_sub_classname:(should_cls_sub_cn env)
+             on_error)
+        ~this_ty:None
+        ~lhs:{ sub_supportdyn = None; ty_sub }
+        ~rhs:{ super_like = false; super_supportdyn = false; ty_super }
+        env)
+  in
+  decompose_subtype_add_prop_err env prop
+
 (* Decompose a general constraint *)
 let decompose_constraint
     (env : env)
@@ -8843,6 +9216,22 @@ let decompose_constraint
   | Ast_defs.Constraint_eq ->
     let env = decompose_subtype env ty_sub ty_super on_error in
     decompose_subtype env ty_super ty_sub on_error
+
+let decompose_constraint_err
+    (env : env)
+    (ck : Ast_defs.constraint_kind)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    on_error =
+  (* constraints are caught based on reason, not error callback. Using unify_error *)
+  match ck with
+  | Ast_defs.Constraint_as -> decompose_subtype_err env ty_sub ty_super on_error
+  | Ast_defs.Constraint_super ->
+    decompose_subtype_err env ty_super ty_sub on_error
+  | Ast_defs.Constraint_eq ->
+    let (env, err_opt1) = decompose_subtype_err env ty_sub ty_super on_error in
+    let (env, err_opt2) = decompose_subtype_err env ty_super ty_sub on_error in
+    (env, Typing_error.multiple_opt @@ List.filter_opt [err_opt1; err_opt2])
 
 (* Given a constraint ty1 ck ty2 where ck is AS, SUPER or =,
  * add bounds to type parameters in the environment that necessarily
@@ -8926,12 +9315,151 @@ let add_constraint
   else
     add_constraint env ck ty_sub ty_super on_error
 
+let add_constraint_err
+    (env : env)
+    (ck : Ast_defs.constraint_kind)
+    (ty_sub : locl_ty)
+    (ty_super : locl_ty)
+    on_error =
+  let oldsize = Env.get_tpenv_size env in
+  let (env, err_opt) =
+    decompose_constraint_err env ck ty_sub ty_super on_error
+  in
+  let ( = ) = Int.equal in
+  if Env.get_tpenv_size env = oldsize then
+    (env, err_opt)
+  else
+    let rec iter n (env, err_opts) =
+      if n > constraint_iteration_limit then
+        (env, Typing_error.multiple_opt @@ List.filter_opt err_opts)
+      else
+        let oldsize = Env.get_tpenv_size env in
+        let (env, err_opts) =
+          List.fold_left
+            (Env.get_generic_parameters env)
+            ~init:(env, err_opts)
+            ~f:(fun (env, err_opts) x ->
+              List.fold_left
+                (Typing_set.elements (Env.get_lower_bounds env x []))
+                ~init:(env, err_opts)
+                ~f:(fun (env, err_opts) ty_sub' ->
+                  List.fold_left
+                    (Typing_set.elements (Env.get_upper_bounds env x []))
+                    ~init:(env, err_opts)
+                    ~f:(fun (env, err_opts) ty_super' ->
+                      let (env, err_opt) =
+                        decompose_subtype_err env ty_sub' ty_super' on_error
+                      in
+                      (env, err_opt :: err_opts))))
+        in
+        if Int.equal (Env.get_tpenv_size env) oldsize then
+          (env, Typing_error.multiple_opt @@ List.filter_opt err_opts)
+        else
+          iter (n + 2) (env, err_opts)
+    in
+    iter 0 (env, [err_opt])
+
 let add_constraints p env constraints =
   let add_constraint env (ty1, ck, ty2) =
     add_constraint env ck ty1 ty2
     @@ Some (Typing_error.Reasons_callback.unify_error_at p)
   in
   List.fold_left constraints ~f:add_constraint ~init:env
+
+let add_constraints_err p env constraints =
+  let add_constraint env (ty1, ck, ty2) =
+    add_constraint_err env ck ty1 ty2
+    @@ Some (Typing_error.Reasons_callback.unify_error_at p)
+  in
+  let (env, err_opts) =
+    List.fold_left
+      constraints
+      ~f:(fun (env, errs) cstr ->
+        let (env, err) = add_constraint env cstr in
+        (env, err :: errs))
+      ~init:(env, [])
+  in
+  (env, Typing_error.multiple_opt @@ List.filter_opt err_opts)
+
+let apply_where_constraints pos def_pos tparams where_constraints ~env =
+  (* First, build a substitution to fresh type parameter names so that we don't
+     accidentally pick up bounds which happen to be in the context but aren't
+     implied by the constraints
+  *)
+  let (env, subst_fwd, subst_bwd, old_to_new) =
+    let (env, subst, subst_bwd, old_to_new) =
+      List.fold_left
+        tparams
+        ~init:(env, [], [], [])
+        ~f:(fun (env, fwds, bwds, nms) { tp_name = (_, orig_nm); _ } ->
+          let (env, new_nm) = Typing_env.fresh_param_name env orig_nm in
+          let new_ty = mk (Typing_reason.none, Tgeneric (new_nm, [])) in
+          let old_ty = mk (Typing_reason.none, Tgeneric (orig_nm, [])) in
+          ( env,
+            (orig_nm, new_ty) :: fwds,
+            (new_nm, old_ty) :: bwds,
+            (orig_nm, new_nm) :: nms ))
+    in
+    (env, SMap.of_list subst, SMap.of_list subst_bwd, SMap.of_list old_to_new)
+  in
+  let combine_reasons ~src ~dest:_ = src in
+  (* Apply the substitution to the [where] constraints *)
+  let where_constraints =
+    let apply ty = Locl_subst.apply ty ~subst:subst_fwd ~combine_reasons in
+    List.map where_constraints ~f:(fun (ty_l, cstr_kind, ty_r) ->
+        (apply ty_l, cstr_kind, apply ty_r))
+  in
+  (* Bind the fresh type parameters and decompose the constraints so we can
+     can capture the implied bounds on the type parameters*)
+  let (tpenv, err_opt) =
+    let tparams =
+      List.map tparams ~f:(fun ({ tp_name = (pos, orig_nm); _ } as tparam) ->
+          let new_nm = SMap.find orig_nm old_to_new in
+          let tp_name = (pos, new_nm) in
+          { tparam with tp_name })
+    in
+    let { tpenv; _ } = env in
+    let (env, tpenv) =
+      Instantiate.bind_tparams
+        (Reason.witness_from_decl def_pos)
+        tparams
+        env
+        tpenv
+    in
+    let env = { env with tpenv } in
+    (* Decompose the constraints and grab the modified type parameter env *)
+    let (env, err_opt) = add_constraints_err pos env where_constraints in
+    (* The new bounds will be applied in the [next] continuation since
+       [add_constraints] is written for refinement *)
+    let m = env.lenv.per_cont_env in
+    ( Option.value_map
+        ~default:env.tpenv
+        ~f:(fun Typing_per_cont_env.{ tpenv; _ } -> tpenv)
+      @@ Typing_continuations.Map.find_opt Typing_cont_key.Next m,
+      err_opt )
+  in
+  (* Update the type parameters with the bounds implied by the where constraint
+     by mapping back from the fresh type parameter's bounds *)
+  let apply ty = Locl_subst.apply ty ~subst:subst_bwd ~combine_reasons in
+  let apply_bounds
+      tp_constraints Typing_kinding_defs.{ lower_bounds; upper_bounds; _ } =
+    Typing_set.fold
+      (fun ty cstrs -> (Ast_defs.Constraint_as, apply ty) :: cstrs)
+      upper_bounds
+    @@ Typing_set.fold
+         (fun ty cstrs -> (Ast_defs.Constraint_super, apply ty) :: cstrs)
+         lower_bounds
+         tp_constraints
+  in
+  ( List.map
+      tparams
+      ~f:(fun ({ tp_name = (_, orig_name); tp_constraints; _ } as default) ->
+        let new_name = SMap.find orig_name old_to_new in
+        let entry_opt = Type_parameter_env.get new_name tpenv in
+        Option.value_map entry_opt ~default ~f:(fun entry ->
+            let tp_constraints = apply_bounds tp_constraints entry in
+            { default with tp_constraints })),
+    err_opt )
 
 (* -- sub_type_with_dynamic_as_bottom entry point --------------------------- *)
 let sub_type_with_dynamic_as_bottom env ty_sub ty_super on_error =
@@ -9289,6 +9817,10 @@ and is_generic_disjoint visited env (name : string) gen_ty ty =
 
 let is_type_disjoint env ty1 ty2 =
   is_type_disjoint_help (Tvid.Set.empty, SSet.empty) env ty1 ty2
+
+(* == Polymorphic type instatiation ========================================= *)
+
+include Instantiate
 
 (* -- Set function references ----------------------------------------------- *)
 let set_fun_refs () =

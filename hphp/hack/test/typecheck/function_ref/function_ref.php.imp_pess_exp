@@ -41,11 +41,27 @@ Invalid argument (Typing[4110])
   File "function_ref.php", line 82, characters 10-39:
   But got `(function(arraykey $x): ~arraykey)`
 ERROR: File "function_ref.php", line 90, characters 16-18:
-Invalid argument (Typing[4110])
-  File "function_ref.php", line 31, characters 3-57:
-  Expected `HH\FunctionRef<(readonly function(arraykey): ~arraykey)>`
+Invalid argument (Typing[4323])
+  File "function_ref.php", line 22, characters 22-22:
+  `T` is a constrained type parameter
   File "function_ref.php", line 22, characters 10-20:
-  But got `(readonly function<T>($x): ~_)`
+  This type constraint is violated
+  File "function_ref.php", line 31, characters 37-44:
+  Expected `arraykey`
+  File "function_ref.php", line 22, characters 10-20:
+  But got `mixed`
+ERROR: File "function_ref.php", line 90, characters 16-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 22, characters 32-32:
+  Expected `T#1`
+  File "function_ref.php", line 31, characters 48-55:
+  But got `arraykey`
+ERROR: File "function_ref.php", line 90, characters 16-18:
+Invalid argument (Typing[4110])
+  File "function_ref.php", line 31, characters 37-44:
+  Expected `arraykey`
+  File "function_ref.php", line 22, characters 25-25:
+  But got `T#1`
 ERROR: File "function_ref.php", line 95, characters 16-19:
 Invalid argument (Typing[4110])
   File "function_ref.php", line 31, characters 3-57:

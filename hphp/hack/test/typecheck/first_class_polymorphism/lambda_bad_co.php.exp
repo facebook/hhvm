@@ -1,0 +1,6 @@
+ERROR: File "lambda_bad_co.php", line 25, characters 29-46:
+Invalid argument (Typing[4110])
+  File "lambda_bad_co.php", line 16, characters 31-35:
+  Expected `Tblah#2`
+  File "lambda_bad_co.php", line 25, characters 42-46:
+  But got `bool`

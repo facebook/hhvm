@@ -1248,6 +1248,152 @@ let check_class_get
                  }))
   | _ -> ()
 
+let polymorphic_fun_type_of_id env ((use_pos, name) as fn_id) =
+  match Env.get_fun env name with
+  | Decl_entry.NotYetAvailable
+  | Decl_entry.DoesNotExist ->
+    let (env, _, ty) = unbound_name env fn_id ((), Pos.none, Aast.Null) in
+    (env, ty, None)
+  | Decl_entry.Found
+      {
+        fe_type;
+        fe_support_dynamic_type;
+        fe_pos = def_pos;
+        fe_deprecated;
+        fe_module;
+        fe_internal;
+        fe_package;
+        _;
+      } ->
+    (match deref fe_type with
+    | (reason, Tfun fun_ty) ->
+      let err_opt =
+        let is_explicit { ua_name = (_, name); _ } =
+          String.equal name SN.UserAttributes.uaExplicit
+        in
+        let other_errs =
+          List.filter_opt
+            [
+              TVis.check_deprecated ~use_pos ~def_pos env fe_deprecated;
+              TVis.check_cross_package
+                ~use_pos
+                ~def_pos
+                env
+                fun_ty.ft_cross_package;
+            ]
+        and access_errs =
+          TVis.check_top_level_access
+            ~ignore_package_errors:false
+            ~in_signature:false
+            ~use_pos
+            ~def_pos
+            env
+            fe_internal
+            (Option.map fe_module ~f:snd)
+            fe_package
+        and explicit_errs =
+          List.filter_map
+            fun_ty.ft_tparams
+            ~f:(fun { tp_user_attributes; tp_name = (decl_pos, param_name); _ }
+               ->
+              if List.exists tp_user_attributes ~f:is_explicit then
+                Some
+                  Typing_error.(
+                    primary
+                    @@ Primary.Require_generic_explicit
+                         { decl_pos; param_name; pos = use_pos })
+              else
+                None)
+        in
+        Typing_error.multiple_opt (other_errs @ access_errs @ explicit_errs)
+      in
+
+      let fun_ty =
+        let pessimise = TCO.pessimise_builtins (Env.get_tcopt env) in
+        Typing_enforceability.compute_enforced_and_pessimize_fun_type
+          ~this_class:None
+          env
+        @@ Typing_special_fun.transform_special_fun_ty ~pessimise fun_ty fn_id 0
+      in
+      let (env, fun_ty) =
+        let ty = mk (Typing_reason.none, Tfun fun_ty) in
+        let ((env, err_opt), ty) =
+          Typing_phase.localize_no_subst env ~ignore_errors:false ty
+        in
+        match get_node ty with
+        | Tfun fun_ty ->
+          (* We need simplify any where constraints so that we can modify the
+                         bounds of any type parameters with the implied constraints
+                         Once applied we are free to remove the where constraints *)
+          let (ft_tparams, err_opt_cstr) =
+            Typing_subtype.apply_where_constraints
+              use_pos
+              def_pos
+              fun_ty.ft_tparams
+              fun_ty.ft_where_constraints
+              ~env
+          in
+          (* If this is not a polymorphic function type, mark as instantiated *)
+          let ft_instantiated = List.is_empty fun_ty.ft_tparams in
+          let fun_ty =
+            {
+              fun_ty with
+              ft_tparams;
+              ft_where_constraints = [];
+              ft_instantiated;
+            }
+          in
+          let (_ : unit) =
+            Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err_opt
+          in
+          let (_ : unit) =
+            Option.iter
+              ~f:(Typing_error_utils.add_typing_error ~env)
+              err_opt_cstr
+          in
+          (env, fun_ty)
+        | _ -> failwith "Expected function type"
+      in
+      let fun_ty =
+        if String.equal name SN.SpecialFunctions.echo then
+          {
+            fun_ty with
+            ft_implicit_params =
+              {
+                capability =
+                  CapTy
+                    (MakeType.capability
+                       (Reason.witness_from_decl def_pos)
+                       SN.Capabilities.io);
+              };
+            ft_params =
+              List.map fun_ty.ft_params ~f:(fun fp ->
+                  {
+                    fp with
+                    fp_flags =
+                      Typing_defs_flags.FunParam.set_readonly true fp.fp_flags;
+                  });
+          }
+        else
+          fun_ty
+      in
+      let reason =
+        let def = Reason.localize reason in
+        let use = Typing_reason.witness use_pos in
+        Typing_reason.flow_call ~def ~use
+      in
+
+      let ty =
+        Typing_dynamic.maybe_wrap_with_supportdyn
+          ~should_wrap:
+            (TCO.enable_sound_dynamic (Env.get_tcopt env)
+            && fe_support_dynamic_type)
+          reason
+          fun_ty
+      in
+      (env, ty, err_opt)
+    | _ -> failwith "Expected function type")
+
 (** Given an identifier for a function, find its function type in the
  * environment and localise it with the input type parameters.
  *)
@@ -3705,6 +3851,16 @@ end = struct
           env
       in
       (env, te, ty)
+    | FunctionPointer (FP_id fid, []) ->
+      let (env, ty, err_opt) = polymorphic_fun_type_of_id env fid in
+      let (_ : unit) =
+        Option.iter err_opt ~f:(Typing_error_utils.add_typing_error ~env)
+      in
+      let (env, ty) = set_function_pointer env ty in
+      (* All function pointers are readonly since they capture no values *)
+      let (env, ty) = set_capture_only_readonly p env ty in
+      let ty = make_function_ref ~contains_generics:false env p ty in
+      make_result env p (FunctionPointer (FP_id fid, [])) ty
     | FunctionPointer (FP_id fid, targs) ->
       let (env, fty, targs) = fun_type_of_id env fid targs [] in
       let e = Aast.FunctionPointer (FP_id fid, targs) in
@@ -6294,6 +6450,22 @@ end = struct
           let (tel, typed_unpack_element, _, _) = List.hd_exn (List.rev resl) in
           (env, (tel, typed_unpack_element, ty, should_forget_fakes))
         | (r2, Tfun ft) ->
+          (* Instantiate polymorphic function types *)
+          let (env, ft) =
+            if ft.ft_instantiated then
+              (env, ft)
+            else
+              let ((env, err_opt), ft) =
+                Typing_subtype.instantiate_fun_type expr_pos ft ~env
+              in
+              let (_ : unit) =
+                Option.iter
+                  err_opt
+                  ~f:(Typing_error_utils.add_typing_error ~env)
+              in
+              (env, ft)
+          in
+
           (* Typing of format string functions. It is dependent on the arguments (el)
            * so it cannot be done earlier.
            *)
@@ -9112,6 +9284,20 @@ end = struct
       (* First check that arities match up *)
       let arity_ok =
         check_lambda_arity env p (get_pos ty) declared_ft expected_ft
+      in
+      (* Instantiate polymorphic function type before using in bidirectional
+         typing *)
+      let (env, expected_ft) =
+        if expected_ft.ft_instantiated then
+          (env, expected_ft)
+        else
+          let ((env, err_opt), expected_ft) =
+            Typing_subtype.instantiate_fun_type p expected_ft ~env
+          in
+          let (_ : unit) =
+            Option.iter err_opt ~f:(Typing_error_utils.add_typing_error ~env)
+          in
+          (env, expected_ft)
       in
       (* Use declared types for parameters in preference to those determined
        * by the context (expected parameters): they might be more general. *)

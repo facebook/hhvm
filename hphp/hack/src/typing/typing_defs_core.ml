@@ -1616,3 +1616,162 @@ let equal_internal_type ty1 ty2 =
   | (ConstraintType ty1, ConstraintType ty2) ->
     constraint_ty_equal ~normalize_lists:true ty1 ty2
   | (_, (LoclType _ | ConstraintType _)) -> false
+
+module Locl_subst = struct
+  type t = locl_ty SMap.t
+
+  let rec apply_ty (ty : locl_ty) ~subst ~combine_reasons =
+    match deref ty with
+    | (reason_src, Tgeneric (nm, _)) ->
+      (match SMap.find_opt nm subst with
+      | Some ty_subst ->
+        map_reason ty_subst ~f:(fun reason_dest ->
+            combine_reasons ~src:reason_src ~dest:reason_dest)
+      | _ -> ty)
+    | (r, Toption ty) -> mk (r, Toption (apply_ty ty ~subst ~combine_reasons))
+    | (r, Tclass_ptr ty) ->
+      mk (r, Tclass_ptr (apply_ty ty ~subst ~combine_reasons))
+    | (r, Taccess (ty, pos_id)) ->
+      mk (r, Taccess (apply_ty ty ~subst ~combine_reasons, pos_id))
+    | (r, Tvec_or_dict (ty_k, ty_v)) ->
+      mk
+        ( r,
+          Tvec_or_dict
+            ( apply_ty ty_k ~subst ~combine_reasons,
+              apply_ty ty_v ~subst ~combine_reasons ) )
+    | (r, Ttuple tuple_ty) ->
+      mk (r, Ttuple (apply_tuple tuple_ty ~subst ~combine_reasons))
+    | (r, Tunion tys) ->
+      mk (r, Tunion (List.map tys ~f:(apply_ty ~subst ~combine_reasons)))
+    | (r, Tintersection tys) ->
+      mk (r, Tintersection (List.map tys ~f:(apply_ty ~subst ~combine_reasons)))
+    | (r, Tfun fun_ty) -> mk (r, Tfun (apply_fun fun_ty ~subst ~combine_reasons))
+    | (r, Tshape shape_ty) ->
+      mk (r, Tshape (apply_shape shape_ty ~subst ~combine_reasons))
+    | (r, Tnewtype (nm, ty_params, ty_bound)) ->
+      mk
+        ( r,
+          Tnewtype
+            ( nm,
+              List.map ty_params ~f:(apply_ty ~subst ~combine_reasons),
+              apply_ty ty_bound ~subst ~combine_reasons ) )
+    | (r, Tdependent (dep_ty, ty)) ->
+      mk (r, Tdependent (dep_ty, apply_ty ty ~subst ~combine_reasons))
+    | (r, Tclass (id, exact, tys)) ->
+      mk
+        ( r,
+          Tclass
+            ( id,
+              apply_exact exact ~subst ~combine_reasons,
+              List.map tys ~f:(apply_ty ~subst ~combine_reasons) ) )
+    | ( _,
+        ( Tvar _ | Tunapplied_alias _ | Tany _ | Tnonnull | Tdynamic | Tprim _
+        | Tlabel _ | Tneg _ ) ) ->
+      ty
+
+  and apply_tuple { t_required; t_extra } ~subst ~combine_reasons =
+    let t_required = List.map t_required ~f:(apply_ty ~subst ~combine_reasons)
+    and t_extra =
+      match t_extra with
+      | Tsplat ty -> Tsplat (apply_ty ty ~subst ~combine_reasons)
+      | Textra { t_optional; t_variadic } ->
+        let t_optional =
+          List.map t_optional ~f:(apply_ty ~subst ~combine_reasons)
+        and t_variadic = apply_ty t_variadic ~subst ~combine_reasons in
+        Textra { t_optional; t_variadic }
+    in
+    { t_required; t_extra }
+
+  and apply_fun
+      ({
+         ft_tparams;
+         ft_where_constraints;
+         ft_params;
+         ft_implicit_params;
+         ft_ret;
+         _;
+       } as fun_type)
+      ~subst
+      ~combine_reasons =
+    let ft_tparams =
+      List.map ft_tparams ~f:(apply_tparam ~subst ~combine_reasons)
+    and ft_params =
+      List.map ft_params ~f:(apply_fun_param ~subst ~combine_reasons)
+    and ft_implicit_params =
+      apply_fun_implicit_params ft_implicit_params ~subst ~combine_reasons
+    and ft_where_constraints =
+      List.map
+        ft_where_constraints
+        ~f:(apply_where_constraint ~subst ~combine_reasons)
+    and ft_ret = apply_ty ft_ret ~subst ~combine_reasons in
+    {
+      fun_type with
+      ft_tparams;
+      ft_where_constraints;
+      ft_params;
+      ft_implicit_params;
+      ft_ret;
+    }
+
+  and apply_tparam ({ tp_constraints; _ } as tparam) ~subst ~combine_reasons =
+    let tp_constraints =
+      List.map tp_constraints ~f:(fun (cstr_kind, ty) ->
+          (cstr_kind, apply_ty ty ~subst ~combine_reasons))
+    in
+    { tparam with tp_constraints }
+
+  and apply_fun_param ({ fp_type; _ } as fun_param) ~subst ~combine_reasons =
+    let fp_type = apply_ty fp_type ~subst ~combine_reasons in
+    { fun_param with fp_type }
+
+  and apply_fun_implicit_params ({ capability } as t) ~subst ~combine_reasons =
+    match capability with
+    | CapDefaults _ -> t
+    | CapTy ty -> { capability = CapTy (apply_ty ty ~subst ~combine_reasons) }
+
+  and apply_where_constraint (ty1, cstr_kind, ty2) ~subst ~combine_reasons =
+    ( apply_ty ty1 ~subst ~combine_reasons,
+      cstr_kind,
+      apply_ty ty2 ~subst ~combine_reasons )
+
+  and apply_shape
+      { s_origin; s_unknown_value; s_fields } ~subst ~combine_reasons =
+    let s_unknown_value = apply_ty s_unknown_value ~subst ~combine_reasons
+    and s_fields =
+      TShapeMap.map (apply_shape_field ~subst ~combine_reasons) s_fields
+    in
+    { s_origin; s_unknown_value; s_fields }
+
+  and apply_shape_field { sft_optional; sft_ty } ~subst ~combine_reasons =
+    let sft_ty = apply_ty sft_ty ~subst ~combine_reasons in
+    { sft_optional; sft_ty }
+
+  and apply_exact exact ~subst ~combine_reasons =
+    match exact with
+    | Exact -> exact
+    | Nonexact { cr_consts } ->
+      let cr_consts =
+        SMap.map (apply_refined_const ~subst ~combine_reasons) cr_consts
+      in
+      Nonexact { cr_consts }
+
+  and apply_refined_const { rc_bound; rc_is_ctx } ~subst ~combine_reasons =
+    let rc_bound =
+      match rc_bound with
+      | TRexact ty -> TRexact (apply_ty ty ~subst ~combine_reasons)
+      | TRloose { tr_lower; tr_upper } ->
+        let tr_lower = List.map tr_lower ~f:(apply_ty ~subst ~combine_reasons)
+        and tr_upper =
+          List.map tr_upper ~f:(apply_ty ~subst ~combine_reasons)
+        in
+        TRloose { tr_lower; tr_upper }
+    in
+    { rc_bound; rc_is_ctx }
+
+  let apply ty ~subst ~combine_reasons =
+    (* Avoid a pointless traversal *)
+    if SMap.is_empty subst then
+      ty
+    else
+      apply_ty ty ~subst ~combine_reasons
+end

@@ -1,5 +1,11 @@
 ERROR: File "T153338497.php", line 15, characters 91-94:
 Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "T153338497.php", line 23, characters 3-19:
+Typing error (Typing[4110])
+  File "T153338497.php", line 15, characters 12-20:
+  Expected `dynamic`
+  File "T153338497.php", line 15, characters 84-87:
+  Type `TBox::TInner` is not a subtype of `dynamic` under dynamic-aware subtyping
 ERROR: File "T153338497.php", line 23, characters 12-18:
 Invalid argument (Typing[4110])
   File "T153338497.php", line 15, characters 91-102:

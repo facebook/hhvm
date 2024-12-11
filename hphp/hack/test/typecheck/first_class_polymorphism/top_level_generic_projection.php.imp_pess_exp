@@ -1,0 +1,46 @@
+ERROR: File "top_level_generic_projection.php", line 17, characters 3-5:
+Type access is only valid for a class, `self`, or `this`. To relate type parameters and type constants, you likely want to use the 'with refinement' feature instead. (Naming[2129])
+ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
+Invalid return type (Typing[4110])
+  File "top_level_generic_projection.php", line 21, characters 37-47:
+  Expected `ImplementsI`
+  File "top_level_generic_projection.php", line 15, characters 56-59:
+  But got `TIn::TBase`
+ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
+Invalid return type (Typing[4110])
+  File "top_level_generic_projection.php", line 21, characters 37-47:
+  Expected `ImplementsI`
+  File "top_level_generic_projection.php", line 17, characters 16-19:
+  But got `TIn::TBase`
+ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
+Invalid return type (Typing[4110])
+  File "top_level_generic_projection.php", line 21, characters 37-47:
+  Expected `ImplementsI`
+  File "top_level_generic_projection.php", line 17, characters 16-19:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type
+ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
+Typing error (Typing[4110])
+  File "top_level_generic_projection.php", line 15, characters 10-20:
+  Expected `dynamic`
+  File "top_level_generic_projection.php", line 17, characters 16-19:
+  Type `TIn::TBase` is not a subtype of `dynamic` under dynamic-aware subtyping
+ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
+Typing error (Typing[4323])
+  File "top_level_generic_projection.php", line 15, characters 35-38:
+  `TOut` is a constrained type parameter
+  File "top_level_generic_projection.php", line 15, characters 43-43:
+  This type constraint is violated
+  File "top_level_generic_projection.php", line 15, characters 43-43:
+  Expected `I`
+  File "top_level_generic_projection.php", line 17, characters 16-19:
+  But got `TIn::TBase`
+ERROR: File "top_level_generic_projection.php", line 23, characters 10-24:
+Typing error (Typing[4323])
+  File "top_level_generic_projection.php", line 15, characters 35-38:
+  `TOut` is a constrained type parameter
+  File "top_level_generic_projection.php", line 15, characters 43-43:
+  This type constraint is violated
+  File "top_level_generic_projection.php", line 15, characters 43-43:
+  Expected `I`
+  File "top_level_generic_projection.php", line 17, characters 16-19:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type

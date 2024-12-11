@@ -2,5 +2,33 @@ ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
 Invalid return type (Typing[4110])
   File "projected_type_const_error2.php", line 9, characters 23-25:
   Expected `int`
-  File "projected_type_const_error2.php", line 20, characters 36-41:
+  File "projected_type_const_error2.php", line 20, characters 60-65:
   But got `string`
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4323])
+  File "projected_type_const_error2.php", line 13, characters 20-23:
+  `TBox` is a constrained type parameter
+  File "projected_type_const_error2.php", line 13, characters 28-60:
+  This type constraint is violated
+  File "projected_type_const_error2.php", line 20, characters 52-57:
+  Expected `IntBox`
+  File "projected_type_const_error2.php", line 13, characters 28-60:
+  But got `MyBox with { type TInner = TVal#1 }`
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4110])
+  File "projected_type_const_error2.php", line 20, characters 52-57:
+  Expected `IntBox`
+  File "projected_type_const_error2.php", line 14, characters 3-6:
+  But got `TBox#1`
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4110])
+  File "projected_type_const_error2.php", line 20, characters 60-65:
+  Expected `string`
+  File "projected_type_const_error2.php", line 15, characters 3-6:
+  But got `TVal#1`
+ERROR: File "projected_type_const_error2.php", line 21, characters 10-20:
+Invalid return type (Typing[4110])
+  File "projected_type_const_error2.php", line 20, characters 60-65:
+  Expected `string`
+  File "projected_type_const_error2.php", line 15, characters 3-6:
+  But got `mixed` arising from an implicit `as mixed` constraint on this type

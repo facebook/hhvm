@@ -1,0 +1,1 @@
+--config allowed_files_for_ignore_readonly=lambda_good_co.php,lambda_good_contra.php,lambda_bad_co.php,lambda_bad_contra.php,mock_return.php

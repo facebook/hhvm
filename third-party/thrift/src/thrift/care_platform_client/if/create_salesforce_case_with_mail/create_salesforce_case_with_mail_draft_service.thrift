@@ -49,21 +49,6 @@ enum CaseVisibility {
   PUBLIC = 1,
 }
 
-enum CareVertical {
-  EC = 0,
-  HELPDESK = 1,
-  HRHOME = 2,
-  HRHUB = 3,
-  LEGALHUB = 4,
-  MULESOFT_CLOUDHUB = 5,
-  PAYMENT_PARTNER = 6,
-  PEEPS = 7,
-  PRIVACY_PORTAL = 8,
-  RL = 9,
-  SUPPLYCHAIN = 10,
-  TEST_VERTICAL = 11,
-}
-
 struct Info {
   1: CareContactInfo contact_info;
   2: string subject;
@@ -100,11 +85,10 @@ struct EmailMessageInfo {
 struct CreateSalesforceCaseWithMailDraftRequest {
   1: optional string session_id;
   2: Info info;
-  3: CareVertical vertical;
-  4: string case_intake_classification_key;
-  5: optional bool dry_run;
-  6: optional list<SubscribersInfo> subscribers;
-  7: optional EmailMessageInfo email_message_info;
+  3: string case_intake_classification_key;
+  4: optional bool dry_run;
+  5: optional list<SubscribersInfo> subscribers;
+  6: optional EmailMessageInfo email_message_info;
 }
 
 service CreateSalesforceCaseWithMailDraftService {

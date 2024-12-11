@@ -169,8 +169,8 @@ void HTTPTunnelSink::writeSuccess() noexcept {
     // If we drop below the max outstanding writes, resume egress
     if (outstandingWrites_ < kMaxOutstandingWrites && handlerEgressPaused_ &&
         handler_) {
-      handler_->onEgressResumed();
       handlerEgressPaused_ = false;
+      handler_->onEgressResumed();
     }
     resetIdleTimeout();
   }

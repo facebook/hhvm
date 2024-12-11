@@ -105,20 +105,6 @@ TEST(CompilerTest, zero_as_field_id_neg_keys) {
 }
 
 TEST(CompilerTest, no_field_id) {
-  check_compile(R"(
-    struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
-    struct Foo {
-      @Experimental
-      i32 field2; # expected-warning@-1: No field id specified for `field2`, resulting protocol may have conflicts or not be backwards compatible!
-    }
-
-    struct Bar {
-      i32 field4; # expected-warning: No field id specified for `field4`, resulting protocol may have conflicts or not be backwards compatible!
-    }
-  )");
-}
-
-TEST(CompilerTest, no_field_id_with_validation) {
   check_compile(
       R"(
     struct Experimental {} (thrift.uri = "facebook.com/thrift/annotation/Experimental") # expected-warning: The annotation thrift.uri is deprecated. Please use @thrift.Uri instead.
@@ -129,9 +115,7 @@ TEST(CompilerTest, no_field_id_with_validation) {
 
     struct Bar {
       i32 field4; # expected-error: No field id specified for `field4`
-    }
-  )",
-      {"--extra-validation", "implicit_field_ids"});
+    })");
 }
 
 TEST(CompilerTest, zero_as_field_id_annotation) {
@@ -150,7 +134,7 @@ TEST(CompilerTest, neg_field_ids) {
       R"(
       struct Foo {
         i32 f1;  // auto id = -1
-          # expected-warning@-1: No field id specified for `f1`, resulting protocol may have conflicts or not be backwards compatible!
+          # expected-error@-1: No field id specified for `f1`
 
         -2: i32 f2; // auto and manual id = -2
         -32: i32 f3; // min value.

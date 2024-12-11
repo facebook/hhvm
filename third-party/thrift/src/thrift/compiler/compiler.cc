@@ -129,7 +129,8 @@ Options:
   --extra-validation
               Comma-separated list of opt-in validators to run. Recognized
               values include:
-                implicit_field_ids
+                implicit_field_ids (IGNORED: always present, i.e. implicit field
+                  IDs are always forbidden).
                 unstructured_annotations_on_field_type
 
 Available generators (and options):
@@ -384,7 +385,7 @@ std::string parse_args(
         if (validator == "unstructured_annotations_on_field_type") {
           sparams.forbid_unstructured_annotations_on_field_types = true;
         } else if (validator == "implicit_field_ids") {
-          sparams.forbid_implicit_field_ids = true;
+          // no-op
         } else {
           fprintf(
               stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());

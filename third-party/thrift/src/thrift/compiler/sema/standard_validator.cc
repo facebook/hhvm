@@ -659,23 +659,16 @@ void limit_terse_write_on_experimental_mode(
 }
 
 void validate_field_id(sema_context& ctx, const t_field& node) {
-  if (node.explicit_id() != node.id()) {
-    if (ctx.sema_parameters().forbid_implicit_field_ids) {
-      ctx.error(node, "No field id specified for `{}`", node.name());
-    } else {
-      ctx.warning(
-          node,
-          "No field id specified for `{}`, resulting protocol may have conflicts "
-          "or not be backwards compatible!",
-          node.name());
-    }
-  }
+  ctx.check(
+      node.explicit_id() == node.id(),
+      "No field id specified for `{}`",
+      node.name());
 
   ctx.check(
       node.id() != 0 ||
           node.has_annotation("cpp.deprecated_allow_zero_as_field_id"),
       "Zero value (0) not allowed as a field id for `{}`",
-      node.get_name());
+      node.name());
 
   ctx.check(
       node.id() >= t_field::min_id || node.is_injected(),

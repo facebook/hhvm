@@ -737,14 +737,14 @@ cdef class SimpleUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def intValue(self):
-        if self.type.value != 7:
+    def intValue(SimpleUnion self not None):
+        if self.type_int != 7:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not intValue')
         return self.value
 
     @property
-    def stringValue(self):
-        if self.type.value != 2:
+    def stringValue(SimpleUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not stringValue')
         return self.value
 
@@ -752,14 +752,20 @@ cdef class SimpleUnion(thrift.py3.types.Union):
     def __hash__(SimpleUnion self):
         return  super().__hash__()
 
+    @property
+    def type(SimpleUnion self not None):
+        if self.py_type is None:
+            self.py_type = SimpleUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(SimpleUnion self):
-        self.type = SimpleUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 7:
+        elif self.type_int == 7:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_intValue()
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringValue()).decode('UTF-8')
 
     def __copy__(SimpleUnion self):
@@ -1201,170 +1207,170 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def intValue(self):
-        if self.type.value != 1:
+    def intValue(ComplexUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not intValue')
         return self.value
 
     @property
-    def opt_intValue(self):
-        if self.type.value != 201:
+    def opt_intValue(ComplexUnion self not None):
+        if self.type_int != 201:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not opt_intValue')
         return self.value
 
     @property
-    def stringValue(self):
-        if self.type.value != 3:
+    def stringValue(ComplexUnion self not None):
+        if self.type_int != 3:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not stringValue')
         return self.value
 
     @property
-    def opt_stringValue(self):
-        if self.type.value != 203:
+    def opt_stringValue(ComplexUnion self not None):
+        if self.type_int != 203:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not opt_stringValue')
         return self.value
 
     @property
-    def intValue2(self):
-        if self.type.value != 4:
+    def intValue2(ComplexUnion self not None):
+        if self.type_int != 4:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not intValue2')
         return self.value
 
     @property
-    def intValue3(self):
-        if self.type.value != 6:
+    def intValue3(ComplexUnion self not None):
+        if self.type_int != 6:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not intValue3')
         return self.value
 
     @property
-    def doubelValue(self):
-        if self.type.value != 7:
+    def doubelValue(ComplexUnion self not None):
+        if self.type_int != 7:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not doubelValue')
         return self.value
 
     @property
-    def boolValue(self):
-        if self.type.value != 8:
+    def boolValue(ComplexUnion self not None):
+        if self.type_int != 8:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not boolValue')
         return self.value
 
     @property
-    def union_list(self):
-        if self.type.value != 9:
+    def union_list(ComplexUnion self not None):
+        if self.type_int != 9:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not union_list')
         return self.value
 
     @property
-    def union_set(self):
-        if self.type.value != 10:
+    def union_set(ComplexUnion self not None):
+        if self.type_int != 10:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not union_set')
         return self.value
 
     @property
-    def union_map(self):
-        if self.type.value != 11:
+    def union_map(ComplexUnion self not None):
+        if self.type_int != 11:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not union_map')
         return self.value
 
     @property
-    def opt_union_map(self):
-        if self.type.value != 211:
+    def opt_union_map(ComplexUnion self not None):
+        if self.type_int != 211:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not opt_union_map')
         return self.value
 
     @property
-    def enum_field(self):
-        if self.type.value != 12:
+    def enum_field(ComplexUnion self not None):
+        if self.type_int != 12:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not enum_field')
         return self.value
 
     @property
-    def enum_container(self):
-        if self.type.value != 13:
+    def enum_container(ComplexUnion self not None):
+        if self.type_int != 13:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not enum_container')
         return self.value
 
     @property
-    def a_struct(self):
-        if self.type.value != 14:
+    def a_struct(ComplexUnion self not None):
+        if self.type_int != 14:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not a_struct')
         return self.value
 
     @property
-    def a_set_struct(self):
-        if self.type.value != 15:
+    def a_set_struct(ComplexUnion self not None):
+        if self.type_int != 15:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not a_set_struct')
         return self.value
 
     @property
-    def a_union(self):
-        if self.type.value != 16:
+    def a_union(ComplexUnion self not None):
+        if self.type_int != 16:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not a_union')
         return self.value
 
     @property
-    def opt_a_union(self):
-        if self.type.value != 216:
+    def opt_a_union(ComplexUnion self not None):
+        if self.type_int != 216:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not opt_a_union')
         return self.value
 
     @property
-    def a_union_list(self):
-        if self.type.value != 17:
+    def a_union_list(ComplexUnion self not None):
+        if self.type_int != 17:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not a_union_list')
         return self.value
 
     @property
-    def a_union_typedef(self):
-        if self.type.value != 18:
+    def a_union_typedef(ComplexUnion self not None):
+        if self.type_int != 18:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not a_union_typedef')
         return self.value
 
     @property
-    def a_union_typedef_list(self):
-        if self.type.value != 19:
+    def a_union_typedef_list(ComplexUnion self not None):
+        if self.type_int != 19:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not a_union_typedef_list')
         return self.value
 
     @property
-    def MyBinaryField(self):
-        if self.type.value != 20:
+    def MyBinaryField(ComplexUnion self not None):
+        if self.type_int != 20:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not MyBinaryField')
         return self.value
 
     @property
-    def MyBinaryField2(self):
-        if self.type.value != 21:
+    def MyBinaryField2(ComplexUnion self not None):
+        if self.type_int != 21:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not MyBinaryField2')
         return self.value
 
     @property
-    def MyBinaryListField4(self):
-        if self.type.value != 23:
+    def MyBinaryListField4(ComplexUnion self not None):
+        if self.type_int != 23:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not MyBinaryListField4')
         return self.value
 
     @property
-    def ref_field(self):
-        if self.type.value != 24:
+    def ref_field(ComplexUnion self not None):
+        if self.type_int != 24:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not ref_field')
         return self.value
 
     @property
-    def ref_field2(self):
-        if self.type.value != 25:
+    def ref_field2(ComplexUnion self not None):
+        if self.type_int != 25:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not ref_field2')
         return self.value
 
     @property
-    def excp_field(self):
-        if self.type.value != 26:
+    def excp_field(ComplexUnion self not None):
+        if self.type_int != 26:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not excp_field')
         return self.value
 
     @property
-    def MyCustomField(self):
-        if self.type.value != 27:
+    def MyCustomField(ComplexUnion self not None):
+        if self.type_int != 27:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not MyCustomField')
         return self.value
 
@@ -1372,74 +1378,80 @@ cdef class ComplexUnion(thrift.py3.types.Union):
     def __hash__(ComplexUnion self):
         return  super().__hash__()
 
+    @property
+    def type(ComplexUnion self not None):
+        if self.py_type is None:
+            self.py_type = ComplexUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(ComplexUnion self):
-        self.type = ComplexUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_intValue()
-        elif type == 201:
+        elif self.type_int == 201:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_opt_intValue()
-        elif type == 3:
+        elif self.type_int == 3:
             self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringValue()).decode('UTF-8')
-        elif type == 203:
+        elif self.type_int == 203:
             self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_opt_stringValue()).decode('UTF-8')
-        elif type == 4:
+        elif self.type_int == 4:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_intValue2()
-        elif type == 6:
+        elif self.type_int == 6:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_intValue3()
-        elif type == 7:
+        elif self.type_int == 7:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_doubelValue()
-        elif type == 8:
+        elif self.type_int == 8:
             self.value = <bint>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_boolValue())
-        elif type == 9:
+        elif self.type_int == 9:
             self.value = List__i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_union_list())
-        elif type == 10:
+        elif self.type_int == 10:
             self.value = Set__i64__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_union_set())
-        elif type == 11:
+        elif self.type_int == 11:
             self.value = Map__string_i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_union_map())
-        elif type == 211:
+        elif self.type_int == 211:
             self.value = Map__string_i32__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_opt_union_map())
-        elif type == 12:
+        elif self.type_int == 12:
             self.value = translate_cpp_enum_to_python(MyEnumA, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_enum_field())
-        elif type == 13:
+        elif self.type_int == 13:
             self.value = List__MyEnumA__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_enum_container())
-        elif type == 14:
+        elif self.type_int == 14:
             self.value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_a_struct()))
-        elif type == 15:
+        elif self.type_int == 15:
             self.value = Set__MyStruct__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_a_set_struct())
-        elif type == 16:
+        elif self.type_int == 16:
             self.value = SimpleUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cSimpleUnion](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_a_union()))
-        elif type == 216:
+        elif self.type_int == 216:
             self.value = SimpleUnion._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cSimpleUnion](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_opt_a_union()))
-        elif type == 17:
+        elif self.type_int == 17:
             self.value = List__SimpleUnion__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_a_union_list())
-        elif type == 18:
+        elif self.type_int == 18:
             self.value = Set__SimpleUnion__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_a_union_typedef())
-        elif type == 19:
+        elif self.type_int == 19:
             self.value = List__Set__SimpleUnion__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_a_union_typedef_list())
-        elif type == 20:
+        elif self.type_int == 20:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_MyBinaryField()
-        elif type == 21:
+        elif self.type_int == 21:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_MyBinaryField2()
-        elif type == 23:
+        elif self.type_int == 23:
             self.value = List__binary__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_MyBinaryListField4())
-        elif type == 24:
+        elif self.type_int == 24:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field():
                 self.value = None
             else:
             
                 self.value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
-        elif type == 25:
+        elif self.type_int == 25:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field2():
                 self.value = None
             else:
             
                 self.value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_ref_field2()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
-        elif type == 26:
+        elif self.type_int == 26:
             self.value = AnException._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cAnException](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_excp_field()))
-        elif type == 27:
+        elif self.type_int == 27:
             self.value =  _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_MyCustomField().clone())
 
     def __copy__(ComplexUnion self):
@@ -3436,14 +3448,14 @@ cdef class FloatUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def floatSide(self):
-        if self.type.value != 1:
+    def floatSide(FloatUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not floatSide')
         return self.value
 
     @property
-    def doubleSide(self):
-        if self.type.value != 2:
+    def doubleSide(FloatUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not doubleSide')
         return self.value
 
@@ -3451,14 +3463,20 @@ cdef class FloatUnion(thrift.py3.types.Union):
     def __hash__(FloatUnion self):
         return  super().__hash__()
 
+    @property
+    def type(FloatUnion self not None):
+        if self.py_type is None:
+            self.py_type = FloatUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(FloatUnion self):
-        self.type = FloatUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatSide()
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_doubleSide()
 
     def __copy__(FloatUnion self):

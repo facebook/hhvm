@@ -977,14 +977,14 @@ cdef class union1(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def i(self):
-        if self.type.value != 1:
+    def i(union1 self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not i')
         return self.value
 
     @property
-    def d(self):
-        if self.type.value != 2:
+    def d(union1 self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not d')
         return self.value
 
@@ -992,14 +992,20 @@ cdef class union1(thrift.py3.types.Union):
     def __hash__(union1 self):
         return  super().__hash__()
 
+    @property
+    def type(union1 self not None):
+        if self.py_type is None:
+            self.py_type = union1.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(union1 self):
-        self.type = union1.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i()
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_d()
 
     def __copy__(union1 self):
@@ -1171,26 +1177,26 @@ cdef class union2(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def i(self):
-        if self.type.value != 1:
+    def i(union2 self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not i')
         return self.value
 
     @property
-    def d(self):
-        if self.type.value != 2:
+    def d(union2 self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not d')
         return self.value
 
     @property
-    def s(self):
-        if self.type.value != 3:
+    def s(union2 self not None):
+        if self.type_int != 3:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not s')
         return self.value
 
     @property
-    def u(self):
-        if self.type.value != 4:
+    def u(union2 self not None):
+        if self.type_int != 4:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not u')
         return self.value
 
@@ -1198,18 +1204,24 @@ cdef class union2(thrift.py3.types.Union):
     def __hash__(union2 self):
         return  super().__hash__()
 
+    @property
+    def type(union2 self not None):
+        if self.py_type is None:
+            self.py_type = union2.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(union2 self):
-        self.type = union2.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i()
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_d()
-        elif type == 3:
+        elif self.type_int == 3:
             self.value = struct1._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cstruct1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_s()))
-        elif type == 4:
+        elif self.type_int == 4:
             self.value = union1._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cunion1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_u()))
 
     def __copy__(union2 self):

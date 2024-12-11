@@ -35,6 +35,7 @@ from thrift.py3.types cimport (
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
+from libc.stdint cimport int64_t
 from thrift.python.common cimport (
     RpcOptions as __RpcOptions,
     MetadataBox as __MetadataBox,
@@ -53,7 +54,8 @@ cdef extern from "thrift/compiler/test/fixtures/refs/gen-py3/module/types.h":
 
 cdef class MyUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(MyUnion self)
 
@@ -71,7 +73,8 @@ cdef class MyUnion(thrift.py3.types.Union):
 
 cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cNonTriviallyDestructibleUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(NonTriviallyDestructibleUnion self)
 

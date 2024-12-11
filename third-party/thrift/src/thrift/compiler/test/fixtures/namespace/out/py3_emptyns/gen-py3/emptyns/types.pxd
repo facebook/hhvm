@@ -35,6 +35,7 @@ from thrift.py3.types cimport (
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
+from libc.stdint cimport int64_t
 from thrift.python.common cimport (
     RpcOptions as __RpcOptions,
     MetadataBox as __MetadataBox,

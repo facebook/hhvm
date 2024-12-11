@@ -363,8 +363,8 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
 
     {{#struct:py3_fields}}
     @property
-    def {{field:py_name}}(self):
-        if self.type.value != {{field:key}}:
+    def {{field:py_name}}({{struct:name}} self not None):
+        if self.type_int != {{field:key}}:
             {{! TODO: python 3.10 adds some more fields to AttributeError, those should be added here at some point }}
             raise AttributeError(f'Union contains a value of type {self.type.name}, not {{field:py_name}}')
         return self.value
@@ -374,13 +374,19 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     def __hash__({{struct:name}} self):
         return  super().__hash__()
 
+    @property
+    def type({{struct:name}} self not None):
+        if self.py_type is None:
+            self.py_type = {{struct:name}}.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache({{struct:name}} self):
-        self.type = {{struct:name}}.Type(<int>(deref(self.{{> types/cpp_obj}}).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self.{{> types/cpp_obj}}).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
         {{#struct:py3_fields}}
-        elif type == {{field:key}}:
+        elif self.type_int == {{field:key}}:
             {{#field:type}}
             {{> types/cython_union_getter}}
             {{/field:type}}

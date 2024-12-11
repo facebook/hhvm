@@ -35,6 +35,7 @@ from thrift.py3.types cimport (
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
+from libc.stdint cimport int64_t
 from thrift.python.common cimport (
     RpcOptions as __RpcOptions,
     MetadataBox as __MetadataBox,
@@ -98,7 +99,8 @@ cdef class MyDataItem(thrift.py3.types.Struct):
 
 cdef class MyUnion(thrift.py3.types.Union):
     cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(MyUnion self)
 
@@ -158,7 +160,8 @@ cdef class ReservedKeyword(thrift.py3.types.Struct):
 
 cdef class UnionToBeRenamed(thrift.py3.types.Union):
     cdef shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(UnionToBeRenamed self)
 

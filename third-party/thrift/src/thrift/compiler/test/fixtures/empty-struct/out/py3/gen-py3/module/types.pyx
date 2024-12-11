@@ -205,10 +205,16 @@ cdef class Nada(thrift.py3.types.Union):
     def __hash__(Nada self):
         return  super().__hash__()
 
+    @property
+    def type(Nada self not None):
+        if self.py_type is None:
+            self.py_type = Nada.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(Nada self):
-        self.type = Nada.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
 
     def __copy__(Nada self):

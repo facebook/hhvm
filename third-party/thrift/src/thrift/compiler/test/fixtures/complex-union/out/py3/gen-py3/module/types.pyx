@@ -182,38 +182,38 @@ cdef class ComplexUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def intValue(self):
-        if self.type.value != 1:
+    def intValue(ComplexUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not intValue')
         return self.value
 
     @property
-    def stringValue(self):
-        if self.type.value != 5:
+    def stringValue(ComplexUnion self not None):
+        if self.type_int != 5:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not stringValue')
         return self.value
 
     @property
-    def intListValue(self):
-        if self.type.value != 2:
+    def intListValue(ComplexUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not intListValue')
         return self.value
 
     @property
-    def stringListValue(self):
-        if self.type.value != 3:
+    def stringListValue(ComplexUnion self not None):
+        if self.type_int != 3:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not stringListValue')
         return self.value
 
     @property
-    def typedefValue(self):
-        if self.type.value != 9:
+    def typedefValue(ComplexUnion self not None):
+        if self.type_int != 9:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not typedefValue')
         return self.value
 
     @property
-    def stringRef(self):
-        if self.type.value != 14:
+    def stringRef(ComplexUnion self not None):
+        if self.type_int != 14:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not stringRef')
         return self.value
 
@@ -221,22 +221,28 @@ cdef class ComplexUnion(thrift.py3.types.Union):
     def __hash__(ComplexUnion self):
         return  super().__hash__()
 
+    @property
+    def type(ComplexUnion self not None):
+        if self.py_type is None:
+            self.py_type = ComplexUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(ComplexUnion self):
-        self.type = ComplexUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_intValue()
-        elif type == 5:
+        elif self.type_int == 5:
             self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringValue()).decode('UTF-8')
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = List__i64__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_intListValue())
-        elif type == 3:
+        elif self.type_int == 3:
             self.value = List__string__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringListValue())
-        elif type == 9:
+        elif self.type_int == 9:
             self.value = Map__i16_string__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_typedefValue())
-        elif type == 14:
+        elif self.type_int == 14:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringRef():
                 self.value = None
             else:
@@ -368,14 +374,14 @@ cdef class ListUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def intListValue(self):
-        if self.type.value != 2:
+    def intListValue(ListUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not intListValue')
         return self.value
 
     @property
-    def stringListValue(self):
-        if self.type.value != 3:
+    def stringListValue(ListUnion self not None):
+        if self.type_int != 3:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not stringListValue')
         return self.value
 
@@ -383,14 +389,20 @@ cdef class ListUnion(thrift.py3.types.Union):
     def __hash__(ListUnion self):
         return  super().__hash__()
 
+    @property
+    def type(ListUnion self not None):
+        if self.py_type is None:
+            self.py_type = ListUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(ListUnion self):
-        self.type = ListUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = List__i64__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_intListValue())
-        elif type == 3:
+        elif self.type_int == 3:
             self.value = List__string__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringListValue())
 
     def __copy__(ListUnion self):
@@ -518,14 +530,14 @@ cdef class DataUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def binaryData(self):
-        if self.type.value != 1:
+    def binaryData(DataUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not binaryData')
         return self.value
 
     @property
-    def stringData(self):
-        if self.type.value != 2:
+    def stringData(DataUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not stringData')
         return self.value
 
@@ -533,14 +545,20 @@ cdef class DataUnion(thrift.py3.types.Union):
     def __hash__(DataUnion self):
         return  super().__hash__()
 
+    @property
+    def type(DataUnion self not None):
+        if self.py_type is None:
+            self.py_type = DataUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(DataUnion self):
-        self.type = DataUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_binaryData()
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_stringData()).decode('UTF-8')
 
     def __copy__(DataUnion self):
@@ -801,14 +819,14 @@ cdef class ValUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def v1(self):
-        if self.type.value != 1:
+    def v1(ValUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not v1')
         return self.value
 
     @property
-    def v2(self):
-        if self.type.value != 2:
+    def v2(ValUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not v2')
         return self.value
 
@@ -816,14 +834,20 @@ cdef class ValUnion(thrift.py3.types.Union):
     def __hash__(ValUnion self):
         return  super().__hash__()
 
+    @property
+    def type(ValUnion self not None):
+        if self.py_type is None:
+            self.py_type = ValUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(ValUnion self):
-        self.type = ValUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = Val._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cVal](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_v1()))
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = Val._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cVal](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_v2()))
 
     def __copy__(ValUnion self):
@@ -951,14 +975,14 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def thingOne(self):
-        if self.type.value != 1:
+    def thingOne(VirtualComplexUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not thingOne')
         return self.value
 
     @property
-    def thingTwo(self):
-        if self.type.value != 2:
+    def thingTwo(VirtualComplexUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not thingTwo')
         return self.value
 
@@ -966,14 +990,20 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
     def __hash__(VirtualComplexUnion self):
         return  super().__hash__()
 
+    @property
+    def type(VirtualComplexUnion self not None):
+        if self.py_type is None:
+            self.py_type = VirtualComplexUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(VirtualComplexUnion self):
-        self.type = VirtualComplexUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_thingOne()).decode('UTF-8')
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = bytes(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_thingTwo()).decode('UTF-8')
 
     def __copy__(VirtualComplexUnion self):
@@ -1193,8 +1223,8 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def s(self):
-        if self.type.value != 1:
+    def s(NonCopyableUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not s')
         return self.value
 
@@ -1202,12 +1232,18 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
     def __hash__(NonCopyableUnion self):
         return  super().__hash__()
 
+    @property
+    def type(NonCopyableUnion self not None):
+        if self.py_type is None:
+            self.py_type = NonCopyableUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(NonCopyableUnion self):
-        self.type = NonCopyableUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = NonCopyableStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cNonCopyableStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_s()))
 
     def __copy__(NonCopyableUnion self):

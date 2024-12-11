@@ -35,6 +35,7 @@ from thrift.py3.types cimport (
 from thrift.python.common cimport cThriftMetadata as __fbthrift_cThriftMetadata
 cimport thrift.py3.exceptions
 cimport thrift.py3.types
+from libc.stdint cimport int64_t
 from thrift.python.common cimport (
     RpcOptions as __RpcOptions,
     MetadataBox as __MetadataBox,
@@ -53,7 +54,8 @@ cdef extern from "thrift/compiler/test/fixtures/complex-union/gen-py3/module/typ
 
 cdef class ComplexUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(ComplexUnion self)
 
@@ -75,7 +77,8 @@ cdef class ComplexUnion(thrift.py3.types.Union):
 
 cdef class ListUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cListUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(ListUnion self)
 
@@ -93,7 +96,8 @@ cdef class ListUnion(thrift.py3.types.Union):
 
 cdef class DataUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cDataUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(DataUnion self)
 
@@ -124,7 +128,8 @@ cdef class Val(thrift.py3.types.Struct):
 
 cdef class ValUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cValUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(ValUnion self)
 
@@ -142,7 +147,8 @@ cdef class ValUnion(thrift.py3.types.Union):
 
 cdef class VirtualComplexUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cVirtualComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(VirtualComplexUnion self)
 
@@ -170,7 +176,8 @@ cdef class NonCopyableStruct(thrift.py3.types.Struct):
 
 cdef class NonCopyableUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cNonCopyableUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
-    cdef readonly object type
+    cdef int64_t type_int
+    cdef object py_type
     cdef readonly object value
     cdef _load_cache(NonCopyableUnion self)
 

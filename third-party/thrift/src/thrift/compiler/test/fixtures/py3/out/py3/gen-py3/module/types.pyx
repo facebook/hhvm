@@ -862,8 +862,8 @@ cdef class BinaryUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def iobuf_val(self):
-        if self.type.value != 1:
+    def iobuf_val(BinaryUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not iobuf_val')
         return self.value
 
@@ -871,12 +871,18 @@ cdef class BinaryUnion(thrift.py3.types.Union):
     def __hash__(BinaryUnion self):
         return  super().__hash__()
 
+    @property
+    def type(BinaryUnion self not None):
+        if self.py_type is None:
+            self.py_type = BinaryUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(BinaryUnion self):
-        self.type = BinaryUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value =  _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_iobuf_val().clone())
 
     def __copy__(BinaryUnion self):

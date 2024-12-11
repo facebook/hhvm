@@ -142,14 +142,14 @@ cdef class MyUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def anInteger(self):
-        if self.type.value != 1:
+    def anInteger(MyUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not anInteger')
         return self.value
 
     @property
-    def aString(self):
-        if self.type.value != 2:
+    def aString(MyUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not aString')
         return self.value
 
@@ -157,18 +157,24 @@ cdef class MyUnion(thrift.py3.types.Union):
     def __hash__(MyUnion self):
         return  super().__hash__()
 
+    @property
+    def type(MyUnion self not None):
+        if self.py_type is None:
+            self.py_type = MyUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(MyUnion self):
-        self.type = MyUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_anInteger():
                 self.value = None
             else:
             
                 self.value = cint32_t._create_FBTHRIFT_ONLY_DO_NOT_USE(__reference_shared_ptr(deref(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_anInteger()), self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE))
-        elif type == 2:
+        elif self.type_int == 2:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_aString():
                 self.value = None
             else:
@@ -300,8 +306,8 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def int_field(self):
-        if self.type.value != 1:
+    def int_field(NonTriviallyDestructibleUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not int_field')
         return self.value
 
@@ -309,12 +315,18 @@ cdef class NonTriviallyDestructibleUnion(thrift.py3.types.Union):
     def __hash__(NonTriviallyDestructibleUnion self):
         return  super().__hash__()
 
+    @property
+    def type(NonTriviallyDestructibleUnion self not None):
+        if self.py_type is None:
+            self.py_type = NonTriviallyDestructibleUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(NonTriviallyDestructibleUnion self):
-        self.type = NonTriviallyDestructibleUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             if not deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_int_field():
                 self.value = None
             else:

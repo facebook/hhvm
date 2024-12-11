@@ -574,26 +574,26 @@ cdef class MyUnion(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def myEnum(self):
-        if self.type.value != 1:
+    def myEnum(MyUnion self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not myEnum')
         return self.value
 
     @property
-    def myStruct(self):
-        if self.type.value != 2:
+    def myStruct(MyUnion self not None):
+        if self.type_int != 2:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not myStruct')
         return self.value
 
     @property
-    def myDataItem(self):
-        if self.type.value != 3:
+    def myDataItem(MyUnion self not None):
+        if self.type_int != 3:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not myDataItem')
         return self.value
 
     @property
-    def floatSet(self):
-        if self.type.value != 4:
+    def floatSet(MyUnion self not None):
+        if self.type_int != 4:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not floatSet')
         return self.value
 
@@ -601,18 +601,24 @@ cdef class MyUnion(thrift.py3.types.Union):
     def __hash__(MyUnion self):
         return  super().__hash__()
 
+    @property
+    def type(MyUnion self not None):
+        if self.py_type is None:
+            self.py_type = MyUnion.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(MyUnion self):
-        self.type = MyUnion.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = translate_cpp_enum_to_python(MyEnum, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myEnum())
-        elif type == 2:
+        elif self.type_int == 2:
             self.value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myStruct()))
-        elif type == 3:
+        elif self.type_int == 3:
             self.value = MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myDataItem()))
-        elif type == 4:
+        elif self.type_int == 4:
             self.value = Set__float__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatSet())
 
     def __copy__(MyUnion self):
@@ -1126,8 +1132,8 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         return __fbthrift_inst
 
     @property
-    def reserved_field(self):
-        if self.type.value != 1:
+    def reserved_field(UnionToBeRenamed self not None):
+        if self.type_int != 1:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not reserved_field')
         return self.value
 
@@ -1135,12 +1141,18 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
     def __hash__(UnionToBeRenamed self):
         return  super().__hash__()
 
+    @property
+    def type(UnionToBeRenamed self not None):
+        if self.py_type is None:
+            self.py_type = UnionToBeRenamed.Type(self.type_int)
+        return self.py_type
+
     cdef _load_cache(UnionToBeRenamed self):
-        self.type = UnionToBeRenamed.Type(<int>(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()))
-        cdef int type = self.type.value
-        if type == 0:    # Empty
+        self.py_type = None
+        self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
+        if self.type_int == 0:    # Empty
             self.value = None
-        elif type == 1:
+        elif self.type_int == 1:
             self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_reserved_field()
 
     def __copy__(UnionToBeRenamed self):

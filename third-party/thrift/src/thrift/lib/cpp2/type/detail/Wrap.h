@@ -151,36 +151,6 @@ class EqWrap : public Wrap<T, Tag>, public BaseDerived<Derived> {
   }
 };
 
-template <typename Derived, typename T, typename Tag = infer_tag<T>>
-class CompareWrap : public EqWrap<Derived, T, Tag> {
-  using Base = EqWrap<Derived, T, Tag>;
-
- public:
-  using Base::Base;
-
- protected:
-  using Base::data;
-  ~CompareWrap() = default; // abstract base class
-
-  constexpr static folly::ordering cmp(const Derived& lhs, const Derived& rhs) {
-    return op::compare<Tag>(data(lhs), data(rhs));
-  }
-
- private:
-  friend constexpr bool operator<(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_lt(cmp(lhs, rhs));
-  }
-  friend constexpr bool operator<=(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_lteq(cmp(lhs, rhs));
-  }
-  friend constexpr bool operator>(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_gt(cmp(lhs, rhs));
-  }
-  friend constexpr bool operator>=(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_gteq(cmp(lhs, rhs));
-  }
-};
-
 // The custom specialization of std::hash injected into the std namespace.
 #define FBTHRIFT_STD_HASH_WRAP_DATA(fullType)                        \
   namespace std {                                                    \

@@ -99,7 +99,6 @@ class RocketSinkClientCallback final : public SinkClientCallback {
   std::unique_ptr<TimeoutCallback> timeout_;
   protocol::PROTOCOL_TYPES protoId_;
   std::unique_ptr<CompressionConfig> compressionConfig_;
-  PayloadSerializer& payloadSerializer_;
 };
 
 } // namespace apache::thrift::rocket

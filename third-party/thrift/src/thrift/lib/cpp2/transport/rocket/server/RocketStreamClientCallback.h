@@ -91,7 +91,6 @@ class RocketStreamClientCallback final : public StreamClientCallback {
   std::unique_ptr<CompressionConfig> compressionConfig_;
   std::string rpcMethodName_{"<unknown_stream_method>"};
   StreamMetricCallback& streamMetricCallback_;
-  PayloadSerializer& payloadSerializer_;
 
   void scheduleTimeout();
   void cancelTimeout();

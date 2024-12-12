@@ -114,7 +114,7 @@ rocket::SetupFrame RocketTestClient::makeTestSetupFrame(
   meta.maxVersion() = kClientVersion;
 
   auto serializedMeta =
-      PayloadSerializer::getInstance().packCompact(std::move(meta));
+      PayloadSerializer::getInstance()->packCompact(std::move(meta));
 
   // Serialize RocketClient's major/minor version (which is separate from the
   // rsocket protocol major/minor version) into setup metadata.
@@ -378,7 +378,7 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
     // Validate RequestSetupMetadata
     RequestSetupMetadata meta;
     size_t unpackedSize =
-        PayloadSerializer::getInstance().unpack(meta, cursor, false);
+        PayloadSerializer::getInstance()->unpack(meta, cursor, false);
     EXPECT_EQ(unpackedSize, frame.payload().metadataSize());
     EXPECT_EQ(expectedSetupMetadata_, meta.opaque_ref().value_or({}));
     version_ = std::min(kServerVersion, meta.maxVersion_ref().value_or(0));
@@ -386,7 +386,7 @@ class RocketTestServer::RocketTestServerHandler : public RocketServerHandler {
     serverMeta.set_setupResponse();
     serverMeta.setupResponse_ref()->version_ref() = version_;
     connection.sendMetadataPush(
-        PayloadSerializer::getInstance().packCompact(std::move(serverMeta)));
+        PayloadSerializer::getInstance()->packCompact(std::move(serverMeta)));
   }
 
   void handleRequestResponseFrame(

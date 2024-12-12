@@ -42,9 +42,7 @@ namespace apache::thrift::rocket {
 // RocketSinkClientCallback methods
 RocketSinkClientCallback::RocketSinkClientCallback(
     StreamId streamId, RocketServerConnection& connection)
-    : streamId_(streamId),
-      connection_(connection),
-      payloadSerializer_(PayloadSerializer::getInstance()) {}
+    : streamId_(streamId), connection_(connection) {}
 
 bool RocketSinkClientCallback::onFirstResponse(
     FirstResponsePayload&& firstResponse,
@@ -62,7 +60,7 @@ bool RocketSinkClientCallback::onFirstResponse(
 
   connection_.sendPayload(
       streamId_,
-      payloadSerializer_.pack(
+      PayloadSerializer::getInstance()->pack(
           std::move(firstResponse),
           connection_.isDecodingMetadataUsingBinaryProtocol(),
           connection_.getRawSocket()),
@@ -80,7 +78,7 @@ void RocketSinkClientCallback::onFirstResponseError(
             DCHECK(encodedError.encoded.payload);
             connection_.sendPayload(
                 streamId_,
-                payloadSerializer_.pack(
+                PayloadSerializer::getInstance()->pack(
                     std::move(encodedError.encoded),
                     connection_.isDecodingMetadataUsingBinaryProtocol(),
                     connection_.getRawSocket()),
@@ -106,7 +104,7 @@ void RocketSinkClientCallback::onFinalResponse(StreamPayload&& finalResponse) {
 
   connection_.sendPayload(
       streamId_,
-      payloadSerializer_.pack(
+      PayloadSerializer::getInstance()->pack(
           std::move(finalResponse),
           connection_.isDecodingMetadataUsingBinaryProtocol(),
           connection_.getRawSocket()),
@@ -138,7 +136,7 @@ void RocketSinkClientCallback::onFinalResponseError(
         }
         connection_.sendPayload(
             streamId_,
-            payloadSerializer_.pack(
+            PayloadSerializer::getInstance()->pack(
                 std::move(err.encoded),
                 connection_.isDecodingMetadataUsingBinaryProtocol(),
                 connection_.getRawSocket()),
@@ -222,7 +220,7 @@ void RocketSinkClientCallback::timeoutExpired() noexcept {
   streamRpcError.what_utf8_ref() = "Sink chunk timeout";
   onFinalResponseError(folly::make_exception_wrapper<rocket::RocketException>(
       rocket::ErrorCode::CANCELED,
-      payloadSerializer_.packCompact(streamRpcError)));
+      PayloadSerializer::getInstance()->packCompact(streamRpcError)));
 }
 
 void RocketSinkClientCallback::setProtoId(protocol::PROTOCOL_TYPES protoId) {

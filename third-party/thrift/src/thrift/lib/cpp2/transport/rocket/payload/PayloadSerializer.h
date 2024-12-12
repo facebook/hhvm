@@ -17,8 +17,6 @@
 #pragma once
 
 #include <variant>
-#include <folly/Overload.h>
-#include <folly/SpinLock.h>
 #include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/ChecksumPayloadSerializerStrategy.h>
 #include <thrift/lib/cpp2/transport/rocket/payload/DefaultPayloadSerializerStrategy.h>
@@ -35,7 +33,41 @@ namespace apache::thrift::rocket {
  * can be overridden by calling the initialize() method if you want to use a
  * different strategy.
  */
-class PayloadSerializer {
+class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
+ private:
+  struct PayloadSerializerHolder;
+
+ public:
+  class Ptr {
+   public:
+    PayloadSerializer* operator->() const noexcept { return serializer_; }
+    PayloadSerializer& operator*() const noexcept { return *serializer_; }
+    operator bool() const noexcept { return serializer_; }
+    friend bool operator==(Ptr const& ptr, std::nullptr_t) noexcept {
+      return ptr.serializer_ == nullptr;
+    }
+    friend bool operator==(std::nullptr_t, Ptr const& ptr) noexcept {
+      return ptr.serializer_ == nullptr;
+    }
+    friend bool operator!=(Ptr const& ptr, std::nullptr_t) noexcept {
+      return ptr.serializer_ != nullptr;
+    }
+    friend bool operator!=(std::nullptr_t, Ptr const& ptr) noexcept {
+      return ptr.serializer_ != nullptr;
+    }
+    PayloadSerializer* get() { return serializer_; }
+
+   private:
+    friend struct PayloadSerializerHolder;
+
+    explicit Ptr(std::atomic<PayloadSerializer*>& cell)
+        : holder_(folly::make_hazard_pointer()),
+          serializer_(holder_.protect(cell)) {}
+
+    folly::hazptr_holder<> holder_;
+    PayloadSerializer* serializer_;
+  };
+
  private:
   std::variant<
       DefaultPayloadSerializerStrategy,
@@ -48,13 +80,16 @@ class PayloadSerializer {
     PayloadSerializerHolder() {}
     ~PayloadSerializerHolder();
 
-    PayloadSerializer& get();
+    PayloadSerializer::Ptr get();
 
     template <typename Strategy>
     void initialize(Strategy&& strategy) {
       auto* serializer =
           new PayloadSerializer(std::forward<Strategy>(strategy));
-      delete serializer_.exchange(serializer, std::memory_order_acq_rel);
+      if (auto s =
+              serializer_.exchange(serializer, std::memory_order_acq_rel)) {
+        s->retire();
+      }
     }
 
     void reset();
@@ -70,6 +105,7 @@ class PayloadSerializer {
       typename = std::enable_if_t<
           std::is_base_of_v<PayloadSerializerStrategy<Strategy>, Strategy>>>
   explicit PayloadSerializer(Strategy s) : strategy_(std::move(s)) {}
+
   /**
    * Lets you override the strategy to one of the supported strategies instead
    * of the default. Must be called before the getInstance() method is called
@@ -84,7 +120,7 @@ class PayloadSerializer {
    * the default strategy or the one that was overridden by the initialize()
    * method.
    */
-  static PayloadSerializer& getInstance();
+  static Ptr getInstance();
 
   template <class T>
   folly::Try<T> unpackAsCompressed(

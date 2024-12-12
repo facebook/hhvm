@@ -179,7 +179,7 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
     }
     ServerPushMetadata serverMeta;
     try {
-      PayloadSerializer::getInstance().unpack(
+      PayloadSerializer::getInstance()->unpack(
           serverMeta, std::move(mdPushFrame.metadata()), false /* useBinary */);
     } catch (...) {
       close(transport::TTransportException(
@@ -232,7 +232,7 @@ void RocketClient::handleFrame(std::unique_ptr<folly::IOBuf> frame) {
 
           close(RocketException(
               ErrorCode::REJECTED,
-              rocket::PayloadSerializer::getInstance().packCompact(
+              rocket::PayloadSerializer::getInstance()->packCompact(
                   responseRpcError)));
         }
         return;
@@ -387,7 +387,7 @@ StreamChannelStatusResponse RocketClient::handleFirstResponse(
     return {StreamChannelStatus::ContractViolation, kErrorMsg};
   }
   auto firstResponse =
-      rocket::PayloadSerializer::getInstance().unpack<FirstResponsePayload>(
+      rocket::PayloadSerializer::getInstance()->unpack<FirstResponsePayload>(
           std::move(fullPayload), encodeMetadataUsingBinary_);
   if (firstResponse.hasException()) {
     serverCallback.onInitialError(std::move(firstResponse.exception()));
@@ -443,7 +443,7 @@ StreamChannelStatusResponse RocketClient::handleStreamResponse(
     bool complete) {
   if (next) {
     auto streamPayload =
-        rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
+        rocket::PayloadSerializer::getInstance()->unpack<StreamPayload>(
             std::move(fullPayload), encodeMetadataUsingBinary_);
     if (streamPayload.hasException()) {
       return serverCallback.onStreamError(std::move(streamPayload.exception()));
@@ -512,7 +512,7 @@ StreamChannelStatusResponse RocketClient::handleSinkResponse(
   };
   if (next) {
     auto streamPayload =
-        rocket::PayloadSerializer::getInstance().unpack<StreamPayload>(
+        rocket::PayloadSerializer::getInstance()->unpack<StreamPayload>(
             std::move(fullPayload), encodeMetadataUsingBinary_);
     if (streamPayload.hasException()) {
       return serverCallback.onFinalResponseError(
@@ -1076,7 +1076,7 @@ bool RocketClient::sendPayload(
   return sendFrame(
       PayloadFrame(
           streamId,
-          rocket::PayloadSerializer::getInstance().pack(
+          rocket::PayloadSerializer::getInstance()->pack(
               std::move(payload),
               encodeMetadataUsingBinary(),
               getTransportWrapper()),
@@ -1129,7 +1129,7 @@ bool RocketClient::sendHeadersPush(
       std::move(payload.payload);
   return sendFrame(
       MetadataPushFrame::makeFromMetadata(
-          rocket::PayloadSerializer::getInstance().packCompact(
+          rocket::PayloadSerializer::getInstance()->packCompact(
               std::move(clientMeta))),
       std::move(onError));
 }
@@ -1517,7 +1517,7 @@ void RocketClient::terminateInteraction(int64_t id) {
   clientMeta.interactionTerminate_ref().ensure().interactionId_ref() = id;
   std::ignore = sendFrame(
       MetadataPushFrame::makeFromMetadata(
-          rocket::PayloadSerializer::getInstance().packCompact(
+          rocket::PayloadSerializer::getInstance()->packCompact(
               std::move(clientMeta))),
       std::move(onError));
 }
@@ -1560,7 +1560,7 @@ void RocketClient::sendTransportMetadataPush() {
     clientMeta.transportMetadataPush_ref() = std::move(*transportMetadataPush);
     std::ignore = sendFrame(
         MetadataPushFrame::makeFromMetadata(
-            rocket::PayloadSerializer::getInstance().packCompact(
+            rocket::PayloadSerializer::getInstance()->packCompact(
                 std::move(clientMeta))),
         std::move(onError));
   }

@@ -308,7 +308,7 @@ void RocketServerConnection::closeIfNeeded() {
           .drainCompleteCode_ref()
           .from_optional(drainCompleteCode_);
       sendMetadataPush(
-          PayloadSerializer::getInstance().packCompact(std::move(serverMeta)));
+          PayloadSerializer::getInstance()->packCompact(std::move(serverMeta)));
       // Send CONNECTION_ERROR error in case client doesn't support
       // DrainCompletePush
       sendError(StreamId{0}, RocketException(ErrorCode::CONNECTION_ERROR));
@@ -352,7 +352,7 @@ void RocketServerConnection::closeIfNeeded() {
                 callback->getStreamId(),
                 RocketException(
                     ErrorCode::CANCELED,
-                    PayloadSerializer::getInstance().packCompact(
+                    PayloadSerializer::getInstance()->packCompact(
                         getStreamConnectionClosingError())));
           }
           callback->onStreamCancel();
@@ -529,7 +529,7 @@ void RocketServerConnection::handleUntrackedFrame(
       MetadataPushFrame metadataFrame(std::move(frame));
       ClientPushMetadata clientMeta;
       try {
-        PayloadSerializer::getInstance().unpack(
+        PayloadSerializer::getInstance()->unpack(
             clientMeta, metadataFrame.metadata(), false);
       } catch (...) {
         close(folly::make_exception_wrapper<RocketException>(
@@ -675,7 +675,7 @@ void RocketServerConnection::handleSinkFrame(
       bool notViolateContract = true;
       if (next) {
         auto streamPayload =
-            PayloadSerializer::getInstance().unpack<StreamPayload>(
+            PayloadSerializer::getInstance()->unpack<StreamPayload>(
                 std::move(*fullPayload), decodeMetadataUsingBinary_.value());
         if (streamPayload.hasException()) {
           notViolateContract =

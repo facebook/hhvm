@@ -105,7 +105,7 @@ RocketException makeRocketException(const ResponseRpcError& responseRpcError) {
 
   return RocketException(
       rocketCategory,
-      PayloadSerializer::getInstance().packCompact(responseRpcError));
+      PayloadSerializer::getInstance()->packCompact(responseRpcError));
 }
 
 template <typename Serializer>
@@ -482,7 +482,7 @@ void ThriftServerRequestResponse::sendThriftResponse(
     context_.sendError(std::move(ex), std::move(cb));
     return;
   }
-  auto payload = PayloadSerializer::getInstance().packWithFds(
+  auto payload = PayloadSerializer::getInstance()->packWithFds(
       &metadata,
       std::move(data),
       std::move(getRequestContext()->getHeader()->fds),

@@ -178,7 +178,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
 
   RequestSetupMetadata meta;
   try {
-    if (PayloadSerializer::getInstance().unpack(
+    if (PayloadSerializer::getInstance()->unpack(
             meta, cursor, frame.encodeMetadataUsingBinary()) !=
         frame.payload().metadataSize()) {
       return connection.close(folly::make_exception_wrapper<RocketException>(
@@ -282,7 +282,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
     serverMeta.setupResponse_ref()->version_ref() = version_;
     serverMeta.setupResponse_ref()->zstdSupported_ref() = true;
     connection.sendMetadataPush(
-        PayloadSerializer::getInstance().packCompact(std::move(serverMeta)));
+        PayloadSerializer::getInstance()->packCompact(std::move(serverMeta)));
   } catch (const std::exception& e) {
     return connection.close(folly::make_exception_wrapper<RocketException>(
         ErrorCode::INVALID_SETUP,
@@ -427,7 +427,7 @@ void ThriftRocketServerHandler::handleRequestCommon(
   rocket::Payload debugPayload = payload.clone();
   auto requestPayloadTry =
       rocket::PayloadSerializer::getInstance()
-          .unpackAsCompressed<RequestPayload>(
+          ->unpackAsCompressed<RequestPayload>(
               std::move(payload), decodeMetadataUsingBinary);
 
   auto makeActiveRequest = [&](auto&& md, auto&& payload, auto&& reqCtx) {

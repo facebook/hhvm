@@ -37,14 +37,14 @@ void testPackAndUnpackWithCompactProtocol(PayloadSerializer& serializer) {
 TEST(PayloadSerializerTest, TestPackWithLegacyStrategy) {
   PayloadSerializer::reset();
   PayloadSerializer::initialize(LegacyPayloadSerializerStrategy());
-  auto& serializer = PayloadSerializer::getInstance();
+  auto& serializer = *PayloadSerializer::getInstance().get();
   testPackAndUnpackWithCompactProtocol(serializer);
 }
 
 TEST(PayloadSerializerTest, TestPackWitDefaultyStrategy) {
   PayloadSerializer::reset();
   PayloadSerializer::initialize(DefaultPayloadSerializerStrategy());
-  auto& serializer = PayloadSerializer::getInstance();
+  auto& serializer = *PayloadSerializer::getInstance().get();
   testPackAndUnpackWithCompactProtocol(serializer);
 }
 
@@ -52,17 +52,17 @@ TEST(PayloadSerializerTest, TestPackWithoutChecksumUsingFacade) {
   PayloadSerializer::reset();
   PayloadSerializer::initialize(
       ChecksumPayloadSerializerStrategy<DefaultPayloadSerializerStrategy>());
-  auto& serializer = PayloadSerializer::getInstance();
   RequestRpcMetadata metadata;
   metadata.protocol() = ProtocolId::COMPACT;
-  auto payload = serializer.packWithFds(
+  auto payload = PayloadSerializer::getInstance()->packWithFds(
       &metadata,
       folly::IOBuf::copyBuffer("test"),
       folly::SocketFds(),
       false, /* encodeMetadataUsingBinary */
       nullptr);
 
-  auto other = serializer.unpack<RequestPayload>(std::move(payload), false);
+  auto other = PayloadSerializer::getInstance()->unpack<RequestPayload>(
+      std::move(payload), false);
   EXPECT_EQ(other.hasException(), false);
 }
 

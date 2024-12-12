@@ -353,7 +353,6 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "object attribute 'Type' is read-only"
         ):
-            # pyre-ignore[8]: Intentional for test
             # pyre-ignore[41]: Intentional for test
             type_union.Type = 1
         _thrift_serialization_round_trip(self, immutable_serializer, type_union)

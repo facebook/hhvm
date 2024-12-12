@@ -153,7 +153,6 @@ class StructTestsParameterized(unittest.TestCase):
             self.easy().__dict__
         # TODO: make it a tuple instead of a list
         # self.assertIsInstance(easy().__class__.__slots__, tuple)
-        # pyre-ignore[16]
         self.assertIs(self.easy().__class__.__slots__, self.easy().__slots__)
         self.assertIs(self.easy(val=5).__slots__, self.easy(name="yo").__slots__)
 

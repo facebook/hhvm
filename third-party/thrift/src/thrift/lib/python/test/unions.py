@@ -213,7 +213,6 @@ class UnionTests(unittest.TestCase):
             self.Integers().__dict__
         # TODO: make it a tuple instead of a list
         # self.assertIsInstance(self.Integer().__class__.__slots__, tuple)
-        # pyre-ignore[16]
         self.assertIs(self.Integers().__class__.__slots__, self.Integers().__slots__)
         self.assertIs(
             self.Integers(small=5).__slots__, self.Integers(large=500).__slots__

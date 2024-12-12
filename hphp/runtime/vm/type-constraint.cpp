@@ -25,11 +25,14 @@
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/match.h"
 #include "hphp/util/trace.h"
+#include "hphp/runtime/base/annot-type.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/datatype.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/runtime-error.h"
+#include "hphp/runtime/base/tv-type.h"
+#include "hphp/runtime/base/typed-value.h"
 #include "hphp/runtime/base/type-structure-helpers.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
@@ -544,6 +547,38 @@ size_t stableHashVec(R&& v) {
   }
   return h;
 }
+
+// Returns the set of all possible default values for a given annot-type.
+AnnotTypeDefault annotTypeDefaultValues(AnnotType at) {
+  switch (at) {
+    case AnnotType::This:
+    case AnnotType::Callable:
+    case AnnotType::Resource:
+    case AnnotType::Object:
+    case AnnotType::SubObject:
+    case AnnotType::Nothing:
+    case AnnotType::NoReturn:
+    case AnnotType::Classname:
+    case AnnotType::Class:
+    case AnnotType::ClassOrClassname:
+    case AnnotType::Null:       return AnnotTypeDefault::Null;
+    case AnnotType::Mixed:      return AnnotTypeDefault::Any;
+    case AnnotType::Nonnull:    return AnnotTypeDefault::AnyNonNull;
+    case AnnotType::Number:     return AnnotTypeDefault::ZeroNumber;
+    case AnnotType::ArrayKey:   return AnnotTypeDefault::ZeroIntOrEmptyString;
+    case AnnotType::Int:        return AnnotTypeDefault::ZeroInt;
+    case AnnotType::Bool:       return AnnotTypeDefault::False;
+    case AnnotType::Float:      return AnnotTypeDefault::ZeroDouble;
+    case AnnotType::ArrayLike:  return AnnotTypeDefault::EmptyArray;
+    case AnnotType::VecOrDict:  return AnnotTypeDefault::EmptyVecOrDict;
+    case AnnotType::Vec:        return AnnotTypeDefault::EmptyVec;
+    case AnnotType::String:     return AnnotTypeDefault::EmptyString;
+    case AnnotType::Dict:       return AnnotTypeDefault::EmptyDict;
+    case AnnotType::Keyset:     return AnnotTypeDefault::EmptyKeyset;
+    case AnnotType::Unresolved: return AnnotTypeDefault::None;
+  }
+  always_assert(false);
+}
 } // anonymous namespace
 
 size_t UnionClassList::stableHash() const {
@@ -884,12 +919,47 @@ std::string TypeConstraint::debugName() const {
   }
 }
 
-TypedValue TypeConstraint::defaultValue() const {
+AnnotTypeDefault TypeConstraint::getPossibleDefaultValues() const {
   // Nullable type-constraints should always default to null, as Hack
   // guarantees this.
-  if (!isCheckable() || isNullable()) return make_tv<KindOfNull>();
-  AnnotType annotType = (*eachTypeConstraintInUnion(*this).begin()).type();
-  return annotDefaultValue(annotType);
+  if (isNullable()) return AnnotTypeDefault::Null;
+  AnnotTypeDefault dv = AnnotTypeDefault::None;
+  for (const auto& tc : eachTypeConstraintInUnion(*this)) {
+    dv = (dv | annotTypeDefaultValues(tc.type()));
+  }
+  return dv;
+}
+
+/*
+ * Choose a default value that satisfies all the constraints in the given
+ * intersection. Returns nullopt if no such default value exists.
+ */
+HPHP::Optional<TypedValue> TypeIntersectionConstraint::defaultValue() const {
+  AnnotTypeDefault dv = AnnotTypeDefault::Any;
+  for (auto const& tc : range()) {
+    dv = (dv & tc.getPossibleDefaultValues());
+  }
+
+  // It is possible that multiple default values satisfy the given
+  // intersection. Choose one in the following order of precedence.
+  if (has_flag(dv, AnnotTypeDefault::Null)) return make_tv<KindOfNull>();
+  if (has_flag(dv, AnnotTypeDefault::ZeroInt)) return make_tv<KindOfInt64>(0);
+  if (has_flag(dv, AnnotTypeDefault::False)) return make_tv<KindOfBoolean>(false);
+  if (has_flag(dv, AnnotTypeDefault::ZeroDouble)) return make_tv<KindOfDouble>(0.0);
+  if (has_flag(dv, AnnotTypeDefault::EmptyString)) {
+    return make_tv<KindOfPersistentString>(staticEmptyString());
+  }
+  if (has_flag(dv, AnnotTypeDefault::EmptyVec)) {
+    return make_tv<KindOfPersistentVec>(staticEmptyVec());
+  }
+  if (has_flag(dv, AnnotTypeDefault::EmptyDict)) {
+    return make_tv<KindOfPersistentDict>(staticEmptyDictArray());
+  }
+  if (has_flag(dv, AnnotTypeDefault::EmptyKeyset)) {
+    return make_tv<KindOfPersistentKeyset>(staticEmptyKeysetArray());
+  }
+  assertx(dv == AnnotTypeDefault::None);
+  return std::nullopt;
 }
 
 namespace {

@@ -11767,13 +11767,14 @@ private:
         cinfo.hasBadRedeclareProp = true;
       }
 
+      auto const dv = prop.typeConstraints.defaultValue();
       auto const nullable = [&] {
         if (isClosure) return true;
         if (!(prop.attrs & AttrSystemInitialValue)) return false;
-        return prop.typeConstraints.main().defaultValue().m_type == KindOfNull;
+        return dv && dv->m_type == KindOfNull;
       }();
 
-      attribute_setter(prop.attrs, !nullable, AttrNoImplicitNullable);
+      attribute_setter(prop.attrs, dv && !nullable, AttrNoImplicitNullable);
       if (!(prop.attrs & AttrSystemInitialValue)) continue;
       if (prop.val.m_type == KindOfUninit) {
         assertx(isClosure || bool(prop.attrs & AttrLateInit));
@@ -11788,7 +11789,8 @@ private:
         if (prop.name == s_86reified_prop.get()) {
           return get_default_value_of_reified_list(cls.userAttributes);
         }
-        return prop.typeConstraints.main().defaultValue();
+
+        return dv ? dv.value() : make_tv<KindOfNull>();
       }();
     }
   }
@@ -14443,7 +14445,8 @@ protected:
           if (prop.name == s_86reified_prop.get()) {
             return get_default_value_of_reified_list(cls.userAttributes);
           }
-          return prop.typeConstraints.main().defaultValue();
+          auto dv = prop.typeConstraints.defaultValue();
+          return dv ? dv.value() : make_tv<KindOfNull>();
         }();
       }
     }

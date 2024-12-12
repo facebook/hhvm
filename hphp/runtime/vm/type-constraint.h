@@ -307,7 +307,7 @@ struct TypeConstraint {
             && !isMixed()
             && !isTypeVar()
             && !isTypeConstant())
-      || isUnion();
+          || isUnion();
   }
 
   /*
@@ -408,12 +408,7 @@ struct TypeConstraint {
 
   std::string debugName() const;
 
-  /*
-   * Obtain an initial value suitable for this type-constraint. Where possible,
-   * the initial value is chosen to satisfy the type-constraint, but this isn't
-   * always possible (for example, for objects).
-   */
-  TypedValue defaultValue() const;
+  AnnotTypeDefault getPossibleDefaultValues() const;
 
   /*
    * Returns whether this and another type-constraint might not be equivalent at
@@ -895,6 +890,8 @@ struct TypeIntersectionConstraint {
       tc.addFlags(flags);
     }
   }
+
+  HPHP::Optional<TypedValue> defaultValue() const;
 
   private:
   folly::Range<TypeConstraint*> mutableRange() {

@@ -117,6 +117,59 @@ constexpr const char* annotNullableTypeName(AnnotType ty) {
   }
 }
 
+// Encodes possible default values for a given AnnotType.
+enum class AnnotTypeDefault : uint8_t {
+  None                 = 0b00000000,
+  Null                 = 0b00000001,
+  ZeroInt              = 0b00000010,
+  False                = 0b00000100,
+  ZeroDouble           = 0b00001000,
+  EmptyString          = 0b00010000,
+  EmptyVec             = 0b00100000,
+  EmptyDict            = 0b01000000,
+  EmptyKeyset          = 0b10000000,
+  // The following are simply unions of the above, defined for convenience
+  AnyNonNull           = 0b11111110,
+  Any                  = 0b11111111,
+  ZeroNumber           = 0b00001010,
+  ZeroIntOrEmptyString = 0b00010010,
+  EmptyArray           = 0b11100000,
+  EmptyVecOrDict       = 0b01100000
+};
+
+constexpr AnnotTypeDefault operator&(AnnotTypeDefault a, AnnotTypeDefault b) {
+  return AnnotTypeDefault(static_cast<uint8_t>(a) & static_cast<uint8_t>(b));
+}
+
+constexpr AnnotTypeDefault operator|(AnnotTypeDefault a, AnnotTypeDefault b) {
+  return AnnotTypeDefault(static_cast<uint8_t>(a) | static_cast<uint8_t>(b));
+}
+
+constexpr AnnotTypeDefault operator~(AnnotTypeDefault a) {
+  return AnnotTypeDefault(~static_cast<uint8_t>(a));
+}
+
+constexpr bool has_flag(AnnotTypeDefault flags, AnnotTypeDefault flag) {
+  return (flags & flag) != AnnotTypeDefault::None;
+}
+
+static_assert(AnnotTypeDefault::ZeroNumber
+  == (AnnotTypeDefault::ZeroInt | AnnotTypeDefault::ZeroDouble));
+static_assert(uint8_t(AnnotTypeDefault::Any) == 0xFF);
+static_assert(uint8_t(AnnotTypeDefault::AnyNonNull)
+    == uint8_t(AnnotTypeDefault::Any & ~AnnotTypeDefault::Null));
+static_assert(AnnotTypeDefault::EmptyArray
+  == (AnnotTypeDefault::EmptyVec
+     | AnnotTypeDefault::EmptyDict
+     | AnnotTypeDefault::EmptyKeyset)
+);
+static_assert(AnnotTypeDefault::ZeroIntOrEmptyString
+  == (AnnotTypeDefault::EmptyString | AnnotTypeDefault::ZeroInt)
+);
+static_assert(AnnotTypeDefault::EmptyVecOrDict
+  == (AnnotTypeDefault::EmptyVec | AnnotTypeDefault::EmptyDict)
+);
+
 constexpr const char* annotTypeName(AnnotType ty) {
   const char* name = annotNullableTypeName(ty);
   assertx(*name == '?');

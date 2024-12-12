@@ -1382,6 +1382,8 @@ void t_mstch_python_generator::generate_file(
 }
 
 void t_mstch_python_generator::generate_types() {
+  // Keep the "experimental_generate_mutable_types" flag for now to enable
+  // generation of "to_mutable_python" conversion methods.
   const bool experimental_generate_mutable_types =
       has_option("experimental_generate_mutable_types");
   // DO_BEFORE(satishvk, 20250130): Remove flags related to abstract types after
@@ -1423,18 +1425,17 @@ void t_mstch_python_generator::generate_types() {
 
   mstch_context_.options.erase("generate_to_mutable_python_conversion_methods");
 
-  if (experimental_generate_mutable_types) {
-    generate_file(
-        "thrift_mutable_types.py",
-        IsTypesFile::Yes,
-        TypeKind::Mutable,
-        generate_root_path_);
-    generate_file(
-        "thrift_mutable_types.pyi",
-        IsTypesFile::Yes,
-        TypeKind::Mutable,
-        generate_root_path_);
-  }
+  generate_file(
+      "thrift_mutable_types.py",
+      IsTypesFile::Yes,
+      TypeKind::Mutable,
+      generate_root_path_);
+  generate_file(
+      "thrift_mutable_types.pyi",
+      IsTypesFile::Yes,
+      TypeKind::Mutable,
+      generate_root_path_);
+
   mstch_context_.options["enable_abstract_types"] = "true";
 }
 
@@ -1458,13 +1459,11 @@ void t_mstch_python_generator::generate_clients() {
       IsTypesFile::No,
       TypeKind::Immutable,
       generate_root_path_);
-  if (has_option("experimental_generate_mutable_types")) {
-    generate_file(
-        "thrift_mutable_clients.py",
-        IsTypesFile::No,
-        TypeKind::Mutable,
-        generate_root_path_);
-  }
+  generate_file(
+      "thrift_mutable_clients.py",
+      IsTypesFile::No,
+      TypeKind::Mutable,
+      generate_root_path_);
 }
 
 void t_mstch_python_generator::generate_services() {
@@ -1478,13 +1477,11 @@ void t_mstch_python_generator::generate_services() {
       IsTypesFile::No,
       TypeKind::Immutable,
       generate_root_path_);
-  if (has_option("experimental_generate_mutable_types")) {
-    generate_file(
-        "thrift_mutable_services.py",
-        IsTypesFile::No,
-        TypeKind::Mutable,
-        generate_root_path_);
-  }
+  generate_file(
+      "thrift_mutable_services.py",
+      IsTypesFile::No,
+      TypeKind::Mutable,
+      generate_root_path_);
 }
 
 class t_python_patch_generator : public t_mstch_generator {
@@ -1533,16 +1530,6 @@ THRIFT_REGISTER_GENERATOR(
     mstch_python,
     "Python",
     "    include_prefix:  Use full include paths in generated files.\n"
-    "    experimental_generate_mutable_types:\n"
-    "      DO NOT USE. Enables the experimental generation of mutable\n"
-    "      thrift-python types (i.e., structs and unions). This is for local\n"
-    "      experimentation, development and testing ONLY. When this option is\n"
-    "      enabled, NO GUARANTEE is provided on any output (including any\n"
-    "      seemingly unrelated logic, such as previously existing generated\n"
-    "      code). Any \"new\" behavior (including the existence of this\n"
-    "      option) should be considered UNSTABLE and is subject to arbitrary\n"
-    "      (backwards incompatible) changes and undefined behavior.\n"
-    "      NEVER ENABLE THIS OPTION in production environments.\n"
     "    disable_abstract_types:\n"
     "      Disable the use of abstract types with thrift-python"
     "      immutable and mutable types.\n");

@@ -25,9 +25,6 @@ namespace whisker {
 
 namespace {
 class basic_native_object : public native_object {
-  const object* lookup_property(std::string_view) const override {
-    return nullptr;
-  }
   void print_to(
       tree_printer::scope scope, const object_print_options&) const override {
     scope.println("<basic_native_object>");

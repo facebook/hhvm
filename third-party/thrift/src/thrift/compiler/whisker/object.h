@@ -24,7 +24,6 @@
 #include <limits>
 #include <map>
 #include <memory>
-#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -107,17 +106,17 @@ struct object_print_options {
 
 /**
  * A native_object is the most powerful type in Whisker. Its properties and
- * behavior are fully defined by user C++ code.
+ * behavior are defined by highly customizable C++ code.
  *
- * A native_object implementation may perform arbitrary computation in C++ to
- * resolve a property name as long as the produced result can be marshaled back
- * to a whisker::object type (including possibly another native_object!).
+ * A native_object can work as a "map":
+ *   as_map_like() can be implemented to resolve a property names using
+ *   arbitrary C++ code, which Whisker's renderer will perform lookups on.
  *
- * Whisker also does not require that all property names exposed by a
- * native_object are statically (or finitely) enumerable. This allows a few
- * freedoms for implementers:
- *   - Properties can be lazily computed at lookup time.
- *   - Property lookup can have side-effects (not recommended, but possible).
+ * A native_object can work as an "array":
+ *   as_array_like() can be implemented to return a sequence of objects, which
+ *   Whisker's renderer will iterate over like an array.
+ *
+ * A native_object can work as both "map" and "array" at the same time!
  */
 class native_object {
  public:
@@ -125,22 +124,108 @@ class native_object {
   virtual ~native_object() = default;
 
   /**
-   * Searches for a property on the object referred to by the provided
-   * identifier, returning a non-empty optional if present, or std::nullopt
-   * otherwise.
+   * A class that allows "map-like" named property access over an underlying
+   * C++ object.
    *
-   * The returned object is by value because it may outlive this native_object
-   * instance. For most whisker::object types, this is fine because they are
-   * self-contained.
-   * If this property lookup returns a native_object, `foo`, and that object
-   * depends on `this`, then `foo` should keep a shared_ptr` to `this` to ensure
-   * that `this` outlives `foo`. The Whisker runtime does not provide any
-   * lifetime guarantees for `this`.
-   *
-   * Preconditions:
-   *   - The provided string is a valid Whisker identifier
+   * This interface is strictly more capable than the built-in map. For example:
+   *   - Property names do not need to be finitely enumerable.
+   *   - Property values can be lazily computed at lookup time.
    */
-  virtual const object* lookup_property(std::string_view identifier) const = 0;
+  class map_like {
+   public:
+    virtual ~map_like() = default;
+    /**
+     * Searches for a property on an object whose name matches the provided
+     * identifier, returning a non-null pointer if present.
+     *
+     * The returned object is by value because it may outlive this native_object
+     * instance. For most whisker::object types, this is fine because they are
+     * self-contained.
+     *
+     * If this property lookup returns a native_object, `foo`, and that object
+     * depends on `this`, then `foo` should keep a `shared_ptr` to `this` to
+     * ensure that `this` outlives `foo`. The Whisker runtime does not provide
+     * any lifetime guarantees for `this`.
+     *
+     * Preconditions:
+     *   - The provided string is a valid Whisker identifier
+     */
+    virtual const object* lookup_property(
+        std::string_view identifier) const = 0;
+  };
+  /**
+   * Returns an implementation of map_list if this object supports map-like
+   * property lookups. Otherwise, returns nullptr.
+   *
+   * When this function returns a non-null pointer, the returned object can be
+   * used in Whisker property lookups, such as section blocks.
+   *
+   * This function returns a shared_ptr so that the returned object can be this
+   * object itself (which is expected to be stored as a native_object::ptr).
+   * Doing so prevents an extra heap allocation in favor of an atomic increment.
+   *
+   *     class my_object : public native_object,
+   *                       public native_object::map_like,
+   *                       public std::enable_shared_from_this<my_object> {
+   *      public:
+   *       std::shared_ptr<const native_object::map_like> as_map_like()
+   *           const override {
+   *         return shared_from_this();
+   *       }
+   *
+   *       // Implement map-like functions...
+   *     };
+   */
+  virtual std::shared_ptr<const native_object::map_like> as_map_like() const {
+    return nullptr;
+  }
+
+  /**
+   * A class that allows "array-like" random access over an underlying sequence
+   * of objects.
+   */
+  class array_like {
+   public:
+    virtual ~array_like() = default;
+    /**
+     * Returns the number of elements in the sequence.
+     */
+    virtual std::size_t size() const = 0;
+    /**
+     * Returns the object at the specified index within the sequence.
+     *
+     * Preconditions:
+     *   - index < size()
+     */
+    virtual const object& at(std::size_t index) const = 0;
+  };
+  /**
+   * Returns an implementation of array_like if this object supports array-like
+   * iteration. Otherwise, returns nullptr.
+   *
+   * When this function returns a non-null pointer, the returned object can be
+   * used in Whisker template looping constructs, such as section blocks.
+   *
+   * This function returns a shared_ptr so that the returned object can be this
+   * object itself (which is expected to be stored as a native_object::ptr).
+   * Doing so prevents an extra heap allocation in favor of an atomic increment.
+   *
+   *     class my_object : public native_object,
+   *                       public native_object::array_like,
+   *                       public std::enable_shared_from_this<my_object> {
+   *      public:
+   *       std::shared_ptr<const native_object::array_like> as_array_like()
+   *           const override {
+   *         return shared_from_this();
+   *       }
+   *
+   *       // Implement array-like functions...
+   *     };
+   */
+  virtual std::shared_ptr<const native_object::array_like> as_array_like()
+      const {
+    return nullptr;
+  }
 
   /**
    * Creates a tree-like string representation of this object, primarily for
@@ -160,55 +245,6 @@ class native_object {
    * The default implementation compares by object identity.
    */
   virtual bool operator==(const native_object& other) const;
-
-  /**
-   * A class that allows "array-like" random access over an underlying sequence
-   * of objects.
-   */
-  class sequence {
-   public:
-    virtual ~sequence() = default;
-    /**
-     * Returns the number of elements in the sequence.
-     */
-    virtual std::size_t size() const = 0;
-    /**
-     * Returns the object at the specified index within the sequence.
-     *
-     * Preconditions:
-     *   - index < size()
-     */
-    virtual const object& at(std::size_t index) const = 0;
-  };
-  /**
-   * Returns an implementation of sequence if this object supports array-like
-   * iteration. Otherwise, returns nullptr.
-   *
-   * When this function returns a non-null pointer, the returned object can be
-   * used in Whisker template looping constructs, such as section blocks.
-   *
-   * This function returns a shared_ptr so that the returned object can be this
-   * object itself (which is expected to be stored as a native_object::ptr).
-   * Doing so prevents an extra heap allocation in favor of an atomic increment.
-   *
-   *     class my_object : public native_object,
-   *                       public native_object::sequence,
-   *                       public std::enable_shared_from_this<my_object> {
-   *      public:
-   *       std::shared_ptr<const sequence> as_sequence() const override {
-   *         return shared_from_this();
-   *       }
-   *
-   *       // Other functions...
-   *     };
-   *
-   * An array-like object is still allowed to have named properties supported
-   * via lookup_property(). This function opts in to strictly additional
-   * capabilities.
-   */
-  virtual std::shared_ptr<const sequence> as_sequence() const {
-    return nullptr;
-  }
 };
 
 namespace detail {

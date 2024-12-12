@@ -35,19 +35,15 @@ namespace {
  */
 class mstch_array_proxy final
     : public native_object,
-      public native_object::sequence,
+      public native_object::array_like,
       public std::enable_shared_from_this<mstch_array_proxy> {
  public:
   explicit mstch_array_proxy(mstch_array&& array)
       : proxied_(std::move(array)) {}
 
  private:
-  const object* lookup_property(std::string_view) const override {
-    // Arrays have no named properties.
-    return nullptr;
-  }
-
-  std::shared_ptr<const native_object::sequence> as_sequence() const override {
+  std::shared_ptr<const native_object::array_like> as_array_like()
+      const override {
     return shared_from_this();
   }
 
@@ -102,11 +98,18 @@ class mstch_array_proxy final
  *
  * Properties are lazily marshaled to whisker::object on first access by name.
  */
-class mstch_map_proxy final : public native_object {
+class mstch_map_proxy final
+    : public native_object,
+      public native_object::map_like,
+      public std::enable_shared_from_this<mstch_map_proxy> {
  public:
   explicit mstch_map_proxy(mstch_map&& map) : proxied_(std::move(map)) {}
 
  private:
+  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+    return shared_from_this();
+  }
+
   const object* lookup_property(std::string_view id) const override {
     if (auto cached = converted_.find(id); cached != converted_.end()) {
       return &cached->second;
@@ -165,10 +168,17 @@ class mstch_map_proxy final : public native_object {
  * Property lookups are NOT cached as the underlying property on the
  * mstch::object may be volatile.
  */
-class mstch_object_proxy : public native_object {
+class mstch_object_proxy
+    : public native_object,
+      public native_object::map_like,
+      public std::enable_shared_from_this<mstch_object_proxy> {
  public:
   explicit mstch_object_proxy(std::shared_ptr<mstch_object>&& obj)
       : proxied_(std::move(obj)) {}
+
+  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+    return shared_from_this();
+  }
 
   const object* lookup_property(std::string_view id) const override {
     // mstch does not support heterogenous lookups, so we need a temporary

@@ -32,18 +32,21 @@ namespace {
 /**
  * An object with no properties.
  */
-class empty_native_object : public native_object {
- public:
-  const object* lookup_property(std::string_view) const override {
-    return nullptr;
-  }
-};
+class empty_native_object : public native_object {};
 
 /**
  * When looking up a property, always returns a whisker::string that is the
  * property name repeated twice.
  */
-class double_property_name : public native_object {
+class double_property_name
+    : public native_object,
+      public native_object::map_like,
+      public std::enable_shared_from_this<double_property_name> {
+ public:
+  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+    return shared_from_this();
+  }
+
   const object* lookup_property(std::string_view id) const override {
     if (auto cached = cached_.find(id); cached != cached_.end()) {
       return &cached->second;
@@ -61,12 +64,18 @@ class double_property_name : public native_object {
  * When looking up a property, always returns the same whisker::object as a
  * reference.
  */
-class delegate_to : public native_object {
+class delegate_to : public native_object,
+                    public native_object::map_like,
+                    public std::enable_shared_from_this<delegate_to> {
  public:
   explicit delegate_to(whisker::object delegate)
       : delegate_(std::move(delegate)) {}
 
  private:
+  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+    return shared_from_this();
+  }
+
   const object* lookup_property(std::string_view) const override {
     return &delegate_;
   }

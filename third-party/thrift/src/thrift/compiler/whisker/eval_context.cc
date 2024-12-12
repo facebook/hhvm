@@ -38,7 +38,10 @@ const object* find_property(const object& o, std::string_view identifier) {
       [](boolean) -> result { return nullptr; },
       [](const array&) -> result { return nullptr; },
       [identifier](const native_object::ptr& o) -> result {
-        return o->lookup_property(identifier);
+        if (auto map_like = o->as_map_like()) {
+          return map_like->lookup_property(identifier);
+        }
+        return nullptr;
       },
       [identifier](const map& m) -> result {
         if (auto it = m.find(identifier); it != m.end()) {
@@ -55,10 +58,17 @@ const object* find_property(const object& o, std::string_view identifier) {
  * This could be a w::map but for debugging purposes, a native_object with a
  * custom print_to function is beneficial.
  */
-class global_scope_object : public native_object {
+class global_scope_object
+    : public native_object,
+      public native_object::map_like,
+      public std::enable_shared_from_this<global_scope_object> {
  public:
   explicit global_scope_object(map properties)
       : properties_(std::move(properties)) {}
+
+  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+    return shared_from_this();
+  }
 
   const object* lookup_property(std::string_view identifier) const override {
     if (auto property = properties_.find(identifier);

@@ -180,10 +180,13 @@ bool coerce_to_boolean(const array& value) {
   return !value.empty();
 }
 bool coerce_to_boolean(const native_object::ptr& value) {
-  if (auto sequence = value->as_sequence(); sequence != nullptr) {
-    return sequence->size() != 0;
+  if (auto array_like = value->as_array_like(); array_like != nullptr) {
+    return array_like->size() != 0;
   }
-  return true;
+  if (auto map_like = value->as_map_like(); map_like != nullptr) {
+    return true;
+  }
+  return false;
 }
 bool coerce_to_boolean(const map&) {
   return true;
@@ -438,25 +441,36 @@ class render_engine {
             // This native_object is being used as a conditional
             maybe_report_coercion();
             if (!coerce_to_boolean(value)) {
-              // Empty sequences are falsy
+              // Empty array-like objects are falsy
               do_visit(whisker::make::null);
             }
             return;
           }
-          // native_object can behave like a map or an array, depending on its
-          // implementation. The "default" implementation is map-like because
-          // lookup_property() must always be implemented.
-          // native::object::sequence is an optional extension.
-          // Our implementation here gives preference for the more specialized
-          // sequence interface.
-          if (auto sequence = value->as_sequence()) {
-            const std::size_t size = sequence->size();
+          // When used as a section_block, a native_object which is both
+          // "map"-like and "array"-like is ambiguous. We arbitrarily choose
+          // "array"-like as the winner. In practice, a native_object is most
+          // likely to be one or the other.
+          //
+          // This is one of the reasons that section blocks are deprecated in
+          // favor of `{{#each}}` and `{{#with}}`.
+          if (auto array_like = value->as_array_like()) {
+            const std::size_t size = array_like->size();
             for (std::size_t i = 0; i < size; ++i) {
-              do_visit(sequence->at(i));
+              do_visit(array_like->at(i));
             }
             return;
           }
-          do_visit(section_variable);
+          if (auto map_like = value->as_map_like()) {
+            do_visit(section_variable);
+            return;
+          }
+
+          // Since this native_object is neither array-like nor map-like, it is
+          // being used as a conditional
+          maybe_report_coercion();
+          if (coerce_to_boolean(value)) {
+            do_visit(whisker::make::null);
+          }
         },
         [&](const map&) {
           if (section.inverted) {

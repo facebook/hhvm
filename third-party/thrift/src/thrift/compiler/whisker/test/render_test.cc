@@ -26,11 +26,7 @@ namespace w = whisker::make;
 namespace whisker {
 
 namespace {
-class empty_native_object : public native_object {
-  const object* lookup_property(std::string_view) const override {
-    return nullptr;
-  }
-};
+class empty_native_object : public native_object {};
 } // namespace
 
 TEST_F(RenderTest, basic) {
@@ -171,17 +167,14 @@ TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
 TEST_F(RenderTest, section_block_array_iterable_native_object) {
   class array_like_native_object
       : public native_object,
-        public native_object::sequence,
+        public native_object::array_like,
         public std::enable_shared_from_this<array_like_native_object> {
    public:
     explicit array_like_native_object(array values)
         : values_(std::move(values)) {}
 
-    const object* lookup_property(std::string_view) const override {
-      return nullptr;
-    }
-
-    std::shared_ptr<const sequence> as_sequence() const override {
+    std::shared_ptr<const native_object::array_like> as_array_like()
+        const override {
       return shared_from_this();
     }
     std::size_t size() const override { return values_.size(); }
@@ -263,9 +256,17 @@ TEST_F(RenderTest, section_block_map) {
 }
 
 TEST_F(RenderTest, section_block_map_like_native_object) {
-  class map_like_native_object : public native_object {
+  class map_like_native_object
+      : public native_object,
+        public native_object::map_like,
+        public std::enable_shared_from_this<map_like_native_object> {
    public:
     explicit map_like_native_object(map values) : values_(std::move(values)) {}
+
+    std::shared_ptr<const native_object::map_like> as_map_like()
+        const override {
+      return shared_from_this();
+    }
 
     const object* lookup_property(std::string_view id) const override {
       if (auto value = values_.find(id); value != values_.end()) {
@@ -310,6 +311,37 @@ TEST_F(RenderTest, section_block_map_like_native_object) {
         "{{/factorials}}",
         factorials);
     EXPECT_EQ(*result, "The factorial function looks like:\n");
+  }
+}
+
+TEST_F(RenderTest, section_block_pointless_native_object) {
+  auto context =
+      w::map({{"pointless", w::make_native_object<empty_native_object>()}});
+  {
+    strict_boolean_conditional = diagnostic_level::info;
+    auto result = render(
+        "{{#pointless}}\n"
+        "Should not be rendered\n"
+        "{{/pointless}}",
+        context);
+    EXPECT_EQ(*result, "");
+  }
+  {
+    strict_boolean_conditional = diagnostic_level::error;
+    auto result = render(
+        "{{#pointless}}\n"
+        "Should not be rendered\n"
+        "{{/pointless}}",
+        context);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Condition 'pointless' is not a boolean. The encountered value is:\n"
+            "<native_object>\n",
+            path_to_file,
+            1)));
   }
 }
 

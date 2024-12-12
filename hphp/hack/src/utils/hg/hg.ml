@@ -105,11 +105,6 @@ module Hg_actual = struct
     else
       (result, false)
 
-  (** [are_same_revs rev1 rev2] returns true if either
-    rev1 is a prefix of rev2 or rev2 a prefix of rev1. *)
-  let are_same_revs rev1 rev2 =
-    String.starts_with rev1 ~prefix:rev2 || String.starts_with rev2 ~prefix:rev1
-
   (** Whether we're on a public commit, (i.e. our mergebase is ourself)
   and there are no local uncommitted changes.
 
@@ -125,7 +120,7 @@ module Hg_actual = struct
       | (_, Error _) ->
         false
       | (Ok (rev, has_local_changes), Ok mergebase) ->
-        (not has_local_changes) && are_same_revs rev mergebase)
+        (not has_local_changes) && Rev.equal rev mergebase)
 
   (** Return the timestamp of a specific hg revision in seconds since Unix epoch.
    * Manually removing timezone offset.

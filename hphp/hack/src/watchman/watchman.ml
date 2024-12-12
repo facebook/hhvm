@@ -511,10 +511,10 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
               ];
           ]))
 
-  (** We filter all responses from get_changes through this. This is to detect
-   * Watchman server crashes.
-   *
-   * See also Watchman docs on "since" query parameter. *)
+  (** We filter all responses from `get_changes` through this. This is to detect
+  Watchman server crashes.
+
+  See also Watchman docs on "since" query parameter. *)
   let assert_no_fresh_instance obj =
     Hh_json.Access.(
       let _ =
@@ -993,7 +993,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
   Edge cases: (1) when we send the first subscribe request, we get back an answer that
   lacks the since property entirely, (2) the next thing we hear has an empty since.mergebase,
   (3) the next thing we hear has a full since.mergebase. *)
-  let extract_mergebase data : (Hg.Rev.t * Hg.Rev.t option) option =
+  let extract_mergebase data : (Hg.Rev.t * Hg.Rev.t option option) option =
     let open Hh_json.Access in
     let accessor = return data in
     let ret =
@@ -1008,7 +1008,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       in
       return
         ( Hg.Rev.of_string mergebase,
-          since_mergebase |> Option.map ~f:Hg.Rev.of_string )
+          since_mergebase |> Option.map ~f:Hg.Rev.of_string_check_empty )
     in
     to_option ret
 
@@ -1030,10 +1030,12 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     | Some data ->
       let clock = extract_clock data in
       env.clockspec <- clock;
+      let files = set_of_list @@ extract_file_names env data in
       (match extract_mergebase data with
-      | Some (mergebase, Some since_mergebase)
+      | Some (mergebase, Some None) ->
+        (env, Changed_merge_base (mergebase, files, clock))
+      | Some (mergebase, Some (Some since_mergebase))
         when not (Hg.Rev.equal mergebase since_mergebase) ->
-        let files = set_of_list @@ extract_file_names env data in
         (env, Changed_merge_base (mergebase, files, clock))
       | _ ->
         assert_no_fresh_instance data;
@@ -1052,8 +1054,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
                  (J.get_string_val "state-leave" data)
                  data )
            with
-          | J.Not_found ->
-            (env, Files_changed (set_of_list @@ extract_file_names env data)))))
+          | J.Not_found -> (env, Files_changed files))))
 
   let get_clock instance =
     match instance with

@@ -7,6 +7,8 @@ module type Types_S = sig
     val to_string : t -> string
 
     val of_string : string -> t
+
+    val of_string_check_empty : string -> t option
   end
 
   type global_rev = int [@@deriving eq, show, yojson]
@@ -31,11 +33,19 @@ module Types = struct
   exception Malformed_result
 
   module Rev = struct
-    type t = string [@@deriving eq, show, yojson]
+    type t = string [@@deriving show, yojson]
+
+    let equal rev1 rev2 =
+      String.starts_with rev1 ~prefix:rev2
+      || String.starts_with rev2 ~prefix:rev1
 
     let to_string x = x
 
     let of_string x = x
+
+    let of_string_check_empty = function
+      | "" -> None
+      | x -> Some x
   end
 
   (** This is a monotonically increasing revision number. *)

@@ -26,6 +26,7 @@ let get_env name =
   try Some (Sys.getenv name) with
   | Stdlib.Not_found -> None
 
+(** Get the user from the $USER or $USERNAME or $LOGNAME environment variable. *)
 let getenv_user () =
   let user_var =
     if Sys.win32 then
@@ -219,6 +220,7 @@ let restart () =
   let argv = Sys.argv in
   Unix.execv cmd argv
 
+(** Try to get the current system username from environment variables or commands such as `logname` *)
 let logname_impl () =
   match getenv_user () with
   | Some user -> user

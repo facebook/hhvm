@@ -305,7 +305,7 @@ let main_internal
       local_config.ServerLocalConfig.consume_streaming_errors
       && (not args.ClientEnv.output_json)
       && prechecked
-      && not (EventLogger.is_sandcastle ())
+      && not (Sandcastle.is_sandcastle ())
     in
     if use_streaming then
       let%lwt (exit_status, streamed_errors, watchman_clock_streaming, telemetry)

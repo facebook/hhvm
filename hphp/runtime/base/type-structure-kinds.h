@@ -20,7 +20,7 @@
 namespace HPHP {
 
 // These values are exposed to the user in
-// hphp/runtime/ext/reflection/ext_reflection-TypeInfo.php
+// hphp/runtime/ext/reflection/ext_reflection-classes.php
 enum class TypeStructureKind : uint8_t {
   T_void = 0,
   T_int = 1,

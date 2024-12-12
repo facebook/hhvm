@@ -1283,7 +1283,7 @@ namespace HH {
   /* These enum values correspond to the 'kind' field in the
    * TypeStructure shape returned by type_structure() or
    * ReflectionTypeConstant::getTypeStructure(). The following enum
-   * values are replicated in hphp/runtime/base/type-structure.h
+   * values are replicated in hphp/runtime/base/type-structure-kinds.h
    */
   enum TypeStructureKind: int {
     OF_VOID = 0;
@@ -1316,6 +1316,8 @@ namespace HH {
     OF_NULL = 28;
     OF_NOTHING = 29;
     OF_DYNAMIC = 30;
+    OF_CLASS_PTR = 33;
+    OF_CLASS_OR_CLASSNAME = 34;
     OF_UNRESOLVED = 101; // for type aliases only
     OF_XHP = 103;
   }

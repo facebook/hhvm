@@ -28,6 +28,7 @@ val process_file :
 
 type result = {
   errors: Errors.t;
+  warnings_saved_state: Warnings_saved_state.t option;
   telemetry: Telemetry.t;
   time_first_error: seconds_since_epoch option;
 }

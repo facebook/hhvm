@@ -154,6 +154,7 @@ type check_info = {
   init_id: string;
   check_reason: string;
   log_errors: bool;
+  discard_warnings: bool;
   recheck_id: string option;
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;
   memtrace_dir: string option;

@@ -637,17 +637,34 @@ module ErrorStats = struct
     }
 end
 
+let add_warnings_to_ss mergebase_warning_hashes errors ~discard_warnings :
+    Warnings_saved_state.t option =
+  Option.map mergebase_warning_hashes ~f:(fun mergebase_warning_hashes ->
+      if discard_warnings then
+        let warning_hashes = Errors.make_warning_saved_state errors in
+        Warnings_saved_state.union mergebase_warning_hashes warning_hashes
+      else
+        mergebase_warning_hashes)
+
+let filter_out_warnings mergebase_warning_hashes errors ~discard_warnings =
+  let mergebase_warning_hashes =
+    add_warnings_to_ss mergebase_warning_hashes errors ~discard_warnings
+  in
+  let errors =
+    Errors.filter_out_mergebase_warnings mergebase_warning_hashes errors
+  in
+  (mergebase_warning_hashes, errors)
+
 module Merge : sig
   val merge :
     batch_counts_by_worker_id:Counts.t ref ->
     error_stats:ErrorStats.t ref ->
     check_info:check_info ->
-    warnings_saved_state:Warnings_saved_state.t option ->
     Todo.t ->
     int ->
     log_message * typing_result * TypingProgress.t ->
-    typing_result ->
-    typing_result
+    Warnings_saved_state.t option * typing_result ->
+    Warnings_saved_state.t option * typing_result
 end = struct
   let process_errors errors error_stats ~stream_errors ~log_errors : unit =
     error_stats := ErrorStats.update errors !error_stats;
@@ -686,16 +703,16 @@ end = struct
       (mergebase_warning_hashes : Warnings_saved_state.t option)
       ~(stream_errors : bool)
       ~log_errors
-      (error_stats : ErrorStats.t ref) : Typing_service_types.typing_result =
-    let produced_by_job =
-      {
-        produced_by_job with
-        errors =
-          Errors.filter_out_mergebase_warnings
-            mergebase_warning_hashes
-            produced_by_job.errors;
-      }
+      ~discard_warnings
+      (error_stats : ErrorStats.t ref) : _ * Typing_service_types.typing_result
+      =
+    let (mergebase_warning_hashes, errors) =
+      filter_out_warnings
+        mergebase_warning_hashes
+        produced_by_job.errors
+        ~discard_warnings
     in
+    let produced_by_job = { produced_by_job with errors } in
     process_errors produced_by_job.errors error_stats ~stream_errors ~log_errors;
 
     Typing_deps.register_discovered_dep_edges produced_by_job.dep_edges;
@@ -706,7 +723,8 @@ end = struct
     in
     let acc = { acc with dep_edges = Typing_deps.dep_edges_make () } in
 
-    accumulate_job_output produced_by_job acc
+    let acc = accumulate_job_output produced_by_job acc in
+    (mergebase_warning_hashes, acc)
 
   (** Merge the results from multiple workers.
 
@@ -717,14 +735,14 @@ end = struct
       ~(batch_counts_by_worker_id : Counts.t ref)
       ~(error_stats : ErrorStats.t ref)
       ~(check_info : check_info)
-      ~(warnings_saved_state : Warnings_saved_state.t option)
       (todo : Todo.t)
       (workitems_initial_count : int)
       ( (worker_id : string),
         (produced_by_job : Typing_service_types.typing_result),
         (progress : TypingProgress.t) )
-      (acc : Typing_service_types.typing_result) :
-      Typing_service_types.typing_result =
+      ((warnings_saved_state, acc) :
+        Warnings_saved_state.t option * Typing_service_types.typing_result) :
+      Warnings_saved_state.t option * Typing_service_types.typing_result =
     batch_counts_by_worker_id :=
       Counts.increment !batch_counts_by_worker_id worker_id;
 
@@ -743,6 +761,7 @@ end = struct
       warnings_saved_state
       ~stream_errors:check_info.log_errors
       ~log_errors:check_info.log_errors
+      ~discard_warnings:check_info.discard_warnings
       error_stats
 end
 
@@ -968,7 +987,8 @@ let process_in_parallel
     ~(check_info : check_info)
     ~warnings_saved_state
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
-    typing_result
+    _
+    * typing_result
     * Telemetry.t
     * _
     * (Relative_path.t list * MultiThreadedCall.cancel_reason) option
@@ -983,8 +1003,10 @@ let process_in_parallel
   let next = next workers todo record in
   (* The [job] lambda is marshalled, sent to the worker process, unmarshalled there, and executed.
      It is marshalled immediately before being executed. *)
-  let job (typing_result : typing_result) (progress : TypingProgress.t) :
-      string * typing_result * TypingProgress.t =
+  let job
+      ((_warnings_saved_state, typing_result) : _ * typing_result)
+      (progress : TypingProgress.t) : string * typing_result * TypingProgress.t
+      =
     let worker_id = Option.value ~default:"main" (Hh_logger.get_id ()) in
     let (typing_result, computation_progress) =
       load_and_process_workitems
@@ -1002,17 +1024,16 @@ let process_in_parallel
     in
     (worker_id, typing_result, computation_progress)
   in
-  let (typing_result, env, cancelled_results) =
+  let ((warnings_saved_state, typing_result), env, cancelled_results) =
     MultiWorker.call_with_interrupt
       workers
       ~job
-      ~neutral:(neutral ())
+      ~neutral:(warnings_saved_state, neutral ())
       ~merge:
         (Merge.merge
            ~batch_counts_by_worker_id
            ~error_stats
            ~check_info
-           ~warnings_saved_state
            todo
            workitems_initial_count)
       ~next
@@ -1037,7 +1058,8 @@ let process_in_parallel
     Option.map cancelled_results ~f:(fun (unfinished, reason) ->
         (paths_of unfinished, reason))
   in
-  ( typing_result,
+  ( warnings_saved_state,
+    typing_result,
     telemetry,
     env,
     cancelled_results,
@@ -1108,6 +1130,7 @@ module Mocking =
 
 type result = {
   errors: Errors.t;
+  warnings_saved_state: Warnings_saved_state.t option;
   telemetry: Telemetry.t;
   time_first_error: seconds_since_epoch option;
 }
@@ -1171,8 +1194,12 @@ let go_with_interrupt
       workers
   in
   Mocking.with_test_mocking fnl @@ fun fnl ->
-  let (typing_result, telemetry, env, cancelled_fnl_and_reason, time_first_error)
-      =
+  let ( warnings_saved_state,
+        typing_result,
+        telemetry,
+        env,
+        cancelled_fnl_and_reason,
+        time_first_error ) =
     let will_use_distc =
       match hh_distc_fanout_threshold with
       | Some fanout_threshold -> BigList.length fnl > fanout_threshold
@@ -1188,17 +1215,22 @@ let go_with_interrupt
       let profiling_info = Telemetry.create () in
       match process_with_hh_distc ~root ~interrupt ~check_info ~tcopt with
       | Success (errors, map_reduce_data, dep_edges, env) ->
-        let errors =
-          Errors.filter_out_mergebase_warnings warnings_saved_state errors
+        let (warnings_saved_state, errors) =
+          filter_out_warnings
+            warnings_saved_state
+            errors
+            ~discard_warnings:check_info.discard_warnings
         in
-        ( { errors; map_reduce_data; dep_edges; profiling_info },
+        ( warnings_saved_state,
+          { errors; map_reduce_data; dep_edges; profiling_info },
           telemetry,
           env,
           None,
           None )
       | Cancel (env, reason) ->
         (* Typecheck is cancelled due to interrupt *)
-        ( {
+        ( warnings_saved_state,
+          {
             errors = Errors.empty;
             map_reduce_data = Map_reduce.empty;
             dep_edges = Typing_deps.dep_edges_make ();
@@ -1242,7 +1274,8 @@ let go_with_interrupt
   let telemetry =
     telemetry |> Telemetry.object_ ~key:"profiling_info" ~value:profiling_info
   in
-  ((env, { errors; telemetry; time_first_error }), cancelled_fnl_and_reason)
+  ( (env, { errors; warnings_saved_state; telemetry; time_first_error }),
+    cancelled_fnl_and_reason )
 
 let go
     (ctx : Provider_context.t)

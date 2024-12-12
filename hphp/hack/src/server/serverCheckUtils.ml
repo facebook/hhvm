@@ -111,12 +111,13 @@ let extend_defs_per_file
     extended_defs_per_file
   )
 
-let get_check_info ~check_reason ~log_errors (genv : genv) env :
-    Typing_service_types.check_info =
+let get_check_info ~check_reason ~log_errors ~discard_warnings (genv : genv) env
+    : Typing_service_types.check_info =
   {
     Typing_service_types.init_id = env.init_env.init_id;
     check_reason;
     log_errors;
+    discard_warnings;
     recheck_id = env.init_env.recheck_id;
     per_file_profiling = genv.local_config.ServerLocalConfig.per_file_profiling;
     memtrace_dir = genv.local_config.ServerLocalConfig.memtrace_dir;

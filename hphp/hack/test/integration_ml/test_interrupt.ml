@@ -80,6 +80,7 @@ let test () =
       Typing_service_types.init_id = "";
       check_reason = "test_interrupt";
       log_errors = false;
+      discard_warnings = false;
       recheck_id = Some "";
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;
       memtrace_dir = None;

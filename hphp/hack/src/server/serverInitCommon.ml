@@ -220,7 +220,7 @@ let defer_or_do_type_check
           use_distc
           genv.local_config.ServerLocalConfig.hh_distc_fanout_threshold
       in
-      let root = Some (ServerArgs.root genv.ServerEnv.options) in
+      let root = ServerArgs.root genv.ServerEnv.options in
       let ctx = Provider_utils.ctx_from_server_env env in
       CgroupProfiler.step_start_end cgroup_steps telemetry_label @@ fun () ->
       Typing_check_service.go
@@ -228,13 +228,18 @@ let defer_or_do_type_check
         genv.workers
         (Telemetry.create ())
         files_to_check
-        ~root
+        ~root:(Some root)
         ~longlived_workers
         ~hh_distc_fanout_threshold
         ~check_info:
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)
              ~log_errors:true
+             ~discard_warnings:
+               (Hg.is_public_without_local_changes (Path.to_string root)
+               |> Future.get ~timeout:3
+               |> Result.ok
+               |> Option.value ~default:false)
              genv
              env)
         ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)

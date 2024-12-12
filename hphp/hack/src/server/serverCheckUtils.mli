@@ -9,6 +9,7 @@
 val get_check_info :
   check_reason:string ->
   log_errors:bool ->
+  discard_warnings:bool ->
   ServerEnv.genv ->
   ServerEnv.env ->
   Typing_service_types.check_info

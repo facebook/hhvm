@@ -362,7 +362,7 @@ The `index` capture is **optional**.
 
 <Example title="Example without index">
 
-```handlebars
+```handlebars title=example.whisker
 Rankings are:
 {{#each winners as |winner|}}
 {{winner}}
@@ -634,7 +634,7 @@ Partial applications (without captures) assume the [scope](#scopes) at the site 
 
 <Example title="Example with implied context (macro)">
 
-```handlebars
+```handlebars title=example.whisker
 {{#partial greeting as |person|}}
 Greetings, {{person.firstName}} {{person.lastName}}!
 {{/partial}}
@@ -851,6 +851,191 @@ Certain scopes lack an **implicit context** `object`, which is represented by `n
 
 ## Standalone Tags
 
+The Mustache spec defines rules around a concept called [*standalone lines*](https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L279-L305).
+
+If a line has control flow tags, but is otherwise only whitespace, then implementations should strip the entire line from the output.
+The following tags are standalone-stripping eligible:
+* `{{! ... }}` — [comments](#comments)
+* `{{# ... }}` — blocks ([`{{#if}}`](#if-blocks), [`{{#each}}`](#each-blocks), [`{{#with}}`](#with-blocks)) and statements ([`{{#let}}`](#let-statements))
+* `{{/ ... }}` — closing tag for blocks listed above
+* `{{> ... }}` — [partial applications](#partial-applications)
+
+<Example>
+
+```handlebars title=example.whisker
+  {{#if true_value}}
+    hello
+  {{/if true_value}}
+```
+
+```json title=Context
+{
+  "true_value": true
+}
+```
+
+```text title=Output
+    hello
+
+```
+
+Notice that the whitespace (including newline) around the tags, `{{#if true_value}}` and `{{/if true_value}}`, are stripped from the output.
+The newline following "hello" is retained.
+
+</Example>
+
+Lines with tags that perform *interpolation*, or with non-whitespace text content, are standalone-stripping ineligible.
+
+<Example title="Example with interpolation">
+
+```handlebars title=example.whisker
+| *
+  {{#if true_value}}  hello
+  {{hello}}{{/if true_value}}
+| *
+```
+
+```json title=Context
+{
+  "true_value": true,
+  "hello": "world"
+}
+```
+
+```text title=Output
+| *
+    hello
+  world
+| *
+```
+
+Notice that both lines are standalone-stripping ineligible and retain their whitespace.
+
+</Example>
+
+Only [`newline` tokens in the grammar](#text--template) denote the end of lines.
+In other words, a line break inside a tag does *not* result in a new line for the purpose of standalone line stripping.
+
+<Example title="Example with multi-line tag">
+
+```handlebars title=example.whisker
+| This Is
+  {{#if boolean
+          .condition}}
+|
+  {{/if boolean.condition}}
+| A Line
+```
+
+```json title=Context
+{
+  "boolean": {
+    "condition": true
+  }
+}
+```
+
+```text title=Output
+| This Is
+|
+| A Line
+```
+
+Notice that `boolean` and `.condition` are on separate lines, yet both lines were stripped from the output.
+
+</Example>
+
+[Partial applications](#partial-applications) have special behavior in the context of standalone line stripping, even though they perform interpolation.
+If a partial application is standalone, then the whitespace **to the left is preserved**, while the one **to the right is stripped**.
+
+<Example title="Example with partial application">
+
+```handlebars title=example.whisker
+| *
+  {{#if true_value}}
+  {{> my-partial}}
+  {{/if true_value}}
+| *
+```
+
+```handlebars title=my-partial.whisker
+hello world
+```
+
+```json title=Context
+{
+  "true_value": true
+}
+```
+
+```text title=Output
+| *
+  hello world
+| *
+```
+
+</Example>
+
+A standalone-stripped line can have multiple tags, as long as none of tags are [partial applications](#partial-applications).
+
+<Example title="Example with multiple tags">
+
+```handlebars title=example.whisker
+| *
+  {{#if a}}{{#if b}}{{#if c}}
+| hello
+  {{/if c}}{{/if b}}{{/if a}}
+| *
+```
+
+```json title=Context
+{
+  "a": true,
+  "b": true,
+  "c": true
+}
+```
+
+```text title=Output
+| *
+| hello
+| *
+```
+
+</Example>
+
+<Example title="Example with multiple tags and partial application">
+
+```handlebars title=example.whisker
+| *
+  {{#if a}}{{#if b}}{{#if c}}{{> my-partial}}
+| hello
+  {{/if c}}{{/if b}}{{/if a}}
+| *
+```
+
+```handlebars title=my-partial.whisker
+hello world
+```
+
+```json title=Context
+{
+  "a": true,
+  "b": true,
+  "c": true
+}
+```
+
+```text title=Output
+| *
+  hello world
+| hello
+| *
+```
+
 :::note
-This section is incomplete.
+Handlebars does *not* consider multiple tags on the same line as standalone.
+Whisker supports such behavior to retain compatibility with [`mstch`](https://github.com/no1msd/mstch).
 :::
+
+</Example>

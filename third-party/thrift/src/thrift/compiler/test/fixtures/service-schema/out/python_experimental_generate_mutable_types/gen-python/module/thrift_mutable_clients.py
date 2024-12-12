@@ -128,6 +128,14 @@ class PrimitivesService(_fbthrift_python_Client["PrimitivesService.Async", "Prim
                 is_mutable_types=True,
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    init = Async.init
+    # pyre-ignore[4]: Missing annotation.
+    method_that_throws = Async.method_that_throws
+    # pyre-ignore[4]: Missing annotation.
+    return_void_method = Async.return_void_method
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

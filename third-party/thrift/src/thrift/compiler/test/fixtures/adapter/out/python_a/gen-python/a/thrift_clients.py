@@ -101,6 +101,12 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 rpc_options=rpc_options,
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    adapted_return = Async.adapted_return
+    # pyre-ignore[4]: Missing annotation.
+    adapted_param = Async.adapted_param
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

@@ -80,6 +80,10 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
                 "Empty Response",
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    check = Async.check
+    
     class Sync(python_module_root.my.namespacing.test.hsmodule.thrift_clients.HsTestService.Sync):
         @staticmethod
         def __get_thrift_name__() -> str:

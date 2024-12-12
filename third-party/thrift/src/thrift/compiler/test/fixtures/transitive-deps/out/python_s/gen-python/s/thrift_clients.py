@@ -73,6 +73,10 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
             if _fbthrift_resp.ex is not None:
                 raise _fbthrift_resp.ex
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    test = Async.test
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

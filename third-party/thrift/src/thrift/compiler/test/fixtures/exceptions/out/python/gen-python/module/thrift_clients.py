@@ -140,6 +140,16 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 "Empty Response",
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    doBland = Async.doBland
+    # pyre-ignore[4]: Missing annotation.
+    doRaise = Async.doRaise
+    # pyre-ignore[4]: Missing annotation.
+    get200 = Async.get200
+    # pyre-ignore[4]: Missing annotation.
+    get500 = Async.get500
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

@@ -73,6 +73,10 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
                 is_mutable_types=True,
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    simple_rpc = Async.simple_rpc
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -157,6 +161,10 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    simple_rpc = Async.simple_rpc
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -430,6 +438,28 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    getRandomData = Async.getRandomData
+    # pyre-ignore[4]: Missing annotation.
+    sink = Async.sink
+    # pyre-ignore[4]: Missing annotation.
+    putDataById = Async.putDataById
+    # pyre-ignore[4]: Missing annotation.
+    hasDataById = Async.hasDataById
+    # pyre-ignore[4]: Missing annotation.
+    getDataById = Async.getDataById
+    # pyre-ignore[4]: Missing annotation.
+    deleteDataById = Async.deleteDataById
+    # pyre-ignore[4]: Missing annotation.
+    lobDataById = Async.lobDataById
+    # pyre-ignore[4]: Missing annotation.
+    invalid_return_for_hack = Async.invalid_return_for_hack
+    # pyre-ignore[4]: Missing annotation.
+    rpc_skipped_codegen = Async.rpc_skipped_codegen
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -719,6 +749,12 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    getDataByKey0 = Async.getDataByKey0
+    # pyre-ignore[4]: Missing annotation.
+    getDataByKey1 = Async.getDataByKey1
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod

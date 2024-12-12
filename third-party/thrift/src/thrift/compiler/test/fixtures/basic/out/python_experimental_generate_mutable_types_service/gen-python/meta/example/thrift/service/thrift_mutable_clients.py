@@ -84,6 +84,10 @@ class EchoService(_fbthrift_python_Client["EchoService.Async", "EchoService.Sync
                 "Empty Response",
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    echo = Async.echo
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

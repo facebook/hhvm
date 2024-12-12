@@ -1048,6 +1048,92 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 "Empty Response",
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    get_five = Async.get_five
+    # pyre-ignore[4]: Missing annotation.
+    add_five = Async.add_five
+    # pyre-ignore[4]: Missing annotation.
+    do_nothing = Async.do_nothing
+    # pyre-ignore[4]: Missing annotation.
+    concat = Async.concat
+    # pyre-ignore[4]: Missing annotation.
+    get_value = Async.get_value
+    # pyre-ignore[4]: Missing annotation.
+    negate = Async.negate
+    # pyre-ignore[4]: Missing annotation.
+    tiny = Async.tiny
+    # pyre-ignore[4]: Missing annotation.
+    small = Async.small
+    # pyre-ignore[4]: Missing annotation.
+    big = Async.big
+    # pyre-ignore[4]: Missing annotation.
+    two = Async.two
+    # pyre-ignore[4]: Missing annotation.
+    expected_exception = Async.expected_exception
+    # pyre-ignore[4]: Missing annotation.
+    unexpected_exception = Async.unexpected_exception
+    # pyre-ignore[4]: Missing annotation.
+    sum_i16_list = Async.sum_i16_list
+    # pyre-ignore[4]: Missing annotation.
+    sum_i32_list = Async.sum_i32_list
+    # pyre-ignore[4]: Missing annotation.
+    sum_i64_list = Async.sum_i64_list
+    # pyre-ignore[4]: Missing annotation.
+    concat_many = Async.concat_many
+    # pyre-ignore[4]: Missing annotation.
+    count_structs = Async.count_structs
+    # pyre-ignore[4]: Missing annotation.
+    sum_set = Async.sum_set
+    # pyre-ignore[4]: Missing annotation.
+    contains_word = Async.contains_word
+    # pyre-ignore[4]: Missing annotation.
+    get_map_value = Async.get_map_value
+    # pyre-ignore[4]: Missing annotation.
+    map_length = Async.map_length
+    # pyre-ignore[4]: Missing annotation.
+    sum_map_values = Async.sum_map_values
+    # pyre-ignore[4]: Missing annotation.
+    complex_sum_i32 = Async.complex_sum_i32
+    # pyre-ignore[4]: Missing annotation.
+    repeat_name = Async.repeat_name
+    # pyre-ignore[4]: Missing annotation.
+    get_struct = Async.get_struct
+    # pyre-ignore[4]: Missing annotation.
+    fib = Async.fib
+    # pyre-ignore[4]: Missing annotation.
+    unique_words = Async.unique_words
+    # pyre-ignore[4]: Missing annotation.
+    words_count = Async.words_count
+    # pyre-ignore[4]: Missing annotation.
+    set_enum = Async.set_enum
+    # pyre-ignore[4]: Missing annotation.
+    list_of_lists = Async.list_of_lists
+    # pyre-ignore[4]: Missing annotation.
+    word_character_frequency = Async.word_character_frequency
+    # pyre-ignore[4]: Missing annotation.
+    list_of_sets = Async.list_of_sets
+    # pyre-ignore[4]: Missing annotation.
+    nested_map_argument = Async.nested_map_argument
+    # pyre-ignore[4]: Missing annotation.
+    make_sentence = Async.make_sentence
+    # pyre-ignore[4]: Missing annotation.
+    get_union = Async.get_union
+    # pyre-ignore[4]: Missing annotation.
+    get_keys = Async.get_keys
+    # pyre-ignore[4]: Missing annotation.
+    lookup_double = Async.lookup_double
+    # pyre-ignore[4]: Missing annotation.
+    retrieve_binary = Async.retrieve_binary
+    # pyre-ignore[4]: Missing annotation.
+    contain_binary = Async.contain_binary
+    # pyre-ignore[4]: Missing annotation.
+    contain_enum = Async.contain_enum
+    # pyre-ignore[4]: Missing annotation.
+    get_binary_union_struct = Async.get_binary_union_struct
+    # pyre-ignore[4]: Missing annotation.
+    get_struct_hidden = Async.get_struct_hidden
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -2065,6 +2151,10 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
                 "Empty Response",
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    get_six = Async.get_six
+    
     class Sync(SimpleService.Sync):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -2152,6 +2242,10 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    get_seven = Async.get_seven
     
     class Sync(DerivedService.Sync):
         @staticmethod

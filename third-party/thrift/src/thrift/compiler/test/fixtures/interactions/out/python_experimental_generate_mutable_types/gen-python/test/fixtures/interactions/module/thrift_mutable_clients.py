@@ -177,6 +177,16 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self #MyService
         ) -> MyService_SerialInteraction.Async:
             return self.createSerialInteraction()
+    
+    # pyre-ignore[4]: Missing annotation.
+    foo = Async.foo
+    # pyre-ignore[4]: Missing annotation.
+    interact = Async.interact
+    # pyre-ignore[4]: Missing annotation.
+    interactFast = Async.interactFast
+    # pyre-ignore[4]: Missing annotation.
+    serialize = Async.serialize
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -301,6 +311,14 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    truthify = Async.truthify
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -408,6 +426,14 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    truthify = Async.truthify
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -469,6 +495,10 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -633,6 +663,16 @@ class Factories(_fbthrift_python_Client["Factories.Async", "Factories.Sync"]):
             self #Factories
         ) -> Factories_SerialInteraction.Async:
             return self.createSerialInteraction()
+    
+    # pyre-ignore[4]: Missing annotation.
+    foo = Async.foo
+    # pyre-ignore[4]: Missing annotation.
+    interact = Async.interact
+    # pyre-ignore[4]: Missing annotation.
+    interactFast = Async.interactFast
+    # pyre-ignore[4]: Missing annotation.
+    serialize = Async.serialize
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -757,6 +797,14 @@ class Factories_MyInteraction(_fbthrift_python_Client["Factories_MyInteraction.A
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    truthify = Async.truthify
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -864,6 +912,14 @@ class Factories_MyInteractionFast(_fbthrift_python_Client["Factories_MyInteracti
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    truthify = Async.truthify
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -925,6 +981,10 @@ class Factories_SerialInteraction(_fbthrift_python_Client["Factories_SerialInter
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -1011,6 +1071,10 @@ class Perform(_fbthrift_python_Client["Perform.Async", "Perform.Sync"]):
             self #Perform
         ) -> Perform_SerialInteraction.Async:
             return self.createSerialInteraction()
+    
+    # pyre-ignore[4]: Missing annotation.
+    foo = Async.foo
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1135,6 +1199,14 @@ class Perform_MyInteraction(_fbthrift_python_Client["Perform_MyInteraction.Async
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    truthify = Async.truthify
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1242,6 +1314,14 @@ class Perform_MyInteractionFast(_fbthrift_python_Client["Perform_MyInteractionFa
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    truthify = Async.truthify
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1303,6 +1383,10 @@ class Perform_SerialInteraction(_fbthrift_python_Client["Perform_SerialInteracti
                 rpc_options=rpc_options,
                 is_mutable_types=True,
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -1388,6 +1472,10 @@ class InteractWithShared(_fbthrift_python_Client["InteractWithShared.Async", "In
             self #InteractWithShared
         ) -> InteractWithShared_SharedInteraction.Async:
             return self.createSharedInteraction()
+    
+    # pyre-ignore[4]: Missing annotation.
+    do_some_similar_things = Async.do_some_similar_things
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1519,6 +1607,14 @@ class InteractWithShared_MyInteraction(_fbthrift_python_Client["InteractWithShar
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    frobnicate = Async.frobnicate
+    # pyre-ignore[4]: Missing annotation.
+    ping = Async.ping
+    # pyre-ignore[4]: Missing annotation.
+    truthify = Async.truthify
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1631,6 +1727,14 @@ class InteractWithShared_SharedInteraction(_fbthrift_python_Client["InteractWith
                 is_mutable_types=True,
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    init = Async.init
+    # pyre-ignore[4]: Missing annotation.
+    do_something = Async.do_something
+    # pyre-ignore[4]: Missing annotation.
+    tear_down = Async.tear_down
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1713,6 +1817,10 @@ class BoxService(_fbthrift_python_Client["BoxService.Async", "BoxService.Sync"])
             self #BoxService
         ) -> BoxService_BoxedInteraction.Async:
             return self.createBoxedInteraction()
+    
+    # pyre-ignore[4]: Missing annotation.
+    getABoxSession = Async.getABoxSession
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:
@@ -1781,6 +1889,10 @@ class BoxService_BoxedInteraction(_fbthrift_python_Client["BoxService_BoxedInter
                 _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
                 "Empty Response",
             )
+    
+    
+    # pyre-ignore[4]: Missing annotation.
+    getABox = Async.getABox
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod

@@ -151,6 +151,12 @@ class Async({{#service:extends}}{{!
     ) -> {{service:parent_service_name}}_{{service:name}}.Async:
         return self.create{{service:name}}()
     {{/service:interactions}}
+
+{{#service:supported_functions}}
+# pyre-ignore[4]: Missing annotation.{{! Adding an annotation here would require way too much duplication }}
+{{function:name}} = Async.{{function:name}}
+{{/service:supported_functions}}
+
 class Sync({{#service:extends}}{{!
     }}{{> services/client_module_path}}.Sync{{!
 }}{{/service:extends}}{{^service:extends?}}{{!

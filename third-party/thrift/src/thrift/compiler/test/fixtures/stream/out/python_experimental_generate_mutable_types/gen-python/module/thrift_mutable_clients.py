@@ -271,6 +271,26 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    returnstream = Async.returnstream
+    # pyre-ignore[4]: Missing annotation.
+    streamthrows = Async.streamthrows
+    # pyre-ignore[4]: Missing annotation.
+    servicethrows = Async.servicethrows
+    # pyre-ignore[4]: Missing annotation.
+    servicethrows2 = Async.servicethrows2
+    # pyre-ignore[4]: Missing annotation.
+    boththrows = Async.boththrows
+    # pyre-ignore[4]: Missing annotation.
+    responseandstreamstreamthrows = Async.responseandstreamstreamthrows
+    # pyre-ignore[4]: Missing annotation.
+    responseandstreamservicethrows = Async.responseandstreamservicethrows
+    # pyre-ignore[4]: Missing annotation.
+    responseandstreamboththrows = Async.responseandstreamboththrows
+    # pyre-ignore[4]: Missing annotation.
+    returnstreamFast = Async.returnstreamFast
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

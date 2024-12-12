@@ -108,6 +108,12 @@ class SomeService(_fbthrift_python_Client["SomeService.Async", "SomeService.Sync
                 "Empty Response",
             )
     
+    
+    # pyre-ignore[4]: Missing annotation.
+    bounce_map = Async.bounce_map
+    # pyre-ignore[4]: Missing annotation.
+    binary_keyed_map = Async.binary_keyed_map
+    
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
         def __get_thrift_name__() -> str:

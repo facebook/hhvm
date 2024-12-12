@@ -104,7 +104,7 @@ func (p *rocketClient) WriteMessageEnd() error {
 
 func (p *rocketClient) Flush() (err error) {
 	dataBytes := p.wbuf.Bytes()
-	if err := p.client.SendSetup(p.serverMetadataPush); err != nil {
+	if err := p.client.SendSetup(p.onServerMetadataPush); err != nil {
 		return err
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
@@ -136,7 +136,7 @@ func unionMaps(dst, src map[string]string) map[string]string {
 	return dst
 }
 
-func (p *rocketClient) serverMetadataPush(zstd bool, drain bool) {
+func (p *rocketClient) onServerMetadataPush(zstd bool, drain bool) {
 	// zstd is only supported if both the client and the server support it.
 	p.zstd = p.zstd && zstd
 }

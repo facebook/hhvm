@@ -30,7 +30,7 @@ import (
 
 // RSocketClient is a client that uses a rsocket library.
 type RSocketClient interface {
-	SendSetup(serverMetadataPush OnServerMetadataPush) error
+	SendSetup(onServerMetadataPush OnServerMetadataPush) error
 	FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) error
 	RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error)
 	Close() error
@@ -48,7 +48,7 @@ func newRSocketClient(conn net.Conn) RSocketClient {
 	return &rsocketClient{conn: conn}
 }
 
-func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error {
+func (r *rsocketClient) SendSetup(onServerMetadataPush OnServerMetadataPush) error {
 	if r.client != nil {
 		// already setup
 		return nil
@@ -64,7 +64,7 @@ func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error
 		MetadataMimeType(RocketMetadataCompactMimeType).
 		SetupPayload(setupPayload).
 		OnClose(func(error) {})
-	clientStarter := clientBuilder.Acceptor(acceptor(serverMetadataPush))
+	clientStarter := clientBuilder.Acceptor(acceptor(onServerMetadataPush))
 	client, err := clientStarter.Transport(transporter(r.conn)).Start(context.Background())
 	r.client = client
 	if client == nil && err == nil {
@@ -73,23 +73,23 @@ func (r *rsocketClient) SendSetup(serverMetadataPush OnServerMetadataPush) error
 	return err
 }
 
-func acceptor(onMetadataPush OnServerMetadataPush) func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
+func acceptor(onServerMetadataPush OnServerMetadataPush) func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
 	return func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
 		return rsocket.NewAbstractSocket(
 			rsocket.MetadataPush(
-				metadataPush(onMetadataPush),
+				metadataPush(onServerMetadataPush),
 			),
 		)
 	}
 }
 
-func metadataPush(onMetadataPush OnServerMetadataPush) func(pay payload.Payload) {
+func metadataPush(onServerMetadataPush OnServerMetadataPush) func(pay payload.Payload) {
 	return func(pay payload.Payload) {
 		metadata, err := decodeServerMetadataPushVersion8(pay)
 		if err != nil {
 			panic(err)
 		}
-		onMetadataPush(metadata.zstd, metadata.drain)
+		onServerMetadataPush(metadata.zstd, metadata.drain)
 	}
 }
 

@@ -1195,6 +1195,8 @@ void RuntimeOption::Load(
     configIdCounter->setValue(ConfigId);
   }
 
+  Cfg::Load(ini, config);
+
   {
     // Logging
     auto setLogLevel = [](const std::string& value) {
@@ -1390,8 +1392,6 @@ void RuntimeOption::Load(
     Config::Bind(HHProfAccum, ini, config, "HHProf.Accum", false);
     Config::Bind(HHProfRequest, ini, config, "HHProf.Request", false);
   }
-
-  Cfg::Load(ini, config);
 
   {
     // Eval

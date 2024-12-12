@@ -18,9 +18,12 @@ from thrift.python.client import (
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
 from thrift.python.common import RpcOptions
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
+import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
+import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
-import python_module_root.my.namespacing.test.module.module.thrift_types as python_module_root__my__namespacing__test__module__module__thrift_types
+import python_module_root.my.namespacing.test.module.module.thrift_mutable_types as python_module_root__my__namespacing__test__module__module__thrift_mutable_types
 import python_module_root.my.namespacing.test.module.module.thrift_metadata
 
 class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync"]):
@@ -63,12 +66,13 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
             _fbthrift_resp = await self._send_request(
                 "TestService",
                 "init",
-                python_module_root__my__namespacing__test__module__module__thrift_types._fbthrift_TestService_init_args(
+                python_module_root__my__namespacing__test__module__module__thrift_mutable_types._fbthrift_TestService_init_args(
                     int1=int1,),
-                python_module_root__my__namespacing__test__module__module__thrift_types._fbthrift_TestService_init_result,
+                python_module_root__my__namespacing__test__module__module__thrift_mutable_types._fbthrift_TestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 uri_or_name="TestService",
                 rpc_options=rpc_options,
+                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -100,11 +104,12 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
             _fbthrift_resp = self._send_request(
                 "TestService",
                 "init",
-                python_module_root__my__namespacing__test__module__module__thrift_types._fbthrift_TestService_init_args(
+                python_module_root__my__namespacing__test__module__module__thrift_mutable_types._fbthrift_TestService_init_args(
                     int1=int1,),
-                python_module_root__my__namespacing__test__module__module__thrift_types._fbthrift_TestService_init_result,
+                python_module_root__my__namespacing__test__module__module__thrift_mutable_types._fbthrift_TestService_init_result,
                 uri_or_name="TestService",
                 rpc_options=rpc_options,
+                is_mutable_types=True,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

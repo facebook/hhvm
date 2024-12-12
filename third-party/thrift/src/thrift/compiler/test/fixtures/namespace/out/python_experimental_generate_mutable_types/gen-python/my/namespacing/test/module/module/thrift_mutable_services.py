@@ -13,10 +13,11 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
-from thrift.python.serializer import serialize_iobuf, deserialize, Protocol
+import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
+from thrift.python.mutable_serializer import serialize_iobuf, deserialize, Protocol
 from thrift.python.server import ServiceInterface, RpcKind, PythonUserException
 
-import python_module_root.my.namespacing.test.module.module.thrift_types as python_module_root__my__namespacing__test__module__module__thrift_types
+import python_module_root.my.namespacing.test.module.module.thrift_mutable_types as python_module_root__my__namespacing__test__module__module__thrift_mutable_types
 import python_module_root.my.namespacing.test.module.module.thrift_metadata
 
 class TestServiceInterface(
@@ -55,8 +56,8 @@ class TestServiceInterface(
         raise NotImplementedError("async def init is not implemented")
 
     async def _fbthrift__handler_init(self, args: _fbthrift_iobuf.IOBuf, protocol: Protocol) -> _fbthrift_iobuf.IOBuf:
-        args_struct = deserialize(python_module_root__my__namespacing__test__module__module__thrift_types._fbthrift_TestService_init_args, args, protocol)
+        args_struct = deserialize(python_module_root__my__namespacing__test__module__module__thrift_mutable_types._fbthrift_TestService_init_args, args, protocol)
         value = await self.init(args_struct.int1,)
-        return_struct = python_module_root__my__namespacing__test__module__module__thrift_types._fbthrift_TestService_init_result(success=value)
+        return_struct = python_module_root__my__namespacing__test__module__module__thrift_mutable_types._fbthrift_TestService_init_result(success=value)
         return serialize_iobuf(return_struct, protocol)
 

@@ -9,8 +9,8 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
-import my.namespacing.test.module.module.thrift_enums as _fbthrift_current_module_enums
-import my.namespacing.test.module.module.thrift_enums
+import python_module_root.my.namespacing.test.module.module.thrift_enums as _fbthrift_current_module_enums
+import python_module_root.my.namespacing.test.module.module.thrift_enums
 
 
 # TODO (ffrancet): This general pattern can be optimized by using tuples and dicts

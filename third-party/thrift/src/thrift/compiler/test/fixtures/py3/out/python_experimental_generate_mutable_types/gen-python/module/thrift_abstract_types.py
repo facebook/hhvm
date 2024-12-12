@@ -33,6 +33,7 @@ class SimpleException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def err_code(self) -> int: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.SimpleException": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.SimpleException": ...  # type: ignore
     def _to_py3(self) -> "module.types.SimpleException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.SimpleException": ...  # type: ignore
@@ -43,6 +44,8 @@ class OptionalRefStruct(_abc.ABC):
     def optional_blob(self) -> _typing.Optional[_fbthrift_iobuf.IOBuf]: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_iobuf.IOBuf]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.OptionalRefStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.OptionalRefStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -81,6 +84,8 @@ class SimpleStruct(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, int, int, int, float, float, int, _typing.Mapping[int, int]]]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.SimpleStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.SimpleStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.SimpleStruct": ...  # type: ignore
@@ -100,6 +105,8 @@ class HiddenTypeFieldsStruct(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_SimpleStruct, _typing.Sequence[_fbthrift_SimpleStruct], _typing.Mapping[int, _fbthrift_SimpleStruct]]]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.HiddenTypeFieldsStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.HiddenTypeFieldsStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.HiddenTypeFieldsStruct": ...  # type: ignore
@@ -110,6 +117,8 @@ class AdaptedUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def best(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.AdaptedUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.AdaptedUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -134,6 +143,7 @@ class HiddenException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def test(self) -> int: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.HiddenException": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.HiddenException": ...  # type: ignore
     def _to_py3(self) -> "module.types.HiddenException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.HiddenException": ...  # type: ignore
@@ -169,6 +179,8 @@ class ComplexStruct(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_SimpleStruct, _fbthrift_SimpleStruct, int, str, _fbthrift_AnEnum, bytes, str, str, bytes]]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.ComplexStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.ComplexStruct": ...  # type: ignore
@@ -179,6 +191,8 @@ class BinaryUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def iobuf_val(self) -> _fbthrift_iobuf.IOBuf: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.BinaryUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.BinaryUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -205,6 +219,8 @@ class BinaryUnionStruct(_abc.ABC):
     def u(self) -> _fbthrift_BinaryUnion: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_BinaryUnion]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.BinaryUnionStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.BinaryUnionStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -243,6 +259,8 @@ class CustomFields(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], _fbthrift_SimpleStruct]]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomFields": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.CustomFields": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.CustomFields": ...  # type: ignore
@@ -280,6 +298,8 @@ class CustomTypedefFields(_abc.ABC):
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], _fbthrift_SimpleStruct]]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomTypedefFields": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.CustomTypedefFields": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.CustomTypedefFields": ...  # type: ignore
@@ -316,6 +336,8 @@ class AdaptedTypedefFields(_abc.ABC):
     def struct_field(self) -> _fbthrift_SimpleStruct: ...
     @_abc.abstractmethod
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bool, int, float, str, bytes, _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], _fbthrift_SimpleStruct]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.AdaptedTypedefFields": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.AdaptedTypedefFields": ...  # type: ignore
     @_abc.abstractmethod

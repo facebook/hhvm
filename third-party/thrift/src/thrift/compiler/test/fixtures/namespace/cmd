@@ -12,4 +12,4 @@ go_extend: mstch_go src/extend.thrift
 go_hsmodule: mstch_go src/hsmodule.thrift
 go_emptyns: mstch_go src/emptyns.thrift
 go_quoted: mstch_go src/quoted.thrift
-python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types:root_module_prefix=python_module_root src/module.thrift
+python_experimental_generate_mutable_types: mstch_python:experimental_generate_mutable_types,root_module_prefix=python_module_root src/module.thrift

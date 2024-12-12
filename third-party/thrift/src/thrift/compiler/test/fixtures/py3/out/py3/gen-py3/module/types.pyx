@@ -828,7 +828,7 @@ cdef class BinaryUnion(thrift.py3.types.Union):
           NULL,
           iobuf_val,
         )))
-        self._load_cache()
+        self._initialize_py()
 
     @staticmethod
     def fromValue(value):
@@ -858,7 +858,7 @@ cdef class BinaryUnion(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cBinaryUnion] cpp_obj):
         __fbthrift_inst = <BinaryUnion>BinaryUnion.__new__(BinaryUnion)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
+        __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
     @property
@@ -877,13 +877,18 @@ cdef class BinaryUnion(thrift.py3.types.Union):
             self.py_type = BinaryUnion.Type(self.type_int)
         return self.py_type
 
-    cdef _load_cache(BinaryUnion self):
+    @property
+    def value(BinaryUnion self not None):
+        if self.py_value is not None or self.type_int == 0:
+            return self.py_value
+        elif self.type_int == 1:
+            self.py_value =  _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_iobuf_val().clone())
+        return self.py_value
+
+    cdef _initialize_py(BinaryUnion self):
         self.py_type = None
         self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
-        if self.type_int == 0:    # Empty
-            self.value = None
-        elif self.type_int == 1:
-            self.value =  _fbthrift_iobuf.from_unique_ptr(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_iobuf_val().clone())
+        self.py_value = None
 
     def __copy__(BinaryUnion self):
         cdef shared_ptr[_module_cbindings.cBinaryUnion] cpp_obj = make_shared[_module_cbindings.cBinaryUnion](
@@ -927,8 +932,8 @@ cdef class BinaryUnion(thrift.py3.types.Union):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cBinaryUnion]()
         with nogil:
             needed = serializer.cdeserialize[_module_cbindings.cBinaryUnion](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+        # clear cache reload since the underlying data's changed
+        self._initialize_py()
         return needed
 
 

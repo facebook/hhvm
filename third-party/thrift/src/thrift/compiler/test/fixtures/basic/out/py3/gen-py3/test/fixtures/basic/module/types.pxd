@@ -101,8 +101,8 @@ cdef class MyUnion(thrift.py3.types.Union):
     cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(MyUnion self)
+    cdef object py_value
+    cdef _initialize_py(MyUnion self)
 
     @staticmethod
     cdef unique_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] _make_instance(
@@ -162,8 +162,8 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
     cdef shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(UnionToBeRenamed self)
+    cdef object py_value
+    cdef _initialize_py(UnionToBeRenamed self)
 
     @staticmethod
     cdef unique_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] _make_instance(

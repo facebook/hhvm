@@ -125,8 +125,8 @@ cdef class BinaryUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cBinaryUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(BinaryUnion self)
+    cdef object py_value
+    cdef _initialize_py(BinaryUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cBinaryUnion] _make_instance(

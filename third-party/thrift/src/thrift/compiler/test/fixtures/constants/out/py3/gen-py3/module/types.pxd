@@ -133,8 +133,8 @@ cdef class union1(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cunion1] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(union1 self)
+    cdef object py_value
+    cdef _initialize_py(union1 self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cunion1] _make_instance(
@@ -152,8 +152,8 @@ cdef class union2(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cunion2] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(union2 self)
+    cdef object py_value
+    cdef _initialize_py(union2 self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cunion2] _make_instance(

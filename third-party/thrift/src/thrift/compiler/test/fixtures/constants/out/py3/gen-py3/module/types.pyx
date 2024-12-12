@@ -920,7 +920,7 @@ cdef class union1(thrift.py3.types.Union):
           i,
           d,
         )))
-        self._load_cache()
+        self._initialize_py()
 
     @staticmethod
     def fromValue(value):
@@ -973,7 +973,7 @@ cdef class union1(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cunion1] cpp_obj):
         __fbthrift_inst = <union1>union1.__new__(union1)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
+        __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
     @property
@@ -998,15 +998,20 @@ cdef class union1(thrift.py3.types.Union):
             self.py_type = union1.Type(self.type_int)
         return self.py_type
 
-    cdef _load_cache(union1 self):
+    @property
+    def value(union1 self not None):
+        if self.py_value is not None or self.type_int == 0:
+            return self.py_value
+        elif self.type_int == 1:
+            self.py_value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i()
+        elif self.type_int == 2:
+            self.py_value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_d()
+        return self.py_value
+
+    cdef _initialize_py(union1 self):
         self.py_type = None
         self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
-        if self.type_int == 0:    # Empty
-            self.value = None
-        elif self.type_int == 1:
-            self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i()
-        elif self.type_int == 2:
-            self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_d()
+        self.py_value = None
 
     def __copy__(union1 self):
         cdef shared_ptr[_module_cbindings.cunion1] cpp_obj = make_shared[_module_cbindings.cunion1](
@@ -1055,8 +1060,8 @@ cdef class union1(thrift.py3.types.Union):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cunion1]()
         with nogil:
             needed = serializer.cdeserialize[_module_cbindings.cunion1](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+        # clear cache reload since the underlying data's changed
+        self._initialize_py()
         return needed
 
 
@@ -1104,7 +1109,7 @@ cdef class union2(thrift.py3.types.Union):
           s,
           u,
         )))
-        self._load_cache()
+        self._initialize_py()
 
     @staticmethod
     def fromValue(value):
@@ -1173,7 +1178,7 @@ cdef class union2(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cunion2] cpp_obj):
         __fbthrift_inst = <union2>union2.__new__(union2)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
+        __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
     @property
@@ -1210,19 +1215,24 @@ cdef class union2(thrift.py3.types.Union):
             self.py_type = union2.Type(self.type_int)
         return self.py_type
 
-    cdef _load_cache(union2 self):
+    @property
+    def value(union2 self not None):
+        if self.py_value is not None or self.type_int == 0:
+            return self.py_value
+        elif self.type_int == 1:
+            self.py_value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i()
+        elif self.type_int == 2:
+            self.py_value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_d()
+        elif self.type_int == 3:
+            self.py_value = struct1._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cstruct1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_s()))
+        elif self.type_int == 4:
+            self.py_value = union1._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cunion1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_u()))
+        return self.py_value
+
+    cdef _initialize_py(union2 self):
         self.py_type = None
         self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
-        if self.type_int == 0:    # Empty
-            self.value = None
-        elif self.type_int == 1:
-            self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_i()
-        elif self.type_int == 2:
-            self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_d()
-        elif self.type_int == 3:
-            self.value = struct1._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cstruct1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_s()))
-        elif self.type_int == 4:
-            self.value = union1._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_module_cbindings.cunion1](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_u()))
+        self.py_value = None
 
     def __copy__(union2 self):
         cdef shared_ptr[_module_cbindings.cunion2] cpp_obj = make_shared[_module_cbindings.cunion2](
@@ -1271,8 +1281,8 @@ cdef class union2(thrift.py3.types.Union):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cunion2]()
         with nogil:
             needed = serializer.cdeserialize[_module_cbindings.cunion2](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+        # clear cache reload since the underlying data's changed
+        self._initialize_py()
         return needed
 
 

@@ -176,7 +176,7 @@ cdef class Nada(thrift.py3.types.Union):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = __to_shared_ptr(cmove(Nada._make_instance(
           NULL,
         )))
-        self._load_cache()
+        self._initialize_py()
 
     @staticmethod
     def fromValue(value):
@@ -198,7 +198,7 @@ cdef class Nada(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_module_cbindings.cNada] cpp_obj):
         __fbthrift_inst = <Nada>Nada.__new__(Nada)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
+        __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
 
@@ -211,11 +211,16 @@ cdef class Nada(thrift.py3.types.Union):
             self.py_type = Nada.Type(self.type_int)
         return self.py_type
 
-    cdef _load_cache(Nada self):
+    @property
+    def value(Nada self not None):
+        if self.py_value is not None or self.type_int == 0:
+            return self.py_value
+        return self.py_value
+
+    cdef _initialize_py(Nada self):
         self.py_type = None
         self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
-        if self.type_int == 0:    # Empty
-            self.value = None
+        self.py_value = None
 
     def __copy__(Nada self):
         cdef shared_ptr[_module_cbindings.cNada] cpp_obj = make_shared[_module_cbindings.cNada](
@@ -264,8 +269,8 @@ cdef class Nada(thrift.py3.types.Union):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_module_cbindings.cNada]()
         with nogil:
             needed = serializer.cdeserialize[_module_cbindings.cNada](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+        # clear cache reload since the underlying data's changed
+        self._initialize_py()
         return needed
 
 

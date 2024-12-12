@@ -111,8 +111,8 @@ cdef class SimpleUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cSimpleUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(SimpleUnion self)
+    cdef object py_value
+    cdef _initialize_py(SimpleUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cSimpleUnion] _make_instance(
@@ -130,8 +130,8 @@ cdef class ComplexUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(ComplexUnion self)
+    cdef object py_value
+    cdef _initialize_py(ComplexUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cComplexUnion] _make_instance(
@@ -444,8 +444,8 @@ cdef class FloatUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cFloatUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(FloatUnion self)
+    cdef object py_value
+    cdef _initialize_py(FloatUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cFloatUnion] _make_instance(

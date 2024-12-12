@@ -56,8 +56,8 @@ cdef class ComplexUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(ComplexUnion self)
+    cdef object py_value
+    cdef _initialize_py(ComplexUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cComplexUnion] _make_instance(
@@ -79,8 +79,8 @@ cdef class ListUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cListUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(ListUnion self)
+    cdef object py_value
+    cdef _initialize_py(ListUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cListUnion] _make_instance(
@@ -98,8 +98,8 @@ cdef class DataUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cDataUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(DataUnion self)
+    cdef object py_value
+    cdef _initialize_py(DataUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cDataUnion] _make_instance(
@@ -130,8 +130,8 @@ cdef class ValUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cValUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(ValUnion self)
+    cdef object py_value
+    cdef _initialize_py(ValUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cValUnion] _make_instance(
@@ -149,8 +149,8 @@ cdef class VirtualComplexUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cVirtualComplexUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(VirtualComplexUnion self)
+    cdef object py_value
+    cdef _initialize_py(VirtualComplexUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cVirtualComplexUnion] _make_instance(
@@ -178,8 +178,8 @@ cdef class NonCopyableUnion(thrift.py3.types.Union):
     cdef shared_ptr[_module_cbindings.cNonCopyableUnion] _cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache(NonCopyableUnion self)
+    cdef object py_value
+    cdef _initialize_py(NonCopyableUnion self)
 
     @staticmethod
     cdef unique_ptr[_module_cbindings.cNonCopyableUnion] _make_instance(

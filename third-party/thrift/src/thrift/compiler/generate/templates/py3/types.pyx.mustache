@@ -279,7 +279,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
           NULL,{{#struct:py3_fields}}
           {{field:py_name}},{{/struct:py3_fields}}
         )))
-        self._load_cache()
+        self._initialize_py()
 
     @staticmethod
     def fromValue(value):
@@ -358,7 +358,7 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[{{> types/current_module_cbindings}}.{{> types/c_struct }}] cpp_obj):
         __fbthrift_inst = <{{struct:name}}>{{struct:name}}.__new__({{struct:name}})
         __fbthrift_inst.{{> types/cpp_obj}} = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
+        __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
     {{#struct:py3_fields}}
@@ -380,18 +380,24 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
             self.py_type = {{struct:name}}.Type(self.type_int)
         return self.py_type
 
-    cdef _load_cache({{struct:name}} self):
-        self.py_type = None
-        self.type_int = deref(self.{{> types/cpp_obj}}).getType()
-        if self.type_int == 0:    # Empty
-            self.value = None
+    @property
+    def value({{struct:name}} self not None):
+        if self.py_value is not None or self.type_int == 0:
+            return self.py_value
         {{#struct:py3_fields}}
         elif self.type_int == {{field:key}}:
             {{#field:type}}
             {{> types/cython_union_getter}}
-            {{/field:type}}
 
+            {{/field:type}}
         {{/struct:py3_fields}}
+        return self.py_value
+
+    {{! initialize python cache}}
+    cdef _initialize_py({{struct:name}} self):
+        self.py_type = None
+        self.type_int = deref(self.{{> types/cpp_obj}}).getType()
+        self.py_value = None
 
 {{/struct:union?}}
     {{! Below are some things that are common to structs and unions: }}
@@ -494,8 +500,8 @@ cdef class {{struct:name}}(thrift.py3.types.Union):
         with nogil:
             needed = serializer.cdeserialize[{{> types/current_module_cbindings}}.{{> types/c_struct }}](buf, self.{{> types/cpp_obj}}.get(), proto)
         {{#struct:union?}}
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+        # clear cache reload since the underlying data's changed
+        self._initialize_py()
         {{/struct:union?}}
         return needed
 

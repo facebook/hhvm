@@ -88,8 +88,8 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     {{#struct:union?}}
     cdef int64_t type_int
     cdef object py_type
-    cdef readonly object value
-    cdef _load_cache({{struct:name}} self)
+    cdef object py_value
+    cdef _initialize_py({{struct:name}} self)
     {{/struct:union?}}
     {{#struct:union?}}
 

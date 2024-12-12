@@ -516,7 +516,7 @@ cdef class MyUnion(thrift.py3.types.Union):
           myDataItem,
           floatSet,
         )))
-        self._load_cache()
+        self._initialize_py()
 
     @staticmethod
     def fromValue(value):
@@ -570,7 +570,7 @@ cdef class MyUnion(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] cpp_obj):
         __fbthrift_inst = <MyUnion>MyUnion.__new__(MyUnion)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
+        __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
     @property
@@ -607,19 +607,24 @@ cdef class MyUnion(thrift.py3.types.Union):
             self.py_type = MyUnion.Type(self.type_int)
         return self.py_type
 
-    cdef _load_cache(MyUnion self):
+    @property
+    def value(MyUnion self not None):
+        if self.py_value is not None or self.type_int == 0:
+            return self.py_value
+        elif self.type_int == 1:
+            self.py_value = translate_cpp_enum_to_python(MyEnum, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myEnum())
+        elif self.type_int == 2:
+            self.py_value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myStruct()))
+        elif self.type_int == 3:
+            self.py_value = MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myDataItem()))
+        elif self.type_int == 4:
+            self.py_value = Set__float__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatSet())
+        return self.py_value
+
+    cdef _initialize_py(MyUnion self):
         self.py_type = None
         self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
-        if self.type_int == 0:    # Empty
-            self.value = None
-        elif self.type_int == 1:
-            self.value = translate_cpp_enum_to_python(MyEnum, <int>deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myEnum())
-        elif self.type_int == 2:
-            self.value = MyStruct._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyStruct](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myStruct()))
-        elif self.type_int == 3:
-            self.value = MyDataItem._create_FBTHRIFT_ONLY_DO_NOT_USE(make_shared[_test_fixtures_basic_module_cbindings.cMyDataItem](deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_myDataItem()))
-        elif self.type_int == 4:
-            self.value = Set__float__from_cpp(deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_floatSet())
+        self.py_value = None
 
     def __copy__(MyUnion self):
         cdef shared_ptr[_test_fixtures_basic_module_cbindings.cMyUnion] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cMyUnion](
@@ -668,8 +673,8 @@ cdef class MyUnion(thrift.py3.types.Union):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cMyUnion]()
         with nogil:
             needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cMyUnion](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+        # clear cache reload since the underlying data's changed
+        self._initialize_py()
         return needed
 
 
@@ -1093,7 +1098,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
           NULL,
           reserved_field,
         )))
-        self._load_cache()
+        self._initialize_py()
 
     @staticmethod
     def fromValue(value):
@@ -1128,7 +1133,7 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
     cdef _create_FBTHRIFT_ONLY_DO_NOT_USE(shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] cpp_obj):
         __fbthrift_inst = <UnionToBeRenamed>UnionToBeRenamed.__new__(UnionToBeRenamed)
         __fbthrift_inst._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = cmove(cpp_obj)
-        __fbthrift_inst._load_cache()
+        __fbthrift_inst._initialize_py()
         return __fbthrift_inst
 
     @property
@@ -1147,13 +1152,18 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
             self.py_type = UnionToBeRenamed.Type(self.type_int)
         return self.py_type
 
-    cdef _load_cache(UnionToBeRenamed self):
+    @property
+    def value(UnionToBeRenamed self not None):
+        if self.py_value is not None or self.type_int == 0:
+            return self.py_value
+        elif self.type_int == 1:
+            self.py_value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_reserved_field()
+        return self.py_value
+
+    cdef _initialize_py(UnionToBeRenamed self):
         self.py_type = None
         self.type_int = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).getType()
-        if self.type_int == 0:    # Empty
-            self.value = None
-        elif self.type_int == 1:
-            self.value = deref(self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE).get_reserved_field()
+        self.py_value = None
 
     def __copy__(UnionToBeRenamed self):
         cdef shared_ptr[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed] cpp_obj = make_shared[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](
@@ -1202,8 +1212,8 @@ cdef class UnionToBeRenamed(thrift.py3.types.Union):
         self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE = make_shared[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed]()
         with nogil:
             needed = serializer.cdeserialize[_test_fixtures_basic_module_cbindings.cUnionToBeRenamed](buf, self._cpp_obj_FBTHRIFT_ONLY_DO_NOT_USE.get(), proto)
-        # force a cache reload since the underlying data's changed
-        self._load_cache()
+        # clear cache reload since the underlying data's changed
+        self._initialize_py()
         return needed
 
 

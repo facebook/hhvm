@@ -132,8 +132,6 @@ class Val(_abc.ABC):
     @_abc.abstractmethod
     def typedefValue(self) -> _typing.Mapping[int, str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, _typing.Mapping[int, str]]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Val": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Val": ...  # type: ignore
@@ -200,8 +198,6 @@ class NonCopyableStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def num(self) -> int: ...
-    @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.NonCopyableStruct": ...  # type: ignore
     @_abc.abstractmethod

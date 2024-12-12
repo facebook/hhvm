@@ -24,8 +24,6 @@ class HsFoo(_abc.ABC):
     @_abc.abstractmethod
     def MyInt(self) -> int: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "python_module_root.my.namespacing.test.hsmodule.thrift_types.HsFoo": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "python_module_root.my.namespacing.test.hsmodule.types.HsFoo": ...  # type: ignore

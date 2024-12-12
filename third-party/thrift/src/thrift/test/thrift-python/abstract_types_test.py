@@ -736,6 +736,13 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             # Incompatible parameter type [6]: In call `set.__init__`,
             # for 1st positional argument, expected `Iterable[Variable[_T]]`
             # but got `TestStructAbstract`
+            # DO_BEFORE(satishvk, 20250630): Add __iter__ to abstract types.
+            # Removed because of type-check failures in the presence of
+            # __iter__ for mutable types when there are invariant types used as
+            # keys in the map.
+            #
+            # pyre-fixme[6]: For 1st argument expected `Iterable[_T]` but got
+            #  `TestStructAbstract`.
             set(ts),
             {("unqualified_string", "hello"), ("optional_string", None)},
         )

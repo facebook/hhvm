@@ -61,10 +61,6 @@ class {{> structs/unadapted_name}}({{!
 {{> fields/maybe_abstract_method_annotation}}
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
     {{/struct:fields_ordered_by_id}}
-    {{^struct:union?}}
-{{> fields/maybe_abstract_method_annotation}}
-    def __iter__(self) -> {{> types/iter_return_type}}: ...
-    {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{#program:generate_to_mutable_python_conversion_methods?}}
 {{> fields/maybe_abstract_method_annotation}}

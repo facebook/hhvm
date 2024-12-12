@@ -36,8 +36,6 @@ class TemplateLists(_abc.ABC):
     @_abc.abstractmethod
     def small_vector_tensor(self) -> _typing.Sequence[_typing.Sequence[_typing.Sequence[str]]]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[str], _typing.Sequence[bytes], _typing.Sequence[_fbthrift_iobuf.IOBuf], _typing.Sequence[_typing.Sequence[str]], _typing.Sequence[_typing.Sequence[_typing.Sequence[str]]]]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.containers.thrift_types.TemplateLists": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.containers.types.TemplateLists": ...  # type: ignore
@@ -66,8 +64,6 @@ class TemplateSets(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def folly_sorted_vector(self) -> _typing.AbstractSet[str]: ...
-    @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.AbstractSet[str], _typing.AbstractSet[str], _typing.AbstractSet[str], _typing.AbstractSet[str], _typing.AbstractSet[str], _typing.AbstractSet[str], _typing.AbstractSet[str]]]]: ...
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.containers.thrift_types.TemplateSets": ...  # type: ignore
     @_abc.abstractmethod
@@ -98,8 +94,6 @@ class TemplateMaps(_abc.ABC):
     @_abc.abstractmethod
     def folly_sorted_vector(self) -> _typing.Mapping[str, str]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str], _typing.Mapping[str, str]]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.containers.thrift_types.TemplateMaps": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.containers.types.TemplateMaps": ...  # type: ignore
@@ -114,8 +108,6 @@ class TWrapped(_abc.ABC):
     @_abc.abstractmethod
     def fieldB(self) -> bytes: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, bytes]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.containers.thrift_types.TWrapped": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.containers.types.TWrapped": ...  # type: ignore
@@ -126,8 +118,6 @@ class IndirectionA(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def lst(self) -> _typing.Sequence[_fbthrift_TWrapped]: ...
-    @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[_fbthrift_TWrapped]]]]: ...
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.containers.thrift_types.IndirectionA": ...  # type: ignore
     @_abc.abstractmethod
@@ -140,8 +130,6 @@ class IndirectionB(_abc.ABC):
     @_abc.abstractmethod
     def lst(self) -> _typing.Sequence[_fbthrift_TWrapped]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[_fbthrift_TWrapped]]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.containers.thrift_types.IndirectionB": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.containers.types.IndirectionB": ...  # type: ignore
@@ -152,8 +140,6 @@ class IndirectionC(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def lst(self) -> _typing.Sequence[_fbthrift_TWrapped]: ...
-    @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[_fbthrift_TWrapped]]]]: ...
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.containers.thrift_types.IndirectionC": ...  # type: ignore
     @_abc.abstractmethod

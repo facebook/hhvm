@@ -24,8 +24,6 @@ class Foo(_abc.ABC):
     @_abc.abstractmethod
     def a(self) -> int: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "transitive.thrift_types.Foo": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "transitive.types.Foo": ...  # type: ignore

@@ -35,8 +35,6 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def c(self) -> typeshed_two.AdapterTwoType[_fbthrift__c__thrift_abstract_types.C2]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[typeshed_one.AdapterOneType[_fbthrift__b__thrift_abstract_types.B], typeshed_three.AdapterThreeType[_fbthrift__c__thrift_abstract_types.C1], typeshed_two.AdapterTwoType[_fbthrift__c__thrift_abstract_types.C2]]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "a.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "a.types.MyStruct": ...  # type: ignore

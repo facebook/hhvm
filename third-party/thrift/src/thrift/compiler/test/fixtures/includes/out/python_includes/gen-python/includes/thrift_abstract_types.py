@@ -28,8 +28,6 @@ class Included(_abc.ABC):
     @_abc.abstractmethod
     def MyTransitiveField(self) -> _fbthrift__transitive__thrift_abstract_types.Foo: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift__transitive__thrift_abstract_types.Foo]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "includes.thrift_types.Included": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "includes.types.Included": ...  # type: ignore

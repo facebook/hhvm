@@ -54,8 +54,6 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def no_hack_codegen_field(self) -> str: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyDataItem, _fbthrift_MyEnum, bool, bool, bool, _typing.AbstractSet[float], str]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyStruct": ...  # type: ignore
@@ -73,8 +71,6 @@ class Containers(_abc.ABC):
     @_abc.abstractmethod
     def StringToI64Map(self) -> _typing.Mapping[str, int]: ...
     @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.AbstractSet[str], _typing.Mapping[str, int]]]]: ...
-    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.Containers": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.basic.module.types.Containers": ...  # type: ignore
@@ -82,8 +78,6 @@ class Containers(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
 _fbthrift_Containers = Containers
 class MyDataItem(_abc.ABC):
-    @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
@@ -136,7 +130,6 @@ class MyException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     def myUnion(self) -> _fbthrift_MyUnion: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyException": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
@@ -150,7 +143,6 @@ class MyExceptionWithMessage(_fbthrift_python_abstract_types.AbstractGeneratedEr
     def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     def myUnion(self) -> _fbthrift_MyUnion: ...
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, _fbthrift_MyStruct, _fbthrift_MyUnion]]]: ...
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
@@ -159,8 +151,6 @@ class ReservedKeyword(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
-    @_abc.abstractmethod
-    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.ReservedKeyword": ...  # type: ignore
     @_abc.abstractmethod

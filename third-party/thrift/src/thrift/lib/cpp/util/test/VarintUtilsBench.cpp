@@ -21,9 +21,50 @@
 #include <folly/io/Cursor.h>
 #include <folly/io/IOBuf.h>
 #include <folly/io/IOBufQueue.h>
+#include <folly/lang/Keep.h>
 #include <thrift/lib/cpp/util/test/VarintUtilsTestUtil.h>
 
 using namespace apache::thrift::util;
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u8_cursor(
+    folly::io::QueueAppender* cur, uint8_t val) {
+  return writeVarint(*cur, val);
+}
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u16_cursor(
+    folly::io::QueueAppender* cur, uint16_t val) {
+  return writeVarint(*cur, val);
+}
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u32_cursor(
+    folly::io::QueueAppender* cur, uint32_t val) {
+  return writeVarint(*cur, val);
+}
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u64_cursor(
+    folly::io::QueueAppender* cur, uint64_t val) {
+  return writeVarint(*cur, val);
+}
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u8_cursor_unrolled(
+    folly::io::QueueAppender* cur, uint8_t val) {
+  return writeVarintUnrolled(*cur, val);
+}
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u16_cursor_unrolled(
+    folly::io::QueueAppender* cur, uint16_t val) {
+  return writeVarintUnrolled(*cur, val);
+}
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u32_cursor_unrolled(
+    folly::io::QueueAppender* cur, uint32_t val) {
+  return writeVarintUnrolled(*cur, val);
+}
+
+extern "C" FOLLY_KEEP uint8_t check_thrift_write_varint_u64_cursor_unrolled(
+    folly::io::QueueAppender* cur, uint64_t val) {
+  return writeVarintUnrolled(*cur, val);
+}
 
 FOLLY_CREATE_QUAL_INVOKER_SUITE(write_unrolled, writeVarintUnrolled);
 #ifdef __BMI2__

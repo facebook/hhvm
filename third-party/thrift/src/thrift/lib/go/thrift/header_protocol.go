@@ -40,11 +40,11 @@ func NewHeaderProtocol(conn net.Conn) (types.Protocol, error) {
 	return newHeaderProtocol(conn, types.ProtocolIDCompact, 0, nil)
 }
 
-func newHeaderProtocol(conn net.Conn, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func newHeaderProtocol(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	p := &headerProtocol{protoID: protoID}
 	p.trans = newHeaderTransport(conn, protoID)
-	p.trans.conn.readTimeout = timeout
-	p.trans.conn.writeTimeout = timeout
+	p.trans.conn.readTimeout = ioTimeout
+	p.trans.conn.writeTimeout = ioTimeout
 	if err := p.resetProtocol(); err != nil {
 		return nil, err
 	}

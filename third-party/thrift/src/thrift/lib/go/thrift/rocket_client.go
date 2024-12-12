@@ -36,7 +36,7 @@ type rocketClient struct {
 	resultData []byte
 	resultErr  error
 
-	timeout time.Duration
+	ioTimeout time.Duration
 
 	protoID types.ProtocolID
 	zstd    bool
@@ -58,22 +58,22 @@ var _ types.RequestHeaders = (*rocketClient)(nil)
 var _ types.ResponseHeaderGetter = (*rocketClient)(nil)
 
 // NewRocketClient creates a new Rocket client given an RSocketClient.
-func NewRocketClient(client RSocketClient, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
-	return newRocketClientFromRsocket(client, protoID, timeout, persistentHeaders)
+func NewRocketClient(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+	return newRocketClientFromRsocket(client, protoID, ioTimeout, persistentHeaders)
 }
 
-func newRocketClient(conn net.Conn, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
-	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, timeout, persistentHeaders)
+func newRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, ioTimeout, persistentHeaders)
 }
 
-func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	p := &rocketClient{
 		client:            client,
 		protoID:           protoID,
 		persistentHeaders: persistentHeaders,
 		rbuf:              NewMemoryBuffer(),
 		wbuf:              NewMemoryBuffer(),
-		timeout:           timeout,
+		ioTimeout:         ioTimeout,
 		reqHeaders:        make(map[string]string),
 		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
@@ -115,9 +115,9 @@ func (p *rocketClient) Flush() (err error) {
 		return nil
 	}
 	ctx := context.Background()
-	if p.timeout > 0 {
+	if p.ioTimeout > 0 {
 		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, p.timeout)
+		ctx, cancel = context.WithTimeout(ctx, p.ioTimeout)
 		defer cancel()
 	}
 	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)

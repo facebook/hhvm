@@ -40,12 +40,12 @@ var _ types.RequestHeaders = (*upgradeToRocketClient)(nil)
 var _ types.ResponseHeaderGetter = (*upgradeToRocketClient)(nil)
 
 // newUpgradeToRocketClient creates a protocol that upgrades from Header to Rocket client from a socket.
-func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, timeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
-	rocket, err := newRocketClient(conn, protoID, timeout, persistentHeaders)
+func newUpgradeToRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+	rocket, err := newRocketClient(conn, protoID, ioTimeout, persistentHeaders)
 	if err != nil {
 		return nil, err
 	}
-	header, err := newHeaderProtocol(conn, protoID, timeout, persistentHeaders)
+	header, err := newHeaderProtocol(conn, protoID, ioTimeout, persistentHeaders)
 	if err != nil {
 		return nil, err
 	}

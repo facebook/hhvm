@@ -92,12 +92,6 @@ module type Watchman_process_S = sig
 
   exception Read_payload_too_long
 
-  val return : 'a -> 'a
-
-  val catch : f:(unit -> 'b) -> catch:(Exception.t -> 'b) -> 'b
-
-  val list_fold_values : 'a list -> init:'b -> f:('b -> 'a -> 'b) -> 'b
-
   val open_connection : timeout:Types.timeout -> sockname:string option -> conn
 
   val request :

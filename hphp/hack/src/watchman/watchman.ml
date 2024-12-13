@@ -119,14 +119,6 @@ module Watchman_process : Watchman_sig.Watchman_process_S = struct
 
   type conn = Buffered_line_reader.t * Out_channel.t
 
-  let return x = x
-
-  let catch ~f ~catch =
-    try f () with
-    | exn -> catch (Exception.wrap exn)
-
-  let list_fold_values = List.fold
-
   (* Send a request to the watchman process *)
   let send_request ~debug_logging oc json =
     let json_str = Hh_json.(json_to_string json) in
@@ -512,20 +504,18 @@ module Watchman_actual : Watchman_sig.S = struct
   (****************************************************************************)
 
   let with_crash_record_exn source f =
-    Watchman_process.catch ~f ~catch:(fun exn ->
-        Hh_logger.exception_ ~prefix:("Watchman " ^ source ^ ": ") exn;
-        Exception.reraise exn)
+    try f () with
+    | exn ->
+      let exn = Exception.wrap exn in
+      Hh_logger.exception_ ~prefix:("Watchman " ^ source ^ ": ") exn;
+      Exception.reraise exn
 
   let with_crash_record_opt source f =
-    Watchman_process.catch
-      ~f:(fun () -> Some (with_crash_record_exn source f))
-      ~catch:(fun exn ->
-        match Exception.unwrap exn with
-        (* Avoid swallowing these *)
-        | Exit_status.Exit_with _
-        | Watchman_restarted ->
-          Exception.reraise exn
-        | _ -> Watchman_process.return None)
+    try Some (with_crash_record_exn source f) with
+    (* Avoid swallowing these *)
+    | (Exit_status.Exit_with _ | Watchman_restarted) as exn ->
+      Exception.reraise (Exception.wrap exn)
+    | _ -> None
 
   let has_capability name capabilities =
     (* Projects down from the boolean error monad into booleans.
@@ -573,7 +563,7 @@ module Watchman_actual : Watchman_sig.S = struct
       Watchman_process.request ~debug_logging ~conn ~sockname query
     in
     match Hh_json_helpers.Jget.bool_opt (Some response) "is_fresh_instance" with
-    | Some false -> Watchman_process.return ()
+    | Some false -> ()
     | Some true ->
       Hh_logger.error
         "Watchman server restarted so we may have missed some updates";
@@ -645,22 +635,22 @@ module Watchman_actual : Watchman_sig.S = struct
         None
     in
     let (watched_path_expression_terms, watch_roots, failed_paths) =
-      Watchman_process.list_fold_values
+      List.fold
         roots
         ~init:(Some [], SSet.empty, SSet.empty)
         ~f:(fun (terms, watch_roots, failed_paths) path ->
           (* Watch this root. If the path doesn't exist, watch_project will throw. In that case catch
            * the error and continue for now. *)
           let response =
-            Watchman_process.catch
-              ~f:(fun () ->
-                Some
-                  (Watchman_process.request
-                     ~debug_logging
-                     ~conn
-                     ~sockname
-                     (watch_project (Path.to_string path))))
-              ~catch:(fun _ -> Watchman_process.return None)
+            try
+              Some
+                (Watchman_process.request
+                   ~debug_logging
+                   ~conn
+                   ~sockname
+                   (watch_project (Path.to_string path)))
+            with
+            | _ -> None
           in
           match response with
           | None ->
@@ -716,7 +706,7 @@ module Watchman_actual : Watchman_sig.S = struct
           ~sockname
           ~watch_root
           ~clockspec;
-        Watchman_process.return clockspec
+        clockspec
       | None ->
         Watchman_process.request
           ~debug_logging
@@ -749,7 +739,7 @@ module Watchman_actual : Watchman_sig.S = struct
       }
     in
     (match subscribe_mode with
-    | None -> Watchman_process.return ()
+    | None -> ()
     | Some mode ->
       let _response : Hh_json.json =
         Watchman_process.request
@@ -794,7 +784,7 @@ module Watchman_actual : Watchman_sig.S = struct
 
   let maybe_restart_instance instance =
     match instance with
-    | Watchman_alive _ -> Watchman_process.return instance
+    | Watchman_alive _ -> instance
     | Watchman_dead dead_env ->
       if dead_env.reinit_attempts >= max_reinit_attempts then
         let () =
@@ -821,7 +811,7 @@ module Watchman_actual : Watchman_sig.S = struct
           EventLogger.watchman_connection_reestablished ();
           Watchman_alive env
       ) else
-        Watchman_process.return instance
+        instance
 
   let close env = Watchman_process.close_connection env.conn
 
@@ -835,7 +825,7 @@ module Watchman_actual : Watchman_sig.S = struct
       if try_to_restart then
         maybe_restart_instance instance
       else
-        Watchman_process.return instance
+        instance
     with
     | Watchman_dead dead_env -> on_dead dead_env
     | Watchman_alive env -> on_alive env
@@ -848,52 +838,48 @@ module Watchman_actual : Watchman_sig.S = struct
    * to be unresponsive (Timeout), and if reading the payload from it is
    * taking too long. *)
   let call_on_instance =
-    let on_dead dead_env =
-      Watchman_process.return (Watchman_dead dead_env, Watchman_unavailable)
-    in
+    let on_dead dead_env = (Watchman_dead dead_env, Watchman_unavailable) in
     let on_alive source f env =
-      Watchman_process.catch
-        ~f:(fun () ->
-          let (env, result) = with_crash_record_exn source (fun () -> f env) in
-          (Watchman_alive env, result))
-        ~catch:(fun exn ->
-          match Exception.unwrap exn with
-          | Sys_error msg when String.equal msg "Broken pipe" ->
-            Hh_logger.log "Watchman Pipe broken.";
-            close_channel_on_instance env
-          | Sys_error msg when String.equal msg "Connection reset by peer" ->
-            Hh_logger.log "Watchman connection reset by peer.";
-            close_channel_on_instance env
-          | Sys_error msg when String.equal msg "Bad file descriptor" ->
-            (* This happens when watchman is tearing itself down after we
-             * retrieved a sock address and connected to the sock address. That's
-             * because Unix.open_connection doesn't
-             * error even when the sock address is no longer valid and actually -
-             * it returns a channel that will error at some later time when you
-             * actually try to do anything with it (write to it, or even get the
-             * file descriptor of it). I'm pretty sure we don't need to close the
-             * channel when that happens since we never had a useable channel
-             * to start with. *)
-            Hh_logger.log "Watchman bad file descriptor.";
-            EventLogger.watchman_died_caught ();
-            Watchman_process.return
-              (Watchman_dead (dead_env_from_alive env), Watchman_unavailable)
-          | End_of_file ->
-            Hh_logger.log "Watchman connection End_of_file. Closing channel";
-            close_channel_on_instance env
-          | Watchman_process.Read_payload_too_long ->
-            Hh_logger.log "Watchman reading payload too long. Closing channel";
-            close_channel_on_instance env
-          | Timeout ->
-            Hh_logger.log "Watchman reading Timeout. Closing channel";
-            close_channel_on_instance env
-          | Watchman_error msg ->
-            Hh_logger.log "Watchman error: %s. Closing channel" msg;
-            close_channel_on_instance env
-          | _ ->
-            let msg = Exception.to_string exn in
-            EventLogger.watchman_uncaught_failure msg;
-            raise Exit_status.(Exit_with Watchman_failed))
+      try
+        let (env, result) = with_crash_record_exn source (fun () -> f env) in
+        (Watchman_alive env, result)
+      with
+      | Sys_error msg when String.equal msg "Broken pipe" ->
+        Hh_logger.log "Watchman Pipe broken.";
+        close_channel_on_instance env
+      | Sys_error msg when String.equal msg "Connection reset by peer" ->
+        Hh_logger.log "Watchman connection reset by peer.";
+        close_channel_on_instance env
+      | Sys_error msg when String.equal msg "Bad file descriptor" ->
+        (* This happens when watchman is tearing itself down after we
+         * retrieved a sock address and connected to the sock address. That's
+         * because Unix.open_connection doesn't
+         * error even when the sock address is no longer valid and actually -
+         * it returns a channel that will error at some later time when you
+         * actually try to do anything with it (write to it, or even get the
+         * file descriptor of it). I'm pretty sure we don't need to close the
+         * channel when that happens since we never had a useable channel
+         * to start with. *)
+        Hh_logger.log "Watchman bad file descriptor.";
+        EventLogger.watchman_died_caught ();
+
+        (Watchman_dead (dead_env_from_alive env), Watchman_unavailable)
+      | End_of_file ->
+        Hh_logger.log "Watchman connection End_of_file. Closing channel";
+        close_channel_on_instance env
+      | Watchman_process.Read_payload_too_long ->
+        Hh_logger.log "Watchman reading payload too long. Closing channel";
+        close_channel_on_instance env
+      | Timeout ->
+        Hh_logger.log "Watchman reading Timeout. Closing channel";
+        close_channel_on_instance env
+      | Watchman_error msg ->
+        Hh_logger.log "Watchman error: %s. Closing channel" msg;
+        close_channel_on_instance env
+      | exn ->
+        let msg = Exception.to_string (Exception.wrap exn) in
+        EventLogger.watchman_uncaught_failure msg;
+        raise Exit_status.(Exit_with Watchman_failed)
     in
     fun instance source f ->
       with_instance
@@ -905,19 +891,19 @@ module Watchman_actual : Watchman_sig.S = struct
   (** This is a large >50MB payload, which could longer than 2 minutes for
    * Watchman to generate and push down the channel. *)
   let get_all_files env =
-    Watchman_process.catch
-      ~f:(fun () ->
-        with_crash_record_exn "get_all_files" @@ fun () ->
-        let response =
-          Watchman_process.request
-            ~debug_logging:env.settings.debug_logging
-            ~timeout:Default_timeout
-            ~sockname:env.settings.sockname
-            (all_query env)
-        in
-        env.clockspec <- J.get_string_val "clock" response;
-        extract_file_names env response)
-      ~catch:(fun _ -> raise Exit_status.(Exit_with Watchman_failed))
+    try
+      with_crash_record_exn "get_all_files" @@ fun () ->
+      let response =
+        Watchman_process.request
+          ~debug_logging:env.settings.debug_logging
+          ~timeout:Default_timeout
+          ~sockname:env.settings.sockname
+          (all_query env)
+      in
+      env.clockspec <- J.get_string_val "clock" response;
+      extract_file_names env response
+    with
+    | _ -> raise Exit_status.(Exit_with Watchman_failed)
 
   module RepoStates : sig
     type state = string
@@ -1156,7 +1142,7 @@ module Watchman_actual : Watchman_sig.S = struct
       Watchman_process.blocking_read ~debug_logging ~timeout env.conn
     in
     if is_finished_flush_response json then
-      Watchman_process.return (env, acc)
+      (env, acc)
     else
       let (env, acc) =
         match json with

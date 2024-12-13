@@ -74,7 +74,7 @@ TEST_F(ParserTest, basic) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- text <line:1:1, col:11> 'Some text '\n"
-      "|- variable <line:1:11, col:22> 'foo.bar'\n"
+      "|- interpolation <line:1:11, col:22> 'foo.bar'\n"
       "|- text <line:1:22, col:32> ' more text'\n");
 }
 
@@ -85,7 +85,7 @@ TEST_F(ParserTest, empty_template) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected variable-lookup in variable but found `}}`",
+          "expected variable-lookup in interpolation but found `}}`",
           path_to_file(1),
           1)));
 }
@@ -95,7 +95,7 @@ TEST_F(ParserTest, variable_is_single_id) {
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- variable <line:1:1, col:10> 'foo'\n");
+      "|- interpolation <line:1:1, col:10> 'foo'\n");
 }
 
 TEST_F(ParserTest, variable_is_multi_id) {
@@ -103,7 +103,7 @@ TEST_F(ParserTest, variable_is_multi_id) {
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- variable <line:1:1, col:19> 'foo.bar.baz'\n");
+      "|- interpolation <line:1:1, col:19> 'foo.bar.baz'\n");
 }
 
 TEST_F(ParserTest, variable_is_dot) {
@@ -111,7 +111,7 @@ TEST_F(ParserTest, variable_is_dot) {
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- variable <line:1:1, col:7> '.'\n");
+      "|- interpolation <line:1:1, col:7> '.'\n");
 }
 
 TEST_F(ParserTest, variable_starts_with_dot) {
@@ -120,7 +120,7 @@ TEST_F(ParserTest, variable_starts_with_dot) {
   EXPECT_EQ(diagnostics.size(), 1);
   EXPECT_EQ(
       diagnostics[0].message(),
-      "expected `}}` to close variable but found identifier");
+      "expected `}}` to close interpolation but found identifier");
 }
 
 TEST_F(ParserTest, variable_has_extra_stuff_after) {
@@ -130,7 +130,7 @@ TEST_F(ParserTest, variable_has_extra_stuff_after) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected `}}` to close variable but found `!`",
+          "expected `}}` to close interpolation but found `!`",
           path_to_file(1),
           1)));
 }
@@ -146,7 +146,7 @@ TEST_F(ParserTest, basic_section) {
       "|- section-block <line:1:1, line:3:23>\n"
       "| `- variable-lookup <line:1:5, col:21> 'news.has-update?'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- variable <line:2:12, col:19> 'foo'\n"
+      "| |- interpolation <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
       "| |- newline <line:2:30, line:3:1> '\\n'\n");
 }
@@ -162,7 +162,7 @@ TEST_F(ParserTest, inverted_section) {
       "|- section-block <inverted> <line:1:1, line:3:22>\n"
       "| `- variable-lookup <line:1:4, col:20> 'news.has-update?'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- variable <line:2:12, col:19> 'foo'\n"
+      "| |- interpolation <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
       "| |- newline <line:2:30, line:3:1> '\\n'\n");
 }
@@ -182,7 +182,7 @@ TEST_F(ParserTest, nested_sections) {
       "| |- section-block <inverted> <line:2:3, line:4:28>\n"
       "| | `- variable-lookup <line:2:6, col:26> 'update.is-important?'\n"
       "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
-      "| | |- variable <line:3:24, col:31> 'foo'\n"
+      "| | |- interpolation <line:3:24, col:31> 'foo'\n"
       "| | |- text <line:3:31, col:42> ' happening!'\n"
       "| | |- newline <line:3:42, line:4:1> '\\n'\n");
 }
@@ -285,7 +285,7 @@ TEST_F(ParserTest, basic_if) {
       "|- if-block <line:1:1, line:3:25>\n"
       "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- variable <line:2:12, col:19> 'foo'\n"
+      "| |- interpolation <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
       "| |- newline <line:2:30, line:3:1> '\\n'\n");
 }
@@ -303,7 +303,7 @@ TEST_F(ParserTest, basic_if_else) {
       "|- if-block <line:1:1, line:5:25>\n"
       "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
-      "| |- variable <line:2:12, col:19> 'foo'\n"
+      "| |- interpolation <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
       "| |- newline <line:2:30, line:3:1> '\\n'\n"
       "| `- else-block <line:3:1, line:5:1>\n"
@@ -371,7 +371,7 @@ TEST_F(ParserTest, if_block_nested) {
       "| |- if-block <line:2:3, line:6:31>\n"
       "| | `- variable-lookup <line:2:9, col:29> 'update.is-important?'\n"
       "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
-      "| | |- variable <line:3:24, col:31> 'foo'\n"
+      "| | |- interpolation <line:3:24, col:31> 'foo'\n"
       "| | |- text <line:3:31, col:42> ' happening!'\n"
       "| | |- newline <line:3:42, line:4:1> '\\n'\n"
       "| | `- else-block <line:4:3, line:6:3>\n"
@@ -769,7 +769,7 @@ TEST_F(ParserTest, strip_standalone_lines_multiline_ineligible) {
       "|- section-block <line:2:3, line:5:25>\n"
       "| `- variable-lookup <line:2:6, line:3:18> 'boolean.condition'\n"
       "| |- text <line:3:20, col:21> ' '\n"
-      "| |- variable <line:3:21, col:35> 'ineligible'\n"
+      "| |- interpolation <line:3:21, col:35> 'ineligible'\n"
       "| |- text <line:3:35, col:36> ' '\n"
       "| |- newline <line:3:36, line:4:1> '\\n'\n"
       "| |- text <line:4:1, col:2> '|'\n"

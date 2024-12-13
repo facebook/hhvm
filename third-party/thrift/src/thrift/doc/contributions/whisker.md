@@ -133,7 +133,7 @@ escaped-comment → { "{{!--" ~ <raw text until we see "--}}"> ~ "--}}" }
 A `template` is the fundamental building block for expressing variability in the output produced by a Whisker template.
 
 There are four categories of `template`s:
-* ***Expressions*** — `{{foo}}` — *interpolate* a value from the *context* into the rendered output.
+* ***Interpolations*** — `{{foo}}` — *interpolate* an *expression* into the rendered output.
 * ***Blocks*** — `{{#foo}} ... {{/foo}}` — *control flow* capabilities like conditionals ([`{{#if}}`](#if-blocks)), or loops ([`{{#each}}`](#each-blocks)) etc.
   * All blocks open with an `{{# ...}}` tag.
   * All blocks close with a corresponding `{{/ ...}}` tag.
@@ -145,9 +145,9 @@ There are four categories of `template`s:
 <Grammar>
 
 ```
-template → { ("{{" ~ expression ~ "}}") | block | statement | partial-apply }
+template → { interpolation | block | statement | partial-apply }
 
-expression    → { <see below> }
+interpolation → { <see below> }
 block         → { <see below> }
 statement     → { <see below> }
 partial-apply → { <see below> }
@@ -155,9 +155,9 @@ partial-apply → { <see below> }
 
 </Grammar>
 
-### Expressions
+### Interpolations
 
-An `expression` represents an *interpolation*. That is, the result of an `expression` is rendered into the output at the position of the enclosing `{{ ... }}`.
+An `interpolation` causes the result of an `expression` to be rendered into the output at the position of the enclosing `{{ ... }}`.
 
 There are three types of `expression`s in Whisker:
 * ***Literal*** — "hard-coded" values in the template, like the string literal, `{{ "hello" }}`.
@@ -189,6 +189,7 @@ Every `expression` produces an `object`. However, not all `object`s are *printab
 <Grammar>
 
 ```
+interpolation → "{{" ~ expression ~ "}}"
 expression → { literal | variable | function-call }
 
 literal             → { string-literal | i64-literal | boolean-literal | null-literal }

@@ -336,14 +336,14 @@ class render_engine {
         });
   }
 
-  void visit(const ast::variable& variable) {
-    const object& value = lookup_variable(variable.lookup);
+  void visit(const ast::interpolation& interpolation) {
+    const object& value = lookup_variable(interpolation.lookup);
 
     const auto report_unprintable_message_only = [&](diagnostic_level level) {
-      maybe_report(variable.lookup.loc, level, [&] {
+      maybe_report(interpolation.lookup.loc, level, [&] {
         return fmt::format(
             "Object named '{}' is not printable. The encountered value is:\n{}",
-            variable.lookup.chain_string(),
+            interpolation.lookup.chain_string(),
             to_string(value));
       });
     };

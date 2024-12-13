@@ -752,11 +752,11 @@ class parser {
   }
 
   using template_body = std::variant<
-      ast::variable,
+      ast::interpolation,
       ast::section_block,
       ast::conditional_block,
       ast::partial_apply>;
-  // template → { variable | section-block | partial-apply }
+  // template → { interpolation | section-block | partial-apply }
   parse_result<template_body> parse_template(parser_scan_window scan) {
     assert(scan.empty());
     if (scan.peek().kind != tok::open) {
@@ -777,7 +777,7 @@ class parser {
     }
 
     std::optional<template_body> templ;
-    if (parse_result variable = parse_variable(scan)) {
+    if (parse_result variable = parse_interpolation(scan)) {
       templ = std::move(variable).consume_and_advance(&scan);
     } else if (parse_result conditional_block = parse_conditional_block(scan)) {
       templ = std::move(conditional_block).consume_and_advance(&scan);
@@ -792,8 +792,9 @@ class parser {
     return {std::move(*templ), scan};
   }
 
-  // variable → { "{{" ~ variable-lookup ~ "}}" }
-  parse_result<ast::variable> parse_variable(parser_scan_window scan) {
+  // interpolation → { "{{" ~ variable-lookup ~ "}}" }
+  parse_result<ast::interpolation> parse_interpolation(
+      parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
@@ -822,15 +823,17 @@ class parser {
 
     parse_result variable_lookup = parse_variable_lookup(scan);
     if (!variable_lookup.has_value()) {
-      report_expected(scan, "variable-lookup in variable");
+      report_expected(scan, "variable-lookup in interpolation");
     }
     ast::variable_lookup lookup =
         std::move(variable_lookup).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, fmt::format("{} to close variable", tok::close));
+      report_expected(
+          scan, fmt::format("{} to close interpolation", tok::close));
     }
     return {
-        ast::variable{scan.with_start(scan_start).range(), std::move(lookup)},
+        ast::interpolation{
+            scan.with_start(scan_start).range(), std::move(lookup)},
         scan};
   }
 

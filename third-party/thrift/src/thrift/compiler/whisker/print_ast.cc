@@ -118,9 +118,12 @@ struct ast_visitor {
         location(variable.loc),
         variable.chain_string());
   }
-  void visit(const ast::variable& variable, tree_printer::scope scope) const {
+  void visit(const ast::interpolation& interpolation, tree_printer::scope scope)
+      const {
     scope.println(
-        " variable {} '{}'", location(variable.loc), variable.chain_string());
+        " interpolation {} '{}'",
+        location(interpolation.loc),
+        interpolation.string());
   }
   // Prevent implicit conversion to ast::body. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing

@@ -31,7 +31,7 @@ struct comment;
 struct section_block;
 struct conditional_block;
 struct partial_apply;
-struct variable;
+struct interpolation;
 
 /**
  * The top-level types of constructs allowed in a Whisker source file.
@@ -40,7 +40,7 @@ using body = std::variant<
     text,
     newline,
     comment,
-    variable,
+    interpolation,
     section_block,
     conditional_block,
     partial_apply>;
@@ -109,14 +109,14 @@ struct variable_lookup {
 };
 
 /**
- * A top-level variable within a template body. It is similar to variable_lookup
- * except its source_range includes the surrounding "{{ }}".
+ * A top-level use of an expression within a template body. It is similar to
+ * expression except its source_range includes the surrounding "{{ }}".
  */
-struct variable {
+struct interpolation {
   source_range loc;
   variable_lookup lookup;
 
-  std::string chain_string() const { return lookup.chain_string(); }
+  std::string string() const { return lookup.chain_string(); }
 };
 
 /**

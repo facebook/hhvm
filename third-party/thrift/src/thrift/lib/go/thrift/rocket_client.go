@@ -105,7 +105,15 @@ func (p *rocketClient) WriteMessageEnd() error {
 
 func (p *rocketClient) Flush() (err error) {
 	dataBytes := p.wbuf.Bytes()
-	if err := p.client.SendSetup(p.onServerMetadataPush); err != nil {
+
+	ctx := context.Background()
+	if p.ioTimeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, p.ioTimeout)
+		defer cancel()
+	}
+
+	if err := p.client.SendSetup(ctx, p.onServerMetadataPush); err != nil {
 		return err
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
@@ -114,12 +122,6 @@ func (p *rocketClient) Flush() (err error) {
 	}
 	if p.writeType != types.CALL {
 		return nil
-	}
-	ctx := context.Background()
-	if p.ioTimeout > 0 {
-		var cancel context.CancelFunc
-		ctx, cancel = context.WithTimeout(ctx, p.ioTimeout)
-		defer cancel()
 	}
 	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
 	clear(p.reqHeaders)

@@ -31,7 +31,7 @@ import (
 
 // RSocketClient is a client that uses a rsocket library.
 type RSocketClient interface {
-	SendSetup(onServerMetadataPush OnServerMetadataPush) error
+	SendSetup(ctx context.Context, onServerMetadataPush OnServerMetadataPush) error
 	FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) error
 	RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, zstd bool, dataBytes []byte) (map[string]string, []byte, error)
 	Close() error
@@ -49,7 +49,7 @@ func newRSocketClient(conn net.Conn) RSocketClient {
 	return &rsocketClient{conn: conn}
 }
 
-func (r *rsocketClient) SendSetup(onServerMetadataPush OnServerMetadataPush) error {
+func (r *rsocketClient) SendSetup(_ context.Context, onServerMetadataPush OnServerMetadataPush) error {
 	if r.client != nil {
 		// already setup
 		return nil

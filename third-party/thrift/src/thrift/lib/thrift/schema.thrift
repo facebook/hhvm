@@ -629,6 +629,14 @@ union Definition {
 @python.Py3Hidden
 typedef list<Definition> DefinitionList
 
+/**
+ * An opaque, unstable identifier for a `Definition`.
+ *
+ * Opaque: don't try to parse it, and the format may change.
+ * Unstable: consistent within a single snapshot of a schema,
+ *  but not across different schemas including the definition
+ *  nor across different snapshots of the same schema.
+ */
 typedef standard.ByteString DefinitionKey
 
 /** A map of definitions (Structs, Enums, Services, etc), accessible by `DefinitionKey`. */

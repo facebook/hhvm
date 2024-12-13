@@ -73,28 +73,20 @@ func validateServerPushMetadata(metadata *rpcmetadata.ServerPushMetadata) error 
 	return nil
 }
 
-type clientMetadataPayload struct {
-	transportMetadata map[string]string
-}
-
-func decodeClientMetadataPush(msg payload.Payload) *clientMetadataPayload {
+func decodeClientMetadataPush(msg payload.Payload) *rpcmetadata.ClientPushMetadata {
 	msg = payload.Clone(msg)
 	metadataBytes, ok := msg.Metadata()
 	if !ok {
 		panic("no metadata in client metadata push")
 	}
-	// Use ClientPushMetadata{} and do not use &ClientPushMetadata{} to ensure stack and avoid heap allocation.
-	metadata := rpcmetadata.ClientPushMetadata{}
-	if err := DecodeCompact(metadataBytes, &metadata); err != nil {
+	result := &rpcmetadata.ClientPushMetadata{}
+	if err := DecodeCompact(metadataBytes, result); err != nil {
 		panic(fmt.Errorf("unable to deserialize metadata push into ClientPushMetadata %w", err))
 	}
-	res := &clientMetadataPayload{}
-	if metadata.InteractionTerminate != nil {
+	if result.InteractionTerminate != nil {
 		panic("client metadata push: InteractionTerminate not implemented")
-	} else if metadata.StreamHeadersPush != nil {
+	} else if result.StreamHeadersPush != nil {
 		panic("client metadata push: StreamHeadersPush not implemented")
-	} else if metadata.TransportMetadataPush != nil {
-		res.transportMetadata = metadata.GetTransportMetadataPush().GetTransportMetadata()
 	}
-	return res
+	return result
 }

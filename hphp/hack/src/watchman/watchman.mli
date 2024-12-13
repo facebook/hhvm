@@ -7,18 +7,8 @@
  *
  *)
 
-module Watchman_process_helpers : sig
-  module J = Hh_json_helpers.AdhocJsonHelpers
-
-  val debug : bool
-
-  val timeout_to_secs : Watchman_sig.Types.timeout -> float option
-
-  exception Read_payload_too_long
-
-  val assert_no_error : Hh_json.json -> unit
-
-  val sanitize_watchman_response : debug_logging:bool -> string -> Hh_json.json
-end
+(** Module for us to interface with Watchman, a file watching service.
+    https://facebook.github.io/watchman/
+  *)
 
 include Watchman_sig.S

@@ -310,11 +310,6 @@ bool runServerDual(
     auto evbs = extractEvbs(*ioThreadPool);
     CHECK_EQ(evbs.size(), mcrouterOpts.num_proxies);
 
-    // Create AsyncMcServer instance
-    asyncMcServer =
-        std::make_shared<AsyncMcServer>(detail::createAsyncMcServerOptions(
-            mcrouterOpts, standaloneOpts, &evbs));
-
     // Create CarbonRouterInstance
     if (standaloneOpts.remote_thread) {
       router =
@@ -327,6 +322,11 @@ bool runServerDual(
       LOG(ERROR) << "CRITICAL: Failed to initialize mcrouter!";
       return false;
     }
+
+    // Create AsyncMcServer instance
+    asyncMcServer =
+        std::make_shared<AsyncMcServer>(detail::createAsyncMcServerOptions(
+            mcrouterOpts, standaloneOpts, &evbs));
 
     setupRouter<RouterInfo>(mcrouterOpts, standaloneOpts, router, preRunCb);
 
@@ -515,10 +515,6 @@ bool runServer(
     // Get EVB of main thread
     auto localEvb = ioThreadPool->getEventBaseManager()->getEventBase();
 
-    asyncMcServer =
-        std::make_shared<AsyncMcServer>(detail::createAsyncMcServerOptions(
-            mcrouterOpts, standaloneOpts, &evbs));
-
     if (standaloneOpts.remote_thread) {
       router =
           CarbonRouterInstance<RouterInfo>::init("standalone", mcrouterOpts);
@@ -530,6 +526,10 @@ bool runServer(
       LOG(ERROR) << "CRITICAL: Failed to initialize mcrouter!";
       return false;
     }
+
+    asyncMcServer =
+        std::make_shared<AsyncMcServer>(detail::createAsyncMcServerOptions(
+            mcrouterOpts, standaloneOpts, &evbs));
 
     setupRouter<RouterInfo>(mcrouterOpts, standaloneOpts, router, preRunCb);
 

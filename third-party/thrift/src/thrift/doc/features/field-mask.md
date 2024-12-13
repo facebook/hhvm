@@ -7,7 +7,7 @@ description: Mask fields in a thrift struct
 
 ## Overview
 
-Field Mask is a data structure that represents a subset of fields and nested fields of a thrift struct, with utilities to manipulate these fields (e.g., copy certain fields from one thrift object to another).
+Field Mask is a data structure that represents a subset of fields and nested fields of a thrift struct, with utilities to manipulate these fields (e.g., clear certain fields from a thrift object).
 
 ## Motivation
 When a client doesn't need all fields, the server can only return selected fields to the client to reduce network bandwidth.
@@ -43,13 +43,12 @@ void ensure(Mask, ThriftStruct);
 // Remove all masked fields
 void clear(Mask, ThriftStruct);
 
-// Copy masked fields from src to dst. If some masked fields are not set in src,
-// remove them in dst as well.
-void copy(Mask, ThriftStruct src, ThriftStruct dst);
+// Returns a new object that contains only the masked fields.
+ThriftStruct filter(Mask, ThriftStruct src);
 
 // It also provides support for protocol::Object
 void clear(Mask, protocol::Object);
-void copy(Mask, protocol::Object src, protocol::Object dst);
+protocol::Object filter(Mask, protocol::Object src);
 ```
 
 ## MaskBuilder
@@ -77,7 +76,7 @@ struct MaskBuilder<Struct> {
     // Mask APIs
     void ensure(Struct& obj) const;
     void clear(Struct& obj) const;
-    void copy(const Struct& src, Struct& dst) const;
+    Struct filter(const Struct& src) const;
 }
 ```
 

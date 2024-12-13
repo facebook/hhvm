@@ -10,7 +10,7 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <folly/io/async/test/MockAsyncTransport.h>
 #include <folly/portability/GTest.h>
-#include <proxygen/lib/http/sink/HTTPTunnelSink.h>
+#include <proxygen/lib/http/sink/HTTPConnectSink.h>
 
 #include "proxygen/facebook/revproxy/test/MockHTTPTransactionHandler.h"
 
@@ -19,10 +19,10 @@ using namespace testing;
 using namespace folly::test;
 
 // Subclass which tracks deletion
-class TestHTTPTunnelSink : public HTTPTunnelSink {
+class TestHTTPConnectSink : public HTTPConnectSink {
  public:
-  using HTTPTunnelSink::HTTPTunnelSink;
-  ~TestHTTPTunnelSink() override {
+  using HTTPConnectSink::HTTPConnectSink;
+  ~TestHTTPConnectSink() override {
     if (isDeleted != nullptr) {
       *isDeleted = true;
     }
@@ -30,13 +30,13 @@ class TestHTTPTunnelSink : public HTTPTunnelSink {
   std::shared_ptr<bool> isDeleted;
 };
 
-class HTTPTunnelSinkTest : public Test {
+class HTTPConnectSinkTest : public Test {
  public:
   void SetUp() override {
     evb_ = folly::EventBaseManager::get()->getEventBase();
     mockSocket_ = new MockAsyncTransport();
     mockHandler_ = new MockHTTPTransactionHandler();
-    sink_ = std::unique_ptr<TestHTTPTunnelSink>(new TestHTTPTunnelSink(
+    sink_ = std::unique_ptr<TestHTTPConnectSink>(new TestHTTPConnectSink(
         folly::AsyncTransport::UniquePtr(mockSocket_), mockHandler_));
     sinkDeleted_ = std::make_shared<bool>(false);
     sink_->isDeleted = sinkDeleted_;
@@ -55,12 +55,12 @@ class HTTPTunnelSinkTest : public Test {
 
   std::shared_ptr<bool> sinkDeleted_;
 
-  std::unique_ptr<TestHTTPTunnelSink> sink_;
+  std::unique_ptr<TestHTTPConnectSink> sink_;
 };
 
 using WriteCB = folly::AsyncTransport::WriteCallback;
 
-TEST_F(HTTPTunnelSinkTest, test_egress_backpressure) {
+TEST_F(HTTPConnectSinkTest, test_egress_backpressure) {
   // Test that egress backpressure is propagated to the handler
 
   // Mock underlying write to just store the callbacks for later
@@ -97,7 +97,7 @@ TEST_F(HTTPTunnelSinkTest, test_egress_backpressure) {
   sink_->sendBody(folly::IOBuf::copyBuffer("We made it!"));
 }
 
-TEST_F(HTTPTunnelSinkTest, test_ingress_control) {
+TEST_F(HTTPConnectSinkTest, test_ingress_control) {
   folly::AsyncTransport::ReadCallback *read_cb = sink_.get();
   EXPECT_CALL(*mockSocket_, setReadCB).WillRepeatedly(Invoke([&](auto cb) {
     read_cb = cb;
@@ -113,7 +113,7 @@ TEST_F(HTTPTunnelSinkTest, test_ingress_control) {
   EXPECT_EQ(read_cb, sink_.get());
 }
 
-TEST_F(HTTPTunnelSinkTest, test_bytes_read) {
+TEST_F(HTTPConnectSinkTest, test_bytes_read) {
   // Test that read bytes are propagated to the handler
   std::string bytes = "Shoelace is a cute dog!";
   size_t num_bytes = bytes.size();
@@ -140,7 +140,7 @@ void sleep_evb(folly::EventBase *evb, std::chrono::milliseconds timeout) {
   }
 };
 
-TEST_F(HTTPTunnelSinkTest, test_idle_timeout) {
+TEST_F(HTTPConnectSinkTest, test_idle_timeout) {
   EXPECT_CALL(*mockSocket_, getEventBase).WillRepeatedly(Invoke([&]() {
     return evb_;
   }));
@@ -175,7 +175,7 @@ TEST_F(HTTPTunnelSinkTest, test_idle_timeout) {
   sleep_evb(evb_, std::chrono::milliseconds(8));
 }
 
-TEST_F(HTTPTunnelSinkTest, test_delayed_destruction) {
+TEST_F(HTTPConnectSinkTest, test_delayed_destruction) {
   // Mock underlying write to just store the callbacks for later
   std::vector<WriteCB *> writeCallbacks;
   EXPECT_CALL(*mockSocket_, writeChain)
@@ -195,7 +195,7 @@ TEST_F(HTTPTunnelSinkTest, test_delayed_destruction) {
   EXPECT_EQ(*sinkDeleted_, true);
 }
 
-TEST_F(HTTPTunnelSinkTest, test_destruction_on_abort) {
+TEST_F(HTTPConnectSinkTest, test_destruction_on_abort) {
   EXPECT_CALL(*mockSocket_, writeChain)
       .WillRepeatedly(
           Invoke([](WriteCB *cb, auto &&, auto &&) { cb->writeSuccess(); }));
@@ -208,7 +208,7 @@ TEST_F(HTTPTunnelSinkTest, test_destruction_on_abort) {
   EXPECT_EQ(*sinkDeleted_, true);
 }
 
-TEST_F(HTTPTunnelSinkTest, test_ingress_eom) {
+TEST_F(HTTPConnectSinkTest, test_ingress_eom) {
   // expect handler onEOM
   EXPECT_CALL(*mockHandler_, onEOM).WillOnce(Return());
   sink_->readEOF();
@@ -221,20 +221,20 @@ TEST_F(HTTPTunnelSinkTest, test_ingress_eom) {
   EXPECT_TRUE(sink_->isEgressEOMSeen());
 }
 
-TEST_F(HTTPTunnelSinkTest, test_send_abort) {
+TEST_F(HTTPConnectSinkTest, test_send_abort) {
   EXPECT_CALL(*mockHandler_, detachTransaction).WillOnce(Return());
   EXPECT_CALL(*mockSocket_, closeWithReset).WillOnce(Return());
   sink_->sendAbort();
 }
 
-TEST_F(HTTPTunnelSinkTest, test_read_error) {
+TEST_F(HTTPConnectSinkTest, test_read_error) {
   EXPECT_CALL(*mockHandler_, onError).WillOnce(Return());
   EXPECT_CALL(*mockHandler_, detachTransaction).WillOnce(Return());
   sink_->readErr(folly::AsyncSocketException(
       folly::AsyncSocketException::AsyncSocketExceptionType::UNKNOWN, "test"));
 }
 
-TEST_F(HTTPTunnelSinkTest, test_read_error_with_abort) {
+TEST_F(HTTPConnectSinkTest, test_read_error_with_abort) {
   EXPECT_CALL(*mockHandler_, onError).WillOnce(Invoke([&](auto &&) {
     sink_->detachAndAbortIfIncomplete(std::move(sink_));
   }));
@@ -243,7 +243,7 @@ TEST_F(HTTPTunnelSinkTest, test_read_error_with_abort) {
       folly::AsyncSocketException::AsyncSocketExceptionType::UNKNOWN, "test"));
 }
 
-TEST_F(HTTPTunnelSinkTest, test_write_error) {
+TEST_F(HTTPConnectSinkTest, test_write_error) {
   EXPECT_CALL(*mockSocket_, writeChain)
       .WillRepeatedly(Invoke([](WriteCB *cb, auto &&, auto &&) {
         cb->writeErr(
@@ -257,7 +257,7 @@ TEST_F(HTTPTunnelSinkTest, test_write_error) {
   sink_->sendBody(folly::IOBuf::copyBuffer("hello world"));
 }
 
-TEST_F(HTTPTunnelSinkTest, test_write_error_with_abort) {
+TEST_F(HTTPConnectSinkTest, test_write_error_with_abort) {
   EXPECT_CALL(*mockSocket_, writeChain)
       .WillRepeatedly(Invoke([](WriteCB *cb, auto &&, auto &&) {
         cb->writeErr(

@@ -88,26 +88,21 @@ module Abstract_types = struct
 end
 
 module type WATCHMAN_PROCESS = sig
-  type 'a result
-
   type conn
 
   exception Read_payload_too_long
 
-  val ( >>= ) : 'a result -> ('a -> 'b result) -> 'b result
+  val ( >>= ) : 'a -> ('a -> 'b) -> 'b
 
-  val ( >|= ) : 'a result -> ('a -> 'b) -> 'b result
+  val ( >|= ) : 'a -> ('a -> 'b) -> 'b
 
-  val return : 'a -> 'a result
+  val return : 'a -> 'a
 
-  val catch :
-    f:(unit -> 'b result) -> catch:(Exception.t -> 'b result) -> 'b result
+  val catch : f:(unit -> 'b) -> catch:(Exception.t -> 'b) -> 'b
 
-  val list_fold_values :
-    'a list -> init:'b -> f:('b -> 'a -> 'b result) -> 'b result
+  val list_fold_values : 'a list -> init:'b -> f:('b -> 'a -> 'b) -> 'b
 
-  val open_connection :
-    timeout:Types.timeout -> sockname:string option -> conn result
+  val open_connection : timeout:Types.timeout -> sockname:string option -> conn
 
   val request :
     debug_logging:bool ->
@@ -115,21 +110,18 @@ module type WATCHMAN_PROCESS = sig
     ?timeout:Types.timeout ->
     sockname:string option ->
     Hh_json.json ->
-    Hh_json.json result
+    Hh_json.json
 
   val send_request_and_do_not_wait_for_response :
-    debug_logging:bool -> conn:conn -> Hh_json.json -> unit result
+    debug_logging:bool -> conn:conn -> Hh_json.json -> unit
 
   val blocking_read :
-    debug_logging:bool ->
-    ?timeout:Types.timeout ->
-    conn ->
-    Hh_json.json option result
+    debug_logging:bool -> ?timeout:Types.timeout -> conn -> Hh_json.json option
 
-  val close_connection : conn -> unit result
+  val close_connection : conn -> unit
 
   module Testing : sig
-    val get_test_conn : unit -> conn result
+    val get_test_conn : unit -> conn
   end
 end
 
@@ -138,7 +130,7 @@ module type S = sig
 
   include module type of Abstract_types
 
-  type 'a result
+  type 'a result = 'a
 
   type conn
 
@@ -172,6 +164,8 @@ module type S = sig
     on_alive:(env -> 'a result) ->
     on_dead:(dead_env -> 'a result) ->
     'a result
+
+  val get_reader : watchman_instance -> Buffered_line_reader.t option
 
   module RepoStates : sig
     val get_as_telemetry : unit -> Telemetry.t

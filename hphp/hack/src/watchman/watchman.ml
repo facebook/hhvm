@@ -115,13 +115,11 @@ module Watchman_process_helpers = struct
 end
 
 module Regular_watchman_process : sig
-  include Watchman_sig.WATCHMAN_PROCESS with type 'a result = 'a
+  include Watchman_sig.WATCHMAN_PROCESS
 
   val get_reader : conn -> Buffered_line_reader.t
 end = struct
   include Watchman_process_helpers
-
-  type 'a result = 'a
 
   type conn = Buffered_line_reader.t * Out_channel.t
 
@@ -306,17 +304,15 @@ end = struct
   end
 end
 
-module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
-  Watchman_sig.S
-    with type 'a result = 'a Watchman_process.result
-     and type conn = Watchman_process.conn = struct
-  let ( >>= ) = Watchman_process.( >>= )
+module Watchman_actual :
+  Watchman_sig.S with type conn = Regular_watchman_process.conn = struct
+  let ( >>= ) = Regular_watchman_process.( >>= )
 
-  let ( >|= ) = Watchman_process.( >|= )
+  let ( >|= ) = Regular_watchman_process.( >|= )
 
-  type 'a result = 'a Watchman_process.result
+  type 'a result = 'a
 
-  type conn = Watchman_process.conn
+  type conn = Regular_watchman_process.conn
 
   (**
    * Ocaml module signatures are static. This means since mocking
@@ -363,7 +359,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
      *
      * See also assert_no_fresh_instance *)
     mutable clockspec: string;
-    conn: Watchman_process.conn;
+    conn: Regular_watchman_process.conn;
     settings: init_settings;
     subscription: string;
     watch_root: string;
@@ -532,12 +528,12 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
   (****************************************************************************)
 
   let with_crash_record_exn source f =
-    Watchman_process.catch ~f ~catch:(fun exn ->
+    Regular_watchman_process.catch ~f ~catch:(fun exn ->
         Hh_logger.exception_ ~prefix:("Watchman " ^ source ^ ": ") exn;
         Exception.reraise exn)
 
   let with_crash_record_opt source f =
-    Watchman_process.catch
+    Regular_watchman_process.catch
       ~f:(fun () -> with_crash_record_exn source f >|= fun v -> Some v)
       ~catch:(fun exn ->
         match Exception.unwrap exn with
@@ -545,7 +541,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         | Exit_status.Exit_with _
         | Watchman_restarted ->
           Exception.reraise exn
-        | _ -> Watchman_process.return None)
+        | _ -> Regular_watchman_process.return None)
 
   let has_capability name capabilities =
     (* Projects down from the boolean error monad into booleans.
@@ -589,10 +585,10 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
               ];
           ])
     in
-    Watchman_process.request ~debug_logging ~conn ~sockname query
+    Regular_watchman_process.request ~debug_logging ~conn ~sockname query
     >>= fun response ->
     match Hh_json_helpers.Jget.bool_opt (Some response) "is_fresh_instance" with
-    | Some false -> Watchman_process.return ()
+    | Some false -> Regular_watchman_process.return ()
     | Some true ->
       Hh_logger.error
         "Watchman server restarted so we may have missed some updates";
@@ -644,9 +640,9 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         subscription_prefix;
       } =
     with_crash_record_opt "init" @@ fun () ->
-    Watchman_process.open_connection ~timeout:init_timeout ~sockname
+    Regular_watchman_process.open_connection ~timeout:init_timeout ~sockname
     >>= fun conn ->
-    Watchman_process.request
+    Regular_watchman_process.request
       ~debug_logging
       ~conn
       ~timeout:Default_timeout
@@ -661,21 +657,21 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       else
         None
     in
-    Watchman_process.list_fold_values
+    Regular_watchman_process.list_fold_values
       roots
       ~init:(Some [], SSet.empty, SSet.empty)
       ~f:(fun (terms, watch_roots, failed_paths) path ->
         (* Watch this root. If the path doesn't exist, watch_project will throw. In that case catch
          * the error and continue for now. *)
-        Watchman_process.catch
+        Regular_watchman_process.catch
           ~f:(fun () ->
-            Watchman_process.request
+            Regular_watchman_process.request
               ~debug_logging
               ~conn
               ~sockname
               (watch_project (Path.to_string path))
             >|= fun response -> Some response)
-          ~catch:(fun _ -> Watchman_process.return None)
+          ~catch:(fun _ -> Regular_watchman_process.return None)
         >|= fun response ->
         match response with
         | None ->
@@ -730,9 +726,13 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         ~sockname
         ~watch_root
         ~clockspec
-      >>= fun () -> Watchman_process.return clockspec
+      >>= fun () -> Regular_watchman_process.return clockspec
     | None ->
-      Watchman_process.request ~debug_logging ~conn ~sockname (clock watch_root)
+      Regular_watchman_process.request
+        ~debug_logging
+        ~conn
+        ~sockname
+        (clock watch_root)
       >|= J.get_string_val "clock")
     >>= fun clockspec ->
     let watched_path_expression_terms =
@@ -759,9 +759,9 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       }
     in
     (match subscribe_mode with
-    | None -> Watchman_process.return ()
+    | None -> Regular_watchman_process.return ()
     | Some mode ->
-      Watchman_process.request
+      Regular_watchman_process.request
         ~debug_logging
         ~conn
         ~sockname
@@ -802,7 +802,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
 
   let maybe_restart_instance instance =
     match instance with
-    | Watchman_alive _ -> Watchman_process.return instance
+    | Watchman_alive _ -> Regular_watchman_process.return instance
     | Watchman_dead dead_env ->
       if dead_env.reinit_attempts >= max_reinit_attempts then
         let () =
@@ -828,9 +828,9 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
           EventLogger.watchman_connection_reestablished ();
           Watchman_alive env
       ) else
-        Watchman_process.return instance
+        Regular_watchman_process.return instance
 
-  let close env = Watchman_process.close_connection env.conn
+  let close env = Regular_watchman_process.close_connection env.conn
 
   let close_channel_on_instance env =
     close env >|= fun () ->
@@ -841,7 +841,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     (if try_to_restart then
       maybe_restart_instance instance
     else
-      Watchman_process.return instance)
+      Regular_watchman_process.return instance)
     >>= function
     | Watchman_dead dead_env -> on_dead dead_env
     | Watchman_alive env -> on_alive env
@@ -855,10 +855,11 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
    * taking too long. *)
   let call_on_instance =
     let on_dead dead_env =
-      Watchman_process.return (Watchman_dead dead_env, Watchman_unavailable)
+      Regular_watchman_process.return
+        (Watchman_dead dead_env, Watchman_unavailable)
     in
     let on_alive source f env =
-      Watchman_process.catch
+      Regular_watchman_process.catch
         ~f:(fun () ->
           with_crash_record_exn source (fun () -> f env)
           >|= fun (env, result) -> (Watchman_alive env, result))
@@ -882,12 +883,12 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
              * to start with. *)
             Hh_logger.log "Watchman bad file descriptor.";
             EventLogger.watchman_died_caught ();
-            Watchman_process.return
+            Regular_watchman_process.return
               (Watchman_dead (dead_env_from_alive env), Watchman_unavailable)
           | End_of_file ->
             Hh_logger.log "Watchman connection End_of_file. Closing channel";
             close_channel_on_instance env
-          | Watchman_process.Read_payload_too_long ->
+          | Regular_watchman_process.Read_payload_too_long ->
             Hh_logger.log "Watchman reading payload too long. Closing channel";
             close_channel_on_instance env
           | Timeout ->
@@ -911,10 +912,10 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
   (** This is a large >50MB payload, which could longer than 2 minutes for
    * Watchman to generate and push down the channel. *)
   let get_all_files env =
-    Watchman_process.catch
+    Regular_watchman_process.catch
       ~f:(fun () ->
         with_crash_record_exn "get_all_files" @@ fun () ->
-        Watchman_process.request
+        Regular_watchman_process.request
           ~debug_logging:env.settings.debug_logging
           ~timeout:Default_timeout
           ~sockname:env.settings.sockname
@@ -1071,7 +1072,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     let debug_logging = env.settings.debug_logging in
     let sockname = env.settings.sockname in
     if Option.is_some env.settings.subscribe_mode then
-      Watchman_process.blocking_read ~debug_logging ?timeout env.conn
+      Regular_watchman_process.blocking_read ~debug_logging ?timeout env.conn
       >|= fun response ->
       let (env, result) =
         transform_asynchronous_get_changes_response env response
@@ -1079,7 +1080,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       (env, Watchman_pushed result)
     else
       let query = since_query env in
-      Watchman_process.request
+      Regular_watchman_process.request
         ~debug_logging
         ~conn:env.conn
         ?timeout
@@ -1092,7 +1093,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       (env, Watchman_synchronous [changes])
 
   let get_changes_since_mergebase ?timeout env =
-    Watchman_process.request
+    Regular_watchman_process.request
       ?timeout
       ~debug_logging:env.settings.debug_logging
       ~sockname:env.settings.sockname
@@ -1100,7 +1101,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     >|= extract_file_names env
 
   let get_mergebase ?timeout env : Hg.Rev.t result =
-    Watchman_process.request
+    Regular_watchman_process.request
       ?timeout
       ~debug_logging:env.settings.debug_logging
       ~sockname:env.settings.sockname
@@ -1154,10 +1155,10 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
         Explicit_timeout timeout
     in
     let debug_logging = env.settings.debug_logging in
-    Watchman_process.blocking_read ~debug_logging ~timeout env.conn
+    Regular_watchman_process.blocking_read ~debug_logging ~timeout env.conn
     >>= fun json ->
     if is_finished_flush_response json then
-      Watchman_process.return (env, acc)
+      Regular_watchman_process.return (env, acc)
     else
       let (env, acc) =
         match json with
@@ -1177,7 +1178,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       if Option.is_none env.settings.subscribe_mode then
         let timeout = Explicit_timeout (float timeout) in
         let query = since_query env in
-        Watchman_process.request
+        Regular_watchman_process.request
           ~debug_logging:env.settings.debug_logging
           ~conn:env.conn
           ~timeout
@@ -1191,7 +1192,7 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
       else
         let request = flush_request ~timeout env.watch_root in
         let conn = env.conn in
-        Watchman_process.send_request_and_do_not_wait_for_response
+        Regular_watchman_process.send_request_and_do_not_wait_for_response
           ~debug_logging:env.settings.debug_logging
           ~conn
           request
@@ -1210,11 +1211,16 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     | Watchman_dead _ -> None
     | Watchman_alive { conn; _ } -> Some conn
 
+  let get_reader instance =
+    Option.map
+      (conn_of_instance instance)
+      ~f:Regular_watchman_process.get_reader
+
   module Testing = struct
     include Testing_common
 
     let get_test_env () =
-      Watchman_process.Testing.get_test_conn () >|= fun conn ->
+      Regular_watchman_process.Testing.get_test_conn () >|= fun conn ->
       {
         settings = test_settings;
         conn;
@@ -1231,15 +1237,6 @@ module Functor (Watchman_process : Watchman_sig.WATCHMAN_PROCESS) :
     let transform_asynchronous_get_changes_response env json =
       transform_asynchronous_get_changes_response env json
   end
-end
-
-module Watchman_actual = struct
-  include Functor (Regular_watchman_process)
-
-  let get_reader instance =
-    Option.map
-      (conn_of_instance instance)
-      ~f:Regular_watchman_process.get_reader
 end
 
 module Watchman_mock = struct
@@ -1325,14 +1322,8 @@ module Watchman_mock = struct
     | Watchman_alive env -> on_alive env
 end
 
-module type S = sig
-  include Watchman_sig.S with type 'a result = 'a
-
-  val get_reader : watchman_instance -> Buffered_line_reader.t option
-end
-
 include
   (val if Injector_config.use_test_stubbing then
-         (module Watchman_mock : S)
+         (module Watchman_mock : Watchman_sig.S)
        else
-         (module Watchman_actual : S))
+         (module Watchman_actual : Watchman_sig.S))

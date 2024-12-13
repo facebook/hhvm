@@ -339,7 +339,7 @@ struct ResourceData : public PeriodicStatsDataBase {
     cpuUtilPercentileConfigured_ = cpuUtilPercentileConfigured;
     cpuRatioUtilPercentile_ = cpuRatioUtilPercentile;
     cpuSoftIrqRatioUtil_ = cpuSoftIrqUsageRatio;
-    softIrqCpuCoreRatioUtils_ = softIrqCpuCoreRatioUtils;
+    softIrqCpuCoreRatioUtils_ = std::move(softIrqCpuCoreRatioUtils);
   }
 
   void setMemStats(uint64_t usedMemBytes,

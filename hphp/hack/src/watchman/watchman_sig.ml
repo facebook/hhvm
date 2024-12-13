@@ -92,10 +92,6 @@ module type Watchman_process_S = sig
 
   exception Read_payload_too_long
 
-  val ( >>= ) : 'a -> ('a -> 'b) -> 'b
-
-  val ( >|= ) : 'a -> ('a -> 'b) -> 'b
-
   val return : 'a -> 'a
 
   val catch : f:(unit -> 'b) -> catch:(Exception.t -> 'b) -> 'b

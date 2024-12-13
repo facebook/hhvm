@@ -119,10 +119,6 @@ module Watchman_process : Watchman_sig.Watchman_process_S = struct
 
   type conn = Buffered_line_reader.t * Out_channel.t
 
-  let ( >>= ) a f = f a
-
-  let ( >|= ) a f = f a
-
   let return x = x
 
   let catch ~f ~catch =
@@ -300,10 +296,6 @@ module Watchman_process : Watchman_sig.Watchman_process_S = struct
 end
 
 module Watchman_actual : Watchman_sig.S = struct
-  let ( >>= ) = Watchman_process.( >>= )
-
-  let ( >|= ) = Watchman_process.( >|= )
-
   type conn = Watchman_process.conn
 
   (**
@@ -526,7 +518,7 @@ module Watchman_actual : Watchman_sig.S = struct
 
   let with_crash_record_opt source f =
     Watchman_process.catch
-      ~f:(fun () -> with_crash_record_exn source f >|= fun v -> Some v)
+      ~f:(fun () -> Some (with_crash_record_exn source f))
       ~catch:(fun exn ->
         match Exception.unwrap exn with
         (* Avoid swallowing these *)
@@ -577,8 +569,9 @@ module Watchman_actual : Watchman_sig.S = struct
               ];
           ])
     in
-    Watchman_process.request ~debug_logging ~conn ~sockname query
-    >>= fun response ->
+    let response =
+      Watchman_process.request ~debug_logging ~conn ~sockname query
+    in
     match Hh_json_helpers.Jget.bool_opt (Some response) "is_fresh_instance" with
     | Some false -> Watchman_process.return ()
     | Some true ->
@@ -632,15 +625,17 @@ module Watchman_actual : Watchman_sig.S = struct
         subscription_prefix;
       } =
     with_crash_record_opt "init" @@ fun () ->
-    Watchman_process.open_connection ~timeout:init_timeout ~sockname
-    >>= fun conn ->
-    Watchman_process.request
-      ~debug_logging
-      ~conn
-      ~timeout:Default_timeout
-      ~sockname
-      (capability_check ~optional:[flush_subscriptions_cmd] ["relative_root"])
-    >>= fun capabilities ->
+    let conn =
+      Watchman_process.open_connection ~timeout:init_timeout ~sockname
+    in
+    let capabilities =
+      Watchman_process.request
+        ~debug_logging
+        ~conn
+        ~timeout:Default_timeout
+        ~sockname
+        (capability_check ~optional:[flush_subscriptions_cmd] ["relative_root"])
+    in
     let supports_flush = has_capability flush_subscriptions_cmd capabilities in
     (* Disable subscribe if Watchman flush feature isn't supported. *)
     let subscribe_mode =
@@ -649,36 +644,38 @@ module Watchman_actual : Watchman_sig.S = struct
       else
         None
     in
-    Watchman_process.list_fold_values
-      roots
-      ~init:(Some [], SSet.empty, SSet.empty)
-      ~f:(fun (terms, watch_roots, failed_paths) path ->
-        (* Watch this root. If the path doesn't exist, watch_project will throw. In that case catch
-         * the error and continue for now. *)
-        Watchman_process.catch
-          ~f:(fun () ->
-            Watchman_process.request
-              ~debug_logging
-              ~conn
-              ~sockname
-              (watch_project (Path.to_string path))
-            >|= fun response -> Some response)
-          ~catch:(fun _ -> Watchman_process.return None)
-        >|= fun response ->
-        match response with
-        | None ->
-          (terms, watch_roots, SSet.add (Path.to_string path) failed_paths)
-        | Some response ->
-          let watch_root = J.get_string_val "watch" response in
-          let relative_path =
-            J.get_string_val "relative_path" ~default:"" response
+    let (watched_path_expression_terms, watch_roots, failed_paths) =
+      Watchman_process.list_fold_values
+        roots
+        ~init:(Some [], SSet.empty, SSet.empty)
+        ~f:(fun (terms, watch_roots, failed_paths) path ->
+          (* Watch this root. If the path doesn't exist, watch_project will throw. In that case catch
+           * the error and continue for now. *)
+          let response =
+            Watchman_process.catch
+              ~f:(fun () ->
+                Some
+                  (Watchman_process.request
+                     ~debug_logging
+                     ~conn
+                     ~sockname
+                     (watch_project (Path.to_string path))))
+              ~catch:(fun _ -> Watchman_process.return None)
           in
-          let terms =
-            prepend_relative_path_of_directory ~relative_path ~terms
-          in
-          let watch_roots = SSet.add watch_root watch_roots in
-          (terms, watch_roots, failed_paths))
-    >>= fun (watched_path_expression_terms, watch_roots, failed_paths) ->
+          match response with
+          | None ->
+            (terms, watch_roots, SSet.add (Path.to_string path) failed_paths)
+          | Some response ->
+            let watch_root = J.get_string_val "watch" response in
+            let relative_path =
+              J.get_string_val "relative_path" ~default:"" response
+            in
+            let terms =
+              prepend_relative_path_of_directory ~relative_path ~terms
+            in
+            let watch_roots = SSet.add watch_root watch_roots in
+            (terms, watch_roots, failed_paths))
+    in
     (* The failed_paths are likely includes which don't exist on the filesystem, so watch_project
      * returned an error. Let's do a best effort attempt to infer the watch root and relative
      * path for each bad include *)
@@ -710,19 +707,24 @@ module Watchman_actual : Watchman_sig.S = struct
              (SSet.cardinal watch_roots))
     in
     (* If we don't have a prior clockspec, grab the current clock *)
-    (match prior_clockspec with
-    | Some clockspec ->
-      assert_watchman_has_not_restarted_since
-        ~debug_logging
-        ~conn
-        ~sockname
-        ~watch_root
-        ~clockspec
-      >>= fun () -> Watchman_process.return clockspec
-    | None ->
-      Watchman_process.request ~debug_logging ~conn ~sockname (clock watch_root)
-      >|= J.get_string_val "clock")
-    >>= fun clockspec ->
+    let clockspec =
+      match prior_clockspec with
+      | Some clockspec ->
+        assert_watchman_has_not_restarted_since
+          ~debug_logging
+          ~conn
+          ~sockname
+          ~watch_root
+          ~clockspec;
+        Watchman_process.return clockspec
+      | None ->
+        Watchman_process.request
+          ~debug_logging
+          ~conn
+          ~sockname
+          (clock watch_root)
+        |> J.get_string_val "clock"
+    in
     let watched_path_expression_terms =
       Option.map watched_path_expression_terms ~f:(J.pred "anyof")
     in
@@ -749,13 +751,15 @@ module Watchman_actual : Watchman_sig.S = struct
     (match subscribe_mode with
     | None -> Watchman_process.return ()
     | Some mode ->
-      Watchman_process.request
-        ~debug_logging
-        ~conn
-        ~sockname
-        (subscribe ~mode env)
-      >|= ignore)
-    >|= fun () -> env
+      let _response : Hh_json.json =
+        Watchman_process.request
+          ~debug_logging
+          ~conn
+          ~sockname
+          (subscribe ~mode env)
+      in
+      ());
+    env
 
   let init ?since_clockspec settings () =
     let prior_clockspec = since_clockspec in
@@ -802,10 +806,11 @@ module Watchman_actual : Watchman_sig.S = struct
         let () =
           Hh_logger.log "Attemping to reestablish watchman subscription"
         in
-        re_init
-          ~prior_clockspec:dead_env.prior_clockspec
-          dead_env.prior_settings
-        >|= function
+        match
+          re_init
+            ~prior_clockspec:dead_env.prior_clockspec
+            dead_env.prior_settings
+        with
         | None ->
           Hh_logger.log "Reestablishing watchman subscription failed.";
           EventLogger.watchman_connection_reestablishment_failed ();
@@ -821,16 +826,17 @@ module Watchman_actual : Watchman_sig.S = struct
   let close env = Watchman_process.close_connection env.conn
 
   let close_channel_on_instance env =
-    close env >|= fun () ->
+    close env;
     EventLogger.watchman_died_caught ();
     (Watchman_dead (dead_env_from_alive env), Watchman_unavailable)
 
   let with_instance instance ~try_to_restart ~on_alive ~on_dead =
-    (if try_to_restart then
-      maybe_restart_instance instance
-    else
-      Watchman_process.return instance)
-    >>= function
+    match
+      if try_to_restart then
+        maybe_restart_instance instance
+      else
+        Watchman_process.return instance
+    with
     | Watchman_dead dead_env -> on_dead dead_env
     | Watchman_alive env -> on_alive env
 
@@ -848,8 +854,8 @@ module Watchman_actual : Watchman_sig.S = struct
     let on_alive source f env =
       Watchman_process.catch
         ~f:(fun () ->
-          with_crash_record_exn source (fun () -> f env)
-          >|= fun (env, result) -> (Watchman_alive env, result))
+          let (env, result) = with_crash_record_exn source (fun () -> f env) in
+          (Watchman_alive env, result))
         ~catch:(fun exn ->
           match Exception.unwrap exn with
           | Sys_error msg when String.equal msg "Broken pipe" ->
@@ -902,12 +908,13 @@ module Watchman_actual : Watchman_sig.S = struct
     Watchman_process.catch
       ~f:(fun () ->
         with_crash_record_exn "get_all_files" @@ fun () ->
-        Watchman_process.request
-          ~debug_logging:env.settings.debug_logging
-          ~timeout:Default_timeout
-          ~sockname:env.settings.sockname
-          (all_query env)
-        >|= fun response ->
+        let response =
+          Watchman_process.request
+            ~debug_logging:env.settings.debug_logging
+            ~timeout:Default_timeout
+            ~sockname:env.settings.sockname
+            (all_query env)
+        in
         env.clockspec <- J.get_string_val "clock" response;
         extract_file_names env response)
       ~catch:(fun _ -> raise Exit_status.(Exit_with Watchman_failed))
@@ -1059,21 +1066,23 @@ module Watchman_actual : Watchman_sig.S = struct
     let debug_logging = env.settings.debug_logging in
     let sockname = env.settings.sockname in
     if Option.is_some env.settings.subscribe_mode then
-      Watchman_process.blocking_read ~debug_logging ?timeout env.conn
-      >|= fun response ->
+      let response =
+        Watchman_process.blocking_read ~debug_logging ?timeout env.conn
+      in
       let (env, result) =
         transform_asynchronous_get_changes_response env response
       in
       (env, Watchman_pushed result)
     else
       let query = since_query env in
-      Watchman_process.request
-        ~debug_logging
-        ~conn:env.conn
-        ?timeout
-        ~sockname
-        query
-      >|= fun response ->
+      let response =
+        Watchman_process.request
+          ~debug_logging
+          ~conn:env.conn
+          ?timeout
+          ~sockname
+          query
+      in
       let (env, changes) =
         transform_asynchronous_get_changes_response env (Some response)
       in
@@ -1085,15 +1094,16 @@ module Watchman_actual : Watchman_sig.S = struct
       ~debug_logging:env.settings.debug_logging
       ~sockname:env.settings.sockname
       (get_changes_since_mergebase_query env)
-    >|= extract_file_names env
+    |> extract_file_names env
 
   let get_mergebase ?timeout env : Hg.Rev.t =
-    Watchman_process.request
-      ?timeout
-      ~debug_logging:env.settings.debug_logging
-      ~sockname:env.settings.sockname
-      (get_changes_since_mergebase_query env)
-    >|= fun response ->
+    let response =
+      Watchman_process.request
+        ?timeout
+        ~debug_logging:env.settings.debug_logging
+        ~sockname:env.settings.sockname
+        (get_changes_since_mergebase_query env)
+    in
     match extract_mergebase response with
     | Some (mergebase, _since_mergebase) -> mergebase
     | None -> raise (Watchman_error "Failed to extract mergebase from response")
@@ -1142,8 +1152,9 @@ module Watchman_actual : Watchman_sig.S = struct
         Explicit_timeout timeout
     in
     let debug_logging = env.settings.debug_logging in
-    Watchman_process.blocking_read ~debug_logging ~timeout env.conn
-    >>= fun json ->
+    let json =
+      Watchman_process.blocking_read ~debug_logging ~timeout env.conn
+    in
     if is_finished_flush_response json then
       Watchman_process.return (env, acc)
     else
@@ -1161,17 +1172,19 @@ module Watchman_actual : Watchman_sig.S = struct
   let poll_until_sync ~deadline env = poll_until_sync ~deadline env []
 
   let get_changes_synchronously ~(timeout : int) instance =
-    ( call_on_instance instance "get_changes_synchronously" @@ fun env ->
+    let (instance, status) =
+      call_on_instance instance "get_changes_synchronously" @@ fun env ->
       if Option.is_none env.settings.subscribe_mode then
         let timeout = Explicit_timeout (float timeout) in
         let query = since_query env in
-        Watchman_process.request
-          ~debug_logging:env.settings.debug_logging
-          ~conn:env.conn
-          ~timeout
-          ~sockname:env.settings.sockname
-          query
-        >|= fun response ->
+        let response =
+          Watchman_process.request
+            ~debug_logging:env.settings.debug_logging
+            ~conn:env.conn
+            ~timeout
+            ~sockname:env.settings.sockname
+            query
+        in
         let (env, changes) =
           transform_asynchronous_get_changes_response env (Some response)
         in
@@ -1182,17 +1195,17 @@ module Watchman_actual : Watchman_sig.S = struct
         Watchman_process.send_request_and_do_not_wait_for_response
           ~debug_logging:env.settings.debug_logging
           ~conn
-          request
-        >>= fun () ->
+          request;
         let deadline = Unix.time () +. float_of_int timeout in
-        poll_until_sync ~deadline env >|= fun (env, changes) ->
-        (env, Watchman_synchronous (List.rev changes)) )
-    >|= function
-    | (_, Watchman_unavailable) ->
+        let (env, changes) = poll_until_sync ~deadline env in
+        (env, Watchman_synchronous (List.rev changes))
+    in
+    match status with
+    | Watchman_unavailable ->
       raise (Watchman_error "Watchman unavailable for synchronous response")
-    | (_, Watchman_pushed _) ->
+    | Watchman_pushed _ ->
       raise (Watchman_error "Wtf? pushed response from synchronous request")
-    | (instance, Watchman_synchronous files) -> (instance, files)
+    | Watchman_synchronous files -> (instance, files)
 
   let conn_of_instance = function
     | Watchman_dead _ -> None
@@ -1205,7 +1218,7 @@ module Watchman_actual : Watchman_sig.S = struct
     include Testing_common
 
     let get_test_env () =
-      Watchman_process.Testing.get_test_conn () >|= fun conn ->
+      let conn = Watchman_process.Testing.get_test_conn () in
       {
         settings = test_settings;
         conn;

@@ -17,6 +17,8 @@
 #include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/detail/overload.h>
 
+#include <fmt/core.h>
+
 #include <cassert>
 #include <iterator>
 #include <utility>
@@ -64,9 +66,18 @@ std::string partial_apply::path_string() const {
 
 std::string expression::to_string() const {
   return detail::variant_match(
-      content, [](const variable_lookup& lookup) -> std::string {
-        return lookup.chain_string();
+      content,
+      [](const variable_lookup& v) { return v.chain_string(); },
+      [](const function_call& f) {
+        return detail::variant_match(f.which, [&](function_call::not_tag) {
+          return fmt::format("(not {})", f.args[0].to_string());
+        });
       });
+}
+
+std::string_view expression::function_call::name() const {
+  return detail::variant_match(
+      which, [&](function_call::not_tag) { return "not"; });
 }
 
 } // namespace whisker::ast

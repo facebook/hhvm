@@ -965,17 +965,52 @@ class parser {
         scan};
   }
 
-  // expression → { variable-lookup }
+  // expression → { variable-lookup | function-call }
   parse_result<ast::expression> parse_expression(parser_scan_window scan) {
     assert(scan.empty());
     auto scan_start = scan.start;
+    using function_call = ast::expression::function_call;
+
     if (parse_result lookup = parse_variable_lookup(scan)) {
       auto expr = std::move(lookup).consume_and_advance(&scan);
       return {
           ast::expression{scan.with_start(scan_start).range(), std::move(expr)},
           scan};
     }
-    return no_parse_result();
+
+    if (!try_consume_token(&scan, tok::l_paren)) {
+      return no_parse_result();
+    }
+
+    function_call func;
+    if (try_consume_token(&scan, tok::kw_not)) {
+      func.which = function_call::not_tag{};
+    } else {
+      report_fatal_error(scan, "unrecognized function {}", scan.peek());
+    }
+
+    while (parse_result cond = parse_expression(scan.make_fresh())) {
+      func.args.push_back(std::move(cond).consume_and_advance(&scan));
+    }
+
+    detail::variant_match(func.which, [&](function_call::not_tag) {
+      if (func.args.size() != 1) {
+        report_fatal_error(
+            scan,
+            "expected 1 argument for helper `not` but got {}",
+            func.args.size());
+      }
+    });
+
+    if (!try_consume_token(&scan, tok::r_paren)) {
+      report_fatal_error(
+          scan,
+          "expected `)` to close helper `{}` but got `{}`",
+          func.name(),
+          scan.peek());
+    }
+
+    return {{scan.with_start(scan_start).range(), std::move(func)}, scan};
   }
 
   // conditional-block →

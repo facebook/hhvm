@@ -573,6 +573,33 @@ TEST_F(RenderTest, unless_else_block) {
   }
 }
 
+TEST_F(RenderTest, if_not_else_block) {
+  {
+    auto result = render(
+        "{{#if (not news.has-update?)}}\n"
+        "Nothing is happening!\n"
+        "{{#else}}\n"
+        "Stuff is {{foo}} happening!\n"
+        "{{/if (not news.has-update?)}}\n",
+        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "Nothing is happening!\n");
+  }
+  {
+    auto result = render(
+        "{{#if (not news.has-update?)}}\n"
+        "Nothing is happening!\n"
+        "{{#else}}\n"
+        "Stuff is {{foo}} happening!\n"
+        "{{/if (not news.has-update?)}}\n",
+        w::map(
+            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+             {"foo", w::string("now")}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "Stuff is now happening!\n");
+  }
+}
+
 TEST_F(RenderTest, printable_types_strict_failure) {
   {
     auto result = render(

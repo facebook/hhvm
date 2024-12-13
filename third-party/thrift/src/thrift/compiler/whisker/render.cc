@@ -338,8 +338,16 @@ class render_engine {
 
   object evaluate(const ast::expression& expr) {
     return detail::variant_match(
-        expr.content, [&](const ast::variable_lookup& variable_lookup) {
+        expr.content,
+        [&](const ast::variable_lookup& variable_lookup) {
           return lookup_variable(variable_lookup);
+        },
+        [&](const ast::expression::function_call& func) {
+          return detail::variant_match(
+              func.which, [&](ast::expression::function_call::not_tag) {
+                assert(func.args.size() == 1); // enforced by the parser
+                return object{!evaluate_as_bool(func.args[0])};
+              });
         });
   }
 
@@ -393,12 +401,12 @@ class render_engine {
    * provided value and render_options::strict_boolean_conditional.
    */
   void maybe_report_boolean_coercion(
-      const ast::variable_lookup& lookup, const object& value) {
+      const ast::expression& expr, const object& value) {
     auto diag_level = opts_.strict_boolean_conditional;
-    maybe_report(lookup.loc, diag_level, [&] {
+    maybe_report(expr.loc, diag_level, [&] {
       return fmt::format(
           "Condition '{}' is not a boolean. The encountered value is:\n{}",
-          lookup.chain_string(),
+          expr.to_string(),
           to_string(value));
     });
     if (diag_level == diagnostic_level::error) {
@@ -406,12 +414,23 @@ class render_engine {
       throw abort_rendering();
     }
   }
+  bool evaluate_as_bool(const ast::expression& expr) {
+    const object result = evaluate(expr);
+    return result.visit(
+        [&](boolean value) { return value; },
+        [&](const auto& value) {
+          maybe_report_boolean_coercion(expr, result);
+          return coerce_to_boolean(value);
+        });
+  }
 
   void visit(const ast::section_block& section) {
     const object& section_variable = lookup_variable(section.variable);
 
     const auto maybe_report_coercion = [&] {
-      maybe_report_boolean_coercion(section.variable, section_variable);
+      maybe_report_boolean_coercion(
+          ast::expression{section.variable.loc, section.variable},
+          section_variable);
     };
 
     const auto do_visit = [&](const object& scope) {
@@ -498,36 +517,18 @@ class render_engine {
   }
 
   void visit(const ast::conditional_block& conditional_block) {
-    const auto& variable =
-        std::get<ast::variable_lookup>(conditional_block.condition.content);
-    const object& condition = lookup_variable(variable);
-
-    const auto maybe_report_coercion = [&] {
-      maybe_report_boolean_coercion(variable, condition);
-    };
-
-    const auto do_visit = [&](const object& scope,
-                              const ast::bodies& body_elements) {
-      eval_context_.push_scope(scope);
+    const auto do_visit = [&](const ast::bodies& body_elements) {
+      eval_context_.push_scope(whisker::make::null);
       visit(body_elements);
       eval_context_.pop_scope();
     };
 
-    const auto do_conditional_visit = [&](bool condition) {
-      if (condition ^ conditional_block.unless) {
-        do_visit(whisker::make::null, conditional_block.body_elements);
-      } else if (conditional_block.else_clause.has_value()) {
-        do_visit(
-            whisker::make::null, conditional_block.else_clause->body_elements);
-      }
-    };
-
-    condition.visit(
-        [&](boolean value) { do_conditional_visit(value); },
-        [&](const auto& value) {
-          maybe_report_coercion();
-          do_conditional_visit(coerce_to_boolean(value));
-        });
+    const bool condition = evaluate_as_bool(conditional_block.condition);
+    if (condition ^ conditional_block.unless) {
+      do_visit(conditional_block.body_elements);
+    } else if (conditional_block.else_clause.has_value()) {
+      do_visit(conditional_block.else_clause->body_elements);
+    }
   }
 
   void visit(const ast::partial_apply& partial_apply) {

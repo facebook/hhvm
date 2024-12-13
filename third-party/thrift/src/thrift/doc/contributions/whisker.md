@@ -177,7 +177,7 @@ There are three types of `expression`s in Whisker:
   * `{{ (concat (uppercase person.firstName) " " (uppercase person.lastName)) }}`
 
 :::warning
-Function call expressions have not been implemented yet.
+Function call expressions are only partially implemented.
 :::
 
 :::note
@@ -194,7 +194,7 @@ expression → { literal | variable | function-call }
 
 literal             → { string-literal | i64-literal | boolean-literal | null-literal }
 variable            → { "." | (identifier ~ ("." ~ identifier)*) }
-function-call       → { "(" ~ function-lookup ~ expression* ~ ")" }
+function-call       → { "(" ~ ((variable ~ expression*) | builtin-call) ~ ")" }
 
 string-literal  → { <see above> }
 i64-literal     → { <see above> }
@@ -228,7 +228,7 @@ keyword → {
 id_prefix → { alpha |        | '_' | '$' }
 id_suffix → { alpha | digits | '_' | '$' | '-' | '+' | ':' | '?' | '/' }
 
-function-lookup → { variable | "and" | "or" | "not" }
+builtin-call → { ("not" ~ expression) | (("and" | "or") ~ expression ~ expression ~ expression*) }
 ```
 
 </Grammar>

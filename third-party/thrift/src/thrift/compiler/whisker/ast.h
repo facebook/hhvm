@@ -114,11 +114,17 @@ struct variable_lookup {
  */
 struct expression {
   source_range loc;
-  std::variant<variable_lookup> content;
+  struct function_call {
+    struct not_tag {};
+    std::variant<not_tag> which;
+    std::vector<expression> args;
+
+    std::string_view name() const;
+  };
+  std::variant<variable_lookup, function_call> content;
 
   std::string to_string() const;
 };
-
 /**
  * A top-level use of an expression within a template body. It is similar to
  * expression except its source_range includes the surrounding "{{ }}".

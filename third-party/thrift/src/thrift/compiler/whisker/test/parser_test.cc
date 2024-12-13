@@ -472,6 +472,36 @@ TEST_F(ParserTest, conditional_block_mismatched_lookup) {
           5)));
 }
 
+TEST_F(ParserTest, conditional_block_with_not) {
+  auto ast = parse_ast(
+      "{{#if (not news.has-update?)}}\n"
+      "  Stuff is happening!\n"
+      "{{/if (not news.has-update?)}}");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- if-block <line:1:1, line:3:31>\n"
+      "| `- expression <line:1:7, col:29> '(not news.has-update?)'\n"
+      "| |- text <line:2:1, col:22> '  Stuff is happening!'\n"
+      "| |- newline <line:2:22, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, conditional_block_not_wrong_arity) {
+  auto ast = parse_ast(
+      "{{#if (not news.has_updates? news.has_updates?)}}\n"
+      "  Stuff is happening!\n"
+      "{{/if (not news.has_updates? news.has_updates?)}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected 1 argument for helper `not` but got 2",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, basic_partial_apply) {
   auto ast = parse_ast("{{> path / to / file }}");
   EXPECT_EQ(

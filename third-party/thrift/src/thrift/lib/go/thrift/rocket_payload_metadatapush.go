@@ -23,7 +23,7 @@ import (
 	"github.com/rsocket/rsocket-go/payload"
 )
 
-func decodeServerMetadataPushVersion8(msg payload.Payload) (*rpcmetadata.ServerPushMetadata, error) {
+func decodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetadata, error) {
 	msg = payload.Clone(msg)
 	minVersion := int32(8)
 	maxVersion := int32(8)
@@ -50,7 +50,7 @@ func decodeServerMetadataPushVersion8(msg payload.Payload) (*rpcmetadata.ServerP
 	return result, nil
 }
 
-func encodeServerMetadataPushVersion8(zstdSupported bool) (payload.Payload, error) {
+func encodeServerMetadataPush(zstdSupported bool) (payload.Payload, error) {
 	version := int32(8)
 	res := rpcmetadata.NewServerPushMetadata().
 		SetSetupResponse(rpcmetadata.NewSetupResponse().

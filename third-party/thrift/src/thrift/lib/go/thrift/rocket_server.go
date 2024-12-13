@@ -107,7 +107,7 @@ func (s *rocketServer) acceptor(ctx context.Context, setup payload.SetupPayload,
 	if err := checkRequestSetupMetadata8(setup); err != nil {
 		return nil, err
 	}
-	serverMetadataPush, err := encodeServerMetadataPushVersion8(s.zstdSupported)
+	serverMetadataPush, err := encodeServerMetadataPush(s.zstdSupported)
 	if err != nil {
 		return nil, err
 	}

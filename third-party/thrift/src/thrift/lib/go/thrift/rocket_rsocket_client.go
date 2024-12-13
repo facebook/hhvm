@@ -86,7 +86,7 @@ func acceptor(onServerMetadataPush OnServerMetadataPush) func(_ context.Context,
 
 func metadataPush(onServerMetadataPush OnServerMetadataPush) func(pay payload.Payload) {
 	return func(pay payload.Payload) {
-		metadata, err := decodeServerMetadataPushVersion8(pay)
+		metadata, err := decodeServerMetadataPush(pay)
 		if err != nil {
 			panic(err)
 		}

@@ -1504,22 +1504,22 @@ cdef class Union(StructOrUnion):
         Returns the value of the field with the given `field_id` if it is indeed the
         field that is (currently) set for this union. Otherwise, raises AttributeError.
         """
-        if self.type.value != field_id:
+        if _fbthrift_get_Union_type_int(self) != field_id:
             # TODO in python 3.10 update this to use name and obj fields
             raise AttributeError(
                 f'Union contains a value of type {self.type.name}, not '
                 f'{type(self).Type(field_id).name}')
         return self.value
 
-    def get_type(self):
+    def get_type(Union self not None):
         return self.type
 
     @property
-    def fbthrift_current_field(self):
+    def fbthrift_current_field(Union self not None):
         return self.type
 
     @property
-    def fbthrift_current_value(self):
+    def fbthrift_current_value(Union self not None):
         return self.value
 
     @classmethod
@@ -1555,35 +1555,49 @@ cdef class Union(StructOrUnion):
     def __deepcopy__(Union self, _memo):
         return self
 
-    def __eq__(Union self, other):
+    def __eq__(Union self not None, other):
         if type(other) != type(self):
             return False
-        return self.type == other.type and self.value == other.value
+        cdef Union other_u = other
+        cdef int self_type_int = _fbthrift_get_Union_type_int(self)
+        cdef int other_type_int = _fbthrift_get_Union_type_int(other_u)
+        return  self_type_int == other_type_int and self.value == other_u.value
 
-    def __lt__(self, other):
+    def __lt__(Union self not None, other):
         if type(self) != type(other):
             return NotImplemented
-        return (self.type.value, self.value) < (other.type.value, other.value)
+        cdef Union other_u = other
+        cdef int self_type_int = _fbthrift_get_Union_type_int(self)
+        cdef int other_type_int = _fbthrift_get_Union_type_int(other_u)
+        return (self_type_int, self.value) < (other_type_int, other_u.value)
 
-    def __le__(self, other):
+    def __le__(Union self not None, other):
         if type(self) != type(other):
             return NotImplemented
-        return (self.type.value, self.value) <= (other.type.value, other.value)
+        cdef Union other_u = other
+        cdef int self_type_int = _fbthrift_get_Union_type_int(self)
+        cdef int other_type_int = _fbthrift_get_Union_type_int(other_u)
+        return (self_type_int, self.value) <= (other_type_int, other_u.value)
 
-    def __hash__(self):
-        return hash((self.type, self.value))
+    def __hash__(Union self not None):
+        cdef int self_type_int = _fbthrift_get_Union_type_int(self)
+        return hash((self_type_int, self.value))
 
     def __repr__(self):
         return f"{type(self).__name__}({self.type.name}={self.value!r})"
 
-    def __bool__(self):
-        return self.type.value != 0
+    def __bool__(self not None):
+        return _fbthrift_get_Union_type_int(self) != 0
 
     def __dir__(self):
         return dir(type(self))
 
     def __reduce__(self):
         return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
+
+
+cdef inline _fbthrift_get_Union_type_int(Union u):
+    return u._fbthrift_data[0]
 
 cdef _make_fget_struct(i):
     """

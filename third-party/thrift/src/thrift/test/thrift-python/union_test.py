@@ -45,7 +45,7 @@ from thrift.test.thrift_python.union_test.thrift_types import (
 )
 
 
-def _thrift_serialization_round_trip(
+def _assert_serialization_round_trip(
     test: unittest.TestCase,
     serializer_module: types.ModuleType,
     thrift_object: typing.Union[MutableStructOrUnion, ImmutableStructOrUnion],
@@ -80,7 +80,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             AttributeError, "Union contains a value of type EMPTY, not string_field"
         ):
             u.string_field
-        _thrift_serialization_round_trip(self, immutable_serializer, u)
+        _assert_serialization_round_trip(self, immutable_serializer, u)
 
         # Specifying exactly one keyword argument whose name corresponds to that of a
         # field for this Union, and a non-None value whose type is valid for that field,
@@ -98,7 +98,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             AttributeError, "Union contains a value of type string_field, not int_field"
         ):
             u2.int_field
-        _thrift_serialization_round_trip(self, immutable_serializer, u2)
+        _assert_serialization_round_trip(self, immutable_serializer, u2)
 
         # Attempts to initialize an instance with a keyword argument whose name does
         # not match that of a field should raise an error.
@@ -250,7 +250,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         )
         self.assertEqual(union_int_bool_1.value, 1)
         self.assertEqual(union_int_bool_1.int_field, 1)
-        _thrift_serialization_round_trip(self, immutable_serializer, union_int_bool_1)
+        _assert_serialization_round_trip(self, immutable_serializer, union_int_bool_1)
 
         # BAD: fromValue(bool) populates an int field if it comes before bool.
         union_int_bool_2 = TestUnionAmbiguousFromValueIntBoolImmutable.fromValue(True)
@@ -264,7 +264,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         )
         self.assertEqual(union_int_bool_2.value, 1)
         self.assertEqual(union_int_bool_2.int_field, 1)
-        _thrift_serialization_round_trip(self, immutable_serializer, union_int_bool_2)
+        _assert_serialization_round_trip(self, immutable_serializer, union_int_bool_2)
 
     def test_from_value_ambiguous_bool_int(self) -> None:
         # BAD: Unlike the previous test case, fromValue(int) does not populate
@@ -281,7 +281,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertEqual(union_bool_int_1.value, 1)
         self.assertEqual(union_bool_int_1.int_field, 1)
         self.assertEqual(union_bool_int_1.int_field, True)
-        _thrift_serialization_round_trip(self, immutable_serializer, union_bool_int_1)
+        _assert_serialization_round_trip(self, immutable_serializer, union_bool_int_1)
 
         union_bool_int_2 = TestUnionAmbiguousFromValueBoolIntImmutable.fromValue(True)
         self.assertIs(
@@ -295,7 +295,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertEqual(union_bool_int_2.value, True)
         self.assertEqual(union_bool_int_2.value, 1)
         self.assertEqual(union_bool_int_2.bool_field, 1)
-        _thrift_serialization_round_trip(self, immutable_serializer, union_bool_int_2)
+        _assert_serialization_round_trip(self, immutable_serializer, union_bool_int_2)
 
     def test_from_value_ambiguous_float_int(self) -> None:
         # BAD: fromValue(int) populated a float field if it comes before int.
@@ -310,7 +310,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         )
         self.assertEqual(union_float_int_1.value, 1.0)
         self.assertEqual(union_float_int_1.float_field, 1)
-        _thrift_serialization_round_trip(self, immutable_serializer, union_float_int_1)
+        _assert_serialization_round_trip(self, immutable_serializer, union_float_int_1)
 
         union_float_int_2 = TestUnionAmbiguousFromValueFloatIntImmutable.fromValue(1.0)
         self.assertIs(
@@ -323,7 +323,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         )
         self.assertEqual(union_float_int_2.value, 1.0)
         self.assertEqual(union_float_int_2.float_field, 1)
-        _thrift_serialization_round_trip(self, immutable_serializer, union_float_int_2)
+        _assert_serialization_round_trip(self, immutable_serializer, union_float_int_2)
 
     def test_field_name_conflict(self) -> None:
         # By setting class type `Type` attr after field attrs, we get the desired behavior
@@ -355,20 +355,18 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         ):
             # pyre-ignore[41]: Intentional for test
             type_union.Type = 1
-        _thrift_serialization_round_trip(self, immutable_serializer, type_union)
+        _assert_serialization_round_trip(self, immutable_serializer, type_union)
 
         u = TestUnionAmbiguousValueFieldNameImmutable(value=42)
         self.assertEqual(u.value, 42)
         with self.assertRaises(AttributeError):
             u.type
-        with self.assertRaises(AttributeError):
-            _thrift_serialization_round_trip(self, immutable_serializer, u)
+        _assert_serialization_round_trip(self, immutable_serializer, u)
 
         u2 = TestUnionAmbiguousValueFieldNameImmutable(type=123)
         with self.assertRaises(AttributeError):
             u2.value
-        with self.assertRaises(AssertionError):
-            _thrift_serialization_round_trip(self, immutable_serializer, u2)
+        _assert_serialization_round_trip(self, immutable_serializer, u2)
 
     def test_hash(self) -> None:
         hash(TestUnionImmutable())
@@ -378,13 +376,13 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         u2 = TestUnionImmutable(string_field="hello")
         self.assertIsNot(u1, u2)
         self.assertEqual(u1, u2)
-        _thrift_serialization_round_trip(self, immutable_serializer, u1)
-        _thrift_serialization_round_trip(self, immutable_serializer, u2)
+        _assert_serialization_round_trip(self, immutable_serializer, u1)
+        _assert_serialization_round_trip(self, immutable_serializer, u2)
 
         u3 = TestUnionImmutable(string_field="world")
         self.assertIsNot(u1, u3)
         self.assertNotEqual(u1, u3)
-        _thrift_serialization_round_trip(self, immutable_serializer, u3)
+        _assert_serialization_round_trip(self, immutable_serializer, u3)
 
     def test_ordering(self) -> None:
         self.assertLess(
@@ -408,7 +406,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         )
         self.assertIs(u1.type, TestUnionAdaptedTypesImmutable.Type.EMPTY)
         self.assertIsNone(u1.value)
-        _thrift_serialization_round_trip(self, immutable_serializer, u1)
+        _assert_serialization_round_trip(self, immutable_serializer, u1)
 
         with self.assertRaisesRegex(
             AttributeError,
@@ -465,8 +463,8 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "'str' object has no attribute 'timestamp'"
         ):
-            (TestUnionAdaptedTypesImmutable.fromValue("1718728839"),)
-        _thrift_serialization_round_trip(self, immutable_serializer, u2)
+            TestUnionAdaptedTypesImmutable.fromValue("1718728839")
+        _assert_serialization_round_trip(self, immutable_serializer, u2)
 
         u3 = TestUnionAdaptedTypesImmutable(non_adapted_i32=1718728839)
         self.assertIs(
@@ -476,7 +474,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         self.assertIs(u3.type, TestUnionAdaptedTypesImmutable.Type.non_adapted_i32)
         self.assertIs(u3.value, u3.non_adapted_i32)
         self.assertEqual(u3.non_adapted_i32, 1718728839)
-        _thrift_serialization_round_trip(self, immutable_serializer, u3)
+        _assert_serialization_round_trip(self, immutable_serializer, u3)
 
     def test_to_immutable_python(self) -> None:
         union_immutable = TestUnionImmutable(string_field="hello")

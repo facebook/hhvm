@@ -73,7 +73,7 @@ func validateServerPushMetadata(metadata *rpcmetadata.ServerPushMetadata) error 
 	return nil
 }
 
-func decodeClientMetadataPush(msg payload.Payload) *rpcmetadata.ClientPushMetadata {
+func decodeClientMetadataPush(msg payload.Payload) (*rpcmetadata.ClientPushMetadata, error) {
 	msg = payload.Clone(msg)
 	metadataBytes, ok := msg.Metadata()
 	if !ok {
@@ -81,12 +81,19 @@ func decodeClientMetadataPush(msg payload.Payload) *rpcmetadata.ClientPushMetada
 	}
 	result := &rpcmetadata.ClientPushMetadata{}
 	if err := DecodeCompact(metadataBytes, result); err != nil {
-		panic(fmt.Errorf("unable to deserialize metadata push into ClientPushMetadata %w", err))
+		return nil, fmt.Errorf("unable to deserialize ClientPushMetadata: %w", err)
 	}
-	if result.InteractionTerminate != nil {
-		panic("client metadata push: InteractionTerminate not implemented")
-	} else if result.StreamHeadersPush != nil {
-		panic("client metadata push: StreamHeadersPush not implemented")
+	if err := validateClientPushMetadata(result); err != nil {
+		return nil, err
 	}
-	return result
+	return result, nil
+}
+
+func validateClientPushMetadata(metadata *rpcmetadata.ClientPushMetadata) error {
+	if metadata.InteractionTerminate != nil {
+		return fmt.Errorf("unsupported InteractionTerminate metadata type")
+	} else if metadata.StreamHeadersPush != nil {
+		return fmt.Errorf("unsupported StreamHeadersPush metadata type")
+	}
+	return nil
 }

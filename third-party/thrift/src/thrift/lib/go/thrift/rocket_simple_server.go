@@ -96,7 +96,10 @@ func newRocketSimpleServerSocket(ctx context.Context, proc Processor, log func(f
 }
 
 func (s *rocketSimpleServerSocket) metadataPush(msg payload.Payload) {
-	_ = decodeClientMetadataPush(msg)
+	_, err := decodeClientMetadataPush(msg)
+	if err != nil {
+		panic(err)
+	}
 	// This is usually something like transportMetadata = map[deciding_accessors:IP=...], but we do not handle it.
 }
 

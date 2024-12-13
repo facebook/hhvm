@@ -50,9 +50,9 @@ import thrift.python.types as _fbthrift_python_types
 import folly.iobuf as _fbthrift_iobuf
 
 import {{program:module_path}}.thrift_types as {{program:module_mangle}}__thrift_types
-{{#unless program:safe_patch?}}
+{{#if (not program:safe_patch?)}}
 import {{program:safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_types
-{{/unless program:safe_patch?}}
+{{/if (not program:safe_patch?)}}
 
 {{#program:include_namespaces}}
 {{#has_types?}}
@@ -85,7 +85,7 @@ class {{struct:py_name}}Patch(
             self._patch,
             {{field:key}},
             {{#field:type}}{{> ../python/types/typeinfo }}{{/field:type}})
-    {{#unless program:safe_patch?}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}
+    {{#if (not program:safe_patch?)}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}
 
     def to_safe_patch(self) -> _fbthrift_safe_patch_types.{{struct:name}}SafePatch:
         return _fbthrift_safe_patch_types.{{struct:name}}SafePatch(
@@ -98,7 +98,7 @@ class {{struct:py_name}}Patch(
         DynamicPatch = Dynamic{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch
         patch._patch = DynamicPatch.deserialize_from_compact_protocol(safe_patch.data)
         return patch
-    {{/unless program:safe_patch?}}
+    {{/if (not program:safe_patch?)}}
 
 
 {{/struct:fields_ordered_by_id}}

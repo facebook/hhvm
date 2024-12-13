@@ -17,7 +17,7 @@
 }}{{#struct:fields}}{{#field:type}}{{#field:has_deprecated_accessors?}}
 {{#type:resolves_to_base_or_enum?}}
 
-{{#unless type:string_or_binary?}}
+{{#if (not type:string_or_binary?)}}
   {{#if field:optional?}}
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
@@ -85,7 +85,7 @@
     {{field:cpp_name}}_ref() = std::forward<T_{{struct:cpp_underlying_name}}_{{field:cpp_name}}_struct_setter>({{field:cpp_name}}_);
     return {{field:cpp_storage_name}};
   }
-{{/unless type:string_or_binary?}}
+{{/if (not type:string_or_binary?)}}
 {{/type:resolves_to_base_or_enum?}}
 {{#type:resolves_to_container_or_struct?}}
   {{#if field:optional?}}

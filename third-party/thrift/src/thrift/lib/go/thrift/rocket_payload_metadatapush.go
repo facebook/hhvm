@@ -25,8 +25,6 @@ import (
 
 func decodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetadata, error) {
 	msg = payload.Clone(msg)
-	minVersion := int32(8)
-	maxVersion := int32(8)
 	// For documentation/reference see the CPP implementation
 	// https://www.internalfb.com/code/fbsource/[ec968d3ea0ab]/fbcode/thrift/lib/cpp2/transport/rocket/client/RocketClient.cpp?lines=181
 	metadataBytes, ok := msg.Metadata()
@@ -35,17 +33,10 @@ func decodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetad
 	}
 	result := &rpcmetadata.ServerPushMetadata{}
 	if err := DecodeCompact(metadataBytes, result); err != nil {
-		panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
+		return nil, fmt.Errorf("unable to deserialize ServerPushMetadata: %w", err)
 	}
-	if result.SetupResponse != nil {
-		if result.SetupResponse.Version != nil {
-			version := *result.SetupResponse.Version
-			if version < minVersion || version > maxVersion {
-				return nil, fmt.Errorf("unsupported protocol version received in metadata push: %d, we only support versions in range: [%d, %d]", version, minVersion, maxVersion)
-			}
-		}
-	} else if result.StreamHeadersPush != nil {
-		panic("server metadata push: StreamHeadersPush not implemented")
+	if err := validateServerPushMetadata(result); err != nil {
+		return nil, err
 	}
 	return result, nil
 }
@@ -53,14 +44,33 @@ func decodeServerMetadataPush(msg payload.Payload) (*rpcmetadata.ServerPushMetad
 func encodeServerMetadataPush(zstdSupported bool) (payload.Payload, error) {
 	version := int32(8)
 	res := rpcmetadata.NewServerPushMetadata().
-		SetSetupResponse(rpcmetadata.NewSetupResponse().
-			SetVersion(&version).
-			SetZstdSupported(&zstdSupported))
+		SetSetupResponse(
+			rpcmetadata.NewSetupResponse().
+				SetVersion(&version).
+				SetZstdSupported(&zstdSupported),
+		)
 	metadataBytes, err := EncodeCompact(res)
 	if err != nil {
 		return nil, fmt.Errorf("unable to serialize metadata push %w", err)
 	}
 	return payload.New(nil, metadataBytes), nil
+}
+
+func validateServerPushMetadata(metadata *rpcmetadata.ServerPushMetadata) error {
+	minVersion := int32(8)
+	maxVersion := int32(8)
+
+	if metadata.SetupResponse != nil {
+		if metadata.SetupResponse.Version != nil {
+			version := *metadata.SetupResponse.Version
+			if version < minVersion || version > maxVersion {
+				return fmt.Errorf("unsupported rocket protocol version: %d", version)
+			}
+		}
+	} else if metadata.StreamHeadersPush != nil {
+		return fmt.Errorf("unsupported StreamHeadersPush metadata type")
+	}
+	return nil
 }
 
 type clientMetadataPayload struct {

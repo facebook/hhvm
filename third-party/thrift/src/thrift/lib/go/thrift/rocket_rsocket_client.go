@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
-	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
@@ -30,7 +29,7 @@ import (
 
 // RSocketClient is a client that uses a rsocket library.
 type RSocketClient interface {
-	SendSetup(ctx context.Context, onServerMetadataPush OnServerMetadataPush) error
+	SendSetup(ctx context.Context) error
 	FireAndForget(messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, dataBytes []byte) error
 	RequestResponse(ctx context.Context, messageName string, protoID types.ProtocolID, typeID types.MessageType, headers map[string]string, dataBytes []byte) (map[string]string, []byte, error)
 	Close() error
@@ -43,14 +42,11 @@ type rsocketClient struct {
 	useZstd bool
 }
 
-// OnServerMetadataPush is called when the server sends a metadata push.
-type OnServerMetadataPush func(metadata *rpcmetadata.ServerPushMetadata)
-
-func newRSocketClient(conn net.Conn) *rsocketClient {
+func newRSocketClient(conn net.Conn) RSocketClient {
 	return &rsocketClient{conn: conn}
 }
 
-func (r *rsocketClient) SendSetup(_ context.Context, onServerMetadataPush OnServerMetadataPush) error {
+func (r *rsocketClient) SendSetup(_ context.Context) error {
 	if r.client != nil {
 		// already setup
 		return nil
@@ -66,7 +62,17 @@ func (r *rsocketClient) SendSetup(_ context.Context, onServerMetadataPush OnServ
 		MetadataMimeType(RocketMetadataCompactMimeType).
 		SetupPayload(setupPayload).
 		OnClose(func(error) {})
-	clientStarter := clientBuilder.Acceptor(acceptor(onServerMetadataPush))
+
+	clientStarter := clientBuilder.Acceptor(
+		func(_ context.Context, _ rsocket.RSocket) rsocket.RSocket {
+			return rsocket.NewAbstractSocket(
+				rsocket.MetadataPush(
+					r.onServerMetadataPush,
+				),
+			)
+		},
+	)
+
 	client, err := clientStarter.Transport(transporter(r.conn)).Start(context.Background())
 	if err != nil {
 		return err
@@ -75,23 +81,16 @@ func (r *rsocketClient) SendSetup(_ context.Context, onServerMetadataPush OnServ
 	return nil
 }
 
-func acceptor(onServerMetadataPush OnServerMetadataPush) func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
-	return func(_ context.Context, socket rsocket.RSocket) rsocket.RSocket {
-		return rsocket.NewAbstractSocket(
-			rsocket.MetadataPush(
-				metadataPush(onServerMetadataPush),
-			),
-		)
+func (r *rsocketClient) onServerMetadataPush(pay payload.Payload) {
+	metadata, err := decodeServerMetadataPush(pay)
+	if err != nil {
+		panic(err)
 	}
-}
-
-func metadataPush(onServerMetadataPush OnServerMetadataPush) func(pay payload.Payload) {
-	return func(pay payload.Payload) {
-		metadata, err := decodeServerMetadataPush(pay)
-		if err != nil {
-			panic(err)
-		}
-		onServerMetadataPush(metadata)
+	if metadata.SetupResponse != nil {
+		setupResponse := metadata.SetupResponse
+		serverSupportsZstd := (setupResponse.ZstdSupported != nil && *setupResponse.ZstdSupported)
+		// zstd is only supported if both the client and the server support it.
+		r.useZstd = r.useZstd && serverSupportsZstd
 	}
 }
 

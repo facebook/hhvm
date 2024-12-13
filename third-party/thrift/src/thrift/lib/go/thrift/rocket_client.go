@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
-	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
 type rocketClient struct {
@@ -32,7 +31,7 @@ type rocketClient struct {
 	types.Decoder
 
 	// rsocket client state
-	client *rsocketClient
+	client RSocketClient
 
 	resultData []byte
 	resultErr  error
@@ -58,7 +57,7 @@ var _ types.RequestHeaders = (*rocketClient)(nil)
 var _ types.ResponseHeaderGetter = (*rocketClient)(nil)
 
 // NewRocketClient creates a new Rocket client given an RSocketClient.
-func NewRocketClient(client *rsocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func NewRocketClient(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	return newRocketClientFromRsocket(client, protoID, ioTimeout, persistentHeaders)
 }
 
@@ -66,7 +65,7 @@ func newRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Dur
 	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, ioTimeout, persistentHeaders)
 }
 
-func newRocketClientFromRsocket(client *rsocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	p := &rocketClient{
 		client:            client,
 		protoID:           protoID,
@@ -111,7 +110,7 @@ func (p *rocketClient) Flush() (err error) {
 		defer cancel()
 	}
 
-	if err := p.client.SendSetup(ctx, p.onServerMetadataPush); err != nil {
+	if err := p.client.SendSetup(ctx); err != nil {
 		return err
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
@@ -135,15 +134,6 @@ func unionMaps(dst, src map[string]string) map[string]string {
 	}
 	maps.Copy(dst, src)
 	return dst
-}
-
-func (p *rocketClient) onServerMetadataPush(metadata *rpcmetadata.ServerPushMetadata) {
-	if metadata.SetupResponse != nil {
-		setupResponse := metadata.SetupResponse
-		serverSupportsZstd := (setupResponse.ZstdSupported != nil && *setupResponse.ZstdSupported)
-		// zstd is only supported if both the client and the server support it.
-		p.client.useZstd = p.client.useZstd && serverSupportsZstd
-	}
 }
 
 func (p *rocketClient) ReadMessageBegin() (string, types.MessageType, int32, error) {

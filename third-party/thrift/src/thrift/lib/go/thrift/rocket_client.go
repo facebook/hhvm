@@ -32,7 +32,7 @@ type rocketClient struct {
 	types.Decoder
 
 	// rsocket client state
-	client RSocketClient
+	client *rsocketClient
 
 	resultData []byte
 	resultErr  error
@@ -40,7 +40,6 @@ type rocketClient struct {
 	ioTimeout time.Duration
 
 	protoID types.ProtocolID
-	zstd    bool
 
 	messageName string
 	writeType   types.MessageType
@@ -59,7 +58,7 @@ var _ types.RequestHeaders = (*rocketClient)(nil)
 var _ types.ResponseHeaderGetter = (*rocketClient)(nil)
 
 // NewRocketClient creates a new Rocket client given an RSocketClient.
-func NewRocketClient(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func NewRocketClient(client *rsocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	return newRocketClientFromRsocket(client, protoID, ioTimeout, persistentHeaders)
 }
 
@@ -67,7 +66,7 @@ func newRocketClient(conn net.Conn, protoID types.ProtocolID, ioTimeout time.Dur
 	return newRocketClientFromRsocket(newRSocketClient(conn), protoID, ioTimeout, persistentHeaders)
 }
 
-func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
+func newRocketClientFromRsocket(client *rsocketClient, protoID types.ProtocolID, ioTimeout time.Duration, persistentHeaders map[string]string) (types.Protocol, error) {
 	p := &rocketClient{
 		client:            client,
 		protoID:           protoID,
@@ -76,7 +75,6 @@ func newRocketClientFromRsocket(client RSocketClient, protoID types.ProtocolID, 
 		wbuf:              NewMemoryBuffer(),
 		ioTimeout:         ioTimeout,
 		reqHeaders:        make(map[string]string),
-		zstd:              false, // zstd adds a performance overhead, so we default to false
 	}
 	switch p.protoID {
 	case types.ProtocolIDBinary:
@@ -118,12 +116,12 @@ func (p *rocketClient) Flush() (err error) {
 	}
 	headers := unionMaps(p.reqHeaders, p.persistentHeaders)
 	if p.writeType == types.ONEWAY {
-		return p.client.FireAndForget(p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
+		return p.client.FireAndForget(p.messageName, p.protoID, p.writeType, headers, dataBytes)
 	}
 	if p.writeType != types.CALL {
 		return nil
 	}
-	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, p.zstd, dataBytes)
+	p.respHeaders, p.resultData, p.resultErr = p.client.RequestResponse(ctx, p.messageName, p.protoID, p.writeType, headers, dataBytes)
 	clear(p.reqHeaders)
 	return nil
 }
@@ -144,7 +142,7 @@ func (p *rocketClient) onServerMetadataPush(metadata *rpcmetadata.ServerPushMeta
 		setupResponse := metadata.SetupResponse
 		serverSupportsZstd := (setupResponse.ZstdSupported != nil && *setupResponse.ZstdSupported)
 		// zstd is only supported if both the client and the server support it.
-		p.zstd = p.zstd && serverSupportsZstd
+		p.client.useZstd = p.client.useZstd && serverSupportsZstd
 	}
 }
 

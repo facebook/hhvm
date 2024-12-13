@@ -1,4 +1,13 @@
-For the most part, we deal with class types directly via their names.  For example:
+```yamlmeta
+{
+  "fbonly messages": [
+    "This type is under migration, with the class-specific use cases described below shifting to the new [class type](/hack/built-in-types/class). There is [an internal wiki](https://www.internalfb.com/intern/wiki/Hack_Foundation/classnameC_vs._classC/) describing the type separation."
+  ]
+}
+```
+
+For the most part, we deal with class types directly via their names. For
+example:
 
 ```Hack no-extract
 class Employee {
@@ -8,7 +17,8 @@ class Employee {
 $emp = new Employee();
 ```
 
-However, in some applications, it is useful to be able to abstract a class' name rather than to hard-code it.  Consider the following:
+However, in some applications, it is useful to be able to abstract a class' name
+rather than to hard-code it. Consider the following:
 
 ```Hack file:employee.hack
 <<__ConsistentConstruct>>
@@ -37,6 +47,5 @@ function demo(): void {
 ```
 
 In Hack code, the class names must be specified using "`::class` literals"
-(`SomeClassName::class`). At runtime, these are regular strings (`SomeClassName::class === 'SomeClassName'`).
-
-The value of an expression of a classname type can be converted implicitly or explicitly to `string`.
+(`SomeClassName::class`). The value of an expression of a classname type can be
+converted implicitly or explicitly to `string`.

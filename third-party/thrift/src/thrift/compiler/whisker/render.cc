@@ -336,14 +336,21 @@ class render_engine {
         });
   }
 
+  object evaluate(const ast::expression& expr) {
+    return detail::variant_match(
+        expr.content, [&](const ast::variable_lookup& variable_lookup) {
+          return lookup_variable(variable_lookup);
+        });
+  }
+
   void visit(const ast::interpolation& interpolation) {
-    const object& value = lookup_variable(interpolation.lookup);
+    const object& value = evaluate(interpolation.content);
 
     const auto report_unprintable_message_only = [&](diagnostic_level level) {
-      maybe_report(interpolation.lookup.loc, level, [&] {
+      maybe_report(interpolation.loc, level, [&] {
         return fmt::format(
             "Object named '{}' is not printable. The encountered value is:\n{}",
-            interpolation.lookup.chain_string(),
+            interpolation.to_string(),
             to_string(value));
       });
     };
@@ -491,10 +498,12 @@ class render_engine {
   }
 
   void visit(const ast::conditional_block& conditional_block) {
-    const object& condition = lookup_variable(conditional_block.variable);
+    const auto& variable =
+        std::get<ast::variable_lookup>(conditional_block.condition.content);
+    const object& condition = lookup_variable(variable);
 
     const auto maybe_report_coercion = [&] {
-      maybe_report_boolean_coercion(conditional_block.variable, condition);
+      maybe_report_boolean_coercion(variable, condition);
     };
 
     const auto do_visit = [&](const object& scope,

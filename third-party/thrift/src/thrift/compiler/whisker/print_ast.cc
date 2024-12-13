@@ -84,7 +84,7 @@ struct ast_visitor {
         " {}-block {}",
         conditional_block.unless ? "unless" : "if",
         location(conditional_block.loc));
-    visit(conditional_block.variable, scope.open_property());
+    visit(conditional_block.condition, scope.open_property());
     visit(conditional_block.body_elements, scope.open_node());
 
     if (auto else_clause = conditional_block.else_clause) {
@@ -118,12 +118,15 @@ struct ast_visitor {
         location(variable.loc),
         variable.chain_string());
   }
+  void visit(const ast::expression& expr, tree_printer::scope scope) const {
+    scope.println(" expression {} '{}'", location(expr.loc), expr.to_string());
+  }
   void visit(const ast::interpolation& interpolation, tree_printer::scope scope)
       const {
     scope.println(
         " interpolation {} '{}'",
         location(interpolation.loc),
-        interpolation.string());
+        interpolation.to_string());
   }
   // Prevent implicit conversion to ast::body. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing

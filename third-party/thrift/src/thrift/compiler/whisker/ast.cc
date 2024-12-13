@@ -62,4 +62,11 @@ std::string partial_apply::path_string() const {
   return path.as_string();
 }
 
+std::string expression::to_string() const {
+  return detail::variant_match(
+      content, [](const variable_lookup& lookup) -> std::string {
+        return lookup.chain_string();
+      });
+}
+
 } // namespace whisker::ast

@@ -85,7 +85,7 @@ TEST_F(ParserTest, empty_template) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected variable-lookup in interpolation but found `}}`",
+          "expected expression in interpolation but found `}}`",
           path_to_file(1),
           1)));
 }
@@ -283,7 +283,7 @@ TEST_F(ParserTest, basic_if) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- if-block <line:1:1, line:3:25>\n"
-      "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
+      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
       "| |- interpolation <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
@@ -301,7 +301,7 @@ TEST_F(ParserTest, basic_if_else) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- if-block <line:1:1, line:5:25>\n"
-      "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
+      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
       "| |- text <line:2:1, col:12> '  Stuff is '\n"
       "| |- interpolation <line:2:12, col:19> 'foo'\n"
       "| |- text <line:2:19, col:30> ' happening!'\n"
@@ -367,9 +367,9 @@ TEST_F(ParserTest, if_block_nested) {
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
       "|- if-block <line:1:1, line:7:25>\n"
-      "| `- variable-lookup <line:1:7, col:23> 'news.has-update?'\n"
+      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
       "| |- if-block <line:2:3, line:6:31>\n"
-      "| | `- variable-lookup <line:2:9, col:29> 'update.is-important?'\n"
+      "| | `- expression <line:2:9, col:29> 'update.is-important?'\n"
       "| | |- text <line:3:1, col:24> '    Important stuff is '\n"
       "| | |- interpolation <line:3:24, col:31> 'foo'\n"
       "| | |- text <line:3:31, col:42> ' happening!'\n"
@@ -404,7 +404,7 @@ TEST_F(ParserTest, if_by_itself) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected variable-lookup to open if-block but found `}}`",
+          "expected expression to open if-block but found `}}`",
           path_to_file(1),
           1)));
 }
@@ -450,7 +450,7 @@ TEST_F(ParserTest, conditional_block_missing_close_lookup) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected variable-lookup to close if-block 'news.has-update?' but found `}}`",
+          "expected expression to close if-block 'news.has-update?' but found `}}`",
           path_to_file(1),
           5)));
 }

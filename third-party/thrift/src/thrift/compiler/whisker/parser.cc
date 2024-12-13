@@ -792,7 +792,7 @@ class parser {
     return {std::move(*templ), scan};
   }
 
-  // interpolation → { "{{" ~ variable-lookup ~ "}}" }
+  // interpolation → { "{{" ~ expression ~ "}}" }
   parse_result<ast::interpolation> parse_interpolation(
       parser_scan_window scan) {
     assert(scan.empty());
@@ -821,12 +821,11 @@ class parser {
     }
     scan = scan.make_fresh();
 
-    parse_result variable_lookup = parse_variable_lookup(scan);
-    if (!variable_lookup.has_value()) {
-      report_expected(scan, "variable-lookup in interpolation");
+    parse_result expression = parse_expression(scan);
+    if (!expression.has_value()) {
+      report_expected(scan, "expression in interpolation");
     }
-    ast::variable_lookup lookup =
-        std::move(variable_lookup).consume_and_advance(&scan);
+    ast::expression lookup = std::move(expression).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
       report_expected(
           scan, fmt::format("{} to close interpolation", tok::close));
@@ -966,16 +965,29 @@ class parser {
         scan};
   }
 
+  // expression → { variable-lookup }
+  parse_result<ast::expression> parse_expression(parser_scan_window scan) {
+    assert(scan.empty());
+    auto scan_start = scan.start;
+    if (parse_result lookup = parse_variable_lookup(scan)) {
+      auto expr = std::move(lookup).consume_and_advance(&scan);
+      return {
+          ast::expression{scan.with_start(scan_start).range(), std::move(expr)},
+          scan};
+    }
+    return no_parse_result();
+  }
+
   // conditional-block →
   //   { cond-block-open ~ body* ~ else-block? ~ cond-block-close }
   // cond-block-open →
-  //   { "{{" ~ "#" ~ ("if" | "unless") ~ variable-lookup ~ "}}" }
+  //   { "{{" ~ "#" ~ ("if" | "unless") ~ expression ~ "}}" }
   // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
   // cond-block-close →
-  //   { "{{" ~ "/" ~ ("if" | "unless") ~ variable-lookup ~ "}}" }
+  //   { "{{" ~ "/" ~ ("if" | "unless") ~ expression ~ "}}" }
   //
-  // NOTE: the "if" or "unless"  and the variable-lookup must match between open
-  // and close
+  // NOTE: the "if" or "unless"  and the expression must match between
+  // open and close
   parse_result<ast::conditional_block> parse_conditional_block(
       parser_scan_window scan) {
     assert(scan.empty());
@@ -997,12 +1009,12 @@ class parser {
 
     const std::string_view block_name = inverted ? "unless" : "if";
 
-    parse_result lookup = parse_variable_lookup(scan);
-    if (!lookup.has_value()) {
+    parse_result condition = parse_expression(scan);
+    if (!condition.has_value()) {
       report_expected(
-          scan, fmt::format("variable-lookup to open {}-block", block_name));
+          scan, fmt::format("expression to open {}-block", block_name));
     }
-    ast::variable_lookup open = std::move(lookup).consume_and_advance(&scan);
+    ast::expression open = std::move(condition).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
       report_expected(
           scan, fmt::format("{} to open {}-block", tok::close, block_name));
@@ -1037,29 +1049,29 @@ class parser {
                 "{} to close {}-block '{}'",
                 kind,
                 block_name,
-                open.chain_string()));
+                open.to_string()));
       }
     };
 
     expect_on_close(tok::open);
     expect_on_close(tok::slash);
     expect_on_close(inverted ? tok::kw_unless : tok::kw_if);
-    lookup = parse_variable_lookup(scan.make_fresh());
-    if (!lookup.has_value()) {
+    condition = parse_expression(scan.make_fresh());
+    if (!condition.has_value()) {
       report_expected(
           scan,
           fmt::format(
-              "variable-lookup to close {}-block '{}'",
+              "expression to close {}-block '{}'",
               block_name,
-              open.chain_string()));
+              open.to_string()));
     }
-    ast::variable_lookup close = std::move(lookup).consume_and_advance(&scan);
-    if (close.chain_string() != open.chain_string()) {
+    ast::expression close = {std::move(condition).consume_and_advance(&scan)};
+    if (close.to_string() != open.to_string()) {
       report_fatal_error(
           scan,
           "conditional-block opening '{}' does not match closing '{}'",
-          open.chain_string(),
-          close.chain_string());
+          open.to_string(),
+          close.to_string());
     }
 
     expect_on_close(tok::close);

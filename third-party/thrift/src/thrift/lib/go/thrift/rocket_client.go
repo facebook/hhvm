@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 )
 
 type rocketClient struct {
@@ -136,9 +137,13 @@ func unionMaps(dst, src map[string]string) map[string]string {
 	return dst
 }
 
-func (p *rocketClient) onServerMetadataPush(zstd bool, drain bool) {
-	// zstd is only supported if both the client and the server support it.
-	p.zstd = p.zstd && zstd
+func (p *rocketClient) onServerMetadataPush(metadata *rpcmetadata.ServerPushMetadata) {
+	if metadata.SetupResponse != nil {
+		setupResponse := metadata.SetupResponse
+		serverSupportsZstd := (setupResponse.ZstdSupported != nil && *setupResponse.ZstdSupported)
+		// zstd is only supported if both the client and the server support it.
+		p.zstd = p.zstd && serverSupportsZstd
+	}
 }
 
 func (p *rocketClient) ReadMessageBegin() (string, types.MessageType, int32, error) {

@@ -23,42 +23,31 @@ import (
 	"github.com/rsocket/rsocket-go/payload"
 )
 
-type serverMetadataPayload struct {
-	zstd  bool
-	drain bool
-}
-
-func decodeServerMetadataPushVersion8(msg payload.Payload) (*serverMetadataPayload, error) {
+func decodeServerMetadataPushVersion8(msg payload.Payload) (*rpcmetadata.ServerPushMetadata, error) {
 	msg = payload.Clone(msg)
 	minVersion := int32(8)
 	maxVersion := int32(8)
-	res := &serverMetadataPayload{}
 	// For documentation/reference see the CPP implementation
 	// https://www.internalfb.com/code/fbsource/[ec968d3ea0ab]/fbcode/thrift/lib/cpp2/transport/rocket/client/RocketClient.cpp?lines=181
 	metadataBytes, ok := msg.Metadata()
 	if !ok {
 		return nil, fmt.Errorf("no metadata in server metadata push")
 	}
-	// Use ServerPushMetadata{} and do not use &ServerPushMetadata{} to ensure stack and avoid heap allocation.
-	metadata := rpcmetadata.ServerPushMetadata{}
-	if err := DecodeCompact(metadataBytes, &metadata); err != nil {
+	result := &rpcmetadata.ServerPushMetadata{}
+	if err := DecodeCompact(metadataBytes, result); err != nil {
 		panic(fmt.Errorf("unable to deserialize metadata push into ServerPushMetadata %w", err))
 	}
-	if metadata.SetupResponse != nil {
-		// If zstdSupported is not set (or if false) client SHOULD not use ZSTD compression.
-		res.zstd = metadata.SetupResponse.ZstdSupported != nil && *metadata.SetupResponse.ZstdSupported
-		if metadata.SetupResponse.Version != nil {
-			version := *metadata.SetupResponse.Version
+	if result.SetupResponse != nil {
+		if result.SetupResponse.Version != nil {
+			version := *result.SetupResponse.Version
 			if version < minVersion || version > maxVersion {
 				return nil, fmt.Errorf("unsupported protocol version received in metadata push: %d, we only support versions in range: [%d, %d]", version, minVersion, maxVersion)
 			}
 		}
-	} else if metadata.StreamHeadersPush != nil {
+	} else if result.StreamHeadersPush != nil {
 		panic("server metadata push: StreamHeadersPush not implemented")
-	} else if metadata.DrainCompletePush != nil {
-		res.drain = true
 	}
-	return res, nil
+	return result, nil
 }
 
 func encodeServerMetadataPushVersion8(zstdSupported bool) (payload.Payload, error) {

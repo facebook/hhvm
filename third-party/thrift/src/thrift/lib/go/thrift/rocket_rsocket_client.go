@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
+	"github.com/facebook/fbthrift/thrift/lib/thrift/rpcmetadata"
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/core/transport"
 	"github.com/rsocket/rsocket-go/payload"
@@ -42,7 +43,7 @@ type rsocketClient struct {
 }
 
 // OnServerMetadataPush is called when the server sends a metadata push.
-type OnServerMetadataPush func(zstd bool, drain bool)
+type OnServerMetadataPush func(metadata *rpcmetadata.ServerPushMetadata)
 
 func newRSocketClient(conn net.Conn) RSocketClient {
 	return &rsocketClient{conn: conn}
@@ -89,7 +90,7 @@ func metadataPush(onServerMetadataPush OnServerMetadataPush) func(pay payload.Pa
 		if err != nil {
 			panic(err)
 		}
-		onServerMetadataPush(metadata.zstd, metadata.drain)
+		onServerMetadataPush(metadata)
 	}
 }
 

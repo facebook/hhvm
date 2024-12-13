@@ -152,19 +152,13 @@ struct section_block {
 };
 
 /**
- * A Whisker construct for conditionals. A conditional_block represents one of
- * two (very similar) block types: if-block and unless-block.
+ * A Whisker construct for conditionals, i.e. the if-block.
  * This matches Handlebars:
  *   https://handlebarsjs.com/guide/builtin-helpers.html#if
- *   https://handlebarsjs.com/guide/builtin-helpers.html#unless
  */
 struct conditional_block {
   source_range loc;
-  /**
-   * {{#if     ⇒ unless == false
-   * {{#unless ⇒ unless == true
-   */
-  bool unless;
+
   expression condition;
   bodies body_elements;
 

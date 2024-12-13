@@ -284,26 +284,6 @@ I don't know who you are.
 
 </Example>
 
-:::note
-`{{#unless}}` blocks are functionally equivalent to `{{#if}}` with a negated condition. However, they are **deprecated** as their behavior can be replicated using `{{#if}}` with the `not` function.
-:::
-
-<Example title={<>Example of <code>unless</code> being redundant</>}>
-
-```handlebars title=example.whisker
-{{! These two blocks have identical behavior }}
-
-{{#unless failed?}}
-Nice!
-{{/unless failed?}}
-
-{{#if (not failed?)}}
-Nice!
-{{/if (not failed?)}}
-```
-
-</Example>
-
 <Grammar>
 
 ```

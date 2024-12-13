@@ -1016,13 +1016,12 @@ class parser {
   // conditional-block →
   //   { cond-block-open ~ body* ~ else-block? ~ cond-block-close }
   // cond-block-open →
-  //   { "{{" ~ "#" ~ ("if" | "unless") ~ expression ~ "}}" }
+  //   { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
   // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
   // cond-block-close →
-  //   { "{{" ~ "/" ~ ("if" | "unless") ~ expression ~ "}}" }
+  //   { "{{" ~ "/" ~ "if" ~ expression ~ "}}" }
   //
-  // NOTE: the "if" or "unless"  and the expression must match between
-  // open and close
+  // NOTE: the expression must match between open and close
   parse_result<ast::conditional_block> parse_conditional_block(
       parser_scan_window scan) {
     assert(scan.empty());
@@ -1032,27 +1031,18 @@ class parser {
           try_consume_token(&scan, tok::pound))) {
       return no_parse_result();
     }
-    bool inverted;
-    if (try_consume_token(&scan, tok::kw_if)) {
-      inverted = false;
-    } else if (try_consume_token(&scan, tok::kw_unless)) {
-      inverted = true;
-    } else {
+    if (!try_consume_token(&scan, tok::kw_if)) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
 
-    const std::string_view block_name = inverted ? "unless" : "if";
-
     parse_result condition = parse_expression(scan);
     if (!condition.has_value()) {
-      report_expected(
-          scan, fmt::format("expression to open {}-block", block_name));
+      report_expected(scan, fmt::format("expression to open if-block"));
     }
     ast::expression open = std::move(condition).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(
-          scan, fmt::format("{} to open {}-block", tok::close, block_name));
+      report_expected(scan, fmt::format("{} to open if-block", tok::close));
     }
     scan = scan.make_fresh();
 
@@ -1080,25 +1070,18 @@ class parser {
       if (!try_consume_token(&scan, kind)) {
         report_expected(
             scan,
-            fmt::format(
-                "{} to close {}-block '{}'",
-                kind,
-                block_name,
-                open.to_string()));
+            fmt::format("{} to close if-block '{}'", kind, open.to_string()));
       }
     };
 
     expect_on_close(tok::open);
     expect_on_close(tok::slash);
-    expect_on_close(inverted ? tok::kw_unless : tok::kw_if);
+    expect_on_close(tok::kw_if);
     condition = parse_expression(scan.make_fresh());
     if (!condition.has_value()) {
       report_expected(
           scan,
-          fmt::format(
-              "expression to close {}-block '{}'",
-              block_name,
-              open.to_string()));
+          fmt::format("expression to close if-block '{}'", open.to_string()));
     }
     ast::expression close = {std::move(condition).consume_and_advance(&scan)};
     if (close.to_string() != open.to_string()) {
@@ -1114,7 +1097,6 @@ class parser {
     return {
         ast::conditional_block{
             scan.with_start(scan_start).range(),
-            inverted,
             std::move(open),
             std::move(bodies),
             std::move(else_block),

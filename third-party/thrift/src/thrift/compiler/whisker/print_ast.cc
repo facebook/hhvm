@@ -80,10 +80,7 @@ struct ast_visitor {
   void visit(
       const ast::conditional_block& conditional_block,
       tree_printer::scope scope) const {
-    scope.println(
-        " {}-block {}",
-        conditional_block.unless ? "unless" : "if",
-        location(conditional_block.loc));
+    scope.println(" if-block {}", location(conditional_block.loc));
     visit(conditional_block.condition, scope.open_property());
     visit(conditional_block.body_elements, scope.open_node());
 

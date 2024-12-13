@@ -524,7 +524,7 @@ class render_engine {
     };
 
     const bool condition = evaluate_as_bool(conditional_block.condition);
-    if (condition ^ conditional_block.unless) {
+    if (condition) {
       do_visit(conditional_block.body_elements);
     } else if (conditional_block.else_clause.has_value()) {
       do_visit(conditional_block.else_clause->body_elements);

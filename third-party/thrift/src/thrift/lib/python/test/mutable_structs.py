@@ -41,6 +41,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesMutable,
     TestStructAsListElement as TestStructAsListElementMutable,
     TestStructContainerAssignment as TestStructContainerAssignmentMutable,
+    TestStructNested_0 as TestStructNested_0_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
     TestStructWithExceptionField as TestStructWithExceptionFieldMutable,
     TestStructWithUnionField as TestStructWithUnionFieldMutable,
@@ -49,6 +50,9 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructAllThriftContainerTypes as TestStructAllThriftContainerTypesImmutable,
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
+    TestStructNested_0 as TestStructNested_0_Immutable,
+    TestStructNested_1 as TestStructNested_1_Immutable,
+    TestStructNested_2 as TestStructNested_2_Immutable,
 )
 
 max_byte: int = 2**7 - 1
@@ -482,3 +486,45 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual("updated", s_elem.string_field)
         self.assertEqual("updated", s.list_struct[0].string_field)
         self.assertEqual("updated", s.list_struct[1].string_field)
+
+    def test_copy_from_immutable_struct(self) -> None:
+        """
+        struct TestStructNested_2 {
+          1: i32 i32_field;
+        }
+
+        struct TestStructNested_1 {
+          1: i32 i32_field;
+          2: TestStructNested_2 nested_2;
+        }
+
+        struct TestStructNested_0 {
+          1: i32 i32_field;
+          2: TestStructNested_1 nested_1;
+        }
+        """
+        s_immutable = TestStructNested_0_Immutable(
+            i32_field=42,
+            nested_1=TestStructNested_1_Immutable(
+                i32_field=41, nested_2=TestStructNested_2_Immutable(i32_field=40)
+            ),
+        )
+        s_mutable = TestStructNested_0_Mutable(i32_field=0)
+
+        # Assignment from immutable struct fields to mutable structs fields
+        # would not work for all field types, for example, for struct fields
+        with self.assertRaisesRegex(
+            TypeError,
+            "is not a <class '.*thrift_mutable_types.TestStructNested_1'>, "
+            "is actually of type <.*thrift_types.TestStructNested_1'>.",
+        ):
+            for field_name, field_value in s_immutable:
+                setattr(s_mutable, field_name, field_value)
+
+        # with `._to_mutable_python()`
+        for field_name, field_value in s_immutable._to_mutable_python():
+            setattr(s_mutable, field_name, field_value)
+
+        self.assertEqual(42, s_mutable.i32_field)
+        self.assertEqual(41, s_mutable.nested_1.i32_field)
+        self.assertEqual(40, s_mutable.nested_1.nested_2.i32_field)

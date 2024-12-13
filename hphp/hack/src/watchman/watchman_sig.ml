@@ -130,40 +130,34 @@ module type S = sig
 
   include module type of Abstract_types
 
-  type 'a result = 'a
-
   type conn
 
-  val init :
-    ?since_clockspec:string -> init_settings -> unit -> env option result
+  val init : ?since_clockspec:string -> init_settings -> unit -> env option
 
-  val get_all_files : env -> string list result
+  val get_all_files : env -> string list
 
-  val get_changes_since_mergebase :
-    ?timeout:timeout -> env -> string list result
+  val get_changes_since_mergebase : ?timeout:timeout -> env -> string list
 
-  val get_mergebase : ?timeout:timeout -> env -> Hg.Rev.t result
+  val get_mergebase : ?timeout:timeout -> env -> Hg.Rev.t
 
   val get_changes :
-    ?deadline:float -> watchman_instance -> (watchman_instance * changes) result
+    ?deadline:float -> watchman_instance -> watchman_instance * changes
 
   val get_changes_synchronously :
-    timeout:int ->
-    watchman_instance ->
-    (watchman_instance * pushed_changes list) result
+    timeout:int -> watchman_instance -> watchman_instance * pushed_changes list
 
   val get_clock : watchman_instance -> clock
 
   val conn_of_instance : watchman_instance -> conn option
 
-  val close : env -> unit result
+  val close : env -> unit
 
   val with_instance :
     watchman_instance ->
     try_to_restart:bool ->
-    on_alive:(env -> 'a result) ->
-    on_dead:(dead_env -> 'a result) ->
-    'a result
+    on_alive:(env -> 'a) ->
+    on_dead:(dead_env -> 'a) ->
+    'a
 
   val get_reader : watchman_instance -> Buffered_line_reader.t option
 
@@ -173,7 +167,7 @@ module type S = sig
 
   (* Expose some things for testing. *)
   module Testing : sig
-    val get_test_env : unit -> env result
+    val get_test_env : unit -> env
 
     val test_settings : init_settings
 

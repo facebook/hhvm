@@ -310,8 +310,6 @@ module Watchman_actual :
 
   let ( >|= ) = Regular_watchman_process.( >|= )
 
-  type 'a result = 'a
-
   type conn = Regular_watchman_process.conn
 
   (**
@@ -1100,7 +1098,7 @@ module Watchman_actual :
       (get_changes_since_mergebase_query env)
     >|= extract_file_names env
 
-  let get_mergebase ?timeout env : Hg.Rev.t result =
+  let get_mergebase ?timeout env : Hg.Rev.t =
     Regular_watchman_process.request
       ?timeout
       ~debug_logging:env.settings.debug_logging
@@ -1241,8 +1239,6 @@ end
 
 module Watchman_mock = struct
   exception Not_available_in_mocking
-
-  type 'a result = 'a
 
   type conn
 

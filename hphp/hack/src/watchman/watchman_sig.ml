@@ -87,7 +87,7 @@ module Abstract_types = struct
     | Watchman_alive of env
 end
 
-module type WATCHMAN_PROCESS = sig
+module type Watchman_process_S = sig
   type conn
 
   exception Read_payload_too_long
@@ -119,6 +119,8 @@ module type WATCHMAN_PROCESS = sig
     debug_logging:bool -> ?timeout:Types.timeout -> conn -> Hh_json.json option
 
   val close_connection : conn -> unit
+
+  val get_reader : conn -> Buffered_line_reader.t
 
   module Testing : sig
     val get_test_conn : unit -> conn

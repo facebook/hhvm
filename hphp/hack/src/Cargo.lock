@@ -514,7 +514,7 @@ dependencies = [
  "itertools 0.13.0",
  "print_opcode",
  "relative_path",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "write_bytes",
 ]
 
@@ -833,7 +833,7 @@ dependencies = [
  "rewrite_program",
  "serde",
  "stack_limit",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -864,7 +864,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha1",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "ty",
 ]
 
@@ -1280,7 +1280,7 @@ dependencies = [
  "oxidized_by_ref",
  "parser_core_types",
  "sha1",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -1757,7 +1757,7 @@ version = "0.0.0"
 dependencies = [
  "hhvm_hhbc_defs_ffi",
  "oxidized",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -1855,7 +1855,7 @@ dependencies = [
  "relative_path",
  "rusqlite",
  "serde",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "typing_deps_hash",
 ]
 
@@ -1938,7 +1938,7 @@ dependencies = [
  "pos",
  "shallow_decl_provider",
  "special_names",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "ty",
 ]
 
@@ -2103,7 +2103,7 @@ dependencies = [
  "relative_path",
  "serde",
  "syn 1.0.109",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -2161,7 +2161,7 @@ dependencies = [
  "strum",
  "tempfile",
  "textual",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "ty",
 ]
 
@@ -2252,7 +2252,7 @@ dependencies = [
  "cxx",
  "cxx-build",
  "glob",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -2324,7 +2324,7 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "typing_deps_hash",
 ]
 
@@ -2928,7 +2928,7 @@ dependencies = [
  "relative_path",
  "rescan_trivia",
  "stack_limit",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -3546,7 +3546,7 @@ dependencies = [
  "serde",
  "serde_json",
  "strum",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "toml",
 ]
 
@@ -3888,7 +3888,7 @@ dependencies = [
  "naming_special_names_rust",
  "oxidized",
  "regex",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "write_bytes",
 ]
 
@@ -4564,7 +4564,7 @@ dependencies = [
  "oxidized",
  "pos",
  "serde",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
  "ty",
 ]
 
@@ -4610,7 +4610,7 @@ dependencies = [
  "md-5",
  "once_cell",
  "regex",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -4784,7 +4784,7 @@ dependencies = [
  "hhbc-gen",
  "log",
  "newtype",
- "thiserror 2.0.3",
+ "thiserror 2.0.7",
 ]
 
 [[package]]
@@ -5045,11 +5045,11 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "2.0.3"
+version = "2.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c006c85c7651b3cf2ada4584faa36773bd07bac24acfb39f3c431b36d7e667aa"
+checksum = "93605438cbd668185516ab499d589afb7ee1859ea3d5fc8f6b0755e1c7443767"
 dependencies = [
- "thiserror-impl 2.0.3",
+ "thiserror-impl 2.0.7",
 ]
 
 [[package]]
@@ -5065,9 +5065,9 @@ dependencies = [
 
 [[package]]
 name = "thiserror-impl"
-version = "2.0.3"
+version = "2.0.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f077553d607adc1caf65430528a576c757a71ed73944b66ebb58ef2bbd243568"
+checksum = "e1d8749b4531af2117677a5fcd12b1348a3fe2b81e36e61ffeac5c4aa3273e36"
 dependencies = [
  "proc-macro2",
  "quote",

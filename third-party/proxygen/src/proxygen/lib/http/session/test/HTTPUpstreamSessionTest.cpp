@@ -3163,6 +3163,74 @@ TEST_F(HTTP2UpstreamSessionTest, TestPingPreserveData) {
   httpSession_->destroy();
 }
 
+class H2LargeFlowControl : public HTTP2UpstreamSessionTest {
+  void SetUp() override {
+    constexpr uint32_t kCapacity = 1024 * 1024;
+    flowControl_ = {kCapacity, kCapacity, kCapacity};
+    HTTP2UpstreamSessionTest::SetUp();
+  }
+};
+
+/*
+ * Verifies that WINDOW_UPDATE is sent when at least kMinThreshold bytes are
+ * read.
+ */
+TEST_F(H2LargeFlowControl, WindowUpdateThresholdTest) {
+  auto handler = openTransaction();
+  handler->txn_->pauseIngress(); // buffer incoming bytes
+  handler->sendRequest();        // getRequest, sends request and eom
+  eventBase_.loopOnce();
+  eventBase_.loopOnce();
+
+  auto serverCodec = makeServerCodec();
+  folly::IOBufQueue output(folly::IOBufQueue::cacheChainLength());
+  serverCodec->generateConnectionPreface(output);
+  serverCodec->generateSettings(output);
+
+  // enqueue 1MB of data into txn
+  auto resp = makeResponse(200);
+  serverCodec->generateHeader(output, handler->txn_->getID(), *resp, false);
+  serverCodec->generateBody(output,
+                            handler->txn_->getID(),
+                            makeBuf(1024 * 1024),
+                            folly::none /* padding */,
+                            false /* eom */);
+
+  auto input = output.move();
+  input->coalesce();
+  readAndLoop(input->data(),
+              input->length()); // buffers server's headers and body to txn
+
+  uint32_t bytesReadSoFar = 0;
+  constexpr uint32_t kMinThreshold = 128 * 1024;
+
+  handler->expectHeaders();
+  // setting up expectation, pause ingress after reading 128KB in callback
+  handler->expectBodyRepeatedly([&] {
+    bytesReadSoFar += input->computeChainDataLength();
+    if (bytesReadSoFar >= kMinThreshold) {
+      handler->txn_->pauseIngress();
+    }
+  });
+
+  handler->txn_->resumeIngress(); // only sent to the handler after this point
+  handler->expectBodyRepeatedly([&] {});
+  handler->expectDetachTransaction();
+
+  // expect window update here
+  NiceMock<MockHTTPCodecCallback> callbacks;
+  serverCodec->setCallback(&callbacks);
+  EXPECT_CALL(callbacks, onWindowUpdate(0, _)).Times(AnyNumber());
+  EXPECT_CALL(callbacks, onWindowUpdate(handler->txn_->getID(), kMinThreshold))
+      .Times(AtLeast(1));
+
+  handler->txn_->resumeIngress();
+  eventBase_.loop();
+  handler->txn_->sendAbort();
+  parseOutput(*serverCodec); // client's buffer -> serverCodec
+  httpSession_->destroy();
+}
+
 TEST_F(HTTP2UpstreamSessionTest, TestConnectionToken) {
   auto handler = openTransaction();
   handler->expectError();

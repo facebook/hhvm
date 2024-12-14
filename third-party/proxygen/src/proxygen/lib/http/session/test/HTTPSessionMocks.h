@@ -355,6 +355,16 @@ class MockHTTPHandler
     }
   }
 
+  void expectBodyRepeatedly(
+      const std::function<void()>& callback = std::function<void()>()) {
+    if (callback) {
+      EXPECT_CALL(*this, _onBodyWithOffset(testing::_, testing::_))
+          .WillRepeatedly(testing::InvokeWithoutArgs(callback));
+    } else {
+      EXPECT_CALL(*this, _onBodyWithOffset(testing::_, testing::_));
+    }
+  }
+
   void expectBody(
       std::function<void(uint64_t, std::shared_ptr<folly::IOBuf>)> callback) {
     EXPECT_CALL(*this, _onBodyWithOffset(testing::_, testing::_))

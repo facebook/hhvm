@@ -20,9 +20,8 @@ import enum as _enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
-from module.thrift_enums import *
-
 from module.thrift_enums import (
+    MyEnum,
     MyEnum as _fbthrift_MyEnum,
     _fbthrift_compatible_with_MyEnum,
 )

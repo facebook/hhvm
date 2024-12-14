@@ -15,11 +15,11 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
-from test.fixtures.basic.module.thrift_enums import *
-
 from test.fixtures.basic.module.thrift_enums import (
+    MyEnum,
     MyEnum as _fbthrift_MyEnum,
     _fbthrift_compatible_with_MyEnum,
+    HackEnum,
     HackEnum as _fbthrift_HackEnum,
     _fbthrift_compatible_with_HackEnum,
 )

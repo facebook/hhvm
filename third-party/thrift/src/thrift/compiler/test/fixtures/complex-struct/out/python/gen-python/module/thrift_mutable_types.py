@@ -21,9 +21,8 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
-from module.thrift_enums import *
-
 from module.thrift_enums import (
+    MyEnum,
     MyEnum as _fbthrift_MyEnum,
     _fbthrift_compatible_with_MyEnum,
 )

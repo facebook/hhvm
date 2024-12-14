@@ -19,11 +19,11 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
-from test.fixtures.basic.module.thrift_enums import *
-
 from test.fixtures.basic.module.thrift_enums import (
+    MyEnum,
     MyEnum as _fbthrift_MyEnum,
     _fbthrift_compatible_with_MyEnum,
+    HackEnum,
     HackEnum as _fbthrift_HackEnum,
     _fbthrift_compatible_with_HackEnum,
 )

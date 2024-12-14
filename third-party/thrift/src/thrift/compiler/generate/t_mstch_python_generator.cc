@@ -153,6 +153,8 @@ class python_mstch_program : public mstch_program {
         this,
         {
             {"program:is_types_file?", &python_mstch_program::is_types_file},
+            {"program:is_source_file?", &python_mstch_program::is_source_file},
+            {"program:is_type_stub?", &python_mstch_program::is_type_stub},
             {"program:generate_abstract_types",
              &python_mstch_program::generate_abstract_types},
             {"program:generate_mutable_types",
@@ -177,6 +179,8 @@ class python_mstch_program : public mstch_program {
   mstch::node py3_auto_migrate() { return has_option("auto_migrate"); }
 
   mstch::node is_types_file() { return has_option("is_types_file"); }
+  mstch::node is_source_file() { return has_option("is_source_file"); }
+  mstch::node is_type_stub() { return has_option("is_type_stub"); }
 
   mstch::node include_namespaces() {
     std::vector<const Namespace*> namespaces;
@@ -1115,7 +1119,7 @@ class t_mstch_python_generator : public t_mstch_generator {
     }
   }
 
-  enum class IsTypesFile { Yes, No };
+  enum class TypesFileKind { NotATypesFile, SourceFile, TypeStub };
   enum class TypeKind { Abstract, Immutable, Mutable };
 
  protected:
@@ -1123,7 +1127,7 @@ class t_mstch_python_generator : public t_mstch_generator {
   void set_mstch_factories();
   void generate_file(
       const std::string& template_name,
-      IsTypesFile is_types_file,
+      TypesFileKind types_file_kind,
       TypeKind type_kind,
       const std::filesystem::path& base);
   void set_types_file(bool val);
@@ -1357,14 +1361,18 @@ void t_mstch_python_generator::set_mstch_factories() {
 
 void t_mstch_python_generator::generate_file(
     const std::string& template_name,
-    IsTypesFile is_types_file,
+    TypesFileKind types_file_kind,
     TypeKind type_kind,
     const std::filesystem::path& base = {}) {
   t_program* program = get_program();
   const std::string& program_name = program->name();
   mstch_context_
       .set_or_erase_option(
-          is_types_file == IsTypesFile::Yes, "is_types_file", "")
+          types_file_kind != TypesFileKind::NotATypesFile, "is_types_file", "")
+      .set_or_erase_option(
+          types_file_kind == TypesFileKind::SourceFile, "is_source_file", "")
+      .set_or_erase_option(
+          types_file_kind == TypesFileKind::TypeStub, "is_type_stub", "")
       .set_or_erase_option(
           type_kind == TypeKind::Abstract, "generate_abstract_types", "yes")
       .set_or_erase_option(
@@ -1398,28 +1406,28 @@ void t_mstch_python_generator::generate_types() {
       enable_abstract_types, "enable_abstract_types", "true");
   generate_file(
       "thrift_types.py",
-      IsTypesFile::Yes,
+      TypesFileKind::SourceFile,
       TypeKind::Immutable,
       generate_root_path_);
   generate_file(
       "thrift_types.pyi",
-      IsTypesFile::Yes,
+      TypesFileKind::TypeStub,
       TypeKind::Immutable,
       generate_root_path_);
   generate_file(
       "thrift_enums.py",
-      IsTypesFile::Yes,
+      TypesFileKind::SourceFile,
       TypeKind::Immutable,
       generate_root_path_);
   generate_file(
       "thrift_enums.pyi",
-      IsTypesFile::Yes,
+      TypesFileKind::TypeStub,
       TypeKind::Immutable,
       generate_root_path_);
 
   generate_file(
       "thrift_abstract_types.py",
-      IsTypesFile::Yes,
+      TypesFileKind::SourceFile,
       TypeKind::Abstract,
       generate_root_path_);
 
@@ -1427,12 +1435,13 @@ void t_mstch_python_generator::generate_types() {
 
   generate_file(
       "thrift_mutable_types.py",
-      IsTypesFile::Yes,
+      TypesFileKind::SourceFile,
       TypeKind::Mutable,
       generate_root_path_);
+
   generate_file(
       "thrift_mutable_types.pyi",
-      IsTypesFile::Yes,
+      TypesFileKind::TypeStub,
       TypeKind::Mutable,
       generate_root_path_);
 
@@ -1442,7 +1451,7 @@ void t_mstch_python_generator::generate_types() {
 void t_mstch_python_generator::generate_metadata() {
   generate_file(
       "thrift_metadata.py",
-      IsTypesFile::Yes,
+      TypesFileKind::SourceFile,
       TypeKind::Immutable,
       generate_root_path_);
 }
@@ -1456,12 +1465,13 @@ void t_mstch_python_generator::generate_clients() {
 
   generate_file(
       "thrift_clients.py",
-      IsTypesFile::No,
+      TypesFileKind::NotATypesFile,
       TypeKind::Immutable,
       generate_root_path_);
+
   generate_file(
       "thrift_mutable_clients.py",
-      IsTypesFile::No,
+      TypesFileKind::NotATypesFile,
       TypeKind::Mutable,
       generate_root_path_);
 }
@@ -1474,12 +1484,13 @@ void t_mstch_python_generator::generate_services() {
   }
   generate_file(
       "thrift_services.py",
-      IsTypesFile::No,
+      TypesFileKind::NotATypesFile,
       TypeKind::Immutable,
       generate_root_path_);
+
   generate_file(
       "thrift_mutable_services.py",
-      IsTypesFile::No,
+      TypesFileKind::NotATypesFile,
       TypeKind::Mutable,
       generate_root_path_);
 }

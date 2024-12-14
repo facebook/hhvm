@@ -24,9 +24,8 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 import include.thrift_mutable_types
 import include.thrift_mutable_types as _fbthrift__include__thrift_mutable_types
 
-from module.thrift_enums import *
-
 from module.thrift_enums import (
+    Result,
     Result as _fbthrift_Result,
     _fbthrift_compatible_with_Result,
 )

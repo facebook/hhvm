@@ -31,8 +31,6 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-from module.thrift_enums import *
-
 from module.thrift_enums import (
     EmptyEnum as _fbthrift_EmptyEnum,
     _fbthrift_compatible_with_EmptyEnum,
@@ -41,6 +39,9 @@ from module.thrift_enums import (
     Company as _fbthrift_Company,
     _fbthrift_compatible_with_Company,
 )
+EmptyEnum = _fbthrift_EmptyEnum
+City = _fbthrift_City
+Company = _fbthrift_Company
 
 
 class _fbthrift_compatible_with_Internship:

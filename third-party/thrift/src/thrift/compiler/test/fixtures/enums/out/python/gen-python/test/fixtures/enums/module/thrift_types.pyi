@@ -14,8 +14,6 @@ import test.fixtures.enums.module.thrift_abstract_types as _fbthrift_python_abst
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-from test.fixtures.enums.module.thrift_enums import *
-
 from test.fixtures.enums.module.thrift_enums import (
     Metasyntactic as _fbthrift_Metasyntactic,
     _fbthrift_compatible_with_Metasyntactic,
@@ -32,6 +30,13 @@ from test.fixtures.enums.module.thrift_enums import (
     MyBitmaskEnum2 as _fbthrift_MyBitmaskEnum2,
     _fbthrift_compatible_with_MyBitmaskEnum2,
 )
+Metasyntactic = _fbthrift_Metasyntactic
+MyEnum1 = _fbthrift_MyEnum1
+MyEnum2 = _fbthrift_MyEnum2
+MyEnum3 = _fbthrift_MyEnum3
+MyEnum4 = _fbthrift_MyEnum4
+MyBitmaskEnum1 = _fbthrift_MyBitmaskEnum1
+MyBitmaskEnum2 = _fbthrift_MyBitmaskEnum2
 
 
 class _fbthrift_compatible_with_SomeStruct:

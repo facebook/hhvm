@@ -31,8 +31,6 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import apache.thrift.fixtures.types.included.thrift_mutable_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_mutable_types
 
-from apache.thrift.fixtures.types.module.thrift_enums import *
-
 from apache.thrift.fixtures.types.module.thrift_enums import (
     has_bitwise_ops as _fbthrift_has_bitwise_ops,
     _fbthrift_compatible_with_has_bitwise_ops,
@@ -41,6 +39,9 @@ from apache.thrift.fixtures.types.module.thrift_enums import (
     MyForwardRefEnum as _fbthrift_MyForwardRefEnum,
     _fbthrift_compatible_with_MyForwardRefEnum,
 )
+has_bitwise_ops = _fbthrift_has_bitwise_ops
+is_unscoped = _fbthrift_is_unscoped
+MyForwardRefEnum = _fbthrift_MyForwardRefEnum
 
 
 class _fbthrift_compatible_with_empty_struct:

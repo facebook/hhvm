@@ -139,7 +139,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.ShouldBeBoxed, ShouldBeBoxed
 _fbthrift_ShouldBeBoxed = ShouldBeBoxed
 
 
-from test.fixtures.interactions.module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

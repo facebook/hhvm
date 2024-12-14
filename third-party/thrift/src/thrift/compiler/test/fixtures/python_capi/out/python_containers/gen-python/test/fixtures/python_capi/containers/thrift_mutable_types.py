@@ -602,7 +602,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.IndirectionC, IndirectionC)
 _fbthrift_IndirectionC = IndirectionC
 
 
-from test.fixtures.python_capi.containers.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

@@ -135,7 +135,6 @@ _fbthrift_MyStruct = MyStruct
 # This unfortunately has to be down here to prevent circular imports
 import with_containers.thrift_metadata
 
-from with_containers.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

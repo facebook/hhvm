@@ -21,6 +21,17 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
+from module.thrift_enums import *
+
+from module.thrift_enums import (
+    EmptyEnum as _fbthrift_EmptyEnum,
+    _fbthrift_compatible_with_EmptyEnum,
+    City as _fbthrift_City,
+    _fbthrift_compatible_with_City,
+    Company as _fbthrift_Company,
+    _fbthrift_compatible_with_Company,
+)
+
 
 class Internship(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -663,14 +674,7 @@ class union2(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta):
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.union2, union2)
 _fbthrift_union2 = union2
 
-from module.thrift_enums import _fbthrift_compatible_with_EmptyEnum
-from module.thrift_enums import EmptyEnum as _fbthrift_EmptyEnum
-from module.thrift_enums import _fbthrift_compatible_with_City
-from module.thrift_enums import City as _fbthrift_City
-from module.thrift_enums import _fbthrift_compatible_with_Company
-from module.thrift_enums import Company as _fbthrift_Company
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
     EmptyEnum,
     City,

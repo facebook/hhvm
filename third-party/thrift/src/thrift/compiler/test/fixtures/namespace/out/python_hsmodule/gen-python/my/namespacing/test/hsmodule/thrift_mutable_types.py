@@ -79,7 +79,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.HsFoo, HsFoo)
 _fbthrift_HsFoo = HsFoo
 
 
-from python_module_root.my.namespacing.test.hsmodule.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

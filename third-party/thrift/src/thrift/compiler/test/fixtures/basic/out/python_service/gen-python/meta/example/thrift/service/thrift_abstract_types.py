@@ -18,7 +18,6 @@ _fbthrift_property = property
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
-from meta.example.thrift.service.thrift_enums import *
 class EchoRequest(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

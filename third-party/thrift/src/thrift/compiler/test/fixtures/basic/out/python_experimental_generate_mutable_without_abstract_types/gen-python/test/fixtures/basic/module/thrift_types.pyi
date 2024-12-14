@@ -14,12 +14,15 @@ import enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
-from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_MyEnum
-from test.fixtures.basic.module.thrift_enums import MyEnum as _fbthrift_MyEnum
-from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_HackEnum
-from test.fixtures.basic.module.thrift_enums import HackEnum as _fbthrift_HackEnum
 
 from test.fixtures.basic.module.thrift_enums import *
+
+from test.fixtures.basic.module.thrift_enums import (
+    MyEnum as _fbthrift_MyEnum,
+    _fbthrift_compatible_with_MyEnum,
+    HackEnum as _fbthrift_HackEnum,
+    _fbthrift_compatible_with_HackEnum,
+)
 
 
 class _fbthrift_compatible_with_MyStruct:

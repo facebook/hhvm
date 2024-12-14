@@ -17,6 +17,17 @@ import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+from module.thrift_enums import *
+
+from module.thrift_enums import (
+    AnEnum as _fbthrift_AnEnum,
+    _fbthrift_compatible_with_AnEnum,
+    AnEnumRenamed as _fbthrift_AnEnumRenamed,
+    _fbthrift_compatible_with_AnEnumRenamed,
+    Flags as _fbthrift_Flags,
+    _fbthrift_compatible_with_Flags,
+)
+
 
 class SimpleException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -1114,14 +1125,7 @@ _fbthrift_AdaptedTypedefFields = AdaptedTypedefFields
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-from module.thrift_enums import _fbthrift_compatible_with_AnEnum
-from module.thrift_enums import AnEnum as _fbthrift_AnEnum
-from module.thrift_enums import _fbthrift_compatible_with_AnEnumRenamed
-from module.thrift_enums import AnEnumRenamed as _fbthrift_AnEnumRenamed
-from module.thrift_enums import _fbthrift_compatible_with_Flags
-from module.thrift_enums import Flags as _fbthrift_Flags
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
     AnEnum,
     AnEnumRenamed,

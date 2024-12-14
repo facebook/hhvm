@@ -161,7 +161,6 @@ class FooEx2(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedError
 _fbthrift_FooEx2 = FooEx2
 
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

@@ -156,7 +156,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Limits, Limits)
 _fbthrift_Limits = Limits
 
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

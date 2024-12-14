@@ -19,7 +19,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import my
 
-from with_containers.thrift_enums import *
 class _fbthrift_unadapted_AnnotationWithContainers(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

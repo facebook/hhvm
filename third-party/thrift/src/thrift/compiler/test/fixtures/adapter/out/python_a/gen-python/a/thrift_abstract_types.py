@@ -23,7 +23,6 @@ import typeshed_three
 import typeshed_two
 import typeshed_one
 
-from a.thrift_enums import *
 class MyStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

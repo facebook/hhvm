@@ -31,8 +31,6 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import python_module_root.my.namespacing.test.hsmodule.thrift_mutable_types as python_module_root__my__namespacing__test__hsmodule__thrift_mutable_types
 
-from python_module_root.my.namespacing.extend.test.extend.thrift_enums import *
-
 
 
 class _fbthrift_ExtendTestService_check_args(_fbthrift_python_mutable_types.MutableStruct):

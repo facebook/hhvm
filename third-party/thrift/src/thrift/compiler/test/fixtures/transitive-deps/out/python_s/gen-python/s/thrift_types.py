@@ -25,7 +25,6 @@ import c.thrift_types as _fbthrift__c__thrift_types
 # This unfortunately has to be down here to prevent circular imports
 import s.thrift_metadata
 
-from s.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

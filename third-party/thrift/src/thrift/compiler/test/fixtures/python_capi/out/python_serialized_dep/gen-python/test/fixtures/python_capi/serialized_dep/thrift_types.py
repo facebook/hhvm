@@ -453,7 +453,6 @@ _fbthrift_MarshalError = MarshalError
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.serialized_dep.thrift_metadata
 
-from test.fixtures.python_capi.serialized_dep.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

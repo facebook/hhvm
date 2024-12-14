@@ -27,6 +27,15 @@ import test.fixtures.python_capi.serialized_dep.thrift_types as _fbthrift__test_
 import test.fixtures.python_capi.thrift_dep.thrift_types
 import test.fixtures.python_capi.thrift_dep.thrift_types as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types
 
+from test.fixtures.python_capi.module.thrift_enums import *
+
+from test.fixtures.python_capi.module.thrift_enums import (
+    MyEnum as _fbthrift_MyEnum,
+    _fbthrift_compatible_with_MyEnum,
+    AnnoyingEnum as _fbthrift_AnnoyingEnum,
+    _fbthrift_compatible_with_AnnoyingEnum,
+)
+
 
 class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1441,12 +1450,7 @@ _fbthrift_Onion = Onion
 
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.module.thrift_metadata
-from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_MyEnum
-from test.fixtures.python_capi.module.thrift_enums import MyEnum as _fbthrift_MyEnum
-from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_AnnoyingEnum
-from test.fixtures.python_capi.module.thrift_enums import AnnoyingEnum as _fbthrift_AnnoyingEnum
 
-from test.fixtures.python_capi.module.thrift_enums import *
 _fbthrift_all_enums = [
     MyEnum,
     AnnoyingEnum,

@@ -16,8 +16,6 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import test.fixtures.another_interactions.shared.thrift_types as _fbthrift__test__fixtures__another_interactions__shared__thrift_types
 
-from test.fixtures.interactions.module.thrift_enums import *
-
 
 class _fbthrift_compatible_with_CustomException:
     pass

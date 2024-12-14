@@ -20,4 +20,3 @@ import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import b.thrift_abstract_types as _fbthrift__b__thrift_abstract_types
 import c.thrift_abstract_types as _fbthrift__c__thrift_abstract_types
 
-from s.thrift_enums import *

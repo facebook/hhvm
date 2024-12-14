@@ -23,7 +23,6 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
 
-from empty.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

@@ -31,8 +31,6 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import c.thrift_mutable_types as _fbthrift__c__thrift_mutable_types
 
-from b.thrift_enums import *
-
 
 B = _typing.List[_fbthrift__c__thrift_mutable_types.C]
 E = _fbthrift__c__thrift_mutable_types.E

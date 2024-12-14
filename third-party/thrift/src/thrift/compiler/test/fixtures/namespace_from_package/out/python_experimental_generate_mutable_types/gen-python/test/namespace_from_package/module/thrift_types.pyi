@@ -14,8 +14,6 @@ import test.namespace_from_package.module.thrift_abstract_types as _fbthrift_pyt
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-from test.namespace_from_package.module.thrift_enums import *
-
 
 class _fbthrift_compatible_with_Foo:
     pass

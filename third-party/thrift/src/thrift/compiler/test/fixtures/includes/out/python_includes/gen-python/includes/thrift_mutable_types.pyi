@@ -31,8 +31,6 @@ import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import transitive.thrift_mutable_types as _fbthrift__transitive__thrift_mutable_types
 
-from includes.thrift_enums import *
-
 
 class _fbthrift_compatible_with_Included:
     pass

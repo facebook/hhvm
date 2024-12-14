@@ -20,7 +20,6 @@ import enum as _enum
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
-from test.fixtures.python_capi.serialized_dep.thrift_enums import *
 class SerializedStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

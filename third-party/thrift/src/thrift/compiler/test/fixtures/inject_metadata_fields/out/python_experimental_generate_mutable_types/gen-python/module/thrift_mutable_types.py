@@ -294,7 +294,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.FieldsInjectedWithIncludedSt
 _fbthrift_FieldsInjectedWithIncludedStruct = FieldsInjectedWithIncludedStruct
 
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

@@ -18,7 +18,6 @@ _fbthrift_property = property
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
-from test.fixtures.python_capi.containers.thrift_enums import *
 class TemplateLists(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

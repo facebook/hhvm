@@ -497,7 +497,6 @@ class Banal(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorM
 _fbthrift_Banal = Banal
 
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

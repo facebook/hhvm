@@ -21,14 +21,18 @@ import enum as _enum
 
 import folly.iobuf as _fbthrift_iobuf
 import fbcode.thrift.python.abstract_types as _fbthrift_python_abstract_types
-from module.thrift_enums import _fbthrift_compatible_with_AnEnum
-from module.thrift_enums import AnEnum as _fbthrift_AnEnum
-from module.thrift_enums import _fbthrift_compatible_with_AnEnumRenamed
-from module.thrift_enums import AnEnumRenamed as _fbthrift_AnEnumRenamed
-from module.thrift_enums import _fbthrift_compatible_with_Flags
-from module.thrift_enums import Flags as _fbthrift_Flags
 
 from module.thrift_enums import *
+
+from module.thrift_enums import (
+    AnEnum as _fbthrift_AnEnum,
+    _fbthrift_compatible_with_AnEnum,
+    AnEnumRenamed as _fbthrift_AnEnumRenamed,
+    _fbthrift_compatible_with_AnEnumRenamed,
+    Flags as _fbthrift_Flags,
+    _fbthrift_compatible_with_Flags,
+)
+
 class SimpleException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def err_code(self) -> int: ...

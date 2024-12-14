@@ -22,7 +22,6 @@ import python_module_root.my.namespacing.test.hsmodule.thrift_types as python_mo
 # This unfortunately has to be down here to prevent circular imports
 import python_module_root.my.namespacing.extend.test.extend.thrift_metadata
 
-from python_module_root.my.namespacing.extend.test.extend.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

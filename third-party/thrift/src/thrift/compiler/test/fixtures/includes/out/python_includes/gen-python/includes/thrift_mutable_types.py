@@ -93,7 +93,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Included, Included)
 _fbthrift_Included = Included
 
 
-from includes.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

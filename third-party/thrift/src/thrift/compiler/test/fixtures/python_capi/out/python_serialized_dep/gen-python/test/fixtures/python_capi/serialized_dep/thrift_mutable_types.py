@@ -499,7 +499,6 @@ class MarshalError(metaclass=_fbthrift_python_mutable_exceptions.MutableGenerate
 _fbthrift_MarshalError = MarshalError
 
 
-from test.fixtures.python_capi.serialized_dep.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

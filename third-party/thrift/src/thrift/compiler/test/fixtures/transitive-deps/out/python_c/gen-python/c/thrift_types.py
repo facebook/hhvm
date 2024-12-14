@@ -107,7 +107,6 @@ _fbthrift_E = E
 # This unfortunately has to be down here to prevent circular imports
 import c.thrift_metadata
 
-from c.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

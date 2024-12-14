@@ -68,7 +68,6 @@ _fbthrift_Foo = Foo
 # This unfortunately has to be down here to prevent circular imports
 import python_module_root.my.namespacing.test.module.module.thrift_metadata
 
-from python_module_root.my.namespacing.test.module.module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

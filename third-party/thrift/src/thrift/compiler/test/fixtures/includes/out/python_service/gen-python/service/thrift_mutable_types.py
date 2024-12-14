@@ -32,7 +32,6 @@ import transitive.thrift_mutable_types as _fbthrift__transitive__thrift_mutable_
 
 
 
-from service.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

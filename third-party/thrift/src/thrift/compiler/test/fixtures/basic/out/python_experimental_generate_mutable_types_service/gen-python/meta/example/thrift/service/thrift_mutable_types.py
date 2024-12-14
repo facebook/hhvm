@@ -192,7 +192,6 @@ class WhisperException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
 _fbthrift_WhisperException = WhisperException
 
 
-from meta.example.thrift.service.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

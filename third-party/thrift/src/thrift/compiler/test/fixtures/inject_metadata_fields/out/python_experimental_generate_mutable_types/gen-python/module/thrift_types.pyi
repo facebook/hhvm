@@ -16,8 +16,6 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import foo.thrift_types as _fbthrift__foo__thrift_types
 
-from module.thrift_enums import *
-
 
 class _fbthrift_compatible_with_Fields:
     pass

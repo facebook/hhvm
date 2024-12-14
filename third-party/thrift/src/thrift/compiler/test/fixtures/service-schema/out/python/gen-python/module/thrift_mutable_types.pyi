@@ -30,10 +30,13 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
 import include.thrift_mutable_types as _fbthrift__include__thrift_mutable_types
-from module.thrift_enums import _fbthrift_compatible_with_Result
-from module.thrift_enums import Result as _fbthrift_Result
 
 from module.thrift_enums import *
+
+from module.thrift_enums import (
+    Result as _fbthrift_Result,
+    _fbthrift_compatible_with_Result,
+)
 
 
 class _fbthrift_compatible_with_CustomException:

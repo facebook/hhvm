@@ -23,12 +23,15 @@ import apache.thrift.type.schema.thrift_types as _fbthrift__apache__thrift__type
 import test.fixtures.python_capi.serialized_dep.thrift_types as _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_types
 
 import test.fixtures.python_capi.thrift_dep.thrift_types as _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_types
-from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_MyEnum
-from test.fixtures.python_capi.module.thrift_enums import MyEnum as _fbthrift_MyEnum
-from test.fixtures.python_capi.module.thrift_enums import _fbthrift_compatible_with_AnnoyingEnum
-from test.fixtures.python_capi.module.thrift_enums import AnnoyingEnum as _fbthrift_AnnoyingEnum
 
 from test.fixtures.python_capi.module.thrift_enums import *
+
+from test.fixtures.python_capi.module.thrift_enums import (
+    MyEnum as _fbthrift_MyEnum,
+    _fbthrift_compatible_with_MyEnum,
+    AnnoyingEnum as _fbthrift_AnnoyingEnum,
+    _fbthrift_compatible_with_AnnoyingEnum,
+)
 
 
 class _fbthrift_compatible_with_MyStruct:

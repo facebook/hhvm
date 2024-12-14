@@ -30,10 +30,13 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
-from module.thrift_enums import _fbthrift_compatible_with_MyEnum
-from module.thrift_enums import MyEnum as _fbthrift_MyEnum
 
 from module.thrift_enums import *
+
+from module.thrift_enums import (
+    MyEnum as _fbthrift_MyEnum,
+    _fbthrift_compatible_with_MyEnum,
+)
 
 
 class _fbthrift_compatible_with_MyStructFloatFieldThrowExp:

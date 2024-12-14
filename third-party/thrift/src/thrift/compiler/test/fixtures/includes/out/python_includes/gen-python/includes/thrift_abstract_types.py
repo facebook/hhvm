@@ -19,7 +19,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import transitive.thrift_abstract_types as _fbthrift__transitive__thrift_abstract_types
 
-from includes.thrift_enums import *
 class Included(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

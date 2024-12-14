@@ -18,7 +18,6 @@ _fbthrift_property = property
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 
-from module.thrift_enums import *
 class FooStreamEx(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_mutable_python(self) -> "module.thrift_mutable_types.FooStreamEx": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.FooStreamEx": ...  # type: ignore

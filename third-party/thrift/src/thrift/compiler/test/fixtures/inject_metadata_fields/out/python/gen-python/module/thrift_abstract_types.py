@@ -19,7 +19,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import foo.thrift_abstract_types as _fbthrift__foo__thrift_abstract_types
 
-from module.thrift_enums import *
 class Fields(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod

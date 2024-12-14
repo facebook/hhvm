@@ -15,6 +15,13 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 
+from module.thrift_enums import *
+
+from module.thrift_enums import (
+    MyEnum as _fbthrift_MyEnum,
+    _fbthrift_compatible_with_MyEnum,
+)
+
 
 class MyStructFloatFieldThrowExp(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
@@ -1797,10 +1804,7 @@ _fbthrift_complexException = complexException
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-from module.thrift_enums import _fbthrift_compatible_with_MyEnum
-from module.thrift_enums import MyEnum as _fbthrift_MyEnum
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
     MyEnum,
 ]

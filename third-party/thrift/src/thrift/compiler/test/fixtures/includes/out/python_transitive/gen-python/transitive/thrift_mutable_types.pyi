@@ -29,8 +29,6 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-from transitive.thrift_enums import *
-
 
 class _fbthrift_compatible_with_Foo:
     pass

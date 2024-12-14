@@ -15,14 +15,17 @@ import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import apache.thrift.fixtures.types.included.thrift_types as _fbthrift__apache__thrift__fixtures__types__included__thrift_types
-from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_has_bitwise_ops
-from apache.thrift.fixtures.types.module.thrift_enums import has_bitwise_ops as _fbthrift_has_bitwise_ops
-from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_is_unscoped
-from apache.thrift.fixtures.types.module.thrift_enums import is_unscoped as _fbthrift_is_unscoped
-from apache.thrift.fixtures.types.module.thrift_enums import _fbthrift_compatible_with_MyForwardRefEnum
-from apache.thrift.fixtures.types.module.thrift_enums import MyForwardRefEnum as _fbthrift_MyForwardRefEnum
 
 from apache.thrift.fixtures.types.module.thrift_enums import *
+
+from apache.thrift.fixtures.types.module.thrift_enums import (
+    has_bitwise_ops as _fbthrift_has_bitwise_ops,
+    _fbthrift_compatible_with_has_bitwise_ops,
+    is_unscoped as _fbthrift_is_unscoped,
+    _fbthrift_compatible_with_is_unscoped,
+    MyForwardRefEnum as _fbthrift_MyForwardRefEnum,
+    _fbthrift_compatible_with_MyForwardRefEnum,
+)
 
 
 class _fbthrift_compatible_with_empty_struct:

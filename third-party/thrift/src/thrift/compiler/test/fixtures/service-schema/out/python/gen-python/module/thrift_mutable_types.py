@@ -24,6 +24,13 @@ import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 import include.thrift_mutable_types
 import include.thrift_mutable_types as _fbthrift__include__thrift_mutable_types
 
+from module.thrift_enums import *
+
+from module.thrift_enums import (
+    Result as _fbthrift_Result,
+    _fbthrift_compatible_with_Result,
+)
+
 
 class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -93,10 +100,7 @@ class CustomException(metaclass=_fbthrift_python_mutable_exceptions.MutableGener
             return thrift.util.converter.to_py_struct(py_asyncio_types.CustomException, self)
 _fbthrift_CustomException = CustomException
 
-from module.thrift_enums import _fbthrift_compatible_with_Result
-from module.thrift_enums import Result as _fbthrift_Result
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
     Result,
 ]

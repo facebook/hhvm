@@ -610,7 +610,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.NonCopyableUnion, NonCopyabl
 _fbthrift_NonCopyableUnion = NonCopyableUnion
 
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

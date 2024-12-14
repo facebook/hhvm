@@ -19,7 +19,6 @@ import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import c.thrift_abstract_types as _fbthrift__c__thrift_abstract_types
 
-from b.thrift_enums import *
 
 B = _typing.Sequence[_fbthrift__c__thrift_abstract_types.C]
 E = _fbthrift__c__thrift_abstract_types.E

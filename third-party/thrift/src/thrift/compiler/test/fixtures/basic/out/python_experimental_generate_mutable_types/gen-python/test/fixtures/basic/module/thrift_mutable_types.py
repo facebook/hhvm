@@ -21,6 +21,15 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
+from test.fixtures.basic.module.thrift_enums import *
+
+from test.fixtures.basic.module.thrift_enums import (
+    MyEnum as _fbthrift_MyEnum,
+    _fbthrift_compatible_with_MyEnum,
+    HackEnum as _fbthrift_HackEnum,
+    _fbthrift_compatible_with_HackEnum,
+)
+
 
 class MyStruct(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -683,12 +692,7 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_mutable_types.MutableUnionMeta
 _fbthrift_ABCMeta.register(_fbthrift_abstract_types.UnionToBeRenamed, UnionToBeRenamed)
 _fbthrift_UnionToBeRenamed = UnionToBeRenamed
 
-from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_MyEnum
-from test.fixtures.basic.module.thrift_enums import MyEnum as _fbthrift_MyEnum
-from test.fixtures.basic.module.thrift_enums import _fbthrift_compatible_with_HackEnum
-from test.fixtures.basic.module.thrift_enums import HackEnum as _fbthrift_HackEnum
 
-from test.fixtures.basic.module.thrift_enums import *
 _fbthrift_all_enums = [
     MyEnum,
     HackEnum,

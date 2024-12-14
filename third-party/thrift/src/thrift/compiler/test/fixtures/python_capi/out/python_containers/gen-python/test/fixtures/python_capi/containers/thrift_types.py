@@ -549,7 +549,6 @@ _fbthrift_IndirectionC = IndirectionC
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.python_capi.containers.thrift_metadata
 
-from test.fixtures.python_capi.containers.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

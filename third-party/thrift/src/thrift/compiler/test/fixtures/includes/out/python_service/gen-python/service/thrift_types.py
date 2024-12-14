@@ -28,7 +28,6 @@ import transitive.thrift_types as _fbthrift__transitive__thrift_types
 # This unfortunately has to be down here to prevent circular imports
 import service.thrift_metadata
 
-from service.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

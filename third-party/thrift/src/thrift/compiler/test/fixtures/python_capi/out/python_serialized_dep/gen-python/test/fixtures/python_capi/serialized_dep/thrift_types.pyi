@@ -16,8 +16,6 @@ import test.fixtures.python_capi.serialized_dep.thrift_abstract_types as _fbthri
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-from test.fixtures.python_capi.serialized_dep.thrift_enums import *
-
 
 class _fbthrift_compatible_with_SerializedStruct:
     pass

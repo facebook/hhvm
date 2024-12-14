@@ -15,14 +15,17 @@ import folly.iobuf as _fbthrift_iobuf
 import module.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
-from module.thrift_enums import _fbthrift_compatible_with_EmptyEnum
-from module.thrift_enums import EmptyEnum as _fbthrift_EmptyEnum
-from module.thrift_enums import _fbthrift_compatible_with_City
-from module.thrift_enums import City as _fbthrift_City
-from module.thrift_enums import _fbthrift_compatible_with_Company
-from module.thrift_enums import Company as _fbthrift_Company
 
 from module.thrift_enums import *
+
+from module.thrift_enums import (
+    EmptyEnum as _fbthrift_EmptyEnum,
+    _fbthrift_compatible_with_EmptyEnum,
+    City as _fbthrift_City,
+    _fbthrift_compatible_with_City,
+    Company as _fbthrift_Company,
+    _fbthrift_compatible_with_Company,
+)
 
 
 class _fbthrift_compatible_with_Internship:

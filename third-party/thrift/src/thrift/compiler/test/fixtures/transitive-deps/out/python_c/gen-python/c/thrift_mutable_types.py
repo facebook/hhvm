@@ -125,7 +125,6 @@ class E(metaclass=_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta)
 _fbthrift_E = E
 
 
-from c.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

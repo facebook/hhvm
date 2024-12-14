@@ -18,6 +18,13 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import include.thrift_types
 import include.thrift_types as _fbthrift__include__thrift_types
 
+from module.thrift_enums import *
+
+from module.thrift_enums import (
+    Result as _fbthrift_Result,
+    _fbthrift_compatible_with_Result,
+)
+
 
 class CustomException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     _fbthrift_SPEC = (
@@ -82,10 +89,7 @@ _fbthrift_CustomException = CustomException
 
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
-from module.thrift_enums import _fbthrift_compatible_with_Result
-from module.thrift_enums import Result as _fbthrift_Result
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
     Result,
 ]

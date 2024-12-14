@@ -90,7 +90,6 @@ _fbthrift_Fields = Fields
 # This unfortunately has to be down here to prevent circular imports
 import foo.thrift_metadata
 
-from foo.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

@@ -68,7 +68,6 @@ _fbthrift_Foo = Foo
 # This unfortunately has to be down here to prevent circular imports
 import test.namespace_from_package.module.thrift_metadata
 
-from test.namespace_from_package.module.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

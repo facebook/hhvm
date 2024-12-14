@@ -110,7 +110,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.MyStruct, MyStruct)
 _fbthrift_MyStruct = MyStruct
 
 
-from a.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

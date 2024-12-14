@@ -14,8 +14,6 @@ import foo.thrift_abstract_types as _fbthrift_python_abstract_types
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-from foo.thrift_enums import *
-
 
 class _fbthrift_compatible_with_Fields:
     pass

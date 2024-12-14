@@ -26,7 +26,6 @@ import c.thrift_mutable_types as _fbthrift__c__thrift_mutable_types
 
 
 
-from b.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

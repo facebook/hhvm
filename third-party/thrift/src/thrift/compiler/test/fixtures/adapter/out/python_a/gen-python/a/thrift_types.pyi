@@ -21,8 +21,6 @@ import typeshed_three
 import typeshed_two
 import typeshed_one
 
-from a.thrift_enums import *
-
 
 class _fbthrift_compatible_with_MyStruct:
     pass

@@ -18,10 +18,14 @@ _fbthrift_property = property
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.abstract_types as _fbthrift_python_abstract_types
 import include.thrift_abstract_types as _fbthrift__include__thrift_abstract_types
-from module.thrift_enums import _fbthrift_compatible_with_Result
-from module.thrift_enums import Result as _fbthrift_Result
 
 from module.thrift_enums import *
+
+from module.thrift_enums import (
+    Result as _fbthrift_Result,
+    _fbthrift_compatible_with_Result,
+)
+
 class CustomException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def name(self) -> str: ...

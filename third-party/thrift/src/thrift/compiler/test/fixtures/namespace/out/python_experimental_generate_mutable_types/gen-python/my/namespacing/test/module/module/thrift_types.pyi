@@ -14,8 +14,6 @@ import python_module_root.my.namespacing.test.module.module.thrift_abstract_type
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
 
-from python_module_root.my.namespacing.test.module.module.thrift_enums import *
-
 
 class _fbthrift_compatible_with_Foo:
     pass

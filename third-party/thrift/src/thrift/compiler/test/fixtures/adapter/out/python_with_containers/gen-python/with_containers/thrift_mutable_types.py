@@ -153,7 +153,6 @@ MyStruct = my.AdaptedType[_fbthrift_unadapted_MyStruct]
 _fbthrift_MyStruct = MyStruct
 
 
-from with_containers.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

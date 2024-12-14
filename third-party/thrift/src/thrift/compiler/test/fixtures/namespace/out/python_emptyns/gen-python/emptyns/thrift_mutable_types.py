@@ -79,7 +79,6 @@ _fbthrift_ABCMeta.register(_fbthrift_abstract_types.Foo, Foo)
 _fbthrift_Foo = Foo
 
 
-from emptyns.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

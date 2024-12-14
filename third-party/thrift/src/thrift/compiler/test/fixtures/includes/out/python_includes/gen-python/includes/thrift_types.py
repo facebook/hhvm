@@ -82,7 +82,6 @@ _fbthrift_Included = Included
 # This unfortunately has to be down here to prevent circular imports
 import includes.thrift_metadata
 
-from includes.thrift_enums import *
 _fbthrift_all_enums = [
 ]
 

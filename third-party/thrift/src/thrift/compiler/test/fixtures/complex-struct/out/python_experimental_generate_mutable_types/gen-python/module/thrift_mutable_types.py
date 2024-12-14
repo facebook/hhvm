@@ -21,6 +21,13 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_typeinfos as _fbthrift_python_mutable_typeinfos
 
 
+from module.thrift_enums import *
+
+from module.thrift_enums import (
+    MyEnum as _fbthrift_MyEnum,
+    _fbthrift_compatible_with_MyEnum,
+)
+
 
 class MyStructFloatFieldThrowExp(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
     _fbthrift_SPEC = (
@@ -1906,10 +1913,7 @@ class complexException(metaclass=_fbthrift_python_mutable_exceptions.MutableGene
             return thrift.util.converter.to_py_struct(py_asyncio_types.complexException, self)
 _fbthrift_complexException = complexException
 
-from module.thrift_enums import _fbthrift_compatible_with_MyEnum
-from module.thrift_enums import MyEnum as _fbthrift_MyEnum
 
-from module.thrift_enums import *
 _fbthrift_all_enums = [
     MyEnum,
 ]

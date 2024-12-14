@@ -30,8 +30,6 @@ import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 import my
 
-from with_containers.thrift_enums import *
-
 
 class _fbthrift_compatible_with__fbthrift_unadapted_AnnotationWithContainers:
     pass

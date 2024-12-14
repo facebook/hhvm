@@ -601,6 +601,8 @@ class py3_mstch_type : public mstch_type {
         this,
         {
             {"type:modulePath", &py3_mstch_type::modulePath},
+            {"type:module_auto_migrate_path",
+             &py3_mstch_type::moduleAutoMigratePath},
             {"type:cbinding_path", &py3_mstch_type::cbinding_path},
             {"type:flat_name", &py3_mstch_type::flatName},
             {"type:cppNamespaces", &py3_mstch_type::cppNamespaces},
@@ -649,6 +651,13 @@ class py3_mstch_type : public mstch_type {
         "_{}",
         fmt::join(
             get_type_py3_namespace(get_type_program(), "cbindings"), "_"));
+  }
+
+  mstch::node moduleAutoMigratePath() {
+    return fmt::format(
+        "_{}",
+        fmt::join(
+            get_type_py3_namespace(get_type_program(), "thrift_types"), "_"));
   }
 
   mstch::node flatName() { return cached_props_.flat_name(); }

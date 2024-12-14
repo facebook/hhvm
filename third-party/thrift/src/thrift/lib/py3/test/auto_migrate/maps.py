@@ -19,15 +19,24 @@ import unittest
 from typing import Dict, List
 
 from testing.types import (
+    Color,
+    ColorGroups,
     F14MapFollyString,
     LocationMap,
+    Map__Color_Color,
+    Map__string_i64,
+    Map__string_List__i32,
     StrI32ListMap,
     StrIntMap,
     StrStrIntListMapMap,
     StrStrMap,
 )
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
-from thrift.py3.types import Container
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
+from thrift.py3.types import Container, Map as Py3Map
+from thrift.python.types import Map as PythonMap
 
 
 class MapTests(unittest.TestCase):
@@ -53,6 +62,22 @@ class MapTests(unittest.TestCase):
             #  typing.Mapping[str, typing.Sequence[int]]]]` for 1st param but got
             #  `Dict[str, Dict[str, None]]`.
             StrStrIntListMapMap({"bar": {"foo": None}})
+
+    def test_isinstance(self) -> None:
+        base_cls = PythonMap if is_auto_migrated() else Py3Map
+        str_int_map = {"foo": 5, "bar": 4}
+        self.assertIsInstance(Map__string_i64(str_int_map), base_cls)
+        self.assertIsInstance(Map__string_i64(str_int_map), Map__string_i64)
+        color_map = {Color.red: Color.blue, Color.green: Color.red}
+        self.assertIsInstance(ColorGroups(color_map=color_map).color_map, base_cls)
+        self.assertIsInstance(
+            ColorGroups(color_map=color_map).color_map, Map__Color_Color
+        )
+        self.assertIsInstance(StrIntMap(str_int_map), base_cls)
+        self.assertIsInstance(StrIntMap(str_int_map), Map__string_i64)
+
+        self.assertNotIsInstance(StrIntMap(str_int_map), Map__Color_Color)
+        self.assertNotIsInstance(StrIntMap(str_int_map), Map__string_List__i32)
 
     def test_getitem(self) -> None:
         x = StrStrMap({"test": "value"})
@@ -97,7 +122,7 @@ class MapTests(unittest.TestCase):
         StrStrIntListMapMap({"foo": {"bar": []}})
 
     def test_mixed_construction(self) -> None:
-        s = StrI32ListMap({"bar": [0, 1]})
+        s = Map__string_List__i32({"bar": [0, 1]})
         x = StrStrIntListMapMap({"foo": s})
         px: Dict[str, Dict[str, List[int]]] = {}
         # pyre-fixme[6]: Expected `Dict[str, List[int]]` for 2nd param but got
@@ -131,7 +156,7 @@ class MapTests(unittest.TestCase):
 
     def test_equality(self) -> None:
         x = StrIntMap({"foo": 5, "bar": 4})
-        y = StrIntMap({"foo": 4, "bar": 5})
+        y = Map__string_i64({"foo": 4, "bar": 5})
         self.assertNotEqual(x, y)
         y = StrIntMap({"foo": 5, "bar": 4})
         self.assertEqual(x, y)

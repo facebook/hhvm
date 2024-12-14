@@ -17,8 +17,6 @@
 
 import unittest
 
-import testing.types
-
 from testing.clients import TestingService
 from testing.services import TestingServiceInterface
 from testing.types import (
@@ -27,8 +25,10 @@ from testing.types import (
     HardError,
     I32List,
     Integers,
+    List__i32,
     Messy,
     Runtime,
+    Set__Color,
     SimpleError,
     StrI32ListMap,
     StrStrIntListMapMap,
@@ -112,18 +112,18 @@ class ReflectionTests(unittest.TestCase):
 
     @brokenInAutoMigrate()
     def test_list_element(self) -> None:
-        x = testing.types.List__i32([1, 2, 3])
+        x = List__i32([1, 2, 3])
         self.assertTrue(inspectable(x))
-        self.assertTrue(inspectable(testing.types.List__i32))
+        self.assertTrue(inspectable(List__i32))
         r = inspect(x)
         self.assertEqual(r.value, int)
         self.assertEqual(r.kind, NumberType.I32)
 
     @brokenInAutoMigrate()
     def test_set_element(self) -> None:
-        x = testing.types.Set__Color({Color.red, Color.blue})
+        x = Set__Color({Color.red, Color.blue})
         self.assertTrue(inspectable(x))
-        self.assertTrue(inspectable(testing.types.Set__Color))
+        self.assertTrue(inspectable(Set__Color))
         r = inspect(x)
         self.assertEqual(r.value, Color)
         self.assertEqual(r.kind, NumberType.NOT_A_NUMBER)

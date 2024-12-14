@@ -2016,6 +2016,9 @@ cdef class List(Container):
     def count(self, item):
         return self._fbthrift_elements.count(item)
 
+    def _fbthrift_same_type(self, other_elem_type):
+        return self._fbthrift_val_info.same_as(other_elem_type)
+
 tag_object_as_sequence(<PyTypeObject*>List)
 Sequence.register(List)
 
@@ -2128,6 +2131,9 @@ cdef class Set(Container):
     def issuperset(self, other):
         return self >= other
 
+    def _fbthrift_same_type(self, other_elem_type):
+        return self._fbthrift_val_info.same_as(other_elem_type)
+
 pySet.register(Set)
 
 
@@ -2207,6 +2213,11 @@ cdef class Map(Container):
         except KeyError:
             return default
 
+    def _fbthrift_same_type(self, other_key_type, other_val_type):
+        return (
+            self._fbthrift_key_info.same_as(other_key_type) and
+            self._fbthrift_val_info.same_as(other_val_type)
+        )
 
 tag_object_as_mapping(<PyTypeObject*>Map)
 Mapping.register(Map)

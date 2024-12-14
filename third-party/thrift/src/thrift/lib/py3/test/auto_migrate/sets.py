@@ -19,17 +19,31 @@ import copy
 import unittest
 from typing import AbstractSet, Sequence, Tuple
 
-from testing.types import SetI32, SetI32Lists, SetSetI32Lists, SetTypes
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+from testing.types import (
+    Color,
+    ColorGroups,
+    Set__Color,
+    Set__i32,
+    Set__string,
+    SetI32,
+    SetI32Lists,
+    SetSetI32Lists,
+    SetTypes,
+)
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
 
 from thrift.lib.python.test.testing_utils import Untruthy
-from thrift.py3.types import Container
+from thrift.py3.types import Container, Set as Py3Set
+from thrift.python.types import Set as PythonSet
 
 
 class SetTests(unittest.TestCase):
     def test_and(self) -> None:
         x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        y = Set__i32({1, 2, 4, 6})
         z = {1, 2, 4, 6}
         self.assertEqual(x & y, set(x) & set(y))
         self.assertEqual(y & x, set(y) & set(x))
@@ -39,7 +53,7 @@ class SetTests(unittest.TestCase):
 
     def test_or(self) -> None:
         x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        y = Set__i32({1, 2, 4, 6})
         z = {1, 3, 4, 5}
         self.assertEqual(x | y, set(x) | set(y))
         self.assertEqual(y | x, set(y) | set(x))
@@ -49,7 +63,7 @@ class SetTests(unittest.TestCase):
 
     def test_xor(self) -> None:
         x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        y = Set__i32({1, 2, 4, 6})
         z = {1, 2, 4, 6}
         self.assertEqual(x ^ y, set(x) ^ set(y))
         self.assertEqual(y ^ x, set(y) ^ set(x))
@@ -59,7 +73,7 @@ class SetTests(unittest.TestCase):
 
     def test_sub(self) -> None:
         x = SetI32({1, 3, 4, 5})
-        y = SetI32({1, 2, 4, 6})
+        y = Set__i32({1, 2, 4, 6})
         z = {1, 2, 4, 6}
         self.assertEqual(x - y, set(x) - set(y))
         self.assertEqual(y - x, set(y) - set(x))
@@ -67,9 +81,22 @@ class SetTests(unittest.TestCase):
         self.assertEqual(x - z, set(x) - set(y))
         self.assertEqual(x.difference(y), set(x) - set(y))
 
+    def test_isinstance(self) -> None:
+        base_cls = PythonSet if is_auto_migrated() else Py3Set
+        self.assertIsInstance(Set__i32({1, 2, 4}), base_cls)
+        self.assertIsInstance(Set__i32({1, 2, 4}), Set__i32)
+        color_set = {Color.red, Color.blue}
+        self.assertIsInstance(ColorGroups(color_set=color_set).color_set, base_cls)
+        self.assertIsInstance(ColorGroups(color_set=color_set).color_set, Set__Color)
+        self.assertIsInstance(SetI32({1, 2, 4}), base_cls)
+        self.assertIsInstance(SetI32({1, 2, 4}), Set__i32)
+
+        self.assertNotIsInstance(Set__i32({1, 2, 4}), Set__Color)
+        self.assertNotIsInstance(Set__string({f"str_{i}" for i in range(5)}), Set__i32)
+
     def test_comparisons(self) -> None:
         x = SetI32({1, 2, 3, 4})
-        y = SetI32({1, 2, 3})
+        y = Set__i32({1, 2, 3})
         x2 = copy.copy(x)
         y2 = {1, 2, 3}
 

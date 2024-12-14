@@ -24,14 +24,21 @@ from testing.types import (
     easy,
     I32List,
     int_list,
+    List__i16,
+    List__i32,
+    List__string,
     ListTypes,
     StringList,
     StrList2D,
     Uint32List,
 )
-from thrift.lib.py3.test.auto_migrate.auto_migrate_util import brokenInAutoMigrate
+from thrift.lib.py3.test.auto_migrate.auto_migrate_util import (
+    brokenInAutoMigrate,
+    is_auto_migrated,
+)
 from thrift.lib.python.test.testing_utils import Untruthy
-from thrift.py3.types import Container
+from thrift.py3.types import Container, List as Py3List
+from thrift.python.types import List as PythonList
 
 
 class ListTests(unittest.TestCase):
@@ -48,6 +55,25 @@ class ListTests(unittest.TestCase):
             # pyre-fixme[6]: Expected `Optional[typing.Sequence[int]]` for 1st param
             #  but got `List[None]`.
             I32List([None, None, None])
+
+        with self.assertRaises(TypeError):
+            # pyre-fixme[6]: Expected `Optional[typing.Sequence[int]]` for 1st param
+            #  but got `List[None]`.
+            List__i32([None, None, None])
+
+    def test_isinstance(self) -> None:
+        base_cls = PythonList if is_auto_migrated() else Py3List
+        self.assertIsInstance(List__i32(range(5)), base_cls)
+        self.assertIsInstance(List__i32(range(5)), List__i32)
+        self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, base_cls)
+        self.assertIsInstance(easy(val_list=[1, 2, 3]).val_list, List__i32)
+        self.assertIsInstance(I32List(range(5)), base_cls)
+        self.assertIsInstance(I32List(range(5)), List__i32)
+
+        self.assertNotIsInstance(List__i16(range(5)), List__i32)
+        self.assertNotIsInstance(
+            List__string([f"str_{i}" for i in range(5)]), List__i32
+        )
 
     def test_list_creation_with_list_items(self) -> None:
         a = ["one", "two", "three"]
@@ -128,7 +154,7 @@ class ListTests(unittest.TestCase):
 
     def test_comparisons(self) -> None:
         x = I32List([1, 2, 3, 4])
-        y = I32List([1, 2, 3, 4, 5])
+        y = List__i32([1, 2, 3, 4, 5])
         z = I32List([1, 2, 3, 1, 10])
 
         # pyre-fixme[6]: For 2nd param expected `SupportsDunderGT[Variable[_T]]` but

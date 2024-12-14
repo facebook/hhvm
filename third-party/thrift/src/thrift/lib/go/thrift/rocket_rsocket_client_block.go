@@ -28,25 +28,23 @@ import (
 func rsocketBlock(ctx context.Context, client rsocket.Client, request payload.Payload) (payload.Payload, error) {
 	mono := client.RequestResponse(request)
 	// This implementation of subscriber avoids race conditions on close that is present in the default implementation in the rsocket library.
-	s := newSubscriber(ctx)
-	mono.SubscribeWith(ctx, s)
-	return s.Block()
+	sub := newSubscriber()
+	mono.SubscribeWith(ctx, sub)
+	return sub.Block(ctx)
 }
 
 type subsriber struct {
 	errChan            chan error
 	valChan            chan payload.Payload
 	completeChan       chan struct{}
-	ctx                context.Context
 	cancelSubscription func()
 }
 
-func newSubscriber(ctx context.Context) *subsriber {
+func newSubscriber() *subsriber {
 	return &subsriber{
 		errChan:      make(chan error, 1),
 		valChan:      make(chan payload.Payload, 1),
 		completeChan: make(chan struct{}, 1),
-		ctx:          ctx,
 	}
 }
 
@@ -76,7 +74,7 @@ func (s *subsriber) OnSubscribe(ctx context.Context, subscription rx.Subscriptio
 	}
 }
 
-func (s *subsriber) Block() (payload.Payload, error) {
+func (s *subsriber) Block(ctx context.Context) (payload.Payload, error) {
 	var val payload.Payload
 	for {
 		select {
@@ -85,8 +83,8 @@ func (s *subsriber) Block() (payload.Payload, error) {
 		case val = <-s.valChan:
 		case <-s.completeChan:
 			return val, nil
-		case <-s.ctx.Done():
-			return val, s.ctx.Err()
+		case <-ctx.Done():
+			return val, ctx.Err()
 		}
 	}
 }

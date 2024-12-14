@@ -17,7 +17,7 @@ bufsize = "1.0.8"
 bytes = { version = "1.6.0", features = ["serde"] }
 futures = { version = "0.3.30", features = ["async-await", "compat"] }
 ghost = "0.1.17"
-num-derive = "0.3.3"
+num-derive = "0.4.2"
 num-traits = { version = "0.2.18", default-features = false }
 ordered-float = { version = "3.7", features = ["serde"] }
 panic-message = "0.3"

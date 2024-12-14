@@ -14,8 +14,8 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}{{#struct:fields?}}{{#struct:fields}}{{#field:type}}{{#type:resolves_to_container_or_struct?}}
-{{#field:has_deprecated_accessors?}}
+}}{{#struct:fields?}}{{#struct:fields}}{{#field:type}}{{#field:has_deprecated_accessors?}}
+{{#type:resolves_to_container_or_struct?}}
 {{#field:optional?}}
 const {{type:cpp_type}}* {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const& {
   return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
@@ -36,5 +36,5 @@ const {{type:cpp_type}}& {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}(
 }
 
 {{/field:optional?}}
-{{/field:has_deprecated_accessors?}}
-{{/type:resolves_to_container_or_struct?}}{{/field:type}}{{/struct:fields}}{{/struct:fields?}}
+{{/type:resolves_to_container_or_struct?}}
+{{/field:has_deprecated_accessors?}}{{/field:type}}{{/struct:fields}}{{/struct:fields?}}

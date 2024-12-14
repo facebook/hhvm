@@ -19,6 +19,7 @@ package thrift
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	rsocket "github.com/rsocket/rsocket-go"
 	"github.com/rsocket/rsocket-go/payload"
@@ -34,22 +35,25 @@ func rsocketBlock(ctx context.Context, client rsocket.Client, request payload.Pa
 }
 
 type subsriber struct {
+	// Error and Complete are two possible terminal states.
 	errChan            chan error
-	valChan            chan payload.Payload
 	completeChan       chan struct{}
+	payload            payload.Payload
+	payloadMutex       sync.Mutex
 	cancelSubscription func()
 }
 
 func newSubscriber() *subsriber {
 	return &subsriber{
 		errChan:      make(chan error, 1),
-		valChan:      make(chan payload.Payload, 1),
 		completeChan: make(chan struct{}, 1),
 	}
 }
 
 func (s *subsriber) OnNext(msg payload.Payload) {
-	s.valChan <- payload.Clone(msg)
+	s.payloadMutex.Lock()
+	defer s.payloadMutex.Unlock()
+	s.payload = payload.Clone(msg)
 }
 
 // OnError represents failed terminal state.
@@ -75,16 +79,16 @@ func (s *subsriber) OnSubscribe(ctx context.Context, subscription rx.Subscriptio
 }
 
 func (s *subsriber) Block(ctx context.Context) (payload.Payload, error) {
-	var val payload.Payload
 	for {
 		select {
 		case err := <-s.errChan:
-			return val, err
-		case val = <-s.valChan:
+			return nil, err
 		case <-s.completeChan:
-			return val, nil
+			s.payloadMutex.Lock()
+			defer s.payloadMutex.Unlock()
+			return s.payload, nil
 		case <-ctx.Done():
-			return val, ctx.Err()
+			return nil, ctx.Err()
 		}
 	}
 }

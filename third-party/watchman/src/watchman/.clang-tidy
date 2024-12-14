@@ -7,8 +7,6 @@
 InheritParentConfig: true
 Checks: '
 facebook-hte-PortabilityInclude-gflags/gflags.h,
-facebook-hte-PortabilityInclude-gmock/gmock.h,
-facebook-hte-PortabilityInclude-gtest/gtest.h,
 -facebook-hte-RelativeInclude,
 '
 ...

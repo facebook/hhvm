@@ -44,6 +44,7 @@ void KernelVersion::parse(const char* s) {
   if (isNumber(m_build_str)) {
     m_build = atoi(m_build_str.c_str());
   }
+  m_debug_str = std::string(s);
 }
 
 KernelVersion::KernelVersion() {

@@ -236,8 +236,8 @@ class FunctionParam;
  *     }
  *
  *     f.type().visit(
- *       [](const List& s) {}
- *       [](const StructNode& u) {}
+ *       [](const List& l) {}
+ *       [](const StructNode& s) {}
  *       [](auto&&) {}
  *     );
  */
@@ -891,10 +891,7 @@ class FunctionResponse final : folly::MoveOnly {
    * This is mutually exclusive with streams.
    */
   const FunctionSink* FOLLY_NULLABLE sink() const {
-    return folly::variant_match(
-        sinkOrStream_,
-        [](const FunctionSink& s) -> const FunctionSink* { return &s; },
-        [](auto&&) -> const FunctionSink* { return nullptr; });
+    return std::get_if<FunctionSink>(&sinkOrStream_);
   }
   /**
    * Returns the sink opened by the RPC, or nullptr if there is no sink.
@@ -902,10 +899,7 @@ class FunctionResponse final : folly::MoveOnly {
    * This is mutually exclusive with sinks.
    */
   const FunctionStream* FOLLY_NULLABLE stream() const {
-    return folly::variant_match(
-        sinkOrStream_,
-        [](const FunctionStream& s) -> const FunctionStream* { return &s; },
-        [](auto&&) -> const FunctionStream* { return nullptr; });
+    return std::get_if<FunctionStream>(&sinkOrStream_);
   }
 
  private:

@@ -356,6 +356,39 @@ class TaggedPatchRef<type::union_t<T>> : public TaggedStructurePatchRef<T> {
   using TaggedStructurePatchRef<T>::operator=;
 };
 
+template <class T>
+class TaggedPatchRef<type::enum_t<T>> {
+ public:
+  using value_type = T;
+  // Dynamically, Enum is always stored in a op::I32Patch.
+  using underlying_dynamic_patch = op::I32Patch;
+
+  explicit TaggedPatchRef(op::I32Patch& patch) : patch_(patch) {}
+
+  void assign(const value_type& v) {
+    patch_.get().assign(folly::to_underlying(v));
+  }
+
+  void operator=(const value_type& v) { assign(v); }
+
+  void clear() { patch_.get().clear(); }
+
+  void apply(value_type& v) {
+    std::int32_t value = folly::to_underlying(v);
+    patch_.get().apply(value);
+    v = static_cast<value_type>(value);
+  }
+
+  void merge(const TaggedPatchRef& other) {
+    patch_.get().merge(other.patch_.get());
+  }
+
+  auto toObject() const { return patch_.get().toObject(); }
+
+ private:
+  std::reference_wrapper<op::I32Patch> patch_;
+};
+
 template <class T, class Tag>
 class TaggedPatchRef<type::cpp_type<T, Tag>> : public TaggedPatchRef<Tag> {
  public:

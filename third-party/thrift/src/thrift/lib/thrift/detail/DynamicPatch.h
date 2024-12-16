@@ -618,6 +618,10 @@ class DynamicPatch {
   auto& getStoredPatchByTag(type::cpp_type<T, Tag>, detail::Badge badge) {
     return getStoredPatchByTag(Tag{}, badge);
   }
+  template <class T>
+  auto& getStoredPatchByTag(type::enum_t<T>, detail::Badge badge) {
+    return getStoredPatch<op::I32Patch>(badge);
+  }
   template <class Tag>
   auto& getStoredPatchByTag(Tag, detail::Badge badge) {
     static_assert(type::is_a_v<Tag, type::primitive_c>);

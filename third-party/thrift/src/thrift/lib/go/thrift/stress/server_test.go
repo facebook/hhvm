@@ -23,6 +23,7 @@ import (
 	"net"
 	"os"
 	"runtime"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -84,12 +85,15 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 		return server.ServeContext(serverCtx)
 	})
 
+	var successRequestCount atomic.Uint64
+
 	makeRequestFunc := func() error {
 		conn, err := thrift.NewClient(
 			clientTransportOption,
 			thrift.WithDialer(func() (net.Conn, error) {
 				return net.Dial("tcp", addr.String())
 			}),
+			thrift.WithIoTimeout(5*time.Second),
 		)
 		if err != nil {
 			return fmt.Errorf("failed to create client: %v", err)
@@ -103,6 +107,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 		if result != "hello" {
 			return fmt.Errorf("unexpected RPC result: %s", result)
 		}
+		successRequestCount.Add(1)
 		return nil
 	}
 
@@ -125,6 +130,7 @@ func runStressTest(t *testing.T, serverTransport thrift.TransportID) {
 	timeElapsed := time.Since(startTime)
 	timePerRequest := timeElapsed / requestCount
 	if err != nil {
+		t.Logf("successful requests: %d/%d", successRequestCount.Load(), requestCount)
 		t.Fatalf("failed to make request: %v", err)
 	}
 

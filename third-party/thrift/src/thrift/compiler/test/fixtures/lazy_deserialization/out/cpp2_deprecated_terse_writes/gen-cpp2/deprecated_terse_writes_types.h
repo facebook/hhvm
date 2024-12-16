@@ -1144,8 +1144,7 @@ class TerseOptionalFoo final  {
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
-  /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
+
   ::std::vector<double>* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -1161,8 +1160,7 @@ class TerseOptionalFoo final  {
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
-  /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
@@ -1178,8 +1176,7 @@ class TerseOptionalFoo final  {
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double>* get_field3() &;
-  /** Glean { "field": "field3" } */
-  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
+
   ::std::vector<double>* get_field3() && = delete;
 
   /** Glean { "field": "field3" } */
@@ -1195,8 +1192,7 @@ class TerseOptionalFoo final  {
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t>* get_field4() &;
-  /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
+
   ::std::vector<::std::int32_t>* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
@@ -1522,8 +1518,7 @@ class TerseOptionalLazyFoo final  {
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
-  /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
+
   ::std::vector<double>* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -1539,8 +1534,7 @@ class TerseOptionalLazyFoo final  {
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
-  /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */

@@ -224,6 +224,15 @@ const ::module2::Struct& BigStruct::get_s() const& {
 }
 
 
+  ::std::int32_t BigStruct::get_id() const {
+    return __fbthrift_field_id;
+  }
+
+  ::std::int32_t& BigStruct::set_id(::std::int32_t id_) {
+    id_ref() = id_;
+    return __fbthrift_field_id;
+  }
+
 void swap([[maybe_unused]] BigStruct& a, [[maybe_unused]] BigStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_s, b.__fbthrift_field_s);

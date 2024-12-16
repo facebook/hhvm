@@ -214,15 +214,11 @@ class Mixin1 final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::string& get_field1() const& {
-    return __fbthrift_field_field1;
-  }
+  const ::std::string& get_field1() const&;
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::string get_field1() && {
-    return std::move(__fbthrift_field_field1);
-  }
+  ::std::string get_field1() &&;
 
   /** Glean { "field": "field1" } */
   template <typename T_Mixin1_field1_struct_setter = ::std::string>
@@ -463,17 +459,12 @@ class Mixin2 final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  const ::std::string* get_field2() const& {
-    return field2_ref() ? std::addressof(__fbthrift_field_field2) : nullptr;
-  }
+  const ::std::string* get_field2() const&;
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::std::string* get_field2() & {
-    return field2_ref() ? std::addressof(__fbthrift_field_field2) : nullptr;
-  }
-  /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+  ::std::string* get_field2() &;
+
   ::std::string* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
@@ -641,15 +632,11 @@ class Mixin3Base final  {
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  const ::std::string& get_field3() const& {
-    return __fbthrift_field_field3;
-  }
+  const ::std::string& get_field3() const&;
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::std::string get_field3() && {
-    return std::move(__fbthrift_field_field3);
-  }
+  ::std::string get_field3() &&;
 
   /** Glean { "field": "field3" } */
   template <typename T_Mixin3Base_field3_struct_setter = ::std::string>
@@ -952,15 +939,11 @@ class Foo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  const ::std::string& get_field4() const& {
-    return __fbthrift_field_field4;
-  }
+  const ::std::string& get_field4() const&;
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  ::std::string get_field4() && {
-    return std::move(__fbthrift_field_field4);
-  }
+  ::std::string get_field4() &&;
 
   /** Glean { "field": "field4" } */
   template <typename T_Foo_field4_struct_setter = ::std::string>

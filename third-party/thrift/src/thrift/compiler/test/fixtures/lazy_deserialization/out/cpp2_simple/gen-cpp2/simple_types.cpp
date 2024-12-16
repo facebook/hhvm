@@ -1543,6 +1543,15 @@ bool IndexedFoo::operator<([[maybe_unused]] const IndexedFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  double IndexedFoo::get_serialized_data_size() const {
+    return __fbthrift_field_serialized_data_size;
+  }
+
+  double& IndexedFoo::set_serialized_data_size(double serialized_data_size_) {
+    serialized_data_size_ref() = serialized_data_size_;
+    return __fbthrift_field_serialized_data_size;
+  }
 const ::std::vector<double>& IndexedFoo::get_field1() const& {
   return __fbthrift_field_field1;
 }
@@ -1711,6 +1720,15 @@ bool OptionalIndexedFoo::operator<([[maybe_unused]] const OptionalIndexedFoo& rh
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  double OptionalIndexedFoo::get_serialized_data_size() const {
+    return __fbthrift_field_serialized_data_size;
+  }
+
+  double& OptionalIndexedFoo::set_serialized_data_size(double serialized_data_size_) {
+    serialized_data_size_ref() = serialized_data_size_;
+    return __fbthrift_field_serialized_data_size;
+  }
 const ::std::vector<double>* OptionalIndexedFoo::get_field1() const& {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }

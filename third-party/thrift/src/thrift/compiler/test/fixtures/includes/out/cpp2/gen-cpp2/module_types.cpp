@@ -112,6 +112,15 @@ const ::cpp2::Included& MyStruct::get_MyOtherIncludedField() const& {
 }
 
 
+  ::cpp2::IncludedInt64 MyStruct::get_MyIncludedInt() const {
+    return __fbthrift_field_MyIncludedInt;
+  }
+
+  ::cpp2::IncludedInt64& MyStruct::set_MyIncludedInt(::cpp2::IncludedInt64 MyIncludedInt_) {
+    MyIncludedInt_ref() = MyIncludedInt_;
+    return __fbthrift_field_MyIncludedInt;
+  }
+
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_MyIncludedField, b.__fbthrift_field_MyIncludedField);

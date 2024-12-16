@@ -1263,8 +1263,7 @@ class OptionalFoo final  {
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
-  /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
+
   ::std::vector<double>* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -1280,8 +1279,7 @@ class OptionalFoo final  {
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
-  /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
@@ -1297,8 +1295,7 @@ class OptionalFoo final  {
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double>* get_field3() &;
-  /** Glean { "field": "field3" } */
-  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
+
   ::std::vector<double>* get_field3() && = delete;
 
   /** Glean { "field": "field3" } */
@@ -1314,8 +1311,7 @@ class OptionalFoo final  {
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t>* get_field4() &;
-  /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
+
   ::std::vector<::std::int32_t>* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
@@ -1641,8 +1637,7 @@ class OptionalLazyFoo final  {
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
-  /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
+
   ::std::vector<double>* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -1658,8 +1653,7 @@ class OptionalLazyFoo final  {
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
-  /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
@@ -2780,16 +2774,11 @@ class IndexedFoo final  {
 
   /** Glean { "field": "serialized_data_size" } */
   [[deprecated("Use `FOO.serialized_data_size().value();` instead of `FOO.get_serialized_data_size();`")]]
-  double get_serialized_data_size() const {
-    return __fbthrift_field_serialized_data_size;
-  }
+  double get_serialized_data_size() const;
 
   /** Glean { "field": "serialized_data_size" } */
   [[deprecated("Use `FOO.serialized_data_size() = BAR;` instead of `FOO.set_serialized_data_size(BAR);`")]]
-  double& set_serialized_data_size(double serialized_data_size_) {
-    serialized_data_size_ref() = serialized_data_size_;
-    return __fbthrift_field_serialized_data_size;
-  }
+  double& set_serialized_data_size(double serialized_data_size_);
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>& get_field1() const&;
@@ -3278,24 +3267,18 @@ class OptionalIndexedFoo final  {
 
   /** Glean { "field": "serialized_data_size" } */
   [[deprecated("Use `FOO.serialized_data_size().value();` instead of `FOO.get_serialized_data_size();`")]]
-  double get_serialized_data_size() const {
-    return __fbthrift_field_serialized_data_size;
-  }
+  double get_serialized_data_size() const;
 
   /** Glean { "field": "serialized_data_size" } */
   [[deprecated("Use `FOO.serialized_data_size() = BAR;` instead of `FOO.set_serialized_data_size(BAR);`")]]
-  double& set_serialized_data_size(double serialized_data_size_) {
-    serialized_data_size_ref() = serialized_data_size_;
-    return __fbthrift_field_serialized_data_size;
-  }
+  double& set_serialized_data_size(double serialized_data_size_);
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>* get_field1() const&;
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
-  /** Glean { "field": "field1" } */
-  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
+
   ::std::vector<double>* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -3311,8 +3294,7 @@ class OptionalIndexedFoo final  {
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
-  /** Glean { "field": "field2" } */
-  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
+
   ::std::vector<::std::int32_t>* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
@@ -3328,8 +3310,7 @@ class OptionalIndexedFoo final  {
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double>* get_field3() &;
-  /** Glean { "field": "field3" } */
-  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
+
   ::std::vector<double>* get_field3() && = delete;
 
   /** Glean { "field": "field3" } */
@@ -3345,8 +3326,7 @@ class OptionalIndexedFoo final  {
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t>* get_field4() &;
-  /** Glean { "field": "field4" } */
-  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
+
   ::std::vector<::std::int32_t>* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */

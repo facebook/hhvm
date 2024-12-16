@@ -128,6 +128,14 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
 }
 
 
+  const ::std::string& MyStruct::get_myString() const& {
+    return __fbthrift_field_myString;
+  }
+
+  ::std::string MyStruct::get_myString() && {
+    return std::move(__fbthrift_field_myString);
+  }
+
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_myString, b.__fbthrift_field_myString);
@@ -358,6 +366,14 @@ bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  const ::std::string& MyException::get_myString() const& {
+    return __fbthrift_field_myString;
+  }
+
+  ::std::string MyException::get_myString() && {
+    return std::move(__fbthrift_field_myString);
+  }
 
 void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   using ::std::swap;

@@ -92,6 +92,14 @@ bool Mixin1::operator<([[maybe_unused]] const Mixin1& rhs) const {
 }
 
 
+  const ::std::string& Mixin1::get_field1() const& {
+    return __fbthrift_field_field1;
+  }
+
+  ::std::string Mixin1::get_field1() && {
+    return std::move(__fbthrift_field_field1);
+  }
+
 void swap([[maybe_unused]] Mixin1& a, [[maybe_unused]] Mixin1& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
@@ -202,6 +210,14 @@ const ::cpp2::Mixin1& Mixin2::get_m1() const& {
 }
 
 
+  const ::std::string* Mixin2::get_field2() const& {
+    return field2_ref() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
+
+  ::std::string* Mixin2::get_field2() & {
+    return field2_ref() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
+
 void swap([[maybe_unused]] Mixin2& a, [[maybe_unused]] Mixin2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_m1, b.__fbthrift_field_m1);
@@ -305,6 +321,14 @@ bool Mixin3Base::operator<([[maybe_unused]] const Mixin3Base& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  const ::std::string& Mixin3Base::get_field3() const& {
+    return __fbthrift_field_field3;
+  }
+
+  ::std::string Mixin3Base::get_field3() && {
+    return std::move(__fbthrift_field_field3);
+  }
 
 void swap([[maybe_unused]] Mixin3Base& a, [[maybe_unused]] Mixin3Base& b) {
   using ::std::swap;
@@ -412,6 +436,14 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  const ::std::string& Foo::get_field4() const& {
+    return __fbthrift_field_field4;
+  }
+
+  ::std::string Foo::get_field4() && {
+    return std::move(__fbthrift_field_field4);
+  }
 const ::cpp2::Mixin2& Foo::get_m2() const& {
   return __fbthrift_field_m2;
 }

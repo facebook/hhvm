@@ -75,6 +75,15 @@ bool Included::operator<([[maybe_unused]] const Included& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  ::std::int64_t Included::get_MyIntField() const {
+    return __fbthrift_field_MyIntField;
+  }
+
+  ::std::int64_t& Included::set_MyIntField(::std::int64_t MyIntField_) {
+    MyIntField_ref() = MyIntField_;
+    return __fbthrift_field_MyIntField;
+  }
 const ::cpp2::Foo& Included::get_MyTransitiveField() const& {
   return __fbthrift_field_MyTransitiveField;
 }

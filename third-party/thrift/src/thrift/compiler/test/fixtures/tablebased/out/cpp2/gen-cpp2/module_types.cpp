@@ -187,6 +187,52 @@ bool TrivialTypesStruct::operator<([[maybe_unused]] const TrivialTypesStruct& rh
 }
 
 
+  const ::std::int32_t* TrivialTypesStruct::get_fieldA() const& {
+    return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
+  }
+
+  ::std::int32_t* TrivialTypesStruct::get_fieldA() & {
+    return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
+  }
+
+  ::std::int32_t& TrivialTypesStruct::set_fieldA(::std::int32_t fieldA_) {
+    fieldA_ref() = fieldA_;
+    return __fbthrift_field_fieldA;
+  }
+
+  const ::std::string* TrivialTypesStruct::get_fieldB() const& {
+    return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
+  }
+
+  ::std::string* TrivialTypesStruct::get_fieldB() & {
+    return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
+  }
+
+  const ::std::string* TrivialTypesStruct::get_fieldC() const& {
+    return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
+  }
+
+  ::std::string* TrivialTypesStruct::get_fieldC() & {
+    return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
+  }
+
+  const ::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() const& {
+    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
+  }
+
+  ::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() & {
+    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
+  }
+
+  ::test::fixtures::tablebased::ExampleEnum TrivialTypesStruct::get_fieldE() const {
+    return __fbthrift_field_fieldE;
+  }
+
+  ::test::fixtures::tablebased::ExampleEnum& TrivialTypesStruct::set_fieldE(::test::fixtures::tablebased::ExampleEnum fieldE_) {
+    fieldE_ref() = fieldE_;
+    return __fbthrift_field_fieldE;
+  }
+
 void swap([[maybe_unused]] TrivialTypesStruct& a, [[maybe_unused]] TrivialTypesStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);

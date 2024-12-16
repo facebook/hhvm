@@ -127,6 +127,41 @@ bool MyStructFloatFieldThrowExp::operator<([[maybe_unused]] const MyStructFloatF
 }
 
 
+  ::std::int64_t MyStructFloatFieldThrowExp::get_myLongField() const {
+    return __fbthrift_field_myLongField;
+  }
+
+  ::std::int64_t& MyStructFloatFieldThrowExp::set_myLongField(::std::int64_t myLongField_) {
+    myLongField_ref() = myLongField_;
+    return __fbthrift_field_myLongField;
+  }
+
+  ::std::int8_t MyStructFloatFieldThrowExp::get_MyByteField() const {
+    return __fbthrift_field_MyByteField;
+  }
+
+  ::std::int8_t& MyStructFloatFieldThrowExp::set_MyByteField(::std::int8_t MyByteField_) {
+    MyByteField_ref() = MyByteField_;
+    return __fbthrift_field_MyByteField;
+  }
+
+  const ::std::string& MyStructFloatFieldThrowExp::get_myStringField() const& {
+    return __fbthrift_field_myStringField;
+  }
+
+  ::std::string MyStructFloatFieldThrowExp::get_myStringField() && {
+    return std::move(__fbthrift_field_myStringField);
+  }
+
+  float MyStructFloatFieldThrowExp::get_myFloatField() const {
+    return __fbthrift_field_myFloatField;
+  }
+
+  float& MyStructFloatFieldThrowExp::set_myFloatField(float myFloatField_) {
+    myFloatField_ref() = myFloatField_;
+    return __fbthrift_field_myFloatField;
+  }
+
 void swap([[maybe_unused]] MyStructFloatFieldThrowExp& a, [[maybe_unused]] MyStructFloatFieldThrowExp& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_myLongField, b.__fbthrift_field_myLongField);
@@ -232,6 +267,15 @@ bool MyStructMapFloatThrowExp::operator<([[maybe_unused]] const MyStructMapFloat
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  ::std::int64_t MyStructMapFloatThrowExp::get_myLongField() const {
+    return __fbthrift_field_myLongField;
+  }
+
+  ::std::int64_t& MyStructMapFloatThrowExp::set_myLongField(::std::int64_t myLongField_) {
+    myLongField_ref() = myLongField_;
+    return __fbthrift_field_myLongField;
+  }
 const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& MyStructMapFloatThrowExp::get_mapListOfFloats() const& {
   return __fbthrift_field_mapListOfFloats;
 }
@@ -479,6 +523,23 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  ::std::int64_t MyStruct::get_MyIntField() const {
+    return __fbthrift_field_MyIntField;
+  }
+
+  ::std::int64_t& MyStruct::set_MyIntField(::std::int64_t MyIntField_) {
+    MyIntField_ref() = MyIntField_;
+    return __fbthrift_field_MyIntField;
+  }
+
+  const ::std::string& MyStruct::get_MyStringField() const& {
+    return __fbthrift_field_MyStringField;
+  }
+
+  ::std::string MyStruct::get_MyStringField() && {
+    return std::move(__fbthrift_field_MyStringField);
+  }
 const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }
@@ -487,6 +548,60 @@ const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
   return std::move(__fbthrift_field_MyDataField);
 }
 
+
+  ::cpp2::MyEnum MyStruct::get_myEnum() const {
+    return __fbthrift_field_myEnum;
+  }
+
+  ::cpp2::MyEnum& MyStruct::set_myEnum(::cpp2::MyEnum myEnum_) {
+    myEnum_ref() = myEnum_;
+    return __fbthrift_field_myEnum;
+  }
+
+  bool MyStruct::get_MyBoolField() const {
+    return __fbthrift_field_MyBoolField;
+  }
+
+  bool& MyStruct::set_MyBoolField(bool MyBoolField_) {
+    MyBoolField_ref() = MyBoolField_;
+    return __fbthrift_field_MyBoolField;
+  }
+
+  ::std::int8_t MyStruct::get_MyByteField() const {
+    return __fbthrift_field_MyByteField;
+  }
+
+  ::std::int8_t& MyStruct::set_MyByteField(::std::int8_t MyByteField_) {
+    MyByteField_ref() = MyByteField_;
+    return __fbthrift_field_MyByteField;
+  }
+
+  ::std::int16_t MyStruct::get_MyShortField() const {
+    return __fbthrift_field_MyShortField;
+  }
+
+  ::std::int16_t& MyStruct::set_MyShortField(::std::int16_t MyShortField_) {
+    MyShortField_ref() = MyShortField_;
+    return __fbthrift_field_MyShortField;
+  }
+
+  ::std::int64_t MyStruct::get_MyLongField() const {
+    return __fbthrift_field_MyLongField;
+  }
+
+  ::std::int64_t& MyStruct::set_MyLongField(::std::int64_t MyLongField_) {
+    MyLongField_ref() = MyLongField_;
+    return __fbthrift_field_MyLongField;
+  }
+
+  double MyStruct::get_MyDoubleField() const {
+    return __fbthrift_field_MyDoubleField;
+  }
+
+  double& MyStruct::set_MyDoubleField(double MyDoubleField_) {
+    MyDoubleField_ref() = MyDoubleField_;
+    return __fbthrift_field_MyDoubleField;
+  }
 const ::std::vector<double>& MyStruct::get_lDouble() const& {
   return __fbthrift_field_lDouble;
 }
@@ -789,6 +904,23 @@ bool SimpleStruct::operator<([[maybe_unused]] const SimpleStruct& rhs) const {
 }
 
 
+  ::std::int64_t SimpleStruct::get_age() const {
+    return __fbthrift_field_age;
+  }
+
+  ::std::int64_t& SimpleStruct::set_age(::std::int64_t age_) {
+    age_ref() = age_;
+    return __fbthrift_field_age;
+  }
+
+  const ::std::string& SimpleStruct::get_name() const& {
+    return __fbthrift_field_name;
+  }
+
+  ::std::string SimpleStruct::get_name() && {
+    return std::move(__fbthrift_field_name);
+  }
+
 void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_age, b.__fbthrift_field_age);
@@ -1030,6 +1162,103 @@ bool defaultStruct::operator<([[maybe_unused]] const defaultStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  ::std::int64_t defaultStruct::get_myLongDFset() const {
+    return __fbthrift_field_myLongDFset;
+  }
+
+  ::std::int64_t& defaultStruct::set_myLongDFset(::std::int64_t myLongDFset_) {
+    myLongDFset_ref() = myLongDFset_;
+    return __fbthrift_field_myLongDFset;
+  }
+
+  ::std::int64_t defaultStruct::get_myLongDF() const {
+    return __fbthrift_field_myLongDF;
+  }
+
+  ::std::int64_t& defaultStruct::set_myLongDF(::std::int64_t myLongDF_) {
+    myLongDF_ref() = myLongDF_;
+    return __fbthrift_field_myLongDF;
+  }
+
+  ::std::int32_t defaultStruct::get_portDFset() const {
+    return __fbthrift_field_portDFset;
+  }
+
+  ::std::int32_t& defaultStruct::set_portDFset(::std::int32_t portDFset_) {
+    portDFset_ref() = portDFset_;
+    return __fbthrift_field_portDFset;
+  }
+
+  ::std::int32_t defaultStruct::get_portNum() const {
+    return __fbthrift_field_portNum;
+  }
+
+  ::std::int32_t& defaultStruct::set_portNum(::std::int32_t portNum_) {
+    portNum_ref() = portNum_;
+    return __fbthrift_field_portNum;
+  }
+
+  const ::std::string& defaultStruct::get_myBinaryDFset() const& {
+    return __fbthrift_field_myBinaryDFset;
+  }
+
+  ::std::string defaultStruct::get_myBinaryDFset() && {
+    return std::move(__fbthrift_field_myBinaryDFset);
+  }
+
+  const ::std::string& defaultStruct::get_myBinary() const& {
+    return __fbthrift_field_myBinary;
+  }
+
+  ::std::string defaultStruct::get_myBinary() && {
+    return std::move(__fbthrift_field_myBinary);
+  }
+
+  ::std::int8_t defaultStruct::get_myByteDFSet() const {
+    return __fbthrift_field_myByteDFSet;
+  }
+
+  ::std::int8_t& defaultStruct::set_myByteDFSet(::std::int8_t myByteDFSet_) {
+    myByteDFSet_ref() = myByteDFSet_;
+    return __fbthrift_field_myByteDFSet;
+  }
+
+  ::std::int8_t defaultStruct::get_myByte() const {
+    return __fbthrift_field_myByte;
+  }
+
+  ::std::int8_t& defaultStruct::set_myByte(::std::int8_t myByte_) {
+    myByte_ref() = myByte_;
+    return __fbthrift_field_myByte;
+  }
+
+  double defaultStruct::get_myDoubleDFset() const {
+    return __fbthrift_field_myDoubleDFset;
+  }
+
+  double& defaultStruct::set_myDoubleDFset(double myDoubleDFset_) {
+    myDoubleDFset_ref() = myDoubleDFset_;
+    return __fbthrift_field_myDoubleDFset;
+  }
+
+  double defaultStruct::get_myDoubleDFZero() const {
+    return __fbthrift_field_myDoubleDFZero;
+  }
+
+  double& defaultStruct::set_myDoubleDFZero(double myDoubleDFZero_) {
+    myDoubleDFZero_ref() = myDoubleDFZero_;
+    return __fbthrift_field_myDoubleDFZero;
+  }
+
+  double defaultStruct::get_myDouble() const {
+    return __fbthrift_field_myDouble;
+  }
+
+  double& defaultStruct::set_myDouble(double myDouble_) {
+    myDouble_ref() = myDouble_;
+    return __fbthrift_field_myDouble;
+  }
 const ::std::map<::std::int32_t, ::std::string>& defaultStruct::get_field3() const& {
   return __fbthrift_field_field3;
 }
@@ -1308,6 +1537,40 @@ bool MyStructTypeDef::operator<([[maybe_unused]] const MyStructTypeDef& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  ::std::int64_t MyStructTypeDef::get_myLongField() const {
+    return __fbthrift_field_myLongField;
+  }
+
+  ::std::int64_t& MyStructTypeDef::set_myLongField(::std::int64_t myLongField_) {
+    myLongField_ref() = myLongField_;
+    return __fbthrift_field_myLongField;
+  }
+
+  ::cpp2::longTypeDef MyStructTypeDef::get_myLongTypeDef() const {
+    return __fbthrift_field_myLongTypeDef;
+  }
+
+  ::cpp2::longTypeDef& MyStructTypeDef::set_myLongTypeDef(::cpp2::longTypeDef myLongTypeDef_) {
+    myLongTypeDef_ref() = myLongTypeDef_;
+    return __fbthrift_field_myLongTypeDef;
+  }
+
+  const ::std::string& MyStructTypeDef::get_myStringField() const& {
+    return __fbthrift_field_myStringField;
+  }
+
+  ::std::string MyStructTypeDef::get_myStringField() && {
+    return std::move(__fbthrift_field_myStringField);
+  }
+
+  const ::cpp2::stringTypedef& MyStructTypeDef::get_myStringTypedef() const& {
+    return __fbthrift_field_myStringTypedef;
+  }
+
+  ::cpp2::stringTypedef MyStructTypeDef::get_myStringTypedef() && {
+    return std::move(__fbthrift_field_myStringTypedef);
+  }
 const ::std::map<::std::int16_t, ::std::string>& MyStructTypeDef::get_myMapField() const& {
   return __fbthrift_field_myMapField;
 }
@@ -2282,6 +2545,23 @@ const ::cpp2::map_i32_FMap_6797& TypeRemapped::get_ioMap() const& {
 }
 
 
+  ::cpp2::i32_1194 TypeRemapped::get_BigInteger() const {
+    return __fbthrift_field_BigInteger;
+  }
+
+  ::cpp2::i32_1194& TypeRemapped::set_BigInteger(::cpp2::i32_1194 BigInteger_) {
+    BigInteger_ref() = BigInteger_;
+    return __fbthrift_field_BigInteger;
+  }
+
+  const ::cpp2::binary_4918& TypeRemapped::get_binaryTestBuffer() const& {
+    return __fbthrift_field_binaryTestBuffer;
+  }
+
+  ::cpp2::binary_4918 TypeRemapped::get_binaryTestBuffer() && {
+    return std::move(__fbthrift_field_binaryTestBuffer);
+  }
+
 void swap([[maybe_unused]] TypeRemapped& a, [[maybe_unused]] TypeRemapped& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_lsMap, b.__fbthrift_field_lsMap);
@@ -2467,6 +2747,23 @@ bool reqXcep::operator<([[maybe_unused]] const reqXcep& rhs) const {
 }
 
 
+  const ::std::string& reqXcep::get_message() const& {
+    return __fbthrift_field_message;
+  }
+
+  ::std::string reqXcep::get_message() && {
+    return std::move(__fbthrift_field_message);
+  }
+
+  ::std::int32_t reqXcep::get_errorCode() const {
+    return __fbthrift_field_errorCode;
+  }
+
+  ::std::int32_t& reqXcep::set_errorCode(::std::int32_t errorCode_) {
+    errorCode_ref() = errorCode_;
+    return __fbthrift_field_errorCode;
+  }
+
 void swap([[maybe_unused]] reqXcep& a, [[maybe_unused]] reqXcep& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
@@ -2570,6 +2867,27 @@ bool optXcep::operator<([[maybe_unused]] const optXcep& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  const ::std::string* optXcep::get_message() const& {
+    return message_ref() ? std::addressof(__fbthrift_field_message) : nullptr;
+  }
+
+  ::std::string* optXcep::get_message() & {
+    return message_ref() ? std::addressof(__fbthrift_field_message) : nullptr;
+  }
+
+  const ::std::int32_t* optXcep::get_errorCode() const& {
+    return errorCode_ref() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
+  }
+
+  ::std::int32_t* optXcep::get_errorCode() & {
+    return errorCode_ref() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
+  }
+
+  ::std::int32_t& optXcep::set_errorCode(::std::int32_t errorCode_) {
+    errorCode_ref() = errorCode_;
+    return __fbthrift_field_errorCode;
+  }
 
 void swap([[maybe_unused]] optXcep& a, [[maybe_unused]] optXcep& b) {
   using ::std::swap;
@@ -2694,6 +3012,14 @@ bool complexException::operator<([[maybe_unused]] const complexException& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  const ::std::string& complexException::get_message() const& {
+    return __fbthrift_field_message;
+  }
+
+  ::std::string complexException::get_message() && {
+    return std::move(__fbthrift_field_message);
+  }
 const ::std::vector<::std::string>& complexException::get_listStrings() const& {
   return __fbthrift_field_listStrings;
 }
@@ -2702,6 +3028,15 @@ const ::std::vector<::std::string>& complexException::get_listStrings() const& {
   return std::move(__fbthrift_field_listStrings);
 }
 
+
+  ::cpp2::MyEnum complexException::get_errorEnum() const {
+    return __fbthrift_field_errorEnum;
+  }
+
+  ::cpp2::MyEnum& complexException::set_errorEnum(::cpp2::MyEnum errorEnum_) {
+    errorEnum_ref() = errorEnum_;
+    return __fbthrift_field_errorEnum;
+  }
 const ::cpp2::MyUnion* complexException::get_unionError() const& {
   return unionError_ref().has_value() ? std::addressof(__fbthrift_field_unionError) : nullptr;
 }

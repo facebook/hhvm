@@ -762,42 +762,27 @@ class SomeStruct final  {
 
   /** Glean { "field": "reasonable" } */
   [[deprecated("Use `FOO.reasonable().value();` instead of `FOO.get_reasonable();`")]]
-  ::test::fixtures::enums::Metasyntactic get_reasonable() const {
-    return __fbthrift_field_reasonable;
-  }
+  ::test::fixtures::enums::Metasyntactic get_reasonable() const;
 
   /** Glean { "field": "reasonable" } */
   [[deprecated("Use `FOO.reasonable() = BAR;` instead of `FOO.set_reasonable(BAR);`")]]
-  ::test::fixtures::enums::Metasyntactic& set_reasonable(::test::fixtures::enums::Metasyntactic reasonable_) {
-    reasonable_ref() = reasonable_;
-    return __fbthrift_field_reasonable;
-  }
+  ::test::fixtures::enums::Metasyntactic& set_reasonable(::test::fixtures::enums::Metasyntactic reasonable_);
 
   /** Glean { "field": "fine" } */
   [[deprecated("Use `FOO.fine().value();` instead of `FOO.get_fine();`")]]
-  ::test::fixtures::enums::Metasyntactic get_fine() const {
-    return __fbthrift_field_fine;
-  }
+  ::test::fixtures::enums::Metasyntactic get_fine() const;
 
   /** Glean { "field": "fine" } */
   [[deprecated("Use `FOO.fine() = BAR;` instead of `FOO.set_fine(BAR);`")]]
-  ::test::fixtures::enums::Metasyntactic& set_fine(::test::fixtures::enums::Metasyntactic fine_) {
-    fine_ref() = fine_;
-    return __fbthrift_field_fine;
-  }
+  ::test::fixtures::enums::Metasyntactic& set_fine(::test::fixtures::enums::Metasyntactic fine_);
 
   /** Glean { "field": "questionable" } */
   [[deprecated("Use `FOO.questionable().value();` instead of `FOO.get_questionable();`")]]
-  ::test::fixtures::enums::Metasyntactic get_questionable() const {
-    return __fbthrift_field_questionable;
-  }
+  ::test::fixtures::enums::Metasyntactic get_questionable() const;
 
   /** Glean { "field": "questionable" } */
   [[deprecated("Use `FOO.questionable() = BAR;` instead of `FOO.set_questionable(BAR);`")]]
-  ::test::fixtures::enums::Metasyntactic& set_questionable(::test::fixtures::enums::Metasyntactic questionable_) {
-    questionable_ref() = questionable_;
-    return __fbthrift_field_questionable;
-  }
+  ::test::fixtures::enums::Metasyntactic& set_questionable(::test::fixtures::enums::Metasyntactic questionable_);
   /** Glean { "field": "tags" } */
   [[deprecated("Use `FOO.tags().value();` instead of `FOO.get_tags();`")]]
   const ::std::set<::std::int32_t>& get_tags() const&;
@@ -1129,55 +1114,35 @@ class MyStruct final  {
 
   /** Glean { "field": "me2_3" } */
   [[deprecated("Use `FOO.me2_3().value();` instead of `FOO.get_me2_3();`")]]
-  ::test::fixtures::enums::MyEnum2 get_me2_3() const {
-    return __fbthrift_field_me2_3;
-  }
+  ::test::fixtures::enums::MyEnum2 get_me2_3() const;
 
   /** Glean { "field": "me2_3" } */
   [[deprecated("Use `FOO.me2_3() = BAR;` instead of `FOO.set_me2_3(BAR);`")]]
-  ::test::fixtures::enums::MyEnum2& set_me2_3(::test::fixtures::enums::MyEnum2 me2_3_) {
-    me2_3_ref() = me2_3_;
-    return __fbthrift_field_me2_3;
-  }
+  ::test::fixtures::enums::MyEnum2& set_me2_3(::test::fixtures::enums::MyEnum2 me2_3_);
 
   /** Glean { "field": "me3_n3" } */
   [[deprecated("Use `FOO.me3_n3().value();` instead of `FOO.get_me3_n3();`")]]
-  ::test::fixtures::enums::MyEnum3 get_me3_n3() const {
-    return __fbthrift_field_me3_n3;
-  }
+  ::test::fixtures::enums::MyEnum3 get_me3_n3() const;
 
   /** Glean { "field": "me3_n3" } */
   [[deprecated("Use `FOO.me3_n3() = BAR;` instead of `FOO.set_me3_n3(BAR);`")]]
-  ::test::fixtures::enums::MyEnum3& set_me3_n3(::test::fixtures::enums::MyEnum3 me3_n3_) {
-    me3_n3_ref() = me3_n3_;
-    return __fbthrift_field_me3_n3;
-  }
+  ::test::fixtures::enums::MyEnum3& set_me3_n3(::test::fixtures::enums::MyEnum3 me3_n3_);
 
   /** Glean { "field": "me1_t1" } */
   [[deprecated("Use `FOO.me1_t1().value();` instead of `FOO.get_me1_t1();`")]]
-  ::test::fixtures::enums::MyEnum1 get_me1_t1() const {
-    return __fbthrift_field_me1_t1;
-  }
+  ::test::fixtures::enums::MyEnum1 get_me1_t1() const;
 
   /** Glean { "field": "me1_t1" } */
   [[deprecated("Use `FOO.me1_t1() = BAR;` instead of `FOO.set_me1_t1(BAR);`")]]
-  ::test::fixtures::enums::MyEnum1& set_me1_t1(::test::fixtures::enums::MyEnum1 me1_t1_) {
-    me1_t1_ref() = me1_t1_;
-    return __fbthrift_field_me1_t1;
-  }
+  ::test::fixtures::enums::MyEnum1& set_me1_t1(::test::fixtures::enums::MyEnum1 me1_t1_);
 
   /** Glean { "field": "me1_t2" } */
   [[deprecated("Use `FOO.me1_t2().value();` instead of `FOO.get_me1_t2();`")]]
-  ::test::fixtures::enums::MyEnum1 get_me1_t2() const {
-    return __fbthrift_field_me1_t2;
-  }
+  ::test::fixtures::enums::MyEnum1 get_me1_t2() const;
 
   /** Glean { "field": "me1_t2" } */
   [[deprecated("Use `FOO.me1_t2() = BAR;` instead of `FOO.set_me1_t2(BAR);`")]]
-  ::test::fixtures::enums::MyEnum1& set_me1_t2(::test::fixtures::enums::MyEnum1 me1_t2_) {
-    me1_t2_ref() = me1_t2_;
-    return __fbthrift_field_me1_t2;
-  }
+  ::test::fixtures::enums::MyEnum1& set_me1_t2(::test::fixtures::enums::MyEnum1 me1_t2_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

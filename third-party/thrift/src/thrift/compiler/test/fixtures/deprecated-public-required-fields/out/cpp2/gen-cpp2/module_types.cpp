@@ -71,6 +71,15 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
 }
 
 
+  ::std::int32_t Foo::get_field() const {
+    return field;
+  }
+
+  ::std::int32_t& Foo::set_field(::std::int32_t field_) {
+    field_ref() = field_;
+    return field;
+  }
+
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.field, b.field);

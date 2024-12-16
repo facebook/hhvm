@@ -241,16 +241,11 @@ class Included final  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
   /** Glean { "field": "MyTransitiveField" } */
   [[deprecated("Use `FOO.MyTransitiveField().value();` instead of `FOO.get_MyTransitiveField();`")]]
   const ::cpp2::Foo& get_MyTransitiveField() const&;

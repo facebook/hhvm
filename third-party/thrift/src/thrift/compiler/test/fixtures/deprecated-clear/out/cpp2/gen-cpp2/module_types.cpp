@@ -181,6 +181,94 @@ bool StructWithDefaultStruct::operator<([[maybe_unused]] const StructWithDefault
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+  bool StructWithDefaultStruct::get_bool_field() const {
+    return __fbthrift_field_bool_field;
+  }
+
+  bool& StructWithDefaultStruct::set_bool_field(bool bool_field_) {
+    bool_field_ref() = bool_field_;
+    return __fbthrift_field_bool_field;
+  }
+
+  ::std::int8_t StructWithDefaultStruct::get_byte_field() const {
+    return __fbthrift_field_byte_field;
+  }
+
+  ::std::int8_t& StructWithDefaultStruct::set_byte_field(::std::int8_t byte_field_) {
+    byte_field_ref() = byte_field_;
+    return __fbthrift_field_byte_field;
+  }
+
+  ::std::int16_t StructWithDefaultStruct::get_short_field() const {
+    return __fbthrift_field_short_field;
+  }
+
+  ::std::int16_t& StructWithDefaultStruct::set_short_field(::std::int16_t short_field_) {
+    short_field_ref() = short_field_;
+    return __fbthrift_field_short_field;
+  }
+
+  ::std::int32_t StructWithDefaultStruct::get_int_field() const {
+    return __fbthrift_field_int_field;
+  }
+
+  ::std::int32_t& StructWithDefaultStruct::set_int_field(::std::int32_t int_field_) {
+    int_field_ref() = int_field_;
+    return __fbthrift_field_int_field;
+  }
+
+  ::std::int64_t StructWithDefaultStruct::get_long_field() const {
+    return __fbthrift_field_long_field;
+  }
+
+  ::std::int64_t& StructWithDefaultStruct::set_long_field(::std::int64_t long_field_) {
+    long_field_ref() = long_field_;
+    return __fbthrift_field_long_field;
+  }
+
+  float StructWithDefaultStruct::get_float_field() const {
+    return __fbthrift_field_float_field;
+  }
+
+  float& StructWithDefaultStruct::set_float_field(float float_field_) {
+    float_field_ref() = float_field_;
+    return __fbthrift_field_float_field;
+  }
+
+  double StructWithDefaultStruct::get_double_field() const {
+    return __fbthrift_field_double_field;
+  }
+
+  double& StructWithDefaultStruct::set_double_field(double double_field_) {
+    double_field_ref() = double_field_;
+    return __fbthrift_field_double_field;
+  }
+
+  const ::std::string& StructWithDefaultStruct::get_string_field() const& {
+    return __fbthrift_field_string_field;
+  }
+
+  ::std::string StructWithDefaultStruct::get_string_field() && {
+    return std::move(__fbthrift_field_string_field);
+  }
+
+  const ::std::string& StructWithDefaultStruct::get_binary_field() const& {
+    return __fbthrift_field_binary_field;
+  }
+
+  ::std::string StructWithDefaultStruct::get_binary_field() && {
+    return std::move(__fbthrift_field_binary_field);
+  }
+
+  ::apache::thrift::test::MyEnum StructWithDefaultStruct::get_enum_field() const {
+    return __fbthrift_field_enum_field;
+  }
+
+  ::apache::thrift::test::MyEnum& StructWithDefaultStruct::set_enum_field(::apache::thrift::test::MyEnum enum_field_) {
+    enum_field_ref() = enum_field_;
+    return __fbthrift_field_enum_field;
+  }
 const ::std::vector<::std::int16_t>& StructWithDefaultStruct::get_list_field() const& {
   return __fbthrift_field_list_field;
 }

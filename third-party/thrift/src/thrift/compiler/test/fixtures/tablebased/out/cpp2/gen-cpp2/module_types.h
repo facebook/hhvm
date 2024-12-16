@@ -515,39 +515,26 @@ class TrivialTypesStruct final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  const ::std::int32_t* get_fieldA() const& {
-    return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
-  }
+  const ::std::int32_t* get_fieldA() const&;
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  ::std::int32_t* get_fieldA() & {
-    return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
-  }
-  /** Glean { "field": "fieldA" } */
-  [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
+  ::std::int32_t* get_fieldA() &;
+
   ::std::int32_t* get_fieldA() && = delete;
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
-  ::std::int32_t& set_fieldA(::std::int32_t fieldA_) {
-    fieldA_ref() = fieldA_;
-    return __fbthrift_field_fieldA;
-  }
+  ::std::int32_t& set_fieldA(::std::int32_t fieldA_);
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  const ::std::string* get_fieldB() const& {
-    return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
-  }
+  const ::std::string* get_fieldB() const&;
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  ::std::string* get_fieldB() & {
-    return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
-  }
-  /** Glean { "field": "fieldB" } */
-  [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
+  ::std::string* get_fieldB() &;
+
   ::std::string* get_fieldB() && = delete;
 
   /** Glean { "field": "fieldB" } */
@@ -560,17 +547,12 @@ class TrivialTypesStruct final  {
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
-  const ::std::string* get_fieldC() const& {
-    return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
-  }
+  const ::std::string* get_fieldC() const&;
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
-  ::std::string* get_fieldC() & {
-    return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
-  }
-  /** Glean { "field": "fieldC" } */
-  [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
+  ::std::string* get_fieldC() &;
+
   ::std::string* get_fieldC() && = delete;
 
   /** Glean { "field": "fieldC" } */
@@ -583,17 +565,12 @@ class TrivialTypesStruct final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  const ::test::fixtures::tablebased::IOBufPtr* get_fieldD() const& {
-    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
-  }
+  const ::test::fixtures::tablebased::IOBufPtr* get_fieldD() const&;
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  ::test::fixtures::tablebased::IOBufPtr* get_fieldD() & {
-    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
-  }
-  /** Glean { "field": "fieldD" } */
-  [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
+  ::test::fixtures::tablebased::IOBufPtr* get_fieldD() &;
+
   ::test::fixtures::tablebased::IOBufPtr* get_fieldD() && = delete;
 
   /** Glean { "field": "fieldD" } */
@@ -606,16 +583,11 @@ class TrivialTypesStruct final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  ::test::fixtures::tablebased::ExampleEnum get_fieldE() const {
-    return __fbthrift_field_fieldE;
-  }
+  ::test::fixtures::tablebased::ExampleEnum get_fieldE() const;
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE() = BAR;` instead of `FOO.set_fieldE(BAR);`")]]
-  ::test::fixtures::tablebased::ExampleEnum& set_fieldE(::test::fixtures::tablebased::ExampleEnum fieldE_) {
-    fieldE_ref() = fieldE_;
-    return __fbthrift_field_fieldE;
-  }
+  ::test::fixtures::tablebased::ExampleEnum& set_fieldE(::test::fixtures::tablebased::ExampleEnum fieldE_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

@@ -409,29 +409,19 @@ class SmallStruct final  {
 
   /** Glean { "field": "small_A" } */
   [[deprecated("Use `FOO.small_A().value();` instead of `FOO.get_small_A();`")]]
-  bool get_small_A() const {
-    return __fbthrift_field_small_A;
-  }
+  bool get_small_A() const;
 
   /** Glean { "field": "small_A" } */
   [[deprecated("Use `FOO.small_A() = BAR;` instead of `FOO.set_small_A(BAR);`")]]
-  bool& set_small_A(bool small_A_) {
-    small_A_ref() = small_A_;
-    return __fbthrift_field_small_A;
-  }
+  bool& set_small_A(bool small_A_);
 
   /** Glean { "field": "small_B" } */
   [[deprecated("Use `FOO.small_B().value();` instead of `FOO.get_small_B();`")]]
-  ::std::int32_t get_small_B() const {
-    return __fbthrift_field_small_B;
-  }
+  ::std::int32_t get_small_B() const;
 
   /** Glean { "field": "small_B" } */
   [[deprecated("Use `FOO.small_B() = BAR;` instead of `FOO.set_small_B(BAR);`")]]
-  ::std::int32_t& set_small_B(::std::int32_t small_B_) {
-    small_B_ref() = small_B_;
-    return __fbthrift_field_small_B;
-  }
+  ::std::int32_t& set_small_B(::std::int32_t small_B_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1676,16 +1666,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  bool get_fieldA() const {
-    return __fbthrift_field_fieldA;
-  }
+  bool get_fieldA() const;
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
-  bool& set_fieldA(bool fieldA_) {
-    fieldA_ref() = fieldA_;
-    return __fbthrift_field_fieldA;
-  }
+  bool& set_fieldA(bool fieldA_);
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const ::std::map<::std::string, bool>& get_fieldB() const&;
@@ -1717,15 +1702,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  const ::std::string& get_fieldD() const& {
-    return __fbthrift_field_fieldD;
-  }
+  const ::std::string& get_fieldD() const&;
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  ::std::string get_fieldD() && {
-    return std::move(__fbthrift_field_fieldD);
-  }
+  ::std::string get_fieldD() &&;
 
   /** Glean { "field": "fieldD" } */
   template <typename T_containerStruct_fieldD_struct_setter = ::std::string>
@@ -1737,15 +1718,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  const ::std::string& get_fieldE() const& {
-    return __fbthrift_field_fieldE;
-  }
+  const ::std::string& get_fieldE() const&;
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  ::std::string get_fieldE() && {
-    return std::move(__fbthrift_field_fieldE);
-  }
+  ::std::string get_fieldE() &&;
 
   /** Glean { "field": "fieldE" } */
   template <typename T_containerStruct_fieldE_struct_setter = ::std::string>
@@ -1799,16 +1776,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldI" } */
   [[deprecated("Use `FOO.fieldI().value();` instead of `FOO.get_fieldI();`")]]
-  bool get_fieldI() const {
-    return __fbthrift_field_fieldI;
-  }
+  bool get_fieldI() const;
 
   /** Glean { "field": "fieldI" } */
   [[deprecated("Use `FOO.fieldI() = BAR;` instead of `FOO.set_fieldI(BAR);`")]]
-  bool& set_fieldI(bool fieldI_) {
-    fieldI_ref() = fieldI_;
-    return __fbthrift_field_fieldI;
-  }
+  bool& set_fieldI(bool fieldI_);
   /** Glean { "field": "fieldJ" } */
   [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
   const ::std::map<::std::string, ::std::vector<::std::int32_t>>& get_fieldJ() const&;
@@ -1910,16 +1882,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldQ" } */
   [[deprecated("Use `FOO.fieldQ().value();` instead of `FOO.get_fieldQ();`")]]
-  ::cpp2::MyEnumA get_fieldQ() const {
-    return __fbthrift_field_fieldQ;
-  }
+  ::cpp2::MyEnumA get_fieldQ() const;
 
   /** Glean { "field": "fieldQ" } */
   [[deprecated("Use `FOO.fieldQ() = BAR;` instead of `FOO.set_fieldQ(BAR);`")]]
-  ::cpp2::MyEnumA& set_fieldQ(::cpp2::MyEnumA fieldQ_) {
-    fieldQ_ref() = fieldQ_;
-    return __fbthrift_field_fieldQ;
-  }
+  ::cpp2::MyEnumA& set_fieldQ(::cpp2::MyEnumA fieldQ_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

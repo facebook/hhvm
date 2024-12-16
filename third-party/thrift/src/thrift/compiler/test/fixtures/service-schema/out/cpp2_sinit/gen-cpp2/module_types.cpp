@@ -122,6 +122,23 @@ bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) con
 }
 
 
+  const ::std::string& CustomException::get_name() const& {
+    return __fbthrift_field_name;
+  }
+
+  ::std::string CustomException::get_name() && {
+    return std::move(__fbthrift_field_name);
+  }
+
+  ::cpp2::Result CustomException::get_result() const {
+    return __fbthrift_field_result;
+  }
+
+  ::cpp2::Result& CustomException::set_result(::cpp2::Result result_) {
+    result_ref() = result_;
+    return __fbthrift_field_result;
+  }
+
 void swap([[maybe_unused]] CustomException& a, [[maybe_unused]] CustomException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);

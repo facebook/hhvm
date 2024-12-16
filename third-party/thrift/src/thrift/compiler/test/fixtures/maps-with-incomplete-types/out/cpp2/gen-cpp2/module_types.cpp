@@ -180,6 +180,19 @@ bool B::operator<([[maybe_unused]] const B& rhs) const {
 }
 
 
+  const ::std::int32_t* B::get_field() const& {
+    return field_ref() ? std::addressof(__fbthrift_field_field) : nullptr;
+  }
+
+  ::std::int32_t* B::get_field() & {
+    return field_ref() ? std::addressof(__fbthrift_field_field) : nullptr;
+  }
+
+  ::std::int32_t& B::set_field(::std::int32_t field_) {
+    field_ref() = field_;
+    return __fbthrift_field_field;
+  }
+
 void swap([[maybe_unused]] B& a, [[maybe_unused]] B& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);

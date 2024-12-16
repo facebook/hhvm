@@ -242,16 +242,11 @@ class AStruct final  {
 
   /** Glean { "field": "FieldA" } */
   [[deprecated("Use `FOO.FieldA().value();` instead of `FOO.get_FieldA();`")]]
-  ::std::int32_t get_FieldA() const {
-    return __fbthrift_field_FieldA;
-  }
+  ::std::int32_t get_FieldA() const;
 
   /** Glean { "field": "FieldA" } */
   [[deprecated("Use `FOO.FieldA() = BAR;` instead of `FOO.set_FieldA(BAR);`")]]
-  ::std::int32_t& set_FieldA(::std::int32_t FieldA_) {
-    FieldA_ref() = FieldA_;
-    return __fbthrift_field_FieldA;
-  }
+  ::std::int32_t& set_FieldA(::std::int32_t FieldA_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

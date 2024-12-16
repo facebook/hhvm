@@ -1355,7 +1355,6 @@ bool process(CompilerOptions &po) {
     auto const shouldIncludeInBuild = [&] (const Package::ParseMeta& p) {
       if (Cfg::Eval::ActiveDeployment.empty()) return true;
       if (Cfg::Eval::PackageV2) {
-        auto const file = Cfg::Server::SourceRoot + p.m_filepath->data();
         if (p.m_packageOverride) {
           auto const& packageInfo =
             RepoOptions::forFile(po.repoOptionsDir).packageInfo();
@@ -1365,6 +1364,7 @@ bool process(CompilerOptions &po) {
         }
         // match file with the include_path declarations and return
         // if most precise one that matches belongs to the active deployment
+        auto const file = p.m_filepath->toCppString();
         for (auto const& it : pathsInDeployment) {
           if (file.size() >= it.first.size() && std::equal(it.first.begin(), it.first.end(), file.begin())) {
             return it.second;

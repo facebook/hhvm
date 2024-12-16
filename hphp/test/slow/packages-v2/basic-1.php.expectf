@@ -1,9 +1,9 @@
 Packages
   intern
-    include_paths => [%s/hphp/test/slow/packages-v2/fake_flib/intern]
+    include_paths => [%s/test/slow/packages-v2/fake_flib/intern]
     includes => [prod]
   prod
-    include_paths => [%s/hphp/test/slow/packages-v2/basic-3.php, %s/hphp/test/slow/packages-v2/fake_flib]
+    include_paths => [%s/test/slow/packages-v2/basic-3.php, %s/test/slow/packages-v2/fake_flib]
     includes => []
 Deployments
   my-intern

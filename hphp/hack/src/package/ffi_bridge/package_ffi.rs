@@ -37,12 +37,24 @@ mod ffi {
         domains: Vec<String>,
     }
     extern "Rust" {
-        pub fn package_info(package_v2: bool, filename: &CxxString) -> PackageInfo;
+        pub fn package_info(
+            package_v2: bool,
+            source_root: &CxxString,
+            filename: &CxxString,
+        ) -> PackageInfo;
     }
 }
 
-pub fn package_info(package_v2: bool, filename: &CxxString) -> ffi::PackageInfo {
-    let s = package::PackageInfo::from_text_strict(package_v2, "", &filename.to_string());
+pub fn package_info(
+    package_v2: bool,
+    source_root: &CxxString,
+    filename: &CxxString,
+) -> ffi::PackageInfo {
+    let s = package::PackageInfo::from_text_strict(
+        package_v2,
+        &source_root.to_string(),
+        &filename.to_string(),
+    );
     match s {
         Ok(info) => {
             let convert = |v: Option<&package::NameSet>| {

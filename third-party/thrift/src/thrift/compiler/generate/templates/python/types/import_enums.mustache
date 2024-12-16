@@ -26,6 +26,10 @@ need to be imported through the types modules.
 }}
 {{#program:enums}}
 {{#first?}}
+{{#program:is_type_stub?}}
+
+from {{program:module_path}}.thrift_enums import *
+{{/program:is_type_stub?}}
 
 from {{program:module_path}}.thrift_enums import (
 {{/first?}}
@@ -38,19 +42,3 @@ from {{program:module_path}}.thrift_enums import (
 )
 {{/last?}}
 {{/program:enums}}
-{{!
-    with
-
-    from module.path.thrift_enums import EnumName
-
-    type-check at the point of use of EnumName fails with
-
-    Undefined import [21]: Could not find a name `EnumName` defined in module `module.path.thrift_types`
-
-    With the assignment below, teach the type-checker what EnumName is.
-}}
-{{#program:is_type_stub?}}
-{{#program:enums}}
-{{enum:name}} = {{> private/alias_prefix}}{{enum:name}}
-{{/program:enums}}
-{{/program:is_type_stub?}}

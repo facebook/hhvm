@@ -106,13 +106,12 @@ WebTransportImpl::StreamReadHandle* WebTransportImpl::onWebTransportUniStream(
   return &ingRes.first->second;
 }
 
-folly::Expected<WebTransportImpl::TransportProvider::FCState,
+folly::Expected<WebTransportImpl::WebTransport::FCState,
                 WebTransport::ErrorCode>
 WebTransportImpl::sendWebTransportStreamData(HTTPCodec::StreamID id,
                                              std::unique_ptr<folly::IOBuf> data,
-                                             bool eof,
-                                             quic::StreamWriteCallback* wcb) {
-  auto res = tp_.sendWebTransportStreamData(id, std::move(data), eof, wcb);
+                                             bool eof) {
+  auto res = tp_.sendWebTransportStreamData(id, std::move(data), eof);
   if (eof || res.hasError()) {
     wtEgressStreams_.erase(id);
   }
@@ -138,28 +137,27 @@ WebTransportImpl::stopReadingWebTransportIngress(HTTPCodec::StreamID id,
   return res;
 }
 
-folly::Expected<folly::SemiFuture<folly::Unit>, WebTransport::ErrorCode>
+folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 WebTransportImpl::StreamWriteHandle::writeStreamData(
     std::unique_ptr<folly::IOBuf> data, bool fin) {
-  CHECK(!writePromise_) << "Wait for previous write to complete";
   if (stopSendingErrorCode_) {
-    return folly::makeSemiFuture<folly::Unit>(
-        folly::make_exception_wrapper<WebTransport::Exception>(
-            *stopSendingErrorCode_));
+    return folly::makeUnexpected(WebTransport::ErrorCode::STOP_SENDING);
   }
   impl_.sp_.refreshTimeout();
-  auto fcState =
-      impl_.sendWebTransportStreamData(id_, std::move(data), fin, this);
+  auto fcState = impl_.sendWebTransportStreamData(id_, std::move(data), fin);
   if (fcState.hasError()) {
     return folly::makeUnexpected(fcState.error());
   }
-  if (*fcState == TransportProvider::FCState::UNBLOCKED) {
-    return folly::makeSemiFuture(folly::unit);
-  } else {
-    auto contract = folly::makePromiseContract<folly::Unit>();
-    writePromise_.emplace(std::move(contract.promise));
-    return std::move(contract.future);
-  }
+  return *fcState;
+}
+
+folly::Expected<folly::SemiFuture<folly::Unit>, WebTransport::ErrorCode>
+WebTransportImpl::StreamWriteHandle::awaitWritable() {
+  CHECK(!writePromise_) << "awaitWritable already called";
+  auto contract = folly::makePromiseContract<folly::Unit>();
+  writePromise_.emplace(std::move(contract.promise));
+  impl_.tp_.notifyPendingWriteOnStream(id_, this);
+  return std::move(contract.future);
 }
 
 void WebTransportImpl::onWebTransportStopSending(HTTPCodec::StreamID id,
@@ -233,14 +231,13 @@ void WebTransportImpl::StreamReadHandle::readAvailable(
   bool eof = readRes.value().second;
   // deliver data, eof
   auto state = dataAvailable(std::move(data), eof);
-  if (state == TransportProvider::FCState::BLOCKED && !eof) {
+  if (state == WebTransport::FCState::BLOCKED && !eof) {
     VLOG(4) << __func__ << " pausing reads";
     impl_.tp_.pauseWebTransportIngress(id);
   }
 }
 
-WebTransportImpl::TransportProvider::FCState
-WebTransportImpl::StreamReadHandle::dataAvailable(
+WebTransport::FCState WebTransportImpl::StreamReadHandle::dataAvailable(
     std::unique_ptr<folly::IOBuf> data, bool eof) {
   VLOG(4)
       << "dataAvailable buflen=" << (data ? data->computeChainDataLength() : 0)
@@ -250,7 +247,7 @@ WebTransportImpl::StreamReadHandle::dataAvailable(
     readPromise_.reset();
     if (eof) {
       impl_.wtIngressStreams_.erase(getID());
-      return TransportProvider::FCState::UNBLOCKED;
+      return WebTransport::FCState::UNBLOCKED;
     }
   } else {
     buf_.append(std::move(data));
@@ -258,8 +255,8 @@ WebTransportImpl::StreamReadHandle::dataAvailable(
   }
   VLOG(4) << "dataAvailable buflen=" << buf_.chainLength();
   return (eof || buf_.chainLength() < kMaxWTIngressBuf)
-             ? TransportProvider::FCState::UNBLOCKED
-             : TransportProvider::FCState::BLOCKED;
+             ? WebTransport::FCState::UNBLOCKED
+             : WebTransport::FCState::BLOCKED;
 }
 
 void WebTransportImpl::StreamReadHandle::readError(

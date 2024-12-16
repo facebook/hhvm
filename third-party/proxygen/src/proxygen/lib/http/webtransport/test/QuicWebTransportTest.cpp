@@ -122,17 +122,9 @@ TEST_F(QuicWebTransportTest, OnStopSending) {
   socketDriver_.addStopSending(id, WT_ERROR_1);
   eventBase_.loopOnce();
   auto res = handle.value()->writeStreamData(nullptr, true);
-  EXPECT_FALSE(res.hasError());
-  EXPECT_TRUE(res.value().isReady());
-  bool err = false;
-  auto fut = std::move(res.value()).via(&eventBase_);
-  std::move(fut).thenError(folly::tag_t<const WebTransport::Exception&>{},
-                           [&](auto const& ex) {
-                             EXPECT_EQ(ex.error, WT_ERROR_1);
-                             err = true;
-                           });
-  eventBase_.loop();
-  EXPECT_TRUE(err);
+  EXPECT_TRUE(res.hasError());
+  EXPECT_EQ(res.error(), WebTransport::ErrorCode::STOP_SENDING);
+  EXPECT_EQ(*handle.value()->stopSendingErrorCode(), WT_ERROR_1);
 }
 
 TEST_F(QuicWebTransportTest, ConnectionError) {

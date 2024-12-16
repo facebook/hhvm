@@ -1832,11 +1832,13 @@ class HQSession
     folly::Expected<HTTPCodec::StreamID, WebTransport::ErrorCode>
     newWebTransportUniStream() override;
 
-    folly::Expected<WebTransportImpl::TransportProvider::FCState,
-                    WebTransport::ErrorCode>
+    folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
     sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
                                std::unique_ptr<folly::IOBuf> /*data*/,
-                               bool /*eof*/,
+                               bool /*eof*/) override;
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    notifyPendingWriteOnStream(HTTPCodec::StreamID,
                                quic::StreamWriteCallback* wcb) override;
 
     folly::Expected<folly::Unit, WebTransport::ErrorCode>

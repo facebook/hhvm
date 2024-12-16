@@ -28,14 +28,15 @@ folly::SemiFuture<Message> expectSendMessage(MockWebTransport& wt) {
       .WillOnce(
           [&wt, promise = folly::MoveWrapper(std::move(promise))](
               uint64_t id, std::unique_ptr<folly::IOBuf> data, bool eof) mutable
-          -> folly::Expected<folly::Unit, proxygen::WebTransport::ErrorCode> {
+          -> folly::Expected<proxygen::WebTransport::FCState,
+                             proxygen::WebTransport::ErrorCode> {
             Message m;
             m.id = id;
             m.message = std::move(data);
             promise->setValue(std::move(m));
             EXPECT_TRUE(eof);
             wt.cleanupStream(id);
-            return folly::unit;
+            return proxygen::WebTransport::FCState::UNBLOCKED;
           })
       .RetiresOnSaturation();
 

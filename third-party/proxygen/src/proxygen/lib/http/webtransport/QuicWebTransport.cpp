@@ -8,7 +8,7 @@
 
 #include <proxygen/lib/http/webtransport/QuicWebTransport.h>
 
-using FCState = proxygen::WebTransportImpl::TransportProvider::FCState;
+using FCState = proxygen::WebTransport::FCState;
 
 namespace proxygen {
 
@@ -92,12 +92,10 @@ QuicWebTransport::newWebTransportUniStream() {
   return id.value();
 }
 
-folly::Expected<WebTransportImpl::TransportProvider::FCState,
-                WebTransport::ErrorCode>
+folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 QuicWebTransport::sendWebTransportStreamData(HTTPCodec::StreamID id,
                                              std::unique_ptr<folly::IOBuf> data,
-                                             bool eof,
-                                             quic::StreamWriteCallback* wcb) {
+                                             bool eof) {
   XCHECK(quicSocket_);
   auto res = quicSocket_->writeChain(id, std::move(data), eof);
   if (!res) {
@@ -109,12 +107,19 @@ QuicWebTransport::sendWebTransportStreamData(HTTPCodec::StreamID id,
     return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
   }
   if (!eof && flowControl->sendWindowAvailable == 0) {
-    quicSocket_->notifyPendingWriteOnStream(id, wcb);
-    VLOG(4) << "Closing fc window";
+    VLOG(4) << "fc window closed";
     return FCState::BLOCKED;
   } else {
     return FCState::UNBLOCKED;
   }
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+QuicWebTransport::notifyPendingWriteOnStream(HTTPCodec::StreamID id,
+                                             quic::StreamWriteCallback* wcb) {
+  XCHECK(quicSocket_);
+  quicSocket_->notifyPendingWriteOnStream(id, wcb);
+  return folly::unit;
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>

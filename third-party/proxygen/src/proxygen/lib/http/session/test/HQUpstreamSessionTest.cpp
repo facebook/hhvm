@@ -2257,20 +2257,23 @@ TEST_P(HQUpstreamSessionTestWebTransport, BidirectionalStream) {
   // shrink the fcw to force it to block
   socketDriver_->setStreamFlowControlWindow(id, 100);
   bool writeComplete = false;
-  stream.writeHandle->writeStreamData(makeBuf(65536), false)
-      .value()
-      .via(&eventBase_)
-      .then([&](auto) {
-        VLOG(4) << "big write complete";
-        // after it completes, write FIN
-        stream.writeHandle->writeStreamData(nullptr, true)
+  stream.writeHandle->writeStreamData(makeBuf(65536), false);
+  stream.writeHandle->awaitWritable().value().via(&eventBase_).then([&](auto) {
+    VLOG(4) << "big write complete";
+    // after it completes, write FIN
+    stream.writeHandle->writeStreamData(nullptr, true);
+#if 0
+        stream.writeHandle
             .value()
             .via(&eventBase_)
             .then([&](auto) {
               VLOG(4) << "fin write complete";
               writeComplete = true;
             });
-      });
+        // ug, can't determine fin write complete;
+#endif
+    writeComplete = true;
+  });
   eventBase_.loopOnce();
   // grow the fcw which will complete the big write
   socketDriver_->setStreamFlowControlWindow(id, 100000);

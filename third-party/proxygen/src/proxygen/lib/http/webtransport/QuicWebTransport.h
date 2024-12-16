@@ -66,11 +66,14 @@ class QuicWebTransport
 
   folly::SemiFuture<folly::Unit> awaitBidiStreamCredit() override;
 
-  folly::Expected<FCState, WebTransport::ErrorCode> sendWebTransportStreamData(
-      HTTPCodec::StreamID /*id*/,
-      std::unique_ptr<folly::IOBuf> /*data*/,
-      bool /*eof*/,
-      quic::StreamWriteCallback* /*wcb*/) override;
+  folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
+  sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
+                             std::unique_ptr<folly::IOBuf> /*data*/,
+                             bool /*eof*/) override;
+
+  folly::Expected<folly::Unit, WebTransport::ErrorCode>
+  notifyPendingWriteOnStream(HTTPCodec::StreamID,
+                             quic::StreamWriteCallback* wcb) override;
 
   folly::Expected<folly::Unit, WebTransport::ErrorCode> resetWebTransportEgress(
       HTTPCodec::StreamID /*id*/, uint32_t /*errorCode*/) override;

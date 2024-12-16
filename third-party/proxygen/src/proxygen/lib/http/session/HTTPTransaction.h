@@ -678,12 +678,17 @@ class HTTPTransaction
       folly::assume_unreachable();
     }
 
-    folly::Expected<WebTransportImpl::TransportProvider::FCState,
-                    WebTransport::ErrorCode>
+    folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
     sendWebTransportStreamData(HTTPCodec::StreamID /*id*/,
                                std::unique_ptr<folly::IOBuf> /*data*/,
-                               bool /*eof*/,
-                               quic::StreamWriteCallback* /*wcb*/) override {
+                               bool /*eof*/) override {
+      LOG(FATAL) << __func__ << " not supported";
+      folly::assume_unreachable();
+    }
+
+    folly::Expected<folly::Unit, WebTransport::ErrorCode>
+    notifyPendingWriteOnStream(HTTPCodec::StreamID,
+                               quic::StreamWriteCallback*) override {
       LOG(FATAL) << __func__ << " not supported";
       folly::assume_unreachable();
     }

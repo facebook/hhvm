@@ -12,7 +12,7 @@
 #include <proxygen/lib/http/session/test/HTTPTransactionMocks.h>
 
 using namespace testing;
-using WTFCState = proxygen::WebTransportImpl::TransportProvider::FCState;
+using WTFCState = proxygen::WebTransport::FCState;
 namespace {
 constexpr uint32_t WT_APP_ERROR_1 = 19;
 constexpr uint32_t WT_APP_ERROR_2 = 77;
@@ -122,15 +122,9 @@ TEST_F(HTTPTransactionWebTransportTest, CreateStreams) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto res2 = wt_->createUniStream();
   EXPECT_TRUE(res2.hasValue());
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, true, _))
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, true))
       .WillOnce(Return(WTFCState::UNBLOCKED));
-  res2.value()
-      ->writeStreamData(nullptr, true)
-      .value()
-      .via(&eventBase_)
-      .thenTry(
-          [](auto writeReady) { EXPECT_FALSE(writeReady.hasException()); });
-
+  res2.value()->writeStreamData(nullptr, true);
   // Try creating streams but fail at transport
   EXPECT_CALL(transport_, newWebTransportBidiStream())
       .WillOnce(Return(folly::makeUnexpected(
@@ -245,7 +239,7 @@ TEST_F(HTTPTransactionWebTransportTest, WriteFails) {
   EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
   auto res = wt_->createUniStream();
   EXPECT_TRUE(res.hasValue());
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false, _))
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
       .WillOnce(
           Return(folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR)));
   EXPECT_EQ(res.value()->writeStreamData(makeBuf(10), false).error(),
@@ -260,10 +254,14 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
   // Block write, then resume
   bool ready = false;
   quic::StreamWriteCallback* wcb{nullptr};
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false, _))
-      .WillOnce(DoAll(SaveArg<3>(&wcb), Return(WTFCState::BLOCKED)));
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
+      .WillOnce(Return(WTFCState::BLOCKED));
+  auto res = writeHandle.value()->writeStreamData(makeBuf(10), false);
+  EXPECT_TRUE(res.hasValue());
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+      .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
   writeHandle.value()
-      ->writeStreamData(makeBuf(10), false)
+      ->awaitWritable()
       .value()
       .via(&eventBase_)
       .thenTry([&ready](auto writeReady) {
@@ -277,10 +275,14 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
 
   // Block write/stop sending
   ready = false;
-  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false, _))
-      .WillOnce(DoAll(SaveArg<3>(&wcb), Return(WTFCState::BLOCKED)));
+  EXPECT_CALL(transport_, sendWebTransportStreamData(1, testing::_, false))
+      .WillOnce(Return(WTFCState::BLOCKED));
+  auto res2 = writeHandle.value()->writeStreamData(makeBuf(10), false);
+  EXPECT_TRUE(res2.hasValue());
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+      .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
   writeHandle.value()
-      ->writeStreamData(makeBuf(10), false)
+      ->awaitWritable()
       .value()
       .via(&eventBase_)
       .thenTry([&ready, &writeHandle, this](auto writeReady) {
@@ -321,25 +323,18 @@ TEST_F(HTTPTransactionWebTransportTest, BidiStreamEdgeCases) {
 
   // Cancellation handling
   folly::CancellationCallback writeCancel(
-      streamHandle.writeHandle->getCancelToken(), [&streamHandle, this] {
+      streamHandle.writeHandle->getCancelToken(), [&streamHandle] {
         // Write cancelled:
         // We can retrieve the stop sending code from the handle
         EXPECT_EQ(*streamHandle.writeHandle->stopSendingErrorCode(),
                   WT_APP_ERROR_2);
         // attempt to write, will error, but don't reset the stream
-        streamHandle.writeHandle->writeStreamData(makeBuf(10), true)
-            .value()
-            .via(&eventBase_)
-            .thenValue([](auto) {})
-            .thenError(folly::tag_t<const WebTransport::Exception&>{},
-                       [](auto const& ex) {
-                         VLOG(4) << "write error";
-                         EXPECT_EQ(ex.error, WT_APP_ERROR_2);
-                       });
+        auto res = streamHandle.writeHandle->writeStreamData(makeBuf(10), true);
+        EXPECT_TRUE(res.hasError());
+        EXPECT_EQ(res.error(), WebTransport::ErrorCode::STOP_SENDING);
       });
   // Deliver SS
   txn_->onWebTransportStopSending(0, WT_APP_ERROR_2);
-  eventBase_.loopOnce();
   EXPECT_CALL(transport_,
               resetWebTransportEgress(0, WebTransport::kInternalError));
   // Note the egress stream was not reset, will be reset when the txn detaches
@@ -424,18 +419,10 @@ TEST_F(HTTPTransactionWebTransportTest, StreamIDAPIs) {
   wt_->stopSending(id, WT_APP_ERROR_1);
 
   // write by ID
-  bool ready = false;
-  EXPECT_CALL(transport_, sendWebTransportStreamData(id, testing::_, false, _))
+  EXPECT_CALL(transport_, sendWebTransportStreamData(id, testing::_, false))
       .WillOnce(Return(WTFCState::UNBLOCKED));
-  wt_->writeStreamData(id, makeBuf(10), false)
-      .value()
-      .via(&eventBase_)
-      .thenTry([&ready](auto writeReady) {
-        EXPECT_FALSE(writeReady.hasException());
-        ready = true;
-      });
-  eventBase_.loopOnce();
-  EXPECT_TRUE(ready);
+  auto res2 = wt_->writeStreamData(id, makeBuf(10), false);
+  EXPECT_TRUE(res2.hasValue());
 
   // resetStream by ID
   EXPECT_CALL(transport_, resetWebTransportEgress(id, WT_APP_ERROR_2));

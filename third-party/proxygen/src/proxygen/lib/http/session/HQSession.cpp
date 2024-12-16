@@ -3865,13 +3865,9 @@ HQSession::HQStreamTransport::newWebTransportUniStream() {
   return *id;
 }
 
-folly::Expected<WebTransportImpl::TransportProvider::FCState,
-                WebTransport::ErrorCode>
+folly::Expected<WebTransport::FCState, WebTransport::ErrorCode>
 HQSession::HQStreamTransport::sendWebTransportStreamData(
-    HTTPCodec::StreamID id,
-    std::unique_ptr<folly::IOBuf> data,
-    bool eof,
-    quic::StreamWriteCallback* writeCallback) {
+    HTTPCodec::StreamID id, std::unique_ptr<folly::IOBuf> data, bool eof) {
   auto res = session_.sock_->writeChain(id, std::move(data), eof);
   if (res.hasError()) {
     LOG(ERROR) << "Failed to write WT stream data";
@@ -3883,12 +3879,19 @@ HQSession::HQStreamTransport::sendWebTransportStreamData(
     return folly::makeUnexpected(WebTransport::ErrorCode::SEND_ERROR);
   }
   if (!eof && flowControl->sendWindowAvailable == 0) {
-    session_.sock_->notifyPendingWriteOnStream(id, writeCallback);
-    VLOG(4) << "Closing fc window";
-    return WebTransportImpl::TransportProvider::FCState::BLOCKED;
+    VLOG(4) << "FC window closed";
+    return WebTransport::FCState::BLOCKED;
   } else {
-    return WebTransportImpl::TransportProvider::FCState::UNBLOCKED;
+    return WebTransport::FCState::UNBLOCKED;
   }
+}
+
+folly::Expected<folly::Unit, WebTransport::ErrorCode>
+HQSession::HQStreamTransport::notifyPendingWriteOnStream(
+    HTTPCodec::StreamID id, quic::StreamWriteCallback* wcb) {
+  CHECK(session_.sock_);
+  session_.sock_->notifyPendingWriteOnStream(id, wcb);
+  return folly::unit;
 }
 
 folly::Expected<folly::Unit, WebTransport::ErrorCode>

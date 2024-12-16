@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_has_bitwise_ops:
     pass
@@ -25,23 +26,24 @@ class has_bitwise_ops(_fbthrift_python_types.Enum, int, _fbthrift_compatible_wit
         return "module.has_bitwise_ops"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "apache.org/thrift/fixtures/types/has_bitwise_ops"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_has_bitwise_ops()
 
-    def _to_python(self):
+    def _to_python(self) -> "has_bitwise_ops":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.has_bitwise_ops": # type: ignore
         import importlib
         py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
         return py3_types.has_bitwise_ops(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_is_unscoped:
     pass
@@ -55,23 +57,24 @@ class is_unscoped(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_is
         return "module.is_unscoped"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "apache.org/thrift/fixtures/types/is_unscoped"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_is_unscoped()
 
-    def _to_python(self):
+    def _to_python(self) -> "is_unscoped":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.is_unscoped": # type: ignore
         import importlib
         py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
         return py3_types.is_unscoped(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyForwardRefEnum:
     pass
@@ -85,22 +88,22 @@ class MyForwardRefEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_wi
         return "module.MyForwardRefEnum"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "apache.org/thrift/fixtures/types/MyForwardRefEnum"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyForwardRefEnum()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyForwardRefEnum":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "apache.thrift.fixtures.types.module.types.MyForwardRefEnum": # type: ignore
         import importlib
         py3_types = importlib.import_module("apache.thrift.fixtures.types.module.types")
         return py3_types.MyForwardRefEnum(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
 
 def _fbthrift_gen_metadata_enum_has_bitwise_ops(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyEnum:
     pass
@@ -22,23 +23,24 @@ class MyEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum)
         return "module.MyEnum"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/python_capi/MyEnum"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyEnum":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.python_capi.module.types.MyEnum": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
         return py3_types.MyEnum(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_AnnoyingEnum:
     pass
@@ -52,22 +54,22 @@ class AnnoyingEnum(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_A
         return "module.AnnoyingEnum"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/python_capi/AnnoyingEnum"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_AnnoyingEnum()
 
-    def _to_python(self):
+    def _to_python(self) -> "AnnoyingEnum":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.python_capi.module.types.AnnoyingEnum": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.module.types")
         return py3_types.AnnoyingEnum(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
 
 def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

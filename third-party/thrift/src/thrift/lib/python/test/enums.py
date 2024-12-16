@@ -314,7 +314,7 @@ class EnumTests(unittest.TestCase):
 
     def test_changing_member(self) -> None:
         with self.assertRaises(AttributeError):
-            # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
+            # pyre-fixme[41]: Cannot reassign final attribute
             self.Color.red = "lol"
 
     def test_contains(self) -> None:
@@ -545,7 +545,7 @@ class EnumMetaTests(unittest.TestCase):
 
     def test_changing_member(self) -> None:
         with self.assertRaises(AttributeError):
-            # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
+            # pyre-fixme[41]: Cannot reassign final attribute
             self.Color.red = "lol"
 
     def test_delete(self) -> None:

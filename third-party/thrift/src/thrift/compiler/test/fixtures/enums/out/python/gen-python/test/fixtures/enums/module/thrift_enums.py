@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 import thrift.python.types as _fbthrift_python_types
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_Metasyntactic:
     pass
@@ -24,23 +25,24 @@ class Metasyntactic(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_
         return "module.Metasyntactic"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/enums/Metasyntactic"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_Metasyntactic()
 
-    def _to_python(self):
+    def _to_python(self) -> "Metasyntactic":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.enums.module.types.Metasyntactic": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
         return py3_types.Metasyntactic(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyEnum1:
     pass
@@ -58,23 +60,24 @@ class MyEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return "module.MyEnum1"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/enums/MyEnum1"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum1()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyEnum1":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum1": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
         return py3_types.MyEnum1(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyEnum2:
     pass
@@ -89,23 +92,24 @@ class MyEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return "module.MyEnum2"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/enums/MyEnum2"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum2()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyEnum2":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum2": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
         return py3_types.MyEnum2(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyEnum3:
     pass
@@ -123,23 +127,24 @@ class MyEnum3(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return "module.MyEnum3"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/enums/MyEnum3"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum3()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyEnum3":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum3": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
         return py3_types.MyEnum3(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyEnum4:
     pass
@@ -155,23 +160,24 @@ class MyEnum4(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with_MyEnum
         return "module.MyEnum4"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/enums/MyEnum4"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyEnum4()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyEnum4":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.enums.module.types.MyEnum4": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
         return py3_types.MyEnum4(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyBitmaskEnum1:
     pass
@@ -186,23 +192,24 @@ class MyBitmaskEnum1(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with
         return "module.MyBitmaskEnum1"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/enums/MyBitmaskEnum1"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyBitmaskEnum1()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyBitmaskEnum1":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.enums.module.types.MyBitmaskEnum1": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
         return py3_types.MyBitmaskEnum1(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
+import typing as _std_python_typing
 
 class _fbthrift_compatible_with_MyBitmaskEnum2:
     pass
@@ -217,22 +224,22 @@ class MyBitmaskEnum2(_fbthrift_python_types.Enum, int, _fbthrift_compatible_with
         return "module.MyBitmaskEnum2"
 
     @staticmethod
-    def __get_thrift_uri__():
+    def __get_thrift_uri__() -> _std_python_typing.Optional[str]:
         return "test.dev/fixtures/enums/MyBitmaskEnum2"
 
     @staticmethod
-    def __get_metadata__():
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return gen_metadata_enum_MyBitmaskEnum2()
 
-    def _to_python(self):
+    def _to_python(self) -> "MyBitmaskEnum2":
         return self
 
-    def _to_py3(self):
+    def _to_py3(self) -> "test.fixtures.enums.module.types.MyBitmaskEnum2": # type: ignore
         import importlib
         py3_types = importlib.import_module("test.fixtures.enums.module.types")
         return py3_types.MyBitmaskEnum2(self.value)
 
-    def _to_py_deprecated(self):
+    def _to_py_deprecated(self) -> int:
         return self.value
 
 def _fbthrift_gen_metadata_enum_Metasyntactic(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

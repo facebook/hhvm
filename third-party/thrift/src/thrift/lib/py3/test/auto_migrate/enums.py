@@ -190,8 +190,7 @@ class EnumTests(unittest.TestCase):
 
     def test_changing_member(self) -> None:
         with self.assertRaises((AttributeError, TypeError)):
-            # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
-            # raises TypeError in thrift-py3, AttributeError in thrift-python
+            # pyre-fixme[41]: Cannot reassign final attribute
             Color.red = "lol"
 
     def test_hash(self) -> None:

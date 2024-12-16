@@ -1419,11 +1419,6 @@ void t_mstch_python_generator::generate_types() {
       TypesFileKind::SourceFile,
       TypeKind::Immutable,
       generate_root_path_);
-  generate_file(
-      "thrift_enums.pyi",
-      TypesFileKind::TypeStub,
-      TypeKind::Immutable,
-      generate_root_path_);
 
   generate_file(
       "thrift_abstract_types.py",

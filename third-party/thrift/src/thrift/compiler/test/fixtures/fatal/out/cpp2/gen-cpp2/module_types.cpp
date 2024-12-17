@@ -622,23 +622,6 @@ bool structA::operator<([[maybe_unused]] const structA& rhs) const {
 }
 
 
-  ::std::int32_t structA::get_a() const {
-    return __fbthrift_field_a;
-  }
-
-  ::std::int32_t& structA::set_a(::std::int32_t a_) {
-    a_ref() = a_;
-    return __fbthrift_field_a;
-  }
-
-  const ::std::string& structA::get_b() const& {
-    return __fbthrift_field_b;
-  }
-
-  ::std::string structA::get_b() && {
-    return std::move(__fbthrift_field_b);
-  }
-
 void swap([[maybe_unused]] structA& a, [[maybe_unused]] structA& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
@@ -888,24 +871,6 @@ bool structB::operator<([[maybe_unused]] const structB& rhs) const {
 }
 
 
-  double structB::get_c() const {
-    return __fbthrift_field_c;
-  }
-
-  double& structB::set_c(double c_) {
-    c_ref() = c_;
-    return __fbthrift_field_c;
-  }
-
-  bool structB::get_d() const {
-    return __fbthrift_field_d;
-  }
-
-  bool& structB::set_d(bool d_) {
-    d_ref() = d_;
-    return __fbthrift_field_d;
-  }
-
 void swap([[maybe_unused]] structB& a, [[maybe_unused]] structB& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_c, b.__fbthrift_field_c);
@@ -1153,59 +1118,6 @@ bool structC::operator<([[maybe_unused]] const structC& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t structC::get_a() const {
-    return __fbthrift_field_a;
-  }
-
-  ::std::int32_t& structC::set_a(::std::int32_t a_) {
-    a_ref() = a_;
-    return __fbthrift_field_a;
-  }
-
-  const ::std::string& structC::get_b() const& {
-    return __fbthrift_field_b;
-  }
-
-  ::std::string structC::get_b() && {
-    return std::move(__fbthrift_field_b);
-  }
-
-  double structC::get_c() const {
-    return __fbthrift_field_c;
-  }
-
-  double& structC::set_c(double c_) {
-    c_ref() = c_;
-    return __fbthrift_field_c;
-  }
-
-  bool structC::get_d() const {
-    return __fbthrift_field_d;
-  }
-
-  bool& structC::set_d(bool d_) {
-    d_ref() = d_;
-    return __fbthrift_field_d;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1 structC::get_e() const {
-    return __fbthrift_field_e;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1& structC::set_e(::test_cpp2::cpp_reflection::enum1 e_) {
-    e_ref() = e_;
-    return __fbthrift_field_e;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2 structC::get_f() const {
-    return __fbthrift_field_f;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2& structC::set_f(::test_cpp2::cpp_reflection::enum2 f_) {
-    f_ref() = f_;
-    return __fbthrift_field_f;
-  }
 const ::test_cpp2::cpp_reflection::union1& structC::get_g() const& {
   return __fbthrift_field_g;
 }
@@ -1616,41 +1528,6 @@ bool struct1::operator<([[maybe_unused]] const struct1& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t struct1::get_field0() const {
-    return __fbthrift_field_field0;
-  }
-
-  ::std::int32_t& struct1::set_field0(::std::int32_t field0_) {
-    field0_ref() = field0_;
-    return __fbthrift_field_field0;
-  }
-
-  const ::std::string* struct1::get_field1() const& {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
-  }
-
-  ::std::string* struct1::get_field1() & {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1 struct1::get_field2() const {
-    return __fbthrift_field_field2;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1& struct1::set_field2(::test_cpp2::cpp_reflection::enum1 field2_) {
-    field2_ref() = field2_;
-    return __fbthrift_field_field2;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2 struct1::get_field3() const {
-    return __fbthrift_field_field3;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2& struct1::set_field3(::test_cpp2::cpp_reflection::enum2 field3_) {
-    field3_ref() = field3_;
-    return __fbthrift_field_field3;
-  }
 const ::test_cpp2::cpp_reflection::union1* struct1::get_field4() const& {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
@@ -1814,41 +1691,6 @@ bool struct2::operator<([[maybe_unused]] const struct2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t struct2::get_fieldA() const {
-    return __fbthrift_field_fieldA;
-  }
-
-  ::std::int32_t& struct2::set_fieldA(::std::int32_t fieldA_) {
-    fieldA_ref() = fieldA_;
-    return __fbthrift_field_fieldA;
-  }
-
-  const ::std::string& struct2::get_fieldB() const& {
-    return __fbthrift_field_fieldB;
-  }
-
-  ::std::string struct2::get_fieldB() && {
-    return std::move(__fbthrift_field_fieldB);
-  }
-
-  ::test_cpp2::cpp_reflection::enum1 struct2::get_fieldC() const {
-    return __fbthrift_field_fieldC;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1& struct2::set_fieldC(::test_cpp2::cpp_reflection::enum1 fieldC_) {
-    fieldC_ref() = fieldC_;
-    return __fbthrift_field_fieldC;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2 struct2::get_fieldD() const {
-    return __fbthrift_field_fieldD;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2& struct2::set_fieldD(::test_cpp2::cpp_reflection::enum2 fieldD_) {
-    fieldD_ref() = fieldD_;
-    return __fbthrift_field_fieldD;
-  }
 const ::test_cpp2::cpp_reflection::union1& struct2::get_fieldE() const& {
   return __fbthrift_field_fieldE;
 }
@@ -2082,32 +1924,6 @@ bool struct3::operator<([[maybe_unused]] const struct3& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  const ::std::string& struct3::get_fieldB() const& {
-    return __fbthrift_field_fieldB;
-  }
-
-  ::std::string struct3::get_fieldB() && {
-    return std::move(__fbthrift_field_fieldB);
-  }
-
-  ::test_cpp2::cpp_reflection::enum1 struct3::get_fieldC() const {
-    return __fbthrift_field_fieldC;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1& struct3::set_fieldC(::test_cpp2::cpp_reflection::enum1 fieldC_) {
-    fieldC_ref() = fieldC_;
-    return __fbthrift_field_fieldC;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2 struct3::get_fieldD() const {
-    return __fbthrift_field_fieldD;
-  }
-
-  ::test_cpp2::cpp_reflection::enum2& struct3::set_fieldD(::test_cpp2::cpp_reflection::enum2 fieldD_) {
-    fieldD_ref() = fieldD_;
-    return __fbthrift_field_fieldD;
-  }
 const ::test_cpp2::cpp_reflection::union1& struct3::get_fieldE() const& {
   return __fbthrift_field_fieldE;
 }
@@ -2413,32 +2229,6 @@ bool struct4::operator<([[maybe_unused]] const struct4& rhs) const {
 }
 
 
-  ::std::int32_t struct4::get_field0() const {
-    return __fbthrift_field_field0;
-  }
-
-  ::std::int32_t& struct4::set_field0(::std::int32_t field0_) {
-    field0_ref() = field0_;
-    return __fbthrift_field_field0;
-  }
-
-  const ::std::string* struct4::get_field1() const& {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
-  }
-
-  ::std::string* struct4::get_field1() & {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1 struct4::get_field2() const {
-    return __fbthrift_field_field2;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1& struct4::set_field2(::test_cpp2::cpp_reflection::enum1 field2_) {
-    field2_ref() = field2_;
-    return __fbthrift_field_field2;
-  }
-
 void swap([[maybe_unused]] struct4& a, [[maybe_unused]] struct4& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field0, b.__fbthrift_field_field0);
@@ -2565,32 +2355,6 @@ bool struct5::operator<([[maybe_unused]] const struct5& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t struct5::get_field0() const {
-    return __fbthrift_field_field0;
-  }
-
-  ::std::int32_t& struct5::set_field0(::std::int32_t field0_) {
-    field0_ref() = field0_;
-    return __fbthrift_field_field0;
-  }
-
-  const ::std::string* struct5::get_field1() const& {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
-  }
-
-  ::std::string* struct5::get_field1() & {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1 struct5::get_field2() const {
-    return __fbthrift_field_field2;
-  }
-
-  ::test_cpp2::cpp_reflection::enum1& struct5::set_field2(::test_cpp2::cpp_reflection::enum1 field2_) {
-    field2_ref() = field2_;
-    return __fbthrift_field_field2;
-  }
 const ::test_cpp2::cpp_reflection::structA& struct5::get_field3() const& {
   return __fbthrift_field_field3;
 }
@@ -2721,14 +2485,6 @@ bool struct_binary::operator<([[maybe_unused]] const struct_binary& rhs) const {
 }
 
 
-  const ::std::string& struct_binary::get_bi() const& {
-    return __fbthrift_field_bi;
-  }
-
-  ::std::string struct_binary::get_bi() && {
-    return std::move(__fbthrift_field_bi);
-  }
-
 void swap([[maybe_unused]] struct_binary& a, [[maybe_unused]] struct_binary& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bi, b.__fbthrift_field_bi);
@@ -2828,15 +2584,6 @@ const ::test_cpp2::cpp_reflection::dep_C_struct& dep_A_struct::get_c() const& {
   return std::move(__fbthrift_field_c);
 }
 
-
-  ::std::int32_t dep_A_struct::get_i_a() const {
-    return __fbthrift_field_i_a;
-  }
-
-  ::std::int32_t& dep_A_struct::set_i_a(::std::int32_t i_a_) {
-    i_a_ref() = i_a_;
-    return __fbthrift_field_i_a;
-  }
 
 void swap([[maybe_unused]] dep_A_struct& a, [[maybe_unused]] dep_A_struct& b) {
   using ::std::swap;
@@ -2952,15 +2699,6 @@ const ::test_cpp2::cpp_reflection::dep_C_struct& dep_B_struct::get_c() const& {
 }
 
 
-  ::std::int32_t dep_B_struct::get_i_a() const {
-    return __fbthrift_field_i_a;
-  }
-
-  ::std::int32_t& dep_B_struct::set_i_a(::std::int32_t i_a_) {
-    i_a_ref() = i_a_;
-    return __fbthrift_field_i_a;
-  }
-
 void swap([[maybe_unused]] dep_B_struct& a, [[maybe_unused]] dep_B_struct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_b, b.__fbthrift_field_b);
@@ -3052,15 +2790,6 @@ bool annotated::operator<([[maybe_unused]] const annotated& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t annotated::get_a() const {
-    return __fbthrift_field_a;
-  }
-
-  ::std::int32_t& annotated::set_a(::std::int32_t a_) {
-    a_ref() = a_;
-    return __fbthrift_field_a;
-  }
 
 void swap([[maybe_unused]] annotated& a, [[maybe_unused]] annotated& b) {
   using ::std::swap;
@@ -3586,258 +3315,6 @@ bool struct_with_special_names::operator<([[maybe_unused]] const struct_with_spe
 }
 
 
-  ::std::int32_t struct_with_special_names::get_get() const {
-    return __fbthrift_field_get;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_get(::std::int32_t get_) {
-    get_ref() = get_;
-    return __fbthrift_field_get;
-  }
-
-  ::std::int32_t struct_with_special_names::get_getter() const {
-    return __fbthrift_field_getter;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_getter(::std::int32_t getter_) {
-    getter_ref() = getter_;
-    return __fbthrift_field_getter;
-  }
-
-  ::std::int32_t struct_with_special_names::get_lists() const {
-    return __fbthrift_field_lists;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_lists(::std::int32_t lists_) {
-    lists_ref() = lists_;
-    return __fbthrift_field_lists;
-  }
-
-  ::std::int32_t struct_with_special_names::get_maps() const {
-    return __fbthrift_field_maps;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_maps(::std::int32_t maps_) {
-    maps_ref() = maps_;
-    return __fbthrift_field_maps;
-  }
-
-  ::std::int32_t struct_with_special_names::get_name() const {
-    return __fbthrift_field_name;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_name(::std::int32_t name_) {
-    name_ref() = name_;
-    return __fbthrift_field_name;
-  }
-
-  ::std::int32_t struct_with_special_names::get_name_to_value() const {
-    return __fbthrift_field_name_to_value;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_name_to_value(::std::int32_t name_to_value_) {
-    name_to_value_ref() = name_to_value_;
-    return __fbthrift_field_name_to_value;
-  }
-
-  ::std::int32_t struct_with_special_names::get_names() const {
-    return __fbthrift_field_names;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_names(::std::int32_t names_) {
-    names_ref() = names_;
-    return __fbthrift_field_names;
-  }
-
-  ::std::int32_t struct_with_special_names::get_prefix_tree() const {
-    return __fbthrift_field_prefix_tree;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_prefix_tree(::std::int32_t prefix_tree_) {
-    prefix_tree_ref() = prefix_tree_;
-    return __fbthrift_field_prefix_tree;
-  }
-
-  ::std::int32_t struct_with_special_names::get_sets() const {
-    return __fbthrift_field_sets;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_sets(::std::int32_t sets_) {
-    sets_ref() = sets_;
-    return __fbthrift_field_sets;
-  }
-
-  ::std::int32_t struct_with_special_names::get_setter() const {
-    return __fbthrift_field_setter;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_setter(::std::int32_t setter_) {
-    setter_ref() = setter_;
-    return __fbthrift_field_setter;
-  }
-
-  ::std::int32_t struct_with_special_names::get_str() const {
-    return __fbthrift_field_str;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_str(::std::int32_t str_) {
-    str_ref() = str_;
-    return __fbthrift_field_str;
-  }
-
-  ::std::int32_t struct_with_special_names::get_strings() const {
-    return __fbthrift_field_strings;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_strings(::std::int32_t strings_) {
-    strings_ref() = strings_;
-    return __fbthrift_field_strings;
-  }
-
-  ::std::int32_t struct_with_special_names::get_type() const {
-    return __fbthrift_field_type;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_type(::std::int32_t type_) {
-    type_ref() = type_;
-    return __fbthrift_field_type;
-  }
-
-  ::std::int32_t struct_with_special_names::get_value() const {
-    return __fbthrift_field_value;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_value(::std::int32_t value_) {
-    value_ref() = value_;
-    return __fbthrift_field_value;
-  }
-
-  ::std::int32_t struct_with_special_names::get_value_to_name() const {
-    return __fbthrift_field_value_to_name;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_value_to_name(::std::int32_t value_to_name_) {
-    value_to_name_ref() = value_to_name_;
-    return __fbthrift_field_value_to_name;
-  }
-
-  ::std::int32_t struct_with_special_names::get_values() const {
-    return __fbthrift_field_values;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_values(::std::int32_t values_) {
-    values_ref() = values_;
-    return __fbthrift_field_values;
-  }
-
-  ::std::int32_t struct_with_special_names::get_id() const {
-    return __fbthrift_field_id;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_id(::std::int32_t id_) {
-    id_ref() = id_;
-    return __fbthrift_field_id;
-  }
-
-  ::std::int32_t struct_with_special_names::get_ids() const {
-    return __fbthrift_field_ids;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_ids(::std::int32_t ids_) {
-    ids_ref() = ids_;
-    return __fbthrift_field_ids;
-  }
-
-  ::std::int32_t struct_with_special_names::get_descriptor() const {
-    return __fbthrift_field_descriptor;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_descriptor(::std::int32_t descriptor_) {
-    descriptor_ref() = descriptor_;
-    return __fbthrift_field_descriptor;
-  }
-
-  ::std::int32_t struct_with_special_names::get_descriptors() const {
-    return __fbthrift_field_descriptors;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_descriptors(::std::int32_t descriptors_) {
-    descriptors_ref() = descriptors_;
-    return __fbthrift_field_descriptors;
-  }
-
-  ::std::int32_t struct_with_special_names::get_key() const {
-    return __fbthrift_field_key;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_key(::std::int32_t key_) {
-    key_ref() = key_;
-    return __fbthrift_field_key;
-  }
-
-  ::std::int32_t struct_with_special_names::get_keys() const {
-    return __fbthrift_field_keys;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_keys(::std::int32_t keys_) {
-    keys_ref() = keys_;
-    return __fbthrift_field_keys;
-  }
-
-  ::std::int32_t struct_with_special_names::get_annotation() const {
-    return __fbthrift_field_annotation;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_annotation(::std::int32_t annotation_) {
-    annotation_ref() = annotation_;
-    return __fbthrift_field_annotation;
-  }
-
-  ::std::int32_t struct_with_special_names::get_annotations() const {
-    return __fbthrift_field_annotations;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_annotations(::std::int32_t annotations_) {
-    annotations_ref() = annotations_;
-    return __fbthrift_field_annotations;
-  }
-
-  ::std::int32_t struct_with_special_names::get_member() const {
-    return __fbthrift_field_member;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_member(::std::int32_t member_) {
-    member_ref() = member_;
-    return __fbthrift_field_member;
-  }
-
-  ::std::int32_t struct_with_special_names::get_members() const {
-    return __fbthrift_field_members;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_members(::std::int32_t members_) {
-    members_ref() = members_;
-    return __fbthrift_field_members;
-  }
-
-  ::std::int32_t struct_with_special_names::get_field() const {
-    return __fbthrift_field_field;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
-
-  ::std::int32_t struct_with_special_names::get_fields() const {
-    return __fbthrift_field_fields;
-  }
-
-  ::std::int32_t& struct_with_special_names::set_fields(::std::int32_t fields_) {
-    fields_ref() = fields_;
-    return __fbthrift_field_fields;
-  }
-
 void swap([[maybe_unused]] struct_with_special_names& a, [[maybe_unused]] struct_with_special_names& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_get, b.__fbthrift_field_get);
@@ -3989,50 +3466,6 @@ bool struct_with_indirections::operator<([[maybe_unused]] const struct_with_indi
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t struct_with_indirections::get_real() const {
-    return __fbthrift_field_real;
-  }
-
-  ::std::int32_t& struct_with_indirections::set_real(::std::int32_t real_) {
-    real_ref() = real_;
-    return __fbthrift_field_real;
-  }
-
-  ::test_cpp2::cpp_reflection::FakeI32 struct_with_indirections::get_fake() const {
-    return __fbthrift_field_fake;
-  }
-
-  ::test_cpp2::cpp_reflection::FakeI32& struct_with_indirections::set_fake(::test_cpp2::cpp_reflection::FakeI32 fake_) {
-    fake_ref() = fake_;
-    return __fbthrift_field_fake;
-  }
-
-  ::test_cpp2::cpp_reflection::HasANumber struct_with_indirections::get_number() const {
-    return __fbthrift_field_number;
-  }
-
-  ::test_cpp2::cpp_reflection::HasANumber& struct_with_indirections::set_number(::test_cpp2::cpp_reflection::HasANumber number_) {
-    number_ref() = number_;
-    return __fbthrift_field_number;
-  }
-
-  ::test_cpp2::cpp_reflection::HasAResult struct_with_indirections::get_result() const {
-    return __fbthrift_field_result;
-  }
-
-  ::test_cpp2::cpp_reflection::HasAResult& struct_with_indirections::set_result(::test_cpp2::cpp_reflection::HasAResult result_) {
-    result_ref() = result_;
-    return __fbthrift_field_result;
-  }
-
-  const ::test_cpp2::cpp_reflection::HasAPhrase& struct_with_indirections::get_phrase() const& {
-    return __fbthrift_field_phrase;
-  }
-
-  ::test_cpp2::cpp_reflection::HasAPhrase struct_with_indirections::get_phrase() && {
-    return std::move(__fbthrift_field_phrase);
-  }
 
 void swap([[maybe_unused]] struct_with_indirections& a, [[maybe_unused]] struct_with_indirections& b) {
   using ::std::swap;

@@ -81,50 +81,6 @@ bool BasicTypes::operator<([[maybe_unused]] const BasicTypes& rhs) const {
 }
 
 
-  ::std::int32_t BasicTypes::get_first() const {
-    return __fbthrift_field_first;
-  }
-
-  ::std::int32_t& BasicTypes::set_first(::std::int32_t first_) {
-    first_ref() = first_;
-    return __fbthrift_field_first;
-  }
-
-  const ::std::int32_t* BasicTypes::get_second() const& {
-    return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
-  }
-
-  ::std::int32_t* BasicTypes::get_second() & {
-    return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
-  }
-
-  ::std::int32_t& BasicTypes::set_second(::std::int32_t second_) {
-    second_ref() = second_;
-    return __fbthrift_field_second;
-  }
-
-  const ::std::int64_t* BasicTypes::get_third() const& {
-    return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
-  }
-
-  ::std::int64_t* BasicTypes::get_third() & {
-    return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
-  }
-
-  ::std::int64_t& BasicTypes::set_third(::std::int64_t third_) {
-    third_ref() = third_;
-    return __fbthrift_field_third;
-  }
-
-  bool BasicTypes::get_isTrue() const {
-    return __fbthrift_field_isTrue;
-  }
-
-  bool& BasicTypes::set_isTrue(bool isTrue_) {
-    isTrue_ref() = isTrue_;
-    return __fbthrift_field_isTrue;
-  }
-
 void swap([[maybe_unused]] BasicTypes& a, [[maybe_unused]] BasicTypes& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_first, b.__fbthrift_field_first);

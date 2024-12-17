@@ -73,15 +73,6 @@ bool ReflectionStruct::operator<([[maybe_unused]] const ReflectionStruct& rhs) c
 }
 
 
-  ::std::int32_t ReflectionStruct::get_fieldA() const {
-    return __fbthrift_field_fieldA;
-  }
-
-  ::std::int32_t& ReflectionStruct::set_fieldA(::std::int32_t fieldA_) {
-    fieldA_ref() = fieldA_;
-    return __fbthrift_field_fieldA;
-  }
-
 void swap([[maybe_unused]] ReflectionStruct& a, [[maybe_unused]] ReflectionStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);

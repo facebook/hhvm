@@ -173,23 +173,6 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int64_t MyStruct::get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
-
-  ::std::int64_t& MyStruct::set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
-
-  const ::std::string& MyStruct::get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
-
-  ::std::string MyStruct::get_MyStringField() && {
-    return std::move(__fbthrift_field_MyStringField);
-  }
 const ::test::fixtures::basic::MyDataItemAlias& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }
@@ -198,42 +181,6 @@ const ::test::fixtures::basic::MyDataItemAlias& MyStruct::get_MyDataField() cons
   return std::move(__fbthrift_field_MyDataField);
 }
 
-
-  ::test::fixtures::basic::MyEnum MyStruct::get_myEnum() const {
-    return __fbthrift_field_myEnum;
-  }
-
-  ::test::fixtures::basic::MyEnum& MyStruct::set_myEnum(::test::fixtures::basic::MyEnum myEnum_) {
-    myEnum_ref() = myEnum_;
-    return __fbthrift_field_myEnum;
-  }
-
-  bool MyStruct::get_oneway() const {
-    return __fbthrift_field_oneway;
-  }
-
-  bool& MyStruct::set_oneway(bool oneway_) {
-    oneway_ref() = oneway_;
-    return __fbthrift_field_oneway;
-  }
-
-  bool MyStruct::get_readonly() const {
-    return __fbthrift_field_readonly;
-  }
-
-  bool& MyStruct::set_readonly(bool readonly_) {
-    readonly_ref() = readonly_;
-    return __fbthrift_field_readonly;
-  }
-
-  bool MyStruct::get_idempotent() const {
-    return __fbthrift_field_idempotent;
-  }
-
-  bool& MyStruct::set_idempotent(bool idempotent_) {
-    idempotent_ref() = idempotent_;
-    return __fbthrift_field_idempotent;
-  }
 const ::std::set<float>& MyStruct::get_floatSet() const& {
   return __fbthrift_field_floatSet;
 }
@@ -242,14 +189,6 @@ const ::std::set<float>& MyStruct::get_floatSet() const& {
   return std::move(__fbthrift_field_floatSet);
 }
 
-
-  const ::std::string& MyStruct::get_no_hack_codegen_field() const& {
-    return __fbthrift_field_no_hack_codegen_field;
-  }
-
-  ::std::string MyStruct::get_no_hack_codegen_field() && {
-    return std::move(__fbthrift_field_no_hack_codegen_field);
-  }
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
@@ -761,23 +700,6 @@ bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int64_t MyException::get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
-
-  ::std::int64_t& MyException::set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
-
-  const ::std::string& MyException::get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
-
-  ::std::string MyException::get_MyStringField() && {
-    return std::move(__fbthrift_field_MyStringField);
-  }
 const ::test::fixtures::basic::MyStruct& MyException::get_myStruct() const& {
   return __fbthrift_field_myStruct;
 }
@@ -930,23 +852,6 @@ bool MyExceptionWithMessage::operator<([[maybe_unused]] const MyExceptionWithMes
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int64_t MyExceptionWithMessage::get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
-
-  ::std::int64_t& MyExceptionWithMessage::set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
-
-  const ::std::string& MyExceptionWithMessage::get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
-
-  ::std::string MyExceptionWithMessage::get_MyStringField() && {
-    return std::move(__fbthrift_field_MyStringField);
-  }
 const ::test::fixtures::basic::MyStruct& MyExceptionWithMessage::get_myStruct() const& {
   return __fbthrift_field_myStruct;
 }
@@ -1060,15 +965,6 @@ bool ReservedKeyword::operator<([[maybe_unused]] const ReservedKeyword& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t ReservedKeyword::get_reserved_field() const {
-    return __fbthrift_field_reserved_field;
-  }
-
-  ::std::int32_t& ReservedKeyword::set_reserved_field(::std::int32_t reserved_field_) {
-    reserved_field_ref() = reserved_field_;
-    return __fbthrift_field_reserved_field;
-  }
 
 void swap([[maybe_unused]] ReservedKeyword& a, [[maybe_unused]] ReservedKeyword& b) {
   using ::std::swap;

@@ -2303,11 +2303,16 @@ class DirectlyAdapted final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t get_field() const;
+  ::std::int32_t get_field() const {
+    return __fbthrift_field_field;
+  }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_);
+  ::std::int32_t& set_field(::std::int32_t field_) {
+    field_ref() = field_;
+    return __fbthrift_field_field;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2806,7 +2811,8 @@ class Bar final  {
   /** Glean { "field": "optionalStructListField" } */
   [[deprecated("Use `FOO.optionalStructListField().value();` instead of `FOO.get_optionalStructListField();`")]]
   ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* get_optionalStructListField() &;
-
+  /** Glean { "field": "optionalStructListField" } */
+  [[deprecated("Use `FOO.optionalStructListField().value();` instead of `FOO.get_optionalStructListField();`")]]
   ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* get_optionalStructListField() && = delete;
 
   /** Glean { "field": "optionalStructListField" } */
@@ -3106,11 +3112,16 @@ class ThriftAdaptedStruct final  {
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
-  ::std::int64_t get_data() const;
+  ::std::int64_t get_data() const {
+    return __fbthrift_field_data;
+  }
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
-  ::std::int64_t& set_data(::std::int64_t data_);
+  ::std::int64_t& set_data(::std::int64_t data_) {
+    data_ref() = data_;
+    return __fbthrift_field_data;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -3272,11 +3283,16 @@ class DirectlyAdaptedStruct final  {
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
-  ::std::int64_t get_data() const;
+  ::std::int64_t get_data() const {
+    return __fbthrift_field_data;
+  }
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
-  ::std::int64_t& set_data(::std::int64_t data_);
+  ::std::int64_t& set_data(::std::int64_t data_) {
+    data_ref() = data_;
+    return __fbthrift_field_data;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -3501,11 +3517,15 @@ class MyAnnotation final  {
 
   /** Glean { "field": "signature" } */
   [[deprecated("Use `FOO.signature().value();` instead of `FOO.get_signature();`")]]
-  const ::std::string& get_signature() const&;
+  const ::std::string& get_signature() const& {
+    return __fbthrift_field_signature;
+  }
 
   /** Glean { "field": "signature" } */
   [[deprecated("Use `FOO.signature().value();` instead of `FOO.get_signature();`")]]
-  ::std::string get_signature() &&;
+  ::std::string get_signature() && {
+    return std::move(__fbthrift_field_signature);
+  }
 
   /** Glean { "field": "signature" } */
   template <typename T_MyAnnotation_signature_struct_setter = ::std::string>
@@ -3517,11 +3537,16 @@ class MyAnnotation final  {
 
   /** Glean { "field": "color" } */
   [[deprecated("Use `FOO.color().value();` instead of `FOO.get_color();`")]]
-  ::facebook::thrift::test::Color get_color() const;
+  ::facebook::thrift::test::Color get_color() const {
+    return __fbthrift_field_color;
+  }
 
   /** Glean { "field": "color" } */
   [[deprecated("Use `FOO.color() = BAR;` instead of `FOO.set_color(BAR);`")]]
-  ::facebook::thrift::test::Color& set_color(::facebook::thrift::test::Color color_);
+  ::facebook::thrift::test::Color& set_color(::facebook::thrift::test::Color color_) {
+    color_ref() = color_;
+    return __fbthrift_field_color;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -3681,11 +3706,16 @@ class IndependentDirectlyAdapted final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t get_field() const;
+  ::std::int32_t get_field() const {
+    return __fbthrift_field_field;
+  }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_);
+  ::std::int32_t& set_field(::std::int32_t field_) {
+    field_ref() = field_;
+    return __fbthrift_field_field;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -4565,11 +4595,15 @@ class Config final  {
 
   /** Glean { "field": "path" } */
   [[deprecated("Use `FOO.path().value();` instead of `FOO.get_path();`")]]
-  const ::std::string& get_path() const&;
+  const ::std::string& get_path() const& {
+    return __fbthrift_field_path;
+  }
 
   /** Glean { "field": "path" } */
   [[deprecated("Use `FOO.path().value();` instead of `FOO.get_path();`")]]
-  ::std::string get_path() &&;
+  ::std::string get_path() && {
+    return std::move(__fbthrift_field_path);
+  }
 
   /** Glean { "field": "path" } */
   template <typename T_Config_path_struct_setter = ::std::string>
@@ -4788,11 +4822,16 @@ class MyStruct final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t get_field() const;
+  ::std::int32_t get_field() const {
+    return __fbthrift_field_field;
+  }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_);
+  ::std::int32_t& set_field(::std::int32_t field_) {
+    field_ref() = field_;
+    return __fbthrift_field_field;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -5419,11 +5458,15 @@ class AdaptTestStruct final  {
 
   /** Glean { "field": "meta" } */
   [[deprecated("Use `FOO.meta().value();` instead of `FOO.get_meta();`")]]
-  const ::std::string& get_meta() const&;
+  const ::std::string& get_meta() const& {
+    return __fbthrift_field_meta;
+  }
 
   /** Glean { "field": "meta" } */
   [[deprecated("Use `FOO.meta().value();` instead of `FOO.get_meta();`")]]
-  ::std::string get_meta() &&;
+  ::std::string get_meta() && {
+    return std::move(__fbthrift_field_meta);
+  }
 
   /** Glean { "field": "meta" } */
   template <typename T_AdaptTestStruct_meta_struct_setter = ::std::string>
@@ -8185,11 +8228,16 @@ class UnderlyingRenamedStruct final  {
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
-  ::std::int64_t get_data() const;
+  ::std::int64_t get_data() const {
+    return __fbthrift_field_data;
+  }
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
-  ::std::int64_t& set_data(::std::int64_t data_);
+  ::std::int64_t& set_data(::std::int64_t data_) {
+    data_ref() = data_;
+    return __fbthrift_field_data;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -8350,11 +8398,16 @@ class UnderlyingSameNamespaceStruct final  {
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
-  ::std::int64_t get_data() const;
+  ::std::int64_t get_data() const {
+    return __fbthrift_field_data;
+  }
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data() = BAR;` instead of `FOO.set_data(BAR);`")]]
-  ::std::int64_t& set_data(::std::int64_t data_);
+  ::std::int64_t& set_data(::std::int64_t data_) {
+    data_ref() = data_;
+    return __fbthrift_field_data;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -9390,11 +9443,15 @@ class Person final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const&;
+  const ::std::string& get_name() const& {
+    return __fbthrift_field_name;
+  }
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() &&;
+  ::std::string get_name() && {
+    return std::move(__fbthrift_field_name);
+  }
 
   /** Glean { "field": "name" } */
   template <typename T_Person_name_struct_setter = ::std::string>
@@ -9562,11 +9619,15 @@ class Person2 final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const&;
+  const ::std::string& get_name() const& {
+    return __fbthrift_field_name;
+  }
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() &&;
+  ::std::string get_name() && {
+    return std::move(__fbthrift_field_name);
+  }
 
   /** Glean { "field": "name" } */
   template <typename T_Person2_name_struct_setter = ::std::string>

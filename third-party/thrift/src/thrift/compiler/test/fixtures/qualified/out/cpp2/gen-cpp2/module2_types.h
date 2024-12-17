@@ -493,11 +493,16 @@ class BigStruct final  {
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id().value();` instead of `FOO.get_id();`")]]
-  ::std::int32_t get_id() const;
+  ::std::int32_t get_id() const {
+    return __fbthrift_field_id;
+  }
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id() = BAR;` instead of `FOO.set_id(BAR);`")]]
-  ::std::int32_t& set_id(::std::int32_t id_);
+  ::std::int32_t& set_id(::std::int32_t id_) {
+    id_ref() = id_;
+    return __fbthrift_field_id;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

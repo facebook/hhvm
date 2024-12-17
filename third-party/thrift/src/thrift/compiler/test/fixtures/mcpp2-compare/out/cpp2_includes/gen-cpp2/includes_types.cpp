@@ -90,15 +90,6 @@ bool AStruct::operator<([[maybe_unused]] const AStruct& rhs) const {
 }
 
 
-  ::std::int32_t AStruct::get_FieldA() const {
-    return __fbthrift_field_FieldA;
-  }
-
-  ::std::int32_t& AStruct::set_FieldA(::std::int32_t FieldA_) {
-    FieldA_ref() = FieldA_;
-    return __fbthrift_field_FieldA;
-  }
-
 void swap([[maybe_unused]] AStruct& a, [[maybe_unused]] AStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_FieldA, b.__fbthrift_field_FieldA);

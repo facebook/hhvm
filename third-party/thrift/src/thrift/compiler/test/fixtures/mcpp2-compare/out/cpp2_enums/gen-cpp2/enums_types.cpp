@@ -158,15 +158,6 @@ bool SomeStruct::operator<([[maybe_unused]] const SomeStruct& rhs) const {
 }
 
 
-  ::std::int32_t SomeStruct::get_fieldA() const {
-    return __fbthrift_field_fieldA;
-  }
-
-  ::std::int32_t& SomeStruct::set_fieldA(::std::int32_t fieldA_) {
-    fieldA_ref() = fieldA_;
-    return __fbthrift_field_fieldA;
-  }
-
 void swap([[maybe_unused]] SomeStruct& a, [[maybe_unused]] SomeStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);

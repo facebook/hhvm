@@ -136,23 +136,6 @@ bool MyAnnotation::operator<([[maybe_unused]] const MyAnnotation& rhs) const {
 }
 
 
-  const ::std::string& MyAnnotation::get_signature() const& {
-    return __fbthrift_field_signature;
-  }
-
-  ::std::string MyAnnotation::get_signature() && {
-    return std::move(__fbthrift_field_signature);
-  }
-
-  ::facebook::thrift::test::Color MyAnnotation::get_color() const {
-    return __fbthrift_field_color;
-  }
-
-  ::facebook::thrift::test::Color& MyAnnotation::set_color(::facebook::thrift::test::Color color_) {
-    color_ref() = color_;
-    return __fbthrift_field_color;
-  }
-
 void swap([[maybe_unused]] MyAnnotation& a, [[maybe_unused]] MyAnnotation& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_signature, b.__fbthrift_field_signature);
@@ -912,15 +895,6 @@ bool DirectlyAdapted::operator<([[maybe_unused]] const DirectlyAdapted& rhs) con
 }
 
 
-  ::std::int32_t DirectlyAdapted::get_field() const {
-    return __fbthrift_field_field;
-  }
-
-  ::std::int32_t& DirectlyAdapted::set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
-
 void swap([[maybe_unused]] DirectlyAdapted& a, [[maybe_unused]] DirectlyAdapted& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
@@ -1004,15 +978,6 @@ bool IndependentDirectlyAdapted::operator<([[maybe_unused]] const IndependentDir
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t IndependentDirectlyAdapted::get_field() const {
-    return __fbthrift_field_field;
-  }
-
-  ::std::int32_t& IndependentDirectlyAdapted::set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
 
 void swap([[maybe_unused]] IndependentDirectlyAdapted& a, [[maybe_unused]] IndependentDirectlyAdapted& b) {
   using ::std::swap;
@@ -1584,14 +1549,6 @@ bool Config::operator<([[maybe_unused]] const Config& rhs) const {
 }
 
 
-  const ::std::string& Config::get_path() const& {
-    return __fbthrift_field_path;
-  }
-
-  ::std::string Config::get_path() && {
-    return std::move(__fbthrift_field_path);
-  }
-
 void swap([[maybe_unused]] Config& a, [[maybe_unused]] Config& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_path, b.__fbthrift_field_path);
@@ -1713,15 +1670,6 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t MyStruct::get_field() const {
-    return __fbthrift_field_field;
-  }
-
-  ::std::int32_t& MyStruct::set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
@@ -1929,14 +1877,6 @@ bool AdaptTestStruct::operator<([[maybe_unused]] const AdaptTestStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  const ::std::string& AdaptTestStruct::get_meta() const& {
-    return __fbthrift_field_meta;
-  }
-
-  ::std::string AdaptTestStruct::get_meta() && {
-    return std::move(__fbthrift_field_meta);
-  }
 
 void swap([[maybe_unused]] AdaptTestStruct& a, [[maybe_unused]] AdaptTestStruct& b) {
   using ::std::swap;
@@ -2640,15 +2580,6 @@ bool ThriftAdaptedStruct::operator<([[maybe_unused]] const ThriftAdaptedStruct& 
 }
 
 
-  ::std::int64_t ThriftAdaptedStruct::get_data() const {
-    return __fbthrift_field_data;
-  }
-
-  ::std::int64_t& ThriftAdaptedStruct::set_data(::std::int64_t data_) {
-    data_ref() = data_;
-    return __fbthrift_field_data;
-  }
-
 void swap([[maybe_unused]] ThriftAdaptedStruct& a, [[maybe_unused]] ThriftAdaptedStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data, b.__fbthrift_field_data);
@@ -2731,15 +2662,6 @@ bool DirectlyAdaptedStruct::operator<([[maybe_unused]] const DirectlyAdaptedStru
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int64_t DirectlyAdaptedStruct::get_data() const {
-    return __fbthrift_field_data;
-  }
-
-  ::std::int64_t& DirectlyAdaptedStruct::set_data(::std::int64_t data_) {
-    data_ref() = data_;
-    return __fbthrift_field_data;
-  }
 
 void swap([[maybe_unused]] DirectlyAdaptedStruct& a, [[maybe_unused]] DirectlyAdaptedStruct& b) {
   using ::std::swap;
@@ -3403,15 +3325,6 @@ bool UnderlyingRenamedStruct::operator<([[maybe_unused]] const UnderlyingRenamed
 }
 
 
-  ::std::int64_t UnderlyingRenamedStruct::get_data() const {
-    return __fbthrift_field_data;
-  }
-
-  ::std::int64_t& UnderlyingRenamedStruct::set_data(::std::int64_t data_) {
-    data_ref() = data_;
-    return __fbthrift_field_data;
-  }
-
 void swap([[maybe_unused]] UnderlyingRenamedStruct& a, [[maybe_unused]] UnderlyingRenamedStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data, b.__fbthrift_field_data);
@@ -3493,15 +3406,6 @@ bool UnderlyingSameNamespaceStruct::operator<([[maybe_unused]] const UnderlyingS
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int64_t UnderlyingSameNamespaceStruct::get_data() const {
-    return __fbthrift_field_data;
-  }
-
-  ::std::int64_t& UnderlyingSameNamespaceStruct::set_data(::std::int64_t data_) {
-    data_ref() = data_;
-    return __fbthrift_field_data;
-  }
 
 void swap([[maybe_unused]] UnderlyingSameNamespaceStruct& a, [[maybe_unused]] UnderlyingSameNamespaceStruct& b) {
   using ::std::swap;
@@ -4171,14 +4075,6 @@ bool Person::operator<([[maybe_unused]] const Person& rhs) const {
 }
 
 
-  const ::std::string& Person::get_name() const& {
-    return __fbthrift_field_name;
-  }
-
-  ::std::string Person::get_name() && {
-    return std::move(__fbthrift_field_name);
-  }
-
 void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
@@ -4279,14 +4175,6 @@ bool Person2::operator<([[maybe_unused]] const Person2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  const ::std::string& Person2::get_name() const& {
-    return __fbthrift_field_name;
-  }
-
-  ::std::string Person2::get_name() && {
-    return std::move(__fbthrift_field_name);
-  }
 
 void swap([[maybe_unused]] Person2& a, [[maybe_unused]] Person2& b) {
   using ::std::swap;

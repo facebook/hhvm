@@ -2550,19 +2550,28 @@ class structA final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::std::int32_t get_a() const;
+  ::std::int32_t get_a() const {
+    return __fbthrift_field_a;
+  }
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
-  ::std::int32_t& set_a(::std::int32_t a_);
+  ::std::int32_t& set_a(::std::int32_t a_) {
+    a_ref() = a_;
+    return __fbthrift_field_a;
+  }
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  const ::std::string& get_b() const&;
+  const ::std::string& get_b() const& {
+    return __fbthrift_field_b;
+  }
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  ::std::string get_b() &&;
+  ::std::string get_b() && {
+    return std::move(__fbthrift_field_b);
+  }
 
   /** Glean { "field": "b" } */
   template <typename T_structA_b_struct_setter = ::std::string>
@@ -3293,19 +3302,29 @@ class structB final  {
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
-  double get_c() const;
+  double get_c() const {
+    return __fbthrift_field_c;
+  }
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
-  double& set_c(double c_);
+  double& set_c(double c_) {
+    c_ref() = c_;
+    return __fbthrift_field_c;
+  }
 
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d().value();` instead of `FOO.get_d();`")]]
-  bool get_d() const;
+  bool get_d() const {
+    return __fbthrift_field_d;
+  }
 
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d() = BAR;` instead of `FOO.set_d(BAR);`")]]
-  bool& set_d(bool d_);
+  bool& set_d(bool d_) {
+    d_ref() = d_;
+    return __fbthrift_field_d;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -4972,19 +4991,28 @@ class structC final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::std::int32_t get_a() const;
+  ::std::int32_t get_a() const {
+    return __fbthrift_field_a;
+  }
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
-  ::std::int32_t& set_a(::std::int32_t a_);
+  ::std::int32_t& set_a(::std::int32_t a_) {
+    a_ref() = a_;
+    return __fbthrift_field_a;
+  }
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  const ::std::string& get_b() const&;
+  const ::std::string& get_b() const& {
+    return __fbthrift_field_b;
+  }
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  ::std::string get_b() &&;
+  ::std::string get_b() && {
+    return std::move(__fbthrift_field_b);
+  }
 
   /** Glean { "field": "b" } */
   template <typename T_structC_b_struct_setter = ::std::string>
@@ -4996,35 +5024,55 @@ class structC final  {
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
-  double get_c() const;
+  double get_c() const {
+    return __fbthrift_field_c;
+  }
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c() = BAR;` instead of `FOO.set_c(BAR);`")]]
-  double& set_c(double c_);
+  double& set_c(double c_) {
+    c_ref() = c_;
+    return __fbthrift_field_c;
+  }
 
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d().value();` instead of `FOO.get_d();`")]]
-  bool get_d() const;
+  bool get_d() const {
+    return __fbthrift_field_d;
+  }
 
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d() = BAR;` instead of `FOO.set_d(BAR);`")]]
-  bool& set_d(bool d_);
+  bool& set_d(bool d_) {
+    d_ref() = d_;
+    return __fbthrift_field_d;
+  }
 
   /** Glean { "field": "e" } */
   [[deprecated("Use `FOO.e().value();` instead of `FOO.get_e();`")]]
-  ::test_cpp2::cpp_reflection::enum1 get_e() const;
+  ::test_cpp2::cpp_reflection::enum1 get_e() const {
+    return __fbthrift_field_e;
+  }
 
   /** Glean { "field": "e" } */
   [[deprecated("Use `FOO.e() = BAR;` instead of `FOO.set_e(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum1& set_e(::test_cpp2::cpp_reflection::enum1 e_);
+  ::test_cpp2::cpp_reflection::enum1& set_e(::test_cpp2::cpp_reflection::enum1 e_) {
+    e_ref() = e_;
+    return __fbthrift_field_e;
+  }
 
   /** Glean { "field": "f" } */
   [[deprecated("Use `FOO.f().value();` instead of `FOO.get_f();`")]]
-  ::test_cpp2::cpp_reflection::enum2 get_f() const;
+  ::test_cpp2::cpp_reflection::enum2 get_f() const {
+    return __fbthrift_field_f;
+  }
 
   /** Glean { "field": "f" } */
   [[deprecated("Use `FOO.f() = BAR;` instead of `FOO.set_f(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum2& set_f(::test_cpp2::cpp_reflection::enum2 f_);
+  ::test_cpp2::cpp_reflection::enum2& set_f(::test_cpp2::cpp_reflection::enum2 f_) {
+    f_ref() = f_;
+    return __fbthrift_field_f;
+  }
   /** Glean { "field": "g" } */
   [[deprecated("Use `FOO.g().value();` instead of `FOO.get_g();`")]]
   const ::test_cpp2::cpp_reflection::union1& get_g() const&;
@@ -5779,20 +5827,30 @@ class struct1 final  {
 
   /** Glean { "field": "field0" } */
   [[deprecated("Use `FOO.field0().value();` instead of `FOO.get_field0();`")]]
-  ::std::int32_t get_field0() const;
+  ::std::int32_t get_field0() const {
+    return __fbthrift_field_field0;
+  }
 
   /** Glean { "field": "field0" } */
   [[deprecated("Use `FOO.field0() = BAR;` instead of `FOO.set_field0(BAR);`")]]
-  ::std::int32_t& set_field0(::std::int32_t field0_);
+  ::std::int32_t& set_field0(::std::int32_t field0_) {
+    field0_ref() = field0_;
+    return __fbthrift_field_field0;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::string* get_field1() const&;
+  const ::std::string* get_field1() const& {
+    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::string* get_field1() &;
-
+  ::std::string* get_field1() & {
+    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
+  /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -5805,26 +5863,37 @@ class struct1 final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::test_cpp2::cpp_reflection::enum1 get_field2() const;
+  ::test_cpp2::cpp_reflection::enum1 get_field2() const {
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum1& set_field2(::test_cpp2::cpp_reflection::enum1 field2_);
+  ::test_cpp2::cpp_reflection::enum1& set_field2(::test_cpp2::cpp_reflection::enum1 field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::test_cpp2::cpp_reflection::enum2 get_field3() const;
+  ::test_cpp2::cpp_reflection::enum2 get_field3() const {
+    return __fbthrift_field_field3;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum2& set_field3(::test_cpp2::cpp_reflection::enum2 field3_);
+  ::test_cpp2::cpp_reflection::enum2& set_field3(::test_cpp2::cpp_reflection::enum2 field3_) {
+    field3_ref() = field3_;
+    return __fbthrift_field_field3;
+  }
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   const ::test_cpp2::cpp_reflection::union1* get_field4() const&;
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::test_cpp2::cpp_reflection::union1* get_field4() &;
-
+  /** Glean { "field": "field4" } */
+  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::test_cpp2::cpp_reflection::union1* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
@@ -6318,19 +6387,28 @@ class struct2 final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  ::std::int32_t get_fieldA() const;
+  ::std::int32_t get_fieldA() const {
+    return __fbthrift_field_fieldA;
+  }
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
-  ::std::int32_t& set_fieldA(::std::int32_t fieldA_);
+  ::std::int32_t& set_fieldA(::std::int32_t fieldA_) {
+    fieldA_ref() = fieldA_;
+    return __fbthrift_field_fieldA;
+  }
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  const ::std::string& get_fieldB() const&;
+  const ::std::string& get_fieldB() const& {
+    return __fbthrift_field_fieldB;
+  }
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  ::std::string get_fieldB() &&;
+  ::std::string get_fieldB() && {
+    return std::move(__fbthrift_field_fieldB);
+  }
 
   /** Glean { "field": "fieldB" } */
   template <typename T_struct2_fieldB_struct_setter = ::std::string>
@@ -6342,19 +6420,29 @@ class struct2 final  {
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
-  ::test_cpp2::cpp_reflection::enum1 get_fieldC() const;
+  ::test_cpp2::cpp_reflection::enum1 get_fieldC() const {
+    return __fbthrift_field_fieldC;
+  }
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC() = BAR;` instead of `FOO.set_fieldC(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum1& set_fieldC(::test_cpp2::cpp_reflection::enum1 fieldC_);
+  ::test_cpp2::cpp_reflection::enum1& set_fieldC(::test_cpp2::cpp_reflection::enum1 fieldC_) {
+    fieldC_ref() = fieldC_;
+    return __fbthrift_field_fieldC;
+  }
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  ::test_cpp2::cpp_reflection::enum2 get_fieldD() const;
+  ::test_cpp2::cpp_reflection::enum2 get_fieldD() const {
+    return __fbthrift_field_fieldD;
+  }
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum2& set_fieldD(::test_cpp2::cpp_reflection::enum2 fieldD_);
+  ::test_cpp2::cpp_reflection::enum2& set_fieldD(::test_cpp2::cpp_reflection::enum2 fieldD_) {
+    fieldD_ref() = fieldD_;
+    return __fbthrift_field_fieldD;
+  }
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   const ::test_cpp2::cpp_reflection::union1& get_fieldE() const&;
@@ -7439,19 +7527,28 @@ class struct3 final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  ::std::int32_t get_fieldA() const;
+  ::std::int32_t get_fieldA() const {
+    return __fbthrift_field_fieldA;
+  }
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
-  ::std::int32_t& set_fieldA(::std::int32_t fieldA_);
+  ::std::int32_t& set_fieldA(::std::int32_t fieldA_) {
+    fieldA_ref() = fieldA_;
+    return __fbthrift_field_fieldA;
+  }
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  const ::std::string& get_fieldB() const&;
+  const ::std::string& get_fieldB() const& {
+    return __fbthrift_field_fieldB;
+  }
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  ::std::string get_fieldB() &&;
+  ::std::string get_fieldB() && {
+    return std::move(__fbthrift_field_fieldB);
+  }
 
   /** Glean { "field": "fieldB" } */
   template <typename T_struct3_fieldB_struct_setter = ::std::string>
@@ -7463,19 +7560,29 @@ class struct3 final  {
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
-  ::test_cpp2::cpp_reflection::enum1 get_fieldC() const;
+  ::test_cpp2::cpp_reflection::enum1 get_fieldC() const {
+    return __fbthrift_field_fieldC;
+  }
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC() = BAR;` instead of `FOO.set_fieldC(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum1& set_fieldC(::test_cpp2::cpp_reflection::enum1 fieldC_);
+  ::test_cpp2::cpp_reflection::enum1& set_fieldC(::test_cpp2::cpp_reflection::enum1 fieldC_) {
+    fieldC_ref() = fieldC_;
+    return __fbthrift_field_fieldC;
+  }
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  ::test_cpp2::cpp_reflection::enum2 get_fieldD() const;
+  ::test_cpp2::cpp_reflection::enum2 get_fieldD() const {
+    return __fbthrift_field_fieldD;
+  }
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum2& set_fieldD(::test_cpp2::cpp_reflection::enum2 fieldD_);
+  ::test_cpp2::cpp_reflection::enum2& set_fieldD(::test_cpp2::cpp_reflection::enum2 fieldD_) {
+    fieldD_ref() = fieldD_;
+    return __fbthrift_field_fieldD;
+  }
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   const ::test_cpp2::cpp_reflection::union1& get_fieldE() const&;
@@ -7984,20 +8091,30 @@ class struct4 final  {
 
   /** Glean { "field": "field0" } */
   [[deprecated("Use `FOO.field0().value();` instead of `FOO.get_field0();`")]]
-  ::std::int32_t get_field0() const;
+  ::std::int32_t get_field0() const {
+    return __fbthrift_field_field0;
+  }
 
   /** Glean { "field": "field0" } */
   [[deprecated("Use `FOO.field0() = BAR;` instead of `FOO.set_field0(BAR);`")]]
-  ::std::int32_t& set_field0(::std::int32_t field0_);
+  ::std::int32_t& set_field0(::std::int32_t field0_) {
+    field0_ref() = field0_;
+    return __fbthrift_field_field0;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::string* get_field1() const&;
+  const ::std::string* get_field1() const& {
+    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::string* get_field1() &;
-
+  ::std::string* get_field1() & {
+    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
+  /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -8010,11 +8127,16 @@ class struct4 final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::test_cpp2::cpp_reflection::enum1 get_field2() const;
+  ::test_cpp2::cpp_reflection::enum1 get_field2() const {
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum1& set_field2(::test_cpp2::cpp_reflection::enum1 field2_);
+  ::test_cpp2::cpp_reflection::enum1& set_field2(::test_cpp2::cpp_reflection::enum1 field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -8381,20 +8503,30 @@ class struct5 final  {
 
   /** Glean { "field": "field0" } */
   [[deprecated("Use `FOO.field0().value();` instead of `FOO.get_field0();`")]]
-  ::std::int32_t get_field0() const;
+  ::std::int32_t get_field0() const {
+    return __fbthrift_field_field0;
+  }
 
   /** Glean { "field": "field0" } */
   [[deprecated("Use `FOO.field0() = BAR;` instead of `FOO.set_field0(BAR);`")]]
-  ::std::int32_t& set_field0(::std::int32_t field0_);
+  ::std::int32_t& set_field0(::std::int32_t field0_) {
+    field0_ref() = field0_;
+    return __fbthrift_field_field0;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::string* get_field1() const&;
+  const ::std::string* get_field1() const& {
+    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::string* get_field1() &;
-
+  ::std::string* get_field1() & {
+    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
+  /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
@@ -8407,11 +8539,16 @@ class struct5 final  {
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::test_cpp2::cpp_reflection::enum1 get_field2() const;
+  ::test_cpp2::cpp_reflection::enum1 get_field2() const {
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::test_cpp2::cpp_reflection::enum1& set_field2(::test_cpp2::cpp_reflection::enum1 field2_);
+  ::test_cpp2::cpp_reflection::enum1& set_field2(::test_cpp2::cpp_reflection::enum1 field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::test_cpp2::cpp_reflection::structA& get_field3() const&;
@@ -8598,11 +8735,15 @@ class struct_binary final  {
 
   /** Glean { "field": "bi" } */
   [[deprecated("Use `FOO.bi().value();` instead of `FOO.get_bi();`")]]
-  const ::std::string& get_bi() const&;
+  const ::std::string& get_bi() const& {
+    return __fbthrift_field_bi;
+  }
 
   /** Glean { "field": "bi" } */
   [[deprecated("Use `FOO.bi().value();` instead of `FOO.get_bi();`")]]
-  ::std::string get_bi() &&;
+  ::std::string get_bi() && {
+    return std::move(__fbthrift_field_bi);
+  }
 
   /** Glean { "field": "bi" } */
   template <typename T_struct_binary_bi_struct_setter = ::std::string>
@@ -8900,11 +9041,16 @@ class dep_A_struct final  {
 
   /** Glean { "field": "i_a" } */
   [[deprecated("Use `FOO.i_a().value();` instead of `FOO.get_i_a();`")]]
-  ::std::int32_t get_i_a() const;
+  ::std::int32_t get_i_a() const {
+    return __fbthrift_field_i_a;
+  }
 
   /** Glean { "field": "i_a" } */
   [[deprecated("Use `FOO.i_a() = BAR;` instead of `FOO.set_i_a(BAR);`")]]
-  ::std::int32_t& set_i_a(::std::int32_t i_a_);
+  ::std::int32_t& set_i_a(::std::int32_t i_a_) {
+    i_a_ref() = i_a_;
+    return __fbthrift_field_i_a;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -9194,11 +9340,16 @@ class dep_B_struct final  {
 
   /** Glean { "field": "i_a" } */
   [[deprecated("Use `FOO.i_a().value();` instead of `FOO.get_i_a();`")]]
-  ::std::int32_t get_i_a() const;
+  ::std::int32_t get_i_a() const {
+    return __fbthrift_field_i_a;
+  }
 
   /** Glean { "field": "i_a" } */
   [[deprecated("Use `FOO.i_a() = BAR;` instead of `FOO.set_i_a(BAR);`")]]
-  ::std::int32_t& set_i_a(::std::int32_t i_a_);
+  ::std::int32_t& set_i_a(::std::int32_t i_a_) {
+    i_a_ref() = i_a_;
+    return __fbthrift_field_i_a;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -9356,11 +9507,16 @@ class annotated final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::std::int32_t get_a() const;
+  ::std::int32_t get_a() const {
+    return __fbthrift_field_a;
+  }
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
-  ::std::int32_t& set_a(::std::int32_t a_);
+  ::std::int32_t& set_a(::std::int32_t a_) {
+    a_ref() = a_;
+    return __fbthrift_field_a;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -12962,227 +13118,367 @@ class struct_with_special_names final  {
 
   /** Glean { "field": "get" } */
   [[deprecated("Use `FOO.get().value();` instead of `FOO.get_get();`")]]
-  ::std::int32_t get_get() const;
+  ::std::int32_t get_get() const {
+    return __fbthrift_field_get;
+  }
 
   /** Glean { "field": "get" } */
   [[deprecated("Use `FOO.get() = BAR;` instead of `FOO.set_get(BAR);`")]]
-  ::std::int32_t& set_get(::std::int32_t get_);
+  ::std::int32_t& set_get(::std::int32_t get_) {
+    get_ref() = get_;
+    return __fbthrift_field_get;
+  }
 
   /** Glean { "field": "getter" } */
   [[deprecated("Use `FOO.getter().value();` instead of `FOO.get_getter();`")]]
-  ::std::int32_t get_getter() const;
+  ::std::int32_t get_getter() const {
+    return __fbthrift_field_getter;
+  }
 
   /** Glean { "field": "getter" } */
   [[deprecated("Use `FOO.getter() = BAR;` instead of `FOO.set_getter(BAR);`")]]
-  ::std::int32_t& set_getter(::std::int32_t getter_);
+  ::std::int32_t& set_getter(::std::int32_t getter_) {
+    getter_ref() = getter_;
+    return __fbthrift_field_getter;
+  }
 
   /** Glean { "field": "lists" } */
   [[deprecated("Use `FOO.lists().value();` instead of `FOO.get_lists();`")]]
-  ::std::int32_t get_lists() const;
+  ::std::int32_t get_lists() const {
+    return __fbthrift_field_lists;
+  }
 
   /** Glean { "field": "lists" } */
   [[deprecated("Use `FOO.lists() = BAR;` instead of `FOO.set_lists(BAR);`")]]
-  ::std::int32_t& set_lists(::std::int32_t lists_);
+  ::std::int32_t& set_lists(::std::int32_t lists_) {
+    lists_ref() = lists_;
+    return __fbthrift_field_lists;
+  }
 
   /** Glean { "field": "maps" } */
   [[deprecated("Use `FOO.maps().value();` instead of `FOO.get_maps();`")]]
-  ::std::int32_t get_maps() const;
+  ::std::int32_t get_maps() const {
+    return __fbthrift_field_maps;
+  }
 
   /** Glean { "field": "maps" } */
   [[deprecated("Use `FOO.maps() = BAR;` instead of `FOO.set_maps(BAR);`")]]
-  ::std::int32_t& set_maps(::std::int32_t maps_);
+  ::std::int32_t& set_maps(::std::int32_t maps_) {
+    maps_ref() = maps_;
+    return __fbthrift_field_maps;
+  }
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::int32_t get_name() const;
+  ::std::int32_t get_name() const {
+    return __fbthrift_field_name;
+  }
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name() = BAR;` instead of `FOO.set_name(BAR);`")]]
-  ::std::int32_t& set_name(::std::int32_t name_);
+  ::std::int32_t& set_name(::std::int32_t name_) {
+    name_ref() = name_;
+    return __fbthrift_field_name;
+  }
 
   /** Glean { "field": "name_to_value" } */
   [[deprecated("Use `FOO.name_to_value().value();` instead of `FOO.get_name_to_value();`")]]
-  ::std::int32_t get_name_to_value() const;
+  ::std::int32_t get_name_to_value() const {
+    return __fbthrift_field_name_to_value;
+  }
 
   /** Glean { "field": "name_to_value" } */
   [[deprecated("Use `FOO.name_to_value() = BAR;` instead of `FOO.set_name_to_value(BAR);`")]]
-  ::std::int32_t& set_name_to_value(::std::int32_t name_to_value_);
+  ::std::int32_t& set_name_to_value(::std::int32_t name_to_value_) {
+    name_to_value_ref() = name_to_value_;
+    return __fbthrift_field_name_to_value;
+  }
 
   /** Glean { "field": "names" } */
   [[deprecated("Use `FOO.names().value();` instead of `FOO.get_names();`")]]
-  ::std::int32_t get_names() const;
+  ::std::int32_t get_names() const {
+    return __fbthrift_field_names;
+  }
 
   /** Glean { "field": "names" } */
   [[deprecated("Use `FOO.names() = BAR;` instead of `FOO.set_names(BAR);`")]]
-  ::std::int32_t& set_names(::std::int32_t names_);
+  ::std::int32_t& set_names(::std::int32_t names_) {
+    names_ref() = names_;
+    return __fbthrift_field_names;
+  }
 
   /** Glean { "field": "prefix_tree" } */
   [[deprecated("Use `FOO.prefix_tree().value();` instead of `FOO.get_prefix_tree();`")]]
-  ::std::int32_t get_prefix_tree() const;
+  ::std::int32_t get_prefix_tree() const {
+    return __fbthrift_field_prefix_tree;
+  }
 
   /** Glean { "field": "prefix_tree" } */
   [[deprecated("Use `FOO.prefix_tree() = BAR;` instead of `FOO.set_prefix_tree(BAR);`")]]
-  ::std::int32_t& set_prefix_tree(::std::int32_t prefix_tree_);
+  ::std::int32_t& set_prefix_tree(::std::int32_t prefix_tree_) {
+    prefix_tree_ref() = prefix_tree_;
+    return __fbthrift_field_prefix_tree;
+  }
 
   /** Glean { "field": "sets" } */
   [[deprecated("Use `FOO.sets().value();` instead of `FOO.get_sets();`")]]
-  ::std::int32_t get_sets() const;
+  ::std::int32_t get_sets() const {
+    return __fbthrift_field_sets;
+  }
 
   /** Glean { "field": "sets" } */
   [[deprecated("Use `FOO.sets() = BAR;` instead of `FOO.set_sets(BAR);`")]]
-  ::std::int32_t& set_sets(::std::int32_t sets_);
+  ::std::int32_t& set_sets(::std::int32_t sets_) {
+    sets_ref() = sets_;
+    return __fbthrift_field_sets;
+  }
 
   /** Glean { "field": "setter" } */
   [[deprecated("Use `FOO.setter().value();` instead of `FOO.get_setter();`")]]
-  ::std::int32_t get_setter() const;
+  ::std::int32_t get_setter() const {
+    return __fbthrift_field_setter;
+  }
 
   /** Glean { "field": "setter" } */
   [[deprecated("Use `FOO.setter() = BAR;` instead of `FOO.set_setter(BAR);`")]]
-  ::std::int32_t& set_setter(::std::int32_t setter_);
+  ::std::int32_t& set_setter(::std::int32_t setter_) {
+    setter_ref() = setter_;
+    return __fbthrift_field_setter;
+  }
 
   /** Glean { "field": "str" } */
   [[deprecated("Use `FOO.str().value();` instead of `FOO.get_str();`")]]
-  ::std::int32_t get_str() const;
+  ::std::int32_t get_str() const {
+    return __fbthrift_field_str;
+  }
 
   /** Glean { "field": "str" } */
   [[deprecated("Use `FOO.str() = BAR;` instead of `FOO.set_str(BAR);`")]]
-  ::std::int32_t& set_str(::std::int32_t str_);
+  ::std::int32_t& set_str(::std::int32_t str_) {
+    str_ref() = str_;
+    return __fbthrift_field_str;
+  }
 
   /** Glean { "field": "strings" } */
   [[deprecated("Use `FOO.strings().value();` instead of `FOO.get_strings();`")]]
-  ::std::int32_t get_strings() const;
+  ::std::int32_t get_strings() const {
+    return __fbthrift_field_strings;
+  }
 
   /** Glean { "field": "strings" } */
   [[deprecated("Use `FOO.strings() = BAR;` instead of `FOO.set_strings(BAR);`")]]
-  ::std::int32_t& set_strings(::std::int32_t strings_);
+  ::std::int32_t& set_strings(::std::int32_t strings_) {
+    strings_ref() = strings_;
+    return __fbthrift_field_strings;
+  }
 
   /** Glean { "field": "type" } */
   [[deprecated("Use `FOO.type().value();` instead of `FOO.get_type();`")]]
-  ::std::int32_t get_type() const;
+  ::std::int32_t get_type() const {
+    return __fbthrift_field_type;
+  }
 
   /** Glean { "field": "type" } */
   [[deprecated("Use `FOO.type() = BAR;` instead of `FOO.set_type(BAR);`")]]
-  ::std::int32_t& set_type(::std::int32_t type_);
+  ::std::int32_t& set_type(::std::int32_t type_) {
+    type_ref() = type_;
+    return __fbthrift_field_type;
+  }
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
-  ::std::int32_t get_value() const;
+  ::std::int32_t get_value() const {
+    return __fbthrift_field_value;
+  }
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value() = BAR;` instead of `FOO.set_value(BAR);`")]]
-  ::std::int32_t& set_value(::std::int32_t value_);
+  ::std::int32_t& set_value(::std::int32_t value_) {
+    value_ref() = value_;
+    return __fbthrift_field_value;
+  }
 
   /** Glean { "field": "value_to_name" } */
   [[deprecated("Use `FOO.value_to_name().value();` instead of `FOO.get_value_to_name();`")]]
-  ::std::int32_t get_value_to_name() const;
+  ::std::int32_t get_value_to_name() const {
+    return __fbthrift_field_value_to_name;
+  }
 
   /** Glean { "field": "value_to_name" } */
   [[deprecated("Use `FOO.value_to_name() = BAR;` instead of `FOO.set_value_to_name(BAR);`")]]
-  ::std::int32_t& set_value_to_name(::std::int32_t value_to_name_);
+  ::std::int32_t& set_value_to_name(::std::int32_t value_to_name_) {
+    value_to_name_ref() = value_to_name_;
+    return __fbthrift_field_value_to_name;
+  }
 
   /** Glean { "field": "values" } */
   [[deprecated("Use `FOO.values().value();` instead of `FOO.get_values();`")]]
-  ::std::int32_t get_values() const;
+  ::std::int32_t get_values() const {
+    return __fbthrift_field_values;
+  }
 
   /** Glean { "field": "values" } */
   [[deprecated("Use `FOO.values() = BAR;` instead of `FOO.set_values(BAR);`")]]
-  ::std::int32_t& set_values(::std::int32_t values_);
+  ::std::int32_t& set_values(::std::int32_t values_) {
+    values_ref() = values_;
+    return __fbthrift_field_values;
+  }
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id().value();` instead of `FOO.get_id();`")]]
-  ::std::int32_t get_id() const;
+  ::std::int32_t get_id() const {
+    return __fbthrift_field_id;
+  }
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id() = BAR;` instead of `FOO.set_id(BAR);`")]]
-  ::std::int32_t& set_id(::std::int32_t id_);
+  ::std::int32_t& set_id(::std::int32_t id_) {
+    id_ref() = id_;
+    return __fbthrift_field_id;
+  }
 
   /** Glean { "field": "ids" } */
   [[deprecated("Use `FOO.ids().value();` instead of `FOO.get_ids();`")]]
-  ::std::int32_t get_ids() const;
+  ::std::int32_t get_ids() const {
+    return __fbthrift_field_ids;
+  }
 
   /** Glean { "field": "ids" } */
   [[deprecated("Use `FOO.ids() = BAR;` instead of `FOO.set_ids(BAR);`")]]
-  ::std::int32_t& set_ids(::std::int32_t ids_);
+  ::std::int32_t& set_ids(::std::int32_t ids_) {
+    ids_ref() = ids_;
+    return __fbthrift_field_ids;
+  }
 
   /** Glean { "field": "descriptor" } */
   [[deprecated("Use `FOO.descriptor().value();` instead of `FOO.get_descriptor();`")]]
-  ::std::int32_t get_descriptor() const;
+  ::std::int32_t get_descriptor() const {
+    return __fbthrift_field_descriptor;
+  }
 
   /** Glean { "field": "descriptor" } */
   [[deprecated("Use `FOO.descriptor() = BAR;` instead of `FOO.set_descriptor(BAR);`")]]
-  ::std::int32_t& set_descriptor(::std::int32_t descriptor_);
+  ::std::int32_t& set_descriptor(::std::int32_t descriptor_) {
+    descriptor_ref() = descriptor_;
+    return __fbthrift_field_descriptor;
+  }
 
   /** Glean { "field": "descriptors" } */
   [[deprecated("Use `FOO.descriptors().value();` instead of `FOO.get_descriptors();`")]]
-  ::std::int32_t get_descriptors() const;
+  ::std::int32_t get_descriptors() const {
+    return __fbthrift_field_descriptors;
+  }
 
   /** Glean { "field": "descriptors" } */
   [[deprecated("Use `FOO.descriptors() = BAR;` instead of `FOO.set_descriptors(BAR);`")]]
-  ::std::int32_t& set_descriptors(::std::int32_t descriptors_);
+  ::std::int32_t& set_descriptors(::std::int32_t descriptors_) {
+    descriptors_ref() = descriptors_;
+    return __fbthrift_field_descriptors;
+  }
 
   /** Glean { "field": "key" } */
   [[deprecated("Use `FOO.key().value();` instead of `FOO.get_key();`")]]
-  ::std::int32_t get_key() const;
+  ::std::int32_t get_key() const {
+    return __fbthrift_field_key;
+  }
 
   /** Glean { "field": "key" } */
   [[deprecated("Use `FOO.key() = BAR;` instead of `FOO.set_key(BAR);`")]]
-  ::std::int32_t& set_key(::std::int32_t key_);
+  ::std::int32_t& set_key(::std::int32_t key_) {
+    key_ref() = key_;
+    return __fbthrift_field_key;
+  }
 
   /** Glean { "field": "keys" } */
   [[deprecated("Use `FOO.keys().value();` instead of `FOO.get_keys();`")]]
-  ::std::int32_t get_keys() const;
+  ::std::int32_t get_keys() const {
+    return __fbthrift_field_keys;
+  }
 
   /** Glean { "field": "keys" } */
   [[deprecated("Use `FOO.keys() = BAR;` instead of `FOO.set_keys(BAR);`")]]
-  ::std::int32_t& set_keys(::std::int32_t keys_);
+  ::std::int32_t& set_keys(::std::int32_t keys_) {
+    keys_ref() = keys_;
+    return __fbthrift_field_keys;
+  }
 
   /** Glean { "field": "annotation" } */
   [[deprecated("Use `FOO.annotation().value();` instead of `FOO.get_annotation();`")]]
-  ::std::int32_t get_annotation() const;
+  ::std::int32_t get_annotation() const {
+    return __fbthrift_field_annotation;
+  }
 
   /** Glean { "field": "annotation" } */
   [[deprecated("Use `FOO.annotation() = BAR;` instead of `FOO.set_annotation(BAR);`")]]
-  ::std::int32_t& set_annotation(::std::int32_t annotation_);
+  ::std::int32_t& set_annotation(::std::int32_t annotation_) {
+    annotation_ref() = annotation_;
+    return __fbthrift_field_annotation;
+  }
 
   /** Glean { "field": "annotations" } */
   [[deprecated("Use `FOO.annotations().value();` instead of `FOO.get_annotations();`")]]
-  ::std::int32_t get_annotations() const;
+  ::std::int32_t get_annotations() const {
+    return __fbthrift_field_annotations;
+  }
 
   /** Glean { "field": "annotations" } */
   [[deprecated("Use `FOO.annotations() = BAR;` instead of `FOO.set_annotations(BAR);`")]]
-  ::std::int32_t& set_annotations(::std::int32_t annotations_);
+  ::std::int32_t& set_annotations(::std::int32_t annotations_) {
+    annotations_ref() = annotations_;
+    return __fbthrift_field_annotations;
+  }
 
   /** Glean { "field": "member" } */
   [[deprecated("Use `FOO.member().value();` instead of `FOO.get_member();`")]]
-  ::std::int32_t get_member() const;
+  ::std::int32_t get_member() const {
+    return __fbthrift_field_member;
+  }
 
   /** Glean { "field": "member" } */
   [[deprecated("Use `FOO.member() = BAR;` instead of `FOO.set_member(BAR);`")]]
-  ::std::int32_t& set_member(::std::int32_t member_);
+  ::std::int32_t& set_member(::std::int32_t member_) {
+    member_ref() = member_;
+    return __fbthrift_field_member;
+  }
 
   /** Glean { "field": "members" } */
   [[deprecated("Use `FOO.members().value();` instead of `FOO.get_members();`")]]
-  ::std::int32_t get_members() const;
+  ::std::int32_t get_members() const {
+    return __fbthrift_field_members;
+  }
 
   /** Glean { "field": "members" } */
   [[deprecated("Use `FOO.members() = BAR;` instead of `FOO.set_members(BAR);`")]]
-  ::std::int32_t& set_members(::std::int32_t members_);
+  ::std::int32_t& set_members(::std::int32_t members_) {
+    members_ref() = members_;
+    return __fbthrift_field_members;
+  }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t get_field() const;
+  ::std::int32_t get_field() const {
+    return __fbthrift_field_field;
+  }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_);
+  ::std::int32_t& set_field(::std::int32_t field_) {
+    field_ref() = field_;
+    return __fbthrift_field_field;
+  }
 
   /** Glean { "field": "fields" } */
   [[deprecated("Use `FOO.fields().value();` instead of `FOO.get_fields();`")]]
-  ::std::int32_t get_fields() const;
+  ::std::int32_t get_fields() const {
+    return __fbthrift_field_fields;
+  }
 
   /** Glean { "field": "fields" } */
   [[deprecated("Use `FOO.fields() = BAR;` instead of `FOO.set_fields(BAR);`")]]
-  ::std::int32_t& set_fields(::std::int32_t fields_);
+  ::std::int32_t& set_fields(::std::int32_t fields_) {
+    fields_ref() = fields_;
+    return __fbthrift_field_fields;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -13549,43 +13845,67 @@ class struct_with_indirections final  {
 
   /** Glean { "field": "real" } */
   [[deprecated("Use `FOO.real().value();` instead of `FOO.get_real();`")]]
-  ::std::int32_t get_real() const;
+  ::std::int32_t get_real() const {
+    return __fbthrift_field_real;
+  }
 
   /** Glean { "field": "real" } */
   [[deprecated("Use `FOO.real() = BAR;` instead of `FOO.set_real(BAR);`")]]
-  ::std::int32_t& set_real(::std::int32_t real_);
+  ::std::int32_t& set_real(::std::int32_t real_) {
+    real_ref() = real_;
+    return __fbthrift_field_real;
+  }
 
   /** Glean { "field": "fake" } */
   [[deprecated("Use `FOO.fake().value();` instead of `FOO.get_fake();`")]]
-  ::test_cpp2::cpp_reflection::FakeI32 get_fake() const;
+  ::test_cpp2::cpp_reflection::FakeI32 get_fake() const {
+    return __fbthrift_field_fake;
+  }
 
   /** Glean { "field": "fake" } */
   [[deprecated("Use `FOO.fake() = BAR;` instead of `FOO.set_fake(BAR);`")]]
-  ::test_cpp2::cpp_reflection::FakeI32& set_fake(::test_cpp2::cpp_reflection::FakeI32 fake_);
+  ::test_cpp2::cpp_reflection::FakeI32& set_fake(::test_cpp2::cpp_reflection::FakeI32 fake_) {
+    fake_ref() = fake_;
+    return __fbthrift_field_fake;
+  }
 
   /** Glean { "field": "number" } */
   [[deprecated("Use `FOO.number().value();` instead of `FOO.get_number();`")]]
-  ::test_cpp2::cpp_reflection::HasANumber get_number() const;
+  ::test_cpp2::cpp_reflection::HasANumber get_number() const {
+    return __fbthrift_field_number;
+  }
 
   /** Glean { "field": "number" } */
   [[deprecated("Use `FOO.number() = BAR;` instead of `FOO.set_number(BAR);`")]]
-  ::test_cpp2::cpp_reflection::HasANumber& set_number(::test_cpp2::cpp_reflection::HasANumber number_);
+  ::test_cpp2::cpp_reflection::HasANumber& set_number(::test_cpp2::cpp_reflection::HasANumber number_) {
+    number_ref() = number_;
+    return __fbthrift_field_number;
+  }
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result().value();` instead of `FOO.get_result();`")]]
-  ::test_cpp2::cpp_reflection::HasAResult get_result() const;
+  ::test_cpp2::cpp_reflection::HasAResult get_result() const {
+    return __fbthrift_field_result;
+  }
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result() = BAR;` instead of `FOO.set_result(BAR);`")]]
-  ::test_cpp2::cpp_reflection::HasAResult& set_result(::test_cpp2::cpp_reflection::HasAResult result_);
+  ::test_cpp2::cpp_reflection::HasAResult& set_result(::test_cpp2::cpp_reflection::HasAResult result_) {
+    result_ref() = result_;
+    return __fbthrift_field_result;
+  }
 
   /** Glean { "field": "phrase" } */
   [[deprecated("Use `FOO.phrase().value();` instead of `FOO.get_phrase();`")]]
-  const ::test_cpp2::cpp_reflection::HasAPhrase& get_phrase() const&;
+  const ::test_cpp2::cpp_reflection::HasAPhrase& get_phrase() const& {
+    return __fbthrift_field_phrase;
+  }
 
   /** Glean { "field": "phrase" } */
   [[deprecated("Use `FOO.phrase().value();` instead of `FOO.get_phrase();`")]]
-  ::test_cpp2::cpp_reflection::HasAPhrase get_phrase() &&;
+  ::test_cpp2::cpp_reflection::HasAPhrase get_phrase() && {
+    return std::move(__fbthrift_field_phrase);
+  }
 
   /** Glean { "field": "phrase" } */
   template <typename T_struct_with_indirections_phrase_struct_setter = ::test_cpp2::cpp_reflection::HasAPhrase>

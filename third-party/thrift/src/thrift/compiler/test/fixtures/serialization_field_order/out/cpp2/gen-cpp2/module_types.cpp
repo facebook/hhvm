@@ -79,33 +79,6 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-  ::std::int32_t Foo::get_field1() const {
-    return __fbthrift_field_field1;
-  }
-
-  ::std::int32_t& Foo::set_field1(::std::int32_t field1_) {
-    field1_ref() = field1_;
-    return __fbthrift_field_field1;
-  }
-
-  ::std::int32_t Foo::get_field2() const {
-    return __fbthrift_field_field2;
-  }
-
-  ::std::int32_t& Foo::set_field2(::std::int32_t field2_) {
-    field2_ref() = field2_;
-    return __fbthrift_field_field2;
-  }
-
-  ::std::int32_t Foo::get_field3() const {
-    return __fbthrift_field_field3;
-  }
-
-  ::std::int32_t& Foo::set_field3(::std::int32_t field3_) {
-    field3_ref() = field3_;
-    return __fbthrift_field_field3;
-  }
-
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
@@ -191,33 +164,6 @@ bool Foo2::operator<([[maybe_unused]] const Foo2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t Foo2::get_field1() const {
-    return __fbthrift_field_field1;
-  }
-
-  ::std::int32_t& Foo2::set_field1(::std::int32_t field1_) {
-    field1_ref() = field1_;
-    return __fbthrift_field_field1;
-  }
-
-  ::std::int32_t Foo2::get_field2() const {
-    return __fbthrift_field_field2;
-  }
-
-  ::std::int32_t& Foo2::set_field2(::std::int32_t field2_) {
-    field2_ref() = field2_;
-    return __fbthrift_field_field2;
-  }
-
-  ::std::int32_t Foo2::get_field3() const {
-    return __fbthrift_field_field3;
-  }
-
-  ::std::int32_t& Foo2::set_field3(::std::int32_t field3_) {
-    field3_ref() = field3_;
-    return __fbthrift_field_field3;
-  }
 
 void swap([[maybe_unused]] Foo2& a, [[maybe_unused]] Foo2& b) {
   using ::std::swap;

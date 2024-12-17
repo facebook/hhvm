@@ -1645,11 +1645,15 @@ class Val final  {
 
   /** Glean { "field": "strVal" } */
   [[deprecated("Use `FOO.strVal().value();` instead of `FOO.get_strVal();`")]]
-  const ::std::string& get_strVal() const&;
+  const ::std::string& get_strVal() const& {
+    return __fbthrift_field_strVal;
+  }
 
   /** Glean { "field": "strVal" } */
   [[deprecated("Use `FOO.strVal().value();` instead of `FOO.get_strVal();`")]]
-  ::std::string get_strVal() &&;
+  ::std::string get_strVal() && {
+    return std::move(__fbthrift_field_strVal);
+  }
 
   /** Glean { "field": "strVal" } */
   template <typename T_Val_strVal_struct_setter = ::std::string>
@@ -1661,11 +1665,16 @@ class Val final  {
 
   /** Glean { "field": "intVal" } */
   [[deprecated("Use `FOO.intVal().value();` instead of `FOO.get_intVal();`")]]
-  ::std::int32_t get_intVal() const;
+  ::std::int32_t get_intVal() const {
+    return __fbthrift_field_intVal;
+  }
 
   /** Glean { "field": "intVal" } */
   [[deprecated("Use `FOO.intVal() = BAR;` instead of `FOO.set_intVal(BAR);`")]]
-  ::std::int32_t& set_intVal(::std::int32_t intVal_);
+  ::std::int32_t& set_intVal(::std::int32_t intVal_) {
+    intVal_ref() = intVal_;
+    return __fbthrift_field_intVal;
+  }
   /** Glean { "field": "typedefValue" } */
   [[deprecated("Use `FOO.typedefValue().value();` instead of `FOO.get_typedefValue();`")]]
   const ::cpp2::containerTypedef& get_typedefValue() const&;
@@ -2455,11 +2464,16 @@ class NonCopyableStruct final  {
 
   /** Glean { "field": "num" } */
   [[deprecated("Use `FOO.num().value();` instead of `FOO.get_num();`")]]
-  ::std::int64_t get_num() const;
+  ::std::int64_t get_num() const {
+    return __fbthrift_field_num;
+  }
 
   /** Glean { "field": "num" } */
   [[deprecated("Use `FOO.num() = BAR;` instead of `FOO.set_num(BAR);`")]]
-  ::std::int64_t& set_num(::std::int64_t num_);
+  ::std::int64_t& set_num(::std::int64_t num_) {
+    num_ref() = num_;
+    return __fbthrift_field_num;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

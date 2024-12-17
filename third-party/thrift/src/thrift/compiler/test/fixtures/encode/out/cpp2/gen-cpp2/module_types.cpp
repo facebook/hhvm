@@ -94,15 +94,6 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-  ::std::int32_t Foo::get_field() const {
-    return __fbthrift_field_field;
-  }
-
-  ::std::int32_t& Foo::set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
-
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
@@ -520,24 +511,6 @@ bool OpEncodeStruct::operator<([[maybe_unused]] const OpEncodeStruct& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  ::std::int32_t OpEncodeStruct::get_int_field() const {
-    return __fbthrift_field_int_field;
-  }
-
-  ::std::int32_t& OpEncodeStruct::set_int_field(::std::int32_t int_field_) {
-    int_field_ref() = int_field_;
-    return __fbthrift_field_int_field;
-  }
-
-  ::facebook::thrift::test::Enum OpEncodeStruct::get_enum_field() const {
-    return __fbthrift_field_enum_field;
-  }
-
-  ::facebook::thrift::test::Enum& OpEncodeStruct::set_enum_field(::facebook::thrift::test::Enum enum_field_) {
-    enum_field_ref() = enum_field_;
-    return __fbthrift_field_enum_field;
-  }
 const ::facebook::thrift::test::Foo& OpEncodeStruct::get_foo_field() const& {
   return __fbthrift_field_foo_field;
 }

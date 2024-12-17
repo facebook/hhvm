@@ -92,14 +92,6 @@ bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) con
 }
 
 
-  const ::std::string& CustomException::get_message() const& {
-    return __fbthrift_field_message;
-  }
-
-  ::std::string CustomException::get_message() && {
-    return std::move(__fbthrift_field_message);
-  }
-
 void swap([[maybe_unused]] CustomException& a, [[maybe_unused]] CustomException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
@@ -196,14 +188,6 @@ bool ShouldBeBoxed::operator<([[maybe_unused]] const ShouldBeBoxed& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  const ::std::string& ShouldBeBoxed::get_sessionId() const& {
-    return __fbthrift_field_sessionId;
-  }
-
-  ::std::string ShouldBeBoxed::get_sessionId() && {
-    return std::move(__fbthrift_field_sessionId);
-  }
 
 void swap([[maybe_unused]] ShouldBeBoxed& a, [[maybe_unused]] ShouldBeBoxed& b) {
   using ::std::swap;

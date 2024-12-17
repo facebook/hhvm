@@ -533,7 +533,8 @@ class TemplateLists final  {
   /** Glean { "field": "std_string" } */
   [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
   std::vector<::std::string>* get_std_string() &;
-
+  /** Glean { "field": "std_string" } */
+  [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
   std::vector<::std::string>* get_std_string() && = delete;
 
   /** Glean { "field": "std_string" } */
@@ -1942,11 +1943,15 @@ class TWrapped final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  const ::std::string& get_fieldA() const&;
+  const ::std::string& get_fieldA() const& {
+    return __fbthrift_field_fieldA;
+  }
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  ::std::string get_fieldA() &&;
+  ::std::string get_fieldA() && {
+    return std::move(__fbthrift_field_fieldA);
+  }
 
   /** Glean { "field": "fieldA" } */
   template <typename T_TWrapped_fieldA_struct_setter = ::std::string>
@@ -1958,11 +1963,15 @@ class TWrapped final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  const ::std::string& get_fieldB() const&;
+  const ::std::string& get_fieldB() const& {
+    return __fbthrift_field_fieldB;
+  }
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  ::std::string get_fieldB() &&;
+  ::std::string get_fieldB() && {
+    return std::move(__fbthrift_field_fieldB);
+  }
 
   /** Glean { "field": "fieldB" } */
   template <typename T_TWrapped_fieldB_struct_setter = ::std::string>

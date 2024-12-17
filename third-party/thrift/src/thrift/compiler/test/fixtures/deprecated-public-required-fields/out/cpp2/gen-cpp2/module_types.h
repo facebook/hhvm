@@ -152,11 +152,16 @@ class Foo final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t get_field() const;
+  ::std::int32_t get_field() const {
+    return field;
+  }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_);
+  ::std::int32_t& set_field(::std::int32_t field_) {
+    field_ref() = field_;
+    return field;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

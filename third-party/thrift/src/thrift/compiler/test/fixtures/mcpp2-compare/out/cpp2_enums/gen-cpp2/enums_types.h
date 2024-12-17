@@ -401,11 +401,16 @@ class SomeStruct final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  ::std::int32_t get_fieldA() const;
+  ::std::int32_t get_fieldA() const {
+    return __fbthrift_field_fieldA;
+  }
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
-  ::std::int32_t& set_fieldA(::std::int32_t fieldA_);
+  ::std::int32_t& set_fieldA(::std::int32_t fieldA_) {
+    fieldA_ref() = fieldA_;
+    return __fbthrift_field_fieldA;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

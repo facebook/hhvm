@@ -77,15 +77,6 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-  ::std::int64_t Foo::get_MyInt() const {
-    return __fbthrift_field_MyInt;
-  }
-
-  ::std::int64_t& Foo::set_MyInt(::std::int64_t MyInt_) {
-    MyInt_ref() = MyInt_;
-    return __fbthrift_field_MyInt;
-  }
-
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_MyInt, b.__fbthrift_field_MyInt);

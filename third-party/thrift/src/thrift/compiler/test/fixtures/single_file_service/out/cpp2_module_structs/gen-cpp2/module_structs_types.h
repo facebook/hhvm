@@ -178,17 +178,25 @@ class Foo final  {
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
-  const ::std::int32_t* get_value() const&;
+  const ::std::int32_t* get_value() const& {
+    return value_ref() ? std::addressof(__fbthrift_field_value) : nullptr;
+  }
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
-  ::std::int32_t* get_value() &;
-
+  ::std::int32_t* get_value() & {
+    return value_ref() ? std::addressof(__fbthrift_field_value) : nullptr;
+  }
+  /** Glean { "field": "value" } */
+  [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
   ::std::int32_t* get_value() && = delete;
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value() = BAR;` instead of `FOO.set_value(BAR);`")]]
-  ::std::int32_t& set_value(::std::int32_t value_);
+  ::std::int32_t& set_value(::std::int32_t value_) {
+    value_ref() = value_;
+    return __fbthrift_field_value;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

@@ -90,15 +90,6 @@ bool A::operator<([[maybe_unused]] const A& rhs) const {
 }
 
 
-  ::std::int32_t A::get_useless_field() const {
-    return __fbthrift_field_useless_field;
-  }
-
-  ::std::int32_t& A::set_useless_field(::std::int32_t useless_field_) {
-    useless_field_ref() = useless_field_;
-    return __fbthrift_field_useless_field;
-  }
-
 void swap([[maybe_unused]] A& a, [[maybe_unused]] A& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_useless_field, b.__fbthrift_field_useless_field);
@@ -329,14 +320,6 @@ bool Bang::operator<([[maybe_unused]] const Bang& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-  const ::std::string& Bang::get_message() const& {
-    return __fbthrift_field_message;
-  }
-
-  ::std::string Bang::get_message() && {
-    return std::move(__fbthrift_field_message);
-  }
 
 void swap([[maybe_unused]] Bang& a, [[maybe_unused]] Bang& b) {
   using ::std::swap;

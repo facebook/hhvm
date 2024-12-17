@@ -271,7 +271,7 @@ module ErrorsFile = struct
         log_message: string;
       }
 
-  let max_payload_size = 200_000_000
+  let max_payload_size = 4_000_000_000 (* 4 GB *)
 
   let assert_payload_size_ok size direction (message : message option) =
     if size >= max_payload_size then (
@@ -332,7 +332,7 @@ module ErrorsFile = struct
         | Some preamble ->
           let size = Marshal_tools.parse_preamble preamble in
           (* This assert is in case the file is garbled, and we read a crazy-big size,
-             to avoid allocating say a 20gb bytes array and having the machine get stuck. *)
+             to avoid allocating say a 10gb bytes array and having the machine get stuck. *)
           assert_payload_size_ok size `Read None;
           (match Sys_utils.read_non_intr fd size with
           | None -> Error Malformed

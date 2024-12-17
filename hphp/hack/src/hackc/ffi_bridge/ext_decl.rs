@@ -130,13 +130,19 @@ pub fn get_file_typedefs(parsed_file: &ParsedFile<'_>, name: &str) -> Vec<ExtDec
                     (enum_typedef_visibility(*vis), extract_type_name(hint))
                 }
                 TypedefTypeAssignment::CaseType((variant, variants)) => {
-                    let mut hints = variants.iter().map(|v| v.0).collect::<Vec<_>>();
-                    hints.insert(0, variant.0);
+                    let mut hints;
+                    let ty_ = if variants.is_empty() {
+                        variant.0.1
+                    } else {
+                        hints = variants.iter().map(|v| v.0).collect::<Vec<_>>();
+                        hints.insert(0, variant.0);
+                        Ty_::Tunion(&hints)
+                    };
                     (
                         String::from("case_type"),
                         extract_type_name(&Ty(
                             &typing_reason::Reason::NoReason, // the position is ignored when printing the type
-                            Ty_::Tunion(&hints),
+                            ty_,
                         )),
                     )
                 }

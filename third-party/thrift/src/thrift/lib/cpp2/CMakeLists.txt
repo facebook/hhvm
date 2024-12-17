@@ -233,6 +233,7 @@ add_library(
   async/HeaderServerChannel.cpp
   async/HibernatingRequestChannel.cpp
   async/Interaction.cpp
+  async/InteractionOverloadPolicy.cpp
   async/MultiplexAsyncProcessor.cpp
   async/PooledRequestChannel.cpp
   async/ReconnectingRequestChannel.cpp

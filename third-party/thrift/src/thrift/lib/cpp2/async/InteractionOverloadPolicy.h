@@ -18,6 +18,10 @@
 
 namespace apache::thrift {
 
+class AlwaysAllowSheddingInteractionOverloadPolicy;
+using DefaultInteractionOverloadPolicy =
+    AlwaysAllowSheddingInteractionOverloadPolicy;
+
 /*
  * InteractionOverloadPolicy defines the interface for determining the behavior
  * of overload protection mechanisms (Host Overload, App Overload, Queue
@@ -43,6 +47,14 @@ class InteractionOverloadPolicy {
    * if there has been any previous request load-shedded.
    */
   virtual bool allowNewRequest() = 0;
+
+  /*
+   * Create a InteractionOverloadPolicy from
+   * THRIFT_FLAG(interaction_overload_protection_policy). Valid values are:
+   *  - "default": DefaultInteractionOverloadPolicy
+   *  - "terminate": TerminateInteractionOverloadPolicy
+   */
+  static std::unique_ptr<InteractionOverloadPolicy> createFromThriftFlag();
 };
 
 } // namespace apache::thrift

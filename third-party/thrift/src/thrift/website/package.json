@@ -18,18 +18,27 @@
     "format:diff": "prettier --config .prettierrc --list-different \"**/*.{js,jsx,ts,tsx,md,mdx}\""
   },
   "dependencies": {
+    "@babel/traverse": "^7.23.2",
+    "@braintree/sanitize-url": "^6.0.1",
     "@docusaurus/core": "2.1.0",
     "@docusaurus/preset-classic": "2.1.0",
     "@mdx-js/react": "^1.6.22",
     "@types/express": "^5.0.0",
     "clsx": "^1.1.1",
     "docusaurus-plugin-internaldocs-fb": "1.9.1",
-    "express": "^4.21.1",
+    "eta": "^2.0.0",
+    "express": "^4.19.2",
+    "follow-redirects": "^1.15.6",
+    "got": "^11.8.5",
     "http-proxy-middleware": "^2.0.7",
     "internaldocs-fb-helpers": "^1.7.1",
-    "mermaid": "^10.9.3",
+    "mermaid": "^10.9.1",
+    "postcss": "^8.4.31",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "semver": "^7.5.2",
+    "ua-parser-js": "^0.7.33",
+    "webpack": "^5.76.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.17.0",

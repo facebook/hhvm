@@ -66,6 +66,8 @@ class WebTransportImpl : public WebTransport {
                                        uint32_t /*errorCode*/) = 0;
     virtual folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
         std::unique_ptr<folly::IOBuf> /*datagram*/) = 0;
+
+    virtual bool usesEncodedApplicationErrorCodes() = 0;
   };
 
   class SessionProvider {
@@ -242,7 +244,7 @@ class WebTransportImpl : public WebTransport {
     }
 
     FCState dataAvailable(std::unique_ptr<folly::IOBuf> data, bool eof);
-    void deliverReadError(uint32_t error);
+    void deliverReadError(const folly::exception_wrapper& ex);
     [[nodiscard]] bool open() const {
       return !eof_ && !error_;
     }
@@ -257,7 +259,7 @@ class WebTransportImpl : public WebTransport {
     folly::Optional<folly::Promise<WebTransport::StreamData>> readPromise_;
     folly::IOBufQueue buf_{folly::IOBufQueue::cacheChainLength()};
     bool eof_{false};
-    folly::Optional<uint32_t> error_;
+    folly::Optional<folly::exception_wrapper> error_;
     folly::CancellationSource cancellationSource_;
   };
 

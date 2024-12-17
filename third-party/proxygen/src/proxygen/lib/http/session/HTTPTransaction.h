@@ -652,6 +652,10 @@ class HTTPTransaction
       folly::assume_unreachable();
     }
 
+    bool usesEncodedApplicationErrorCodes() override {
+      return true;
+    }
+
     [[nodiscard]] virtual bool supportsWebTransport() const {
       return false;
     }

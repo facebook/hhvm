@@ -87,6 +87,11 @@ class WebTransport {
               "Peer reset or abandoned stream with error=", inError)),
           error(inError) {
     }
+    Exception(uint32_t inError, const std::string& msg)
+        : std::runtime_error(
+              folly::to<std::string>(msg, " with error=", inError)),
+          error(inError) {
+    }
     uint32_t error;
   };
 

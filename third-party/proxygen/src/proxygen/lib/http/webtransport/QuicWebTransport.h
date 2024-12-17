@@ -117,6 +117,10 @@ class QuicWebTransport
   folly::Expected<folly::Unit, WebTransport::ErrorCode> sendDatagram(
       std::unique_ptr<folly::IOBuf> /*datagram*/) override;
 
+  bool usesEncodedApplicationErrorCodes() override {
+    return false;
+  }
+
   folly::Expected<folly::Unit, WebTransport::ErrorCode> closeSession(
       folly::Optional<uint32_t> /*error*/) override;
 

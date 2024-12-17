@@ -24,7 +24,8 @@ void WebTransportImpl::destroy() {
     // Deliver an error to the application if needed
     if (stream.open()) {
       VLOG(4) << "aborting WT ingress id=" << id;
-      stream.deliverReadError(WebTransport::kInternalError);
+      stream.deliverReadError(WebTransport::Exception(
+          WebTransport::kInternalError, "shutting down"));
       stopReadingWebTransportIngress(id, WebTransport::kInternalError);
       // TODO: does the spec say how to handle this at the transport?  Eg: the
       // peer must RESET any open write streams.
@@ -156,12 +157,23 @@ WebTransportImpl::StreamWriteHandle::awaitWritable() {
   CHECK(!writePromise_) << "awaitWritable already called";
   auto contract = folly::makePromiseContract<folly::Unit>();
   writePromise_.emplace(std::move(contract.promise));
+  writePromise_->setInterruptHandler(
+      [this](const folly::exception_wrapper& ex) {
+        VLOG(4) << "Exception from interrupt handler ex=" << ex.what();
+        // if awaitWritable is cancelled, just reset it
+        CHECK(ex.with_exception([this](const folly::FutureCancellation& ex) {
+          VLOG(5) << "Setting exception ex=" << ex.what();
+          writePromise_->setException(ex);
+          writePromise_.reset();
+        })) << "Unexpected exception type";
+      });
   impl_.tp_.notifyPendingWriteOnStream(id_, this);
   return std::move(contract.future);
 }
 
 void WebTransportImpl::onWebTransportStopSending(HTTPCodec::StreamID id,
                                                  uint32_t errorCode) {
+  // The caller already decodes errorCode, if necessary
   auto it = wtEgressStreams_.find(id);
   if (it != wtEgressStreams_.end()) {
     it->second.onStopSending(errorCode);
@@ -169,6 +181,7 @@ void WebTransportImpl::onWebTransportStopSending(HTTPCodec::StreamID id,
 }
 
 void WebTransportImpl::StreamWriteHandle::onStopSending(uint32_t errorCode) {
+  // The caller already decodes errorCode, if necessary
   auto token = cancellationSource_.getToken();
   if (writePromise_) {
     writePromise_->setException(WebTransport::Exception(errorCode));
@@ -193,13 +206,23 @@ WebTransportImpl::StreamReadHandle::readStreamData() {
   VLOG(4) << __func__;
   CHECK(!readPromise_) << "One read at a time";
   if (error_) {
-    auto ex = folly::make_exception_wrapper<WebTransport::Exception>(*error_);
+    auto ex = std::move(*error_);
     impl_.wtIngressStreams_.erase(getID());
     return folly::makeSemiFuture<WebTransport::StreamData>(std::move(ex));
   } else if (buf_.empty() && !eof_) {
     VLOG(4) << __func__ << " waiting for data";
     auto contract = folly::makePromiseContract<WebTransport::StreamData>();
     readPromise_.emplace(std::move(contract.promise));
+    readPromise_->setInterruptHandler(
+        [this](const folly::exception_wrapper& ex) {
+          VLOG(4) << "Exception from interrupt handler ex=" << ex.what();
+          CHECK(ex.with_exception([this](const folly::FutureCancellation& ex) {
+            // TODO: allow app to configure the reset code on cancellation?
+            impl_.tp_.stopReadingWebTransportIngress(
+                id_, WebTransport::kInternalError);
+            deliverReadError(ex);
+          })) << "Unexpected exception type";
+        });
     return std::move(contract.future);
   } else {
     VLOG(4) << __func__ << " returning data len=" << buf_.chainLength();
@@ -265,25 +288,37 @@ void WebTransportImpl::StreamReadHandle::readError(
   impl_.sp_.refreshTimeout();
   auto quicAppErrorCode = error.code.asApplicationErrorCode();
   if (quicAppErrorCode) {
-    auto appErrorCode =
-        proxygen::WebTransport::toApplicationErrorCode(*quicAppErrorCode);
-    if (appErrorCode) {
-      deliverReadError(*appErrorCode);
-      return;
+    folly::Expected<uint32_t, WebTransport::ErrorCode> appErrorCode{
+        *quicAppErrorCode};
+    if (impl_.tp_.usesEncodedApplicationErrorCodes()) {
+      appErrorCode =
+          proxygen::WebTransport::toApplicationErrorCode(*quicAppErrorCode);
+      if (!appErrorCode) {
+        deliverReadError(WebTransport::Exception(
+            *quicAppErrorCode, "received invalid reset_stream"));
+        return;
+      }
     }
+    deliverReadError(
+        WebTransport::Exception(*appErrorCode, "received reset_stream"));
+    return;
+  } else {
+    VLOG(4) << error;
   }
   // any other error
-  deliverReadError(proxygen::WebTransport::kInternalError);
+  deliverReadError(WebTransport::Exception(
+      proxygen::WebTransport::kInternalError, "quic error"));
 }
 
-void WebTransportImpl::StreamReadHandle::deliverReadError(uint32_t error) {
+void WebTransportImpl::StreamReadHandle::deliverReadError(
+    const folly::exception_wrapper& ex) {
   cancellationSource_.requestCancellation();
   if (readPromise_) {
-    readPromise_->setException(WebTransport::Exception(error));
+    readPromise_->setException(ex);
     readPromise_.reset();
     impl_.wtIngressStreams_.erase(getID());
   } else {
-    error_ = error;
+    error_ = ex;
   }
 }
 

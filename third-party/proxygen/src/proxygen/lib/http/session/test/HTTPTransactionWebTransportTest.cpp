@@ -73,15 +73,24 @@ class HTTPTransactionWebTransportTest : public testing::Test {
   HTTP2PriorityQueue txnEgressQueue_;
   std::unique_ptr<HTTPTransaction> txn_;
 
-  static void readCallback(folly::Try<WebTransport::StreamData> streamData,
-                           bool expectException,
-                           size_t expectedLength,
-                           bool expectFin) {
+  static void readCallback(
+      folly::Try<WebTransport::StreamData> streamData,
+      bool expectException,
+      size_t expectedLength,
+      bool expectFin,
+      folly::Optional<uint32_t> expectedErrorCode = folly::none) {
     VLOG(4) << __func__ << " expectException=" << uint64_t(expectException)
             << " expectedLength=" << expectedLength
             << " expectFin=" << expectFin;
     EXPECT_EQ(streamData.hasException(), expectException);
     if (expectException || streamData.hasException()) {
+      if (expectedErrorCode) {
+        auto wtEx = streamData.tryGetExceptionObject<WebTransport::Exception>();
+        EXPECT_NE(wtEx, nullptr);
+        if (wtEx) {
+          EXPECT_EQ(wtEx->error, *expectedErrorCode);
+        }
+      }
       return;
     }
     if (streamData->data) {
@@ -202,14 +211,18 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamBufferedError) {
   auto implHandle = txn_->onWebTransportUniStream(0);
   EXPECT_NE(readHandle, nullptr);
 
-  implHandle->deliverReadError(WT_APP_ERROR_2);
+  implHandle->readError(implHandle->getID(),
+                        quic::QuicError(quic::ApplicationErrorCode(
+                            WebTransport::toHTTPErrorCode(WT_APP_ERROR_2))));
 
-  // read with buffered error
-  auto fut = readHandle->readStreamData()
-                 .via(&eventBase_)
-                 .thenTry([](auto streamData) {
-                   readCallback(std::move(streamData), true, 0, false);
-                 });
+  // read with buffered error - simulate coming directly from QUIC with
+  // encoded error code
+  auto fut =
+      readHandle->readStreamData()
+          .via(&eventBase_)
+          .thenTry([](auto streamData) {
+            readCallback(std::move(streamData), true, 0, false, WT_APP_ERROR_2);
+          });
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
 }
@@ -223,16 +236,41 @@ TEST_F(HTTPTransactionWebTransportTest, ReadStreamError) {
   EXPECT_NE(readHandle, nullptr);
 
   // read with nothing queued
-  auto fut = readHandle->readStreamData()
-                 .via(&eventBase_)
-                 .thenTry([](auto streamData) {
-                   readCallback(std::move(streamData), true, 0, false);
-                 });
+  auto fut =
+      readHandle->readStreamData()
+          .via(&eventBase_)
+          .thenTry([](auto streamData) {
+            readCallback(std::move(streamData), true, 0, false, WT_APP_ERROR_2);
+          });
   EXPECT_FALSE(fut.isReady());
 
-  implHandle->deliverReadError(WT_APP_ERROR_2);
+  // Don't encode the error, it will be passed directly
+  implHandle->readError(
+      implHandle->getID(),
+      quic::QuicError(quic::ApplicationErrorCode(WT_APP_ERROR_2)));
   eventBase_.loopOnce();
   EXPECT_TRUE(fut.isReady());
+}
+
+TEST_F(HTTPTransactionWebTransportTest, ReadStreamCancel) {
+  WebTransport::StreamReadHandle* readHandle{nullptr};
+  EXPECT_CALL(handler_, onWebTransportUniStream(_, _))
+      .WillOnce(SaveArg<1>(&readHandle));
+
+  txn_->onWebTransportUniStream(0);
+  EXPECT_NE(readHandle, nullptr);
+
+  // Get the read future
+  auto fut = readHandle->readStreamData();
+
+  // Cancel the future, the transport will get a STOP_SENDING
+  EXPECT_CALL(transport_,
+              stopReadingWebTransportIngress(0, WebTransport::kInternalError))
+      .WillOnce(Return(folly::unit));
+  fut.cancel();
+  EXPECT_TRUE(fut.isReady());
+  EXPECT_NE(fut.result().tryGetExceptionObject<folly::FutureCancellation>(),
+            nullptr);
 }
 
 TEST_F(HTTPTransactionWebTransportTest, WriteFails) {
@@ -296,6 +334,47 @@ TEST_F(HTTPTransactionWebTransportTest, WriteStreamPauseStopSending) {
       });
   EXPECT_FALSE(ready);
   txn_->onWebTransportStopSending(1, WT_APP_ERROR_2);
+  eventBase_.loopOnce();
+  EXPECT_TRUE(ready);
+}
+
+TEST_F(HTTPTransactionWebTransportTest, AwaitWritableCancel) {
+  EXPECT_CALL(transport_, newWebTransportUniStream()).WillOnce(Return(1));
+  auto writeHandle = wt_->createUniStream();
+  EXPECT_FALSE(writeHandle.hasError());
+
+  // Block write
+  quic::StreamWriteCallback* wcb{nullptr};
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+      .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
+  // awaitWritable
+  auto fut = writeHandle.value()->awaitWritable().value();
+
+  // Cancel future
+  fut.cancel();
+  EXPECT_TRUE(fut.isReady());
+  EXPECT_TRUE(fut.hasException());
+  EXPECT_NE(fut.result().tryGetExceptionObject<folly::FutureCancellation>(),
+            nullptr);
+
+  // awaitWritable again
+  bool ready = false;
+  EXPECT_CALL(transport_, notifyPendingWriteOnStream(1, testing::_))
+      .WillOnce(DoAll(SaveArg<1>(&wcb), Return(folly::unit)));
+  writeHandle.value()
+      ->awaitWritable()
+      .value()
+      .via(&eventBase_)
+      .thenTry([&ready, &writeHandle, this](auto writeReady) {
+        EXPECT_TRUE(writeReady.hasValue());
+        EXPECT_CALL(transport_, resetWebTransportEgress(1, WT_APP_ERROR_1));
+        writeHandle.value()->resetStream(WT_APP_ERROR_1);
+        ready = true;
+      });
+  EXPECT_FALSE(ready);
+
+  // Resume - only happens once because the reset, maybe?
+  wcb->onStreamWriteReady(0, 65536);
   eventBase_.loopOnce();
   EXPECT_TRUE(ready);
 }

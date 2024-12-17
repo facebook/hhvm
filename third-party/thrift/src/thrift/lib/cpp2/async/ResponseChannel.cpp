@@ -39,4 +39,8 @@ const std::string kChecksumMismatchErrorCode{"30"};
 const std::string kUnimplementedMethodErrorCode{"31"};
 const std::string kTenantQuotaExceededErrorCode{"32"};
 const std::string kTenantBlocklistedErrorCode{"33"};
+const std::string kInteractionLoadsheddedErrorCode{"34"};
+const std::string kInteractionLoadsheddedQueueTimeoutErrorCode{"35"};
+const std::string kInteractionLoadsheddedOverloadErrorCode{"36"};
+const std::string kInteractionLoadsheddedAppOverloadErrorCode{"37"};
 const std::string kConnectionClosingErrorCode{"-1"};

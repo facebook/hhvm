@@ -57,6 +57,10 @@ extern const std::string kChecksumMismatchErrorCode;
 extern const std::string kUnimplementedMethodErrorCode;
 extern const std::string kTenantQuotaExceededErrorCode;
 extern const std::string kTenantBlocklistedErrorCode;
+extern const std::string kInteractionLoadsheddedErrorCode;
+extern const std::string kInteractionLoadsheddedQueueTimeoutErrorCode;
+extern const std::string kInteractionLoadsheddedOverloadErrorCode;
+extern const std::string kInteractionLoadsheddedAppOverloadErrorCode;
 
 namespace apache::thrift {
 

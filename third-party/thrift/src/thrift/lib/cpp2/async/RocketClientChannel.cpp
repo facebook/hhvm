@@ -206,6 +206,22 @@ folly::Try<FirstResponsePayload> decodeResponseError(
       exCode = kTenantBlocklistedErrorCode;
       exType = TApplicationException::TENANT_BLOCKLISTED;
       break;
+    case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED:
+      exCode = kInteractionLoadsheddedErrorCode;
+      exType = TApplicationException::LOADSHEDDING;
+      break;
+    case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_OVERLOAD:
+      exCode = kInteractionLoadsheddedOverloadErrorCode;
+      exType = TApplicationException::LOADSHEDDING;
+      break;
+    case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_APP_OVERLOAD:
+      exCode = kInteractionLoadsheddedAppOverloadErrorCode;
+      exType = TApplicationException::LOADSHEDDING;
+      break;
+    case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_QUEUE_TIMEOUT:
+      exCode = kInteractionLoadsheddedQueueTimeoutErrorCode;
+      exType = TApplicationException::LOADSHEDDING;
+      break;
     default:
       exCode = kUnknownErrorCode;
       break;

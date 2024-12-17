@@ -70,6 +70,10 @@ ResponseRpcError makeResponseRpcError(
       case ResponseRpcErrorCode::QUEUE_OVERLOADED:
       case ResponseRpcErrorCode::QUEUE_TIMEOUT:
       case ResponseRpcErrorCode::APP_OVERLOAD:
+      case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED:
+      case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_OVERLOAD:
+      case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_APP_OVERLOAD:
+      case ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_QUEUE_TIMEOUT:
         return ResponseRpcErrorCategory::LOADSHEDDING;
       case ResponseRpcErrorCode::SHUTDOWN:
         return ResponseRpcErrorCategory::SHUTDOWN;
@@ -292,7 +296,17 @@ FOLLY_NODISCARD std::optional<ResponseRpcError> processFirstResponseHelper(
                        {kTenantQuotaExceededErrorCode,
                         ResponseRpcErrorCode::TENANT_QUOTA_EXCEEDED},
                        {kTenantBlocklistedErrorCode,
-                        ResponseRpcErrorCode::TENANT_BLOCKLISTED}});
+                        ResponseRpcErrorCode::TENANT_BLOCKLISTED},
+                       {kInteractionLoadsheddedErrorCode,
+                        ResponseRpcErrorCode::INTERACTION_LOADSHEDDED},
+                       {kInteractionLoadsheddedOverloadErrorCode,
+                        ResponseRpcErrorCode::INTERACTION_LOADSHEDDED_OVERLOAD},
+                       {kInteractionLoadsheddedAppOverloadErrorCode,
+                        ResponseRpcErrorCode::
+                            INTERACTION_LOADSHEDDED_APP_OVERLOAD},
+                       {kInteractionLoadsheddedQueueTimeoutErrorCode,
+                        ResponseRpcErrorCode::
+                            INTERACTION_LOADSHEDDED_QUEUE_TIMEOUT}});
                   if (auto errorCode = folly::get_ptr(errorCodeMap, *exPtr)) {
                     return *errorCode;
                   }

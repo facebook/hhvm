@@ -481,6 +481,18 @@ enum ResponseRpcErrorCode {
   // Tenant blocklisted
   // ResponseRpcErrorCategory::TENANT_BLOCKLISTED
   TENANT_BLOCKLISTED = 18,
+  // Interaction request rejected because interaction is already load-shedded
+  // ResponseRpcErrorCategory::LOADSHEDDING
+  INTERACTION_LOADSHEDDED = 19,
+  // Interaction request rejected due to OVERLOAD and interaction marked load-shedded
+  // ResponseRpcErrorCategory::LOADSHEDDING
+  INTERACTION_LOADSHEDDED_OVERLOAD = 20,
+  // Interaction request rejected due to APP_OVERLOAD and interaction marked load-shedded
+  // ResponseRpcErrorCategory::LOADSHEDDING
+  INTERACTION_LOADSHEDDED_APP_OVERLOAD = 21,
+  // Interaction request rejected due to QUEUE_TIMEOUT and interaction marked load-shedded
+  // ResponseRpcErrorCategory::LOADSHEDDING
+  INTERACTION_LOADSHEDDED_QUEUE_TIMEOUT = 22,
 }
 
 struct ResponseRpcError {

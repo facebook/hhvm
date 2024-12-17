@@ -23,7 +23,7 @@
 #include "hphp/runtime/base/zend-printf.h"
 #include "hphp/util/conv-10.h"
 
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 
 #include <algorithm>
 
@@ -230,7 +230,7 @@ String& String::operator+=(folly::StringPiece slice) {
   }
   if (!m_str->cowCheck()) {
     UNUSED auto const lsize = m_str->size();
-    FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, slice.size());
+    USDT(hhvm, hhvm_mut_concat, lsize, slice.size());
     auto const tmp = m_str->append(slice);
     if (UNLIKELY(tmp != m_str)) {
       // had to realloc even though count==1
@@ -238,7 +238,7 @@ String& String::operator+=(folly::StringPiece slice) {
     }
     return *this;
   }
-  FOLLY_SDT(hhvm, hhvm_cow_concat, m_str->size(), slice.size());
+  USDT(hhvm, hhvm_cow_concat, m_str->size(), slice.size());
   m_str = req::ptr<StringData>::attach(
     StringData::Make(m_str.get(), slice)
   );

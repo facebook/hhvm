@@ -34,7 +34,7 @@
 #include "hphp/util/trace.h"
 #include "hphp/util/text-util.h"
 
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 #include <folly/Random.h>
 
 namespace HPHP {
@@ -70,7 +70,7 @@ void print_boolean(bool val) {
  */
 StringData* concat_ss(StringData* v1, StringData* v2) {
   if (v1->cowCheck()) {
-    FOLLY_SDT(hhvm, hhvm_cow_concat, v1->size(), v2->size());
+    USDT(hhvm, hhvm_cow_concat, v1->size(), v2->size());
     StringData* ret = StringData::Make(v1, v2);
     // Because v1 was shared, we know this won't release the string.
     v1->decRefCount();
@@ -79,7 +79,7 @@ StringData* concat_ss(StringData* v1, StringData* v2) {
 
   auto const rhs = v2->slice();
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, rhs.size());
+  USDT(hhvm, hhvm_mut_concat, lsize, rhs.size());
   auto const ret = v1->append(rhs);
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1
@@ -109,7 +109,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   auto const s2 = conv_10(v2, intbuf + sizeof(intbuf));
   if (v1->cowCheck()) {
     auto const s1 = v1->slice();
-    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size());
+    USDT(hhvm, hhvm_cow_concat, s1.size(), s2.size());
     auto const ret = StringData::Make(s1, s2);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
@@ -117,7 +117,7 @@ StringData* concat_si(StringData* v1, int64_t v2) {
   }
 
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, s2.size());
+  USDT(hhvm, hhvm_mut_concat, lsize, s2.size());
   auto const ret = v1->append(s2);
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1
@@ -132,7 +132,7 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
     auto s1 = v1->slice();
     auto s2 = v2->slice();
     auto s3 = v3->slice();
-    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size());
+    USDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size());
     StringData* ret = StringData::Make(s1, s2, s3);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
@@ -140,7 +140,7 @@ StringData* concat_s3(StringData* v1, StringData* v2, StringData* v3) {
   }
 
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size());
+  USDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size());
   auto const ret = v1->append(v2->slice(), v3->slice());
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1
@@ -157,8 +157,7 @@ StringData* concat_s4(StringData* v1, StringData* v2,
     auto s2 = v2->slice();
     auto s3 = v3->slice();
     auto s4 = v4->slice();
-    FOLLY_SDT(hhvm, hhvm_cow_concat, s1.size(),
-              s2.size() + s3.size() + s4.size());
+    USDT(hhvm, hhvm_cow_concat, s1.size(), s2.size() + s3.size() + s4.size());
     StringData* ret = StringData::Make(s1, s2, s3, s4);
     // Because v1 was shared, we know this won't release it.
     v1->decRefCount();
@@ -166,8 +165,7 @@ StringData* concat_s4(StringData* v1, StringData* v2,
   }
 
   UNUSED auto const lsize = v1->size();
-  FOLLY_SDT(hhvm, hhvm_mut_concat, lsize,
-            v2->size() + v3->size() + v4->size());
+  USDT(hhvm, hhvm_mut_concat, lsize, v2->size() + v3->size() + v4->size());
   auto const ret = v1->append(v2->slice(), v3->slice(), v4->slice());
   if (UNLIKELY(ret != v1)) {
     // had to realloc even though count==1

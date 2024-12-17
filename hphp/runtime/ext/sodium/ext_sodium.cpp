@@ -22,7 +22,7 @@
 
 #include <cstring>
 #include <sodium.h>
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 
 #include <limits>
 
@@ -51,10 +51,10 @@ String sodium_separate_string(Variant& string_inout) {
   auto string = string_inout.toString();
   auto data = string.get();
   if (!data->cowCheck()) {
-    FOLLY_SDT(hhvm, hhvm_mut_sodium, data->size());
+    USDT(hhvm, hhvm_mut_sodium, data->size());
     return string;
   }
-  FOLLY_SDT(hhvm, hhvm_cow_sodium, string.size());
+  USDT(hhvm, hhvm_cow_sodium, string.size());
   String copy(string, CopyString);
   string_inout = copy;
   return copy;
@@ -140,7 +140,7 @@ void HHVM_FUNCTION(sodium_memzero, Variant& buffer) {
    * $x) is now wiped.
    */
   if (data->hasExactlyOneRef() && !data->empty()) {
-    FOLLY_SDT(hhvm, hhvm_mut_sodium, data->size());
+    USDT(hhvm, hhvm_mut_sodium, data->size());
     sodium_memzero(data->mutableData(), data->size());
   }
   buffer = init_null();

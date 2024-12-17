@@ -21,7 +21,7 @@
 
 #include <folly/CPortability.h>
 #include <folly/ScopeGuard.h>
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 
 #include "hphp/runtime/base/array-data-defs.h"
 #include "hphp/runtime/base/double-to-int64.h"
@@ -527,7 +527,7 @@ void tvBitNot(TypedValue& cell) {
       [[fallthrough]];
     case KindOfPersistentString:
         auto const sl = cell.m_data.pstr->slice();
-        FOLLY_SDT(hhvm, hhvm_cow_bitnot, sl.size());
+        USDT(hhvm, hhvm_cow_bitnot, sl.size());
         auto const newSd = StringData::Make(sl, CopyString);
         cell.m_data.pstr->decRefCount(); // can't go to zero
         cell.m_data.pstr = newSd;
@@ -537,7 +537,7 @@ void tvBitNot(TypedValue& cell) {
         // created, so the following mutation will be safe wrt its
         // internal hash caching.
         cell.m_data.pstr->invalidateHash();
-        FOLLY_SDT(hhvm, hhvm_mut_bitnot, cell.m_data.pstr->size());
+        USDT(hhvm, hhvm_mut_bitnot, cell.m_data.pstr->size());
       }
 
       {

@@ -1,6 +1,6 @@
 User-space defined tracepoints (USDTs) in HHVM.
 
-Tracepoints are implemented with FOLLY_SDT follow the naming
+Tracepoints are implemented with USDT follow the naming
 convention hhvm_{event}_{cause}. {event} describes what happened,
 and {cause} describes what caused the event. Some tracepoints
 may occur more than once in the source (due to implementation details)

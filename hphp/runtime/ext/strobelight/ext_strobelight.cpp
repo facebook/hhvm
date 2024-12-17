@@ -31,8 +31,7 @@
 #include <mutex>
 #include <time.h>
 
-#include <folly/tracing/StaticTracepoint.h>
-FOLLY_SDT_DEFINE_SEMAPHORE(hhvm, hhvm_stack);
+#include <usdt/usdt.h>
 
 namespace HPHP {
 
@@ -131,7 +130,7 @@ bool logToUSDT(const Array& bt) {
   bt_slab.len = i;
 
   // Allow BPF to read the now-formatted stacktrace
-  FOLLY_SDT_WITH_SEMAPHORE(hhvm, hhvm_stack, &bt_slab);
+  USDT_WITH_SEMA(hhvm, hhvm_stack, &bt_slab);
 
   return true;
 }
@@ -158,7 +157,7 @@ bool Strobelight::active() {
   }
 
   // return true if a USDT probe function is listening
-  return FOLLY_SDT_IS_ENABLED(hhvm, hhvm_stack);
+  return USDT_IS_ACTIVE(hhvm, hhvm_stack);
 }
 
 bool Strobelight::isXenonActive() {

@@ -39,7 +39,7 @@
 #include "hphp/system/systemlib.h"
 #include "hphp/util/configs/php7.h"
 
-#include <folly/tracing/StaticTracepoint.h>
+#include <usdt/usdt.h>
 
 namespace HPHP {
 
@@ -1178,7 +1178,7 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
   if (x < baseLen && !oldp->cowCheck()) {
     // Modify base in place.  This is safe because the LHS owns the
     // only reference.
-    FOLLY_SDT(hhvm, hhvm_mut_modifychar, baseLen, x);
+    USDT(hhvm, hhvm_mut_modifychar, baseLen, x);
     auto const newp = oldp->modifyChar(x, y);
     if (UNLIKELY(newp != oldp)) {
       // only way we can get here is due to a private (count==1) apc string.
@@ -1188,7 +1188,7 @@ inline StringData* SetElemString(tv_lval base, key_type<keyType> key,
     }
     // NB: if x < capacity, we could have appended in-place here.
   } else {
-    FOLLY_SDT(hhvm, hhvm_cow_modifychar, baseLen, x);
+    USDT(hhvm, hhvm_cow_modifychar, baseLen, x);
     StringData* sd = StringData::Make(slen);
     char* s = sd->mutableData();
     memcpy(s, oldp->data(), baseLen);

@@ -37,6 +37,7 @@
   state_loader
   sys_utils
   utils_config_file_lwt
+  watchman_lwt
   yojson
   version)
  (preprocess

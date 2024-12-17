@@ -1323,6 +1323,14 @@ module Process (Exec : Watchman_sig.Exec) = struct
     | Process_failure of Exec.error
     | Unexpected_json of { json_string: string }
 
+  let error_to_string = function
+    | Process_failure e ->
+      Printf.sprintf
+        "Error while running `watchman` command: %s"
+        (Exec.error_to_string e)
+    | Unexpected_json { json_string } ->
+      Printf.sprintf "Error while parsing watchman response: %s" json_string
+
   (** [watch_project ~root ~socket] queries watchman to watch a [root]. *)
   let watch_project ~root ~sockname =
     let open Exec.Monad_infix in

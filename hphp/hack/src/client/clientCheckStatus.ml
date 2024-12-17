@@ -465,24 +465,31 @@ let watchman_get_raw_updates_since
     ~(clock : Watchman.clock)
     ~(fail_on_new_instance : bool)
     ~(fail_during_state : bool) : (string list, string) result Lwt.t =
+  let open Lwt_result in
   if fail_on_new_instance then
     failwith "Not yet implemented: fail_on_new_instance";
   if fail_during_state then failwith "Not yet implemented: fail_during_state";
+  Watchman_lwt.watch_project ~root ~sockname:None
+  |> Lwt_result.map_error Watchman_lwt.error_to_string
+  >>= fun { Watchman_sig.Types.watch; relative_path } ->
   let query =
     Hh_json.(
       JSON_Array
         [
           JSON_String "query";
-          JSON_String (Path.to_string root);
+          JSON_String watch;
           JSON_Object
-            [
-              ("since", JSON_String clock);
-              ("fields", JSON_Array [JSON_String "name"]);
-              ( "expression",
-                Hh_json_helpers.AdhocJsonHelpers.pred
-                  "allof"
-                  FilesToIgnore.watchman_server_expression_terms );
-            ];
+            ((match relative_path with
+             | None -> []
+             | Some p -> [("relative_path", JSON_String p)])
+            @ [
+                ("since", JSON_String clock);
+                ("fields", JSON_Array [JSON_String "name"]);
+                ( "expression",
+                  Hh_json_helpers.AdhocJsonHelpers.pred
+                    "allof"
+                    FilesToIgnore.watchman_server_expression_terms );
+              ]);
         ])
     |> Hh_json.json_to_string
   in

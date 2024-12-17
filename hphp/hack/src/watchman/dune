@@ -23,3 +23,11 @@
  (libraries hh_json logging utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
+
+(library
+ (name watchman_lwt)
+ (modules
+  watchman_lwt)
+ (libraries
+  watchman
+  lwt_utils))

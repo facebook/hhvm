@@ -161,6 +161,8 @@ module type Exec = sig
 
   type error
 
+  val error_to_string : error -> string
+
   module Monad_infix : sig
     val ( >>| ) : 'a future -> ('a -> 'b) -> 'b future
 
@@ -181,6 +183,8 @@ module type Process_S = sig
   type error =
     | Process_failure of exec_error
     | Unexpected_json of { json_string: string }
+
+  val error_to_string : error -> string
 
   (** [watch_project ~root ~socket] queries watchman to watch a [root]. *)
   val watch_project :

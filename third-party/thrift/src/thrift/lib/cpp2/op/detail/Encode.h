@@ -224,6 +224,12 @@ struct SerializedSize<false, type::binary_t> {
   uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
     return prot.serializedSizeBinary(s);
   }
+
+  template <typename Protocol>
+  uint32_t operator()(
+      Protocol& prot, const std::unique_ptr<folly::IOBuf>& s) const {
+    return prot.serializedSizeBinary(s);
+  }
 };
 
 template <>
@@ -234,6 +240,11 @@ struct SerializedSize<true, type::binary_t> {
   }
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
+    return prot.serializedSizeZCBinary(s);
+  }
+  template <typename Protocol>
+  uint32_t operator()(
+      Protocol& prot, const std::unique_ptr<folly::IOBuf>& s) const {
     return prot.serializedSizeZCBinary(s);
   }
 };

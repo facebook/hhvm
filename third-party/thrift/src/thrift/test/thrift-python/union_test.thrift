@@ -61,7 +61,9 @@ union TestUnionAmbiguousTypeFieldName {
 # (immutable) thrift-python union class implementation. See union_test.py for
 # the resulting behavior.
 union TestUnionAmbiguousValueFieldName {
+  @python.Name{name = "type_"}
   1: i32 type;
+  @python.Name{name = "value_"}
   2: i32 value;
 }
 # NOTE: Error on import (due to fake "EMPTY" enum value):

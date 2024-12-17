@@ -980,7 +980,12 @@ class python_mstch_enum_value : public mstch_enum_value {
 // Generator-specific validator that enforces "name" and "value" are not used
 // as enum member or union field names (thrift-py3).
 namespace enum_member_union_field_names_validator {
-void validate(const t_named* node, const std::string& name, sema_context& ctx) {
+template <typename Pred>
+void validate(
+    const t_named* node,
+    const std::string& name,
+    sema_context& ctx,
+    Pred&& field_name_predicate) {
   auto pyname = node->get_annotation("py3.name", &name);
   if (const t_const* annot =
           node->find_structured_annotation_or_null(kPythonNameUri)) {
@@ -989,31 +994,33 @@ void validate(const t_named* node, const std::string& name, sema_context& ctx) {
       pyname = annotation_name->get_string();
     }
   }
-  if (pyname == "name" || pyname == "value") {
+  if (field_name_predicate(pyname)) {
     ctx.report(
         *node,
         "enum-member-union-field-names-rule",
         diagnostic_level::error,
         "'{}' should not be used as an enum/union field name in thrift-py3. "
         "Use a different name or annotate the field with "
-        "`(py3.name=\"<new_py_name>\")`",
+        "`@python.Name{{name=\"<new_py_name>\"}}`",
         pyname);
   }
 }
 bool validate_enum(sema_context& ctx, const t_enum& enm) {
+  auto predicate = [](const auto& pyname) {
+    return pyname == "name" || pyname == "value";
+  };
   for (const t_enum_value* ev : enm.get_enum_values()) {
-    validate(ev, ev->get_name(), ctx);
+    validate(ev, ev->get_name(), ctx, predicate);
   }
   return true;
 }
 
-// TODO(T176314881): this never does anything?
-bool validate_structured(sema_context& ctx, const t_struct& s) {
-  if (!s.is_union()) {
-    return false;
-  }
+bool validate_union(sema_context& ctx, const t_struct& s) {
+  auto predicate = [](const auto& pyname) {
+    return pyname == "type" || pyname == "value";
+  };
   for (const t_field& f : s.fields()) {
-    validate(&f, f.name(), ctx);
+    validate(&f, f.name(), ctx, predicate);
   }
   return true;
 }
@@ -1096,8 +1103,8 @@ class t_mstch_python_generator : public t_mstch_generator {
     validator.add_program_visitor(validate_no_reserved_key_in_namespace);
     validator.add_enum_visitor(
         enum_member_union_field_names_validator::validate_enum);
-    validator.add_struct_visitor(
-        enum_member_union_field_names_validator::validate_structured);
+    validator.add_union_visitor(
+        enum_member_union_field_names_validator::validate_union);
     if (get_py3_namespace(program_).empty()) {
       validator.add_structured_definition_visitor(
           module_name_collision_validator::validate_named);

@@ -357,15 +357,17 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
             type_union.Type = 1
         _assert_serialization_round_trip(self, immutable_serializer, type_union)
 
-        u = TestUnionAmbiguousValueFieldNameImmutable(value=42)
+        u = TestUnionAmbiguousValueFieldNameImmutable(value_=42)
+        self.assertEqual(u.value_, 42)
+        # this is now the catch-all accessor
         self.assertEqual(u.value, 42)
         with self.assertRaises(AttributeError):
-            u.type
+            u.type_
         _assert_serialization_round_trip(self, immutable_serializer, u)
 
-        u2 = TestUnionAmbiguousValueFieldNameImmutable(type=123)
+        u2 = TestUnionAmbiguousValueFieldNameImmutable(type_=123)
         with self.assertRaises(AttributeError):
-            u2.value
+            u2.value_
         _assert_serialization_round_trip(self, immutable_serializer, u2)
 
     def test_hash(self) -> None:

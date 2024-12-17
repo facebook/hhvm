@@ -366,13 +366,13 @@ class BasicTypes final  {
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   const ::std::int32_t* get_second() const& {
-    return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
+    return second_ref().has_value() ? std::addressof(__fbthrift_field_second) : nullptr;
   }
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   ::std::int32_t* get_second() & {
-    return second_ref() ? std::addressof(__fbthrift_field_second) : nullptr;
+    return second_ref().has_value() ? std::addressof(__fbthrift_field_second) : nullptr;
   }
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
@@ -388,13 +388,13 @@ class BasicTypes final  {
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
   const ::std::int64_t* get_third() const& {
-    return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
+    return third_ref().has_value() ? std::addressof(__fbthrift_field_third) : nullptr;
   }
 
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
   ::std::int64_t* get_third() & {
-    return third_ref() ? std::addressof(__fbthrift_field_third) : nullptr;
+    return third_ref().has_value() ? std::addressof(__fbthrift_field_third) : nullptr;
   }
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]

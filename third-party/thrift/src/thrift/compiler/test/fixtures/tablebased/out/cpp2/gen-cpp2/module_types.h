@@ -516,13 +516,13 @@ class TrivialTypesStruct final  {
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   const ::std::int32_t* get_fieldA() const& {
-    return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
+    return fieldA_ref().has_value() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
   }
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   ::std::int32_t* get_fieldA() & {
-    return fieldA_ref() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
+    return fieldA_ref().has_value() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
   }
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
@@ -538,13 +538,13 @@ class TrivialTypesStruct final  {
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const ::std::string* get_fieldB() const& {
-    return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
+    return fieldB_ref().has_value() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
   }
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::string* get_fieldB() & {
-    return fieldB_ref() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
+    return fieldB_ref().has_value() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
   }
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
@@ -561,13 +561,13 @@ class TrivialTypesStruct final  {
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   const ::std::string* get_fieldC() const& {
-    return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
+    return fieldC_ref().has_value() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
   }
 
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   ::std::string* get_fieldC() & {
-    return fieldC_ref() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
+    return fieldC_ref().has_value() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
   }
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
@@ -584,13 +584,13 @@ class TrivialTypesStruct final  {
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   const ::test::fixtures::tablebased::IOBufPtr* get_fieldD() const& {
-    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
+    return fieldD_ref().has_value() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
   }
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   ::test::fixtures::tablebased::IOBufPtr* get_fieldD() & {
-    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
+    return fieldD_ref().has_value() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
   }
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]

@@ -3030,13 +3030,13 @@ class PrimitiveStruct final  {
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty().value();` instead of `FOO.get_floaty();`")]]
   const float* get_floaty() const& {
-    return floaty_ref() ? std::addressof(__fbthrift_field_floaty) : nullptr;
+    return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
   }
 
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty().value();` instead of `FOO.get_floaty();`")]]
   float* get_floaty() & {
-    return floaty_ref() ? std::addressof(__fbthrift_field_floaty) : nullptr;
+    return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
   }
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty().value();` instead of `FOO.get_floaty();`")]]

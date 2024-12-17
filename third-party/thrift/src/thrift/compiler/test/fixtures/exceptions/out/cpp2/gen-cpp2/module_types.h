@@ -422,13 +422,13 @@ class FOLLY_EXPORT Serious : public virtual apache::thrift::TException {
   /** Glean { "field": "sonnet" } */
   [[deprecated("Use `FOO.sonnet().value();` instead of `FOO.get_sonnet();`")]]
   const ::std::string* get_sonnet() const& {
-    return sonnet_ref() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
+    return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
   }
 
   /** Glean { "field": "sonnet" } */
   [[deprecated("Use `FOO.sonnet().value();` instead of `FOO.get_sonnet();`")]]
   ::std::string* get_sonnet() & {
-    return sonnet_ref() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
+    return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
   }
   /** Glean { "field": "sonnet" } */
   [[deprecated("Use `FOO.sonnet().value();` instead of `FOO.get_sonnet();`")]]

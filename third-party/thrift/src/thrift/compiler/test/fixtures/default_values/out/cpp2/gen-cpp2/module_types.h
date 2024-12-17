@@ -685,13 +685,13 @@ class StructWithNoCustomDefaultValues final  {
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   const ::std::int32_t* get_optional_integer() const& {
-    return optional_integer_ref() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
   }
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   ::std::int32_t* get_optional_integer() & {
-    return optional_integer_ref() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
   }
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
@@ -1198,13 +1198,13 @@ class StructWithCustomDefaultValues final  {
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   const ::std::int32_t* get_optional_integer() const& {
-    return optional_integer_ref() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
   }
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   ::std::int32_t* get_optional_integer() & {
-    return optional_integer_ref() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
   }
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]

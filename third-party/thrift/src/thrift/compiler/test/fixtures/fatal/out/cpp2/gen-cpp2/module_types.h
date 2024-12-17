@@ -5855,13 +5855,13 @@ class struct1 final  {
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::string* get_field1() const& {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() & {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
@@ -8106,13 +8106,13 @@ class struct4 final  {
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::string* get_field1() const& {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() & {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
@@ -8518,13 +8518,13 @@ class struct5 final  {
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::string* get_field1() const& {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() & {
-    return field1_ref() ? std::addressof(__fbthrift_field_field1) : nullptr;
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]

@@ -22,13 +22,13 @@
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
-    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
+    return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() & {
-    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
+    return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
@@ -53,13 +53,13 @@
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
-    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
+    return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() & {
-    return {{field:cpp_name}}_ref() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
+    return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]

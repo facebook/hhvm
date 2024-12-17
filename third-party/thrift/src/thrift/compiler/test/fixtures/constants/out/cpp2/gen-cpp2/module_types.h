@@ -698,13 +698,13 @@ class Internship final  {
   /** Glean { "field": "employer" } */
   [[deprecated("Use `FOO.employer().value();` instead of `FOO.get_employer();`")]]
   const ::cpp2::Company* get_employer() const& {
-    return employer_ref() ? std::addressof(__fbthrift_field_employer) : nullptr;
+    return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
   }
 
   /** Glean { "field": "employer" } */
   [[deprecated("Use `FOO.employer().value();` instead of `FOO.get_employer();`")]]
   ::cpp2::Company* get_employer() & {
-    return employer_ref() ? std::addressof(__fbthrift_field_employer) : nullptr;
+    return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
   }
   /** Glean { "field": "employer" } */
   [[deprecated("Use `FOO.employer().value();` instead of `FOO.get_employer();`")]]
@@ -720,13 +720,13 @@ class Internship final  {
   /** Glean { "field": "compensation" } */
   [[deprecated("Use `FOO.compensation().value();` instead of `FOO.get_compensation();`")]]
   const double* get_compensation() const& {
-    return compensation_ref() ? std::addressof(__fbthrift_field_compensation) : nullptr;
+    return compensation_ref().has_value() ? std::addressof(__fbthrift_field_compensation) : nullptr;
   }
 
   /** Glean { "field": "compensation" } */
   [[deprecated("Use `FOO.compensation().value();` instead of `FOO.get_compensation();`")]]
   double* get_compensation() & {
-    return compensation_ref() ? std::addressof(__fbthrift_field_compensation) : nullptr;
+    return compensation_ref().has_value() ? std::addressof(__fbthrift_field_compensation) : nullptr;
   }
   /** Glean { "field": "compensation" } */
   [[deprecated("Use `FOO.compensation().value();` instead of `FOO.get_compensation();`")]]
@@ -742,13 +742,13 @@ class Internship final  {
   /** Glean { "field": "school" } */
   [[deprecated("Use `FOO.school().value();` instead of `FOO.get_school();`")]]
   const ::std::string* get_school() const& {
-    return school_ref() ? std::addressof(__fbthrift_field_school) : nullptr;
+    return school_ref().has_value() ? std::addressof(__fbthrift_field_school) : nullptr;
   }
 
   /** Glean { "field": "school" } */
   [[deprecated("Use `FOO.school().value();` instead of `FOO.get_school();`")]]
   ::std::string* get_school() & {
-    return school_ref() ? std::addressof(__fbthrift_field_school) : nullptr;
+    return school_ref().has_value() ? std::addressof(__fbthrift_field_school) : nullptr;
   }
   /** Glean { "field": "school" } */
   [[deprecated("Use `FOO.school().value();` instead of `FOO.get_school();`")]]
@@ -2186,13 +2186,13 @@ class struct4 final  {
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
   const double* get_b() const& {
-    return b_ref() ? std::addressof(__fbthrift_field_b) : nullptr;
+    return b_ref().has_value() ? std::addressof(__fbthrift_field_b) : nullptr;
   }
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
   double* get_b() & {
-    return b_ref() ? std::addressof(__fbthrift_field_b) : nullptr;
+    return b_ref().has_value() ? std::addressof(__fbthrift_field_b) : nullptr;
   }
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
@@ -2208,13 +2208,13 @@ class struct4 final  {
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   const ::std::int8_t* get_c() const& {
-    return c_ref() ? std::addressof(__fbthrift_field_c) : nullptr;
+    return c_ref().has_value() ? std::addressof(__fbthrift_field_c) : nullptr;
   }
 
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   ::std::int8_t* get_c() & {
-    return c_ref() ? std::addressof(__fbthrift_field_c) : nullptr;
+    return c_ref().has_value() ? std::addressof(__fbthrift_field_c) : nullptr;
   }
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]

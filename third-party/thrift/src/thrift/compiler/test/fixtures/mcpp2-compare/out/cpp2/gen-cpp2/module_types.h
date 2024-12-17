@@ -2355,13 +2355,13 @@ class MyStruct final  {
   /** Glean { "field": "MyBinaryField2" } */
   [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
   const ::std::string* get_MyBinaryField2() const& {
-    return MyBinaryField2_ref() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
+    return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
   }
 
   /** Glean { "field": "MyBinaryField2" } */
   [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
   ::std::string* get_MyBinaryField2() & {
-    return MyBinaryField2_ref() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
+    return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
   }
   /** Glean { "field": "MyBinaryField2" } */
   [[deprecated("Use `FOO.MyBinaryField2().value();` instead of `FOO.get_MyBinaryField2();`")]]
@@ -8029,13 +8029,13 @@ class containerStruct final  {
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   const bool* get_opt_fieldA() const& {
-    return opt_fieldA_ref() ? std::addressof(opt_fieldA) : nullptr;
+    return opt_fieldA_ref().has_value() ? std::addressof(opt_fieldA) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   bool* get_opt_fieldA() & {
-    return opt_fieldA_ref() ? std::addressof(opt_fieldA) : nullptr;
+    return opt_fieldA_ref().has_value() ? std::addressof(opt_fieldA) : nullptr;
   }
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
@@ -8201,13 +8201,13 @@ class containerStruct final  {
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   const ::std::string* get_opt_fieldE() const& {
-    return opt_fieldE_ref() ? std::addressof(opt_fieldE) : nullptr;
+    return opt_fieldE_ref().has_value() ? std::addressof(opt_fieldE) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   ::std::string* get_opt_fieldE() & {
-    return opt_fieldE_ref() ? std::addressof(opt_fieldE) : nullptr;
+    return opt_fieldE_ref().has_value() ? std::addressof(opt_fieldE) : nullptr;
   }
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
@@ -8415,13 +8415,13 @@ class containerStruct final  {
   /** Glean { "field": "opt_fieldR" } */
   [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]
   const ::some::valid::ns::MyEnumA* get_opt_fieldR() const& {
-    return opt_fieldR_ref() ? std::addressof(opt_fieldR) : nullptr;
+    return opt_fieldR_ref().has_value() ? std::addressof(opt_fieldR) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldR" } */
   [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]
   ::some::valid::ns::MyEnumA* get_opt_fieldR() & {
-    return opt_fieldR_ref() ? std::addressof(opt_fieldR) : nullptr;
+    return opt_fieldR_ref().has_value() ? std::addressof(opt_fieldR) : nullptr;
   }
   /** Glean { "field": "opt_fieldR" } */
   [[deprecated("Use `FOO.opt_fieldR().value();` instead of `FOO.get_opt_fieldR();`")]]

@@ -464,13 +464,13 @@ class Mixin2 final  {
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::string* get_field2() const& {
-    return field2_ref() ? std::addressof(__fbthrift_field_field2) : nullptr;
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
   }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::string* get_field2() & {
-    return field2_ref() ? std::addressof(__fbthrift_field_field2) : nullptr;
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
   }
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]

@@ -179,13 +179,13 @@ class Foo final  {
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
   const ::std::int32_t* get_value() const& {
-    return value_ref() ? std::addressof(__fbthrift_field_value) : nullptr;
+    return value_ref().has_value() ? std::addressof(__fbthrift_field_value) : nullptr;
   }
 
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]
   ::std::int32_t* get_value() & {
-    return value_ref() ? std::addressof(__fbthrift_field_value) : nullptr;
+    return value_ref().has_value() ? std::addressof(__fbthrift_field_value) : nullptr;
   }
   /** Glean { "field": "value" } */
   [[deprecated("Use `FOO.value().value();` instead of `FOO.get_value();`")]]

@@ -9108,13 +9108,13 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   const ::std::string* get_message() const& {
-    return message_ref() ? std::addressof(__fbthrift_field_message) : nullptr;
+    return message_ref().has_value() ? std::addressof(__fbthrift_field_message) : nullptr;
   }
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string* get_message() & {
-    return message_ref() ? std::addressof(__fbthrift_field_message) : nullptr;
+    return message_ref().has_value() ? std::addressof(__fbthrift_field_message) : nullptr;
   }
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
@@ -9131,13 +9131,13 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]
   const ::std::int32_t* get_errorCode() const& {
-    return errorCode_ref() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
+    return errorCode_ref().has_value() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
   }
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]
   ::std::int32_t* get_errorCode() & {
-    return errorCode_ref() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
+    return errorCode_ref().has_value() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
   }
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]

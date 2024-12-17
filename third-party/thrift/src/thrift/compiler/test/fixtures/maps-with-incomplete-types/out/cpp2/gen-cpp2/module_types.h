@@ -185,13 +185,13 @@ class B final  {
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   const ::std::int32_t* get_field() const& {
-    return field_ref() ? std::addressof(__fbthrift_field_field) : nullptr;
+    return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
   }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::int32_t* get_field() & {
-    return field_ref() ? std::addressof(__fbthrift_field_field) : nullptr;
+    return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
   }
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]

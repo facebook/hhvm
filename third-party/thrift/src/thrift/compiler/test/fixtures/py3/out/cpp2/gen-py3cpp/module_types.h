@@ -1727,13 +1727,13 @@ class OptionalRefStruct final  {
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value();` instead of `FOO.get_optional_blob();`")]]
   const ::py3::simple::IOBufPtr* get_optional_blob() const& {
-    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
+    return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
   }
 
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value();` instead of `FOO.get_optional_blob();`")]]
   ::py3::simple::IOBufPtr* get_optional_blob() & {
-    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
+    return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
   }
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value();` instead of `FOO.get_optional_blob();`")]]

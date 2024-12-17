@@ -891,13 +891,13 @@ class containerStruct2 final  {
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   const bool* get_opt_fieldA() const& {
-    return opt_fieldA_ref() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
+    return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   bool* get_opt_fieldA() & {
-    return opt_fieldA_ref() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
+    return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
   }
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
@@ -1063,13 +1063,13 @@ class containerStruct2 final  {
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   const ::std::string* get_opt_fieldE() const& {
-    return opt_fieldE_ref() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
+    return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
   }
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   ::std::string* get_opt_fieldE() & {
-    return opt_fieldE_ref() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
+    return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
   }
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]

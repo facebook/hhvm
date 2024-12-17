@@ -105,23 +105,6 @@ module Hg_actual = struct
     else
       (result, false)
 
-  (** Whether we're on a public commit, (i.e. our mergebase is ourself)
-  and there are no local uncommitted changes.
-
-  If an error occurs during hg execution, this will conservatively return false. *)
-  let is_public_without_local_changes repo =
-    Future.merge
-      (current_working_copy_hg_rev repo)
-      (current_mergebase_hg_rev repo)
-    @@ fun x y ->
-    Ok
-      (match (x, y) with
-      | (Error _, _)
-      | (_, Error _) ->
-        false
-      | (Ok (rev, has_local_changes), Ok mergebase) ->
-        (not has_local_changes) && Rev.equal rev mergebase)
-
   (** Return the timestamp of a specific hg revision in seconds since Unix epoch.
    * Manually removing timezone offset.
    * hg log -r rev -T "{date|hgdate} --cwd repo"
@@ -292,8 +275,6 @@ module Hg_mock = struct
     let current_mergebase_hg_rev : Rev.t Future.t ref =
       ref @@ Future.of_value ""
 
-    let is_public_without_local_changes = ref @@ Future.of_value false
-
     let get_hg_revision_time _ _ = Future.of_value 123
 
     let closest_global_ancestor = Hashtbl.create 10
@@ -338,9 +319,6 @@ module Hg_mock = struct
     !Mocking.current_mergebase_hg_rev
 
   let current_working_copy_hg_rev _ = !Mocking.current_working_copy_hg_rev
-
-  let is_public_without_local_changes _ =
-    !Mocking.is_public_without_local_changes
 
   let current_working_copy_base_rev _ = !Mocking.current_working_copy_base_rev
 

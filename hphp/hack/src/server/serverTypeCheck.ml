@@ -358,11 +358,13 @@ let do_type_checking
                (let during_init =
                   Option.is_some env.init_env.why_needed_full_check
                 in
-                during_init
-                && Hg.is_public_without_local_changes (Path.to_string root)
-                   |> Future.get ~timeout:3
-                   |> Result.ok
-                   |> Option.value ~default:false)
+                let mergebase_has_saved_state =
+                  let open Option.Monad_infix in
+                  env.init_env.saved_state_revs_info
+                  >>= ServerEnv.mergebase_has_saved_state
+                  |> Option.value ~default:false
+                in
+                during_init && not mergebase_has_saved_state)
              genv
              env)
         ~warnings_saved_state:ServerEnv.(env.init_env.mergebase_warning_hashes)

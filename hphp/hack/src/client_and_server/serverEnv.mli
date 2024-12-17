@@ -66,6 +66,8 @@ type saved_state_revs_info = {
 }
 [@@deriving show, yojson]
 
+val mergebase_has_saved_state : saved_state_revs_info -> bool option
+
 module SavedStateRevsInfo : sig
   type t = saved_state_revs_info
 

@@ -91,13 +91,6 @@ module type S = sig
         hg id -i --cwd <repo> *)
   val current_working_copy_hg_rev : string -> (Rev.t * bool) Future.t
 
-  (** [is_public_without_local_changes repo] returns
-  whether we're on a public commit, (i.e. our mergebase is ourself)
-  and there are no local uncommitted changes.
-
-  If an error occurs during hg execution, this will conservatively return false. *)
-  val is_public_without_local_changes : string -> bool Future.t
-
   (** Get the global base revision of the current working copy in the given
    * repo dir. *)
   val current_working_copy_base_rev : string -> global_rev Future.t

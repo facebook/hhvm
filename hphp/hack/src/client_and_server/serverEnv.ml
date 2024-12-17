@@ -180,6 +180,9 @@ type saved_state_revs_info = {
 }
 [@@deriving show, yojson]
 
+let mergebase_has_saved_state { saved_state_rev; mergebase_rev; _ } =
+  Option.map mergebase_rev ~f:(Hg.Rev.equal saved_state_rev)
+
 module SavedStateRevsInfo = struct
   type t = saved_state_revs_info [@@deriving yojson]
 

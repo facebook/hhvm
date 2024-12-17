@@ -85,6 +85,12 @@ class MyStructFloatFieldThrowExp(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyStructFloatFieldThrowExp, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -144,6 +150,12 @@ class MyStructMapFloatThrowExp(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyStructMapFloatThrowExp, self)
 
     def _to_py3(self):
         import importlib
@@ -491,6 +503,12 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -550,6 +568,12 @@ class SimpleStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.SimpleStruct, self)
 
     def _to_py3(self):
         import importlib
@@ -831,6 +855,12 @@ class defaultStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.defaultStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -968,6 +998,12 @@ class MyStructTypeDef(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyStructTypeDef, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -1005,6 +1041,12 @@ class MyDataItem(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyDataItem, self)
 
     def _to_py3(self):
         import importlib
@@ -1113,6 +1155,12 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyUnion, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -1197,6 +1245,12 @@ class MyUnionFloatFieldThrowExp(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MyUnionFloatFieldThrowExp, self)
 
     def _to_py3(self):
         import importlib
@@ -1434,6 +1488,12 @@ class ComplexNestedStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ComplexNestedStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -1516,6 +1576,12 @@ class TypeRemapped(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.TypeRemapped, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -1556,6 +1622,12 @@ class emptyXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.emptyXcep, self)
 
     def _to_py3(self):
         import importlib
@@ -1618,6 +1690,12 @@ class reqXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.reqXcep, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -1678,6 +1756,12 @@ class optXcep(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.optXcep, self)
 
     def _to_py3(self):
         import importlib
@@ -1783,6 +1867,12 @@ class complexException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.complexException, self)
 
     def _to_py3(self):
         import importlib

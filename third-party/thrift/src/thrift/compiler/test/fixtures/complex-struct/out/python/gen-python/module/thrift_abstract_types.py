@@ -40,6 +40,8 @@ class MyStructFloatFieldThrowExp(_abc.ABC):
     @_abc.abstractmethod
     def myFloatField(self) -> float: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStructFloatFieldThrowExp": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyStructFloatFieldThrowExp": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.MyStructFloatFieldThrowExp": ...  # type: ignore
@@ -53,6 +55,8 @@ class MyStructMapFloatThrowExp(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def mapListOfFloats(self) -> _typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStructMapFloatThrowExp": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyStructMapFloatThrowExp": ...  # type: ignore
     @_abc.abstractmethod
@@ -146,6 +150,8 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def mListList(self) -> _typing.Mapping[_typing.Sequence[int], _typing.Sequence[int]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.MyStruct": ...  # type: ignore
@@ -159,6 +165,8 @@ class SimpleStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def name(self) -> str: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.SimpleStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.SimpleStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -234,6 +242,8 @@ class defaultStruct(_abc.ABC):
     @_abc.abstractmethod
     def enumMapDFset(self) -> _typing.Mapping[str, _typing.Mapping[int, _fbthrift_MyEnum]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.defaultStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.defaultStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.defaultStruct": ...  # type: ignore
@@ -269,6 +279,8 @@ class MyStructTypeDef(_abc.ABC):
     @_abc.abstractmethod
     def myMapListOfTypeDef(self) -> _typing.Mapping[int, _typing.Sequence[_typing.Sequence[float]]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStructTypeDef": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyStructTypeDef": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.MyStructTypeDef": ...  # type: ignore
@@ -276,6 +288,8 @@ class MyStructTypeDef(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyStructTypeDef": ...  # type: ignore
 _fbthrift_MyStructTypeDef = MyStructTypeDef
 class MyDataItem(_abc.ABC):
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
@@ -302,6 +316,8 @@ class MyUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def intValue(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -340,6 +356,8 @@ class MyUnionFloatFieldThrowExp(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def complexNestedStruct(self) -> _fbthrift_ComplexNestedStruct: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyUnionFloatFieldThrowExp": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyUnionFloatFieldThrowExp": ...  # type: ignore
     @_abc.abstractmethod
@@ -419,6 +437,8 @@ class ComplexNestedStruct(_abc.ABC):
     @_abc.abstractmethod
     def mapKeyListValSet(self) -> _typing.Mapping[_typing.Sequence[int], _typing.AbstractSet[_typing.Mapping[float, str]]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.ComplexNestedStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.ComplexNestedStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.ComplexNestedStruct": ...  # type: ignore
@@ -439,6 +459,8 @@ class TypeRemapped(_abc.ABC):
     @_abc.abstractmethod
     def binaryTestBuffer(self) -> bytes: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.TypeRemapped": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.TypeRemapped": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.TypeRemapped": ...  # type: ignore
@@ -446,6 +468,7 @@ class TypeRemapped(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.TypeRemapped": ...  # type: ignore
 _fbthrift_TypeRemapped = TypeRemapped
 class emptyXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.emptyXcep": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.emptyXcep": ...  # type: ignore
     def _to_py3(self) -> "module.types.emptyXcep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.emptyXcep": ...  # type: ignore
@@ -455,6 +478,7 @@ class reqXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def message(self) -> str: ...
     @_fbthrift_property
     def errorCode(self) -> int: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.reqXcep": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.reqXcep": ...  # type: ignore
     def _to_py3(self) -> "module.types.reqXcep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.reqXcep": ...  # type: ignore
@@ -464,6 +488,7 @@ class optXcep(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def message(self) -> _typing.Optional[str]: ...
     @_fbthrift_property
     def errorCode(self) -> _typing.Optional[int]: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.optXcep": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.optXcep": ...  # type: ignore
     def _to_py3(self) -> "module.types.optXcep": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.optXcep": ...  # type: ignore
@@ -481,6 +506,7 @@ class complexException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def structError(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     def lsMap(self) -> _typing.Mapping[int, str]: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.complexException": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.complexException": ...  # type: ignore
     def _to_py3(self) -> "module.types.complexException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.complexException": ...  # type: ignore

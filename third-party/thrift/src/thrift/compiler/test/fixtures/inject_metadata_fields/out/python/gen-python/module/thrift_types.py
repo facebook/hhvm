@@ -49,6 +49,12 @@ class Fields(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Fields, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -97,6 +103,12 @@ class FieldsInjectedToEmptyStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.FieldsInjectedToEmptyStruct, self)
 
     def _to_py3(self):
         import importlib
@@ -157,6 +169,12 @@ class FieldsInjectedToStruct(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.FieldsInjectedToStruct, self)
 
     def _to_py3(self):
         import importlib
@@ -239,6 +257,12 @@ class FieldsInjectedWithIncludedStruct(metaclass=_fbthrift_python_types.StructMe
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.FieldsInjectedWithIncludedStruct, self)
 
     def _to_py3(self):
         import importlib

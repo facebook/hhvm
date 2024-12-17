@@ -161,9 +161,6 @@ class python_mstch_program : public mstch_program {
              &python_mstch_program::generate_mutable_types},
             {"program:generate_immutable_types",
              &python_mstch_program::generate_immutable_types},
-            {"program:generate_to_mutable_python_conversion_methods?",
-             &python_mstch_program::
-                 generate_to_mutable_python_conversion_methods},
             {"program:enable_abstract_types?",
              &python_mstch_program::enable_abstract_types},
         });
@@ -266,10 +263,6 @@ class python_mstch_program : public mstch_program {
 
   mstch::node generate_immutable_types() {
     return !get_option("generate_immutable_types").empty();
-  }
-
-  mstch::node generate_to_mutable_python_conversion_methods() {
-    return !get_option("generate_to_mutable_python_conversion_methods").empty();
   }
 
   mstch::node enable_abstract_types() {
@@ -1390,18 +1383,10 @@ void t_mstch_python_generator::generate_file(
 }
 
 void t_mstch_python_generator::generate_types() {
-  // Keep the "experimental_generate_mutable_types" flag for now to enable
-  // generation of "to_mutable_python" conversion methods.
-  const bool experimental_generate_mutable_types =
-      has_option("experimental_generate_mutable_types");
   // DO_BEFORE(satishvk, 20250130): Remove flags related to abstract types after
   // launch.
   const bool enable_abstract_types = !has_option("disable_abstract_types");
 
-  mstch_context_.set_or_erase_option(
-      experimental_generate_mutable_types,
-      "generate_to_mutable_python_conversion_methods",
-      "true");
   mstch_context_.set_or_erase_option(
       enable_abstract_types, "enable_abstract_types", "true");
   generate_file(
@@ -1425,8 +1410,6 @@ void t_mstch_python_generator::generate_types() {
       TypesFileKind::SourceFile,
       TypeKind::Abstract,
       generate_root_path_);
-
-  mstch_context_.options.erase("generate_to_mutable_python_conversion_methods");
 
   generate_file(
       "thrift_mutable_types.py",

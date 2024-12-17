@@ -49,6 +49,8 @@ class Internship(_abc.ABC):
     @_abc.abstractmethod
     def school(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Internship": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Internship": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Internship": ...  # type: ignore
@@ -63,6 +65,8 @@ class Range(_abc.ABC):
     @_abc.abstractmethod
     def max(self) -> int: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Range": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Range": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Range": ...  # type: ignore
@@ -76,6 +80,8 @@ class struct1(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> str: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct1": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.struct1": ...  # type: ignore
     @_abc.abstractmethod
@@ -97,6 +103,8 @@ class struct2(_abc.ABC):
     @_abc.abstractmethod
     def d(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct2": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.struct2": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.struct2": ...  # type: ignore
@@ -113,6 +121,8 @@ class struct3(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def c(self) -> _fbthrift_struct2: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct3": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.struct3": ...  # type: ignore
     @_abc.abstractmethod
@@ -131,6 +141,8 @@ class struct4(_abc.ABC):
     @_abc.abstractmethod
     def c(self) -> _typing.Optional[int]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.struct4": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.struct4": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.struct4": ...  # type: ignore
@@ -144,6 +156,8 @@ class union1(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def d(self) -> float: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.union1": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.union1": ...  # type: ignore
     @_abc.abstractmethod
@@ -178,6 +192,8 @@ class union2(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def u(self) -> _fbthrift_union1: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.union2": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.union2": ...  # type: ignore
     @_abc.abstractmethod

@@ -43,6 +43,7 @@ class SerializedStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, str, str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedStruct": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedStruct": ...  # type: ignore
 _fbthrift_SerializedStruct = SerializedStruct
@@ -79,6 +80,7 @@ class SerializedUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Se
     type: _typing.Final[Type]
     def get_type(self) -> Type: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedUnion": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedUnion": ...  # type: ignore
 _fbthrift_SerializedUnion = SerializedUnion
@@ -100,6 +102,7 @@ class SerializedError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedError": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedError": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedError": ...  # type: ignore
 _fbthrift_SerializedError = SerializedError
@@ -130,6 +133,7 @@ class MarshalStruct(_fbthrift_python_types.Struct, _fbthrift_compatible_with_Mar
     ) -> _typing.Self: ...
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, int, str, str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.MarshalStruct": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalStruct": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalStruct": ...  # type: ignore
 _fbthrift_MarshalStruct = MarshalStruct
@@ -166,6 +170,7 @@ class MarshalUnion(_fbthrift_python_types.Union, _fbthrift_compatible_with_Marsh
     type: _typing.Final[Type]
     def get_type(self) -> Type: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.MarshalUnion": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalUnion": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalUnion": ...  # type: ignore
 _fbthrift_MarshalUnion = MarshalUnion
@@ -187,6 +192,7 @@ class MarshalError(_fbthrift_python_exceptions.GeneratedError, _fbthrift_compati
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, str, str]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.MarshalError": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalError": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalError": ...  # type: ignore
 _fbthrift_MarshalError = MarshalError

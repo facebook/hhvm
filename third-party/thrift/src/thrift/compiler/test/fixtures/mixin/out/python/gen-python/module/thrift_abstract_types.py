@@ -23,6 +23,8 @@ class Mixin1(_abc.ABC):
     @_abc.abstractmethod
     def field1(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin1": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Mixin1": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Mixin1": ...  # type: ignore
@@ -37,6 +39,8 @@ class Mixin2(_abc.ABC):
     @_abc.abstractmethod
     def field2(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin2": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Mixin2": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.Mixin2": ...  # type: ignore
@@ -47,6 +51,8 @@ class Mixin3Base(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def field3(self) -> str: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Mixin3Base": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Mixin3Base": ...  # type: ignore
     @_abc.abstractmethod
@@ -64,6 +70,8 @@ class Foo(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def m3(self) -> _fbthrift_Mixin3Base: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Foo": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.Foo": ...  # type: ignore
     @_abc.abstractmethod

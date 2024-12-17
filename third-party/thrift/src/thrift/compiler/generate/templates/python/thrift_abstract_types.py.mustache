@@ -62,10 +62,8 @@ class {{> structs/unadapted_name}}({{!
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
     {{/struct:fields_ordered_by_id}}
     {{#struct:legacy_api?}}
-{{#program:generate_to_mutable_python_conversion_methods?}}
 {{> fields/maybe_abstract_method_annotation}}
     def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{> structs/unadapted_name}}": ...  # type: ignore
-{{/program:generate_to_mutable_python_conversion_methods?}}
 {{> fields/maybe_abstract_method_annotation}}
     def _to_python(self) -> "{{program:module_path}}.thrift_types.{{> structs/unadapted_name}}": ...  # type: ignore
 {{> fields/maybe_abstract_method_annotation}}

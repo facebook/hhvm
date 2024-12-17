@@ -102,6 +102,12 @@ class Internship(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Internship, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -162,6 +168,12 @@ class Range(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Range, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -221,6 +233,12 @@ class struct1(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.struct1, self)
 
     def _to_py3(self):
         import importlib
@@ -304,6 +322,12 @@ class struct2(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.struct2, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -374,6 +398,12 @@ class struct3(metaclass=_fbthrift_python_types.StructMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.struct3, self)
 
     def _to_py3(self):
         import importlib
@@ -446,6 +476,12 @@ class struct4(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.struct4, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -508,6 +544,12 @@ class union1(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.union1, self)
 
     def _to_py3(self):
         import importlib
@@ -593,6 +635,12 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.union2, self)
 
     def _to_py3(self):
         import importlib

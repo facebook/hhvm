@@ -31,9 +31,7 @@ always
 {{> structs/union_field_and_value}}
 {{/program:enable_abstract_types?}}
 {{^program:enable_abstract_types?}}
-{{#program:generate_to_mutable_python_conversion_methods?}}
 {{> structs/union_field_and_value}}
-{{/program:generate_to_mutable_python_conversion_methods?}}
 {{/program:enable_abstract_types?}}
 {{/program:generate_immutable_types}}
 {{#program:generate_mutable_types}}

@@ -39,6 +39,7 @@ class CustomException(_fbthrift_python_exceptions.GeneratedError, _fbthrift_comp
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_Result]]]: ...
     def _to_python(self) -> _typing.Self: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomException": ...  # type: ignore
     def _to_py3(self) -> "module.types.CustomException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CustomException": ...  # type: ignore
 _fbthrift_CustomException = CustomException

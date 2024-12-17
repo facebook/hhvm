@@ -23,6 +23,8 @@ class Foo(_abc.ABC):
     @_abc.abstractmethod
     def MyInt(self) -> int: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "emptyns.thrift_mutable_types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "emptyns.thrift_types.Foo": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "emptyns.types.Foo": ...  # type: ignore

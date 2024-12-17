@@ -122,9 +122,7 @@ class {{> structs/unadapted_name}}({{!
     {{#struct:legacy_api?}}
 {{#program:generate_immutable_types}}
     def _to_python(self) -> _typing.Self: ...
-{{#program:generate_to_mutable_python_conversion_methods?}}
     def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{> structs/unadapted_name}}": ...  # type: ignore
-{{/program:generate_to_mutable_python_conversion_methods?}}
 {{/program:generate_immutable_types}}
 {{#program:generate_mutable_types}}
     def _to_python(self) -> "{{program:module_path}}.thrift_types.{{> structs/unadapted_name}}": ...  # type: ignore

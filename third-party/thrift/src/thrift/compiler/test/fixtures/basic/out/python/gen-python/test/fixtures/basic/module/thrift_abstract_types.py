@@ -58,6 +58,8 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def no_hack_codegen_field(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyStruct": ...  # type: ignore
@@ -75,6 +77,8 @@ class Containers(_abc.ABC):
     @_abc.abstractmethod
     def StringToI64Map(self) -> _typing.Mapping[str, int]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.Containers": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.Containers": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.basic.module.types.Containers": ...  # type: ignore
@@ -82,6 +86,8 @@ class Containers(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
 _fbthrift_Containers = Containers
 class MyDataItem(_abc.ABC):
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
@@ -102,6 +108,8 @@ class MyUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def floatSet(self) -> _typing.AbstractSet[float]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -134,6 +142,7 @@ class MyException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     def myUnion(self) -> _fbthrift_MyUnion: ...
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyException": ...  # type: ignore
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyException": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyException": ...  # type: ignore
@@ -147,6 +156,7 @@ class MyExceptionWithMessage(_fbthrift_python_abstract_types.AbstractGeneratedEr
     def myStruct(self) -> _fbthrift_MyStruct: ...
     @_fbthrift_property
     def myUnion(self) -> _fbthrift_MyUnion: ...
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.MyExceptionWithMessage": ...  # type: ignore
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.basic.module.types.MyExceptionWithMessage": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.MyExceptionWithMessage": ...  # type: ignore
@@ -155,6 +165,8 @@ class ReservedKeyword(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.ReservedKeyword": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.ReservedKeyword": ...  # type: ignore
     @_abc.abstractmethod
@@ -166,6 +178,8 @@ class UnionToBeRenamed(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def reserved_field(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.basic.module.thrift_mutable_types.UnionToBeRenamed": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.basic.module.thrift_types.UnionToBeRenamed": ...  # type: ignore
     @_abc.abstractmethod

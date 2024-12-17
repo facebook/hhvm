@@ -59,6 +59,8 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def intSetty(self) -> _typing.AbstractSet[int]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.MyStruct": ...  # type: ignore
@@ -70,6 +72,8 @@ class MyDataItem(_abc.ABC):
     @_abc.abstractmethod
     def s(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.MyDataItem": ...  # type: ignore
@@ -77,6 +81,8 @@ class MyDataItem(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyDataItem": ...  # type: ignore
 _fbthrift_MyDataItem = MyDataItem
 class TransitiveDoubler(_abc.ABC):
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.TransitiveDoubler": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.TransitiveDoubler": ...  # type: ignore
     @_abc.abstractmethod
@@ -92,6 +98,8 @@ class DoubledPair(_abc.ABC):
     @_abc.abstractmethod
     def x(self) -> int: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.DoubledPair": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.DoubledPair": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.DoubledPair": ...  # type: ignore
@@ -106,6 +114,8 @@ class StringPair(_abc.ABC):
     @_abc.abstractmethod
     def doubled(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.StringPair": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.StringPair": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.StringPair": ...  # type: ignore
@@ -113,6 +123,8 @@ class StringPair(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.StringPair": ...  # type: ignore
 _fbthrift_StringPair = StringPair
 class EmptyStruct(_abc.ABC):
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.EmptyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.EmptyStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -170,6 +182,8 @@ class PrimitiveStruct(_abc.ABC):
     @_abc.abstractmethod
     def some_error(self) -> _fbthrift__test__fixtures__python_capi__thrift_dep__thrift_abstract_types.SomeError: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.PrimitiveStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.PrimitiveStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.PrimitiveStruct": ...  # type: ignore
@@ -189,6 +203,8 @@ class AdaptedFields(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def inline_adapted_int(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.AdaptedFields": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.AdaptedFields": ...  # type: ignore
     @_abc.abstractmethod
@@ -225,6 +241,8 @@ class ListStruct(_abc.ABC):
     @_abc.abstractmethod
     def buf_ptrs(self) -> _typing.Sequence[_fbthrift_iobuf.IOBuf]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.ListStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.ListStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.ListStruct": ...  # type: ignore
@@ -253,6 +271,8 @@ class SetStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def setz(self) -> _typing.Sequence[_typing.AbstractSet[int]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.SetStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.SetStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -292,6 +312,8 @@ class MapStruct(_abc.ABC):
     @_abc.abstractmethod
     def unsigned_list_map(self) -> _typing.Mapping[int, _typing.Sequence[int]]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.MapStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.MapStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.MapStruct": ...  # type: ignore
@@ -330,6 +352,8 @@ class ComposeStruct(_abc.ABC):
     @_abc.abstractmethod
     def serial_error(self) -> _fbthrift__test__fixtures__python_capi__serialized_dep__thrift_abstract_types.SerializedError: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.ComposeStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.ComposeStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.module.types.ComposeStruct": ...  # type: ignore
@@ -358,6 +382,8 @@ class Onion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def adapted_int(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.module.thrift_mutable_types.Onion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.module.thrift_types.Onion": ...  # type: ignore
     @_abc.abstractmethod

@@ -56,6 +56,12 @@ class Fiery(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Fiery, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -112,6 +118,12 @@ class Serious(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Serious, self)
 
     def _to_py3(self):
         import importlib
@@ -181,6 +193,12 @@ class ComplexFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ComplexFieldNames, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -248,6 +266,12 @@ class CustomFieldNames(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.CustomFieldNames, self)
 
     def _to_py3(self):
         import importlib
@@ -317,6 +341,12 @@ class ExceptionWithPrimitiveField(metaclass=_fbthrift_python_exceptions.Generate
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ExceptionWithPrimitiveField, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -385,6 +415,12 @@ class ExceptionWithStructuredAnnotation(metaclass=_fbthrift_python_exceptions.Ge
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.ExceptionWithStructuredAnnotation, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("module.types")
@@ -423,6 +459,12 @@ class Banal(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Banal, self)
 
     def _to_py3(self):
         import importlib

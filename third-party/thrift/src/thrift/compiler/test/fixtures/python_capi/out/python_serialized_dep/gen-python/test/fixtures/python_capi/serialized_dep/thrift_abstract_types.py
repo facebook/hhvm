@@ -34,6 +34,8 @@ class SerializedStruct(_abc.ABC):
     @_abc.abstractmethod
     def rs(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.SerializedStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedStruct": ...  # type: ignore
@@ -47,6 +49,8 @@ class SerializedUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def i(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.SerializedUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -75,6 +79,7 @@ class SerializedError(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def os(self) -> _typing.Optional[str]: ...
     @_fbthrift_property
     def rs(self) -> str: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.SerializedError": ...  # type: ignore
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.SerializedError": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.SerializedError": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.SerializedError": ...  # type: ignore
@@ -93,6 +98,8 @@ class MarshalStruct(_abc.ABC):
     @_abc.abstractmethod
     def rs(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.MarshalStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.MarshalStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalStruct": ...  # type: ignore
@@ -106,6 +113,8 @@ class MarshalUnion(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def i(self) -> int: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.MarshalUnion": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.MarshalUnion": ...  # type: ignore
     @_abc.abstractmethod
@@ -134,6 +143,7 @@ class MarshalError(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def os(self) -> _typing.Optional[str]: ...
     @_fbthrift_property
     def rs(self) -> str: ...
+    def _to_mutable_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_mutable_types.MarshalError": ...  # type: ignore
     def _to_python(self) -> "test.fixtures.python_capi.serialized_dep.thrift_types.MarshalError": ...  # type: ignore
     def _to_py3(self) -> "test.fixtures.python_capi.serialized_dep.types.MarshalError": ...  # type: ignore
     def _to_py_deprecated(self) -> "serialized_dep.ttypes.MarshalError": ...  # type: ignore

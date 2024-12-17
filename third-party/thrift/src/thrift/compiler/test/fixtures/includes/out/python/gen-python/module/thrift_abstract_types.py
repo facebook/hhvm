@@ -30,6 +30,8 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def MyIncludedInt(self) -> int: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "module.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "module.types.MyStruct": ...  # type: ignore

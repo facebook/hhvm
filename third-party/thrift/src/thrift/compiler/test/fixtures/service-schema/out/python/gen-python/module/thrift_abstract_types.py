@@ -30,6 +30,7 @@ class CustomException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def name(self) -> str: ...
     @_fbthrift_property
     def result(self) -> _fbthrift_Result: ...
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.CustomException": ...  # type: ignore
     def _to_python(self) -> "module.thrift_types.CustomException": ...  # type: ignore
     def _to_py3(self) -> "module.types.CustomException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.CustomException": ...  # type: ignore

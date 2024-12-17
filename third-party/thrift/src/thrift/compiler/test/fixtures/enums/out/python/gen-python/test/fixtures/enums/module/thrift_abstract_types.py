@@ -56,6 +56,8 @@ class SomeStruct(_abc.ABC):
     @_abc.abstractmethod
     def tags(self) -> _typing.AbstractSet[int]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.SomeStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.enums.module.thrift_types.SomeStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "test.fixtures.enums.module.types.SomeStruct": ...  # type: ignore
@@ -75,6 +77,8 @@ class MyStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def me1_t2(self) -> _fbthrift_MyEnum1: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "test.fixtures.enums.module.thrift_mutable_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "test.fixtures.enums.module.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod

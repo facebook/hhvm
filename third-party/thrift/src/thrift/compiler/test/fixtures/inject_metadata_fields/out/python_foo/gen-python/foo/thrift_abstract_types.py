@@ -29,6 +29,8 @@ class Fields(_abc.ABC):
     @_abc.abstractmethod
     def injected_unstructured_annotation_field(self) -> _typing.Optional[str]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "foo.thrift_mutable_types.Fields": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "foo.thrift_types.Fields": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "foo.types.Fields": ...  # type: ignore

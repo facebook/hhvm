@@ -23,6 +23,8 @@ class Foo(_abc.ABC):
     @_abc.abstractmethod
     def a(self) -> int: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "transitive.thrift_mutable_types.Foo": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "transitive.thrift_types.Foo": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "transitive.types.Foo": ...  # type: ignore

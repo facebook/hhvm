@@ -23,6 +23,8 @@ class EchoRequest(_abc.ABC):
     @_abc.abstractmethod
     def text(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "meta.example.thrift.service.thrift_mutable_types.EchoRequest": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "meta.example.thrift.service.thrift_types.EchoRequest": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "meta.example.thrift.service.types.EchoRequest": ...  # type: ignore
@@ -34,6 +36,8 @@ class EchoResponse(_abc.ABC):
     @_abc.abstractmethod
     def text(self) -> str: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "meta.example.thrift.service.thrift_mutable_types.EchoResponse": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "meta.example.thrift.service.thrift_types.EchoResponse": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "meta.example.thrift.service.types.EchoResponse": ...  # type: ignore
@@ -43,6 +47,7 @@ _fbthrift_EchoResponse = EchoResponse
 class WhisperException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     @_fbthrift_property
     def message(self) -> str: ...
+    def _to_mutable_python(self) -> "meta.example.thrift.service.thrift_mutable_types.WhisperException": ...  # type: ignore
     def _to_python(self) -> "meta.example.thrift.service.thrift_types.WhisperException": ...  # type: ignore
     def _to_py3(self) -> "meta.example.thrift.service.types.WhisperException": ...  # type: ignore
     def _to_py_deprecated(self) -> "service.ttypes.WhisperException": ...  # type: ignore

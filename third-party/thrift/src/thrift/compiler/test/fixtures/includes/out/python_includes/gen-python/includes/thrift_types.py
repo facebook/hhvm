@@ -60,6 +60,12 @@ class Included(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("includes.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Included, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("includes.types")

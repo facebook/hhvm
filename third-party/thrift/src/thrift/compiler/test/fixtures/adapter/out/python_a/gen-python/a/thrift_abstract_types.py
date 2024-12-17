@@ -34,6 +34,8 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def c(self) -> typeshed_two.AdapterTwoType[_fbthrift__c__thrift_abstract_types.C2]: ...
     @_abc.abstractmethod
+    def _to_mutable_python(self) -> "a.thrift_mutable_types.MyStruct": ...  # type: ignore
+    @_abc.abstractmethod
     def _to_python(self) -> "a.thrift_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_py3(self) -> "a.types.MyStruct": ...  # type: ignore

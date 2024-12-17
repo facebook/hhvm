@@ -79,6 +79,12 @@ class SerializedStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.SerializedStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
@@ -141,6 +147,12 @@ class SerializedUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.SerializedUnion, self)
 
     def _to_py3(self):
         import importlib
@@ -215,6 +227,12 @@ class SerializedError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.SerializedError, self)
 
     def _to_py3(self):
         import importlib
@@ -296,6 +314,12 @@ class MarshalStruct(metaclass=_fbthrift_python_types.StructMeta):
     def _to_python(self):
         return self
 
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MarshalStruct, self)
+
     def _to_py3(self):
         import importlib
         py3_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.types")
@@ -358,6 +382,12 @@ class MarshalUnion(metaclass=_fbthrift_python_types.UnionMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MarshalUnion, self)
 
     def _to_py3(self):
         import importlib
@@ -432,6 +462,12 @@ class MarshalError(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta):
 
     def _to_python(self):
         return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("test.fixtures.python_capi.serialized_dep.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.MarshalError, self)
 
     def _to_py3(self):
         import importlib

@@ -646,6 +646,27 @@
           "column" : 48
         }
       }
+    },
+    "AllowLegacyNonOptionalRef" : {
+      "lineno" : 390,
+      "is_exception" : false,
+      "is_union" : false,
+      "structured_annotations" : {
+        "scope.Field" : {  }
+      },
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 390,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 391,
+          "column" : 36
+        }
+      }
     }
   }
 }

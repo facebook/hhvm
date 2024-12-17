@@ -1852,3 +1852,77 @@ class GenerateDeprecatedHeaderClientMethods implements \IThriftSyncStruct, \IThr
 
 }
 
+/**
+ * Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it
+ * is not optional (or in a union, which is effectively optional).
+ * 
+ * This annotation is provided for a limited time, to exempt pre-existing fields
+ * while rolling out a stricter enforcement of the condition above.
+ * 
+ * Reminder: reference fields should be optional because the corresponding smart
+ * pointers (std::unique_ptr, std::shared_ptr) can always be reset or set to
+ * nullptr by the clients. If the field is not optional, this leads to a
+ * confusing (or non-sensical) situation, wherein a field that should always
+ * have a value has nullptr instead.
+ *
+ * Original thrift struct:-
+ * AllowLegacyNonOptionalRef
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/AllowLegacyNonOptionalRef'))>>
+class AllowLegacyNonOptionalRef implements \IThriftSyncStruct, \IThriftStructMetadata {
+  use \ThriftSerializationTrait;
+
+  const \ThriftStructTypes::TSpec SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AllowLegacyNonOptionalRef';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.AllowLegacyNonOptionalRef",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\facebook\thrift\annotation\Field' => \facebook\thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

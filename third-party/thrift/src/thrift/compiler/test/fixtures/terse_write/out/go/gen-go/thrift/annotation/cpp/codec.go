@@ -249,6 +249,17 @@ var (
 
         }
     }()
+    premadeCodecTypeSpec_cpp_AllowLegacyNonOptionalRef = func() *thrift.TypeSpec {
+        return &thrift.TypeSpec{
+            FullName: "cpp.AllowLegacyNonOptionalRef",
+            CodecStructSpec: &thrift.CodecStructSpec{
+    ScopedName: "cpp.AllowLegacyNonOptionalRef",
+    IsUnion:    false,
+    NewFunc:    func() thrift.Struct { return NewAllowLegacyNonOptionalRef() },
+},
+
+        }
+    }()
 )
 
 // Premade struct specs
@@ -645,6 +656,20 @@ var (
     },
 }
     }()
+    premadeStructSpec_AllowLegacyNonOptionalRef = func() *thrift.StructSpec {
+        return &thrift.StructSpec{
+    Name:                 "AllowLegacyNonOptionalRef",
+    ScopedName:           "cpp.AllowLegacyNonOptionalRef",
+    IsUnion:              false,
+    IsException:          false,
+    FieldSpecs:           []thrift.FieldSpec{
+    },
+    FieldSpecIDToIndex:   map[int16]int{
+    },
+    FieldSpecNameToIndex: map[string]int{
+    },
+}
+    }()
 )
 
 // Premade slice of all struct specs
@@ -668,6 +693,7 @@ var premadeStructSpecs = func() []*thrift.StructSpec {
     fbthriftResults = append(fbthriftResults, premadeStructSpec_RuntimeAnnotation)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_UseCursorSerialization)
     fbthriftResults = append(fbthriftResults, premadeStructSpec_GenerateDeprecatedHeaderClientMethods)
+    fbthriftResults = append(fbthriftResults, premadeStructSpec_AllowLegacyNonOptionalRef)
     return fbthriftResults
 }()
 
@@ -695,6 +721,7 @@ var premadeCodecSpecsMap = func() map[string]*thrift.TypeSpec {
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_RuntimeAnnotation.FullName] = premadeCodecTypeSpec_cpp_RuntimeAnnotation
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_UseCursorSerialization.FullName] = premadeCodecTypeSpec_cpp_UseCursorSerialization
     fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods.FullName] = premadeCodecTypeSpec_cpp_GenerateDeprecatedHeaderClientMethods
+    fbthriftTypeSpecsMap[premadeCodecTypeSpec_cpp_AllowLegacyNonOptionalRef.FullName] = premadeCodecTypeSpec_cpp_AllowLegacyNonOptionalRef
     return fbthriftTypeSpecsMap
 }()
 

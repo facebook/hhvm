@@ -149,6 +149,12 @@ var (
                 SetName("cpp.GenerateDeprecatedHeaderClientMethods"),
         )
     }()
+    premadeThriftType_cpp_AllowLegacyNonOptionalRef = func() *metadata.ThriftType {
+        return metadata.NewThriftType().SetTStruct(
+            metadata.NewThriftStructType().
+                SetName("cpp.AllowLegacyNonOptionalRef"),
+        )
+    }()
 )
 
 // Helper type to allow us to store Thrift types in a slice at compile time,
@@ -183,6 +189,7 @@ var premadeThriftTypesMap = func() map[string]*metadata.ThriftType {
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.RuntimeAnnotation", premadeThriftType_cpp_RuntimeAnnotation })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.UseCursorSerialization", premadeThriftType_cpp_UseCursorSerialization })
     thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.GenerateDeprecatedHeaderClientMethods", premadeThriftType_cpp_GenerateDeprecatedHeaderClientMethods })
+    thriftTypesWithFullName = append(thriftTypesWithFullName, thriftTypeWithFullName{ "cpp.AllowLegacyNonOptionalRef", premadeThriftType_cpp_AllowLegacyNonOptionalRef })
 
     fbthriftThriftTypesMap := make(map[string]*metadata.ThriftType, len(thriftTypesWithFullName))
     for _, value := range thriftTypesWithFullName {

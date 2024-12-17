@@ -373,3 +373,19 @@ struct UseCursorSerialization {}
 @scope.Service
 @scope.Function
 struct GenerateDeprecatedHeaderClientMethods {}
+
+/**
+ * Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it
+ * is not optional (or in a union, which is effectively optional).
+ *
+ * This annotation is provided for a limited time, to exempt pre-existing fields
+ * while rolling out a stricter enforcement of the condition above.
+ *
+ * Reminder: reference fields should be optional because the corresponding smart
+ * pointers (std::unique_ptr, std::shared_ptr) can always be reset or set to
+ * nullptr by the clients. If the field is not optional, this leads to a
+ * confusing (or non-sensical) situation, wherein a field that should always
+ * have a value has nullptr instead.
+ */
+@scope.Field
+struct AllowLegacyNonOptionalRef {}

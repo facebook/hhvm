@@ -48,7 +48,7 @@ class ThriftEnumWrapper(int):
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'RefType', 'EnumUnderlyingType', 'Name', 'Type', 'Ref', 'Lazy', 'DisableLazyChecksum', 'Adapter', 'PackIsset', 'MinimizePadding', 'ScopedEnumAsUnionType', 'FieldInterceptor', 'UseOpEncode', 'EnumType', 'Frozen2Exclude', 'Frozen2RequiresCompleteContainerParams', 'ProcessInEbThreadUnsafe', 'RuntimeAnnotation', 'UseCursorSerialization', 'GenerateDeprecatedHeaderClientMethods']
+__all__ = ['UTF8STRINGS', 'RefType', 'EnumUnderlyingType', 'Name', 'Type', 'Ref', 'Lazy', 'DisableLazyChecksum', 'Adapter', 'PackIsset', 'MinimizePadding', 'ScopedEnumAsUnionType', 'FieldInterceptor', 'UseOpEncode', 'EnumType', 'Frozen2Exclude', 'Frozen2RequiresCompleteContainerParams', 'ProcessInEbThreadUnsafe', 'RuntimeAnnotation', 'UseCursorSerialization', 'GenerateDeprecatedHeaderClientMethods', 'AllowLegacyNonOptionalRef']
 
 class RefType:
   r"""
@@ -1947,6 +1947,97 @@ class GenerateDeprecatedHeaderClientMethods:
   def _to_py_deprecated(self):
     return self
 
+class AllowLegacyNonOptionalRef:
+  r"""
+  Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it
+  is not optional (or in a union, which is effectively optional).
+  
+  This annotation is provided for a limited time, to exempt pre-existing fields
+  while rolling out a stricter enforcement of the condition above.
+  
+  Reminder: reference fields should be optional because the corresponding smart
+  pointers (std::unique_ptr, std::shared_ptr) can always be reset or set to
+  nullptr by the clients. If the field is not optional, this leads to a
+  confusing (or non-sensical) situation, wherein a field that should always
+  have a value has nullptr instead.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AllowLegacyNonOptionalRef')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.annotation.cpp.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AllowLegacyNonOptionalRef, self)
+
+  def _to_mutable_python(self):
+    import importlib
+    import thrift.python.mutable_converter
+    python_mutable_types = importlib.import_module("facebook.thrift.annotation.cpp.thrift_mutable_types")
+    return thrift.python.mutable_converter.to_mutable_python_struct_or_union(python_mutable_types.AllowLegacyNonOptionalRef, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.annotation.cpp.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AllowLegacyNonOptionalRef, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 all_structs.append(Name)
 Name.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
   (1, TType.STRING, 'value', True, None, 2, ), # 1
@@ -2229,6 +2320,15 @@ GenerateDeprecatedHeaderClientMethods.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
 GenerateDeprecatedHeaderClientMethods.thrift_struct_annotations = {
 }
 GenerateDeprecatedHeaderClientMethods.thrift_field_annotations = {
+}
+
+all_structs.append(AllowLegacyNonOptionalRef)
+AllowLegacyNonOptionalRef.thrift_spec = tuple(__EXPAND_THRIFT_SPEC((
+)))
+
+AllowLegacyNonOptionalRef.thrift_struct_annotations = {
+}
+AllowLegacyNonOptionalRef.thrift_field_annotations = {
 }
 
 fix_spec(all_structs)

@@ -621,6 +621,23 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 373
+      },
+      "AllowLegacyNonOptionalRef" : {
+        "name" : "AllowLegacyNonOptionalRef",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
+},
+        "value" : {}
+      }
+        },
+        "docstring" : "Allows the field to be annotated @cpp.Ref (or cpp[2].ref[_type]) even if it\nis not optional (or in a union, which is effectively optional).\n\nThis annotation is provided for a limited time, to exempt pre-existing fields\nwhile rolling out a stricter enforcement of the condition above.\n\nReminder: reference fields should be optional because the corresponding smart\npointers (std::unique_ptr, std::shared_ptr) can always be reset or set to\nnullptr by the clients. If the field is not optional, this leads to a\nconfusing (or non-sensical) situation, wherein a field that should always\nhave a value has nullptr instead.\n",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 390
       }
       },
   "source_path" : "thrift/annotation/cpp",

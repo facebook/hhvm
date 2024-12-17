@@ -11,7 +11,10 @@
   sys_utils
   utils_core)
  (preprocess
-  (pps lwt_ppx ppx_deriving.std)))
+  (pps
+   lwt_ppx
+   ppx_deriving.std
+   ppx_yojson_conv)))
 
 (library
  (name watchman_utils)

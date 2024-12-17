@@ -7,6 +7,8 @@
  *
  *)
 
+open Ppx_yojson_conv_lib.Yojson_conv.Primitives
+
 module Types = struct
   exception Timeout
 
@@ -68,6 +70,14 @@ module Types = struct
     | Watchman_unavailable
     | Watchman_pushed of pushed_changes
     | Watchman_synchronous of pushed_changes list
+
+  (** The response from watchman for the `watch` command should contain these fields *)
+  type watch_project_response = {
+    watch: string;  (** Corresponds to the VCS repo root. *)
+    relative_path: string option; [@yojson.option]
+        (** The path being watched relative to the `watch` path *)
+  }
+  [@@deriving of_yojson] [@@yojson.allow_extra_fields]
 end
 
 (** The abstract types, and the types that are defined in terms of
@@ -144,4 +154,37 @@ module type S = sig
 
     val get_changes_returns : changes -> unit
   end
+end
+
+module type Exec = sig
+  type 'a future
+
+  type error
+
+  module Monad_infix : sig
+    val ( >>| ) : 'a future -> ('a -> 'b) -> 'b future
+
+    val ( >|= ) :
+      ('a, 'e) result future ->
+      ('a -> ('b, 'e) result) ->
+      ('b, 'e) result future
+  end
+
+  val exec : Exec_command.t -> string list -> (string, error) result future
+end
+
+module type Process_S = sig
+  type 'a future
+
+  type exec_error
+
+  type error =
+    | Process_failure of exec_error
+    | Unexpected_json of { json_string: string }
+
+  (** [watch_project ~root ~socket] queries watchman to watch a [root]. *)
+  val watch_project :
+    root:Path.t ->
+    sockname:Path.t option ->
+    (Types.watch_project_response, error) result future
 end

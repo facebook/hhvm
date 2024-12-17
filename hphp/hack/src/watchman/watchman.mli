@@ -12,3 +12,8 @@
   *)
 
 include Watchman_sig.S
+
+module Process : functor (Exec : Watchman_sig.Exec) ->
+  Watchman_sig.Process_S
+    with type 'a future := 'a Exec.future
+     and type exec_error := Exec.error

@@ -1318,6 +1318,33 @@ module Watchman_mock = struct
     | Watchman_alive env -> on_alive env
 end
 
+module Process (Exec : Watchman_sig.Exec) = struct
+  type error =
+    | Process_failure of Exec.error
+    | Unexpected_json of { json_string: string }
+
+  (** [watch_project ~root ~socket] queries watchman to watch a [root]. *)
+  let watch_project ~root ~sockname =
+    let open Exec.Monad_infix in
+    let args =
+      ["watch-project"; Path.to_string root]
+      @
+      match sockname with
+      | None -> []
+      | Some sockname -> ["--sockname"; Path.to_string sockname]
+    in
+    Exec.exec Exec_command.Watchman args
+    >>| Result.map_error ~f:(fun e -> Process_failure e)
+    >|= fun stdout ->
+    try
+      Ok
+        (Watchman_sig.Types.watch_project_response_of_yojson
+        @@ Yojson.Safe.from_string stdout)
+    with
+    | Ppx_yojson_conv_lib.Yojson_conv.Of_yojson_error _ ->
+      Error (Unexpected_json { json_string = stdout })
+end
+
 include
   (val if Injector_config.use_test_stubbing then
          (module Watchman_mock : Watchman_sig.S)

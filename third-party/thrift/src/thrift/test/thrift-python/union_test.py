@@ -232,10 +232,8 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         )
 
     def test_from_value_none(self) -> None:
-        # BAD: fromValue(None) results in a weird state, where u.type is None
-        # rather than EMPTY.
         union_none = TestUnionImmutable.fromValue(None)
-        self.assertIsNone(union_none.type)
+        self.assertEqual(union_none.type, union_none.Type.EMPTY)
         self.assertIsNone(union_none.value)
 
     def test_from_value_ambiguous_int_bool(self) -> None:

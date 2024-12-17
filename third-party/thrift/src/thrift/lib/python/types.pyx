@@ -1398,6 +1398,7 @@ cdef class Union(StructOrUnion):
     """
     def __cinit__(self):
         self._fbthrift_data = createUnionTuple()
+        self.py_type = None
 
     def __init__(self, **kwargs):
         self_type = type(self)
@@ -1474,10 +1475,11 @@ cdef class Union(StructOrUnion):
 
     cdef void _fbthrift_update_current_field_attributes(self) except *:
         """
-        Updates the `type` and `value` attributes from the internal data tuple
+        Updates the `value` attribute from the internal data tuple
         of this union (`self._fbthrift_data`).
+        Resets `py_type` to None
         """
-        self.type = type(self).Type(self._fbthrift_data[0])
+        self.py_type = None
         val = self._fbthrift_data[1]
         if val is None:
             self.value = None
@@ -1507,16 +1509,31 @@ cdef class Union(StructOrUnion):
         if _fbthrift_get_Union_type_int(self) != field_id:
             # TODO in python 3.10 update this to use name and obj fields
             raise AttributeError(
-                f'Union contains a value of type {self.type.name}, not '
+                f'Union contains a value of type {self.get_type().name}, not '
                 f'{type(self).Type(field_id).name}')
         return self.value
 
+
+    cdef object _fbthrift_py_type_enum(self):
+        '''
+        Initializes self.py_type enum if None.
+        '''
+        if self.py_type is None:
+            self.py_type = type(self).Type(
+                _fbthrift_get_Union_type_int(self)
+            )
+        return self.py_type
+
+    @property
+    def type(Union self not None):
+        return self._fbthrift_py_type_enum()
+
     def get_type(Union self not None):
-        return self.type
+        return self._fbthrift_py_type_enum()
 
     @property
     def fbthrift_current_field(Union self not None):
-        return self.type
+        return self._fbthrift_py_type_enum()
 
     @property
     def fbthrift_current_value(Union self not None):
@@ -1596,7 +1613,7 @@ cdef class Union(StructOrUnion):
         return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
 
 
-cdef inline _fbthrift_get_Union_type_int(Union u):
+cdef inline int _fbthrift_get_Union_type_int(Union u):
     return u._fbthrift_data[0]
 
 cdef _make_fget_struct(i):

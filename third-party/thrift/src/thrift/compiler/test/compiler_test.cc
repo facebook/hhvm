@@ -1339,6 +1339,131 @@ TEST(CompilerTest, non_optional_ref_and_box) {
   )");
 }
 
+TEST(CompilerTest, non_optional_ref_and_box_forbidden) {
+  check_compile(
+      R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/thrift.thrift"
+
+    struct Bar {
+      1: Foo field1 (cpp.ref);
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field1` (in `Bar`).
+
+      2: Foo field2 (cpp2.ref);
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field2` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.Unique}
+      3: Foo field3;
+        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field3` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.Shared}
+      4: Foo field4;
+        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field4` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.SharedMutable}
+      5: Foo field5;
+        # expected-error@-2: Field with @cpp.Ref (or similar) annotation must be optional: `field5` (in `Bar`).
+
+      6: Foo field6 (cpp.ref_type = "unique");
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field6` (in `Bar`).
+
+      7: Foo field7 (cpp2.ref_type = "unique");
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field7` (in `Bar`).
+
+      8: Foo field8 (cpp.ref_type = "shared");
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field8` (in `Bar`).
+
+      9: Foo field9 (cpp2.ref_type = "shared");
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field9` (in `Bar`).
+
+      10: Foo field10 (cpp.ref = "true");
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field10` (in `Bar`).
+
+      11: Foo field11 (cpp2.ref = "true");
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field11` (in `Bar`).
+
+      12: Foo field12;
+
+      @thrift.Box
+      13: Foo field13;
+        # expected-error@-2: The `thrift.box` annotation can only be used with optional fields. Make sure `field13` is optional.
+    }
+
+    struct Foo {}
+  )",
+
+      {"--extra-validation", "forbid_non_optional_cpp_ref_fields"});
+}
+
+TEST(CompilerTest, non_optional_ref_and_box_legacy_allowed) {
+  check_compile(
+      R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/thrift.thrift"
+
+    struct Bar {
+      @cpp.AllowLegacyNonOptionalRef
+      1: Foo field1 (cpp.ref);
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field1` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      2: Foo field2 (cpp2.ref);
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field2` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.Unique}
+      @cpp.AllowLegacyNonOptionalRef
+      3: Foo field3;
+        # expected-warning@-3: Field with @cpp.Ref (or similar) annotation should be optional: `field3` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.Shared}
+      @cpp.AllowLegacyNonOptionalRef
+      4: Foo field4;
+        # expected-warning@-3: Field with @cpp.Ref (or similar) annotation should be optional: `field4` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.SharedMutable}
+      @cpp.AllowLegacyNonOptionalRef
+      5: Foo field5;
+        # expected-warning@-3: Field with @cpp.Ref (or similar) annotation should be optional: `field5` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      6: Foo field6 (cpp.ref_type = "unique");
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field6` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      7: Foo field7 (cpp2.ref_type = "unique");
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field7` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      8: Foo field8 (cpp.ref_type = "shared");
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field8` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      9: Foo field9 (cpp2.ref_type = "shared");
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field9` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      10: Foo field10 (cpp.ref = "true");
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field10` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      11: Foo field11 (cpp2.ref = "true");
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field11` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      12: Foo field12;
+
+      @thrift.Box
+      @cpp.AllowLegacyNonOptionalRef
+      13: Foo field13;
+        # expected-error@-3: The `thrift.box` annotation can only be used with optional fields. Make sure `field13` is optional.
+    }
+
+    struct Foo {}
+  )",
+
+      {"--extra-validation", "forbid_non_optional_cpp_ref_fields"});
+}
+
 TEST(CompilerTest, nonexistent_field_name) {
   check_compile(R"(
     struct Foo {}

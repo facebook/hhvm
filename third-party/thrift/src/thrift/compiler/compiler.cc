@@ -129,9 +129,15 @@ Options:
   --extra-validation
               Comma-separated list of opt-in validators to run. Recognized
               values include:
+                unstructured_annotations_on_field_type
+
+                forbid_non_optional_cpp_ref_fields
+                  Enforces that struct (and exception) fields with a @cpp.Ref
+                  (or cpp[2].ref[_type]) annotation must be optional, unless
+                  annotated with @cpp.AllowLegacyNonOptionalRef.
+
                 implicit_field_ids (IGNORED: always present, i.e. implicit field
                   IDs are always forbidden).
-                unstructured_annotations_on_field_type
 
 Available generators (and options):
 )");
@@ -384,6 +390,8 @@ std::string parse_args(
       for (const auto& validator : validators) {
         if (validator == "unstructured_annotations_on_field_type") {
           sparams.forbid_unstructured_annotations_on_field_types = true;
+        } else if (validator == "forbid_non_optional_cpp_ref_fields") {
+          sparams.forbid_non_optional_cpp_ref_fields = true;
         } else if (validator == "implicit_field_ids") {
           // no-op
         } else {

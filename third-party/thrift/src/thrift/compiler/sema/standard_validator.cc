@@ -494,18 +494,34 @@ void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
   const t_structured& parent_node =
       dynamic_cast<const t_structured&>(*ctx.parent());
 
-  // Reminder: all fields in a union are effectively optional.
   if (node.qualifier() != t_field_qualifier::optional &&
       !parent_node.is_union()) {
+    // Field is not optional (and not in a union)
+    // Reminder: all fields in a union are effectively optional.
+
     if (box) {
+      // For thrift.Box, optional fields are always forbidden.
       ctx.error(
           "The `thrift.box` annotation can only be used with optional fields. "
           "Make sure `{}` is optional.",
           node.name());
     } else if (ref) {
-      ctx.warning(
-          "Field with @cpp.Ref (or similar) annotation should be optional: "
+      // For @cpp.Ref (and cpp[2].ref[_type]), optional fields result in either
+      // a warning on an error, depending on the validation parameters (see
+      // `forbid_non_optional_cpp_ref_fields`) and whether the field is
+      // annotated with `@cpp.AllowLegacyNonOptionalRef`.
+
+      const bool report_error =
+          ctx.sema_parameters().forbid_non_optional_cpp_ref_fields &&
+          node.find_structured_annotation_or_null(
+              kCppAllowLegacyNonOptionalRefUri) == nullptr;
+
+      ctx.report(
+          node,
+          report_error ? diagnostic_level::error : diagnostic_level::warning,
+          "Field with @cpp.Ref (or similar) annotation {} be optional: "
           "`{}` (in `{}`).",
+          report_error ? "must" : "should",
           node.name(),
           parent_node.name());
     }

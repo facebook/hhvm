@@ -91,6 +91,14 @@ class node_metadata_cache {
 struct sema_params {
   bool forbid_unstructured_annotations_on_field_types = false;
   bool skip_lowering_type_annotations = false;
+
+  /**
+   * If true, standard_validator will report an error on struct (or exception)
+   * fields that have a C++ reference annotation (@cpp.Ref, cpp[2].ref[_type])
+   * and are NOT optional (unless they are annotated with
+   * @cpp.AllowLegacyNonOptionalRef).
+   */
+  bool forbid_non_optional_cpp_ref_fields = false;
 };
 
 // An AST visitor context for semantic analysis. It combines diagnostics

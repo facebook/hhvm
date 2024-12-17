@@ -718,19 +718,35 @@ void validate_compatibility_with_lazy_field(
 }
 
 /**
- * Checks that the given field has either the (newer) structured @cpp.Ref
- * annotation, or one of the legacy unstructured annotations (cpp.ref,
- * cpp.ref_type, etc.)
+ * Checks that the given field does not have both the (newer) structured
+ * @cpp.Ref annotation and one of the legacy unstructured annotations (cpp.ref,
+ * cpp.ref_type, etc.).
  */
 void validate_ref_annotation(sema_context& ctx, const t_field& node) {
-  if (node.find_structured_annotation_or_null(kCppRefUri) &&
-      node.has_annotation(
-          {"cpp.ref", "cpp2.ref", "cpp.ref_type", "cpp2.ref_type"})) {
-    ctx.error(
-        "The @cpp.Ref annotation cannot be combined with the `cpp.ref` or "
-        "`cpp.ref_type` annotations. Remove one of the annotations from `{}`.",
+  const bool hasStructuredAnnotation =
+      node.find_structured_annotation_or_null(kCppRefUri) != nullptr;
+
+  const bool hasUnstructuredAnnotation = node.has_annotation(
+      {"cpp.ref", "cpp2.ref", "cpp.ref_type", "cpp2.ref_type"});
+
+  const int count = hasStructuredAnnotation + hasUnstructuredAnnotation;
+  if (count == 0) {
+    // Neither @cpp.Ref nor cpp[2].ref[_type].
+    // Check that there is no @cpp.AllowedLegacyNonOptionalRef
+    ctx.check(
+        node.find_structured_annotation_or_null(
+            kCppAllowLegacyNonOptionalRefUri) == nullptr,
+        "Cannot annotate field with @cpp.AllowLegacyNonOptionalRef unless it "
+        "is a reference field (i.e., @cpp.Ref): `{}`.",
         node.name());
+    return;
   }
+
+  ctx.check(
+      count == 1,
+      "The @cpp.Ref annotation cannot be combined with the `cpp.ref` or "
+      "`cpp.ref_type` annotations. Remove one of the annotations from `{}`.",
+      node.name());
 }
 
 void validate_cpp_adapter_annotation(sema_context& ctx, const t_named& node) {

@@ -1449,13 +1449,32 @@ TEST(CompilerTest, non_optional_ref_and_box_legacy_allowed) {
       11: Foo field11 (cpp2.ref = "true");
         # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field11` (in `Bar`).
 
-      @cpp.AllowLegacyNonOptionalRef
       12: Foo field12;
 
       @thrift.Box
-      @cpp.AllowLegacyNonOptionalRef
       13: Foo field13;
-        # expected-error@-3: The `thrift.box` annotation can only be used with optional fields. Make sure `field13` is optional.
+        # expected-error@-2: The `thrift.box` annotation can only be used with optional fields. Make sure `field13` is optional.
+    }
+
+    struct Foo {}
+  )",
+
+      {"--extra-validation", "forbid_non_optional_cpp_ref_fields"});
+}
+
+TEST(CompilerTest, non_optional_ref_legacy_allowed_annotation_on_wrong_field) {
+  check_compile(
+      R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/thrift.thrift"
+
+    struct Bar {
+      1: Foo field1 (cpp.ref);
+        # expected-error@-1: Field with @cpp.Ref (or similar) annotation must be optional: `field1` (in `Bar`).
+
+      @cpp.AllowLegacyNonOptionalRef
+      2: Foo field2;
+        # expected-error@-2: Cannot annotate field with @cpp.AllowLegacyNonOptionalRef unless it is a reference field (i.e., @cpp.Ref): `field2`.
     }
 
     struct Foo {}

@@ -1207,27 +1207,32 @@ TEST(CompilerTest, boxed_ref_and_optional) {
 
     struct A {
         1: optional i64 field (cpp.ref, thrift.box);
-          # expected-error@-1: The `@thrift.Box` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotations from `field`.
+          # expected-error@-1: The `@thrift.Box` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotation from `field`.
           # expected-warning@-2: The annotation thrift.box is deprecated. Please use @thrift.Box instead.
+
         @thrift.Box
-          # expected-error@-1: The `@thrift.InternBox` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotations from `field2`.
+          # expected-error@-1: The `@thrift.InternBox` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotation from `field2`.
           # expected-error@-2: The `@thrift.InternBox` annotation can only be used with a struct field.
           # expected-error@-3: The `@thrift.InternBox` annotation can only be used with unqualified or terse fields. Make sure `field2` is unqualified or annotated with `@thrift.TerseWrite`.
         @thrift.InternBox
         2: optional i64 field2;
+
         @thrift.InternBox
           # expected-error@-1: The `@thrift.InternBox` annotation currently does not support a field with custom default.
         3: MyStruct field3 = {"field1" : 1};
+
         @cpp.Ref
-          # expected-error@-1: The `@thrift.InternBox` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotations from `field4`.
+          # expected-error@-1: The `@thrift.InternBox` annotation cannot be combined with the other reference annotations. Only annotate a single reference annotation from `field4`.
           # expected-error@-2: The `thrift.box` annotation can only be used with optional fields. Make sure `field4` is optional.
         @thrift.Box
         @thrift.InternBox
         @thrift.TerseWrite
         4: MyStruct field4;
+
         @thrift.InternBox
         @thrift.TerseWrite
         5: MyStruct field5;
+
         @thrift.InternBox
         @thrift.TerseWrite
         6: MyStruct2 field6;
@@ -1242,27 +1247,92 @@ TEST(CompilerTest, unique_ref) {
     struct Bar {
       1: optional Foo field1 (cpp.ref);
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field1`.
+
       2: optional Foo field2 (cpp2.ref);
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field2`.
+
       @cpp.Ref{type = cpp.RefType.Unique}
       3: optional Foo field3;
         # expected-warning@-2: @cpp.Ref{type = cpp.RefType.Unique} is deprecated. Please use @thrift.Box annotation instead in `field3`.
+
       @cpp.Ref{type = cpp.RefType.Shared}
       4: optional Foo field4;
+
       @cpp.Ref{type = cpp.RefType.SharedMutable}
       5: optional Foo field5;
+
       6: optional Foo field6 (cpp.ref_type = "unique");
         # expected-warning@-1: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `field6`.
+
       7: optional Foo field7 (cpp2.ref_type = "unique");
         # expected-warning@-1: cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. Please use @thrift.Box annotation instead in `field7`.
+
       8: optional Foo field8 (cpp.ref_type = "shared");
+
       9: optional Foo field9 (cpp2.ref_type = "shared");
+
       10: optional Foo field10 (cpp.ref = "true");
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field10`.
+
       11: optional Foo field11 (cpp2.ref = "true");
         # expected-warning@-1: cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box annotation instead in `field11`.
+
       12: optional Foo field12;
+
       13: optional Foo field13;
+    }
+
+    struct Foo {}
+  )");
+}
+
+TEST(CompilerTest, non_optional_ref_and_box) {
+  check_compile(R"(
+    include "thrift/annotation/cpp.thrift"
+    include "thrift/annotation/thrift.thrift"
+
+    struct Bar {
+      1: Foo field1 (cpp.ref);
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field1` (in `Bar`).
+
+      2: Foo field2 (cpp2.ref);
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field2` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.Unique}
+      3: Foo field3;
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field3` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.Shared}
+      4: Foo field4;
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field4` (in `Bar`).
+
+      @cpp.Ref{type = cpp.RefType.SharedMutable}
+      5: Foo field5;
+        # expected-warning@-2: Field with @cpp.Ref (or similar) annotation should be optional: `field5` (in `Bar`).
+
+      6: Foo field6 (cpp.ref_type = "unique");
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field6` (in `Bar`).
+
+      7: Foo field7 (cpp2.ref_type = "unique");
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field7` (in `Bar`).
+
+      8: Foo field8 (cpp.ref_type = "shared");
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field8` (in `Bar`).
+
+      9: Foo field9 (cpp2.ref_type = "shared");
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field9` (in `Bar`).
+
+      10: Foo field10 (cpp.ref = "true");
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field10` (in `Bar`).
+
+      11: Foo field11 (cpp2.ref = "true");
+        # expected-warning@-1: Field with @cpp.Ref (or similar) annotation should be optional: `field11` (in `Bar`).
+
+      12: Foo field12;
+
+      @thrift.Box
+      13: Foo field13;
+        # expected-error@-2: The `thrift.box` annotation can only be used with optional fields. Make sure `field13` is optional.
     }
 
     struct Foo {}

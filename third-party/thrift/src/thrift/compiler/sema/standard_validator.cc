@@ -455,45 +455,60 @@ void validate_union_field_attributes(sema_context& ctx, const t_union& node) {
   }
 }
 
+/**
+ * Validates fields with C++ "reference types" (i.e., Box, cpp.Ref, etc.).
+ */
 void validate_boxed_field_attributes(sema_context& ctx, const t_field& node) {
   if (gen::cpp::find_ref_type(node) == gen::cpp::reference_type::none) {
     return;
   }
 
-  bool ref = node.has_annotation({
-                 "cpp.ref",
-                 "cpp2.ref",
-                 "cpp.ref_type",
-                 "cpp2.ref_type",
-             }) ||
+  const bool ref = node.has_annotation({
+                       "cpp.ref",
+                       "cpp2.ref",
+                       "cpp.ref_type",
+                       "cpp2.ref_type",
+                   }) ||
       node.find_structured_annotation_or_null(kCppRefUri);
 
-  bool box = node.has_annotation({
-                 "cpp.box",
-                 "thrift.box",
-             }) ||
+  const bool box = node.has_annotation({
+                       "cpp.box",
+                       "thrift.box",
+                   }) ||
       node.find_structured_annotation_or_null(kBoxUri);
 
-  bool intern_box = node.find_structured_annotation_or_null(kInternBoxUri);
+  const bool intern_box =
+      node.find_structured_annotation_or_null(kInternBoxUri);
 
   if (ref + box + intern_box > 1) {
     ctx.error(
         node,
-        "The {} annotation cannot be combined with the other reference annotations. "
-        "Only annotate a single reference annotations from `{}`.",
+        "The {} annotation cannot be combined with the other reference "
+        "annotations. Only annotate a single reference annotation from `{}`.",
         intern_box ? "`@thrift.InternBox`"
             : box  ? "`@thrift.Box`"
                    : "`@cpp.Ref`",
         node.name());
   }
 
-  if (box) {
-    ctx.check(
-        dynamic_cast<const t_union*>(ctx.parent()) ||
-            node.qualifier() == t_field_qualifier::optional,
-        "The `thrift.box` annotation can only be used with optional fields. "
-        "Make sure `{}` is optional.",
-        node.name());
+  const t_structured& parent_node =
+      dynamic_cast<const t_structured&>(*ctx.parent());
+
+  // Reminder: all fields in a union are effectively optional.
+  if (node.qualifier() != t_field_qualifier::optional &&
+      !parent_node.is_union()) {
+    if (box) {
+      ctx.error(
+          "The `thrift.box` annotation can only be used with optional fields. "
+          "Make sure `{}` is optional.",
+          node.name());
+    } else if (ref) {
+      ctx.warning(
+          "Field with @cpp.Ref (or similar) annotation should be optional: "
+          "`{}` (in `{}`).",
+          node.name(),
+          parent_node.name());
+    }
   }
 
   if (intern_box) {
@@ -686,6 +701,11 @@ void validate_compatibility_with_lazy_field(
   }
 }
 
+/**
+ * Checks that the given field has either the (newer) structured @cpp.Ref
+ * annotation, or one of the legacy unstructured annotations (cpp.ref,
+ * cpp.ref_type, etc.)
+ */
 void validate_ref_annotation(sema_context& ctx, const t_field& node) {
   if (node.find_structured_annotation_or_null(kCppRefUri) &&
       node.has_annotation(
@@ -734,51 +754,57 @@ void validate_java_wrapper_and_adapter_annotation(
       node, kJavaAdapterUri, kJavaWrapperUri, "@java.Adapter", "@java.Wrapper");
 }
 
+/**
+ * Suggest @thrift.Box as a replacement for unique reference fields (@cpp.Ref,
+ * etc.). Require it for adapted fields with a reference annotation.
+ */
 void validate_ref_unique_and_box_annotation(
     sema_context& ctx, const t_field& node) {
   const t_const* adapter_annotation =
-      node.find_structured_annotation_or_null(kCppAdapterUri);
+      node.find_structured_annotation_or_null(kCppAdapterUri); // @cpp.Adapter
 
-  if (cpp2::is_unique_ref(&node)) {
-    if (node.has_annotation({"cpp.ref", "cpp2.ref"})) {
-      if (adapter_annotation) {
-        ctx.error(
-            "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
-            "annotation instead in `{}` with @cpp.Adapter.",
-            node.name());
-      } else if (node.qualifier() == t_field_qualifier::optional) {
-        ctx.warning(
-            "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
-            "annotation instead in `{}`.",
-            node.name());
-      }
+  if (!cpp2::is_unique_ref(&node)) {
+    return;
+  }
+
+  if (node.has_annotation({"cpp.ref", "cpp2.ref"})) {
+    if (adapter_annotation) {
+      ctx.error(
+          "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
+          "annotation instead in `{}` with @cpp.Adapter.",
+          node.name());
+    } else if (node.qualifier() == t_field_qualifier::optional) {
+      ctx.warning(
+          "cpp.ref, cpp2.ref are deprecated. Please use @thrift.Box "
+          "annotation instead in `{}`.",
+          node.name());
     }
-    if (node.has_annotation({"cpp.ref_type", "cpp2.ref_type"})) {
-      if (adapter_annotation) {
-        ctx.error(
-            "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
-            "Please use @thrift.Box annotation instead in `{}` with "
-            "@cpp.Adapter.",
-            node.name());
-      } else if (node.qualifier() == t_field_qualifier::optional) {
-        ctx.warning(
-            "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
-            "Please use @thrift.Box annotation instead in `{}`.",
-            node.name());
-      }
+  }
+  if (node.has_annotation({"cpp.ref_type", "cpp2.ref_type"})) {
+    if (adapter_annotation) {
+      ctx.error(
+          "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
+          "Please use @thrift.Box annotation instead in `{}` with "
+          "@cpp.Adapter.",
+          node.name());
+    } else if (node.qualifier() == t_field_qualifier::optional) {
+      ctx.warning(
+          "cpp.ref_type = `unique`, cpp2.ref_type = `unique` are deprecated. "
+          "Please use @thrift.Box annotation instead in `{}`.",
+          node.name());
     }
-    if (node.find_structured_annotation_or_null(kCppRefUri) != nullptr) {
-      if (adapter_annotation) {
-        ctx.error(
-            "@cpp.Ref{{type = cpp.RefType.Unique}} is deprecated. Please use "
-            "@thrift.Box annotation instead in `{}` with @cpp.Adapter.",
-            node.name());
-      } else if (node.qualifier() == t_field_qualifier::optional) {
-        ctx.warning(
-            "@cpp.Ref{{type = cpp.RefType.Unique}} is deprecated. Please use "
-            "@thrift.Box annotation instead in `{}`.",
-            node.name());
-      }
+  }
+  if (node.find_structured_annotation_or_null(kCppRefUri) != nullptr) {
+    if (adapter_annotation) {
+      ctx.error(
+          "@cpp.Ref{{type = cpp.RefType.Unique}} is deprecated. Please use "
+          "@thrift.Box annotation instead in `{}` with @cpp.Adapter.",
+          node.name());
+    } else if (node.qualifier() == t_field_qualifier::optional) {
+      ctx.warning(
+          "@cpp.Ref{{type = cpp.RefType.Unique}} is deprecated. Please use "
+          "@thrift.Box annotation instead in `{}`.",
+          node.name());
     }
   }
 }

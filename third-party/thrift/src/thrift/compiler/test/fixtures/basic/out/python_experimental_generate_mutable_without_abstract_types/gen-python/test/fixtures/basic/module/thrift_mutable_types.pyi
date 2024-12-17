@@ -29,14 +29,14 @@ import thrift.python.mutable_types as _fbthrift_python_mutable_types
 import thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-from test.fixtures.basic.module.thrift_enums import *
-
 from test.fixtures.basic.module.thrift_enums import (
     MyEnum as _fbthrift_MyEnum,
     _fbthrift_compatible_with_MyEnum,
     HackEnum as _fbthrift_HackEnum,
     _fbthrift_compatible_with_HackEnum,
 )
+MyEnum = _fbthrift_MyEnum
+HackEnum = _fbthrift_HackEnum
 
 
 class _fbthrift_compatible_with_MyStruct:

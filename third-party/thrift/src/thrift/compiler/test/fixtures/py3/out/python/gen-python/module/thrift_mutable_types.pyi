@@ -34,8 +34,6 @@ import fbcode.thrift.python.mutable_types as _fbthrift_python_mutable_types
 import fbcode.thrift.python.mutable_exceptions as _fbthrift_python_mutable_exceptions
 import fbcode.thrift.python.mutable_containers as _fbthrift_python_mutable_containers
 
-from module.thrift_enums import *
-
 from module.thrift_enums import (
     AnEnum as _fbthrift_AnEnum,
     _fbthrift_compatible_with_AnEnum,
@@ -44,6 +42,9 @@ from module.thrift_enums import (
     Flags as _fbthrift_Flags,
     _fbthrift_compatible_with_Flags,
 )
+AnEnum = _fbthrift_AnEnum
+AnEnumRenamed = _fbthrift_AnEnumRenamed
+Flags = _fbthrift_Flags
 
 
 class _fbthrift_compatible_with_SimpleException:

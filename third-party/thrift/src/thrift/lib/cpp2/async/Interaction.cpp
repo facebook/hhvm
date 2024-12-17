@@ -131,6 +131,9 @@ void TilePromise::fulfill(
     Tile::onTermination({&tile, &eb}, eb);
   }
 
+  // transfer overload policy to the actual tile
+  tile.setOverloadPolicy(std::move(overloadPolicy_));
+
   // Inline destruction of this is possible at the setTile()
   auto continuations = std::move(continuations_);
   bool firstContinuation = true;
@@ -219,6 +222,9 @@ void TilePromise::fulfill(
   if (terminated_) {
     Tile::onTermination({&tile, &eb}, eb);
   }
+
+  // transfer overload policy to the actual tile
+  tile.setOverloadPolicy(std::move(overloadPolicy_));
 
   // Inline destruction of this is possible at the setTile()
   auto continuations = std::move(continuations_);

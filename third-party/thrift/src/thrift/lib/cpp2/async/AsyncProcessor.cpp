@@ -215,6 +215,8 @@ bool GeneratedAsyncProcessorBase::createInteraction(ServerRequest& req) {
           kInteractionConstructorErrorErrorCode);
       return true; // Not a duplicate; caller will see missing tile.
     }
+    tile.value()->setOverloadPolicy(
+        InteractionOverloadPolicy::createFromThriftFlag());
     return conn.addTile(id, {tile->release(), &eb});
   }
 
@@ -306,6 +308,8 @@ bool GeneratedAsyncProcessorBase::createInteraction(
           kInteractionConstructorErrorErrorCode);
       return true; // Not a duplicate; caller will see missing tile.
     }
+    tile.value()->setOverloadPolicy(
+        InteractionOverloadPolicy::createFromThriftFlag());
     return conn.addTile(id, {tile->release(), &eb});
   }
 

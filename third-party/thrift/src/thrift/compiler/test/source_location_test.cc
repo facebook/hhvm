@@ -67,6 +67,16 @@ TEST(SourceLocationTest, get_text) {
   EXPECT_EQ(sm.get_text(source.start + 2), text + 2);
 }
 
+TEST(SourceLocationTest, get_text_range) {
+  source_manager sm;
+  auto source = sm.add_virtual_file("path/to/file", R"(First line
+Second    Line)");
+  EXPECT_EQ(sm.get_text_range({source.start, source.start + 5}), "First");
+  EXPECT_EQ(
+      sm.get_text_range({source.start + 5, source.start + 17}),
+      " line\nSecond");
+}
+
 TEST(SourceLocationTest, stable_file_name) {
   auto sm = source_manager();
   auto source = sm.add_virtual_file("f1", "");

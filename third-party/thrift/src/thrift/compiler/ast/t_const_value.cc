@@ -27,24 +27,4 @@ const std::vector<t_const_value*>& t_const_value::get_list_or_empty_map()
   return empty;
 }
 
-t_type::value_type from_const_value_type(
-    t_const_value::t_const_value_kind kind) {
-  switch (kind) {
-    case t_const_value::t_const_value_kind::CV_BOOL:
-      return t_type::value_type::BOOL;
-    case t_const_value::t_const_value_kind::CV_INTEGER:
-      return t_type::value_type::I64;
-    case t_const_value::t_const_value_kind::CV_DOUBLE:
-      return t_type::value_type::DOUBLE;
-    case t_const_value::t_const_value_kind::CV_STRING:
-      return t_type::value_type::STRING;
-    case t_const_value::t_const_value_kind::CV_MAP:
-      return t_type::value_type::MAP;
-    case t_const_value::t_const_value_kind::CV_LIST:
-      return t_type::value_type::LIST;
-    case t_const_value::t_const_value_kind::CV_IDENTIFIER:
-      return t_type::value_type::STRING;
-  }
-}
-
 } // namespace apache::thrift::compiler

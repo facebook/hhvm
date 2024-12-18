@@ -103,17 +103,14 @@ void schematizer::add_definition(
 
     for (const auto& item : structured) {
       auto annot = t_const_value::make_map();
-
-      const auto ty_wrapper = protocol_value_builder{*item.type()};
-
       if (!item.value()->is_empty()) {
         auto protocol_value_ttype =
             std_type("facebook.com/thrift/protocol/Value");
         auto fields = t_const_value::make_map();
-        for (const auto& [key, value] : item.value()->get_map()) {
+        for (const auto& pair : item.value()->get_map()) {
           fields->add_map(
-              key->clone(),
-              ty_wrapper.property(*key).wrap(*value, protocol_value_ttype));
+              pair.first->clone(),
+              wrap_with_protocol_value(*pair.second, protocol_value_ttype));
         }
         annot->add_map(val("fields"), std::move(fields));
       }
@@ -294,8 +291,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
           type_uri(*resolved_type));
       break;
     }
-    case t_type::type::t_service:
-    case t_type::type::t_program:
+    default:
       assert(false);
   }
   schema->add_map(val("name"), std::move(type_name));
@@ -719,194 +715,39 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_typedef& node) {
   return schema;
 }
 
-const char* protocol_value_type_name(t_type::value_type ty) {
-  switch (ty) {
-    case t_type::value_type::BOOL:
-      return "boolValue";
-    case t_type::value_type::BYTE:
-      return "byteValue";
-    case t_type::value_type::I16:
-      return "i16Value";
-    case t_type::value_type::I32:
-      return "i32Value";
-    case t_type::value_type::I64:
-      return "i64Value";
-    case t_type::value_type::FLOAT:
-      return "floatValue";
-    case t_type::value_type::DOUBLE:
-      return "doubleValue";
-    case t_type::value_type::STRING:
-      return "stringValue";
-    case t_type::value_type::BINARY:
-      return "binaryValue";
-    case t_type::value_type::OBJECT:
-      return "objectValue";
-    case t_type::value_type::LIST:
-      return "listValue";
-    case t_type::value_type::SET:
-      return "setValue";
-    case t_type::value_type::MAP:
-      return "mapValue";
-  }
-}
-
-protocol_value_builder::protocol_value_builder(const t_type& struct_ty)
-    : ty_{struct_ty.get_true_type()} {}
-
-protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
-
-[[nodiscard]] protocol_value_builder protocol_value_builder::as_value_type() {
-  return protocol_value_builder{};
-}
-
-[[nodiscard]] protocol_value_builder protocol_value_builder::property(
-    const t_const_value& key) const {
-  if (ty_ == nullptr) {
-    return as_value_type();
-  }
-
-  const auto* ttype = ty_->get_true_type();
-  assert(ttype != nullptr && (ttype->is_struct() || ttype->is_map()));
-
-  if (ttype->is_map()) {
-    // Maps are not restricted to string-based field keys, so we should extend
-    // the look-up to any sealed key type.
-    const auto* map_ty = dynamic_cast<const t_map*>(ttype);
-    const auto* val_ty = map_ty->get_val_type()->get_true_type();
-    return protocol_value_builder{*val_ty};
-  }
-
-  assert(
-      key.kind() == t_const_value::CV_STRING &&
-      "A struct only has named fields");
-  const auto* struct_ty = dynamic_cast<const t_struct*>(ttype);
-  const auto* field = struct_ty->get_field_by_name(key.get_string());
-  const auto* field_ty = field->get_type()->get_true_type();
-  return protocol_value_builder{*field_ty};
-}
-
-[[nodiscard]] protocol_value_builder protocol_value_builder::key(
-    [[maybe_unused]] const t_const_value& key) const {
-  if (ty_ == nullptr) {
-    return as_value_type();
-  }
-
-  if (ty_->is_struct()) {
-    assert(
-        key.kind() == t_const_value::CV_STRING &&
-        "A struct only has named fields");
-    return as_value_type();
-  }
-
-  assert(ty_->is_map() && "The type must be a map");
-  const auto* map_ty = dynamic_cast<const t_map*>(ty_);
-  const auto* key_ty = map_ty->get_key_type()->get_true_type();
-  assert(key_ty != nullptr);
-  return protocol_value_builder{*key_ty};
-}
-
-[[nodiscard]] protocol_value_builder protocol_value_builder::container_element(
-    const t_const_value& container) const {
-  assert(container.kind() == t_const_value::CV_LIST);
-  if (container.get_list().empty()) {
-    // If the list is empty, we don't care what the type resolves to
-    return as_value_type();
-  }
-
-  assert(
-      ty_->is_container() &&
-      "Resolving to a container element requires the current field to be a container");
-  const auto* container_ty = dynamic_cast<const t_container*>(ty_);
-  const t_type* element_ty = nullptr;
-  switch (container_ty->container_type()) {
-    case t_container::type::t_list:
-      element_ty = static_cast<const t_list*>(container_ty)
-                       ->elem_type()
-                       ->get_true_type();
-      break;
-    case t_container::type::t_set:
-      element_ty =
-          static_cast<const t_set*>(container_ty)->elem_type()->get_true_type();
-      break;
-    case t_container::type::t_map:
-      assert(false && "Maps should not deduce a single container element");
-  }
-  return protocol_value_builder{*element_ty};
-}
-
-// Generates a protocol value key for a given `t_const_value`, based on the
-// type of the field it represents.
-std::unique_ptr<t_const_value> protocol_value_builder::protocol_value_label(
-    const t_const_value& value) const {
-  if (ty_ == nullptr) {
-    return val(protocol_value_type_name(from_const_value_type(value.kind())));
-  }
-
-  auto raise_exception = [&] {
-    throw std::runtime_error(fmt::format(
-        "{} type={} is not a valid type for protocol value key",
-        ty_->get_name(),
-        t_type::type_name(ty_->get_type_value())));
-  };
-  // Verify that the field is a valid type for a protocol value key
-  switch (value.kind()) {
-    case t_const_value::CV_INTEGER:
-      if (!(ty_->is_any_int() || ty_->is_enum())) {
-        raise_exception();
-      }
-      break;
-    case t_const_value::CV_DOUBLE:
-      if (!ty_->is_floating_point()) {
-        raise_exception();
-      }
-      break;
-    case t_const_value::CV_STRING:
-      if (!ty_->is_string_or_binary()) {
-        raise_exception();
-      }
-      break;
-    case t_const_value::CV_BOOL:
-    case t_const_value::CV_MAP:
-    case t_const_value::CV_LIST:
-    case t_const_value::CV_IDENTIFIER:
-      // These all have unequivocal keys
-      break;
-  }
-
-  // Generate the key
-  const auto obj_val_ty = ty_->as_value_type().value();
-  return val(protocol_value_type_name(obj_val_ty));
-}
-
-std::unique_ptr<t_const_value> protocol_value_builder::wrap(
-    const t_const_value& protocol_value, t_type_ref ttype) const {
+std::unique_ptr<t_const_value> wrap_with_protocol_value(
+    const t_const_value& value, t_type_ref ttype) {
   auto ret = t_const_value::make_map();
   ret->set_ttype(ttype);
-  switch (protocol_value.kind()) {
+  switch (value.kind()) {
     case t_const_value::CV_BOOL:
+      ret->add_map(val("boolValue"), value.clone());
+      break;
     case t_const_value::CV_INTEGER:
+      ret->add_map(val("i64Value"), value.clone());
+      break;
     case t_const_value::CV_DOUBLE:
+      ret->add_map(val("doubleValue"), value.clone());
+      break;
     case t_const_value::CV_STRING:
-      ret->add_map(
-          protocol_value_label(protocol_value), protocol_value.clone());
+      ret->add_map(val("stringValue"), value.clone());
       break;
     case t_const_value::CV_MAP: {
       auto map = t_const_value::make_map();
-      for (const auto& [k, v] : protocol_value.get_map()) {
-        map->add_map(key(*k).wrap(*k, ttype), property(*k).wrap(*v, ttype));
+      for (const auto& map_elem : value.get_map()) {
+        map->add_map(
+            wrap_with_protocol_value(*map_elem.first, ttype),
+            wrap_with_protocol_value(*map_elem.second, ttype));
       }
       ret->add_map(val("mapValue"), std::move(map));
       break;
     }
     case t_const_value::CV_LIST: {
       auto list = t_const_value::make_list();
-      auto list_ty_resolver = container_element(protocol_value);
-      for (const auto& list_elem : protocol_value.get_list()) {
-        list->add_list(list_ty_resolver.wrap(*list_elem, ttype));
+      for (const auto& list_elem : value.get_list()) {
+        list->add_list(wrap_with_protocol_value(*list_elem, ttype));
       }
-      auto container_value_type = ty_->as_value_type().value();
-      ret->add_map(
-          val(protocol_value_type_name(container_value_type)), std::move(list));
+      ret->add_map(val("listValue"), std::move(list));
       break;
     }
     case t_const_value::CV_IDENTIFIER:

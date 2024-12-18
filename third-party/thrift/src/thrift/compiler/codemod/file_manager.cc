@@ -22,6 +22,41 @@
 
 namespace apache::thrift::compiler::codemod {
 
+namespace {
+
+// Subset of "standard whitespace" characters (as defined in
+// https://en.cppreference.com/w/c/string/byte/isspace) that only cause
+// horizontal movement (i.e., indentation)
+constexpr const char* kHorizontalWhitespaceChars = " \t";
+
+size_t get_first_character_of_this_line(
+    const std::string& content, size_t pos) {
+  // NOTE: `pos` may be the trailing newline of this line, so need to start
+  // search for preceding newline (if any) *before* `pos`.
+
+  // If there are no previous characters, `pos` is the first character of this
+  // line (and of the entire content).
+  if (pos == 0) {
+    return 0;
+  }
+
+  // Otherwise, `pos` is not the first character in the content, look for any
+  // preceding newline (marking the end of the previous line).
+  const std::string::size_type line_start_offset =
+      content.find_last_of("\n", pos - 1);
+
+  if (line_start_offset == std::string::npos) {
+    // If no preceding newline is found, `pos` is in the first line of
+    // `content`, and therefore the line begins at the start of the string.
+    return 0;
+  } else {
+    // Otherwise, the line starts just past the last found newline.
+    return line_start_offset + 1;
+  }
+}
+
+} // namespace
+
 std::string file_manager::get_new_content() const {
   size_t prev_end = 0;
   std::string new_content;
@@ -103,20 +138,22 @@ void file_manager::expand_over_whitespaces(
 }
 
 void file_manager::add_include(std::string include) {
-  if (includes_.find(include) == includes_.end()) {
-    std::string curr_include = "include \"" + include + "\"\n";
-    includes_.insert(std::move(include));
-    size_t offset;
-    if (!program_->includes().empty()) {
-      offset = to_offset(program_->includes().back()->src_range().end) + 1;
-    } else {
-      offset = program_->definitions().empty()
-          ? 0
-          : to_offset(program_->definitions().front().src_range().begin);
-      curr_include += "\n";
-    }
-    replacements_.insert({offset, offset, curr_include, true});
+  if (includes_.contains(include)) {
+    return;
   }
+
+  std::string curr_include = "include \"" + include + "\"\n";
+  includes_.insert(std::move(include));
+  size_t offset;
+  if (!program_->includes().empty()) {
+    offset = to_offset(program_->includes().back()->src_range().end) + 1;
+  } else {
+    offset = program_->definitions().empty()
+        ? 0
+        : to_offset(program_->definitions().front().src_range().begin);
+    curr_include += "\n";
+  }
+  replacements_.insert({offset, offset, curr_include, /* is_include= */ true});
 }
 
 void file_manager::remove_all_annotations(const t_node& node) {
@@ -140,6 +177,26 @@ void file_manager::remove_all_annotations(const t_node& node) {
   }
 
   replacements_.insert({begin_offset, end_offset, ""});
+}
+
+source_range file_manager::get_line_leading_whitespace(
+    source_location loc) const {
+  const size_t loc_offset = loc.offset();
+
+  const size_t line_start_offset =
+      get_first_character_of_this_line(old_content_, loc_offset);
+
+  std::string::size_type whitespace_end_offset = old_content_.find_first_not_of(
+      kHorizontalWhitespaceChars, line_start_offset);
+  if (whitespace_end_offset == std::string::npos) {
+    whitespace_end_offset = old_content_.size();
+  }
+
+  const source_location source_start = source_mgr_.get_source_start(loc);
+  return source_range{
+      .begin = source_start + line_start_offset,
+      .end = source_start + whitespace_end_offset,
+  };
 }
 
 void file_manager::set_namespace(

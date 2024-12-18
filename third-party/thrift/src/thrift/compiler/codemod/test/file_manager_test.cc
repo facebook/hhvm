@@ -48,7 +48,8 @@ struct Foo {
 class FileManagerTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    source_manager_.add_virtual_file(kVirtualFileName, kVirtualFileContents);
+    source_ = source_manager_.add_virtual_file(
+        kVirtualFileName, kVirtualFileContents);
     program_bundle_ = parse_and_get_program(
         source_manager_, {"<virtual compiler>", kVirtualFileName});
     ASSERT_THAT(program_bundle_, NotNull());
@@ -58,6 +59,7 @@ class FileManagerTest : public ::testing::Test {
   }
 
   source_manager source_manager_;
+  source source_;
   std::unique_ptr<t_program_bundle> program_bundle_;
   std::unique_ptr<file_manager> file_manager_;
 };
@@ -119,6 +121,26 @@ struct Foo {
   1: optional i32 bar;
 }
 )"));
+}
+
+TEST_F(FileManagerTest, get_line_leading_whitespace) {
+  {
+    const source_range leading_whitespace =
+        file_manager_->get_line_leading_whitespace(source_.start + 69);
+
+    EXPECT_EQ(leading_whitespace.begin.offset(), 65);
+    EXPECT_EQ(leading_whitespace.end.offset(), 67);
+    EXPECT_EQ(source_manager_.get_text_range(leading_whitespace), "  ");
+  }
+
+  {
+    const source_range leading_whitespace =
+        file_manager_->get_line_leading_whitespace(source_.start);
+
+    EXPECT_EQ(leading_whitespace.begin.offset(), 0);
+    EXPECT_EQ(leading_whitespace.end.offset(), 0);
+    EXPECT_EQ(source_manager_.get_text_range(leading_whitespace), "");
+  }
 }
 
 // Testing overloading of < operator in replacement struct.

@@ -22,13 +22,12 @@
 
 namespace apache::thrift::compiler::codemod {
 
-void file_manager::apply_replacements() {
+std::string file_manager::get_new_content() const {
   size_t prev_end = 0;
   std::string new_content;
 
   if (replacements_.empty()) {
-    fmt::print("No changes produced\n");
-    return;
+    return old_content_;
   }
 
   // Perform the replacements.
@@ -43,10 +42,18 @@ void file_manager::apply_replacements() {
 
   // Get the last part of the file.
   new_content += old_content_.substr(prev_end);
+  return new_content;
+}
+
+void file_manager::apply_replacements() {
+  if (replacements_.empty()) {
+    fmt::print("No changes produced\n");
+    return;
+  }
 
   // No need for catching nor throwing here since if file doesn't exist
   // the constructor itself will throw an exception.
-  folly::writeFile(new_content, program_->path().c_str());
+  folly::writeFile(get_new_content(), program_->path().c_str());
 
   fmt::print("{} replacements\n", replacements_.size());
 }

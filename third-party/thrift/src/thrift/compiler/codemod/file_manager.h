@@ -59,16 +59,27 @@ struct replacement {
 class file_manager {
  public:
   file_manager(source_manager& sm, const t_program& program)
-      : source_mgr_(sm), program_(&program) {
-    if (!folly::readFile(program_->path().c_str(), old_content_)) {
-      throw std::runtime_error("Could not read file: " + program_->path());
-    }
+      : source_mgr_(sm),
+        program_(&program),
+        old_content_(sm.get_file(program_->path())->text.data()) {
     for (const auto* include : program_->includes()) {
       includes_.insert(fmt::to_string(include->raw_path()));
     }
   }
 
-  // Write all existing replacements back to file.
+  /**
+   * Returns the content with all existing replacements applied.
+   *
+   * This is similar to `apply_replacements()`, but the change does not get
+   * written back to file.
+   */
+  std::string get_new_content() const;
+
+  /**
+   * Write all existing replacements back to file.
+   *
+   * The written content is the same as `get_new_content()`.
+   */
   void apply_replacements();
 
   // Adds a given replacement to the set of replacements.

@@ -1202,7 +1202,53 @@ CO_TEST_P(ServiceInterceptorTestP, ServiceAndMethodNames) {
   EXPECT_THAT(interceptor->names, ElementsAreArray(expectedNames));
 }
 
-CO_TEST_P(ServiceInterceptorTestP, ResultOrActiveExceptionTypesAreCorrect) {
+CO_TEST_P(
+    ServiceInterceptorTestP, ResultOrActiveExceptionTypesAreCorrectBasic) {
+  auto interceptor =
+      std::make_shared<ServiceInterceptorLogResultTypeOnResponse>(
+          "Interceptor1");
+  auto runner =
+      makeServer(std::make_shared<TestHandler>(), [&](ThriftServer& server) {
+        server.addModule(std::make_unique<TestModule>(interceptor));
+      });
+
+  auto client =
+      makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
+  co_await client->co_echo("");
+  co_await client->co_noop();
+
+  EXPECT_THROW(
+      co_await client->co_echo("throw"), apache::thrift::TApplicationException);
+
+  co_await client->co_echo_eb("");
+
+  {
+    test::RequestArgsStruct requestArgs;
+    requestArgs.foo() = 1;
+    requestArgs.bar() = "hello";
+    co_await client->co_echoStruct(requestArgs);
+  }
+
+  using ResultKind = ServiceInterceptorLogResultTypeOnResponse::ResultKind;
+  const std::vector<ServiceInterceptorLogResultTypeOnResponse::Entry>
+      expectedResults = {
+          // echo
+          {ResultKind::OK, typeid(std::string)},
+          // noop
+          {ResultKind::OK, typeid(folly::Unit)},
+          // echo("throw")
+          {ResultKind::EXCEPTION, typeid(std::runtime_error)},
+          // echo_eb
+          {ResultKind::OK, typeid(std::string)},
+          // echoStruct
+          {ResultKind::OK, typeid(test::ResponseArgsStruct)},
+      };
+
+  EXPECT_THAT(interceptor->results, ElementsAreArray(expectedResults));
+}
+
+CO_TEST_P(
+    ServiceInterceptorTestP, ResultOrActiveExceptionTypesAreCorrectAdvanced) {
   if (transportType() != TransportType::ROCKET) {
     // only rocket supports all transport features being tested here
     co_return;
@@ -1218,8 +1264,6 @@ CO_TEST_P(ServiceInterceptorTestP, ResultOrActiveExceptionTypesAreCorrect) {
 
   auto client =
       makeClient<apache::thrift::Client<test::ServiceInterceptorTest>>(*runner);
-  co_await client->co_echo("");
-  co_await client->co_noop();
 
   {
     auto stream = (co_await client->co_iota(1)).toAsyncGenerator();
@@ -1240,25 +1284,9 @@ CO_TEST_P(ServiceInterceptorTestP, ResultOrActiveExceptionTypesAreCorrect) {
     // terminate interaction
   }
 
-  EXPECT_THROW(
-      co_await client->co_echo("throw"), apache::thrift::TApplicationException);
-
-  co_await client->co_echo_eb("");
-
-  {
-    test::RequestArgsStruct requestArgs;
-    requestArgs.foo() = 1;
-    requestArgs.bar() = "hello";
-    co_await client->co_echoStruct(requestArgs);
-  }
-
   using ResultKind = ServiceInterceptorLogResultTypeOnResponse::ResultKind;
-  std::vector<ServiceInterceptorLogResultTypeOnResponse::Entry>
+  const std::vector<ServiceInterceptorLogResultTypeOnResponse::Entry>
       expectedResults = {
-          // echo
-          {ResultKind::OK, typeid(std::string)},
-          // noop
-          {ResultKind::OK, typeid(folly::Unit)},
           // iota
           {ResultKind::OK, typeid(apache::thrift::ServerStream<std::int32_t>)},
           // createInteraction
@@ -1267,12 +1295,6 @@ CO_TEST_P(ServiceInterceptorTestP, ResultOrActiveExceptionTypesAreCorrect) {
           {ResultKind::OK, typeid(std::string)},
           // SampleInteraction2.echo
           {ResultKind::OK, typeid(std::string)},
-          // echo("throw")
-          {ResultKind::EXCEPTION, typeid(std::runtime_error)},
-          // echo_eb
-          {ResultKind::OK, typeid(std::string)},
-          // echoStruct
-          {ResultKind::OK, typeid(test::ResponseArgsStruct)},
       };
 
   EXPECT_THAT(interceptor->results, ElementsAreArray(expectedResults));

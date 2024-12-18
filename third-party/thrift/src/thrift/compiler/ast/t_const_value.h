@@ -339,6 +339,10 @@ class t_const_value {
   const t_type* get_ttype() const { return ttype_.get_type(); }
 };
 
+// Returns the ProtocolObject ValueType of a t_const_value
+t_type::value_type from_const_value_type(
+    t_const_value::t_const_value_kind kind);
+
 } // namespace apache::thrift::compiler
 
 #endif

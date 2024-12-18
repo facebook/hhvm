@@ -21,7 +21,8 @@ import (
 	"net"
 )
 
-// NewSimpleServer creates a new server that only supports Header Transport.
+// NewSimpleServer creates a new simple server.
+// Deprecated: use NewServer() instead.
 func NewSimpleServer(processor Processor, listener net.Listener, transportType TransportID, options ...ServerOption) Server {
 	serverOptions := newServerOptions(options...)
 	switch transportType {

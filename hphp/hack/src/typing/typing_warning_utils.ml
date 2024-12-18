@@ -412,6 +412,27 @@ module Duplicated_properties = struct
   let lint_quickfix _ = None
 end
 
+module Class_pointer_to_string = struct
+  type t = Typing_warning.Class_pointer_to_string.t
+
+  let code = Codes.ClassPointerToString
+
+  let codes = [code]
+
+  let code _ = code
+
+  let claim { Typing_warning.Class_pointer_to_string.ty; _ } =
+    "Using "
+    ^ ty
+    ^ " in this position will trigger an implicit runtime conversion to string. You may use "
+    ^ Markdown_lite.md_codify "HH\\class_to_classname"
+    ^ " to get the class name as a string."
+
+  let reasons _ = []
+
+  let quickfixes _ = []
+end
+
 let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
     (module Warning with type t = x) =
   match kind with
@@ -423,6 +444,7 @@ let module_of (type a x) (kind : (x, a) Typing_warning.kind) :
   | Typing_warning.Truthiness_test -> (module Truthiness_test)
   | Typing_warning.Equality_check -> (module Equality_check)
   | Typing_warning.Duplicate_properties -> (module Duplicated_properties)
+  | Typing_warning.Class_pointer_to_string -> (module Class_pointer_to_string)
 
 let module_of_migrated
     (type x) (kind : (x, Typing_warning.migrated) Typing_warning.kind) :

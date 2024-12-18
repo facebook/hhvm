@@ -74,7 +74,7 @@ let shape_field_name_with_ty_err env (_, p, field) =
     Error
       Typing_error.(
         primary
-        @@ Primary.Class_pointer_to_string
+        @@ Primary.Class_const_to_string
              {
                pos = p;
                cls_name = Typing_class_pointers.string_of_class_id_ cid;

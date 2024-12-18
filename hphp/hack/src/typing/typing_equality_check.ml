@@ -71,11 +71,6 @@ let eq_incompatible_types env p ty1 ty2 =
                    Reason.to_string ("This is " ^ tys2) (get_reason ty2));
            })
 
-let is_arraykey t =
-  match get_node t with
-  | Tprim N.Tarraykey -> true
-  | _ -> false
-
 let bad_compare_prim_to_enum ty enum_bound =
   match get_node enum_bound with
   | Tprim enum_bound ->

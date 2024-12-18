@@ -5439,7 +5439,7 @@ end = struct
       [],
       User_error_flags.empty )
 
-  let class_pointer_to_string pos cid_str =
+  let class_const_to_string pos cid_str =
     let cid_str = Utils.strip_ns cid_str in
     let nameof = "nameof " ^ cid_str in
     let nameof_md = Markdown_lite.md_codify nameof in
@@ -5461,6 +5461,23 @@ end = struct
       lazy [],
       lazy Explanation.empty,
       quickfixes,
+      User_error_flags.empty )
+
+  let class_pointer_to_string pos ty =
+    let class_to_classname = "HH\\class_to_classname" in
+    let class_to_classname_md = Markdown_lite.md_codify class_to_classname in
+    ( Error_code.ClassPointerToString,
+      lazy
+        ( pos,
+          "Using "
+          ^ ty
+          ^ " in this position will trigger an implicit runtime conversion to string. "
+          ^ "You may use "
+          ^ class_to_classname_md
+          ^ " to get the class name as a string." ),
+      lazy [],
+      lazy Explanation.empty,
+      [],
       User_error_flags.empty )
 
   let to_error t ~env : error =
@@ -6037,8 +6054,9 @@ end = struct
         pos
         (Lazy.force expr_ty)
         (List.map unsupported_tys ~f:Lazy.force)
-    | Class_pointer_to_string { pos; cls_name } ->
-      class_pointer_to_string pos cls_name
+    | Class_const_to_string { pos; cls_name } ->
+      class_const_to_string pos cls_name
+    | Class_pointer_to_string { pos; ty } -> class_pointer_to_string pos ty
     | Optional_parameter_not_supported pos ->
       optional_parameter_not_supported pos
     | Optional_parameter_not_abstract pos -> optional_parameter_not_abstract pos

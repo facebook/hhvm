@@ -58,11 +58,6 @@ let is_shape t =
   | Tshape _ -> true
   | _ -> false
 
-let is_arraykey t =
-  match get_node t with
-  | Tprim Aast.Tarraykey -> true
-  | _ -> false
-
 let fold_errs errs =
   List.fold_left (List.rev errs) ~init:(Ok []) ~f:(fun acc res ->
       match (acc, res) with

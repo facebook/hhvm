@@ -402,6 +402,8 @@ val error_Tunapplied_alias_in_illegal_context : unit -> 'a
 
 val is_typeconst_type_abstract : typeconst_type -> bool
 
+val is_arraykey : locl_ty -> bool
+
 module Attributes : sig
   val mem : string -> user_attribute Hh_prelude.List.t -> bool
 

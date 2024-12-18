@@ -696,6 +696,11 @@ let is_typeconst_type_abstract tc =
   | TCConcrete _ -> false
   | TCAbstract _ -> true
 
+let is_arraykey t =
+  match get_node t with
+  | Tprim Aast.Tarraykey -> true
+  | _ -> false
+
 module Attributes = struct
   let mem x xs =
     List.exists xs ~f:(fun { ua_name; _ } -> String.equal x (snd ua_name))

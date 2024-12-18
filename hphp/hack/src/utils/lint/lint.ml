@@ -98,7 +98,7 @@ let option_null pos =
     pos
     "`?null` is a redundant typehint - just use `null`"
 
-let class_pointer_to_string pos cid_str =
+let class_const_to_string pos cid_str =
   let cid_str = Utils.strip_ns cid_str in
   let nameof = "nameof " ^ cid_str in
   let nameof_md = Markdown_lite.md_codify nameof in

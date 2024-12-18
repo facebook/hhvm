@@ -9,15 +9,28 @@
 open Typing_defs
 open Aast_defs
 
-let error env level pos cls_name =
+let error_at_cls_const_expr env level pos cls_name =
   if level > 1 then
     Typing_error_utils.add_typing_error
       ~env
-      Typing_error.(
-        primary @@ Primary.Class_pointer_to_string { pos; cls_name })
+      Typing_error.(primary @@ Primary.Class_const_to_string { pos; cls_name })
   (* error *)
   else
-    Lint.class_pointer_to_string pos cls_name
+    Lint.class_const_to_string pos cls_name
+
+let error_at_cls_ptr_type env level pos ty =
+  match level with
+  | 3 ->
+    Typing_warning_utils.add
+      env
+      ( pos,
+        Typing_warning.Class_pointer_to_string,
+        { Typing_warning.Class_pointer_to_string.pos; ty } )
+  | 4 ->
+    Typing_error_utils.add_typing_error
+      ~env
+      Typing_error.(primary @@ Primary.Class_pointer_to_string { pos; ty })
+  | _ -> ()
 
 let string_of_class_id_ = function
   | CIparent -> "parent"
@@ -41,7 +54,8 @@ let check_string_coercion_point env ~flag expr ty =
         | _ ->
           let check ty =
             match get_node ty with
-            | Tprim Tstring -> error env level pos (string_of_class_id_ cid_)
+            | Tprim Tstring ->
+              error_at_cls_const_expr env level pos (string_of_class_id_ cid_)
             | _ -> ()
           in
           let (_env, ty) = Typing_dynamic_utils.strip_dynamic env ty in

@@ -1320,9 +1320,13 @@ module Primary : sig
         expr_ty: string Lazy.t;
         unsupported_tys: string Lazy.t list;
       }
-    | Class_pointer_to_string of {
+    | Class_const_to_string of {
         pos: Pos.t;
         cls_name: string;
+      }
+    | Class_pointer_to_string of {
+        pos: Pos.t;
+        ty: string;
       }
     | Optional_parameter_not_supported of Pos.t
     | Optional_parameter_not_abstract of Pos.t

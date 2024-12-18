@@ -24,4 +24,4 @@ val option_mixed : Pos.t -> unit
 
 val option_null : Pos.t -> unit
 
-val class_pointer_to_string : Pos.t -> string -> unit
+val class_const_to_string : Pos.t -> string -> unit

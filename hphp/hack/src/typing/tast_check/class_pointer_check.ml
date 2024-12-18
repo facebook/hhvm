@@ -28,7 +28,7 @@ let handler =
         when enum_level > 0 && String.(name = SN.Members.mClass) ->
         (match Env.get_self_id env with
         | Some e when Env.is_enum env e ->
-          ClassPointer.error
+          ClassPointer.error_at_cls_const_expr
             (Env.tast_env_as_typing_env env)
             enum_level
             pos
@@ -40,15 +40,22 @@ let handler =
       let arraykey_level =
         TypecheckerOptions.class_pointer_level (Env.get_tcopt env) "arraykey"
       in
+      let env = Env.tast_env_as_typing_env env in
       let error = function
         | (_ty, pos, Class_const ((_cty, _cpos, cid_), (_, name)))
           when String.(name = SN.Members.mClass) ->
-          ClassPointer.error
-            (Env.tast_env_as_typing_env env)
+          ClassPointer.error_at_cls_const_expr
+            env
             arraykey_level
             pos
             (ClassPointer.string_of_class_id_ cid_)
-        | _ -> ()
+        | (ty, pos, _) ->
+          let open Typing_defs in
+          let ty_str = Typing_print.error env ty in
+          (match get_node ty with
+          | Tclass_ptr _ ->
+            ClassPointer.error_at_cls_ptr_type env arraykey_level pos ty_str
+          | _ -> ())
       in
       match e with
       (* $d[C::class] *)

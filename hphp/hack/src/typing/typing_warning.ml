@@ -111,6 +111,13 @@ module Duplicate_properties = struct
   }
 end
 
+module Class_pointer_to_string = struct
+  type t = {
+    pos: Pos.t;
+    ty: string;
+  }
+end
+
 type (_, _) kind =
   | Sketchy_equality : (Sketchy_equality.t, warn) kind
   | Is_as_always : (Is_as_always.t, migrated) kind
@@ -120,5 +127,6 @@ type (_, _) kind =
   | Truthiness_test : (Truthiness_test.t, migrated) kind
   | Equality_check : (Equality_check.t, migrated) kind
   | Duplicate_properties : (Duplicate_properties.t, migrated) kind
+  | Class_pointer_to_string : (Class_pointer_to_string.t, warn) kind
 
 type ('x, 'a) t = Pos.t * ('x, 'a) kind * 'x

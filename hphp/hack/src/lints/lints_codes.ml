@@ -116,4 +116,6 @@ module Codes = struct
   let awaitable_awaitable = 5651
 
   let cast_non_primitive = 5652
+
+  let class_pointer_to_string = 5653
 end

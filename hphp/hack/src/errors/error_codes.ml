@@ -794,6 +794,7 @@ module Warning = struct
     | IsIsAlwaysFalse [@value 12010]
     | AsAlwaysSucceeds [@value 12011]
     | AsAlwaysFails [@value 12012]
+    | ClassPointerToString [@value 12013]
   [@@deriving enum, ord, show { with_path = false }]
 end
 

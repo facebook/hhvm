@@ -190,7 +190,7 @@ impl<'de> Deserialize<'de> for RelativePath<'de> {
                 write!(formatter, "a string for RelativePath")
             }
 
-            fn visit_borrowed_str<E>(self, value: &'de str) -> Result<RelativePath<'_>, E>
+            fn visit_borrowed_str<E>(self, value: &'de str) -> Result<RelativePath<'de>, E>
             where
                 E: serde::de::Error,
             {

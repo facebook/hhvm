@@ -23,6 +23,7 @@ use crate::Result;
 /// Protocol kind. int16
 #[repr(i16)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, FromPrimitive)]
+#[num_traits = "num_traits"] // Work-around 1.83.0 incompatibility in num-derive 0.3
 pub enum ProtocolID {
     BinaryProtocol = 0,
     JSONProtocol = 1,
@@ -59,6 +60,7 @@ impl From<ProtocolID> for &'static str {
 /// Message type constants in the Thrift protocol, treated as i32 in golang
 #[derive(Debug, Copy, Clone, Eq, PartialEq, FromPrimitive)]
 #[repr(u32)]
+#[num_traits = "num_traits"] // Work-around 1.83.0 incompatibility in num-derive 0.3
 pub enum MessageType {
     InvalidMessageType = 0,
     Call = 1,

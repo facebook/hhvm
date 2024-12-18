@@ -157,7 +157,7 @@ fn compute_doc_move_gains<'a>(
     r_to_l_gains: Vec<i64>,
     left_partition_len: usize,
     is_parallel: bool,
-) -> Vec<(i64, &mut Doc)> {
+) -> Vec<(i64, &'a mut Doc)> {
     let sum_gains = move |(i, doc): (usize, &'a mut Doc)| {
         let mut gain = 0;
 

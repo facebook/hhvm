@@ -24,7 +24,7 @@ where
     T: LexableToken,
     Syntax<'arena, T, V>: SyntaxTrait,
 {
-    pub fn errors<'r>(&'r self) -> Vec<&SyntaxError>
+    pub fn errors<'r>(&'r self) -> Vec<&'r SyntaxError>
     where
         State: Clone,
         'r: 'arena,

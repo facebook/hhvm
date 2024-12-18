@@ -8,7 +8,6 @@ use std::alloc::Allocator;
 use std::alloc::Layout;
 use std::hash::BuildHasher;
 use std::hash::Hash;
-use std::hash::Hasher;
 use std::mem::MaybeUninit;
 use std::ptr::NonNull;
 
@@ -312,9 +311,8 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
         if NUM_SHARDS == 1 {
             return 0;
         }
-        let mut hasher = self.hash_builder.build_hasher();
-        key.hash(&mut hasher);
-        let hash = hasher.finish();
+
+        let hash = self.hash_builder.hash_one(key);
 
         // The higher bits are also used by hashbrown's HashMap.
         // This is a cheap mixer to get some entropy for shard selection.
@@ -427,7 +425,7 @@ impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
     /// Acquire a read lock on the shard which may contain the value associated
     /// with the given key. If the map contains a value for this key,
     /// `.get()` will return `Some`.
-    pub fn read<'a>(&'a self, key: &'a K) -> CMapValueReader<'shm, '_, K, V, S> {
+    pub fn read<'a>(&'a self, key: &'a K) -> CMapValueReader<'shm, 'a, K, V, S> {
         let shard = self.shard_for_reading(key);
         CMapValueReader { shard, key }
     }

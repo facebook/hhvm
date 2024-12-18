@@ -20,17 +20,12 @@ from typing import Any, NamedTuple, Optional, overload, Tuple, Type, TypeVar, Un
 
 from thrift.py3.client import Client
 from thrift.py3.exceptions import Error
-from thrift.py3.server import ServiceInterface
 from thrift.py3.types import Struct
 
 TClient = TypeVar("TClient", bound=Client)
 
 @overload
 def inspect(cls: Union[Struct, Type[Struct], Error, Type[Error]]) -> StructSpec: ...
-@overload
-def inspect(
-    cls: Union[ServiceInterface, Type[ServiceInterface], TClient, Type[TClient]],
-) -> InterfaceSpec: ...
 @overload
 def inspect(
     # pyre-ignore[2] : it may return anything
@@ -129,51 +124,4 @@ class MapSpec:
         # pyre-ignore[2]: it can be any type
         value: Type[Any],
         value_kind: NumberType,
-    ) -> None: ...
-
-class InterfaceSpec:
-    name: str
-    methods: Sequence[MethodSpec]
-    annotations: Mapping[str, str] = {}
-    def __init__(
-        self,
-        name: str,
-        methods: Sequence[MethodSpec],
-        annotations: Mapping[str, str] = {},
-    ) -> None: ...
-
-class MethodSpec:
-    name: str
-    arguments: Sequence[ArgumentSpec]
-    # pyre-ignore[4]: it can be any type
-    result: Optional[Type[Any]]
-    result_kind: NumberType
-    # pyre-ignore[4]: it can be any type
-    exceptions: Sequence[Type[Any]] = []
-    annotations: Mapping[str, str] = {}
-    def __init__(
-        self,
-        name: str,
-        arguments: Sequence[ArgumentSpec],
-        # pyre-ignore[2]: it can be any type
-        result: Optional[Type[Any]],
-        result_kind: NumberType,
-        # pyre-ignore[2]: it can be any type
-        exceptions: Sequence[Type[Any]] = [],
-        annotations: Mapping[str, str] = {},
-    ) -> None: ...
-
-class ArgumentSpec:
-    name: str
-    # pyre-ignore[4]: it can be any type
-    type: Type[Any]
-    kind: NumberType
-    annotations: Mapping[str, str] = {}
-    def __init__(
-        self,
-        name: str,
-        # pyre-ignore[2]: it can be any type
-        type: Type[Any],
-        kind: NumberType,
-        annotations: Mapping[str, str] = {},
     ) -> None: ...

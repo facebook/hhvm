@@ -891,10 +891,14 @@ void TypeParserImpl::genNames(Env& env,
         // infer one ourself (making it a synthetic name).
 
         // Try the first named member
-        auto const first_member = [&](const char* type, auto member_type) {
+        auto const first_member = [&](const char* type) {
           std::string first_member;
           for (const auto& child : curContext.die.children()) {
-            if (child.getTag() == member_type) {
+            if ((tag == llvm::dwarf::DW_TAG_enumeration_type &&
+                 child.getTag() == llvm::dwarf::DW_TAG_enumerator) ||
+                (tag != llvm::dwarf::DW_TAG_enumeration_type &&
+                 (child.getTag() == llvm::dwarf::DW_TAG_member ||
+                  child.getTag() == llvm::dwarf::DW_TAG_variable))) {
               first_member = dwarfContext.getDIEName(dieContext.die);
             }
             if (!first_member.empty()) break;
@@ -915,14 +919,7 @@ void TypeParserImpl::genNames(Env& env,
           return "type";
         };
 
-        auto const member_type = [&]() {
-          if (tag == llvm::dwarf::DW_TAG_enumeration_type) {
-            return llvm::dwarf::DW_TAG_enumerator;
-          }
-          return llvm::dwarf::DW_TAG_member;
-        };
-
-        auto first_member_name = first_member(type_name(), member_type());
+        auto first_member_name = first_member(type_name());
         if (!first_member_name.empty()) {
           return std::make_tuple(
             std::move(first_member_name), true, incomplete
@@ -978,7 +975,8 @@ void TypeParserImpl::genNames(Env& env,
 
         folly::F14FastMap<std::string, GlobalOff> map;
         for (const auto& child : dieContext.die.children()) {
-          if (child.getTag() == llvm::dwarf::DW_TAG_member) {
+          if (child.getTag() == llvm::dwarf::DW_TAG_member ||
+              child.getTag() == llvm::dwarf::DW_TAG_variable) {
             auto name = dwarfContext.getDIEName(child);
             map.emplace(
               std::move(name),
@@ -1249,6 +1247,7 @@ Object TypeParserImpl::genObject(const DieContext& dieContext,
         obj.bases.emplace_back(genBase({child, isInfo}, obj.name));
         break;
       case llvm::dwarf::DW_TAG_member:
+      case llvm::dwarf::DW_TAG_variable:
         obj.members.emplace_back(genMember({child, isInfo}, obj.name));
         if (obj.name.linkage != ObjectTypeName::Linkage::external) {
           // Clang gives linkage names to things that don't actually have

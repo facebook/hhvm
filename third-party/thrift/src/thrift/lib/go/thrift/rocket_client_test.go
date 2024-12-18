@@ -45,7 +45,7 @@ func TestRocketClientClose(t *testing.T) {
 		t.Fatalf("failed to listen: %v", err)
 	}
 	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
-	server := NewSimpleServer(processor, listener, TransportIDRocket)
+	server := NewServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()
@@ -86,7 +86,7 @@ func TestRocketClientUnix(t *testing.T) {
 		t.Fatalf("failed to listen: %v", err)
 	}
 	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
-	server := NewSimpleServer(processor, listener, TransportIDRocket)
+	server := NewServer(processor, listener, TransportIDRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()

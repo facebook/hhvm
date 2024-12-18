@@ -50,7 +50,7 @@ func newServer(processor thrift.Processor, addr string) (thrift.Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	return thrift.NewSimpleServer(processor, listener, thrift.TransportIDUpgradeToRocket), nil
+	return thrift.NewServer(processor, listener, thrift.TransportIDUpgradeToRocket), nil
 }
 
 // Echo - does echo

@@ -55,7 +55,7 @@ func TestUpgradeToRocketClientUnix(t *testing.T) {
 		t.Fatalf("failed to listen: %v", err)
 	}
 	processor := dummy.NewDummyProcessor(&dummy.DummyHandler{})
-	server := NewSimpleServer(processor, listener, TransportIDUpgradeToRocket)
+	server := NewServer(processor, listener, TransportIDUpgradeToRocket)
 	go func() {
 		errChan <- server.ServeContext(ctx)
 	}()

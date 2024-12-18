@@ -243,9 +243,11 @@ class Struct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> second() && {
     return {static_cast<T&&>(this->__fbthrift_field_second), __isset.at(1), __isset.bit(1)};
   }
+
   /** Glean { "field": "first" } */
   [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
   const ::module0::Struct& get_first() const&;
+
   /** Glean { "field": "first" } */
   [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
   ::module0::Struct get_first() &&;
@@ -257,9 +259,11 @@ class Struct final  {
     first_ref() = std::forward<T_Struct_first_struct_setter>(first_);
     return __fbthrift_field_first;
   }
+
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   const ::module1::Struct& get_second() const&;
+
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   ::module1::Struct get_second() &&;
@@ -476,9 +480,11 @@ class BigStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> id() && {
     return {static_cast<T&&>(this->__fbthrift_field_id), __isset.at(1), __isset.bit(1)};
   }
+
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
   const ::module2::Struct& get_s() const&;
+
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
   ::module2::Struct get_s() &&;

@@ -693,6 +693,7 @@ class StructWithNoCustomDefaultValues final  {
   ::std::int32_t* get_optional_integer() & {
     return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
   }
+
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   ::std::int32_t* get_optional_integer() && = delete;
@@ -716,9 +717,11 @@ class StructWithNoCustomDefaultValues final  {
     required_integer_ref() = required_integer_;
     return __fbthrift_field_required_integer;
   }
+
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value();` instead of `FOO.get_unqualified_struct();`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_unqualified_struct() const&;
+
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value();` instead of `FOO.get_unqualified_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct get_unqualified_struct() &&;
@@ -730,12 +733,15 @@ class StructWithNoCustomDefaultValues final  {
     unqualified_struct_ref() = std::forward<T_StructWithNoCustomDefaultValues_unqualified_struct_struct_setter>(unqualified_struct_);
     return __fbthrift_field_unqualified_struct;
   }
+
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() const&;
+
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() &;
+
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() && = delete;
@@ -747,9 +753,11 @@ class StructWithNoCustomDefaultValues final  {
     optional_struct_ref() = std::forward<T_StructWithNoCustomDefaultValues_optional_struct_struct_setter>(optional_struct_);
     return __fbthrift_field_optional_struct;
   }
+
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value();` instead of `FOO.get_required_struct();`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_required_struct() const&;
+
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value();` instead of `FOO.get_required_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct get_required_struct() &&;
@@ -1206,6 +1214,7 @@ class StructWithCustomDefaultValues final  {
   ::std::int32_t* get_optional_integer() & {
     return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
   }
+
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   ::std::int32_t* get_optional_integer() && = delete;
@@ -1229,9 +1238,11 @@ class StructWithCustomDefaultValues final  {
     required_integer_ref() = required_integer_;
     return __fbthrift_field_required_integer;
   }
+
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value();` instead of `FOO.get_unqualified_struct();`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_unqualified_struct() const&;
+
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value();` instead of `FOO.get_unqualified_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct get_unqualified_struct() &&;
@@ -1243,12 +1254,15 @@ class StructWithCustomDefaultValues final  {
     unqualified_struct_ref() = std::forward<T_StructWithCustomDefaultValues_unqualified_struct_struct_setter>(unqualified_struct_);
     return __fbthrift_field_unqualified_struct;
   }
+
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() const&;
+
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() &;
+
   /** Glean { "field": "optional_struct" } */
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() && = delete;
@@ -1260,9 +1274,11 @@ class StructWithCustomDefaultValues final  {
     optional_struct_ref() = std::forward<T_StructWithCustomDefaultValues_optional_struct_struct_setter>(optional_struct_);
     return __fbthrift_field_optional_struct;
   }
+
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value();` instead of `FOO.get_required_struct();`")]]
   const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& get_required_struct() const&;
+
   /** Glean { "field": "required_struct" } */
   [[deprecated("Use `FOO.required_struct().value();` instead of `FOO.get_required_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct get_required_struct() &&;

@@ -1226,6 +1226,7 @@ class EmptiableStruct final  {
   bool* get_bool_field() & {
     return bool_field_ref().has_value() ? std::addressof(__fbthrift_field_bool_field) : nullptr;
   }
+
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field().value();` instead of `FOO.get_bool_field();`")]]
   bool* get_bool_field() && = delete;
@@ -1248,6 +1249,7 @@ class EmptiableStruct final  {
   ::std::int8_t* get_byte_field() & {
     return byte_field_ref().has_value() ? std::addressof(__fbthrift_field_byte_field) : nullptr;
   }
+
   /** Glean { "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field().value();` instead of `FOO.get_byte_field();`")]]
   ::std::int8_t* get_byte_field() && = delete;
@@ -1270,6 +1272,7 @@ class EmptiableStruct final  {
   ::std::int16_t* get_short_field() & {
     return short_field_ref().has_value() ? std::addressof(__fbthrift_field_short_field) : nullptr;
   }
+
   /** Glean { "field": "short_field" } */
   [[deprecated("Use `FOO.short_field().value();` instead of `FOO.get_short_field();`")]]
   ::std::int16_t* get_short_field() && = delete;
@@ -1292,6 +1295,7 @@ class EmptiableStruct final  {
   ::std::int32_t* get_int_field() & {
     return int_field_ref().has_value() ? std::addressof(__fbthrift_field_int_field) : nullptr;
   }
+
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field().value();` instead of `FOO.get_int_field();`")]]
   ::std::int32_t* get_int_field() && = delete;
@@ -1314,6 +1318,7 @@ class EmptiableStruct final  {
   ::std::int64_t* get_long_field() & {
     return long_field_ref().has_value() ? std::addressof(__fbthrift_field_long_field) : nullptr;
   }
+
   /** Glean { "field": "long_field" } */
   [[deprecated("Use `FOO.long_field().value();` instead of `FOO.get_long_field();`")]]
   ::std::int64_t* get_long_field() && = delete;
@@ -1336,6 +1341,7 @@ class EmptiableStruct final  {
   float* get_float_field() & {
     return float_field_ref().has_value() ? std::addressof(__fbthrift_field_float_field) : nullptr;
   }
+
   /** Glean { "field": "float_field" } */
   [[deprecated("Use `FOO.float_field().value();` instead of `FOO.get_float_field();`")]]
   float* get_float_field() && = delete;
@@ -1358,6 +1364,7 @@ class EmptiableStruct final  {
   double* get_double_field() & {
     return double_field_ref().has_value() ? std::addressof(__fbthrift_field_double_field) : nullptr;
   }
+
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value();` instead of `FOO.get_double_field();`")]]
   double* get_double_field() && = delete;
@@ -1380,6 +1387,7 @@ class EmptiableStruct final  {
   ::std::string* get_string_field() & {
     return string_field_ref().has_value() ? std::addressof(__fbthrift_field_string_field) : nullptr;
   }
+
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   ::std::string* get_string_field() && = delete;
@@ -1403,6 +1411,7 @@ class EmptiableStruct final  {
   ::std::string* get_binary_field() & {
     return binary_field_ref().has_value() ? std::addressof(__fbthrift_field_binary_field) : nullptr;
   }
+
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
   ::std::string* get_binary_field() && = delete;
@@ -1426,6 +1435,7 @@ class EmptiableStruct final  {
   ::apache::thrift::test::MyEnum* get_enum_field() & {
     return enum_field_ref().has_value() ? std::addressof(__fbthrift_field_enum_field) : nullptr;
   }
+
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value();` instead of `FOO.get_enum_field();`")]]
   ::apache::thrift::test::MyEnum* get_enum_field() && = delete;
@@ -1436,12 +1446,15 @@ class EmptiableStruct final  {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::std::vector<::std::int16_t>* get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::std::int16_t>* get_list_field() &;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::std::int16_t>* get_list_field() && = delete;
@@ -1453,12 +1466,15 @@ class EmptiableStruct final  {
     list_field_ref() = std::forward<T_EmptiableStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   const ::std::set<::std::int16_t>* get_set_field() const&;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::std::set<::std::int16_t>* get_set_field() &;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::std::set<::std::int16_t>* get_set_field() && = delete;
@@ -1470,12 +1486,15 @@ class EmptiableStruct final  {
     set_field_ref() = std::forward<T_EmptiableStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   const ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() const&;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() &;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() && = delete;
@@ -1487,12 +1506,15 @@ class EmptiableStruct final  {
     map_field_ref() = std::forward<T_EmptiableStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   const ::apache::thrift::test::MyStruct* get_struct_field() const&;
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   ::apache::thrift::test::MyStruct* get_struct_field() &;
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   ::apache::thrift::test::MyStruct* get_struct_field() && = delete;
@@ -3189,6 +3211,7 @@ class NotEmptiableStruct final  {
   ::std::int8_t* get_byte_field() & {
     return byte_field_ref().has_value() ? std::addressof(__fbthrift_field_byte_field) : nullptr;
   }
+
   /** Glean { "field": "byte_field" } */
   [[deprecated("Use `FOO.byte_field().value();` instead of `FOO.get_byte_field();`")]]
   ::std::int8_t* get_byte_field() && = delete;
@@ -3211,6 +3234,7 @@ class NotEmptiableStruct final  {
   ::std::int16_t* get_short_field() & {
     return short_field_ref().has_value() ? std::addressof(__fbthrift_field_short_field) : nullptr;
   }
+
   /** Glean { "field": "short_field" } */
   [[deprecated("Use `FOO.short_field().value();` instead of `FOO.get_short_field();`")]]
   ::std::int16_t* get_short_field() && = delete;
@@ -3233,6 +3257,7 @@ class NotEmptiableStruct final  {
   ::std::int32_t* get_int_field() & {
     return int_field_ref().has_value() ? std::addressof(__fbthrift_field_int_field) : nullptr;
   }
+
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field().value();` instead of `FOO.get_int_field();`")]]
   ::std::int32_t* get_int_field() && = delete;
@@ -3255,6 +3280,7 @@ class NotEmptiableStruct final  {
   ::std::int64_t* get_long_field() & {
     return long_field_ref().has_value() ? std::addressof(__fbthrift_field_long_field) : nullptr;
   }
+
   /** Glean { "field": "long_field" } */
   [[deprecated("Use `FOO.long_field().value();` instead of `FOO.get_long_field();`")]]
   ::std::int64_t* get_long_field() && = delete;
@@ -3277,6 +3303,7 @@ class NotEmptiableStruct final  {
   float* get_float_field() & {
     return float_field_ref().has_value() ? std::addressof(__fbthrift_field_float_field) : nullptr;
   }
+
   /** Glean { "field": "float_field" } */
   [[deprecated("Use `FOO.float_field().value();` instead of `FOO.get_float_field();`")]]
   float* get_float_field() && = delete;
@@ -3299,6 +3326,7 @@ class NotEmptiableStruct final  {
   double* get_double_field() & {
     return double_field_ref().has_value() ? std::addressof(__fbthrift_field_double_field) : nullptr;
   }
+
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value();` instead of `FOO.get_double_field();`")]]
   double* get_double_field() && = delete;
@@ -3321,6 +3349,7 @@ class NotEmptiableStruct final  {
   ::std::string* get_string_field() & {
     return string_field_ref().has_value() ? std::addressof(__fbthrift_field_string_field) : nullptr;
   }
+
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   ::std::string* get_string_field() && = delete;
@@ -3344,6 +3373,7 @@ class NotEmptiableStruct final  {
   ::std::string* get_binary_field() & {
     return binary_field_ref().has_value() ? std::addressof(__fbthrift_field_binary_field) : nullptr;
   }
+
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
   ::std::string* get_binary_field() && = delete;
@@ -3367,6 +3397,7 @@ class NotEmptiableStruct final  {
   ::apache::thrift::test::MyEnum* get_enum_field() & {
     return enum_field_ref().has_value() ? std::addressof(__fbthrift_field_enum_field) : nullptr;
   }
+
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value();` instead of `FOO.get_enum_field();`")]]
   ::apache::thrift::test::MyEnum* get_enum_field() && = delete;
@@ -3377,12 +3408,15 @@ class NotEmptiableStruct final  {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::std::vector<::std::int16_t>* get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::std::int16_t>* get_list_field() &;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::std::int16_t>* get_list_field() && = delete;
@@ -3394,12 +3428,15 @@ class NotEmptiableStruct final  {
     list_field_ref() = std::forward<T_NotEmptiableStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   const ::std::set<::std::int16_t>* get_set_field() const&;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::std::set<::std::int16_t>* get_set_field() &;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::std::set<::std::int16_t>* get_set_field() && = delete;
@@ -3411,12 +3448,15 @@ class NotEmptiableStruct final  {
     set_field_ref() = std::forward<T_NotEmptiableStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   const ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() const&;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() &;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::std::map<::std::int16_t, ::std::int16_t>* get_map_field() && = delete;
@@ -3428,12 +3468,15 @@ class NotEmptiableStruct final  {
     map_field_ref() = std::forward<T_NotEmptiableStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   const ::apache::thrift::test::MyStruct* get_struct_field() const&;
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   ::apache::thrift::test::MyStruct* get_struct_field() &;
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   ::apache::thrift::test::MyStruct* get_struct_field() && = delete;

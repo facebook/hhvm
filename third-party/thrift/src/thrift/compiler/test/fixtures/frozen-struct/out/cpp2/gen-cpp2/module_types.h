@@ -601,9 +601,11 @@ class ModuleA final  {
     strField_ref() = std::forward<T_ModuleA_strField_struct_setter>(strField_);
     return __fbthrift_field_strField;
   }
+
   /** Glean { "field": "listField" } */
   [[deprecated("Use `FOO.listField().value();` instead of `FOO.get_listField();`")]]
   const ::std::vector<::std::int16_t>& get_listField() const&;
+
   /** Glean { "field": "listField" } */
   [[deprecated("Use `FOO.listField().value();` instead of `FOO.get_listField();`")]]
   ::std::vector<::std::int16_t> get_listField() &&;
@@ -615,9 +617,11 @@ class ModuleA final  {
     listField_ref() = std::forward<T_ModuleA_listField_struct_setter>(listField_);
     return __fbthrift_field_listField;
   }
+
   /** Glean { "field": "mapField" } */
   [[deprecated("Use `FOO.mapField().value();` instead of `FOO.get_mapField();`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_mapField() const&;
+
   /** Glean { "field": "mapField" } */
   [[deprecated("Use `FOO.mapField().value();` instead of `FOO.get_mapField();`")]]
   ::std::map<::std::string, ::std::int32_t> get_mapField() &&;
@@ -629,9 +633,11 @@ class ModuleA final  {
     mapField_ref() = std::forward<T_ModuleA_mapField_struct_setter>(mapField_);
     return __fbthrift_field_mapField;
   }
+
   /** Glean { "field": "inclAField" } */
   [[deprecated("Use `FOO.inclAField().value();` instead of `FOO.get_inclAField();`")]]
   const ::some::ns::IncludedA& get_inclAField() const&;
+
   /** Glean { "field": "inclAField" } */
   [[deprecated("Use `FOO.inclAField().value();` instead of `FOO.get_inclAField();`")]]
   ::some::ns::IncludedA get_inclAField() &&;
@@ -643,9 +649,11 @@ class ModuleA final  {
     inclAField_ref() = std::forward<T_ModuleA_inclAField_struct_setter>(inclAField_);
     return __fbthrift_field_inclAField;
   }
+
   /** Glean { "field": "inclBField" } */
   [[deprecated("Use `FOO.inclBField().value();` instead of `FOO.get_inclBField();`")]]
   const ::some::ns::IncludedB& get_inclBField() const&;
+
   /** Glean { "field": "inclBField" } */
   [[deprecated("Use `FOO.inclBField().value();` instead of `FOO.get_inclBField();`")]]
   ::some::ns::IncludedB get_inclBField() &&;

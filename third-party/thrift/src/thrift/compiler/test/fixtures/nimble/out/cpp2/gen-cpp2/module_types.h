@@ -374,6 +374,7 @@ class BasicTypes final  {
   ::std::int32_t* get_second() & {
     return second_ref().has_value() ? std::addressof(__fbthrift_field_second) : nullptr;
   }
+
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   ::std::int32_t* get_second() && = delete;
@@ -396,6 +397,7 @@ class BasicTypes final  {
   ::std::int64_t* get_third() & {
     return third_ref().has_value() ? std::addressof(__fbthrift_field_third) : nullptr;
   }
+
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
   ::std::int64_t* get_third() && = delete;

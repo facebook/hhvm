@@ -960,9 +960,11 @@ class MyStruct final  {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
+
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   const ::test::fixtures::basic::MyDataItemAlias& get_MyDataField() const&;
+
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   ::test::fixtures::basic::MyDataItemAlias get_MyDataField() &&;
@@ -1026,9 +1028,11 @@ class MyStruct final  {
     idempotent_ref() = idempotent_;
     return __fbthrift_field_idempotent;
   }
+
   /** Glean { "field": "floatSet" } */
   [[deprecated("Use `FOO.floatSet().value();` instead of `FOO.get_floatSet();`")]]
   const ::std::set<float>& get_floatSet() const&;
+
   /** Glean { "field": "floatSet" } */
   [[deprecated("Use `FOO.floatSet().value();` instead of `FOO.get_floatSet();`")]]
   ::std::set<float> get_floatSet() &&;
@@ -1320,9 +1324,11 @@ class Containers final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> StringToI64Map() && {
     return {static_cast<T&&>(this->__fbthrift_field_StringToI64Map), __isset.at(2), __isset.bit(2)};
   }
+
   /** Glean { "field": "I32List" } */
   [[deprecated("Use `FOO.I32List().value();` instead of `FOO.get_I32List();`")]]
   const ::std::vector<::std::int32_t>& get_I32List() const&;
+
   /** Glean { "field": "I32List" } */
   [[deprecated("Use `FOO.I32List().value();` instead of `FOO.get_I32List();`")]]
   ::std::vector<::std::int32_t> get_I32List() &&;
@@ -1334,9 +1340,11 @@ class Containers final  {
     I32List_ref() = std::forward<T_Containers_I32List_struct_setter>(I32List_);
     return __fbthrift_field_I32List;
   }
+
   /** Glean { "field": "StringSet" } */
   [[deprecated("Use `FOO.StringSet().value();` instead of `FOO.get_StringSet();`")]]
   const ::std::set<::std::string>& get_StringSet() const&;
+
   /** Glean { "field": "StringSet" } */
   [[deprecated("Use `FOO.StringSet().value();` instead of `FOO.get_StringSet();`")]]
   ::std::set<::std::string> get_StringSet() &&;
@@ -1348,9 +1356,11 @@ class Containers final  {
     StringSet_ref() = std::forward<T_Containers_StringSet_struct_setter>(StringSet_);
     return __fbthrift_field_StringSet;
   }
+
   /** Glean { "field": "StringToI64Map" } */
   [[deprecated("Use `FOO.StringToI64Map().value();` instead of `FOO.get_StringToI64Map();`")]]
   const ::std::map<::std::string, ::std::int64_t>& get_StringToI64Map() const&;
+
   /** Glean { "field": "StringToI64Map" } */
   [[deprecated("Use `FOO.StringToI64Map().value();` instead of `FOO.get_StringToI64Map();`")]]
   ::std::map<::std::string, ::std::int64_t> get_StringToI64Map() &&;
@@ -2176,9 +2186,11 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
     MyStringField_ref() = std::forward<T_MyException_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
+
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value();` instead of `FOO.get_myStruct();`")]]
   const ::test::fixtures::basic::MyStruct& get_myStruct() const&;
+
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value();` instead of `FOO.get_myStruct();`")]]
   ::test::fixtures::basic::MyStruct get_myStruct() &&;
@@ -2190,9 +2202,11 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
     myStruct_ref() = std::forward<T_MyException_myStruct_struct_setter>(myStruct_);
     return __fbthrift_field_myStruct;
   }
+
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value();` instead of `FOO.get_myUnion();`")]]
   const ::test::fixtures::basic::MyUnion& get_myUnion() const&;
+
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value();` instead of `FOO.get_myUnion();`")]]
   ::test::fixtures::basic::MyUnion get_myUnion() &&;
@@ -2560,9 +2574,11 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
     MyStringField_ref() = std::forward<T_MyExceptionWithMessage_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
+
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value();` instead of `FOO.get_myStruct();`")]]
   const ::test::fixtures::basic::MyStruct& get_myStruct() const&;
+
   /** Glean { "field": "myStruct" } */
   [[deprecated("Use `FOO.myStruct().value();` instead of `FOO.get_myStruct();`")]]
   ::test::fixtures::basic::MyStruct get_myStruct() &&;
@@ -2574,9 +2590,11 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
     myStruct_ref() = std::forward<T_MyExceptionWithMessage_myStruct_struct_setter>(myStruct_);
     return __fbthrift_field_myStruct;
   }
+
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value();` instead of `FOO.get_myUnion();`")]]
   const ::test::fixtures::basic::MyUnion& get_myUnion() const&;
+
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value();` instead of `FOO.get_myUnion();`")]]
   ::test::fixtures::basic::MyUnion get_myUnion() &&;

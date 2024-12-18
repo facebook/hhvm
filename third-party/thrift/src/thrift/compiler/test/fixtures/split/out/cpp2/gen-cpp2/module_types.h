@@ -722,9 +722,11 @@ class MyStruct final  {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
+
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   const ::cpp2::MyDataItem& get_MyDataField() const&;
+
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   ::cpp2::MyDataItem get_MyDataField() &&;

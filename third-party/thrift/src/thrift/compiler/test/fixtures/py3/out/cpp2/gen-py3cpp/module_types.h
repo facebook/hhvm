@@ -1112,9 +1112,11 @@ class SimpleStruct final  {
     smaller_real_ref() = smaller_real_;
     return __fbthrift_field_smaller_real;
   }
+
   /** Glean { "field": "something" } */
   [[deprecated("Use `FOO.something().value();` instead of `FOO.get_something();`")]]
   const ::std::unordered_map<::std::int32_t, ::std::int32_t>& get_something() const&;
+
   /** Glean { "field": "something" } */
   [[deprecated("Use `FOO.something().value();` instead of `FOO.get_something();`")]]
   ::std::unordered_map<::std::int32_t, ::std::int32_t> get_something() &&;
@@ -1735,6 +1737,7 @@ class OptionalRefStruct final  {
   ::py3::simple::IOBufPtr* get_optional_blob() & {
     return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
   }
+
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value();` instead of `FOO.get_optional_blob();`")]]
   ::py3::simple::IOBufPtr* get_optional_blob() && = delete;
@@ -2004,9 +2007,11 @@ class HiddenTypeFieldsStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field3() && {
     return {static_cast<T&&>(this->__fbthrift_field_field3), __isset.at(2), __isset.bit(2)};
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::vector<::py3::simple::AdaptedTypeDef>& get_field2() const&;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::py3::simple::AdaptedTypeDef> get_field2() &&;
@@ -2018,9 +2023,11 @@ class HiddenTypeFieldsStruct final  {
     field2_ref() = std::forward<T_HiddenTypeFieldsStruct_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& get_field3() const&;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> get_field3() &&;
@@ -2781,9 +2788,11 @@ class ComplexStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> bytes_with_cpp_type() && {
     return {static_cast<T&&>(this->__fbthrift_field_bytes_with_cpp_type), __isset.at(8), __isset.bit(8)};
   }
+
   /** Glean { "field": "structOne" } */
   [[deprecated("Use `FOO.structOne().value();` instead of `FOO.get_structOne();`")]]
   const ::py3::simple::SimpleStruct& get_structOne() const&;
+
   /** Glean { "field": "structOne" } */
   [[deprecated("Use `FOO.structOne().value();` instead of `FOO.get_structOne();`")]]
   ::py3::simple::SimpleStruct get_structOne() &&;
@@ -2795,9 +2804,11 @@ class ComplexStruct final  {
     structOne_ref() = std::forward<T_ComplexStruct_structOne_struct_setter>(structOne_);
     return __fbthrift_field_structOne;
   }
+
   /** Glean { "field": "structTwo" } */
   [[deprecated("Use `FOO.structTwo().value();` instead of `FOO.get_structTwo();`")]]
   const ::py3::simple::SimpleStruct& get_structTwo() const&;
+
   /** Glean { "field": "structTwo" } */
   [[deprecated("Use `FOO.structTwo().value();` instead of `FOO.get_structTwo();`")]]
   ::py3::simple::SimpleStruct get_structTwo() &&;
@@ -3307,9 +3318,11 @@ class BinaryUnionStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> u() && {
     return {static_cast<T&&>(this->__fbthrift_field_u), __isset.at(0), __isset.bit(0)};
   }
+
   /** Glean { "field": "u" } */
   [[deprecated("Use `FOO.u().value();` instead of `FOO.get_u();`")]]
   const ::py3::simple::BinaryUnion& get_u() const&;
+
   /** Glean { "field": "u" } */
   [[deprecated("Use `FOO.u().value();` instead of `FOO.get_u();`")]]
   ::py3::simple::BinaryUnion get_u() &&;
@@ -3971,9 +3984,11 @@ class CustomFields final  {
     binary_field_ref() = std::forward<T_CustomFields_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::MyType& get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::MyType get_list_field() &&;
@@ -3985,9 +4000,11 @@ class CustomFields final  {
     list_field_ref() = std::forward<T_CustomFields_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   const ::MyType& get_set_field() const&;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::MyType get_set_field() &&;
@@ -3999,9 +4016,11 @@ class CustomFields final  {
     set_field_ref() = std::forward<T_CustomFields_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   const ::MyType& get_map_field() const&;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::MyType get_map_field() &&;
@@ -4013,9 +4032,11 @@ class CustomFields final  {
     map_field_ref() = std::forward<T_CustomFields_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   const ::MyType& get_struct_field() const&;
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   ::MyType get_struct_field() &&;
@@ -4677,9 +4698,11 @@ class CustomTypedefFields final  {
     binary_field_ref() = std::forward<T_CustomTypedefFields_binary_field_struct_setter>(binary_field_);
     return __fbthrift_field_binary_field;
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::py3::simple::CustomList& get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::py3::simple::CustomList get_list_field() &&;
@@ -4691,9 +4714,11 @@ class CustomTypedefFields final  {
     list_field_ref() = std::forward<T_CustomTypedefFields_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   const ::py3::simple::CustomSet& get_set_field() const&;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::py3::simple::CustomSet get_set_field() &&;
@@ -4705,9 +4730,11 @@ class CustomTypedefFields final  {
     set_field_ref() = std::forward<T_CustomTypedefFields_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   const ::py3::simple::CustomMap& get_map_field() const&;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::py3::simple::CustomMap get_map_field() &&;
@@ -4719,9 +4746,11 @@ class CustomTypedefFields final  {
     map_field_ref() = std::forward<T_CustomTypedefFields_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   const ::py3::simple::CustomStruct& get_struct_field() const&;
+
   /** Glean { "field": "struct_field" } */
   [[deprecated("Use `FOO.struct_field().value();` instead of `FOO.get_struct_field();`")]]
   ::py3::simple::CustomStruct get_struct_field() &&;

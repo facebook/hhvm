@@ -422,6 +422,7 @@ class Default final  {
   ::std::int32_t* get_field1() & {
     return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
@@ -444,6 +445,7 @@ class Default final  {
   ::std::int32_t* get_field2() & {
     return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
@@ -466,6 +468,7 @@ class Default final  {
   ::std::string* get_field3() & {
     return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
@@ -489,6 +492,7 @@ class Default final  {
   double* get_field4() & {
     return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;
@@ -822,6 +826,7 @@ class NonAtomic final  {
   ::std::int32_t* get_field1() & {
     return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
@@ -844,6 +849,7 @@ class NonAtomic final  {
   ::std::int32_t* get_field2() & {
     return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
@@ -866,6 +872,7 @@ class NonAtomic final  {
   ::std::string* get_field3() & {
     return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
@@ -889,6 +896,7 @@ class NonAtomic final  {
   double* get_field4() & {
     return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;
@@ -1222,6 +1230,7 @@ class Atomic final  {
   ::std::int32_t* get_field1() & {
     return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
@@ -1244,6 +1253,7 @@ class Atomic final  {
   ::std::int32_t* get_field2() & {
     return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
@@ -1266,6 +1276,7 @@ class Atomic final  {
   ::std::string* get_field3() & {
     return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
@@ -1289,6 +1300,7 @@ class Atomic final  {
   double* get_field4() & {
     return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;
@@ -1622,6 +1634,7 @@ class AtomicFoo final  {
   ::std::int32_t* get_field1() & {
     return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
@@ -1644,6 +1657,7 @@ class AtomicFoo final  {
   ::std::int32_t* get_field2() & {
     return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
@@ -1666,6 +1680,7 @@ class AtomicFoo final  {
   ::std::string* get_field3() & {
     return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
@@ -1689,6 +1704,7 @@ class AtomicFoo final  {
   double* get_field4() & {
     return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;

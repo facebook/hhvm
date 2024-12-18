@@ -983,9 +983,11 @@ class YourStruct final  {
     my_enum_ref() = my_enum_;
     return __fbthrift_field_my_enum;
   }
+
   /** Glean { "field": "cpp_type_annotation" } */
   [[deprecated("Use `FOO.cpp_type_annotation().value();` instead of `FOO.get_cpp_type_annotation();`")]]
   const ::cpp2::list_string_6884& get_cpp_type_annotation() const&;
+
   /** Glean { "field": "cpp_type_annotation" } */
   [[deprecated("Use `FOO.cpp_type_annotation().value();` instead of `FOO.get_cpp_type_annotation();`")]]
   ::cpp2::list_string_6884 get_cpp_type_annotation() &&;

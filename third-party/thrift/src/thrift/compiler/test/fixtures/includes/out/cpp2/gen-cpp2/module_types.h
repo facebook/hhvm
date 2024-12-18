@@ -290,9 +290,11 @@ class MyStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> MyIncludedInt() && {
     return {static_cast<T&&>(this->__fbthrift_field_MyIncludedInt), __isset.at(2), __isset.bit(2)};
   }
+
   /** Glean { "field": "MyIncludedField" } */
   [[deprecated("Use `FOO.MyIncludedField().value();` instead of `FOO.get_MyIncludedField();`")]]
   const ::cpp2::Included& get_MyIncludedField() const&;
+
   /** Glean { "field": "MyIncludedField" } */
   [[deprecated("Use `FOO.MyIncludedField().value();` instead of `FOO.get_MyIncludedField();`")]]
   ::cpp2::Included get_MyIncludedField() &&;
@@ -304,9 +306,11 @@ class MyStruct final  {
     MyIncludedField_ref() = std::forward<T_MyStruct_MyIncludedField_struct_setter>(MyIncludedField_);
     return __fbthrift_field_MyIncludedField;
   }
+
   /** Glean { "field": "MyOtherIncludedField" } */
   [[deprecated("Use `FOO.MyOtherIncludedField().value();` instead of `FOO.get_MyOtherIncludedField();`")]]
   const ::cpp2::Included& get_MyOtherIncludedField() const&;
+
   /** Glean { "field": "MyOtherIncludedField" } */
   [[deprecated("Use `FOO.MyOtherIncludedField().value();` instead of `FOO.get_MyOtherIncludedField();`")]]
   ::cpp2::Included get_MyOtherIncludedField() &&;

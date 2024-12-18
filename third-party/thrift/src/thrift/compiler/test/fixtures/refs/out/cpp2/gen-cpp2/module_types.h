@@ -2039,9 +2039,11 @@ class StructWithUnion final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> f() && {
     return {static_cast<T&&>(this->__fbthrift_field_f), __isset.at(0), __isset.bit(0)};
   }
+
   /** Glean { "field": "f" } */
   [[deprecated("Use `FOO.f().value();` instead of `FOO.get_f();`")]]
   const ::cpp2::MyField& get_f() const&;
+
   /** Glean { "field": "f" } */
   [[deprecated("Use `FOO.f().value();` instead of `FOO.get_f();`")]]
   ::cpp2::MyField get_f() &&;
@@ -2208,12 +2210,15 @@ class RecursiveStruct final  {
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> mes() && {
     return {static_cast<T&&>(this->__fbthrift_field_mes), __isset.at(0), __isset.bit(0)};
   }
+
   /** Glean { "field": "mes" } */
   [[deprecated("Use `FOO.mes().value();` instead of `FOO.get_mes();`")]]
   const ::std::vector<::cpp2::RecursiveStruct>* get_mes() const&;
+
   /** Glean { "field": "mes" } */
   [[deprecated("Use `FOO.mes().value();` instead of `FOO.get_mes();`")]]
   ::std::vector<::cpp2::RecursiveStruct>* get_mes() &;
+
   /** Glean { "field": "mes" } */
   [[deprecated("Use `FOO.mes().value();` instead of `FOO.get_mes();`")]]
   ::std::vector<::cpp2::RecursiveStruct>* get_mes() && = delete;

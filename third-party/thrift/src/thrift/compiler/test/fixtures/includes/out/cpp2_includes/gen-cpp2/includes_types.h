@@ -251,9 +251,11 @@ class Included final  {
     MyIntField_ref() = MyIntField_;
     return __fbthrift_field_MyIntField;
   }
+
   /** Glean { "field": "MyTransitiveField" } */
   [[deprecated("Use `FOO.MyTransitiveField().value();` instead of `FOO.get_MyTransitiveField();`")]]
   const ::cpp2::Foo& get_MyTransitiveField() const&;
+
   /** Glean { "field": "MyTransitiveField" } */
   [[deprecated("Use `FOO.MyTransitiveField().value();` instead of `FOO.get_MyTransitiveField();`")]]
   ::cpp2::Foo get_MyTransitiveField() &&;

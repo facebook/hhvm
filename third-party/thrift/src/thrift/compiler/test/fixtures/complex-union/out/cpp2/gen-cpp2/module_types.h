@@ -1675,9 +1675,11 @@ class Val final  {
     intVal_ref() = intVal_;
     return __fbthrift_field_intVal;
   }
+
   /** Glean { "field": "typedefValue" } */
   [[deprecated("Use `FOO.typedefValue().value();` instead of `FOO.get_typedefValue();`")]]
   const ::cpp2::containerTypedef& get_typedefValue() const&;
+
   /** Glean { "field": "typedefValue" } */
   [[deprecated("Use `FOO.typedefValue().value();` instead of `FOO.get_typedefValue();`")]]
   ::cpp2::containerTypedef get_typedefValue() &&;

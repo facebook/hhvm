@@ -446,9 +446,11 @@ class Mixin2 final  {
   FOLLY_ERASE auto field1() const&      { return field1_ref(); }
   FOLLY_ERASE auto field1() &&          { return std::move(*this).field1_ref(); }
   FOLLY_ERASE auto field1() const&&     { return std::move(*this).field1_ref(); }
+
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value();` instead of `FOO.get_m1();`")]]
   const ::cpp2::Mixin1& get_m1() const&;
+
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value();` instead of `FOO.get_m1();`")]]
   ::cpp2::Mixin1 get_m1() &&;
@@ -472,6 +474,7 @@ class Mixin2 final  {
   ::std::string* get_field2() & {
     return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::string* get_field2() && = delete;
@@ -969,9 +972,11 @@ class Foo final  {
     field4_ref() = std::forward<T_Foo_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
   }
+
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value();` instead of `FOO.get_m2();`")]]
   const ::cpp2::Mixin2& get_m2() const&;
+
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value();` instead of `FOO.get_m2();`")]]
   ::cpp2::Mixin2 get_m2() &&;
@@ -983,9 +988,11 @@ class Foo final  {
     m2_ref() = std::forward<T_Foo_m2_struct_setter>(m2_);
     return __fbthrift_field_m2;
   }
+
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value();` instead of `FOO.get_m3();`")]]
   const ::cpp2::Mixin3& get_m3() const&;
+
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value();` instead of `FOO.get_m3();`")]]
   ::cpp2::Mixin3 get_m3() &&;

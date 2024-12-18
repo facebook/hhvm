@@ -482,9 +482,11 @@ class Bar final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_list_field), __isset.at(0), __isset.bit(0)};
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_field() &&;
@@ -704,9 +706,11 @@ class Baz final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> nested_list_field() && {
     return {static_cast<T&&>(this->__fbthrift_field_nested_list_field), __isset.at(1), __isset.bit(1)};
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_field() &&;
@@ -718,9 +722,11 @@ class Baz final  {
     list_field_ref() = std::forward<T_Baz_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+
   /** Glean { "field": "nested_list_field" } */
   [[deprecated("Use `FOO.nested_list_field().value();` instead of `FOO.get_nested_list_field();`")]]
   const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& get_nested_list_field() const&;
+
   /** Glean { "field": "nested_list_field" } */
   [[deprecated("Use `FOO.nested_list_field().value();` instead of `FOO.get_nested_list_field();`")]]
   ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> get_nested_list_field() &&;
@@ -1484,9 +1490,11 @@ class OpEncodeStruct final  {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
+
   /** Glean { "field": "foo_field" } */
   [[deprecated("Use `FOO.foo_field().value();` instead of `FOO.get_foo_field();`")]]
   const ::facebook::thrift::test::Foo& get_foo_field() const&;
+
   /** Glean { "field": "foo_field" } */
   [[deprecated("Use `FOO.foo_field().value();` instead of `FOO.get_foo_field();`")]]
   ::facebook::thrift::test::Foo get_foo_field() &&;
@@ -1498,9 +1506,11 @@ class OpEncodeStruct final  {
     foo_field_ref() = std::forward<T_OpEncodeStruct_foo_field_struct_setter>(foo_field_);
     return __fbthrift_field_foo_field;
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_field() &&;
@@ -1512,9 +1522,11 @@ class OpEncodeStruct final  {
     list_field_ref() = std::forward<T_OpEncodeStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+
   /** Glean { "field": "list_cpp_type_field" } */
   [[deprecated("Use `FOO.list_cpp_type_field().value();` instead of `FOO.get_list_cpp_type_field();`")]]
   const ::std::vector<::facebook::thrift::test::AdaptedFoo>& get_list_cpp_type_field() const&;
+
   /** Glean { "field": "list_cpp_type_field" } */
   [[deprecated("Use `FOO.list_cpp_type_field().value();` instead of `FOO.get_list_cpp_type_field();`")]]
   ::std::vector<::facebook::thrift::test::AdaptedFoo> get_list_cpp_type_field() &&;
@@ -1526,9 +1538,11 @@ class OpEncodeStruct final  {
     list_cpp_type_field_ref() = std::forward<T_OpEncodeStruct_list_cpp_type_field_struct_setter>(list_cpp_type_field_);
     return __fbthrift_field_list_cpp_type_field;
   }
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   const ::std::set<::facebook::thrift::test::AdaptedFoo>& get_set_field() const&;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::std::set<::facebook::thrift::test::AdaptedFoo> get_set_field() &&;
@@ -1540,9 +1554,11 @@ class OpEncodeStruct final  {
     set_field_ref() = std::forward<T_OpEncodeStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   const ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>& get_map_field() const&;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> get_map_field() &&;
@@ -1554,9 +1570,11 @@ class OpEncodeStruct final  {
     map_field_ref() = std::forward<T_OpEncodeStruct_map_field_struct_setter>(map_field_);
     return __fbthrift_field_map_field;
   }
+
   /** Glean { "field": "nested_field" } */
   [[deprecated("Use `FOO.nested_field().value();` instead of `FOO.get_nested_field();`")]]
   const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>& get_nested_field() const&;
+
   /** Glean { "field": "nested_field" } */
   [[deprecated("Use `FOO.nested_field().value();` instead of `FOO.get_nested_field();`")]]
   ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> get_nested_field() &&;
@@ -1568,9 +1586,11 @@ class OpEncodeStruct final  {
     nested_field_ref() = std::forward<T_OpEncodeStruct_nested_field_struct_setter>(nested_field_);
     return __fbthrift_field_nested_field;
   }
+
   /** Glean { "field": "bar_field" } */
   [[deprecated("Use `FOO.bar_field().value();` instead of `FOO.get_bar_field();`")]]
   const ::facebook::thrift::test::Bar& get_bar_field() const&;
+
   /** Glean { "field": "bar_field" } */
   [[deprecated("Use `FOO.bar_field().value();` instead of `FOO.get_bar_field();`")]]
   ::facebook::thrift::test::Bar get_bar_field() &&;

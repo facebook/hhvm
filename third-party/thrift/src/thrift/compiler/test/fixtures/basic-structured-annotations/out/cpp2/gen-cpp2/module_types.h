@@ -1134,9 +1134,11 @@ class structured_annotation_recursive final  {
     name_ref() = std::forward<T_structured_annotation_recursive_name_struct_setter>(name_);
     return __fbthrift_field_name;
   }
+
   /** Glean { "field": "forward" } */
   [[deprecated("Use `FOO.forward().value();` instead of `FOO.get_forward();`")]]
   const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& get_forward() const&;
+
   /** Glean { "field": "forward" } */
   [[deprecated("Use `FOO.forward().value();` instead of `FOO.get_forward();`")]]
   ::test::fixtures::basic-structured-annotations::structured_annotation_forward get_forward() &&;
@@ -1376,9 +1378,11 @@ class structured_annotation_nested final  {
     name_ref() = std::forward<T_structured_annotation_nested_name_struct_setter>(name_);
     return __fbthrift_field_name;
   }
+
   /** Glean { "field": "nest" } */
   [[deprecated("Use `FOO.nest().value();` instead of `FOO.get_nest();`")]]
   const ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& get_nest() const&;
+
   /** Glean { "field": "nest" } */
   [[deprecated("Use `FOO.nest().value();` instead of `FOO.get_nest();`")]]
   ::test::fixtures::basic-structured-annotations::structured_annotation_with_default get_nest() &&;

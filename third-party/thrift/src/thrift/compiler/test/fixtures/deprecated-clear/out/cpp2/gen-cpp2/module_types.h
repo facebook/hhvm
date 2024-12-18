@@ -1059,9 +1059,11 @@ class StructWithDefaultStruct final  {
     enum_field_ref() = enum_field_;
     return __fbthrift_field_enum_field;
   }
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   const ::std::vector<::std::int16_t>& get_list_field() const&;
+
   /** Glean { "field": "list_field" } */
   [[deprecated("Use `FOO.list_field().value();` instead of `FOO.get_list_field();`")]]
   ::std::vector<::std::int16_t> get_list_field() &&;
@@ -1073,9 +1075,11 @@ class StructWithDefaultStruct final  {
     list_field_ref() = std::forward<T_StructWithDefaultStruct_list_field_struct_setter>(list_field_);
     return __fbthrift_field_list_field;
   }
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   const ::std::set<::std::int16_t>& get_set_field() const&;
+
   /** Glean { "field": "set_field" } */
   [[deprecated("Use `FOO.set_field().value();` instead of `FOO.get_set_field();`")]]
   ::std::set<::std::int16_t> get_set_field() &&;
@@ -1087,9 +1091,11 @@ class StructWithDefaultStruct final  {
     set_field_ref() = std::forward<T_StructWithDefaultStruct_set_field_struct_setter>(set_field_);
     return __fbthrift_field_set_field;
   }
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   const ::std::map<::std::int16_t, ::std::int16_t>& get_map_field() const&;
+
   /** Glean { "field": "map_field" } */
   [[deprecated("Use `FOO.map_field().value();` instead of `FOO.get_map_field();`")]]
   ::std::map<::std::int16_t, ::std::int16_t> get_map_field() &&;

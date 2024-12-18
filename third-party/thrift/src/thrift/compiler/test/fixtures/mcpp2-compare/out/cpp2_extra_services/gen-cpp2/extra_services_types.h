@@ -899,6 +899,7 @@ class containerStruct2 final  {
   bool* get_opt_fieldA() & {
     return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
   }
+
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   bool* get_opt_fieldA() && = delete;
@@ -909,9 +910,11 @@ class containerStruct2 final  {
     opt_fieldA_ref() = opt_fieldA_;
     return __fbthrift_field_opt_fieldA;
   }
+
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   const ::std::map<::std::string, bool>& get_fieldB() const&;
+
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::map<::std::string, bool> get_fieldB() &&;
@@ -923,9 +926,11 @@ class containerStruct2 final  {
     fieldB_ref() = std::forward<T_containerStruct2_fieldB_struct_setter>(fieldB_);
     return __fbthrift_field_fieldB;
   }
+
   /** Glean { "field": "req_fieldB" } */
   [[deprecated("Use `FOO.req_fieldB().value();` instead of `FOO.get_req_fieldB();`")]]
   const ::std::map<::std::string, bool>& get_req_fieldB() const&;
+
   /** Glean { "field": "req_fieldB" } */
   [[deprecated("Use `FOO.req_fieldB().value();` instead of `FOO.get_req_fieldB();`")]]
   ::std::map<::std::string, bool> get_req_fieldB() &&;
@@ -937,12 +942,15 @@ class containerStruct2 final  {
     req_fieldB_ref() = std::forward<T_containerStruct2_req_fieldB_struct_setter>(req_fieldB_);
     return __fbthrift_field_req_fieldB;
   }
+
   /** Glean { "field": "opt_fieldB" } */
   [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   const ::std::map<::std::string, bool>* get_opt_fieldB() const&;
+
   /** Glean { "field": "opt_fieldB" } */
   [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   ::std::map<::std::string, bool>* get_opt_fieldB() &;
+
   /** Glean { "field": "opt_fieldB" } */
   [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   ::std::map<::std::string, bool>* get_opt_fieldB() && = delete;
@@ -954,9 +962,11 @@ class containerStruct2 final  {
     opt_fieldB_ref() = std::forward<T_containerStruct2_opt_fieldB_struct_setter>(opt_fieldB_);
     return __fbthrift_field_opt_fieldB;
   }
+
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   const ::std::set<::std::int32_t>& get_fieldC() const&;
+
   /** Glean { "field": "fieldC" } */
   [[deprecated("Use `FOO.fieldC().value();` instead of `FOO.get_fieldC();`")]]
   ::std::set<::std::int32_t> get_fieldC() &&;
@@ -968,9 +978,11 @@ class containerStruct2 final  {
     fieldC_ref() = std::forward<T_containerStruct2_fieldC_struct_setter>(fieldC_);
     return __fbthrift_field_fieldC;
   }
+
   /** Glean { "field": "req_fieldC" } */
   [[deprecated("Use `FOO.req_fieldC().value();` instead of `FOO.get_req_fieldC();`")]]
   const ::std::set<::std::int32_t>& get_req_fieldC() const&;
+
   /** Glean { "field": "req_fieldC" } */
   [[deprecated("Use `FOO.req_fieldC().value();` instead of `FOO.get_req_fieldC();`")]]
   ::std::set<::std::int32_t> get_req_fieldC() &&;
@@ -982,12 +994,15 @@ class containerStruct2 final  {
     req_fieldC_ref() = std::forward<T_containerStruct2_req_fieldC_struct_setter>(req_fieldC_);
     return __fbthrift_field_req_fieldC;
   }
+
   /** Glean { "field": "opt_fieldC" } */
   [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   const ::std::set<::std::int32_t>* get_opt_fieldC() const&;
+
   /** Glean { "field": "opt_fieldC" } */
   [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   ::std::set<::std::int32_t>* get_opt_fieldC() &;
+
   /** Glean { "field": "opt_fieldC" } */
   [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   ::std::set<::std::int32_t>* get_opt_fieldC() && = delete;
@@ -1071,6 +1086,7 @@ class containerStruct2 final  {
   ::std::string* get_opt_fieldE() & {
     return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
   }
+
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   ::std::string* get_opt_fieldE() && = delete;

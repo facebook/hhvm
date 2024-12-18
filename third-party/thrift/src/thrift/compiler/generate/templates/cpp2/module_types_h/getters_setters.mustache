@@ -16,9 +16,9 @@
 
 }}{{#struct:fields}}{{#field:type}}{{#field:has_deprecated_accessors?}}
 {{#type:resolves_to_base_or_enum?}}
-
 {{#if (not type:string_or_binary?)}}
   {{#if field:optional?}}
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
@@ -30,18 +30,19 @@
   {{type:cpp_type}}* get_{{field:cpp_name}}() & {
     return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
-
   {{#else}}
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}} get_{{field:cpp_name}}() const {
     return {{field:cpp_storage_name}};
   }
-
   {{/if field:optional?}}
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}() = BAR;` instead of `FOO.set_{{field:cpp_name}}(BAR);`")]]
   {{type:cpp_type}}& set_{{field:cpp_name}}({{type:cpp_type}} {{field:cpp_name}}_) {
@@ -50,6 +51,7 @@
   }
 {{#else}}
   {{#if field:optional?}}
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const& {
@@ -61,10 +63,12 @@
   {{type:cpp_type}}* get_{{field:cpp_name}}() & {
     return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
   }
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
   {{#else}}
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}& get_{{field:cpp_name}}() const& {
@@ -89,19 +93,24 @@
 {{/type:resolves_to_base_or_enum?}}
 {{#type:resolves_to_container_or_struct?}}
   {{#if field:optional?}}
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}* get_{{field:cpp_name}}() const&;
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() &;
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}}* get_{{field:cpp_name}}() && = delete;
   {{#else}}
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   const {{type:cpp_type}}& get_{{field:cpp_name}}() const&;
+
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}} get_{{field:cpp_name}}() &&;

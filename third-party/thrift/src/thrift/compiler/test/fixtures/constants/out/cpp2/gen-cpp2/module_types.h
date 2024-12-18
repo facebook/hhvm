@@ -706,6 +706,7 @@ class Internship final  {
   ::cpp2::Company* get_employer() & {
     return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
   }
+
   /** Glean { "field": "employer" } */
   [[deprecated("Use `FOO.employer().value();` instead of `FOO.get_employer();`")]]
   ::cpp2::Company* get_employer() && = delete;
@@ -728,6 +729,7 @@ class Internship final  {
   double* get_compensation() & {
     return compensation_ref().has_value() ? std::addressof(__fbthrift_field_compensation) : nullptr;
   }
+
   /** Glean { "field": "compensation" } */
   [[deprecated("Use `FOO.compensation().value();` instead of `FOO.get_compensation();`")]]
   double* get_compensation() && = delete;
@@ -750,6 +752,7 @@ class Internship final  {
   ::std::string* get_school() & {
     return school_ref().has_value() ? std::addressof(__fbthrift_field_school) : nullptr;
   }
+
   /** Glean { "field": "school" } */
   [[deprecated("Use `FOO.school().value();` instead of `FOO.get_school();`")]]
   ::std::string* get_school() && = delete;
@@ -1576,9 +1579,11 @@ class struct2 final  {
     b_ref() = std::forward<T_struct2_b_struct_setter>(b_);
     return __fbthrift_field_b;
   }
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   const ::cpp2::struct1& get_c() const&;
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   ::cpp2::struct1 get_c() &&;
@@ -1590,9 +1595,11 @@ class struct2 final  {
     c_ref() = std::forward<T_struct2_c_struct_setter>(c_);
     return __fbthrift_field_c;
   }
+
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d().value();` instead of `FOO.get_d();`")]]
   const ::std::vector<::std::int32_t>& get_d() const&;
+
   /** Glean { "field": "d" } */
   [[deprecated("Use `FOO.d().value();` instead of `FOO.get_d();`")]]
   ::std::vector<::std::int32_t> get_d() &&;
@@ -1896,9 +1903,11 @@ class struct3 final  {
     b_ref() = b_;
     return __fbthrift_field_b;
   }
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   const ::cpp2::struct2& get_c() const&;
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   ::cpp2::struct2 get_c() &&;
@@ -2194,6 +2203,7 @@ class struct4 final  {
   double* get_b() & {
     return b_ref().has_value() ? std::addressof(__fbthrift_field_b) : nullptr;
   }
+
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
   double* get_b() && = delete;
@@ -2216,6 +2226,7 @@ class struct4 final  {
   ::std::int8_t* get_c() & {
     return c_ref().has_value() ? std::addressof(__fbthrift_field_c) : nullptr;
   }
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   ::std::int8_t* get_c() && = delete;

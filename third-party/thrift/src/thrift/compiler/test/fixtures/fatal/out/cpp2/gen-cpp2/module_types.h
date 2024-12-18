@@ -5087,9 +5087,11 @@ class structC final  {
     f_ref() = f_;
     return __fbthrift_field_f;
   }
+
   /** Glean { "field": "g" } */
   [[deprecated("Use `FOO.g().value();` instead of `FOO.get_g();`")]]
   const ::test_cpp2::cpp_reflection::union1& get_g() const&;
+
   /** Glean { "field": "g" } */
   [[deprecated("Use `FOO.g().value();` instead of `FOO.get_g();`")]]
   ::test_cpp2::cpp_reflection::union1 get_g() &&;
@@ -5101,9 +5103,11 @@ class structC final  {
     g_ref() = std::forward<T_structC_g_struct_setter>(g_);
     return __fbthrift_field_g;
   }
+
   /** Glean { "field": "h" } */
   [[deprecated("Use `FOO.h().value();` instead of `FOO.get_h();`")]]
   const ::test_cpp2::cpp_reflection::unionA& get_h() const&;
+
   /** Glean { "field": "h" } */
   [[deprecated("Use `FOO.h().value();` instead of `FOO.get_h();`")]]
   ::test_cpp2::cpp_reflection::unionA get_h() &&;
@@ -5115,9 +5119,11 @@ class structC final  {
     h_ref() = std::forward<T_structC_h_struct_setter>(h_);
     return __fbthrift_field_h;
   }
+
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i().value();` instead of `FOO.get_i();`")]]
   const ::test_cpp2::cpp_reflection::unionA& get_i() const&;
+
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i().value();` instead of `FOO.get_i();`")]]
   ::test_cpp2::cpp_reflection::unionA get_i() &&;
@@ -5129,9 +5135,11 @@ class structC final  {
     i_ref() = std::forward<T_structC_i_struct_setter>(i_);
     return __fbthrift_field_i;
   }
+
   /** Glean { "field": "j" } */
   [[deprecated("Use `FOO.j().value();` instead of `FOO.get_j();`")]]
   const ::std::vector<::std::int32_t>& get_j() const&;
+
   /** Glean { "field": "j" } */
   [[deprecated("Use `FOO.j().value();` instead of `FOO.get_j();`")]]
   ::std::vector<::std::int32_t> get_j() &&;
@@ -5143,9 +5151,11 @@ class structC final  {
     j_ref() = std::forward<T_structC_j_struct_setter>(j_);
     return __fbthrift_field_j;
   }
+
   /** Glean { "field": "j1" } */
   [[deprecated("Use `FOO.j1().value();` instead of `FOO.get_j1();`")]]
   const ::std::vector<::std::int32_t>& get_j1() const&;
+
   /** Glean { "field": "j1" } */
   [[deprecated("Use `FOO.j1().value();` instead of `FOO.get_j1();`")]]
   ::std::vector<::std::int32_t> get_j1() &&;
@@ -5157,9 +5167,11 @@ class structC final  {
     j1_ref() = std::forward<T_structC_j1_struct_setter>(j1_);
     return __fbthrift_field_j1;
   }
+
   /** Glean { "field": "j2" } */
   [[deprecated("Use `FOO.j2().value();` instead of `FOO.get_j2();`")]]
   const ::std::vector<::test_cpp2::cpp_reflection::enum1>& get_j2() const&;
+
   /** Glean { "field": "j2" } */
   [[deprecated("Use `FOO.j2().value();` instead of `FOO.get_j2();`")]]
   ::std::vector<::test_cpp2::cpp_reflection::enum1> get_j2() &&;
@@ -5171,9 +5183,11 @@ class structC final  {
     j2_ref() = std::forward<T_structC_j2_struct_setter>(j2_);
     return __fbthrift_field_j2;
   }
+
   /** Glean { "field": "j3" } */
   [[deprecated("Use `FOO.j3().value();` instead of `FOO.get_j3();`")]]
   const ::std::vector<::test_cpp2::cpp_reflection::structA>& get_j3() const&;
+
   /** Glean { "field": "j3" } */
   [[deprecated("Use `FOO.j3().value();` instead of `FOO.get_j3();`")]]
   ::std::vector<::test_cpp2::cpp_reflection::structA> get_j3() &&;
@@ -5185,9 +5199,11 @@ class structC final  {
     j3_ref() = std::forward<T_structC_j3_struct_setter>(j3_);
     return __fbthrift_field_j3;
   }
+
   /** Glean { "field": "k" } */
   [[deprecated("Use `FOO.k().value();` instead of `FOO.get_k();`")]]
   const ::std::set<::std::int32_t>& get_k() const&;
+
   /** Glean { "field": "k" } */
   [[deprecated("Use `FOO.k().value();` instead of `FOO.get_k();`")]]
   ::std::set<::std::int32_t> get_k() &&;
@@ -5199,9 +5215,11 @@ class structC final  {
     k_ref() = std::forward<T_structC_k_struct_setter>(k_);
     return __fbthrift_field_k;
   }
+
   /** Glean { "field": "k1" } */
   [[deprecated("Use `FOO.k1().value();` instead of `FOO.get_k1();`")]]
   const ::std::set<::std::int32_t>& get_k1() const&;
+
   /** Glean { "field": "k1" } */
   [[deprecated("Use `FOO.k1().value();` instead of `FOO.get_k1();`")]]
   ::std::set<::std::int32_t> get_k1() &&;
@@ -5213,9 +5231,11 @@ class structC final  {
     k1_ref() = std::forward<T_structC_k1_struct_setter>(k1_);
     return __fbthrift_field_k1;
   }
+
   /** Glean { "field": "k2" } */
   [[deprecated("Use `FOO.k2().value();` instead of `FOO.get_k2();`")]]
   const ::std::set<::test_cpp2::cpp_reflection::enum2>& get_k2() const&;
+
   /** Glean { "field": "k2" } */
   [[deprecated("Use `FOO.k2().value();` instead of `FOO.get_k2();`")]]
   ::std::set<::test_cpp2::cpp_reflection::enum2> get_k2() &&;
@@ -5227,9 +5247,11 @@ class structC final  {
     k2_ref() = std::forward<T_structC_k2_struct_setter>(k2_);
     return __fbthrift_field_k2;
   }
+
   /** Glean { "field": "k3" } */
   [[deprecated("Use `FOO.k3().value();` instead of `FOO.get_k3();`")]]
   const ::std::set<::test_cpp2::cpp_reflection::structB>& get_k3() const&;
+
   /** Glean { "field": "k3" } */
   [[deprecated("Use `FOO.k3().value();` instead of `FOO.get_k3();`")]]
   ::std::set<::test_cpp2::cpp_reflection::structB> get_k3() &&;
@@ -5241,9 +5263,11 @@ class structC final  {
     k3_ref() = std::forward<T_structC_k3_struct_setter>(k3_);
     return __fbthrift_field_k3;
   }
+
   /** Glean { "field": "l" } */
   [[deprecated("Use `FOO.l().value();` instead of `FOO.get_l();`")]]
   const ::std::map<::std::int32_t, ::std::int32_t>& get_l() const&;
+
   /** Glean { "field": "l" } */
   [[deprecated("Use `FOO.l().value();` instead of `FOO.get_l();`")]]
   ::std::map<::std::int32_t, ::std::int32_t> get_l() &&;
@@ -5255,9 +5279,11 @@ class structC final  {
     l_ref() = std::forward<T_structC_l_struct_setter>(l_);
     return __fbthrift_field_l;
   }
+
   /** Glean { "field": "l1" } */
   [[deprecated("Use `FOO.l1().value();` instead of `FOO.get_l1();`")]]
   const ::std::map<::std::int32_t, ::std::int32_t>& get_l1() const&;
+
   /** Glean { "field": "l1" } */
   [[deprecated("Use `FOO.l1().value();` instead of `FOO.get_l1();`")]]
   ::std::map<::std::int32_t, ::std::int32_t> get_l1() &&;
@@ -5269,9 +5295,11 @@ class structC final  {
     l1_ref() = std::forward<T_structC_l1_struct_setter>(l1_);
     return __fbthrift_field_l1;
   }
+
   /** Glean { "field": "l2" } */
   [[deprecated("Use `FOO.l2().value();` instead of `FOO.get_l2();`")]]
   const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1>& get_l2() const&;
+
   /** Glean { "field": "l2" } */
   [[deprecated("Use `FOO.l2().value();` instead of `FOO.get_l2();`")]]
   ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::enum1> get_l2() &&;
@@ -5283,9 +5311,11 @@ class structC final  {
     l2_ref() = std::forward<T_structC_l2_struct_setter>(l2_);
     return __fbthrift_field_l2;
   }
+
   /** Glean { "field": "l3" } */
   [[deprecated("Use `FOO.l3().value();` instead of `FOO.get_l3();`")]]
   const ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB>& get_l3() const&;
+
   /** Glean { "field": "l3" } */
   [[deprecated("Use `FOO.l3().value();` instead of `FOO.get_l3();`")]]
   ::std::map<::std::int32_t, ::test_cpp2::cpp_reflection::structB> get_l3() &&;
@@ -5297,9 +5327,11 @@ class structC final  {
     l3_ref() = std::forward<T_structC_l3_struct_setter>(l3_);
     return __fbthrift_field_l3;
   }
+
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value();` instead of `FOO.get_m1();`")]]
   const ::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t>& get_m1() const&;
+
   /** Glean { "field": "m1" } */
   [[deprecated("Use `FOO.m1().value();` instead of `FOO.get_m1();`")]]
   ::std::map<::test_cpp2::cpp_reflection::enum1, ::std::int32_t> get_m1() &&;
@@ -5311,9 +5343,11 @@ class structC final  {
     m1_ref() = std::forward<T_structC_m1_struct_setter>(m1_);
     return __fbthrift_field_m1;
   }
+
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value();` instead of `FOO.get_m2();`")]]
   const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::enum2>& get_m2() const&;
+
   /** Glean { "field": "m2" } */
   [[deprecated("Use `FOO.m2().value();` instead of `FOO.get_m2();`")]]
   ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::enum2> get_m2() &&;
@@ -5325,9 +5359,11 @@ class structC final  {
     m2_ref() = std::forward<T_structC_m2_struct_setter>(m2_);
     return __fbthrift_field_m2;
   }
+
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value();` instead of `FOO.get_m3();`")]]
   const ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::structB>& get_m3() const&;
+
   /** Glean { "field": "m3" } */
   [[deprecated("Use `FOO.m3().value();` instead of `FOO.get_m3();`")]]
   ::std::map<::test_cpp2::cpp_reflection::enum1, ::test_cpp2::cpp_reflection::structB> get_m3() &&;
@@ -5339,9 +5375,11 @@ class structC final  {
     m3_ref() = std::forward<T_structC_m3_struct_setter>(m3_);
     return __fbthrift_field_m3;
   }
+
   /** Glean { "field": "n1" } */
   [[deprecated("Use `FOO.n1().value();` instead of `FOO.get_n1();`")]]
   const ::std::map<::std::string, ::std::int32_t>& get_n1() const&;
+
   /** Glean { "field": "n1" } */
   [[deprecated("Use `FOO.n1().value();` instead of `FOO.get_n1();`")]]
   ::std::map<::std::string, ::std::int32_t> get_n1() &&;
@@ -5353,9 +5391,11 @@ class structC final  {
     n1_ref() = std::forward<T_structC_n1_struct_setter>(n1_);
     return __fbthrift_field_n1;
   }
+
   /** Glean { "field": "n2" } */
   [[deprecated("Use `FOO.n2().value();` instead of `FOO.get_n2();`")]]
   const ::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1>& get_n2() const&;
+
   /** Glean { "field": "n2" } */
   [[deprecated("Use `FOO.n2().value();` instead of `FOO.get_n2();`")]]
   ::std::map<::std::string, ::test_cpp2::cpp_reflection::enum1> get_n2() &&;
@@ -5367,9 +5407,11 @@ class structC final  {
     n2_ref() = std::forward<T_structC_n2_struct_setter>(n2_);
     return __fbthrift_field_n2;
   }
+
   /** Glean { "field": "n3" } */
   [[deprecated("Use `FOO.n3().value();` instead of `FOO.get_n3();`")]]
   const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& get_n3() const&;
+
   /** Glean { "field": "n3" } */
   [[deprecated("Use `FOO.n3().value();` instead of `FOO.get_n3();`")]]
   ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB> get_n3() &&;
@@ -5381,9 +5423,11 @@ class structC final  {
     n3_ref() = std::forward<T_structC_n3_struct_setter>(n3_);
     return __fbthrift_field_n3;
   }
+
   /** Glean { "field": "o1" } */
   [[deprecated("Use `FOO.o1().value();` instead of `FOO.get_o1();`")]]
   const ::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t>& get_o1() const&;
+
   /** Glean { "field": "o1" } */
   [[deprecated("Use `FOO.o1().value();` instead of `FOO.get_o1();`")]]
   ::std::map<::test_cpp2::cpp_reflection::structA, ::std::int32_t> get_o1() &&;
@@ -5395,9 +5439,11 @@ class structC final  {
     o1_ref() = std::forward<T_structC_o1_struct_setter>(o1_);
     return __fbthrift_field_o1;
   }
+
   /** Glean { "field": "o2" } */
   [[deprecated("Use `FOO.o2().value();` instead of `FOO.get_o2();`")]]
   const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::enum1>& get_o2() const&;
+
   /** Glean { "field": "o2" } */
   [[deprecated("Use `FOO.o2().value();` instead of `FOO.get_o2();`")]]
   ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::enum1> get_o2() &&;
@@ -5409,9 +5455,11 @@ class structC final  {
     o2_ref() = std::forward<T_structC_o2_struct_setter>(o2_);
     return __fbthrift_field_o2;
   }
+
   /** Glean { "field": "o3" } */
   [[deprecated("Use `FOO.o3().value();` instead of `FOO.get_o3();`")]]
   const ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB>& get_o3() const&;
+
   /** Glean { "field": "o3" } */
   [[deprecated("Use `FOO.o3().value();` instead of `FOO.get_o3();`")]]
   ::std::map<::test_cpp2::cpp_reflection::structA, ::test_cpp2::cpp_reflection::structB> get_o3() &&;
@@ -5863,6 +5911,7 @@ class struct1 final  {
   ::std::string* get_field1() & {
     return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() && = delete;
@@ -5900,12 +5949,15 @@ class struct1 final  {
     field3_ref() = field3_;
     return __fbthrift_field_field3;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   const ::test_cpp2::cpp_reflection::union1* get_field4() const&;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::test_cpp2::cpp_reflection::union1* get_field4() &;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::test_cpp2::cpp_reflection::union1* get_field4() && = delete;
@@ -5917,9 +5969,11 @@ class struct1 final  {
     field4_ref() = std::forward<T_struct1_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
   }
+
   /** Glean { "field": "field5" } */
   [[deprecated("Use `FOO.field5().value();` instead of `FOO.get_field5();`")]]
   const ::test_cpp2::cpp_reflection::union2& get_field5() const&;
+
   /** Glean { "field": "field5" } */
   [[deprecated("Use `FOO.field5().value();` instead of `FOO.get_field5();`")]]
   ::test_cpp2::cpp_reflection::union2 get_field5() &&;
@@ -6457,9 +6511,11 @@ class struct2 final  {
     fieldD_ref() = fieldD_;
     return __fbthrift_field_fieldD;
   }
+
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   const ::test_cpp2::cpp_reflection::union1& get_fieldE() const&;
+
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   ::test_cpp2::cpp_reflection::union1 get_fieldE() &&;
@@ -6471,9 +6527,11 @@ class struct2 final  {
     fieldE_ref() = std::forward<T_struct2_fieldE_struct_setter>(fieldE_);
     return __fbthrift_field_fieldE;
   }
+
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   const ::test_cpp2::cpp_reflection::union2& get_fieldF() const&;
+
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   ::test_cpp2::cpp_reflection::union2 get_fieldF() &&;
@@ -6485,9 +6543,11 @@ class struct2 final  {
     fieldF_ref() = std::forward<T_struct2_fieldF_struct_setter>(fieldF_);
     return __fbthrift_field_fieldF;
   }
+
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   const ::test_cpp2::cpp_reflection::struct1& get_fieldG() const&;
+
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   ::test_cpp2::cpp_reflection::struct1 get_fieldG() &&;
@@ -7584,9 +7644,11 @@ class struct3 final  {
     fieldD_ref() = fieldD_;
     return __fbthrift_field_fieldD;
   }
+
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   const ::test_cpp2::cpp_reflection::union1& get_fieldE() const&;
+
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   ::test_cpp2::cpp_reflection::union1 get_fieldE() &&;
@@ -7598,9 +7660,11 @@ class struct3 final  {
     fieldE_ref() = std::forward<T_struct3_fieldE_struct_setter>(fieldE_);
     return __fbthrift_field_fieldE;
   }
+
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   const ::test_cpp2::cpp_reflection::union2& get_fieldF() const&;
+
   /** Glean { "field": "fieldF" } */
   [[deprecated("Use `FOO.fieldF().value();` instead of `FOO.get_fieldF();`")]]
   ::test_cpp2::cpp_reflection::union2 get_fieldF() &&;
@@ -7612,9 +7676,11 @@ class struct3 final  {
     fieldF_ref() = std::forward<T_struct3_fieldF_struct_setter>(fieldF_);
     return __fbthrift_field_fieldF;
   }
+
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   const ::test_cpp2::cpp_reflection::struct1& get_fieldG() const&;
+
   /** Glean { "field": "fieldG" } */
   [[deprecated("Use `FOO.fieldG().value();` instead of `FOO.get_fieldG();`")]]
   ::test_cpp2::cpp_reflection::struct1 get_fieldG() &&;
@@ -7626,9 +7692,11 @@ class struct3 final  {
     fieldG_ref() = std::forward<T_struct3_fieldG_struct_setter>(fieldG_);
     return __fbthrift_field_fieldG;
   }
+
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   const ::test_cpp2::cpp_reflection::union2& get_fieldH() const&;
+
   /** Glean { "field": "fieldH" } */
   [[deprecated("Use `FOO.fieldH().value();` instead of `FOO.get_fieldH();`")]]
   ::test_cpp2::cpp_reflection::union2 get_fieldH() &&;
@@ -7640,9 +7708,11 @@ class struct3 final  {
     fieldH_ref() = std::forward<T_struct3_fieldH_struct_setter>(fieldH_);
     return __fbthrift_field_fieldH;
   }
+
   /** Glean { "field": "fieldI" } */
   [[deprecated("Use `FOO.fieldI().value();` instead of `FOO.get_fieldI();`")]]
   const ::std::vector<::std::int32_t>& get_fieldI() const&;
+
   /** Glean { "field": "fieldI" } */
   [[deprecated("Use `FOO.fieldI().value();` instead of `FOO.get_fieldI();`")]]
   ::std::vector<::std::int32_t> get_fieldI() &&;
@@ -7654,9 +7724,11 @@ class struct3 final  {
     fieldI_ref() = std::forward<T_struct3_fieldI_struct_setter>(fieldI_);
     return __fbthrift_field_fieldI;
   }
+
   /** Glean { "field": "fieldJ" } */
   [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
   const ::std::vector<::std::string>& get_fieldJ() const&;
+
   /** Glean { "field": "fieldJ" } */
   [[deprecated("Use `FOO.fieldJ().value();` instead of `FOO.get_fieldJ();`")]]
   ::std::vector<::std::string> get_fieldJ() &&;
@@ -7668,9 +7740,11 @@ class struct3 final  {
     fieldJ_ref() = std::forward<T_struct3_fieldJ_struct_setter>(fieldJ_);
     return __fbthrift_field_fieldJ;
   }
+
   /** Glean { "field": "fieldK" } */
   [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
   const ::std::vector<::std::string>& get_fieldK() const&;
+
   /** Glean { "field": "fieldK" } */
   [[deprecated("Use `FOO.fieldK().value();` instead of `FOO.get_fieldK();`")]]
   ::std::vector<::std::string> get_fieldK() &&;
@@ -7682,9 +7756,11 @@ class struct3 final  {
     fieldK_ref() = std::forward<T_struct3_fieldK_struct_setter>(fieldK_);
     return __fbthrift_field_fieldK;
   }
+
   /** Glean { "field": "fieldL" } */
   [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
   const ::std::vector<::test_cpp2::cpp_reflection::structA>& get_fieldL() const&;
+
   /** Glean { "field": "fieldL" } */
   [[deprecated("Use `FOO.fieldL().value();` instead of `FOO.get_fieldL();`")]]
   ::std::vector<::test_cpp2::cpp_reflection::structA> get_fieldL() &&;
@@ -7696,9 +7772,11 @@ class struct3 final  {
     fieldL_ref() = std::forward<T_struct3_fieldL_struct_setter>(fieldL_);
     return __fbthrift_field_fieldL;
   }
+
   /** Glean { "field": "fieldM" } */
   [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
   const ::std::set<::std::int32_t>& get_fieldM() const&;
+
   /** Glean { "field": "fieldM" } */
   [[deprecated("Use `FOO.fieldM().value();` instead of `FOO.get_fieldM();`")]]
   ::std::set<::std::int32_t> get_fieldM() &&;
@@ -7710,9 +7788,11 @@ class struct3 final  {
     fieldM_ref() = std::forward<T_struct3_fieldM_struct_setter>(fieldM_);
     return __fbthrift_field_fieldM;
   }
+
   /** Glean { "field": "fieldN" } */
   [[deprecated("Use `FOO.fieldN().value();` instead of `FOO.get_fieldN();`")]]
   const ::std::set<::std::string>& get_fieldN() const&;
+
   /** Glean { "field": "fieldN" } */
   [[deprecated("Use `FOO.fieldN().value();` instead of `FOO.get_fieldN();`")]]
   ::std::set<::std::string> get_fieldN() &&;
@@ -7724,9 +7804,11 @@ class struct3 final  {
     fieldN_ref() = std::forward<T_struct3_fieldN_struct_setter>(fieldN_);
     return __fbthrift_field_fieldN;
   }
+
   /** Glean { "field": "fieldO" } */
   [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
   const ::std::set<::std::string>& get_fieldO() const&;
+
   /** Glean { "field": "fieldO" } */
   [[deprecated("Use `FOO.fieldO().value();` instead of `FOO.get_fieldO();`")]]
   ::std::set<::std::string> get_fieldO() &&;
@@ -7738,9 +7820,11 @@ class struct3 final  {
     fieldO_ref() = std::forward<T_struct3_fieldO_struct_setter>(fieldO_);
     return __fbthrift_field_fieldO;
   }
+
   /** Glean { "field": "fieldP" } */
   [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
   const ::std::set<::test_cpp2::cpp_reflection::structB>& get_fieldP() const&;
+
   /** Glean { "field": "fieldP" } */
   [[deprecated("Use `FOO.fieldP().value();` instead of `FOO.get_fieldP();`")]]
   ::std::set<::test_cpp2::cpp_reflection::structB> get_fieldP() &&;
@@ -7752,9 +7836,11 @@ class struct3 final  {
     fieldP_ref() = std::forward<T_struct3_fieldP_struct_setter>(fieldP_);
     return __fbthrift_field_fieldP;
   }
+
   /** Glean { "field": "fieldQ" } */
   [[deprecated("Use `FOO.fieldQ().value();` instead of `FOO.get_fieldQ();`")]]
   const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structA>& get_fieldQ() const&;
+
   /** Glean { "field": "fieldQ" } */
   [[deprecated("Use `FOO.fieldQ().value();` instead of `FOO.get_fieldQ();`")]]
   ::std::map<::std::string, ::test_cpp2::cpp_reflection::structA> get_fieldQ() &&;
@@ -7766,9 +7852,11 @@ class struct3 final  {
     fieldQ_ref() = std::forward<T_struct3_fieldQ_struct_setter>(fieldQ_);
     return __fbthrift_field_fieldQ;
   }
+
   /** Glean { "field": "fieldR" } */
   [[deprecated("Use `FOO.fieldR().value();` instead of `FOO.get_fieldR();`")]]
   const ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB>& get_fieldR() const&;
+
   /** Glean { "field": "fieldR" } */
   [[deprecated("Use `FOO.fieldR().value();` instead of `FOO.get_fieldR();`")]]
   ::std::map<::std::string, ::test_cpp2::cpp_reflection::structB> get_fieldR() &&;
@@ -8114,6 +8202,7 @@ class struct4 final  {
   ::std::string* get_field1() & {
     return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() && = delete;
@@ -8526,6 +8615,7 @@ class struct5 final  {
   ::std::string* get_field1() & {
     return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::string* get_field1() && = delete;
@@ -8550,9 +8640,11 @@ class struct5 final  {
     field2_ref() = field2_;
     return __fbthrift_field_field2;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::test_cpp2::cpp_reflection::structA& get_field3() const&;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::test_cpp2::cpp_reflection::structA get_field3() &&;
@@ -8564,9 +8656,11 @@ class struct5 final  {
     field3_ref() = std::forward<T_struct5_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   const ::test_cpp2::cpp_reflection::structB& get_field4() const&;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::test_cpp2::cpp_reflection::structB get_field4() &&;
@@ -9011,9 +9105,11 @@ class dep_A_struct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i_a() && {
     return {static_cast<T&&>(this->__fbthrift_field_i_a), __isset.at(2), __isset.bit(2)};
   }
+
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
   const ::test_cpp2::cpp_reflection::dep_B_struct& get_b() const&;
+
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
   ::test_cpp2::cpp_reflection::dep_B_struct get_b() &&;
@@ -9025,9 +9121,11 @@ class dep_A_struct final  {
     b_ref() = std::forward<T_dep_A_struct_b_struct_setter>(b_);
     return __fbthrift_field_b;
   }
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   const ::test_cpp2::cpp_reflection::dep_C_struct& get_c() const&;
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   ::test_cpp2::cpp_reflection::dep_C_struct get_c() &&;
@@ -9310,9 +9408,11 @@ class dep_B_struct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> i_a() && {
     return {static_cast<T&&>(this->__fbthrift_field_i_a), __isset.at(2), __isset.bit(2)};
   }
+
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
   const ::test_cpp2::cpp_reflection::dep_B_struct& get_b() const&;
+
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
   ::test_cpp2::cpp_reflection::dep_B_struct get_b() &&;
@@ -9324,9 +9424,11 @@ class dep_B_struct final  {
     b_ref() = std::forward<T_dep_B_struct_b_struct_setter>(b_);
     return __fbthrift_field_b;
   }
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   const ::test_cpp2::cpp_reflection::dep_C_struct& get_c() const&;
+
   /** Glean { "field": "c" } */
   [[deprecated("Use `FOO.c().value();` instead of `FOO.get_c();`")]]
   ::test_cpp2::cpp_reflection::dep_C_struct get_c() &&;

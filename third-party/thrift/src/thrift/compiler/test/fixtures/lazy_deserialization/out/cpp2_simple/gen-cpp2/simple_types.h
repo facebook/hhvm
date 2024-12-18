@@ -529,9 +529,11 @@ class Foo final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field4() && {
     return {static_cast<T&&>(this->__fbthrift_field_field4), __isset.at(3), __isset.bit(3)};
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>& get_field1() const&;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double> get_field1() &&;
@@ -543,9 +545,11 @@ class Foo final  {
     field1_ref() = std::forward<T_Foo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::vector<::std::int32_t>& get_field2() const&;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t> get_field2() &&;
@@ -557,9 +561,11 @@ class Foo final  {
     field2_ref() = std::forward<T_Foo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::std::vector<double>& get_field3() const&;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double> get_field3() &&;
@@ -571,9 +577,11 @@ class Foo final  {
     field3_ref() = std::forward<T_Foo_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   const ::std::vector<::std::int32_t>& get_field4() const&;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t> get_field4() &&;
@@ -895,9 +903,11 @@ class LazyFoo final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field4() && {
     return {static_cast<T&&>(this->__fbthrift_read_field_field4()), __isset.at(3), __isset.bit(3)};
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>& get_field1() const&;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double> get_field1() &&;
@@ -909,9 +919,11 @@ class LazyFoo final  {
     field1_ref() = std::forward<T_LazyFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::vector<::std::int32_t>& get_field2() const&;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t> get_field2() &&;
@@ -1257,12 +1269,15 @@ class OptionalFoo final  {
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> field4() && {
     return {static_cast<T&&>(this->__fbthrift_field_field4), __isset.at(3), __isset.bit(3)};
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>* get_field1() const&;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() && = delete;
@@ -1274,12 +1289,15 @@ class OptionalFoo final  {
     field1_ref() = std::forward<T_OptionalFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::vector<::std::int32_t>* get_field2() const&;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() && = delete;
@@ -1291,12 +1309,15 @@ class OptionalFoo final  {
     field2_ref() = std::forward<T_OptionalFoo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::std::vector<double>* get_field3() const&;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double>* get_field3() &;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double>* get_field3() && = delete;
@@ -1308,12 +1329,15 @@ class OptionalFoo final  {
     field3_ref() = std::forward<T_OptionalFoo_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   const ::std::vector<::std::int32_t>* get_field4() const&;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t>* get_field4() &;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t>* get_field4() && = delete;
@@ -1635,12 +1659,15 @@ class OptionalLazyFoo final  {
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> field4() && {
     return {static_cast<T&&>(this->__fbthrift_read_field_field4()), __isset.at(3), __isset.bit(3)};
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>* get_field1() const&;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() && = delete;
@@ -1652,12 +1679,15 @@ class OptionalLazyFoo final  {
     field1_ref() = std::forward<T_OptionalLazyFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::vector<::std::int32_t>* get_field2() const&;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() && = delete;
@@ -2790,9 +2820,11 @@ class IndexedFoo final  {
     serialized_data_size_ref() = serialized_data_size_;
     return __fbthrift_field_serialized_data_size;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>& get_field1() const&;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double> get_field1() &&;
@@ -2804,9 +2836,11 @@ class IndexedFoo final  {
     field1_ref() = std::forward<T_IndexedFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::vector<::std::int32_t>& get_field2() const&;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t> get_field2() &&;
@@ -2818,9 +2852,11 @@ class IndexedFoo final  {
     field2_ref() = std::forward<T_IndexedFoo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::std::vector<double>& get_field3() const&;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double> get_field3() &&;
@@ -2832,9 +2868,11 @@ class IndexedFoo final  {
     field3_ref() = std::forward<T_IndexedFoo_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   const ::std::vector<::std::int32_t>& get_field4() const&;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t> get_field4() &&;
@@ -2846,9 +2884,11 @@ class IndexedFoo final  {
     field4_ref() = std::forward<T_IndexedFoo_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
   }
+
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value();` instead of `FOO.get_field_id_to_size();`")]]
   const ::std::map<::std::int16_t, ::std::int64_t>& get_field_id_to_size() const&;
+
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value();` instead of `FOO.get_field_id_to_size();`")]]
   ::std::map<::std::int16_t, ::std::int64_t> get_field_id_to_size() &&;
@@ -3288,12 +3328,15 @@ class OptionalIndexedFoo final  {
     serialized_data_size_ref() = serialized_data_size_;
     return __fbthrift_field_serialized_data_size;
   }
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   const ::std::vector<double>* get_field1() const&;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() &;
+
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::vector<double>* get_field1() && = delete;
@@ -3305,12 +3348,15 @@ class OptionalIndexedFoo final  {
     field1_ref() = std::forward<T_OptionalIndexedFoo_field1_struct_setter>(field1_);
     return __fbthrift_field_field1;
   }
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   const ::std::vector<::std::int32_t>* get_field2() const&;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() &;
+
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::vector<::std::int32_t>* get_field2() && = delete;
@@ -3322,12 +3368,15 @@ class OptionalIndexedFoo final  {
     field2_ref() = std::forward<T_OptionalIndexedFoo_field2_struct_setter>(field2_);
     return __fbthrift_field_field2;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::std::vector<double>* get_field3() const&;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double>* get_field3() &;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::vector<double>* get_field3() && = delete;
@@ -3339,12 +3388,15 @@ class OptionalIndexedFoo final  {
     field3_ref() = std::forward<T_OptionalIndexedFoo_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
   }
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   const ::std::vector<::std::int32_t>* get_field4() const&;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t>* get_field4() &;
+
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   ::std::vector<::std::int32_t>* get_field4() && = delete;
@@ -3356,9 +3408,11 @@ class OptionalIndexedFoo final  {
     field4_ref() = std::forward<T_OptionalIndexedFoo_field4_struct_setter>(field4_);
     return __fbthrift_field_field4;
   }
+
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value();` instead of `FOO.get_field_id_to_size();`")]]
   const ::std::map<::std::int16_t, ::std::int64_t>& get_field_id_to_size() const&;
+
   /** Glean { "field": "field_id_to_size" } */
   [[deprecated("Use `FOO.field_id_to_size().value();` instead of `FOO.get_field_id_to_size();`")]]
   ::std::map<::std::int16_t, ::std::int64_t> get_field_id_to_size() &&;

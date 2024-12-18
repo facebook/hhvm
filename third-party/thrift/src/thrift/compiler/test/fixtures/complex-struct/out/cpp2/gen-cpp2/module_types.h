@@ -1243,9 +1243,11 @@ class MyStructMapFloatThrowExp final  {
     myLongField_ref() = myLongField_;
     return __fbthrift_field_myLongField;
   }
+
   /** Glean { "field": "mapListOfFloats" } */
   [[deprecated("Use `FOO.mapListOfFloats().value();` instead of `FOO.get_mapListOfFloats();`")]]
   const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>>& get_mapListOfFloats() const&;
+
   /** Glean { "field": "mapListOfFloats" } */
   [[deprecated("Use `FOO.mapListOfFloats().value();` instead of `FOO.get_mapListOfFloats();`")]]
   ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::floatTypedef>>> get_mapListOfFloats() &&;
@@ -2948,9 +2950,11 @@ class MyStruct final  {
     MyStringField_ref() = std::forward<T_MyStruct_MyStringField_struct_setter>(MyStringField_);
     return __fbthrift_field_MyStringField;
   }
+
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   const ::cpp2::MyDataItem& get_MyDataField() const&;
+
   /** Glean { "field": "MyDataField" } */
   [[deprecated("Use `FOO.MyDataField().value();` instead of `FOO.get_MyDataField();`")]]
   ::cpp2::MyDataItem get_MyDataField() &&;
@@ -3040,9 +3044,11 @@ class MyStruct final  {
     MyDoubleField_ref() = MyDoubleField_;
     return __fbthrift_field_MyDoubleField;
   }
+
   /** Glean { "field": "lDouble" } */
   [[deprecated("Use `FOO.lDouble().value();` instead of `FOO.get_lDouble();`")]]
   const ::std::vector<double>& get_lDouble() const&;
+
   /** Glean { "field": "lDouble" } */
   [[deprecated("Use `FOO.lDouble().value();` instead of `FOO.get_lDouble();`")]]
   ::std::vector<double> get_lDouble() &&;
@@ -3054,9 +3060,11 @@ class MyStruct final  {
     lDouble_ref() = std::forward<T_MyStruct_lDouble_struct_setter>(lDouble_);
     return __fbthrift_field_lDouble;
   }
+
   /** Glean { "field": "lShort" } */
   [[deprecated("Use `FOO.lShort().value();` instead of `FOO.get_lShort();`")]]
   const ::std::vector<::std::int16_t>& get_lShort() const&;
+
   /** Glean { "field": "lShort" } */
   [[deprecated("Use `FOO.lShort().value();` instead of `FOO.get_lShort();`")]]
   ::std::vector<::std::int16_t> get_lShort() &&;
@@ -3068,9 +3076,11 @@ class MyStruct final  {
     lShort_ref() = std::forward<T_MyStruct_lShort_struct_setter>(lShort_);
     return __fbthrift_field_lShort;
   }
+
   /** Glean { "field": "lInteger" } */
   [[deprecated("Use `FOO.lInteger().value();` instead of `FOO.get_lInteger();`")]]
   const ::std::vector<::std::int32_t>& get_lInteger() const&;
+
   /** Glean { "field": "lInteger" } */
   [[deprecated("Use `FOO.lInteger().value();` instead of `FOO.get_lInteger();`")]]
   ::std::vector<::std::int32_t> get_lInteger() &&;
@@ -3082,9 +3092,11 @@ class MyStruct final  {
     lInteger_ref() = std::forward<T_MyStruct_lInteger_struct_setter>(lInteger_);
     return __fbthrift_field_lInteger;
   }
+
   /** Glean { "field": "lLong" } */
   [[deprecated("Use `FOO.lLong().value();` instead of `FOO.get_lLong();`")]]
   const ::std::vector<::std::int64_t>& get_lLong() const&;
+
   /** Glean { "field": "lLong" } */
   [[deprecated("Use `FOO.lLong().value();` instead of `FOO.get_lLong();`")]]
   ::std::vector<::std::int64_t> get_lLong() &&;
@@ -3096,9 +3108,11 @@ class MyStruct final  {
     lLong_ref() = std::forward<T_MyStruct_lLong_struct_setter>(lLong_);
     return __fbthrift_field_lLong;
   }
+
   /** Glean { "field": "lString" } */
   [[deprecated("Use `FOO.lString().value();` instead of `FOO.get_lString();`")]]
   const ::std::vector<::std::string>& get_lString() const&;
+
   /** Glean { "field": "lString" } */
   [[deprecated("Use `FOO.lString().value();` instead of `FOO.get_lString();`")]]
   ::std::vector<::std::string> get_lString() &&;
@@ -3110,9 +3124,11 @@ class MyStruct final  {
     lString_ref() = std::forward<T_MyStruct_lString_struct_setter>(lString_);
     return __fbthrift_field_lString;
   }
+
   /** Glean { "field": "lBool" } */
   [[deprecated("Use `FOO.lBool().value();` instead of `FOO.get_lBool();`")]]
   const ::std::vector<bool>& get_lBool() const&;
+
   /** Glean { "field": "lBool" } */
   [[deprecated("Use `FOO.lBool().value();` instead of `FOO.get_lBool();`")]]
   ::std::vector<bool> get_lBool() &&;
@@ -3124,9 +3140,11 @@ class MyStruct final  {
     lBool_ref() = std::forward<T_MyStruct_lBool_struct_setter>(lBool_);
     return __fbthrift_field_lBool;
   }
+
   /** Glean { "field": "lByte" } */
   [[deprecated("Use `FOO.lByte().value();` instead of `FOO.get_lByte();`")]]
   const ::std::vector<::std::int8_t>& get_lByte() const&;
+
   /** Glean { "field": "lByte" } */
   [[deprecated("Use `FOO.lByte().value();` instead of `FOO.get_lByte();`")]]
   ::std::vector<::std::int8_t> get_lByte() &&;
@@ -3138,9 +3156,11 @@ class MyStruct final  {
     lByte_ref() = std::forward<T_MyStruct_lByte_struct_setter>(lByte_);
     return __fbthrift_field_lByte;
   }
+
   /** Glean { "field": "mShortString" } */
   [[deprecated("Use `FOO.mShortString().value();` instead of `FOO.get_mShortString();`")]]
   const ::std::map<::std::int16_t, ::std::string>& get_mShortString() const&;
+
   /** Glean { "field": "mShortString" } */
   [[deprecated("Use `FOO.mShortString().value();` instead of `FOO.get_mShortString();`")]]
   ::std::map<::std::int16_t, ::std::string> get_mShortString() &&;
@@ -3152,9 +3172,11 @@ class MyStruct final  {
     mShortString_ref() = std::forward<T_MyStruct_mShortString_struct_setter>(mShortString_);
     return __fbthrift_field_mShortString;
   }
+
   /** Glean { "field": "mIntegerString" } */
   [[deprecated("Use `FOO.mIntegerString().value();` instead of `FOO.get_mIntegerString();`")]]
   const ::std::map<::std::int32_t, ::std::string>& get_mIntegerString() const&;
+
   /** Glean { "field": "mIntegerString" } */
   [[deprecated("Use `FOO.mIntegerString().value();` instead of `FOO.get_mIntegerString();`")]]
   ::std::map<::std::int32_t, ::std::string> get_mIntegerString() &&;
@@ -3166,9 +3188,11 @@ class MyStruct final  {
     mIntegerString_ref() = std::forward<T_MyStruct_mIntegerString_struct_setter>(mIntegerString_);
     return __fbthrift_field_mIntegerString;
   }
+
   /** Glean { "field": "mStringMyStruct" } */
   [[deprecated("Use `FOO.mStringMyStruct().value();` instead of `FOO.get_mStringMyStruct();`")]]
   const ::std::map<::std::string, ::cpp2::MyStruct>& get_mStringMyStruct() const&;
+
   /** Glean { "field": "mStringMyStruct" } */
   [[deprecated("Use `FOO.mStringMyStruct().value();` instead of `FOO.get_mStringMyStruct();`")]]
   ::std::map<::std::string, ::cpp2::MyStruct> get_mStringMyStruct() &&;
@@ -3180,9 +3204,11 @@ class MyStruct final  {
     mStringMyStruct_ref() = std::forward<T_MyStruct_mStringMyStruct_struct_setter>(mStringMyStruct_);
     return __fbthrift_field_mStringMyStruct;
   }
+
   /** Glean { "field": "mStringBool" } */
   [[deprecated("Use `FOO.mStringBool().value();` instead of `FOO.get_mStringBool();`")]]
   const ::std::map<::std::string, bool>& get_mStringBool() const&;
+
   /** Glean { "field": "mStringBool" } */
   [[deprecated("Use `FOO.mStringBool().value();` instead of `FOO.get_mStringBool();`")]]
   ::std::map<::std::string, bool> get_mStringBool() &&;
@@ -3194,9 +3220,11 @@ class MyStruct final  {
     mStringBool_ref() = std::forward<T_MyStruct_mStringBool_struct_setter>(mStringBool_);
     return __fbthrift_field_mStringBool;
   }
+
   /** Glean { "field": "mIntegerInteger" } */
   [[deprecated("Use `FOO.mIntegerInteger().value();` instead of `FOO.get_mIntegerInteger();`")]]
   const ::std::map<::std::int32_t, ::std::int32_t>& get_mIntegerInteger() const&;
+
   /** Glean { "field": "mIntegerInteger" } */
   [[deprecated("Use `FOO.mIntegerInteger().value();` instead of `FOO.get_mIntegerInteger();`")]]
   ::std::map<::std::int32_t, ::std::int32_t> get_mIntegerInteger() &&;
@@ -3208,9 +3236,11 @@ class MyStruct final  {
     mIntegerInteger_ref() = std::forward<T_MyStruct_mIntegerInteger_struct_setter>(mIntegerInteger_);
     return __fbthrift_field_mIntegerInteger;
   }
+
   /** Glean { "field": "mIntegerBool" } */
   [[deprecated("Use `FOO.mIntegerBool().value();` instead of `FOO.get_mIntegerBool();`")]]
   const ::std::map<::std::int32_t, bool>& get_mIntegerBool() const&;
+
   /** Glean { "field": "mIntegerBool" } */
   [[deprecated("Use `FOO.mIntegerBool().value();` instead of `FOO.get_mIntegerBool();`")]]
   ::std::map<::std::int32_t, bool> get_mIntegerBool() &&;
@@ -3222,9 +3252,11 @@ class MyStruct final  {
     mIntegerBool_ref() = std::forward<T_MyStruct_mIntegerBool_struct_setter>(mIntegerBool_);
     return __fbthrift_field_mIntegerBool;
   }
+
   /** Glean { "field": "sShort" } */
   [[deprecated("Use `FOO.sShort().value();` instead of `FOO.get_sShort();`")]]
   const ::std::set<::std::int16_t>& get_sShort() const&;
+
   /** Glean { "field": "sShort" } */
   [[deprecated("Use `FOO.sShort().value();` instead of `FOO.get_sShort();`")]]
   ::std::set<::std::int16_t> get_sShort() &&;
@@ -3236,9 +3268,11 @@ class MyStruct final  {
     sShort_ref() = std::forward<T_MyStruct_sShort_struct_setter>(sShort_);
     return __fbthrift_field_sShort;
   }
+
   /** Glean { "field": "sMyStruct" } */
   [[deprecated("Use `FOO.sMyStruct().value();` instead of `FOO.get_sMyStruct();`")]]
   const ::std::set<::cpp2::MyStruct>& get_sMyStruct() const&;
+
   /** Glean { "field": "sMyStruct" } */
   [[deprecated("Use `FOO.sMyStruct().value();` instead of `FOO.get_sMyStruct();`")]]
   ::std::set<::cpp2::MyStruct> get_sMyStruct() &&;
@@ -3250,9 +3284,11 @@ class MyStruct final  {
     sMyStruct_ref() = std::forward<T_MyStruct_sMyStruct_struct_setter>(sMyStruct_);
     return __fbthrift_field_sMyStruct;
   }
+
   /** Glean { "field": "sLong" } */
   [[deprecated("Use `FOO.sLong().value();` instead of `FOO.get_sLong();`")]]
   const ::std::set<::std::int64_t>& get_sLong() const&;
+
   /** Glean { "field": "sLong" } */
   [[deprecated("Use `FOO.sLong().value();` instead of `FOO.get_sLong();`")]]
   ::std::set<::std::int64_t> get_sLong() &&;
@@ -3264,9 +3300,11 @@ class MyStruct final  {
     sLong_ref() = std::forward<T_MyStruct_sLong_struct_setter>(sLong_);
     return __fbthrift_field_sLong;
   }
+
   /** Glean { "field": "sString" } */
   [[deprecated("Use `FOO.sString().value();` instead of `FOO.get_sString();`")]]
   const ::std::set<::std::string>& get_sString() const&;
+
   /** Glean { "field": "sString" } */
   [[deprecated("Use `FOO.sString().value();` instead of `FOO.get_sString();`")]]
   ::std::set<::std::string> get_sString() &&;
@@ -3278,9 +3316,11 @@ class MyStruct final  {
     sString_ref() = std::forward<T_MyStruct_sString_struct_setter>(sString_);
     return __fbthrift_field_sString;
   }
+
   /** Glean { "field": "sByte" } */
   [[deprecated("Use `FOO.sByte().value();` instead of `FOO.get_sByte();`")]]
   const ::std::set<::std::int8_t>& get_sByte() const&;
+
   /** Glean { "field": "sByte" } */
   [[deprecated("Use `FOO.sByte().value();` instead of `FOO.get_sByte();`")]]
   ::std::set<::std::int8_t> get_sByte() &&;
@@ -3292,9 +3332,11 @@ class MyStruct final  {
     sByte_ref() = std::forward<T_MyStruct_sByte_struct_setter>(sByte_);
     return __fbthrift_field_sByte;
   }
+
   /** Glean { "field": "mListList" } */
   [[deprecated("Use `FOO.mListList().value();` instead of `FOO.get_mListList();`")]]
   const ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>>& get_mListList() const&;
+
   /** Glean { "field": "mListList" } */
   [[deprecated("Use `FOO.mListList().value();` instead of `FOO.get_mListList();`")]]
   ::std::map<::std::vector<::std::int32_t>, ::std::vector<::std::int32_t>> get_mListList() &&;
@@ -4585,9 +4627,11 @@ class ComplexNestedStruct final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> mapKeyListValSet() && {
     return {static_cast<T&&>(this->__fbthrift_field_mapKeyListValSet), __isset.at(17), __isset.bit(17)};
   }
+
   /** Glean { "field": "setOfSetOfInt" } */
   [[deprecated("Use `FOO.setOfSetOfInt().value();` instead of `FOO.get_setOfSetOfInt();`")]]
   const ::std::set<::std::set<::std::int32_t>>& get_setOfSetOfInt() const&;
+
   /** Glean { "field": "setOfSetOfInt" } */
   [[deprecated("Use `FOO.setOfSetOfInt().value();` instead of `FOO.get_setOfSetOfInt();`")]]
   ::std::set<::std::set<::std::int32_t>> get_setOfSetOfInt() &&;
@@ -4599,9 +4643,11 @@ class ComplexNestedStruct final  {
     setOfSetOfInt_ref() = std::forward<T_ComplexNestedStruct_setOfSetOfInt_struct_setter>(setOfSetOfInt_);
     return __fbthrift_field_setOfSetOfInt;
   }
+
   /** Glean { "field": "listofListOfListOfListOfEnum" } */
   [[deprecated("Use `FOO.listofListOfListOfListOfEnum().value();` instead of `FOO.get_listofListOfListOfListOfEnum();`")]]
   const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& get_listofListOfListOfListOfEnum() const&;
+
   /** Glean { "field": "listofListOfListOfListOfEnum" } */
   [[deprecated("Use `FOO.listofListOfListOfListOfEnum().value();` instead of `FOO.get_listofListOfListOfListOfEnum();`")]]
   ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>> get_listofListOfListOfListOfEnum() &&;
@@ -4613,9 +4659,11 @@ class ComplexNestedStruct final  {
     listofListOfListOfListOfEnum_ref() = std::forward<T_ComplexNestedStruct_listofListOfListOfListOfEnum_struct_setter>(listofListOfListOfListOfEnum_);
     return __fbthrift_field_listofListOfListOfListOfEnum;
   }
+
   /** Glean { "field": "listOfListOfMyStruct" } */
   [[deprecated("Use `FOO.listOfListOfMyStruct().value();` instead of `FOO.get_listOfListOfMyStruct();`")]]
   const ::std::vector<::std::vector<::cpp2::MyStruct>>& get_listOfListOfMyStruct() const&;
+
   /** Glean { "field": "listOfListOfMyStruct" } */
   [[deprecated("Use `FOO.listOfListOfMyStruct().value();` instead of `FOO.get_listOfListOfMyStruct();`")]]
   ::std::vector<::std::vector<::cpp2::MyStruct>> get_listOfListOfMyStruct() &&;
@@ -4627,9 +4675,11 @@ class ComplexNestedStruct final  {
     listOfListOfMyStruct_ref() = std::forward<T_ComplexNestedStruct_listOfListOfMyStruct_struct_setter>(listOfListOfMyStruct_);
     return __fbthrift_field_listOfListOfMyStruct;
   }
+
   /** Glean { "field": "setOfListOfListOfLong" } */
   [[deprecated("Use `FOO.setOfListOfListOfLong().value();` instead of `FOO.get_setOfListOfListOfLong();`")]]
   const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& get_setOfListOfListOfLong() const&;
+
   /** Glean { "field": "setOfListOfListOfLong" } */
   [[deprecated("Use `FOO.setOfListOfListOfLong().value();` instead of `FOO.get_setOfListOfListOfLong();`")]]
   ::std::set<::std::vector<::std::vector<::std::int64_t>>> get_setOfListOfListOfLong() &&;
@@ -4641,9 +4691,11 @@ class ComplexNestedStruct final  {
     setOfListOfListOfLong_ref() = std::forward<T_ComplexNestedStruct_setOfListOfListOfLong_struct_setter>(setOfListOfListOfLong_);
     return __fbthrift_field_setOfListOfListOfLong;
   }
+
   /** Glean { "field": "setOfSetOfsetOfLong" } */
   [[deprecated("Use `FOO.setOfSetOfsetOfLong().value();` instead of `FOO.get_setOfSetOfsetOfLong();`")]]
   const ::std::set<::std::set<::std::set<::std::int64_t>>>& get_setOfSetOfsetOfLong() const&;
+
   /** Glean { "field": "setOfSetOfsetOfLong" } */
   [[deprecated("Use `FOO.setOfSetOfsetOfLong().value();` instead of `FOO.get_setOfSetOfsetOfLong();`")]]
   ::std::set<::std::set<::std::set<::std::int64_t>>> get_setOfSetOfsetOfLong() &&;
@@ -4655,9 +4707,11 @@ class ComplexNestedStruct final  {
     setOfSetOfsetOfLong_ref() = std::forward<T_ComplexNestedStruct_setOfSetOfsetOfLong_struct_setter>(setOfSetOfsetOfLong_);
     return __fbthrift_field_setOfSetOfsetOfLong;
   }
+
   /** Glean { "field": "mapStructListOfListOfLong" } */
   [[deprecated("Use `FOO.mapStructListOfListOfLong().value();` instead of `FOO.get_mapStructListOfListOfLong();`")]]
   const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& get_mapStructListOfListOfLong() const&;
+
   /** Glean { "field": "mapStructListOfListOfLong" } */
   [[deprecated("Use `FOO.mapStructListOfListOfLong().value();` instead of `FOO.get_mapStructListOfListOfLong();`")]]
   ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>> get_mapStructListOfListOfLong() &&;
@@ -4669,9 +4723,11 @@ class ComplexNestedStruct final  {
     mapStructListOfListOfLong_ref() = std::forward<T_ComplexNestedStruct_mapStructListOfListOfLong_struct_setter>(mapStructListOfListOfLong_);
     return __fbthrift_field_mapStructListOfListOfLong;
   }
+
   /** Glean { "field": "mKeyStructValInt" } */
   [[deprecated("Use `FOO.mKeyStructValInt().value();` instead of `FOO.get_mKeyStructValInt();`")]]
   const ::std::map<::cpp2::MyStruct, ::std::int32_t>& get_mKeyStructValInt() const&;
+
   /** Glean { "field": "mKeyStructValInt" } */
   [[deprecated("Use `FOO.mKeyStructValInt().value();` instead of `FOO.get_mKeyStructValInt();`")]]
   ::std::map<::cpp2::MyStruct, ::std::int32_t> get_mKeyStructValInt() &&;
@@ -4683,9 +4739,11 @@ class ComplexNestedStruct final  {
     mKeyStructValInt_ref() = std::forward<T_ComplexNestedStruct_mKeyStructValInt_struct_setter>(mKeyStructValInt_);
     return __fbthrift_field_mKeyStructValInt;
   }
+
   /** Glean { "field": "listOfMapKeyIntValInt" } */
   [[deprecated("Use `FOO.listOfMapKeyIntValInt().value();` instead of `FOO.get_listOfMapKeyIntValInt();`")]]
   const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& get_listOfMapKeyIntValInt() const&;
+
   /** Glean { "field": "listOfMapKeyIntValInt" } */
   [[deprecated("Use `FOO.listOfMapKeyIntValInt().value();` instead of `FOO.get_listOfMapKeyIntValInt();`")]]
   ::std::vector<::std::map<::std::int32_t, ::std::int32_t>> get_listOfMapKeyIntValInt() &&;
@@ -4697,9 +4755,11 @@ class ComplexNestedStruct final  {
     listOfMapKeyIntValInt_ref() = std::forward<T_ComplexNestedStruct_listOfMapKeyIntValInt_struct_setter>(listOfMapKeyIntValInt_);
     return __fbthrift_field_listOfMapKeyIntValInt;
   }
+
   /** Glean { "field": "listOfMapKeyStrValList" } */
   [[deprecated("Use `FOO.listOfMapKeyStrValList().value();` instead of `FOO.get_listOfMapKeyStrValList();`")]]
   const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& get_listOfMapKeyStrValList() const&;
+
   /** Glean { "field": "listOfMapKeyStrValList" } */
   [[deprecated("Use `FOO.listOfMapKeyStrValList().value();` instead of `FOO.get_listOfMapKeyStrValList();`")]]
   ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>> get_listOfMapKeyStrValList() &&;
@@ -4711,9 +4771,11 @@ class ComplexNestedStruct final  {
     listOfMapKeyStrValList_ref() = std::forward<T_ComplexNestedStruct_listOfMapKeyStrValList_struct_setter>(listOfMapKeyStrValList_);
     return __fbthrift_field_listOfMapKeyStrValList;
   }
+
   /** Glean { "field": "mapKeySetValLong" } */
   [[deprecated("Use `FOO.mapKeySetValLong().value();` instead of `FOO.get_mapKeySetValLong();`")]]
   const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& get_mapKeySetValLong() const&;
+
   /** Glean { "field": "mapKeySetValLong" } */
   [[deprecated("Use `FOO.mapKeySetValLong().value();` instead of `FOO.get_mapKeySetValLong();`")]]
   ::std::map<::std::set<::std::int32_t>, ::std::int64_t> get_mapKeySetValLong() &&;
@@ -4725,9 +4787,11 @@ class ComplexNestedStruct final  {
     mapKeySetValLong_ref() = std::forward<T_ComplexNestedStruct_mapKeySetValLong_struct_setter>(mapKeySetValLong_);
     return __fbthrift_field_mapKeySetValLong;
   }
+
   /** Glean { "field": "mapKeyListValLong" } */
   [[deprecated("Use `FOO.mapKeyListValLong().value();` instead of `FOO.get_mapKeyListValLong();`")]]
   const ::std::map<::std::vector<::std::string>, ::std::int32_t>& get_mapKeyListValLong() const&;
+
   /** Glean { "field": "mapKeyListValLong" } */
   [[deprecated("Use `FOO.mapKeyListValLong().value();` instead of `FOO.get_mapKeyListValLong();`")]]
   ::std::map<::std::vector<::std::string>, ::std::int32_t> get_mapKeyListValLong() &&;
@@ -4739,9 +4803,11 @@ class ComplexNestedStruct final  {
     mapKeyListValLong_ref() = std::forward<T_ComplexNestedStruct_mapKeyListValLong_struct_setter>(mapKeyListValLong_);
     return __fbthrift_field_mapKeyListValLong;
   }
+
   /** Glean { "field": "mapKeyMapValMap" } */
   [[deprecated("Use `FOO.mapKeyMapValMap().value();` instead of `FOO.get_mapKeyMapValMap();`")]]
   const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& get_mapKeyMapValMap() const&;
+
   /** Glean { "field": "mapKeyMapValMap" } */
   [[deprecated("Use `FOO.mapKeyMapValMap().value();` instead of `FOO.get_mapKeyMapValMap();`")]]
   ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>> get_mapKeyMapValMap() &&;
@@ -4753,9 +4819,11 @@ class ComplexNestedStruct final  {
     mapKeyMapValMap_ref() = std::forward<T_ComplexNestedStruct_mapKeyMapValMap_struct_setter>(mapKeyMapValMap_);
     return __fbthrift_field_mapKeyMapValMap;
   }
+
   /** Glean { "field": "mapKeySetValMap" } */
   [[deprecated("Use `FOO.mapKeySetValMap().value();` instead of `FOO.get_mapKeySetValMap();`")]]
   const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& get_mapKeySetValMap() const&;
+
   /** Glean { "field": "mapKeySetValMap" } */
   [[deprecated("Use `FOO.mapKeySetValMap().value();` instead of `FOO.get_mapKeySetValMap();`")]]
   ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> get_mapKeySetValMap() &&;
@@ -4767,9 +4835,11 @@ class ComplexNestedStruct final  {
     mapKeySetValMap_ref() = std::forward<T_ComplexNestedStruct_mapKeySetValMap_struct_setter>(mapKeySetValMap_);
     return __fbthrift_field_mapKeySetValMap;
   }
+
   /** Glean { "field": "NestedMaps" } */
   [[deprecated("Use `FOO.NestedMaps().value();` instead of `FOO.get_NestedMaps();`")]]
   const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& get_NestedMaps() const&;
+
   /** Glean { "field": "NestedMaps" } */
   [[deprecated("Use `FOO.NestedMaps().value();` instead of `FOO.get_NestedMaps();`")]]
   ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>> get_NestedMaps() &&;
@@ -4781,9 +4851,11 @@ class ComplexNestedStruct final  {
     NestedMaps_ref() = std::forward<T_ComplexNestedStruct_NestedMaps_struct_setter>(NestedMaps_);
     return __fbthrift_field_NestedMaps;
   }
+
   /** Glean { "field": "mapKeyIntValList" } */
   [[deprecated("Use `FOO.mapKeyIntValList().value();` instead of `FOO.get_mapKeyIntValList();`")]]
   const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& get_mapKeyIntValList() const&;
+
   /** Glean { "field": "mapKeyIntValList" } */
   [[deprecated("Use `FOO.mapKeyIntValList().value();` instead of `FOO.get_mapKeyIntValList();`")]]
   ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>> get_mapKeyIntValList() &&;
@@ -4795,9 +4867,11 @@ class ComplexNestedStruct final  {
     mapKeyIntValList_ref() = std::forward<T_ComplexNestedStruct_mapKeyIntValList_struct_setter>(mapKeyIntValList_);
     return __fbthrift_field_mapKeyIntValList;
   }
+
   /** Glean { "field": "mapKeyIntValSet" } */
   [[deprecated("Use `FOO.mapKeyIntValSet().value();` instead of `FOO.get_mapKeyIntValSet();`")]]
   const ::std::map<::std::int32_t, ::std::set<bool>>& get_mapKeyIntValSet() const&;
+
   /** Glean { "field": "mapKeyIntValSet" } */
   [[deprecated("Use `FOO.mapKeyIntValSet().value();` instead of `FOO.get_mapKeyIntValSet();`")]]
   ::std::map<::std::int32_t, ::std::set<bool>> get_mapKeyIntValSet() &&;
@@ -4809,9 +4883,11 @@ class ComplexNestedStruct final  {
     mapKeyIntValSet_ref() = std::forward<T_ComplexNestedStruct_mapKeyIntValSet_struct_setter>(mapKeyIntValSet_);
     return __fbthrift_field_mapKeyIntValSet;
   }
+
   /** Glean { "field": "mapKeySetValInt" } */
   [[deprecated("Use `FOO.mapKeySetValInt().value();` instead of `FOO.get_mapKeySetValInt();`")]]
   const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& get_mapKeySetValInt() const&;
+
   /** Glean { "field": "mapKeySetValInt" } */
   [[deprecated("Use `FOO.mapKeySetValInt().value();` instead of `FOO.get_mapKeySetValInt();`")]]
   ::std::map<::std::set<bool>, ::cpp2::MyEnum> get_mapKeySetValInt() &&;
@@ -4823,9 +4899,11 @@ class ComplexNestedStruct final  {
     mapKeySetValInt_ref() = std::forward<T_ComplexNestedStruct_mapKeySetValInt_struct_setter>(mapKeySetValInt_);
     return __fbthrift_field_mapKeySetValInt;
   }
+
   /** Glean { "field": "mapKeyListValSet" } */
   [[deprecated("Use `FOO.mapKeyListValSet().value();` instead of `FOO.get_mapKeyListValSet();`")]]
   const ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& get_mapKeyListValSet() const&;
+
   /** Glean { "field": "mapKeyListValSet" } */
   [[deprecated("Use `FOO.mapKeyListValSet().value();` instead of `FOO.get_mapKeyListValSet();`")]]
   ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>> get_mapKeyListValSet() &&;
@@ -6837,9 +6915,11 @@ class defaultStruct final  {
     myDouble_ref() = myDouble_;
     return __fbthrift_field_myDouble;
   }
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   const ::std::map<::std::int32_t, ::std::string>& get_field3() const&;
+
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::map<::std::int32_t, ::std::string> get_field3() &&;
@@ -6851,9 +6931,11 @@ class defaultStruct final  {
     field3_ref() = std::forward<T_defaultStruct_field3_struct_setter>(field3_);
     return __fbthrift_field_field3;
   }
+
   /** Glean { "field": "myList" } */
   [[deprecated("Use `FOO.myList().value();` instead of `FOO.get_myList();`")]]
   const ::std::vector<::cpp2::MyEnum>& get_myList() const&;
+
   /** Glean { "field": "myList" } */
   [[deprecated("Use `FOO.myList().value();` instead of `FOO.get_myList();`")]]
   ::std::vector<::cpp2::MyEnum> get_myList() &&;
@@ -6865,9 +6947,11 @@ class defaultStruct final  {
     myList_ref() = std::forward<T_defaultStruct_myList_struct_setter>(myList_);
     return __fbthrift_field_myList;
   }
+
   /** Glean { "field": "mySet" } */
   [[deprecated("Use `FOO.mySet().value();` instead of `FOO.get_mySet();`")]]
   const ::std::set<::std::string>& get_mySet() const&;
+
   /** Glean { "field": "mySet" } */
   [[deprecated("Use `FOO.mySet().value();` instead of `FOO.get_mySet();`")]]
   ::std::set<::std::string> get_mySet() &&;
@@ -6879,9 +6963,11 @@ class defaultStruct final  {
     mySet_ref() = std::forward<T_defaultStruct_mySet_struct_setter>(mySet_);
     return __fbthrift_field_mySet;
   }
+
   /** Glean { "field": "simpleStruct" } */
   [[deprecated("Use `FOO.simpleStruct().value();` instead of `FOO.get_simpleStruct();`")]]
   const ::cpp2::SimpleStruct& get_simpleStruct() const&;
+
   /** Glean { "field": "simpleStruct" } */
   [[deprecated("Use `FOO.simpleStruct().value();` instead of `FOO.get_simpleStruct();`")]]
   ::cpp2::SimpleStruct get_simpleStruct() &&;
@@ -6893,9 +6979,11 @@ class defaultStruct final  {
     simpleStruct_ref() = std::forward<T_defaultStruct_simpleStruct_struct_setter>(simpleStruct_);
     return __fbthrift_field_simpleStruct;
   }
+
   /** Glean { "field": "listStructDFset" } */
   [[deprecated("Use `FOO.listStructDFset().value();` instead of `FOO.get_listStructDFset();`")]]
   const ::std::vector<::cpp2::SimpleStruct>& get_listStructDFset() const&;
+
   /** Glean { "field": "listStructDFset" } */
   [[deprecated("Use `FOO.listStructDFset().value();` instead of `FOO.get_listStructDFset();`")]]
   ::std::vector<::cpp2::SimpleStruct> get_listStructDFset() &&;
@@ -6907,9 +6995,11 @@ class defaultStruct final  {
     listStructDFset_ref() = std::forward<T_defaultStruct_listStructDFset_struct_setter>(listStructDFset_);
     return __fbthrift_field_listStructDFset;
   }
+
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value();` instead of `FOO.get_myUnion();`")]]
   const ::cpp2::MyUnion& get_myUnion() const&;
+
   /** Glean { "field": "myUnion" } */
   [[deprecated("Use `FOO.myUnion().value();` instead of `FOO.get_myUnion();`")]]
   ::cpp2::MyUnion get_myUnion() &&;
@@ -6921,9 +7011,11 @@ class defaultStruct final  {
     myUnion_ref() = std::forward<T_defaultStruct_myUnion_struct_setter>(myUnion_);
     return __fbthrift_field_myUnion;
   }
+
   /** Glean { "field": "listUnionDFset" } */
   [[deprecated("Use `FOO.listUnionDFset().value();` instead of `FOO.get_listUnionDFset();`")]]
   const ::std::vector<::cpp2::MyUnion>& get_listUnionDFset() const&;
+
   /** Glean { "field": "listUnionDFset" } */
   [[deprecated("Use `FOO.listUnionDFset().value();` instead of `FOO.get_listUnionDFset();`")]]
   ::std::vector<::cpp2::MyUnion> get_listUnionDFset() &&;
@@ -6935,9 +7027,11 @@ class defaultStruct final  {
     listUnionDFset_ref() = std::forward<T_defaultStruct_listUnionDFset_struct_setter>(listUnionDFset_);
     return __fbthrift_field_listUnionDFset;
   }
+
   /** Glean { "field": "mapNestlistStructDfSet" } */
   [[deprecated("Use `FOO.mapNestlistStructDfSet().value();` instead of `FOO.get_mapNestlistStructDfSet();`")]]
   const ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>>& get_mapNestlistStructDfSet() const&;
+
   /** Glean { "field": "mapNestlistStructDfSet" } */
   [[deprecated("Use `FOO.mapNestlistStructDfSet().value();` instead of `FOO.get_mapNestlistStructDfSet();`")]]
   ::std::map<::std::int32_t, ::std::vector<::cpp2::SimpleStruct>> get_mapNestlistStructDfSet() &&;
@@ -6949,9 +7043,11 @@ class defaultStruct final  {
     mapNestlistStructDfSet_ref() = std::forward<T_defaultStruct_mapNestlistStructDfSet_struct_setter>(mapNestlistStructDfSet_);
     return __fbthrift_field_mapNestlistStructDfSet;
   }
+
   /** Glean { "field": "mapJavaTypeDFset" } */
   [[deprecated("Use `FOO.mapJavaTypeDFset().value();` instead of `FOO.get_mapJavaTypeDFset();`")]]
   const ::cpp2::map_i64_string_5732& get_mapJavaTypeDFset() const&;
+
   /** Glean { "field": "mapJavaTypeDFset" } */
   [[deprecated("Use `FOO.mapJavaTypeDFset().value();` instead of `FOO.get_mapJavaTypeDFset();`")]]
   ::cpp2::map_i64_string_5732 get_mapJavaTypeDFset() &&;
@@ -6963,9 +7059,11 @@ class defaultStruct final  {
     mapJavaTypeDFset_ref() = std::forward<T_defaultStruct_mapJavaTypeDFset_struct_setter>(mapJavaTypeDFset_);
     return __fbthrift_field_mapJavaTypeDFset;
   }
+
   /** Glean { "field": "emptyMap" } */
   [[deprecated("Use `FOO.emptyMap().value();` instead of `FOO.get_emptyMap();`")]]
   const ::std::map<::std::int64_t, ::std::int32_t>& get_emptyMap() const&;
+
   /** Glean { "field": "emptyMap" } */
   [[deprecated("Use `FOO.emptyMap().value();` instead of `FOO.get_emptyMap();`")]]
   ::std::map<::std::int64_t, ::std::int32_t> get_emptyMap() &&;
@@ -6977,9 +7075,11 @@ class defaultStruct final  {
     emptyMap_ref() = std::forward<T_defaultStruct_emptyMap_struct_setter>(emptyMap_);
     return __fbthrift_field_emptyMap;
   }
+
   /** Glean { "field": "enumMapDFset" } */
   [[deprecated("Use `FOO.enumMapDFset().value();` instead of `FOO.get_enumMapDFset();`")]]
   const ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>>& get_enumMapDFset() const&;
+
   /** Glean { "field": "enumMapDFset" } */
   [[deprecated("Use `FOO.enumMapDFset().value();` instead of `FOO.get_enumMapDFset();`")]]
   ::std::map<::std::string, ::std::map<::std::int32_t, ::cpp2::MyEnum>> get_enumMapDFset() &&;
@@ -7628,9 +7728,11 @@ class MyStructTypeDef final  {
     myStringTypedef_ref() = std::forward<T_MyStructTypeDef_myStringTypedef_struct_setter>(myStringTypedef_);
     return __fbthrift_field_myStringTypedef;
   }
+
   /** Glean { "field": "myMapField" } */
   [[deprecated("Use `FOO.myMapField().value();` instead of `FOO.get_myMapField();`")]]
   const ::std::map<::std::int16_t, ::std::string>& get_myMapField() const&;
+
   /** Glean { "field": "myMapField" } */
   [[deprecated("Use `FOO.myMapField().value();` instead of `FOO.get_myMapField();`")]]
   ::std::map<::std::int16_t, ::std::string> get_myMapField() &&;
@@ -7642,9 +7744,11 @@ class MyStructTypeDef final  {
     myMapField_ref() = std::forward<T_MyStructTypeDef_myMapField_struct_setter>(myMapField_);
     return __fbthrift_field_myMapField;
   }
+
   /** Glean { "field": "myMapTypedef" } */
   [[deprecated("Use `FOO.myMapTypedef().value();` instead of `FOO.get_myMapTypedef();`")]]
   const ::cpp2::mapTypedef& get_myMapTypedef() const&;
+
   /** Glean { "field": "myMapTypedef" } */
   [[deprecated("Use `FOO.myMapTypedef().value();` instead of `FOO.get_myMapTypedef();`")]]
   ::cpp2::mapTypedef get_myMapTypedef() &&;
@@ -7656,9 +7760,11 @@ class MyStructTypeDef final  {
     myMapTypedef_ref() = std::forward<T_MyStructTypeDef_myMapTypedef_struct_setter>(myMapTypedef_);
     return __fbthrift_field_myMapTypedef;
   }
+
   /** Glean { "field": "myListField" } */
   [[deprecated("Use `FOO.myListField().value();` instead of `FOO.get_myListField();`")]]
   const ::std::vector<double>& get_myListField() const&;
+
   /** Glean { "field": "myListField" } */
   [[deprecated("Use `FOO.myListField().value();` instead of `FOO.get_myListField();`")]]
   ::std::vector<double> get_myListField() &&;
@@ -7670,9 +7776,11 @@ class MyStructTypeDef final  {
     myListField_ref() = std::forward<T_MyStructTypeDef_myListField_struct_setter>(myListField_);
     return __fbthrift_field_myListField;
   }
+
   /** Glean { "field": "myListTypedef" } */
   [[deprecated("Use `FOO.myListTypedef().value();` instead of `FOO.get_myListTypedef();`")]]
   const ::cpp2::listTypedef& get_myListTypedef() const&;
+
   /** Glean { "field": "myListTypedef" } */
   [[deprecated("Use `FOO.myListTypedef().value();` instead of `FOO.get_myListTypedef();`")]]
   ::cpp2::listTypedef get_myListTypedef() &&;
@@ -7684,9 +7792,11 @@ class MyStructTypeDef final  {
     myListTypedef_ref() = std::forward<T_MyStructTypeDef_myListTypedef_struct_setter>(myListTypedef_);
     return __fbthrift_field_myListTypedef;
   }
+
   /** Glean { "field": "myMapListOfTypeDef" } */
   [[deprecated("Use `FOO.myMapListOfTypeDef().value();` instead of `FOO.get_myMapListOfTypeDef();`")]]
   const ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>>& get_myMapListOfTypeDef() const&;
+
   /** Glean { "field": "myMapListOfTypeDef" } */
   [[deprecated("Use `FOO.myMapListOfTypeDef().value();` instead of `FOO.get_myMapListOfTypeDef();`")]]
   ::std::map<::std::int16_t, ::std::vector<::cpp2::listTypedef>> get_myMapListOfTypeDef() &&;
@@ -8471,9 +8581,11 @@ class TypeRemapped final  {
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binaryTestBuffer() && {
     return {static_cast<T&&>(this->__fbthrift_field_binaryTestBuffer), __isset.at(3), __isset.bit(3)};
   }
+
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value();` instead of `FOO.get_lsMap();`")]]
   const ::cpp2::map_i64_string_5732& get_lsMap() const&;
+
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value();` instead of `FOO.get_lsMap();`")]]
   ::cpp2::map_i64_string_5732 get_lsMap() &&;
@@ -8485,9 +8597,11 @@ class TypeRemapped final  {
     lsMap_ref() = std::forward<T_TypeRemapped_lsMap_struct_setter>(lsMap_);
     return __fbthrift_field_lsMap;
   }
+
   /** Glean { "field": "ioMap" } */
   [[deprecated("Use `FOO.ioMap().value();` instead of `FOO.get_ioMap();`")]]
   const ::cpp2::map_i32_FMap_6797& get_ioMap() const&;
+
   /** Glean { "field": "ioMap" } */
   [[deprecated("Use `FOO.ioMap().value();` instead of `FOO.get_ioMap();`")]]
   ::cpp2::map_i32_FMap_6797 get_ioMap() &&;
@@ -9116,6 +9230,7 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
   ::std::string* get_message() & {
     return message_ref().has_value() ? std::addressof(__fbthrift_field_message) : nullptr;
   }
+
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string* get_message() && = delete;
@@ -9139,6 +9254,7 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
   ::std::int32_t* get_errorCode() & {
     return errorCode_ref().has_value() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
   }
+
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]
   ::std::int32_t* get_errorCode() && = delete;
@@ -9594,9 +9710,11 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
     message_ref() = std::forward<T_complexException_message_struct_setter>(message_);
     return __fbthrift_field_message;
   }
+
   /** Glean { "field": "listStrings" } */
   [[deprecated("Use `FOO.listStrings().value();` instead of `FOO.get_listStrings();`")]]
   const ::std::vector<::std::string>& get_listStrings() const&;
+
   /** Glean { "field": "listStrings" } */
   [[deprecated("Use `FOO.listStrings().value();` instead of `FOO.get_listStrings();`")]]
   ::std::vector<::std::string> get_listStrings() &&;
@@ -9621,12 +9739,15 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
     errorEnum_ref() = errorEnum_;
     return __fbthrift_field_errorEnum;
   }
+
   /** Glean { "field": "unionError" } */
   [[deprecated("Use `FOO.unionError().value();` instead of `FOO.get_unionError();`")]]
   const ::cpp2::MyUnion* get_unionError() const&;
+
   /** Glean { "field": "unionError" } */
   [[deprecated("Use `FOO.unionError().value();` instead of `FOO.get_unionError();`")]]
   ::cpp2::MyUnion* get_unionError() &;
+
   /** Glean { "field": "unionError" } */
   [[deprecated("Use `FOO.unionError().value();` instead of `FOO.get_unionError();`")]]
   ::cpp2::MyUnion* get_unionError() && = delete;
@@ -9638,9 +9759,11 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
     unionError_ref() = std::forward<T_complexException_unionError_struct_setter>(unionError_);
     return __fbthrift_field_unionError;
   }
+
   /** Glean { "field": "structError" } */
   [[deprecated("Use `FOO.structError().value();` instead of `FOO.get_structError();`")]]
   const ::cpp2::MyStruct& get_structError() const&;
+
   /** Glean { "field": "structError" } */
   [[deprecated("Use `FOO.structError().value();` instead of `FOO.get_structError();`")]]
   ::cpp2::MyStruct get_structError() &&;
@@ -9652,9 +9775,11 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
     structError_ref() = std::forward<T_complexException_structError_struct_setter>(structError_);
     return __fbthrift_field_structError;
   }
+
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value();` instead of `FOO.get_lsMap();`")]]
   const ::cpp2::map_i64_string_5732& get_lsMap() const&;
+
   /** Glean { "field": "lsMap" } */
   [[deprecated("Use `FOO.lsMap().value();` instead of `FOO.get_lsMap();`")]]
   ::cpp2::map_i64_string_5732 get_lsMap() &&;

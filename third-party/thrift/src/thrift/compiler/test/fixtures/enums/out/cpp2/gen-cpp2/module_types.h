@@ -798,9 +798,11 @@ class SomeStruct final  {
     questionable_ref() = questionable_;
     return __fbthrift_field_questionable;
   }
+
   /** Glean { "field": "tags" } */
   [[deprecated("Use `FOO.tags().value();` instead of `FOO.get_tags();`")]]
   const ::std::set<::std::int32_t>& get_tags() const&;
+
   /** Glean { "field": "tags" } */
   [[deprecated("Use `FOO.tags().value();` instead of `FOO.get_tags();`")]]
   ::std::set<::std::int32_t> get_tags() &&;

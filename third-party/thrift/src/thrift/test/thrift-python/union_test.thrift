@@ -54,6 +54,7 @@ union TestUnionAmbiguousFromValueFloatInt {
 # possible fields. See union_test.py for the resulting behavior.
 #
 union TestUnionAmbiguousTypeFieldName {
+  @python.Name{name = "Type_"}
   1: i32 Type;
 }
 

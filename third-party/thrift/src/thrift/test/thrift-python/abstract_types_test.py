@@ -680,7 +680,7 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             ),
             (
                 "TestUnionAmbiguousTypeFieldNameAbstract.Type",
-                TestUnionAmbiguousTypeFieldNameAbstract.Type,
+                TestUnionAmbiguousTypeFieldNameAbstract.Type_,
                 int,
             ),
         ]

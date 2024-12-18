@@ -331,18 +331,16 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         )
         self.assertEqual(
             TestUnionAmbiguousTypeFieldNameImmutable().type,
-            # pyre-ignore[16]: There are 2 `Type`s
             TestUnionAmbiguousTypeFieldNameImmutable().Type.EMPTY,
         )
 
         self.assertEqual(
-            TestUnionAmbiguousTypeFieldNameImmutable(Type=3).fbthrift_current_field,
-            TestUnionAmbiguousTypeFieldNameImmutable.FbThriftUnionFieldEnum.Type,
+            TestUnionAmbiguousTypeFieldNameImmutable(Type_=3).fbthrift_current_field,
+            TestUnionAmbiguousTypeFieldNameImmutable.FbThriftUnionFieldEnum.Type_,
         )
         self.assertEqual(
-            TestUnionAmbiguousTypeFieldNameImmutable(Type=3).type,
-            # pyre-ignore[16]: There are 2 `Type`s
-            TestUnionAmbiguousTypeFieldNameImmutable.Type.Type,
+            TestUnionAmbiguousTypeFieldNameImmutable(Type_=3).type,
+            TestUnionAmbiguousTypeFieldNameImmutable.Type.Type_,
         )
         self.assertIsInstance(
             TestUnionAmbiguousTypeFieldNameImmutable.Type, enum.EnumMeta
@@ -351,7 +349,7 @@ class ThriftPython_ImmutableUnion_Test(unittest.TestCase):
         with self.assertRaisesRegex(
             AttributeError, "object attribute 'Type' is read-only"
         ):
-            # pyre-ignore[41]: Intentional for test
+            # pyre-ignore[8, 41]: Intentional for test
             type_union.Type = 1
         _assert_serialization_round_trip(self, immutable_serializer, type_union)
 

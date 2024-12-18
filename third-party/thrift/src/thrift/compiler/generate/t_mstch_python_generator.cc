@@ -1017,7 +1017,7 @@ bool validate_enum(sema_context& ctx, const t_enum& enm) {
 
 bool validate_union(sema_context& ctx, const t_struct& s) {
   auto predicate = [](const auto& pyname) {
-    return pyname == "type" || pyname == "value";
+    return pyname == "type" || pyname == "value" || pyname == "Type";
   };
   for (const t_field& f : s.fields()) {
     validate(&f, f.name(), ctx, predicate);

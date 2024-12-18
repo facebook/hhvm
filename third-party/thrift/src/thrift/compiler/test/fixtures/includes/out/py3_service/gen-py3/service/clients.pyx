@@ -111,6 +111,11 @@ cdef class MyService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_query = {
+        'return': 'None',
+        's': 'module.types.MyStruct', 'i': 'includes.types.Included', 
+    }
+
     @cython.always_allow_keywords(True)
     def query(
             MyService self,
@@ -134,6 +139,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_has_arg_docs = {
+        'return': 'None',
+        's': 'module.types.MyStruct', 'i': 'includes.types.Included', 
+    }
 
     @cython.always_allow_keywords(True)
     def has_arg_docs(

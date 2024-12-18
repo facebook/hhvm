@@ -261,6 +261,11 @@ cdef class FooService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_simple_rpc = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def simple_rpc(
             FooService self,
@@ -311,6 +316,11 @@ cdef class FB303Service(thrift.py3.client.Client):
         self._client = makeClientWrapper[cFB303ServiceAsyncClient, cFB303ServiceClientWrapper](
             cmove(channel)
         )
+
+    _fbthrift_annotations_DO_NOT_USE_simple_rpc = {
+        'return': 'test.fixtures.basic.module.types.ReservedKeyword',
+        'int_parameter': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def simple_rpc(
@@ -369,6 +379,11 @@ cdef class MyService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_ping = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def ping(
             MyService self,
@@ -389,6 +404,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_getRandomData = {
+        'return': 'str',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def getRandomData(
             MyService self,
@@ -408,6 +428,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_sink = {
+        'return': 'None',
+        'sink': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def sink(
@@ -434,6 +459,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_putDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     @cython.always_allow_keywords(True)
     def putDataById(
@@ -463,6 +493,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
+        'return': 'bool',
+        'id': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def hasDataById(
             MyService self,
@@ -488,6 +523,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_getDataById = {
+        'return': 'str',
+        'id': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def getDataById(
@@ -515,6 +555,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_deleteDataById = {
+        'return': 'None',
+        'id': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def deleteDataById(
             MyService self,
@@ -540,6 +585,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     @cython.always_allow_keywords(True)
     def lobDataById(
@@ -569,6 +619,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_invalid_return_for_hack = {
+        'return': '_typing.AbstractSet[float]',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def invalid_return_for_hack(
             MyService self,
@@ -588,6 +643,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_rpc_skipped_codegen = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def rpc_skipped_codegen(
@@ -640,6 +700,11 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_getDataByKey0 = {
+        'return': 'bytes',
+        'key': 'str', 
+    }
+
     @cython.always_allow_keywords(True)
     def getDataByKey0(
             DbMixedStackArguments self,
@@ -661,6 +726,11 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_getDataByKey1 = {
+        'return': 'bytes',
+        'key': 'str', 
+    }
 
     @cython.always_allow_keywords(True)
     def getDataByKey1(

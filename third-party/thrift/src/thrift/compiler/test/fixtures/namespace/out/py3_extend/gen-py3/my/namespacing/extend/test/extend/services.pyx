@@ -123,6 +123,11 @@ cdef class ExtendTestServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_check = {
+        'return': 'bool',
+        'struct1': 'my.namespacing.test.hsmodule.types.HsFoo', 
+    }
+
     async def check(
             self,
             struct1):

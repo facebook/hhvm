@@ -236,6 +236,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_returnstream = {
+        'return': 'None',
+        'i32_from': 'int', 'i32_to': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def returnstream(
             PubSubStreamingService self,
@@ -268,6 +273,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_streamthrows = {
+        'return': 'None',
+        'foo': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def streamthrows(
             PubSubStreamingService self,
@@ -293,6 +303,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_servicethrows = {
+        'return': 'None',
+        'foo': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def servicethrows(
@@ -320,6 +335,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_servicethrows2 = {
+        'return': 'None',
+        'foo': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def servicethrows2(
             PubSubStreamingService self,
@@ -345,6 +365,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_boththrows = {
+        'return': 'None',
+        'foo': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def boththrows(
@@ -372,6 +397,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_responseandstreamstreamthrows = {
+        'return': 'None',
+        'foo': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def responseandstreamstreamthrows(
             PubSubStreamingService self,
@@ -397,6 +427,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_responseandstreamservicethrows = {
+        'return': 'None',
+        'foo': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def responseandstreamservicethrows(
@@ -424,6 +459,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_responseandstreamboththrows = {
+        'return': 'None',
+        'foo': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def responseandstreamboththrows(
             PubSubStreamingService self,
@@ -449,6 +489,11 @@ cdef class PubSubStreamingService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_returnstreamFast = {
+        'return': 'None',
+        'i32_from': 'int', 'i32_to': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def returnstreamFast(

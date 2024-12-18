@@ -146,6 +146,11 @@ cdef class A(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'module.types.Foo',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def foo(
             A self,
@@ -237,6 +242,11 @@ cdef class B(A):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_bar = {
+        'return': 'None',
+        'foo': 'module.types.Foo', 
+    }
+
     @cython.always_allow_keywords(True)
     def bar(
             B self,
@@ -258,6 +268,11 @@ cdef class B(A):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_stream_stuff = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def stream_stuff(

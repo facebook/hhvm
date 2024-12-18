@@ -95,6 +95,11 @@ cdef class ExtendTestService(_my_namespacing_test_hsmodule_clients.HsTestService
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_check = {
+        'return': 'bool',
+        'struct1': 'my.namespacing.test.hsmodule.types.HsFoo', 
+    }
+
     @cython.always_allow_keywords(True)
     def check(
             ExtendTestService self,

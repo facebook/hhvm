@@ -111,11 +111,21 @@ cdef class MyServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_query = {
+        'return': 'None',
+        's': 'module.types.MyStruct', 'i': 'includes.types.Included', 
+    }
+
     async def query(
             self,
             s,
             i):
         raise NotImplementedError("async def query is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_has_arg_docs = {
+        'return': 'None',
+        's': 'module.types.MyStruct', 'i': 'includes.types.Included', 
+    }
 
     async def has_arg_docs(
             self,

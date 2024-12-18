@@ -108,6 +108,11 @@ cdef class TestServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_test = {
+        'return': 'None',
+        
+    }
+
     async def test(
             self):
         raise NotImplementedError("async def test is not implemented")

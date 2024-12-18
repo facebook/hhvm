@@ -283,6 +283,11 @@ cdef class MyService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_ping = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def ping(
             MyService self,
@@ -303,6 +308,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_getRandomData = {
+        'return': 'str',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def getRandomData(
             MyService self,
@@ -322,6 +332,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
+        'return': 'bool',
+        'id': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def hasDataById(
@@ -349,6 +364,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_getDataById = {
+        'return': 'str',
+        'id': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def getDataById(
             MyService self,
@@ -374,6 +394,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_putDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     @cython.always_allow_keywords(True)
     def putDataById(
@@ -403,6 +428,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
+
     @cython.always_allow_keywords(True)
     def lobDataById(
             MyService self,
@@ -430,6 +460,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_doNothing = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def doNothing(
@@ -482,6 +517,11 @@ cdef class MyServicePrioParent(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_ping = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def ping(
             MyServicePrioParent self,
@@ -501,6 +541,11 @@ cdef class MyServicePrioParent(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_pong = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def pong(
@@ -553,6 +598,11 @@ cdef class MyServicePrioChild(MyServicePrioParent):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_pang = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def pang(
             MyServicePrioChild self,
@@ -603,6 +653,11 @@ cdef class BadService(thrift.py3.client.Client):
         self._client = makeClientWrapper[cBadServiceAsyncClient, cBadServiceClientWrapper](
             cmove(channel)
         )
+
+    _fbthrift_annotations_DO_NOT_USE_bar = {
+        'return': 'int',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def bar(
@@ -695,6 +750,11 @@ cdef class FooBarBazService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def foo(
             FooBarBazService self,
@@ -715,6 +775,11 @@ cdef class FooBarBazService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_bar = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def bar(
             FooBarBazService self,
@@ -734,6 +799,11 @@ cdef class FooBarBazService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_baz = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def baz(

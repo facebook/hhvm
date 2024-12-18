@@ -601,6 +601,8 @@ class py3_mstch_type : public mstch_type {
         this,
         {
             {"type:modulePath", &py3_mstch_type::modulePath},
+            {"type:module_path_period_separated",
+             &py3_mstch_type::module_path_period_separated},
             {"type:module_auto_migrate_path",
              &py3_mstch_type::moduleAutoMigratePath},
             {"type:cbinding_path", &py3_mstch_type::cbinding_path},
@@ -644,6 +646,12 @@ class py3_mstch_type : public mstch_type {
     return fmt::format(
         "_{}",
         fmt::join(get_type_py3_namespace(get_type_program(), "types"), "_"));
+  }
+
+  mstch::node module_path_period_separated() {
+    return fmt::format(
+        "{}",
+        fmt::join(get_type_py3_namespace(get_type_program(), "types"), "."));
   }
 
   mstch::node cbinding_path() {

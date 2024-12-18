@@ -89,6 +89,11 @@ cdef class TestService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_init = {
+        'return': 'int',
+        'int1': 'int', 
+    }
+
     @cython.always_allow_keywords(True)
     def init(
             TestService self,

@@ -154,23 +154,48 @@ cdef class MyServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_ping = {
+        'return': 'None',
+        
+    }
+
     async def ping(
             self):
         raise NotImplementedError("async def ping is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_getRandomData = {
+        'return': 'str',
+        
+    }
+
     async def getRandomData(
             self):
         raise NotImplementedError("async def getRandomData is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
+        'return': 'bool',
+        'id': 'int', 
+    }
 
     async def hasDataById(
             self,
             id):
         raise NotImplementedError("async def hasDataById is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_getDataById = {
+        'return': 'str',
+        'id': 'int', 
+    }
+
     async def getDataById(
             self,
             id):
         raise NotImplementedError("async def getDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_putDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     async def putDataById(
             self,
@@ -178,11 +203,21 @@ cdef class MyServiceInterface(
             data):
         raise NotImplementedError("async def putDataById is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
+
     async def lobDataById(
             self,
             id,
             data):
         raise NotImplementedError("async def lobDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_doNothing = {
+        'return': 'None',
+        
+    }
 
     async def doNothing(
             self):
@@ -218,9 +253,19 @@ cdef class MyServicePrioParentInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_ping = {
+        'return': 'None',
+        
+    }
+
     async def ping(
             self):
         raise NotImplementedError("async def ping is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_pong = {
+        'return': 'None',
+        
+    }
 
     async def pong(
             self):
@@ -256,6 +301,11 @@ MyServicePrioParentInterface
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_pang = {
+        'return': 'None',
+        
+    }
+
     async def pang(
             self):
         raise NotImplementedError("async def pang is not implemented")
@@ -289,6 +339,11 @@ cdef class BadServiceInterface(
             <PyObject *> self,
             get_executor()
         )
+
+    _fbthrift_annotations_DO_NOT_USE_bar = {
+        'return': 'int',
+        
+    }
 
     async def bar(
             self):
@@ -324,13 +379,28 @@ cdef class FooBarBazServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
+
     async def foo(
             self):
         raise NotImplementedError("async def foo is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_bar = {
+        'return': 'None',
+        
+    }
+
     async def bar(
             self):
         raise NotImplementedError("async def bar is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_baz = {
+        'return': 'None',
+        
+    }
 
     async def baz(
             self):

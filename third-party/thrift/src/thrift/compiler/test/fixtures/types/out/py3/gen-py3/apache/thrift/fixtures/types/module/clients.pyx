@@ -105,6 +105,11 @@ cdef class SomeService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_bounce_map = {
+        'return': '_typing.Mapping[int, str]',
+        'm': '_typing.Mapping[int, str]', 
+    }
+
     @cython.always_allow_keywords(True)
     def bounce_map(
             SomeService self,
@@ -128,6 +133,11 @@ cdef class SomeService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_binary_keyed_map = {
+        'return': '_typing.Mapping[bytes, int]',
+        'r': '_typing.Sequence[int]', 
+    }
 
     @cython.always_allow_keywords(True)
     def binary_keyed_map(

@@ -131,6 +131,13 @@ cdef class {{service:name}}({{#service:extends}}{{#service:externalProgram?}}{{!
         )
 
 {{#service:supportedFunctions}}
+    {{! horrific workaround to expose python annotations on thrift py3 service functions}}
+    _fbthrift_annotations_DO_NOT_USE_{{function:name}} = {
+        'return': '{{#function:return_type}}{{!
+        }}{{> types/pep484_type_period_separated}}{{/function:return_type}}',
+        {{#function:args}}'{{field:py_name}}': '{{#field:type}}{{> types/pep484_type_period_separated}}{{/field:type}}', {{/function:args}}
+    }
+
     @cython.always_allow_keywords(True)
     def {{function:name}}(
             {{service:name}} self{{#function:args}},

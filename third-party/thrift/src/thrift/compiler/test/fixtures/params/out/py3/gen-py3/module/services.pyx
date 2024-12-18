@@ -102,25 +102,50 @@ cdef class NestedContainersInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_mapList = {
+        'return': 'None',
+        'foo': '_typing.Mapping[int, _typing.Sequence[int]]', 
+    }
+
     async def mapList(
             self,
             foo):
         raise NotImplementedError("async def mapList is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_mapSet = {
+        'return': 'None',
+        'foo': '_typing.Mapping[int, _typing.AbstractSet[int]]', 
+    }
 
     async def mapSet(
             self,
             foo):
         raise NotImplementedError("async def mapSet is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_listMap = {
+        'return': 'None',
+        'foo': '_typing.Sequence[_typing.Mapping[int, int]]', 
+    }
+
     async def listMap(
             self,
             foo):
         raise NotImplementedError("async def listMap is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_listSet = {
+        'return': 'None',
+        'foo': '_typing.Sequence[_typing.AbstractSet[int]]', 
+    }
+
     async def listSet(
             self,
             foo):
         raise NotImplementedError("async def listSet is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_turtles = {
+        'return': 'None',
+        'foo': '_typing.Sequence[_typing.Sequence[_typing.Mapping[int, _typing.Mapping[int, _typing.AbstractSet[int]]]]]', 
+    }
 
     async def turtles(
             self,

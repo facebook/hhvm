@@ -629,6 +629,11 @@ cdef class MyService(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def foo(
             MyService self,
@@ -648,6 +653,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_interact = {
+        'return': 'None',
+        'arg': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def interact(
@@ -675,6 +685,11 @@ cdef class MyService(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_interactFast = {
+        'return': 'int',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def interactFast(
             MyService self,
@@ -694,6 +709,11 @@ cdef class MyService(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_serialize = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def serialize(
@@ -946,6 +966,11 @@ cdef class Factories(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def foo(
             Factories self,
@@ -965,6 +990,11 @@ cdef class Factories(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_interact = {
+        'return': 'None',
+        'arg': 'int', 
+    }
 
     @cython.always_allow_keywords(True)
     def interact(
@@ -992,6 +1022,11 @@ cdef class Factories(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_interactFast = {
+        'return': 'int',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def interactFast(
             Factories self,
@@ -1011,6 +1046,11 @@ cdef class Factories(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_serialize = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def serialize(
@@ -1062,6 +1102,11 @@ cdef class Perform(thrift.py3.client.Client):
         self._client = makeClientWrapper[cPerformAsyncClient, cPerformClientWrapper](
             cmove(channel)
         )
+
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def foo(
@@ -1314,6 +1359,11 @@ cdef class InteractWithShared(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_do_some_similar_things = {
+        'return': 'test.fixtures.another_interactions.shared.types.DoSomethingResult',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def do_some_similar_things(
             InteractWithShared self,
@@ -1524,6 +1574,11 @@ cdef class BoxService(thrift.py3.client.Client):
         self._client = makeClientWrapper[cBoxServiceAsyncClient, cBoxServiceClientWrapper](
             cmove(channel)
         )
+
+    _fbthrift_annotations_DO_NOT_USE_getABoxSession = {
+        'return': 'test.fixtures.interactions.module.types.ShouldBeBoxed',
+        'req': 'test.fixtures.interactions.module.types.ShouldBeBoxed', 
+    }
 
     @cython.always_allow_keywords(True)
     def getABoxSession(

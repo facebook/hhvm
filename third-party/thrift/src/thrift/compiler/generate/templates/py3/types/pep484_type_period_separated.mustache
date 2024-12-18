@@ -1,0 +1,35 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+
+This is for pep 484 typing but with period separated module path
+
+This is useful for typing call paterns since it allows python container types OR
+thrift-py3 specific container types.
+
+}}{{#type:struct}}{{!
+  }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
+  }}{{struct:name}}{{!
+}}{{/type:struct}}{{!
+}}{{#type:container?}}{{!
+  }}{{> types/pep484_containers_period_separated}}{{!
+}}{{/type:container?}}{{!
+}}{{#type:enum}}{{!
+  }}{{#type:need_module_path?}}{{type:module_path_period_separated}}.{{/type:need_module_path?}}{{!
+  }}{{enum:name}}{{!
+}}{{/type:enum}}{{!
+}}{{^type:struct}}{{^type:container?}}{{^type:enum}}{{> types/pep484_type }}{{/type:enum}}{{/type:container?}}{{/type:struct}}

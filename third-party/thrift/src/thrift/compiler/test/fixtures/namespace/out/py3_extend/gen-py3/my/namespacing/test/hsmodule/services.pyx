@@ -118,6 +118,11 @@ cdef class HsTestServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_init = {
+        'return': 'int',
+        'int1': 'int', 
+    }
+
     async def init(
             self,
             int1):

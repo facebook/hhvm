@@ -118,17 +118,37 @@ cdef class RaiserInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_doBland = {
+        'return': 'None',
+        
+    }
+
     async def doBland(
             self):
         raise NotImplementedError("async def doBland is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_doRaise = {
+        'return': 'None',
+        
+    }
 
     async def doRaise(
             self):
         raise NotImplementedError("async def doRaise is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_get200 = {
+        'return': 'str',
+        
+    }
+
     async def get200(
             self):
         raise NotImplementedError("async def get200 is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_get500 = {
+        'return': 'str',
+        
+    }
 
     async def get500(
             self):

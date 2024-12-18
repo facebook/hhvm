@@ -104,6 +104,11 @@ cdef class MyRootInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_do_root = {
+        'return': 'None',
+        
+    }
+
     async def do_root(
             self):
         raise NotImplementedError("async def do_root is not implemented")
@@ -138,6 +143,11 @@ MyRootInterface
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_do_mid = {
+        'return': 'None',
+        
+    }
+
     async def do_mid(
             self):
         raise NotImplementedError("async def do_mid is not implemented")
@@ -171,6 +181,11 @@ MyNodeInterface
             <PyObject *> self,
             get_executor()
         )
+
+    _fbthrift_annotations_DO_NOT_USE_do_leaf = {
+        'return': 'None',
+        
+    }
 
     async def do_leaf(
             self):

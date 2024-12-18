@@ -333,18 +333,38 @@ cdef class MyServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
+
     async def foo(
             self):
         raise NotImplementedError("async def foo is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_interact = {
+        'return': 'None',
+        'arg': 'int', 
+    }
 
     async def interact(
             self,
             arg):
         raise NotImplementedError("async def interact is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_interactFast = {
+        'return': 'int',
+        
+    }
+
     async def interactFast(
             self):
         raise NotImplementedError("async def interactFast is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_serialize = {
+        'return': 'None',
+        
+    }
 
     async def serialize(
             self):
@@ -386,18 +406,38 @@ cdef class FactoriesInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
+
     async def foo(
             self):
         raise NotImplementedError("async def foo is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_interact = {
+        'return': 'None',
+        'arg': 'int', 
+    }
 
     async def interact(
             self,
             arg):
         raise NotImplementedError("async def interact is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_interactFast = {
+        'return': 'int',
+        
+    }
+
     async def interactFast(
             self):
         raise NotImplementedError("async def interactFast is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_serialize = {
+        'return': 'None',
+        
+    }
 
     async def serialize(
             self):
@@ -439,6 +479,11 @@ cdef class PerformInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_foo = {
+        'return': 'None',
+        
+    }
+
     async def foo(
             self):
         raise NotImplementedError("async def foo is not implemented")
@@ -473,6 +518,11 @@ cdef class InteractWithSharedInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_do_some_similar_things = {
+        'return': 'test.fixtures.another_interactions.shared.types.DoSomethingResult',
+        
+    }
+
     async def do_some_similar_things(
             self):
         raise NotImplementedError("async def do_some_similar_things is not implemented")
@@ -506,6 +556,11 @@ cdef class BoxServiceInterface(
             <PyObject *> self,
             get_executor()
         )
+
+    _fbthrift_annotations_DO_NOT_USE_getABoxSession = {
+        'return': 'test.fixtures.interactions.module.types.ShouldBeBoxed',
+        'req': 'test.fixtures.interactions.module.types.ShouldBeBoxed', 
+    }
 
     async def getABoxSession(
             self,

@@ -185,6 +185,11 @@ cdef class FooServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_simple_rpc = {
+        'return': 'None',
+        
+    }
+
     async def simple_rpc(
             self):
         raise NotImplementedError("async def simple_rpc is not implemented")
@@ -218,6 +223,11 @@ cdef class FB303ServiceInterface(
             <PyObject *> self,
             get_executor()
         )
+
+    _fbthrift_annotations_DO_NOT_USE_simple_rpc = {
+        'return': 'test.fixtures.basic.module.types.ReservedKeyword',
+        'int_parameter': 'int', 
+    }
 
     async def simple_rpc(
             self,
@@ -254,18 +264,38 @@ cdef class MyServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_ping = {
+        'return': 'None',
+        
+    }
+
     async def ping(
             self):
         raise NotImplementedError("async def ping is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_getRandomData = {
+        'return': 'str',
+        
+    }
 
     async def getRandomData(
             self):
         raise NotImplementedError("async def getRandomData is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_sink = {
+        'return': 'None',
+        'sink': 'int', 
+    }
+
     async def sink(
             self,
             sink):
         raise NotImplementedError("async def sink is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_putDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     async def putDataById(
             self,
@@ -273,20 +303,40 @@ cdef class MyServiceInterface(
             data):
         raise NotImplementedError("async def putDataById is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
+        'return': 'bool',
+        'id': 'int', 
+    }
+
     async def hasDataById(
             self,
             id):
         raise NotImplementedError("async def hasDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_getDataById = {
+        'return': 'str',
+        'id': 'int', 
+    }
 
     async def getDataById(
             self,
             id):
         raise NotImplementedError("async def getDataById is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_deleteDataById = {
+        'return': 'None',
+        'id': 'int', 
+    }
+
     async def deleteDataById(
             self,
             id):
         raise NotImplementedError("async def deleteDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     async def lobDataById(
             self,
@@ -294,9 +344,19 @@ cdef class MyServiceInterface(
             data):
         raise NotImplementedError("async def lobDataById is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_invalid_return_for_hack = {
+        'return': '_typing.AbstractSet[float]',
+        
+    }
+
     async def invalid_return_for_hack(
             self):
         raise NotImplementedError("async def invalid_return_for_hack is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_rpc_skipped_codegen = {
+        'return': 'None',
+        
+    }
 
     async def rpc_skipped_codegen(
             self):
@@ -332,10 +392,20 @@ cdef class DbMixedStackArgumentsInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_getDataByKey0 = {
+        'return': 'bytes',
+        'key': 'str', 
+    }
+
     async def getDataByKey0(
             self,
             key):
         raise NotImplementedError("async def getDataByKey0 is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_getDataByKey1 = {
+        'return': 'bytes',
+        'key': 'str', 
+    }
 
     async def getDataByKey1(
             self,

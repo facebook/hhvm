@@ -170,6 +170,11 @@ cdef class Raiser(thrift.py3.client.Client):
             cmove(channel)
         )
 
+    _fbthrift_annotations_DO_NOT_USE_doBland = {
+        'return': 'None',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def doBland(
             Raiser self,
@@ -189,6 +194,11 @@ cdef class Raiser(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_doRaise = {
+        'return': 'None',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def doRaise(
@@ -210,6 +220,11 @@ cdef class Raiser(thrift.py3.client.Client):
         )
         return asyncio_shield(__future)
 
+    _fbthrift_annotations_DO_NOT_USE_get200 = {
+        'return': 'str',
+        
+    }
+
     @cython.always_allow_keywords(True)
     def get200(
             Raiser self,
@@ -229,6 +244,11 @@ cdef class Raiser(thrift.py3.client.Client):
             <PyObject *> __userdata
         )
         return asyncio_shield(__future)
+
+    _fbthrift_annotations_DO_NOT_USE_get500 = {
+        'return': 'str',
+        
+    }
 
     @cython.always_allow_keywords(True)
     def get500(

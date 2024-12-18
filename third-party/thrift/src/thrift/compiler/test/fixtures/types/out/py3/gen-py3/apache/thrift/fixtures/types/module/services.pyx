@@ -137,10 +137,20 @@ cdef class SomeServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_bounce_map = {
+        'return': '_typing.Mapping[int, str]',
+        'm': '_typing.Mapping[int, str]', 
+    }
+
     async def bounce_map(
             self,
             m):
         raise NotImplementedError("async def bounce_map is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_binary_keyed_map = {
+        'return': '_typing.Mapping[bytes, int]',
+        'r': '_typing.Sequence[int]', 
+    }
 
     async def binary_keyed_map(
             self,

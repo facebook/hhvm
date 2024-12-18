@@ -424,18 +424,38 @@ cdef class SimpleServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_get_five = {
+        'return': 'int',
+        
+    }
+
     async def get_five(
             self):
         raise NotImplementedError("async def get_five is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_add_five = {
+        'return': 'int',
+        'num': 'int', 
+    }
 
     async def add_five(
             self,
             num):
         raise NotImplementedError("async def add_five is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_do_nothing = {
+        'return': 'None',
+        
+    }
+
     async def do_nothing(
             self):
         raise NotImplementedError("async def do_nothing is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_concat = {
+        'return': 'str',
+        'first': 'str', 'second': 'str', 
+    }
 
     async def concat(
             self,
@@ -443,73 +463,148 @@ cdef class SimpleServiceInterface(
             second):
         raise NotImplementedError("async def concat is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_get_value = {
+        'return': 'int',
+        'simple_struct': 'module.types.SimpleStruct', 
+    }
+
     async def get_value(
             self,
             simple_struct):
         raise NotImplementedError("async def get_value is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_negate = {
+        'return': 'bool',
+        'input': 'bool', 
+    }
 
     async def negate(
             self,
             input):
         raise NotImplementedError("async def negate is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_tiny = {
+        'return': 'int',
+        'input': 'int', 
+    }
+
     async def tiny(
             self,
             input):
         raise NotImplementedError("async def tiny is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_small = {
+        'return': 'int',
+        'input': 'int', 
+    }
 
     async def small(
             self,
             input):
         raise NotImplementedError("async def small is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_big = {
+        'return': 'int',
+        'input': 'int', 
+    }
+
     async def big(
             self,
             input):
         raise NotImplementedError("async def big is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_two = {
+        'return': 'float',
+        'input': 'float', 
+    }
 
     async def two(
             self,
             input):
         raise NotImplementedError("async def two is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_expected_exception = {
+        'return': 'None',
+        
+    }
+
     async def expected_exception(
             self):
         raise NotImplementedError("async def expected_exception is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_unexpected_exception = {
+        'return': 'int',
+        
+    }
+
     async def unexpected_exception(
             self):
         raise NotImplementedError("async def unexpected_exception is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_sum_i16_list = {
+        'return': 'int',
+        'numbers': '_typing.Sequence[int]', 
+    }
 
     async def sum_i16_list(
             self,
             numbers):
         raise NotImplementedError("async def sum_i16_list is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_sum_i32_list = {
+        'return': 'int',
+        'numbers': '_typing.Sequence[int]', 
+    }
+
     async def sum_i32_list(
             self,
             numbers):
         raise NotImplementedError("async def sum_i32_list is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_sum_i64_list = {
+        'return': 'int',
+        'numbers': '_typing.Sequence[int]', 
+    }
 
     async def sum_i64_list(
             self,
             numbers):
         raise NotImplementedError("async def sum_i64_list is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_concat_many = {
+        'return': 'str',
+        'words': '_typing.Sequence[str]', 
+    }
+
     async def concat_many(
             self,
             words):
         raise NotImplementedError("async def concat_many is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_count_structs = {
+        'return': 'int',
+        'items': '_typing.Sequence[module.types.SimpleStruct]', 
+    }
 
     async def count_structs(
             self,
             items):
         raise NotImplementedError("async def count_structs is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_sum_set = {
+        'return': 'int',
+        'numbers': '_typing.AbstractSet[int]', 
+    }
+
     async def sum_set(
             self,
             numbers):
         raise NotImplementedError("async def sum_set is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_contains_word = {
+        'return': 'bool',
+        'words': '_typing.AbstractSet[str]', 'word': 'str', 
+    }
 
     async def contains_word(
             self,
@@ -517,55 +612,110 @@ cdef class SimpleServiceInterface(
             word):
         raise NotImplementedError("async def contains_word is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_get_map_value = {
+        'return': 'str',
+        'words': '_typing.Mapping[str, str]', 'key': 'str', 
+    }
+
     async def get_map_value(
             self,
             words,
             key):
         raise NotImplementedError("async def get_map_value is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_map_length = {
+        'return': 'int',
+        'items': '_typing.Mapping[str, module.types.SimpleStruct]', 
+    }
+
     async def map_length(
             self,
             items):
         raise NotImplementedError("async def map_length is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_sum_map_values = {
+        'return': 'int',
+        'items': '_typing.Mapping[str, int]', 
+    }
 
     async def sum_map_values(
             self,
             items):
         raise NotImplementedError("async def sum_map_values is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_complex_sum_i32 = {
+        'return': 'int',
+        'counter': 'module.types.ComplexStruct', 
+    }
+
     async def complex_sum_i32(
             self,
             counter):
         raise NotImplementedError("async def complex_sum_i32 is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_repeat_name = {
+        'return': 'str',
+        'counter': 'module.types.ComplexStruct', 
+    }
 
     async def repeat_name(
             self,
             counter):
         raise NotImplementedError("async def repeat_name is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_get_struct = {
+        'return': 'module.types.SimpleStruct',
+        
+    }
+
     async def get_struct(
             self):
         raise NotImplementedError("async def get_struct is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_fib = {
+        'return': '_typing.Sequence[int]',
+        'n': 'int', 
+    }
 
     async def fib(
             self,
             n):
         raise NotImplementedError("async def fib is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_unique_words = {
+        'return': '_typing.AbstractSet[str]',
+        'words': '_typing.Sequence[str]', 
+    }
+
     async def unique_words(
             self,
             words):
         raise NotImplementedError("async def unique_words is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_words_count = {
+        'return': '_typing.Mapping[str, int]',
+        'words': '_typing.Sequence[str]', 
+    }
 
     async def words_count(
             self,
             words):
         raise NotImplementedError("async def words_count is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_set_enum = {
+        'return': 'module.types.AnEnum',
+        'in_enum': 'module.types.AnEnum', 
+    }
+
     async def set_enum(
             self,
             in_enum):
         raise NotImplementedError("async def set_enum is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_list_of_lists = {
+        'return': '_typing.Sequence[_typing.Sequence[int]]',
+        'num_lists': 'int', 'num_items': 'int', 
+    }
 
     async def list_of_lists(
             self,
@@ -573,55 +723,110 @@ cdef class SimpleServiceInterface(
             num_items):
         raise NotImplementedError("async def list_of_lists is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_word_character_frequency = {
+        'return': '_typing.Mapping[str, _typing.Mapping[str, int]]',
+        'sentence': 'str', 
+    }
+
     async def word_character_frequency(
             self,
             sentence):
         raise NotImplementedError("async def word_character_frequency is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_list_of_sets = {
+        'return': '_typing.Sequence[_typing.AbstractSet[str]]',
+        'some_words': 'str', 
+    }
 
     async def list_of_sets(
             self,
             some_words):
         raise NotImplementedError("async def list_of_sets is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_nested_map_argument = {
+        'return': 'int',
+        'struct_map': '_typing.Mapping[str, _typing.Sequence[module.types.SimpleStruct]]', 
+    }
+
     async def nested_map_argument(
             self,
             struct_map):
         raise NotImplementedError("async def nested_map_argument is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_make_sentence = {
+        'return': 'str',
+        'word_chars': '_typing.Sequence[_typing.Sequence[str]]', 
+    }
 
     async def make_sentence(
             self,
             word_chars):
         raise NotImplementedError("async def make_sentence is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_get_union = {
+        'return': '_typing.AbstractSet[int]',
+        'sets': '_typing.Sequence[_typing.AbstractSet[int]]', 
+    }
+
     async def get_union(
             self,
             sets):
         raise NotImplementedError("async def get_union is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_get_keys = {
+        'return': '_typing.AbstractSet[str]',
+        'string_map': '_typing.Sequence[_typing.Mapping[str, str]]', 
+    }
 
     async def get_keys(
             self,
             string_map):
         raise NotImplementedError("async def get_keys is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_lookup_double = {
+        'return': 'float',
+        'key': 'int', 
+    }
+
     async def lookup_double(
             self,
             key):
         raise NotImplementedError("async def lookup_double is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_retrieve_binary = {
+        'return': 'bytes',
+        'something': 'bytes', 
+    }
 
     async def retrieve_binary(
             self,
             something):
         raise NotImplementedError("async def retrieve_binary is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_contain_binary = {
+        'return': '_typing.AbstractSet[bytes]',
+        'binaries': '_typing.Sequence[bytes]', 
+    }
+
     async def contain_binary(
             self,
             binaries):
         raise NotImplementedError("async def contain_binary is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_contain_enum = {
+        'return': '_typing.Sequence[module.types.AnEnum]',
+        'the_enum': '_typing.Sequence[module.types.AnEnum]', 
+    }
+
     async def contain_enum(
             self,
             the_enum):
         raise NotImplementedError("async def contain_enum is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_get_binary_union_struct = {
+        'return': 'module.types.BinaryUnionStruct',
+        'u': 'module.types.BinaryUnion', 
+    }
 
     async def get_binary_union_struct(
             self,
@@ -659,6 +864,11 @@ SimpleServiceInterface
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_get_six = {
+        'return': 'int',
+        
+    }
+
     async def get_six(
             self):
         raise NotImplementedError("async def get_six is not implemented")
@@ -692,6 +902,11 @@ DerivedServiceInterface
             <PyObject *> self,
             get_executor()
         )
+
+    _fbthrift_annotations_DO_NOT_USE_get_seven = {
+        'return': 'int',
+        
+    }
 
     async def get_seven(
             self):

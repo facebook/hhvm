@@ -168,21 +168,41 @@ cdef class MyServiceInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
+        'return': 'bool',
+        'id': 'int', 
+    }
+
     async def hasDataById(
             self,
             id):
         raise NotImplementedError("async def hasDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_getDataById = {
+        'return': 'str',
+        'id': 'int', 
+    }
 
     async def getDataById(
             self,
             id):
         raise NotImplementedError("async def getDataById is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_putDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
+
     async def putDataById(
             self,
             id,
             data):
         raise NotImplementedError("async def putDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     async def lobDataById(
             self,
@@ -220,21 +240,41 @@ cdef class MyServiceFastInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_hasDataById = {
+        'return': 'bool',
+        'id': 'int', 
+    }
+
     async def hasDataById(
             self,
             id):
         raise NotImplementedError("async def hasDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_getDataById = {
+        'return': 'str',
+        'id': 'int', 
+    }
 
     async def getDataById(
             self,
             id):
         raise NotImplementedError("async def getDataById is not implemented")
 
+    _fbthrift_annotations_DO_NOT_USE_putDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
+
     async def putDataById(
             self,
             id,
             data):
         raise NotImplementedError("async def putDataById is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_lobDataById = {
+        'return': 'None',
+        'id': 'int', 'data': 'str', 
+    }
 
     async def lobDataById(
             self,
@@ -272,10 +312,20 @@ cdef class DbMixedStackArgumentsInterface(
             get_executor()
         )
 
+    _fbthrift_annotations_DO_NOT_USE_getDataByKey0 = {
+        'return': 'bytes',
+        'key': 'str', 
+    }
+
     async def getDataByKey0(
             self,
             key):
         raise NotImplementedError("async def getDataByKey0 is not implemented")
+
+    _fbthrift_annotations_DO_NOT_USE_getDataByKey1 = {
+        'return': 'bytes',
+        'key': 'str', 
+    }
 
     async def getDataByKey1(
             self,

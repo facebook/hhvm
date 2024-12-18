@@ -1114,8 +1114,8 @@ cdef class Struct(StructOrUnion):
             set_struct_field(new_inst._fbthrift_data, field_index, value_to_copy)
         if kwargs:
             raise TypeError(
-                f"{type(self)}: error updating copy with unknown field: "
-                f"'{kwargs.keys()[0]}'"
+                f"'{type(self).__name__}' object does not have attribute(s): "
+                f"'{', '.join(kwargs.keys())}'"
             )
         new_inst._fbthrift_populate_primitive_fields()
         return new_inst

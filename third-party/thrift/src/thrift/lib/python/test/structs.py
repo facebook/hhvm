@@ -71,7 +71,6 @@ from thrift.python.mutable_types import (
     to_thrift_set,
 )
 
-from thrift.python.serializer import deserialize, serialize_iobuf
 from thrift.python.types import isset, update_nested_field
 
 ListT = TypeVar("ListT")
@@ -303,6 +302,14 @@ class StructTestsParameterized(unittest.TestCase):
         self.assertIsNotNone(x.val_list)
         self.assertIsNone(x.name)
         self.assertIsNotNone(x.an_int)
+
+    def test_call_bad_key(self) -> None:
+        x = self.easy()
+
+        err_type = AttributeError if self.is_mutable_run else TypeError
+        with self.assertRaisesRegex(err_type, "'easy' object .* attribute.* 'bad_key'"):
+            # pyre-ignore[28]: bad key for test
+            x = x(bad_key="foo")
 
     def test_reserved(self) -> None:
         x = self.Reserved(

@@ -116,7 +116,10 @@ struct expression {
   source_range loc;
   struct function_call {
     struct not_tag {};
-    std::variant<not_tag> which;
+    struct and_or_tag {}; // for convenience of writing matchers
+    struct and_tag : and_or_tag {};
+    struct or_tag : and_or_tag {};
+    std::variant<not_tag, and_tag, or_tag> which;
     std::vector<expression> args;
 
     std::string_view name() const;

@@ -600,6 +600,33 @@ TEST_F(RenderTest, if_not_else_block) {
   }
 }
 
+TEST_F(RenderTest, and_or) {
+  {
+    auto result = render(
+        "{{#if (and (or no yes) yes)}}\n"
+        "Yes!\n"
+        "{{/if (and (or no yes) yes)}}\n",
+        w::map({{"yes", w::boolean(true)}, {"no", w::boolean(false)}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "Yes!\n");
+  }
+}
+
+TEST_F(RenderTest, and_or_short_circuit) {
+  {
+    auto result = render(
+        "{{#if (and news.has-update? intentionally_undefined)}}\n"
+        "Oops!\n"
+        "{{/if (and news.has-update? intentionally_undefined)}}\n"
+        "{{#if (or (not news.has-update?) intentionally_undefined)}}\n"
+        "Nothing is happening!\n"
+        "{{/if (or (not news.has-update?) intentionally_undefined)}}\n",
+        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(*result, "Nothing is happening!\n");
+  }
+}
+
 TEST_F(RenderTest, printable_types_strict_failure) {
   {
     auto result = render(

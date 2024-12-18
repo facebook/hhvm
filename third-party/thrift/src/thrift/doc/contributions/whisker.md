@@ -181,6 +181,10 @@ Function call expressions are only partially implemented.
 :::
 
 :::note
+The `and` and `or` builtin functions short-circuit their evaluation, meaning additional arguments will not be evaluated or checked for errors once the result is determined.
+:::
+
+:::note
 Whisker includes a set of *keywords* that are reserved. These cannot be used as identifiers. See the grammar below.
 :::
 

@@ -985,6 +985,10 @@ class parser {
     function_call func;
     if (try_consume_token(&scan, tok::kw_not)) {
       func.which = function_call::not_tag{};
+    } else if (try_consume_token(&scan, tok::kw_and)) {
+      func.which = function_call::and_tag{};
+    } else if (try_consume_token(&scan, tok::kw_or)) {
+      func.which = function_call::or_tag{};
     } else {
       report_fatal_error(scan, "unrecognized function {}", scan.peek());
     }
@@ -993,14 +997,25 @@ class parser {
       func.args.push_back(std::move(cond).consume_and_advance(&scan));
     }
 
-    detail::variant_match(func.which, [&](function_call::not_tag) {
-      if (func.args.size() != 1) {
-        report_fatal_error(
-            scan,
-            "expected 1 argument for helper `not` but got {}",
-            func.args.size());
-      }
-    });
+    detail::variant_match(
+        func.which,
+        [&](function_call::not_tag) {
+          if (func.args.size() != 1) {
+            report_fatal_error(
+                scan,
+                "expected 1 argument for helper `not` but got {}",
+                func.args.size());
+          }
+        },
+        [&](function_call::and_or_tag&) {
+          if (func.args.size() <= 1) {
+            report_fatal_error(
+                scan,
+                "expected at least 2 arguments for helper `{}` but got {}",
+                func.name(),
+                func.args.size());
+          }
+        });
 
     if (!try_consume_token(&scan, tok::r_paren)) {
       report_fatal_error(

@@ -344,9 +344,26 @@ class render_engine {
         },
         [&](const ast::expression::function_call& func) {
           return detail::variant_match(
-              func.which, [&](ast::expression::function_call::not_tag) {
+              func.which,
+              [&](ast::expression::function_call::not_tag) {
                 assert(func.args.size() == 1); // enforced by the parser
                 return object{!evaluate_as_bool(func.args[0])};
+              },
+              [&](ast::expression::function_call::and_tag) {
+                for (const ast::expression& arg : func.args) {
+                  if (!evaluate_as_bool(arg)) {
+                    return object{false};
+                  }
+                }
+                return object{true};
+              },
+              [&](ast::expression::function_call::or_tag) {
+                for (const ast::expression& arg : func.args) {
+                  if (evaluate_as_bool(arg)) {
+                    return object{true};
+                  }
+                }
+                return object{false};
               });
         });
   }

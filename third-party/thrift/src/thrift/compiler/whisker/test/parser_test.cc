@@ -487,6 +487,21 @@ TEST_F(ParserTest, conditional_block_with_not) {
       "| |- newline <line:2:22, line:3:1> '\\n'\n");
 }
 
+TEST_F(ParserTest, conditional_block_with_and_or) {
+  auto ast = parse_ast(
+      "{{#if (and (or no yes) yes)}}\n"
+      "Yes!\n"
+      "{{/if (and (or no yes) yes)}}");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- if-block <line:1:1, line:3:30>\n"
+      "| `- expression <line:1:7, col:28> '(and (or no yes) yes)'\n"
+      "| |- text <line:2:1, col:5> 'Yes!'\n"
+      "| |- newline <line:2:5, line:3:1> '\\n'\n");
+}
+
 TEST_F(ParserTest, conditional_block_not_wrong_arity) {
   auto ast = parse_ast(
       "{{#if (not news.has_updates? news.has_updates?)}}\n"

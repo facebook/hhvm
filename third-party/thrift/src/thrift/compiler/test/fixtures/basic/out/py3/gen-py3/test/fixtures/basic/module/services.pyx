@@ -57,7 +57,8 @@ cimport test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 cimport test.fixtures.basic.module.cbindings as _test_fixtures_basic_module_cbindings
 import test.fixtures.basic.module.types as _test_fixtures_basic_module_types
 
-cimport test.fixtures.basic.module.services_interface as _fbthrift_services_interface
+import test.fixtures.basic.module.services_reflection as _services_reflection
+cimport test.fixtures.basic.module.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -193,10 +194,14 @@ cdef class FooServiceInterface(
             self):
         raise NotImplementedError("async def simple_rpc is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__FooService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cFooServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cFooServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -229,10 +234,14 @@ cdef class FB303ServiceInterface(
             int_parameter):
         raise NotImplementedError("async def simple_rpc is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__FB303Service(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cFB303ServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cFB303ServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -353,10 +362,14 @@ cdef class MyServiceInterface(
             self):
         raise NotImplementedError("async def rpc_skipped_codegen is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -399,10 +412,14 @@ cdef class DbMixedStackArgumentsInterface(
             key):
         raise NotImplementedError("async def getDataByKey1 is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__DbMixedStackArguments(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cDbMixedStackArgumentsSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cDbMixedStackArgumentsSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

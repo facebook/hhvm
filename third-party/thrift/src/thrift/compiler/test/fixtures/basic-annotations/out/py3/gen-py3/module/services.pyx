@@ -57,7 +57,8 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-cimport module.services_interface as _fbthrift_services_interface
+import module.services_reflection as _services_reflection
+cimport module.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -222,10 +223,14 @@ cdef class MyServiceInterface(
             self):
         raise NotImplementedError("async def doNothing is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -266,10 +271,14 @@ cdef class MyServicePrioParentInterface(
             self):
         raise NotImplementedError("async def pong is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyServicePrioParent(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyServicePrioParentSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyServicePrioParentSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -301,10 +310,14 @@ MyServicePrioParentInterface
             self):
         raise NotImplementedError("async def pang is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyServicePrioChild(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyServicePrioChildSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyServicePrioChildSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -336,10 +349,14 @@ cdef class BadServiceInterface(
             self):
         raise NotImplementedError("async def bar is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__BadService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cGoodServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cGoodServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -389,10 +406,14 @@ cdef class FooBarBazServiceInterface(
             self):
         raise NotImplementedError("async def baz is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__FooBarBazService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cFooBarBazServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cFooBarBazServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

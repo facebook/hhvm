@@ -56,7 +56,8 @@ cimport includes.types as _includes_types
 cimport includes.cbindings as _includes_cbindings
 import includes.types as _includes_types
 
-cimport module.services_interface as _fbthrift_services_interface
+import module.services_reflection as _services_reflection
+cimport module.services_reflection as _services_reflection
 
 from module.clients_wrapper cimport cEmptyServiceAsyncClient, cEmptyServiceClientWrapper
 from module.clients_wrapper cimport cReturnServiceAsyncClient, cReturnServiceClientWrapper
@@ -731,10 +732,14 @@ cdef class EmptyService(thrift.py3.client.Client):
         )
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__EmptyService(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cEmptyServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cEmptyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -1295,10 +1300,14 @@ cdef class ReturnService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__ReturnService(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cReturnServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cReturnServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -2215,10 +2224,14 @@ cdef class ParamService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__ParamService(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cParamServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cParamServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

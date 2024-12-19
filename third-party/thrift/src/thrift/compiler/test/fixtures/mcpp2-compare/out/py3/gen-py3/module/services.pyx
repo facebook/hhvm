@@ -60,7 +60,8 @@ import includes.types as _includes_types
 cimport includes.types as _includes_types
 cimport includes.cbindings as _includes_cbindings
 
-cimport module.services_interface as _fbthrift_services_interface
+import module.services_reflection as _services_reflection
+cimport module.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -458,10 +459,14 @@ cdef class EmptyServiceInterface(
             get_executor()
         )
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__EmptyService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cEmptyServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cEmptyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -675,10 +680,14 @@ cdef class ReturnServiceInterface(
             size):
         raise NotImplementedError("async def readData is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__ReturnService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cReturnServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cReturnServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -1003,10 +1012,14 @@ cdef class ParamServiceInterface(
             param1):
         raise NotImplementedError("async def listunion_string_param is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__ParamService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cParamServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cParamServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

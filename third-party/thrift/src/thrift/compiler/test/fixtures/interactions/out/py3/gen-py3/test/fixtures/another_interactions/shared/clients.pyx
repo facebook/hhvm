@@ -53,7 +53,8 @@ cimport test.fixtures.another_interactions.shared.types as _test_fixtures_anothe
 cimport test.fixtures.another_interactions.shared.cbindings as _test_fixtures_another_interactions_shared_cbindings
 import test.fixtures.another_interactions.shared.types as _test_fixtures_another_interactions_shared_types
 
-cimport test.fixtures.another_interactions.shared.services_interface as _fbthrift_services_interface
+import test.fixtures.another_interactions.shared.services_reflection as _services_reflection
+cimport test.fixtures.another_interactions.shared.services_reflection as _services_reflection
 
 from test.fixtures.another_interactions.shared.clients_wrapper cimport cInteractLocallyAsyncClient, cInteractLocallyClientWrapper
 from test.fixtures.another_interactions.shared.clients_wrapper cimport cInteractLocallyClientWrapper_SharedInteractionInteractionWrapper
@@ -133,10 +134,14 @@ cdef class InteractLocally(thrift.py3.client.Client):
     ):
         return self.createSharedInteraction()
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__InteractLocally(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cInteractLocallySvIf].gen(response)
+        ServiceMetadata[_services_reflection.cInteractLocallySvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

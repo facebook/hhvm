@@ -57,7 +57,8 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-cimport module.services_interface as _fbthrift_services_interface
+import module.services_reflection as _services_reflection
+cimport module.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -153,10 +154,14 @@ cdef class RaiserInterface(
             self):
         raise NotImplementedError("async def get500 is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__Raiser(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cRaiserSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cRaiserSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

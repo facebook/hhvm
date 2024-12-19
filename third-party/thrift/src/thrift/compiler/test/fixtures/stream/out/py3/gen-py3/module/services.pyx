@@ -59,7 +59,8 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-cimport module.services_interface as _fbthrift_services_interface
+import module.services_reflection as _services_reflection
+cimport module.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -639,10 +640,14 @@ cdef class PubSubStreamingServiceInterface(
 
         return (ServerStream_cint32_t._fbthrift_create(cmove(deref(streams).first)), ServerPublisher_cint32_t._fbthrift_create(cmove(deref(streams).second)))
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__PubSubStreamingService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cPubSubStreamingServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cPubSubStreamingServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

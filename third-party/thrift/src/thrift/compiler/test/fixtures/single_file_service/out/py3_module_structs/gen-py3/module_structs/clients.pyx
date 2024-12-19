@@ -53,7 +53,8 @@ cimport module_structs.types as _module_structs_types
 cimport module_structs.cbindings as _module_structs_cbindings
 import module_structs.types as _module_structs_types
 
-cimport module_structs.services_interface as _fbthrift_services_interface
+import module_structs.services_reflection as _services_reflection
+cimport module_structs.services_reflection as _services_reflection
 
 
 

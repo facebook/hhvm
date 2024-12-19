@@ -53,7 +53,8 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-cimport module.services_interface as _fbthrift_services_interface
+import module.services_reflection as _services_reflection
+cimport module.services_reflection as _services_reflection
 
 from module.clients_wrapper cimport cMyRootAsyncClient, cMyRootClientWrapper
 from module.clients_wrapper cimport cMyNodeAsyncClient, cMyNodeClientWrapper
@@ -142,10 +143,14 @@ cdef class MyRoot(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyRoot(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyRootSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyRootSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -194,10 +199,14 @@ cdef class MyNode(MyRoot):
         return asyncio_shield(__future)
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyNode(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyNodeSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyNodeSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -246,10 +255,14 @@ cdef class MyLeaf(MyNode):
         return asyncio_shield(__future)
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyLeaf(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyLeafSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyLeafSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

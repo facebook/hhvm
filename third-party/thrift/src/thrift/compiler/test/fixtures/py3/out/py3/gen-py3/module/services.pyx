@@ -57,7 +57,8 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-cimport module.services_interface as _fbthrift_services_interface
+import module.services_reflection as _services_reflection
+cimport module.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -832,10 +833,14 @@ cdef class SimpleServiceInterface(
             u):
         raise NotImplementedError("async def get_binary_union_struct is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__SimpleService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cSimpleServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cSimpleServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -868,10 +873,14 @@ SimpleServiceInterface
             self):
         raise NotImplementedError("async def get_six is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__DerivedService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cDerivedServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cDerivedServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -903,10 +912,14 @@ DerivedServiceInterface
             self):
         raise NotImplementedError("async def get_seven is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__RederivedService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cRederivedServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cRederivedServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

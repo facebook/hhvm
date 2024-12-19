@@ -66,7 +66,8 @@ import transitive.types as _transitive_types
 cimport transitive.types as _transitive_types
 cimport transitive.cbindings as _transitive_cbindings
 
-cimport service.services_interface as _fbthrift_services_interface
+import service.services_reflection as _services_reflection
+cimport service.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -132,10 +133,14 @@ cdef class MyServiceInterface(
             i):
         raise NotImplementedError("async def has_arg_docs is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__MyService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cMyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

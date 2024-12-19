@@ -57,7 +57,8 @@ cimport emptyns.types as _emptyns_types
 cimport emptyns.cbindings as _emptyns_cbindings
 import emptyns.types as _emptyns_types
 
-cimport emptyns.services_interface as _fbthrift_services_interface
+import emptyns.services_reflection as _services_reflection
+cimport emptyns.services_reflection as _services_reflection
 
 import asyncio
 import functools
@@ -127,10 +128,14 @@ cdef class TestServiceInterface(
             int1):
         raise NotImplementedError("async def init is not implemented")
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__TestService(for_clients=False)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cTestServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cTestServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

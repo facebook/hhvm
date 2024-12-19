@@ -53,7 +53,8 @@ cimport my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_type
 cimport my.namespacing.test.hsmodule.cbindings as _my_namespacing_test_hsmodule_cbindings
 import my.namespacing.test.hsmodule.types as _my_namespacing_test_hsmodule_types
 
-cimport my.namespacing.test.hsmodule.services_interface as _fbthrift_services_interface
+import my.namespacing.test.hsmodule.services_reflection as _services_reflection
+cimport my.namespacing.test.hsmodule.services_reflection as _services_reflection
 
 from my.namespacing.test.hsmodule.clients_wrapper cimport cHsTestServiceAsyncClient, cHsTestServiceClientWrapper
 
@@ -120,10 +121,14 @@ cdef class HsTestService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__HsTestService(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cHsTestServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cHsTestServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

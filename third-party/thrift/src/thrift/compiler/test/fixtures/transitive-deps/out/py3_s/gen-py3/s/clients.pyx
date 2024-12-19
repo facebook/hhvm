@@ -59,7 +59,8 @@ cimport c.types as _c_types
 cimport c.cbindings as _c_cbindings
 import c.types as _c_types
 
-cimport s.services_interface as _fbthrift_services_interface
+import s.services_reflection as _services_reflection
+cimport s.services_reflection as _services_reflection
 
 from s.clients_wrapper cimport cTestServiceAsyncClient, cTestServiceClientWrapper
 
@@ -127,10 +128,14 @@ cdef class TestService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
+    @classmethod
+    def __get_reflection__(cls):
+        return _services_reflection.get_reflection__TestService(for_clients=True)
+
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_fbthrift_services_interface.cTestServiceSvIf].gen(response)
+        ServiceMetadata[_services_reflection.cTestServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

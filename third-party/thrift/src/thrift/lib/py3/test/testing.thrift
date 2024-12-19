@@ -191,6 +191,7 @@ union Integers {
   @python.Name{name = "name_"}
   6: string name;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   7: Digits digits;
 }
 
@@ -276,6 +277,7 @@ struct mixed {
   @cpp.Ref{type = cpp.RefType.Unique}
   4: optional easy opt_easy_ref;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   6: list<string> const_container_ref;
   @python.Name{name = "some_field_"}
   7: optional string some_field;

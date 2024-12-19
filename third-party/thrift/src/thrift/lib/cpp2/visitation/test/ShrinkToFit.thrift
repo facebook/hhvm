@@ -39,8 +39,10 @@ struct Fields {
   5: map<i32, list<StructWithListField>> nestedStructListMapField;
 
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   6: list<i32> listFieldRef;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   7: StructWithListField structFieldRef;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   8: optional list<i32> optListFieldRef;

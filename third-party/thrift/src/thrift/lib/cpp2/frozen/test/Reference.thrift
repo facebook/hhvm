@@ -26,14 +26,19 @@ struct Person {
 
 struct SimpleRef {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: Person c2s;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: Person c2u;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: Person c1r;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   4: Person c2r;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   9: Person c2sc;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   5: optional Person c2s_opt;
@@ -70,14 +75,17 @@ struct BoxedNode {
 
 struct SharedRef {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: Person p1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: Person p2;
   5: i64 id;
 }
 
 struct SharedRef2 {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: Person p2;
   5: i64 id;
 }

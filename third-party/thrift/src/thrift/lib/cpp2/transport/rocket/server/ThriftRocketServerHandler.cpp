@@ -602,6 +602,22 @@ void ThriftRocketServerHandler::handleRequestCommon(
       ? (*metadata.frameworkMetadata())->clone()
       : nullptr;
 
+  if (interactionIdOpt &&
+      THRIFT_FLAG(enable_interaction_overload_protection_server)) {
+    if (auto* interaction =
+            apache::thrift::detail::Cpp2ConnContextInternalAPI(connContext_)
+                .findTile(*interactionIdOpt)) {
+      if (auto* overloadPolicy =
+              apache::thrift::detail::TileInternalAPI(*interaction)
+                  .getOverloadPolicy();
+          overloadPolicy && !overloadPolicy->allowNewRequest()) {
+        handleInteractionLoadshedded(makeActiveRequest(
+            std::move(metadata), std::move(debugPayload), std::move(reqCtx)));
+        return;
+      }
+    }
+  }
+
   // A request should not be active until the overload checking is done.
   auto request = makeRequest(
       std::move(metadata), std::move(debugPayload), std::move(reqCtx));
@@ -855,6 +871,19 @@ void ThriftRocketServerHandler::handleServerShutdown(
       folly::make_exception_wrapper<TApplicationException>(
           TApplicationException::LOADSHEDDING, "server shutting down"),
       kQueueOverloadedErrorCode);
+}
+
+void ThriftRocketServerHandler::handleInteractionLoadshedded(
+    ThriftRequestCoreUniquePtr request) {
+  if (auto* observer = serverConfigs_->getObserver()) {
+    observer->taskKilled();
+  }
+
+  request->sendErrorWrapped(
+      folly::make_exception_wrapper<TApplicationException>(
+          TApplicationException::LOADSHEDDING,
+          "Interaction already loadshedded"),
+      kInteractionLoadsheddedErrorCode);
 }
 
 void ThriftRocketServerHandler::handleInjectedFault(

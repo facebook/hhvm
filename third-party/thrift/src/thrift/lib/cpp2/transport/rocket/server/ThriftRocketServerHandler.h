@@ -160,6 +160,8 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       ThriftRequestCoreUniquePtr request, std::string&& reason);
   FOLLY_NOINLINE void handleServerNotReady(ThriftRequestCoreUniquePtr request);
   FOLLY_NOINLINE void handleServerShutdown(ThriftRequestCoreUniquePtr request);
+  FOLLY_NOINLINE void handleInteractionLoadshedded(
+      ThriftRequestCoreUniquePtr request);
 
   enum class InjectedFault { ERROR, DROP, DISCONNECT };
   FOLLY_NOINLINE void handleInjectedFault(

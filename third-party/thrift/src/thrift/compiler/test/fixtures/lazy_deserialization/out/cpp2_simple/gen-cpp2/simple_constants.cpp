@@ -16,10 +16,10 @@ namespace simple_constants {
 
 
 
-::std::string_view _fbthrift_schema_80230e619119706c() {
+::std::string_view _fbthrift_schema_fd38c81e7958ce95() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_80230e619119706c_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_fd38c81e7958ce95_includes() {
   return {};
 }
 

@@ -78,6 +78,7 @@ struct LazyCppRef {
   3: optional list<i32> field3;
   @cpp.Lazy
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   4: list<i32> field4;
 }
 

@@ -16,10 +16,10 @@ namespace some::ns {
 namespace module_constants {
 
 
-::std::string_view _fbthrift_schema_82239cb6679d7868() {
+::std::string_view _fbthrift_schema_4dd995b4249eaff4() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_82239cb6679d7868_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_4dd995b4249eaff4_includes() {
   return {};
 }
 

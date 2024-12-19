@@ -47,8 +47,10 @@ struct DirectlyAdapted {
 
 struct CppRef {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: i32 shared_field;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   2: i32 shared_const_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   3: optional i32 opt_shared_field;

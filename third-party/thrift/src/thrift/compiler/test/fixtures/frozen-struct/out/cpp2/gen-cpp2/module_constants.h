@@ -14,8 +14,8 @@ namespace some::ns {
 /** Glean {"file": "thrift/compiler/test/fixtures/frozen-struct/src/module.thrift"} */
 namespace module_constants {
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_82239cb6679d7868();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_82239cb6679d7868_includes();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_4dd995b4249eaff4();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_4dd995b4249eaff4_includes();
 
 } // namespace module_constants
 } // namespace some::ns

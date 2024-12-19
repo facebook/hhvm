@@ -123,10 +123,10 @@ namespace module_constants {
 }
 
 
-::std::string_view _fbthrift_schema_1b995ae4836da474() {
+::std::string_view _fbthrift_schema_54513f84fd7e96ac() {
   return "";
 }
-::folly::Range<const ::std::string_view*> _fbthrift_schema_1b995ae4836da474_includes() {
+::folly::Range<const ::std::string_view*> _fbthrift_schema_54513f84fd7e96ac_includes() {
   return {};
 }
 

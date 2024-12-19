@@ -28,8 +28,8 @@ namespace simple_constants {
     return kIndexId_;
   }
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_80230e619119706c();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_80230e619119706c_includes();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_fd38c81e7958ce95();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_fd38c81e7958ce95_includes();
 
 } // namespace simple_constants
 } // namespace apache::thrift::test

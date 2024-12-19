@@ -26,6 +26,7 @@ struct InterceptedFields {
 
   @cpp.FieldInterceptor{name = "my::FieldInterceptor"}
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: i32 access_shared_field;
 
   @cpp.FieldInterceptor{name = "my::FieldInterceptor"}
@@ -34,6 +35,7 @@ struct InterceptedFields {
 
   @cpp.FieldInterceptor{name = "my::FieldInterceptor"}
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   4: i32 access_shared_const_field;
 
   @cpp.FieldInterceptor{name = "my::FieldInterceptor"}

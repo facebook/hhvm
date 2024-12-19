@@ -35,5 +35,6 @@ struct AStruct {
 
 struct AStructB {
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   1: AStruct FieldA;
 }

@@ -3336,6 +3336,10 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftStructMetada
                 "type" => \facebook\thrift\annotation\cpp\RefType::Shared,
               )
             ),
+            '\facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef' => \facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef::fromShape(
+              shape(
+              )
+            ),
           ],
           'type' => dict[],
         ),
@@ -7318,6 +7322,10 @@ class ReorderedStruct implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
             '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
                 "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+            '\facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef' => \facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef::fromShape(
+              shape(
               )
             ),
           ],

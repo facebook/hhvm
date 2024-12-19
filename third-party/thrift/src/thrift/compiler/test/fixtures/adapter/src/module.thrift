@@ -180,6 +180,7 @@ struct StructWithFieldAdapter {
   1: i32 field;
   @cpp.Adapter{name = "::my::Adapter1"}
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   2: i32 shared_field;
   @cpp.Adapter{name = "::my::Adapter1"}
   @cpp.Ref{type = cpp.RefType.Shared}
@@ -408,6 +409,7 @@ typedef CircularAdaptee AdaptedCircularAdaptee
 
 struct ReorderedStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: DeclaredAfterStruct reordered_dependent_adapted;
 }
 @cpp.Adapter{

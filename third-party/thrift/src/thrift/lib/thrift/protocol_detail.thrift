@@ -49,6 +49,7 @@ struct Object {
   // TODO(ytj): use schema.FieldId as key
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "::folly::F14NodeMap"}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i16, Value> members;
 } (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Object", rust.ord)
 
@@ -90,11 +91,13 @@ union Value {
   @hack.SkipCodegen{
     reason = "Set can only have integer/string/binary/enum values",
   }
+  @cpp.AllowLegacyNonOptionalRef
   15: set<Value> setValue;
 
   // TODO(dokwon): Migrate to @thrift.Box after resolving incomplete type.
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "::folly::F14FastMap"}
   @hack.SkipCodegen{reason = "Map keys can only be integer/string/binary/enum"}
+  @cpp.AllowLegacyNonOptionalRef
   16: map<Value, Value> mapValue;
 } (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Value", rust.ord)

@@ -71,6 +71,7 @@ class ClientMetadataRef {
 };
 
 namespace detail {
+class Cpp2ConnContextInternalAPI;
 using ConnectionInternalFieldsT = util::TypeErasedValue<128>;
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     ConnectionInternalFieldsT, createPerConnectionInternalFields);
@@ -429,6 +430,12 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
    * Throws std::out_of_range if not found
    */
   Tile& getTile(int64_t id) { return *tiles_.at(id); }
+  Tile* findTile(int64_t id) {
+    if (auto tile = tiles_.find(id); tile != tiles_.end()) {
+      return tile->second.get();
+    }
+    return nullptr;
+  }
   friend class GeneratedAsyncProcessorBase;
   friend class Tile;
   friend class TilePromise;
@@ -454,6 +461,7 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
   friend class Cpp2Connection;
   friend class rocket::ThriftRocketServerHandler;
   friend class HTTP2RoutingHandler;
+  friend class detail::Cpp2ConnContextInternalAPI;
 
   /**
    * Platform-independent representation of unix domain socket peer credentials,
@@ -553,6 +561,21 @@ class Cpp2ConnContext : public apache::thrift::server::TConnectionContext {
       serviceInterceptorsStorage_;
   detail::ConnectionInternalFieldsT internalFields_;
 };
+
+namespace detail {
+class Cpp2ConnContextInternalAPI {
+ public:
+  explicit Cpp2ConnContextInternalAPI(Cpp2ConnContext& connContext)
+      : connContext_(connContext) {}
+
+  Tile* findTile(int64_t interactionId) const {
+    return connContext_.findTile(interactionId);
+  }
+
+ private:
+  Cpp2ConnContext& connContext_;
+};
+} // namespace detail
 
 // Request-specific context
 class Cpp2RequestContext : public apache::thrift::server::TConnectionContext {

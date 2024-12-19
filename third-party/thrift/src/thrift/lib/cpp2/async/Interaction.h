@@ -27,6 +27,8 @@
 namespace apache::thrift {
 namespace detail {
 
+class TileInternalAPI;
+
 enum class InternalPriority;
 
 struct InteractionTask {
@@ -131,8 +133,23 @@ class Tile {
   friend class TilePromise;
   friend class TilePtr;
   friend class TileStreamGuard;
+  friend class detail::TileInternalAPI;
   friend class GeneratedAsyncProcessorBase;
 };
+
+namespace detail {
+class TileInternalAPI {
+ public:
+  explicit TileInternalAPI(Tile& tile) : tile_(tile) {}
+
+  InteractionOverloadPolicy* FOLLY_NULLABLE getOverloadPolicy() {
+    return tile_.getOverloadPolicy();
+  }
+
+ private:
+  Tile& tile_;
+};
+} // namespace detail
 
 class SerialInteractionTile : public Tile {
  private:

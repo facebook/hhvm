@@ -218,7 +218,8 @@ class Cpp2Connection : public HeaderServerChannel::Callback,
         MessageChannel::SendCallback* notUsed = nullptr) override;
     void sendErrorWrapped(
         folly::exception_wrapper ew, std::string exCode) override;
-    void sendQueueTimeoutResponse() override;
+    void sendQueueTimeoutResponse(
+        bool interactionIsTerminated = false) override;
     void sendTimeoutResponse(
         apache::thrift::HeaderServerChannel::HeaderRequest::TimeoutResponseType
             responseType);

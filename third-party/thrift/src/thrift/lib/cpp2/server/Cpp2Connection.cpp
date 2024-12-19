@@ -891,7 +891,8 @@ void Cpp2Connection::Cpp2Request::sendTimeoutResponse(
   cancelTimeout();
 }
 
-void Cpp2Connection::Cpp2Request::sendQueueTimeoutResponse() {
+void Cpp2Connection::Cpp2Request::sendQueueTimeoutResponse(
+    bool /*interactionIsTerminated*/) {
   sendTimeoutResponse(
       HeaderServerChannel::HeaderRequest::TimeoutResponseType::QUEUE);
   connection_->queueTimeoutExpired();

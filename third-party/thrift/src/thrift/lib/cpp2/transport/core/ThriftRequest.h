@@ -294,7 +294,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
   void sendException(
       ResponsePayload&& response, MessageChannel::SendCallback* cb) final;
 
-  void sendQueueTimeoutResponse() final {
+  void sendQueueTimeoutResponse(bool interactionIsTerminated = false) final {
     if (tryCancel() && !isOneway()) {
       // once queue timeout is fired, there's no need for task timeout.
       // Also queue timeout is always <= task timeout,
@@ -309,7 +309,8 @@ class ThriftRequestCore : public ResponseChannelRequest {
               fmt::format(
                   "Load Shedding Due to Queue Timeout: {} ms",
                   queueTimeout_.value.count())),
-          kServerQueueTimeoutErrorCode,
+          interactionIsTerminated ? kInteractionLoadsheddedQueueTimeoutErrorCode
+                                  : kServerQueueTimeoutErrorCode,
           {},
           {});
     }
@@ -537,7 +538,22 @@ class ThriftRequestCore : public ResponseChannelRequest {
 
     void timeoutExpired() noexcept override {
       if (request.stateMachine_.tryStopProcessing()) {
-        request.sendQueueTimeoutResponse();
+        bool terminateInteraction = false;
+        if (THRIFT_FLAG(enable_interaction_overload_protection_server)) {
+          auto* reqCtx = request.getRequestContext();
+          if (auto interactionId = reqCtx->getInteractionId()) {
+            if (auto* interaction = detail::Cpp2ConnContextInternalAPI(
+                                        *reqCtx->getConnectionContext())
+                                        .findTile(interactionId)) {
+              if (auto* overloadPolicy = detail::TileInternalAPI(*interaction)
+                                             .getOverloadPolicy()) {
+                overloadPolicy->onRequestLoadshed();
+                terminateInteraction = !overloadPolicy->allowNewRequest();
+              };
+            }
+          }
+        }
+        request.sendQueueTimeoutResponse(terminateInteraction);
       }
     }
   };

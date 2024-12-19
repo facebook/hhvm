@@ -153,7 +153,8 @@ class ResponseChannelRequest {
   virtual void sendErrorWrapped(
       folly::exception_wrapper ex, std::string exCode) = 0;
 
-  virtual void sendQueueTimeoutResponse() {}
+  virtual void sendQueueTimeoutResponse(
+      bool /*interactionIsTerminated*/ = false) {}
 
   virtual ~ResponseChannelRequest() = default;
 

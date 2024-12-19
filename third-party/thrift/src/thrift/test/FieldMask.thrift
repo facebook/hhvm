@@ -50,8 +50,10 @@ union RecursiveUnion {
   2: Bar bar;
   3: Baz baz;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   4: RecursiveUnion recurse;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   5: map<string, RecursiveUnion> recurseMap;
 }
 
@@ -94,6 +96,7 @@ struct SmartPointerStruct {
 
 struct SharedConstPointerStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: Foo2 unique;
   @cpp.Ref{type = cpp.RefType.Shared}
   2: optional Foo2 shared_const;

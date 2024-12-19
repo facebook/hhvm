@@ -212,6 +212,7 @@ typedef CircularAdaptee AdaptedCircularAdaptee
 
 struct ReorderedStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: DeclaredAfterStruct reordered_dependent_adapted;
 }
 @cpp.Adapter{

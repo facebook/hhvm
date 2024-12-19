@@ -63,6 +63,7 @@ union TestUnion {
 struct StructWithAUnion {
   1: TestUnion test_union;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: TestUnion test_union_ref;
 }
 

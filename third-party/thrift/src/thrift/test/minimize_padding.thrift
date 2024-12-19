@@ -112,9 +112,11 @@ struct same_sizes {
 struct ref_type {
   1: required byte a;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: required byte b;
   3: required byte c;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   4: required byte d;
 }
 

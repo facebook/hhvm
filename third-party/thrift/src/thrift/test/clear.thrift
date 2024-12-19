@@ -52,6 +52,7 @@ struct StructWithNoDefaultStruct {
   13: map<i16, i16> map_field;
   14: MyStruct struct_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   15: MyStruct ref_field;
 }
 

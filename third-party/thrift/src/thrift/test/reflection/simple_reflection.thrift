@@ -73,9 +73,11 @@ union union1 {
   66: list<i64> field_list_i64;
   99: list<string> field_list_string;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   5: string field_string_reference;
   999: binary field_binary;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   12: smallstruct field_smallstruct;
 }
 
@@ -83,8 +85,10 @@ struct struct3 {
   @cpp.Ref{type = cpp.RefType.Unique}
   1: optional smallstruct opt_nested;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: smallstruct def_nested;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: required smallstruct req_nested;
   @thrift.Box
   4: optional smallstruct box_nested1;
@@ -123,10 +127,12 @@ struct struct5_listworkaround {
 
 struct struct6 {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: smallstruct def_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   2: optional smallstruct opt_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   3: required smallstruct req_field;
 }
 
@@ -141,14 +147,17 @@ struct struct7 {
   8: i64 field8;
   9: string field9;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   10: smallstruct field10;
   11: IOBuf field11;
   12: binary field12;
   @cpp.Ref{type = cpp.RefType.Unique}
   13: optional smallstruct field13;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   14: required smallstruct field14;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   15: smallstruct field15;
   @cpp.Ref{type = cpp.RefType.Unique}
   16: optional map<i32, string> field16;
@@ -157,10 +166,12 @@ struct struct7 {
 
 struct struct8 {
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   1: smallstruct def_field;
   @cpp.Ref{type = cpp.RefType.Shared}
   2: optional smallstruct opt_field;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   3: required smallstruct req_field;
 }
 

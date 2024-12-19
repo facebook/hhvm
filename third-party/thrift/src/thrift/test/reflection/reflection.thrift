@@ -204,6 +204,7 @@ struct struct4 {
   2: optional string field1;
   3: enum1 field2;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   6: structA field3;
 }
 
@@ -412,17 +413,22 @@ const i32 constant_with_special_name = 42;
 
 struct hasRefUnique {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: structA aStruct;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "std::deque"}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> aList;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "std::unordered_set"}
+  @cpp.AllowLegacyNonOptionalRef
   3: set<string> aSet;
   @cpp.Ref{type = cpp.RefType.Unique}
   @cpp.Type{template = "std::unordered_map"}
+  @cpp.AllowLegacyNonOptionalRef
   4: map<string, string> aMap;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   5: unionA aUnion;
   @cpp.Ref{type = cpp.RefType.Unique}
   6: optional structA anOptionalStruct;
@@ -442,14 +448,19 @@ struct hasRefUnique {
 struct hasRefUniqueSimple {
   // same as above, but no cpp.template annotations
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: structA aStruct;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> aList;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: set<string> aSet;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   4: map<string, string> aMap;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   5: unionA aUnion;
   @cpp.Ref{type = cpp.RefType.Unique}
   6: optional structA anOptionalStruct;
@@ -465,23 +476,29 @@ struct hasRefUniqueSimple {
 
 union variantHasRefUnique {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: structA aStruct;
   2: i32 anInt;
 }
 
 struct hasRefShared {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: structA aStruct;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.Type{template = "std::deque"}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> aList;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.Type{template = "std::unordered_set"}
+  @cpp.AllowLegacyNonOptionalRef
   3: set<string> aSet;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   @cpp.Type{template = "std::unordered_map"}
+  @cpp.AllowLegacyNonOptionalRef
   4: map<string, string> aMap;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   5: unionA aUnion;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   6: optional structA anOptionalStruct;
@@ -501,14 +518,19 @@ struct hasRefShared {
 struct hasRefSharedSimple {
   // same as above, but no cpp.template annotations
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: structA aStruct;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> aList;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   3: set<string> aSet;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   4: map<string, string> aMap;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   5: unionA aUnion;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   6: optional structA anOptionalStruct;
@@ -524,17 +546,22 @@ struct hasRefSharedSimple {
 
 struct hasRefSharedConst {
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   1: structA aStruct;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.Type{template = "std::deque"}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> aList;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.Type{template = "std::unordered_set"}
+  @cpp.AllowLegacyNonOptionalRef
   3: set<string> aSet;
   @cpp.Ref{type = cpp.RefType.Shared}
   @cpp.Type{template = "std::unordered_map"}
+  @cpp.AllowLegacyNonOptionalRef
   4: map<string, string> aMap;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   5: unionA aUnion;
   @cpp.Ref{type = cpp.RefType.Shared}
   6: optional structA anOptionalStruct;
@@ -554,14 +581,19 @@ struct hasRefSharedConst {
 struct hasRefSharedConstSimple {
   // same as above, but no cpp.template annotations
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   1: structA aStruct;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> aList;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   3: set<string> aSet;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   4: map<string, string> aMap;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   5: unionA aUnion;
   @cpp.Ref{type = cpp.RefType.Shared}
   6: optional structA anOptionalStruct;

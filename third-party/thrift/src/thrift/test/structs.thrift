@@ -39,11 +39,13 @@ struct HasInt {
 
 struct BasicRefs {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: HasInt def_field;
 }
 
 struct BasicRefsShared {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: HasInt def_field;
 }
 

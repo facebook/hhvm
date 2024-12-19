@@ -63,12 +63,16 @@ struct SampleStruct {
   21: string annotated_string_field (ann_key = 'ann_value');
   22: HasANumber i32_indirection_field;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   23: SampleSubStruct struct_ref_field;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   24: SampleSubStruct struct_unique_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   25: SampleSubStruct struct_shared_field;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   26: SampleSubStruct struct_shared_const_field;
   @thrift.Box
   31: optional SampleSubStruct struct_box_field;

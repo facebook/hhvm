@@ -22,10 +22,12 @@ struct Empty {}
 
 struct StructWithRef {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: Empty def_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: required Empty req_field;
 }
 
@@ -37,10 +39,12 @@ const StructWithRef kStructWithRef = {
 
 struct StructWithRefTypeUnique {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: Empty def_field;
   @cpp.Ref{type = cpp.RefType.Unique}
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: required Empty req_field;
 }
 
@@ -52,10 +56,12 @@ const StructWithRefTypeUnique kStructWithRefTypeUnique = {
 
 struct StructWithRefTypeShared {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: Empty def_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   3: required Empty req_field;
 }
 
@@ -67,10 +73,12 @@ const StructWithRefTypeShared kStructWithRefTypeShared = {
 
 struct StructWithRefTypeSharedConst {
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   1: Empty def_field;
   @cpp.Ref{type = cpp.RefType.Shared}
   2: optional Empty opt_field;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   3: required Empty req_field;
 }
 

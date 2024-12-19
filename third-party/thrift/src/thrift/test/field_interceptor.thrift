@@ -30,6 +30,7 @@ struct InterceptedFields {
 
   @cpp.FieldInterceptor{name = "::apache::thrift::test::TestFieldInterceptor"}
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: i32 access_shared_field;
 
   @cpp.FieldInterceptor{name = "::apache::thrift::test::TestFieldInterceptor"}
@@ -38,6 +39,7 @@ struct InterceptedFields {
 
   @cpp.FieldInterceptor{name = "::apache::thrift::test::TestFieldInterceptor"}
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   4: i32 access_shared_const_field;
 
   @cpp.FieldInterceptor{name = "::apache::thrift::test::TestFieldInterceptor"}

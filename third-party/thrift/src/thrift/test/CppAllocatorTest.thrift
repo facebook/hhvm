@@ -196,10 +196,12 @@ struct AlwaysThrowCppRefChild {
 
 struct AlwaysThrowCppRefParent {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: AlwaysThrowCppRefChild_9703 uniqueChild (
     cpp.template = "::AlwaysThrowUniquePtr",
   );
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: AlwaysThrowCppRefChild_9703 sharedChild;
   3: i32 no_alloc;
 } (cpp.allocator = "::ScopedAlwaysThrowAlloc<>")
@@ -211,17 +213,22 @@ struct CountingCppRefChild {
 
 struct CountingCppRefParent {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: CountingCppRefChild_4892 uniqueChild (
     cpp.template = "::CountingUniquePtr",
   );
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: CountingCppRefChild_4892 sharedChild;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: CountingCppRefChild noAllocUniqueChild;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   4: CountingCppRefChild noAllocSharedChild;
   5: i32 no_alloc;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   6: list_i32_8474 allocVector;
   @thrift.Box
   7: optional CountingCppRefChild noAllocBoxedChild;

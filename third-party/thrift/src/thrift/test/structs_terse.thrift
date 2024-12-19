@@ -65,8 +65,10 @@ struct BasicRefsSharedTerseWrites {
   @cpp.Ref{type = cpp.RefType.Shared}
   5: optional list<structs.HasInt> shared_fields_const;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   6: structs.HasInt shared_field_req;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   7: list<structs.HasInt> shared_fields_req;
 }
 
@@ -87,7 +89,9 @@ struct OptionalFieldsTerseStruct {
 
 struct RefsWithStringAndContainerTerseWrites {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> string_list_field;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: string string_field;
 }

@@ -62,8 +62,7 @@ cimport transitive.types as _transitive_types
 cimport transitive.cbindings as _transitive_cbindings
 import transitive.types as _transitive_types
 
-import service.services_reflection as _services_reflection
-cimport service.services_reflection as _services_reflection
+cimport service.services_interface as _fbthrift_services_interface
 
 from service.clients_wrapper cimport cMyServiceAsyncClient, cMyServiceClientWrapper
 
@@ -170,14 +169,10 @@ cdef class MyService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__MyService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cMyServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

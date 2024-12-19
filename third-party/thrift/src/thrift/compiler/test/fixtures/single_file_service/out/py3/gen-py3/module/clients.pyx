@@ -54,8 +54,7 @@ cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 from thrift.py3.stream cimport cResponseAndClientBufferedStream, cClientBufferedStream
 
-import module.services_reflection as _services_reflection
-cimport module.services_reflection as _services_reflection
+cimport module.services_interface as _fbthrift_services_interface
 
 from module.clients_wrapper cimport cAAsyncClient, cAClientWrapper
 from module.clients_wrapper cimport cAClientWrapper_IInteractionWrapper
@@ -189,14 +188,10 @@ cdef class A(thrift.py3.client.Client):
     ):
         return self.createI()
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__A(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cASvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cASvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -295,14 +290,10 @@ cdef class B(A):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__B(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cBSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cBSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -343,14 +334,10 @@ cdef class C(thrift.py3.client.Client):
     ):
         return self.createI()
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__C(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cCSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cCSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

@@ -53,8 +53,7 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-import module.services_reflection as _services_reflection
-cimport module.services_reflection as _services_reflection
+cimport module.services_interface as _fbthrift_services_interface
 
 from module.clients_wrapper cimport cMyServiceAsyncClient, cMyServiceClientWrapper
 from module.clients_wrapper cimport cMyServicePrioParentAsyncClient, cMyServicePrioParentClientWrapper
@@ -487,14 +486,10 @@ cdef class MyService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__MyService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cMyServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -568,14 +563,10 @@ cdef class MyServicePrioParent(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__MyServicePrioParent(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cMyServicePrioParentSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cMyServicePrioParentSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -624,14 +615,10 @@ cdef class MyServicePrioChild(MyServicePrioParent):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__MyServicePrioChild(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cMyServicePrioChildSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cMyServicePrioChildSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -697,14 +684,10 @@ cdef class BadService(thrift.py3.client.Client):
     ):
         return self.createBadInteraction()
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__BadService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cGoodServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cGoodServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -826,14 +809,10 @@ cdef class FooBarBazService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__FooBarBazService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cFooBarBazServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cFooBarBazServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

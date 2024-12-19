@@ -59,8 +59,7 @@ import test.fixtures.another_interactions.shared.types as _test_fixtures_another
 cimport test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
 import test.fixtures.another_interactions.shared.clients as _test_fixtures_another_interactions_shared_clients
 
-import test.fixtures.interactions.module.services_reflection as _services_reflection
-cimport test.fixtures.interactions.module.services_reflection as _services_reflection
+cimport test.fixtures.interactions.module.services_interface as _fbthrift_services_interface
 
 from test.fixtures.interactions.module.clients_wrapper cimport cMyServiceAsyncClient, cMyServiceClientWrapper
 from test.fixtures.interactions.module.clients_wrapper cimport cMyServiceClientWrapper_MyInteractionInteractionWrapper
@@ -787,14 +786,10 @@ cdef class MyService(thrift.py3.client.Client):
     ):
         return self.createSerialInteraction()
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__MyService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cMyServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -1073,14 +1068,10 @@ cdef class Factories(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__Factories(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cFactoriesSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cFactoriesSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -1180,14 +1171,10 @@ cdef class Perform(thrift.py3.client.Client):
     ):
         return self.createSerialInteraction()
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__Perform(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cPerformSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cPerformSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -1419,14 +1406,10 @@ cdef class InteractWithShared(thrift.py3.client.Client):
     ):
         return self.createMyInteraction()
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__InteractWithShared(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cInteractWithSharedSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cInteractWithSharedSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -1603,14 +1586,10 @@ cdef class BoxService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__BoxService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cBoxServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cBoxServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

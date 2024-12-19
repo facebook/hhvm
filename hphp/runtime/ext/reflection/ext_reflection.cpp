@@ -405,7 +405,7 @@ Variant HHVM_FUNCTION(hphp_invoke_method, const Variant& obj,
 
   auto const providedClass = Class::load(cls.get());
   if (!providedClass) {
-    raise_error("Call to undefined method %s::%s()", cls.data(), name.data());
+    raise_error("Class undefined: %s", cls.data());
   }
   auto const selectedFunc = providedClass->lookupMethod(name.get());
   if (!selectedFunc) {

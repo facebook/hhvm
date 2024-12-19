@@ -57,8 +57,7 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-import module.services_reflection as _services_reflection
-cimport module.services_reflection as _services_reflection
+cimport module.services_interface as _fbthrift_services_interface
 
 import asyncio
 import functools
@@ -102,14 +101,10 @@ cdef class SinkServiceInterface(
             get_executor()
         )
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__SinkService(for_clients=False)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cSinkServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cSinkServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

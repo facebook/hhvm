@@ -53,8 +53,7 @@ cimport empty.types as _empty_types
 cimport empty.cbindings as _empty_cbindings
 import empty.types as _empty_types
 
-import empty.services_reflection as _services_reflection
-cimport empty.services_reflection as _services_reflection
+cimport empty.services_interface as _fbthrift_services_interface
 
 from empty.clients_wrapper cimport cNullServiceAsyncClient, cNullServiceClientWrapper
 
@@ -77,14 +76,10 @@ cdef class NullService(thrift.py3.client.Client):
         )
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__NullService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cNullServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cNullServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

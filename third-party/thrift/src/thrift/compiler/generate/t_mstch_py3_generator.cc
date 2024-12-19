@@ -1609,8 +1609,7 @@ void t_mstch_py3_generator::generate_services() {
   std::vector<std::string> cythonFiles{
       "clients_wrapper.pxd",
       "services_wrapper.pxd",
-      "services_reflection.pxd",
-      "services_reflection.py",
+      "services_interface.pxd",
   };
 
   std::vector<std::string> cppFiles{

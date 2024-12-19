@@ -53,8 +53,7 @@ cimport module.types as _module_types
 cimport module.cbindings as _module_cbindings
 import module.types as _module_types
 
-import module.services_reflection as _services_reflection
-cimport module.services_reflection as _services_reflection
+cimport module.services_interface as _fbthrift_services_interface
 
 from module.clients_wrapper cimport cMyServiceAsyncClient, cMyServiceClientWrapper
 from module.clients_wrapper cimport cMyServiceFastAsyncClient, cMyServiceFastClientWrapper
@@ -337,14 +336,10 @@ cdef class MyService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__MyService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cMyServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cMyServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -496,14 +491,10 @@ cdef class MyServiceFast(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__MyServiceFast(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cMyServiceFastSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cMyServiceFastSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod
@@ -581,14 +572,10 @@ cdef class DbMixedStackArguments(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__DbMixedStackArguments(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cDbMixedStackArgumentsSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cDbMixedStackArgumentsSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

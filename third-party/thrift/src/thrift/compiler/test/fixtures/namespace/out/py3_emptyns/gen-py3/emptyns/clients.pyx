@@ -53,8 +53,7 @@ cimport emptyns.types as _emptyns_types
 cimport emptyns.cbindings as _emptyns_cbindings
 import emptyns.types as _emptyns_types
 
-import emptyns.services_reflection as _services_reflection
-cimport emptyns.services_reflection as _services_reflection
+cimport emptyns.services_interface as _fbthrift_services_interface
 
 from emptyns.clients_wrapper cimport cTestServiceAsyncClient, cTestServiceClientWrapper
 
@@ -121,14 +120,10 @@ cdef class TestService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__TestService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cTestServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cTestServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

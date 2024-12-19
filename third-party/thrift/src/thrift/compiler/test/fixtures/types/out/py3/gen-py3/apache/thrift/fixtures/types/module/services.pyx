@@ -60,8 +60,7 @@ import apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_ty
 cimport apache.thrift.fixtures.types.included.types as _apache_thrift_fixtures_types_included_types
 cimport apache.thrift.fixtures.types.included.cbindings as _apache_thrift_fixtures_types_included_cbindings
 
-import apache.thrift.fixtures.types.module.services_reflection as _services_reflection
-cimport apache.thrift.fixtures.types.module.services_reflection as _services_reflection
+cimport apache.thrift.fixtures.types.module.services_interface as _fbthrift_services_interface
 
 import asyncio
 import functools
@@ -157,14 +156,10 @@ cdef class SomeServiceInterface(
             r):
         raise NotImplementedError("async def binary_keyed_map is not implemented")
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__SomeService(for_clients=False)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cSomeServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cSomeServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

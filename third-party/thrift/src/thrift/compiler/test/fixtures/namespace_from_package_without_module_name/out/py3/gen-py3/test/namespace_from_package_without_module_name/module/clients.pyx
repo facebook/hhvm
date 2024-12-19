@@ -53,8 +53,7 @@ cimport test.namespace_from_package_without_module_name.module.types as _test_na
 cimport test.namespace_from_package_without_module_name.module.cbindings as _test_namespace_from_package_without_module_name_module_cbindings
 import test.namespace_from_package_without_module_name.module.types as _test_namespace_from_package_without_module_name_module_types
 
-import test.namespace_from_package_without_module_name.module.services_reflection as _services_reflection
-cimport test.namespace_from_package_without_module_name.module.services_reflection as _services_reflection
+cimport test.namespace_from_package_without_module_name.module.services_interface as _fbthrift_services_interface
 
 from test.namespace_from_package_without_module_name.module.clients_wrapper cimport cTestServiceAsyncClient, cTestServiceClientWrapper
 
@@ -121,14 +120,10 @@ cdef class TestService(thrift.py3.client.Client):
         return asyncio_shield(__future)
 
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__TestService(for_clients=True)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cTestServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cTestServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

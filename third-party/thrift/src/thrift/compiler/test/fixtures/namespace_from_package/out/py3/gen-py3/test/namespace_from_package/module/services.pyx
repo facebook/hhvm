@@ -57,8 +57,7 @@ cimport test.namespace_from_package.module.types as _test_namespace_from_package
 cimport test.namespace_from_package.module.cbindings as _test_namespace_from_package_module_cbindings
 import test.namespace_from_package.module.types as _test_namespace_from_package_module_types
 
-import test.namespace_from_package.module.services_reflection as _services_reflection
-cimport test.namespace_from_package.module.services_reflection as _services_reflection
+cimport test.namespace_from_package.module.services_interface as _fbthrift_services_interface
 
 import asyncio
 import functools
@@ -128,14 +127,10 @@ cdef class TestServiceInterface(
             int1):
         raise NotImplementedError("async def init is not implemented")
 
-    @classmethod
-    def __get_reflection__(cls):
-        return _services_reflection.get_reflection__TestService(for_clients=False)
-
     @staticmethod
     def __get_metadata__():
         cdef __fbthrift_cThriftServiceMetadataResponse response
-        ServiceMetadata[_services_reflection.cTestServiceSvIf].gen(response)
+        ServiceMetadata[_fbthrift_services_interface.cTestServiceSvIf].gen(response)
         return __MetadataBox.box(cmove(deref(response.metadata_ref())))
 
     @staticmethod

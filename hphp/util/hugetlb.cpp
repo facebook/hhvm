@@ -30,10 +30,8 @@
 #endif
 #include <unistd.h>
 
-#include "hphp/util/kernel-version.h"
 #include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
-#include "hphp/util/service-data.h"
 
 #endif
 
@@ -46,6 +44,14 @@
 #include <atomic>
 #include <stdexcept>
 
+#ifndef MAP_HUGE_2MB
+#define MAP_HUGE_2MB (21 << 26)
+#endif
+
+#ifndef MAP_HUGE_1GB
+#define MAP_HUGE_1GB (30 << 26)
+#endif
+
 namespace HPHP {
 
 static char s_hugePath[256];
@@ -57,7 +63,6 @@ constexpr unsigned kMaxNum1GPages = 16;
 static void* s_1GPages[kMaxNum1GPages];
 
 static unsigned s_num2MPages;
-static auto hp_counter = ServiceData::createCounter("admin.huge-pages");
 
 // Record error message based on errno, with an optional message.
 static void record_err_msg(const char* msg = nullptr) {
@@ -267,18 +272,10 @@ bool auto_mount_hugetlbfs() {
 // mincore() can be used to check if a memory region is stilled mapped in.
 NEVER_INLINE void* mmap_2m_impl(void* addr, bool fixed) {
   void* ret = MAP_FAILED;
-  int flags = MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB;
+  int flags = MAP_ANONYMOUS | MAP_PRIVATE | MAP_HUGETLB | MAP_HUGE_2MB;
   if (fixed) {
     flags |= MAP_FIXED;
     assert(addr != nullptr);
-  }
-  // MAP_HUGE_2MB can be specified after 3.8 kernel.
-  static KernelVersion version;
-  if (version.m_major > 3 || (version.m_major == 3 && version.m_minor >= 8)) {
-#ifndef MAP_HUGE_2MB
-#define MAP_HUGE_2MB (21 << 26)
-#endif
-    flags |= MAP_HUGE_2MB;
   }
   ret = mmap(addr, size2m, PROT_READ | PROT_WRITE, flags, -1, 0);
   if (ret == MAP_FAILED) {
@@ -354,20 +351,11 @@ inline void* mmap_1g_impl(void* addr, bool map_fixed) {
   }
 
   if (ret == MAP_FAILED) {
-    // MAP_HUGE_1GB is available in 3.9 and later kernels
-    KernelVersion version;
-    if (version.m_major > 3 || (version.m_major == 3 && version.m_minor >= 9)) {
-#ifndef MAP_HUGE_1GB
-#define MAP_HUGE_1GB (30 << 26)
-#endif
-      int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
-        (map_fixed ? MAP_FIXED : 0);
-      ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
-      if (ret == MAP_FAILED) {
-        record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
-        return nullptr;
-      }
-    } else {
+    int flags = MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB | MAP_HUGE_1GB |
+      (map_fixed ? MAP_FIXED : 0);
+    ret = mmap(addr, size1g, PROT_READ | PROT_WRITE, flags, -1, 0);
+    if (ret == MAP_FAILED) {
+      record_err_msg("mmap() with MAP_HUGE_1GB failed: ");
       return nullptr;
     }
   }
@@ -500,7 +488,6 @@ void* mmap_1g(void* addr, int node, bool map_fixed) {
 #endif
   void* ret = mmap_1g_impl(addr, map_fixed);
   if (ret != nullptr) {
-    hp_counter->increment();
     s_1GPages[s_num1GPages++] = ret;
   }
   return ret;

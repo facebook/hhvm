@@ -180,6 +180,7 @@ struct struct4 {
   2: optional string field1;
   3: enum1 field2;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   6: structA field3;
 }
 

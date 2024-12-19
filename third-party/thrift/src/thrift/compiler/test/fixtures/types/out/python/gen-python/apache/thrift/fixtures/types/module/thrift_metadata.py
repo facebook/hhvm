@@ -865,9 +865,11 @@ def _fbthrift_gen_metadata_struct_AllocatorAware(metadata_struct: _fbthrift_meta
         ]),
         _fbthrift_metadata.ThriftField(id=6, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="aa_unique", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Ref"), fields= { "type": _fbthrift_metadata.ThriftConstValue(cv_integer=0),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.AllowLegacyNonOptionalRef"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=7, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="aa_shared", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Ref"), fields= { "type": _fbthrift_metadata.ThriftConstValue(cv_integer=2),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.AllowLegacyNonOptionalRef"), fields= {  }),
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)

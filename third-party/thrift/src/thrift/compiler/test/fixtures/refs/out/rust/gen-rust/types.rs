@@ -605,12 +605,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyUnion {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -725,6 +743,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonTriviallyDestructibleUnion {
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -933,12 +960,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -969,12 +1014,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             6 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1005,12 +1068,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyField {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             9 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1162,12 +1243,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1305,12 +1404,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithUnion {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1592,12 +1709,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1616,12 +1751,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             4 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1640,12 +1793,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithContainers {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             6 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -1797,12 +1968,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithSharedConst {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             3 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -2036,6 +2225,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
@@ -2054,6 +2252,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRef {
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3012,6 +3219,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
@@ -3030,6 +3246,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeUnique {
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3169,6 +3394,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
@@ -3187,6 +3421,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeShared {
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3326,6 +3569,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
@@ -3344,6 +3596,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefTypeSharedConst {
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Shared,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3457,6 +3718,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithRefAndAnnotCppNoexcep
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::Unique,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3612,12 +3882,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             2 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;
@@ -3636,6 +3924,15 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             4 => {
 
@@ -3648,12 +3945,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithString {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             5 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

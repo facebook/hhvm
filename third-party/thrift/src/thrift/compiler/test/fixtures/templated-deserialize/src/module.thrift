@@ -56,13 +56,18 @@ struct containerStruct {
   16: list<IndirectionC> fieldP;
   17: MyEnumA fieldQ;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   18: map<string, bool> fieldR;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   19: SmallStruct fieldS;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   20: SmallStruct fieldT;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   21: SmallStruct fieldU;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   23: SmallStruct fieldX;
 }

@@ -142,8 +142,10 @@ union ComplexUnion {
   21: binary MyBinaryField2;
   23: list<binary> MyBinaryListField4;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   24: MyStruct ref_field;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   25: MyStruct ref_field2;
   26: AnException excp_field;
   27: CustomProtocolType MyCustomField;
@@ -249,6 +251,7 @@ struct MyIncludedStruct {
   1: includes.IncludedInt64 MyIncludedInt = includes.IncludedConstant;
   2: AStruct MyIncludedStruct;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: AStruct ARefField;
   4: required AStruct ARequiredField;
 } (cpp2.declare_hash = 1, cpp2.declare_equal_to)
@@ -275,16 +278,22 @@ typedef map<i64, string> folly_map
 struct AnnotatedStruct {
   1: containerStruct no_annotation;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: containerStruct cpp_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   3: containerStruct cpp2_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   4: map<i32, list<string>> container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   5: required containerStruct req_cpp_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   6: required containerStruct req_cpp2_unique_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   7: required list<string> req_container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
   8: optional containerStruct opt_cpp_unique_ref;
@@ -293,16 +302,22 @@ struct AnnotatedStruct {
   @cpp.Ref{type = cpp.RefType.Unique}
   10: optional set<i32> opt_container_with_ref;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   11: containerStruct ref_type_unique;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   12: containerStruct ref_type_shared;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   13: map<i32, list<string>> ref_type_const;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   14: required containerStruct req_ref_type_shared;
   @cpp.Ref{type = cpp.RefType.Shared}
+  @cpp.AllowLegacyNonOptionalRef
   15: required containerStruct req_ref_type_const;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   16: required list<string> req_ref_type_unique;
   @cpp.Ref{type = cpp.RefType.Shared}
   17: optional containerStruct opt_ref_type_const;

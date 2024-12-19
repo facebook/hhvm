@@ -488,6 +488,7 @@ def _fbthrift_gen_metadata_struct_ComposeStruct(metadata_struct: _fbthrift_metad
         ]),
         _fbthrift_metadata.ThriftField(id=4, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.ListStruct")), name="aliased", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Ref"), fields= { "type": _fbthrift_metadata.ThriftConstValue(cv_integer=1),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.AllowLegacyNonOptionalRef"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=5, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="thrift_dep.DepEnum")), name="xenum", is_optional=False, structured_annotations=[
         ]),
@@ -543,9 +544,11 @@ def _fbthrift_gen_metadata_struct_Onion(metadata_struct: _fbthrift_metadata.Thri
         ]),
         _fbthrift_metadata.ThriftField(id=8, type=_fbthrift_metadata.ThriftType(t_list=_fbthrift_metadata.ThriftListType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_DOUBLE_TYPE))), name="doubleList", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Ref"), fields= { "type": _fbthrift_metadata.ThriftConstValue(cv_integer=1),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.AllowLegacyNonOptionalRef"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=9, type=_fbthrift_metadata.ThriftType(t_map=_fbthrift_metadata.ThriftMapType(keyType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE),valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE))), name="strMap", is_optional=False, structured_annotations=[
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Ref"), fields= { "type": _fbthrift_metadata.ThriftConstValue(cv_integer=0),  }),
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.AllowLegacyNonOptionalRef"), fields= {  }),
         ]),
         _fbthrift_metadata.ThriftField(id=10, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), name="adapted_int", is_optional=False, structured_annotations=[
         ]),

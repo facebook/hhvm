@@ -4853,6 +4853,10 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
                 "type" => \facebook\thrift\annotation\cpp\RefType::Unique,
               )
             ),
+            '\facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef' => \facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef::fromShape(
+              shape(
+              )
+            ),
           ],
           'type' => dict[],
         ),
@@ -4861,6 +4865,10 @@ class AllocatorAware implements \IThriftSyncStruct, \IThriftStructMetadata {
             '\facebook\thrift\annotation\cpp\Ref' => \facebook\thrift\annotation\cpp\Ref::fromShape(
               shape(
                 "type" => \facebook\thrift\annotation\cpp\RefType::SharedMutable,
+              )
+            ),
+            '\facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef' => \facebook\thrift\annotation\cpp\AllowLegacyNonOptionalRef::fromShape(
+              shape(
               )
             ),
           ],

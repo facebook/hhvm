@@ -4929,12 +4929,30 @@ impl ::fbthrift::metadata::ThriftAnnotations for AllocatorAware {
                     let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
                     return r.take();
                 }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
             },
             7 => {
 
                 if type_id == ::std::any::TypeId::of::<cpp__types::Ref>() {
                     let mut tmp = ::std::option::Option::Some(cpp__types::Ref {
                         r#type: cpp__types::RefType::SharedMutable,
+                        ..::std::default::Default::default()
+                    });
+                    let r: &mut dyn ::std::any::Any = &mut tmp;
+                    let r: &mut ::std::option::Option<T> = r.downcast_mut().unwrap();
+                    return r.take();
+                }
+
+                if type_id == ::std::any::TypeId::of::<cpp__types::AllowLegacyNonOptionalRef>() {
+                    let mut tmp = ::std::option::Option::Some(cpp__types::AllowLegacyNonOptionalRef {
                         ..::std::default::Default::default()
                     });
                     let r: &mut dyn ::std::any::Any = &mut tmp;

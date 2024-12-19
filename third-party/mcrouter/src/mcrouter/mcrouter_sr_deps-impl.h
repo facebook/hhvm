@@ -28,6 +28,9 @@ class HostInfoLocation {
   const uint16_t* getTWTaskID() const {
     return nullptr;
   }
+  uint64_t hostUniqueKey() const noexcept {
+    return 0;
+  }
 
  private:
   const std::string ip_ = "127.0.0.1";

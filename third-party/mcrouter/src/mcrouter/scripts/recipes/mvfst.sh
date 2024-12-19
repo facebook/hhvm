@@ -11,6 +11,6 @@ if [ ! -d "$PKG_DIR/mvfst" ]; then
     cd "$PKG_DIR/mvfst" || die "cd fail"
 
     cmake . \
-        -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" -DBUILD_TESTS=OFF
-    make $MAKE_ARGS && make install $MAKE_ARGS
+        -G Ninja -DCMAKE_INSTALL_PREFIX="$INSTALL_DIR" -DBUILD_TESTS=OFF
+    cmake --build . && cmake --install .
 fi

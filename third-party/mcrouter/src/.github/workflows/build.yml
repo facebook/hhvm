@@ -11,14 +11,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Build dependencies
         run: |
-          ./mcrouter/scripts/install_ubuntu_20.04.sh "$(pwd)"/mcrouter-install deps
+          ./mcrouter/scripts/install_ubuntu_24.04.sh "$(pwd)"/mcrouter-install deps
       - name: Build mcrouter
         run: |
           mkdir -p "$(pwd)"/mcrouter-install/install
-          ./mcrouter/scripts/install_ubuntu_20.04.sh "$(pwd)"/mcrouter-install mcrouter
+          ./mcrouter/scripts/install_ubuntu_24.04.sh "$(pwd)"/mcrouter-install mcrouter

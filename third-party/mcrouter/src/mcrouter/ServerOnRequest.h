@@ -11,7 +11,10 @@
 #include <cassert>
 #include <memory>
 
+#ifndef MCROUTER_OSS_BUILD
 #include "core_infra_security/thrift_authentication_module/ClientIdentifierHelper.h"
+#endif
+
 #include "mcrouter/CarbonRouterClient.h"
 #include "mcrouter/RequestAclChecker.h"
 #include "mcrouter/config.h"
@@ -165,7 +168,8 @@ class ServerOnRequest {
     auto& reqRef = rctx->req;
     auto& ctxRef = rctx->ctx;
 
-    // Set hashed TLS client identities on request to propogate from proxy ->
+#ifndef MCROUTER_OSS_BUILD
+    // Set hashed TLS client identities on request to propagate from proxy ->
     // memcache server only IF enableKeyClientBinding_ is enabled.
     if (FOLLY_UNLIKELY(enableKeyClientBinding_) &&
         ctxRef.getThriftRequestContext()) {
@@ -180,6 +184,8 @@ class ServerOnRequest {
             std::get<std::string>(mayBeHashedIdentities.value()));
       }
     }
+#endif
+
     // if we are reusing the request buffer, adjust the start offset and set
     // it to the request.
     if (reusableRequestBuffer) {

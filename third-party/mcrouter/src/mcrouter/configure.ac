@@ -57,9 +57,9 @@ LT_INIT
 CXXFLAGS="-fno-strict-aliasing -std=c++20 $CXXFLAGS"
 CXXFLAGS="-W -Wall -Wextra -Wno-unused-parameter $CXXFLAGS"
 CXXFLAGS=" -Wno-missing-field-initializers -Wno-deprecated-declarations $CXXFLAGS"
-CXXFLAGS="-DLIBMC_FBTRACE_DISABLE -DDISABLE_COMPRESSION $CXXFLAGS"
+CXXFLAGS="-DLIBMC_FBTRACE_DISABLE -DDISABLE_COMPRESSION -DMCROUTER_OSS_BUILD $CXXFLAGS"
 
-CFLAGS="-DLIBMC_FBTRACE_DISABLE -DDISABLE_COMPRESSION $CFLAGS"
+CFLAGS="-DLIBMC_FBTRACE_DISABLE -DDISABLE_COMPRESSION -DMCROUTER_OSS_BUILD $CFLAGS"
 
 # Checks for glog and gflags
 # There are no symbols with C linkage, so we do a try-run
@@ -199,7 +199,7 @@ AC_CHECK_FUNCS([gettimeofday \
 LIBS="$LIBS $BOOST_LDFLAGS $BOOST_CONTEXT_LIB $BOOST_FILESYSTEM_LIB \
       $BOOST_PROGRAM_OPTIONS_LIB $BOOST_SYSTEM_LIB $BOOST_REGEX_LIB \
       $BOOST_THREAD_LIB -lpthread -pthread -ldl -lunwind \
-      -lbz2 -llz4 -llzma -lsnappy -lzstd -latomic"
+      -lbz2 -llz4 -llzma -lsnappy -lzstd -latomic -lxxhash"
 
 AM_PATH_PYTHON([2.6],, [:])
 AM_CONDITIONAL([HAVE_PYTHON], [test "$PYTHON" != :])

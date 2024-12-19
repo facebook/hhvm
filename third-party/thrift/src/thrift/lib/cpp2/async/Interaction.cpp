@@ -16,6 +16,8 @@
 
 #include <thrift/lib/cpp2/async/Interaction.h>
 
+THRIFT_FLAG_DEFINE_bool(enable_interaction_overload_protection_server, false);
+
 namespace apache::thrift {
 
 Tile::~Tile() {

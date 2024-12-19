@@ -44,6 +44,7 @@
 #include <thrift/lib/cpp2/transport/rocket/compression/CompressionManager.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/ErrorCode.h>
 #include <thrift/lib/cpp2/transport/rocket/framing/Frames.h>
+#include <thrift/lib/cpp2/transport/rocket/server/InteractionOverload.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerFrameContext.h>
 #include <thrift/lib/cpp2/transport/rocket/server/RocketSinkClientCallback.h>
@@ -612,6 +613,13 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto overloadResult = serverConfigs_->checkOverload(headers, name);
   serverConfigs_->incActiveRequests();
   if (UNLIKELY(overloadResult.has_value())) {
+    if ((interactionCreateOpt || interactionIdOpt) &&
+        shouldTerminateInteraction(
+            interactionCreateOpt.has_value(),
+            interactionIdOpt,
+            &connContext_)) {
+      overloadResult->errorCode = mapToTerminalError(overloadResult->errorCode);
+    }
     handleRequestOverloadedServer(
         std::move(request), std::move(*overloadResult));
     return;
@@ -634,12 +642,18 @@ void ThriftRocketServerHandler::handleRequestCommon(
           handleAppError(std::move(request), ase);
         },
         [&](AppOverloadedException& aoe) {
+          std::string_view exCode = kAppOverloadedErrorCode;
+          if ((interactionCreateOpt || interactionIdOpt) &&
+              shouldTerminateInteraction(
+                  interactionCreateOpt.has_value(),
+                  interactionIdOpt,
+                  &connContext_)) {
+            exCode = kInteractionLoadsheddedAppOverloadErrorCode;
+          }
           handleRequestOverloadedServer(
               std::move(request),
               OverloadResult{
-                  kAppOverloadedErrorCode,
-                  aoe.getMessage(),
-                  LoadShedder::CUSTOM});
+                  std::string(exCode), aoe.getMessage(), LoadShedder::CUSTOM});
         },
         [&](AppQuotaExceededException& aqe) {
           handleQuotaExceededException(

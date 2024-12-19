@@ -22,7 +22,10 @@
 #include <folly/coro/Task.h>
 #include <folly/io/async/EventBase.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/async/InteractionOverloadPolicy.h>
+
+THRIFT_FLAG_DECLARE_bool(enable_interaction_overload_protection_server);
 
 namespace apache::thrift {
 namespace detail {

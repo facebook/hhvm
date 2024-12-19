@@ -293,7 +293,6 @@ void match_type_with_const_value(
       break;
     case t_type::type::t_void:
     case t_type::type::t_service:
-    case t_type::type::t_program:
       assert(false);
   }
 

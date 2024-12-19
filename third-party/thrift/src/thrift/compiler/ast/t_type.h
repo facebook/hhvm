@@ -111,7 +111,6 @@ class t_type : public t_named {
     t_enum = 8,
     t_structured = 12,
     t_service = 13,
-    t_program = 14,
   };
   static constexpr size_t kTypeCount = 19;
   // TODO: add description

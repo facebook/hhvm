@@ -291,7 +291,7 @@ std::unique_ptr<t_const_value> schematizer::gen_type(
           type_uri(*resolved_type));
       break;
     }
-    default:
+    case t_type::type::t_service:
       assert(false);
   }
   schema->add_map(val("name"), std::move(type_name));

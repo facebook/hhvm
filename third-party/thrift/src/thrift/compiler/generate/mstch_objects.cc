@@ -416,7 +416,6 @@ mstch::node mstch_field::idl_type() {
       case t_type::type::t_structured:
         return BaseType::Struct;
       case t_type::type::t_service:
-      case t_type::type::t_program:
         return std::nullopt;
     }
     // unneccessary, but prevents a GCC warning

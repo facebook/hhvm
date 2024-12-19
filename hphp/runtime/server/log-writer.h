@@ -30,7 +30,6 @@
 #include "hphp/runtime/server/transport.h"
 #include "hphp/runtime/server/virtual-host.h"
 #include "hphp/util/hardware-counter.h"
-#include "hphp/util/kernel-version.h"
 #include "hphp/util/timer.h"
 #include "hphp/util/service-data.h"
 
@@ -150,12 +149,6 @@ bool FieldGenerator::gen(char field, const std::string& arg, T& out) {
       if (jitMaturityCounter) {
         out = folly::to<T>(jitMaturityCounter->getValue());
       }
-    }
-    break;
-  case 'k':
-    {
-      static KernelVersion version;
-      out = folly::to<T>(version.m_debug_str);
     }
     break;
   case 'n':

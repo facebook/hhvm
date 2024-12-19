@@ -27,7 +27,6 @@ struct KernelVersion {
   int m_build;
   std::string m_release_str;
   std::string m_build_str;
-  std::string m_debug_str;
   int m_fbk;
   KernelVersion();             // Use uname
   explicit KernelVersion(const char*);  // A known kernel version for cmp.
@@ -47,3 +46,4 @@ struct KernelVersion {
 };
 
 }
+

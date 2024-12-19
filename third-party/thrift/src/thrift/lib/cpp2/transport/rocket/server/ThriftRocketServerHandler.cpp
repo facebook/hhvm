@@ -649,42 +649,11 @@ void ThriftRocketServerHandler::handleRequestCommon(
   auto preprocessResult =
       serverConfigs_->preprocess({headers, name, connContext_, request.get()});
   if (UNLIKELY(!std::holds_alternative<std::monostate>(preprocessResult))) {
-    folly::variant_match(
-        preprocessResult,
-        [&](AppClientException& ace) {
-          handleAppError(std::move(request), ace);
-        },
-        [&](const AppServerException& ase) {
-          handleAppError(std::move(request), ase);
-        },
-        [&](AppOverloadedException& aoe) {
-          std::string_view exCode = kAppOverloadedErrorCode;
-          if ((interactionCreateOpt || interactionIdOpt) &&
-              shouldTerminateInteraction(
-                  interactionCreateOpt.has_value(),
-                  interactionIdOpt,
-                  &connContext_)) {
-            exCode = kInteractionLoadsheddedAppOverloadErrorCode;
-          }
-          handleRequestOverloadedServer(
-              std::move(request),
-              OverloadResult{
-                  std::string(exCode), aoe.getMessage(), LoadShedder::CUSTOM});
-        },
-        [&](AppQuotaExceededException& aqe) {
-          handleQuotaExceededException(
-              std::move(request),
-              kTenantQuotaExceededErrorCode,
-              aqe.getMessage());
-        },
-        [&](AppTenantBlocklistedException& atb) {
-          handleQuotaExceededException(
-              std::move(request),
-              kTenantBlocklistedErrorCode,
-              atb.getMessage());
-        },
-        [](std::monostate&) { folly::assume_unreachable(); });
-
+    handlePreprocessResult(
+        std::move(request),
+        std::move(preprocessResult),
+        interactionCreateOpt.has_value(),
+        interactionIdOpt);
     return;
   }
 
@@ -748,6 +717,42 @@ void ThriftRocketServerHandler::handleRequestCommon(
       cpp2ReqCtx,
       threadManager_.get(),
       worker_->getServer());
+}
+
+void ThriftRocketServerHandler::handlePreprocessResult(
+    ThriftRequestCoreUniquePtr request,
+    PreprocessResult&& preprocessResult,
+    bool isInteractionCreatePresent,
+    std::optional<int64_t>& interactionIdOpt) {
+  folly::variant_match(
+      preprocessResult,
+      [&](AppClientException& ace) { handleAppError(std::move(request), ace); },
+      [&](const AppServerException& ase) {
+        handleAppError(std::move(request), ase);
+      },
+      [&](AppOverloadedException& aoe) {
+        std::string_view exCode = kAppOverloadedErrorCode;
+        if ((isInteractionCreatePresent || interactionIdOpt) &&
+            shouldTerminateInteraction(
+                isInteractionCreatePresent, interactionIdOpt, &connContext_)) {
+          exCode = kInteractionLoadsheddedAppOverloadErrorCode;
+        }
+        handleRequestOverloadedServer(
+            std::move(request),
+            OverloadResult{
+                std::string(exCode), aoe.getMessage(), LoadShedder::CUSTOM});
+      },
+      [&](AppQuotaExceededException& aqe) {
+        handleQuotaExceededException(
+            std::move(request),
+            kTenantQuotaExceededErrorCode,
+            aqe.getMessage());
+      },
+      [&](AppTenantBlocklistedException& atb) {
+        handleQuotaExceededException(
+            std::move(request), kTenantBlocklistedErrorCode, atb.getMessage());
+      },
+      [](std::monostate&) { folly::assume_unreachable(); });
 }
 
 void ThriftRocketServerHandler::handleRequestWithBadMetadata(

@@ -141,6 +141,11 @@ class ThriftRocketServerHandler : public RocketServerHandler {
       RpcKind expectedKind,
       bool decodeMetadataUsingBinary);
 
+  FOLLY_NOINLINE void handlePreprocessResult(
+      ThriftRequestCoreUniquePtr request,
+      PreprocessResult&& preprocessResult,
+      bool isInteractionCreatePresent,
+      std::optional<int64_t>& interactionId);
   FOLLY_NOINLINE void handleRequestWithBadMetadata(
       ThriftRequestCoreUniquePtr request);
   FOLLY_NOINLINE void handleRequestWithBadChecksum(

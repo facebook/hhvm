@@ -64,12 +64,12 @@ impl<R: Reason> Display for Ty_<R> {
             }
             Tunion(tys) => match tys.len() {
                 0 => write!(f, "nothing"),
-                1 => write!(f, "(|{})", tys[0]),
+                1 => write!(f, "{}", tys[0]),
                 _ => list(f, "(", " | ", ")", tys.iter()),
             },
             Tintersection(tys) => match tys.len() {
                 0 => write!(f, "mixed"),
-                1 => write!(f, "(&{})", tys[0]),
+                1 => write!(f, "{}", tys[0]),
                 _ => list(f, "(", " & ", ")", tys.iter()),
             },
             Tapply(params) => {

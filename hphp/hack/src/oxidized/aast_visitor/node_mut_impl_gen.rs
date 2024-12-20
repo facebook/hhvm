@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9e7c0f6a07a71c78eeadbef56e20d355>>
+// @generated SignedSource<<b1fd9f6263ce03d14116dbb8b2762d8a>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1937,6 +1937,7 @@ impl<P: Params> NodeMut<P> for RequireKind {
             RequireKind::RequireExtends => Ok(()),
             RequireKind::RequireImplements => Ok(()),
             RequireKind::RequireClass => Ok(()),
+            RequireKind::RequireThisAs => Ok(()),
         }
     }
 }

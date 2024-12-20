@@ -185,6 +185,8 @@ struct
       dc_req_ancestors = List.map dc.dc_req_ancestors ~f:requirement;
       dc_req_ancestors_extends = dc.dc_req_ancestors_extends;
       dc_req_class_ancestors = List.map dc.dc_req_class_ancestors ~f:requirement;
+      dc_req_this_as_ancestors =
+        List.map dc.dc_req_this_as_ancestors ~f:requirement;
       dc_tparams = List.map dc.dc_tparams ~f:type_param;
       dc_substs =
         SMap.map
@@ -259,6 +261,7 @@ struct
       sc_req_extends = List.map sc.sc_req_extends ~f:ty;
       sc_req_implements = List.map sc.sc_req_implements ~f:ty;
       sc_req_class = List.map sc.sc_req_class ~f:ty;
+      sc_req_this_as = List.map sc.sc_req_this_as ~f:ty;
       sc_implements = List.map sc.sc_implements ~f:ty;
       sc_support_dynamic_type = sc.sc_support_dynamic_type;
       sc_consts = List.map sc.sc_consts ~f:shallow_class_const;

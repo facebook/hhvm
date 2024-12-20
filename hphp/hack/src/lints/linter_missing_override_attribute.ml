@@ -75,7 +75,8 @@ let ancestors_providing_methods
           (* We only care if this is a parent that is a class. *)
           Some hint
         | RequireImplements
-        | RequireClass ->
+        | RequireClass
+        | RequireThisAs ->
           None)
   in
   c_extends @ c_implements @ c_uses @ reqs

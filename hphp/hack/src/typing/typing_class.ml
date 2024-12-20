@@ -1606,6 +1606,9 @@ let check_class_where_require_class_constraints env c =
         | (t, RequireClass) ->
           let pos = fst t in
           Some ((pos, Hthis), Ast_defs.Constraint_eq, t)
+        | (t, RequireThisAs) ->
+          let pos = fst t in
+          Some ((pos, Hthis), Ast_defs.Constraint_as, t)
         | _ -> None)
   in
   let (env, ty_err_opt1) =
@@ -1625,6 +1628,7 @@ type class_parents = {
   req_extends: (Aast.hint * decl_ty) list;
   req_implements: (Aast.hint * decl_ty) list;
   req_class: (Aast.hint * decl_ty) list;
+  req_this_as: (Aast.hint * decl_ty) list;
   enum_includes: (Aast.hint * decl_ty) list option;
   xhp_attr_uses: (Aast.hint * decl_ty) list;
 }
@@ -1636,10 +1640,13 @@ let class_parents_hints_to_types env c : class_parents =
   let extends = hints_and_decl_tys c.c_extends in
   let implements = hints_and_decl_tys c.c_implements in
   let uses = hints_and_decl_tys c.c_uses in
-  let (req_extends, req_implements, req_class) = split_reqs c.c_reqs in
+  let (req_extends, req_implements, req_class, req_this_as) =
+    split_reqs c.c_reqs
+  in
   let req_extends = hints_and_decl_tys req_extends in
   let req_implements = hints_and_decl_tys req_implements in
   let req_class = hints_and_decl_tys req_class in
+  let req_this_as = hints_and_decl_tys req_this_as in
   let enum_includes =
     Option.map c.c_enum ~f:(fun e -> hints_and_decl_tys e.e_includes)
   in
@@ -1651,6 +1658,7 @@ let class_parents_hints_to_types env c : class_parents =
     req_extends;
     req_implements;
     req_class;
+    req_this_as;
     enum_includes;
     xhp_attr_uses;
   }
@@ -1665,6 +1673,7 @@ let check_parents_are_tapply_add_constructor_deps
     req_extends;
     req_implements;
     req_class;
+    req_this_as;
     enum_includes;
     xhp_attr_uses;
   } =
@@ -1679,6 +1688,7 @@ let check_parents_are_tapply_add_constructor_deps
     ~is_req:false;
   check_is_tapply_add_constructor_extends_dep env ~is_req:false uses;
   check_is_tapply_add_constructor_extends_dep env ~is_req:true req_class;
+  check_is_tapply_add_constructor_extends_dep env ~is_req:true req_this_as;
   check_is_tapply_add_constructor_extends_dep env ~is_req:true req_extends;
   check_is_tapply_add_constructor_extends_dep env ~is_req:true req_implements;
   Option.iter
@@ -1767,6 +1777,7 @@ let class_hierarchy_checks env c tc (parents : class_parents) =
       req_extends;
       req_implements;
       req_class = _;
+      req_this_as = _;
       enum_includes = _;
       xhp_attr_uses = _;
     } =

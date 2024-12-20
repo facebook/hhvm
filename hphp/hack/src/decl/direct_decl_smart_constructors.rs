@@ -774,6 +774,11 @@ pub struct RequireClause<'a> {
 }
 
 #[derive(Debug)]
+pub struct RequireClauseConstraint<'a> {
+    name: Node<'a>,
+}
+
+#[derive(Debug)]
 pub struct TypeParameterDecl<'a> {
     name: Node<'a>,
     reified: aast::ReifyKind,
@@ -987,6 +992,7 @@ pub enum Node<'a> {
     TypeConstant(&'a ShallowTypeconst<'a>),
     ContextConstraint(&'a (ConstraintKind, Node<'a>)),
     RequireClause(&'a RequireClause<'a>),
+    RequireClauseConstraint(&'a RequireClauseConstraint<'a>),
     ClassishBody(&'a &'a [Node<'a>]),
     TypeParameter(&'a TypeParameterDecl<'a>),
     TypeConstraint(&'a (ConstraintKind, Node<'a>)),
@@ -4587,6 +4593,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut req_extends_len = 0;
         let mut req_implements_len = 0;
         let mut req_class_len = 0;
+        let mut req_this_as_len = 0;
         let mut consts_len = 0;
         let mut typeconsts_len = 0;
         let mut props_len = 0;
@@ -4627,6 +4634,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     Some(TokenKind::Class) => req_class_len += 1,
                     _ => {}
                 },
+                Node::RequireClauseConstraint(_) => {
+                    req_this_as_len += 1;
+                }
                 Node::List(consts @ [Node::Const(..), ..]) => consts_len += consts.len(),
                 Node::Property(&PropertyNode { decls, is_static }) => {
                     if is_static {
@@ -4656,6 +4666,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let mut req_extends = bump::Vec::with_capacity_in(req_extends_len, self.arena);
         let mut req_implements = bump::Vec::with_capacity_in(req_implements_len, self.arena);
         let mut req_class = bump::Vec::with_capacity_in(req_class_len, self.arena);
+        let mut req_this_as = bump::Vec::with_capacity_in(req_this_as_len, self.arena);
         let mut consts = bump::Vec::with_capacity_in(consts_len, self.arena);
         let mut typeconsts = bump::Vec::with_capacity_in(typeconsts_len, self.arena);
         let mut props = bump::Vec::with_capacity_in(props_len, self.arena);
@@ -4718,6 +4729,9 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     }
                     _ => {}
                 },
+                Node::RequireClauseConstraint(require) => {
+                    req_this_as.extend(self.node_to_ty(require.name).iter())
+                }
                 Node::List(&const_nodes @ [Node::Const(..), ..]) => {
                     for node in const_nodes {
                         if let Node::Const(decl) = *node {
@@ -4796,6 +4810,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         let req_extends = req_extends.into_bump_slice();
         let req_implements = req_implements.into_bump_slice();
         let req_class = req_class.into_bump_slice();
+        let req_this_as = req_this_as.into_bump_slice();
         let consts = consts.into_bump_slice();
         let typeconsts = typeconsts.into_bump_slice();
         let props = props.into_bump_slice();
@@ -4831,6 +4846,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             req_extends,
             req_implements,
             req_class,
+            req_this_as,
             implements,
             support_dynamic_type,
             consts,
@@ -5307,6 +5323,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             req_extends: &[],
             req_implements: &[],
             req_class: &[],
+            req_this_as: &[],
             implements: &[],
             support_dynamic_type: parsed_attributes.support_dynamic_type,
             consts,
@@ -5526,6 +5543,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             req_extends: &[],
             req_implements: &[],
             req_class: &[],
+            req_this_as: &[],
             implements: &[],
             support_dynamic_type,
             consts,
@@ -6054,6 +6072,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         _semicolon: Self::Output,
     ) -> Self::Output {
         Node::RequireClause(self.alloc(RequireClause { require_type, name }))
+    }
+
+    fn make_require_clause_constraint(
+        &mut self,
+        _keyword: Self::Output,
+        _this: Self::Output,
+        _as: Self::Output,
+        name: Self::Output,
+        _semicolon: Self::Output,
+    ) -> Self::Output {
+        Node::RequireClauseConstraint(self.alloc(RequireClauseConstraint { name }))
     }
 
     fn make_nullable_type_specifier(

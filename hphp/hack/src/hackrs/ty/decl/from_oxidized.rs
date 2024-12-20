@@ -433,6 +433,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             req_extends,
             req_implements,
             req_class,
+            req_this_as,
             implements,
             support_dynamic_type,
             consts,
@@ -468,6 +469,7 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ClassDecl<'_>> for shallow::Shallo
             req_extends: slice(req_extends),
             req_implements: slice(req_implements),
             req_class: slice(req_class),
+            req_this_as: slice(req_this_as),
             implements: slice(implements),
             support_dynamic_type: *support_dynamic_type,
             consts: slice(consts),
@@ -734,6 +736,7 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
             req_ancestors,
             req_ancestors_extends,
             req_class_ancestors,
+            req_this_as_ancestors,
             extends,
             sealed_whitelist,
             xhp_attr_deps,
@@ -779,6 +782,10 @@ impl<R: Reason> From<&obr::decl_defs::DeclClassType<'_>> for folded::FoldedClass
                 .map(Into::into)
                 .collect(),
             req_class_ancestors: (req_class_ancestors.iter())
+                .copied()
+                .map(Into::into)
+                .collect(),
+            req_this_as_ancestors: (req_this_as_ancestors.iter())
                 .copied()
                 .map(Into::into)
                 .collect(),

@@ -61,6 +61,7 @@ type t =
   | ClassishBody
   | TraitUse
   | RequireClause
+  | RequireClauseConstraint
   | ConstDeclaration
   | ConstantDeclarator
   | TypeConstDeclaration
@@ -250,6 +251,7 @@ let to_string kind =
   | ClassishBody -> "classish_body"
   | TraitUse -> "trait_use"
   | RequireClause -> "require_clause"
+  | RequireClauseConstraint -> "require_clause_constraint"
   | ConstDeclaration -> "const_declaration"
   | ConstantDeclarator -> "constant_declarator"
   | TypeConstDeclaration -> "type_const_declaration"

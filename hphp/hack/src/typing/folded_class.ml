@@ -302,6 +302,12 @@ module ApiEager = struct
     let (c, _) = t in
     c.Decl_defs.dc_req_class_ancestors
 
+  let all_ancestor_req_this_as_requirements (decl, t, _ctx) =
+    Decl_counters.count_subdecl decl Decl_counters.All_ancestor_reqs
+    @@ fun () ->
+    let (c, _) = t in
+    c.Decl_defs.dc_req_this_as_ancestors
+
   let upper_bounds_on_this t =
     (* tally is already done by all_ancestors and upper_bounds *)
     List.map ~f:(fun req -> snd req) (all_ancestor_reqs t)

@@ -7,8 +7,8 @@
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = [];
+       sc_req_this_as = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:17-34], "instanceProperty");
           sp_xhp_attr = None; sp_type = (Rhint ([5:10-16]), (Tprim Tstring));
@@ -194,11 +194,12 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }));
   ("\\MyFinalClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -208,11 +209,12 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }));
   ("\\MyStaticClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = true;
@@ -222,11 +224,12 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }));
   ("\\MyConstructorPropertiesClass",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -237,8 +240,9 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([29:20-28], "private");
            sp_xhp_attr = None;

@@ -7,9 +7,10 @@
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = [];
+       sc_req_this_as = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:19-28], "openDoors");
           sm_type =
@@ -63,10 +64,10 @@
         sc_name = ([8:11-17], "\\Fliers"); sc_tparams = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = [];
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([9:19-22], "fly");
            sm_type =
@@ -104,7 +105,7 @@
         [(Rhint ([13:19-26]), (Tapply (([13:19-26], "\\Machine"), [])))];
         sc_req_implements =
         [(Rhint ([14:22-28]), (Tapply (([14:22-28], "\\Fliers"), [])))];
-        sc_req_class = []; sc_implements = [];
+        sc_req_class = []; sc_req_this_as = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
@@ -142,9 +143,10 @@
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = [];
+        sc_req_this_as = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = [];
         sc_methods =
         [{ Shallow_decl_defs.sm_name = ([24:19-30], "startEngine");
            sm_type =
@@ -182,7 +184,7 @@
         [(Rhint ([28:19-26]), (Tapply (([28:19-26], "\\Machine"), [])))];
         sc_req_implements =
         [(Rhint ([29:22-31]), (Tapply (([29:22-31], "\\HasEngine"), [])))];
-        sc_req_class = []; sc_implements = [];
+        sc_req_class = []; sc_req_this_as = []; sc_implements = [];
         sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
         sc_props = []; sc_sprops = []; sc_constructor = None;
         sc_static_methods = [];
@@ -224,7 +226,7 @@
           (Rhint ([39:7-16]), (Tapply (([39:7-16], "\\Startable"), [])))];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = [];
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
         sc_implements =
         [(Rhint ([37:41-47]), (Tapply (([37:41-47], "\\Fliers"), [])));
           (Rhint ([37:49-58]), (Tapply (([37:49-58], "\\HasEngine"), [])))];

@@ -10,8 +10,8 @@ A: (Major_change
                              "\\L" -> Added };
                            order_change = false });
                    req_extends_changes = None; req_implements_changes = None;
-                   req_class_changes = None; uses_changes = None;
-                   xhp_attr_changes = None });
+                   req_class_changes = None; req_this_as_changes = None;
+                   uses_changes = None; xhp_attr_changes = None });
            type_parameters_change = None; kind_change = None;
            final_change = None; abstract_change = None; is_xhp_change = None;
            internal_change = None; has_xhp_keyword_change = None;

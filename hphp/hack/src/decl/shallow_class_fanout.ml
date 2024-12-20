@@ -356,6 +356,7 @@ let get_parent_changes_fanout
       req_extends_changes;
       req_implements_changes;
       req_class_changes;
+      req_this_as_changes;
       uses_changes;
       xhp_attr_changes;
     } =
@@ -374,6 +375,7 @@ let get_parent_changes_fanout
           req_extends_changes;
           req_implements_changes;
           req_class_changes;
+          req_this_as_changes;
           uses_changes;
           xhp_attr_changes;
         ]

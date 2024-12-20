@@ -6,9 +6,10 @@
        sc_name = ([3:11-15], "\\IFoo"); sc_tparams = []; sc_extends = [];
        sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
        sc_xhp_marked_empty = false; sc_req_extends = [];
-       sc_req_implements = []; sc_req_class = []; sc_implements = [];
-       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+       sc_typeconsts = []; sc_props = []; sc_sprops = [];
+       sc_constructor = None;
        sc_static_methods =
        [{ Shallow_decl_defs.sm_name = ([6:26-32], "getFoo");
           sm_type =
@@ -62,9 +63,10 @@
         sc_name = ([13:11-15], "\\IBaz"); sc_tparams = []; sc_extends = [];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None;
         sc_static_methods =
         [{ Shallow_decl_defs.sm_name = ([15:26-32], "getFoo");
            sm_type =
@@ -120,6 +122,7 @@
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+        sc_req_this_as = [];
         sc_implements =
         [(Rhint ([21:31-35]), (Tapply (([21:31-35], "\\IFoo"), [])));
           (Rhint ([21:37-41]), (Tapply (([21:37-41], "\\IBaz"), [])))];
@@ -180,6 +183,7 @@
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+        sc_req_this_as = [];
         sc_implements =
         [(Rhint ([33:31-35]), (Tapply (([33:31-35], "\\IBaz"), [])));
           (Rhint ([33:37-41]), (Tapply (([33:37-41], "\\IFoo"), [])))];

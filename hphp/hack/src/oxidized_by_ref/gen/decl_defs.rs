@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d8575c242f0957571f5b5f75398a6d62>>
+// @generated SignedSource<<a185a0f371fd02e076f337d1095a241f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -243,6 +243,12 @@ pub struct DeclClassType<'a> {
     /// `dc_req_ancestors_extends` fields.
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub req_class_ancestors: &'a [&'a Requirement<'a>],
+    /// dc_req_this_as_ancestors gathers all the `require this as`
+    /// requirements declared in ancestors.  Remark that `require this as`
+    /// requirements are _not_ stored in `dc_req_ancestors` or
+    /// `dc_req_ancestors_extends` fields.
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub req_this_as_ancestors: &'a [&'a Requirement<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub extends: s_set::SSet<'a>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
@@ -269,3 +275,34 @@ pub struct DeclClassType<'a> {
 }
 impl<'a> TrivialDrop for DeclClassType<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(DeclClassType<'arena>);
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRepIn,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cr_req_")]
+#[repr(C)]
+pub struct ClassRequirements<'a> {
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub ancestors: &'a [&'a typing_defs::Requirement<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub ancestors_extends: s_set::SSet<'a>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub class_ancestors: &'a [&'a typing_defs::Requirement<'a>],
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub this_as_ancestors: &'a [&'a typing_defs::Requirement<'a>],
+}
+impl<'a> TrivialDrop for ClassRequirements<'a> {}
+arena_deserializer::impl_deserialize_in_arena!(ClassRequirements<'arena>);

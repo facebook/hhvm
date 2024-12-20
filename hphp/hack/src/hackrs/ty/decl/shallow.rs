@@ -169,6 +169,7 @@ pub struct ShallowClass<R: Reason> {
     pub req_extends: Box<[Ty<R>]>,
     pub req_implements: Box<[Ty<R>]>,
     pub req_class: Box<[Ty<R>]>,
+    pub req_this_as: Box<[Ty<R>]>,
     pub implements: Box<[Ty<R>]>,
     pub support_dynamic_type: bool,
     pub consts: Box<[ShallowClassConst<R>]>,

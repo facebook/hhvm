@@ -43,6 +43,7 @@ type feature_name =
   | MethodTraitDiamond
   | UpcastExpression
   | RequireClass
+  | RequireConstraint
   | NewtypeSuperBounds
   | Package
   | RequirePackage
@@ -84,6 +85,7 @@ let feature_name_map =
       ("method_trait_diamond", MethodTraitDiamond);
       ("upcast_expression", UpcastExpression);
       ("require_class", RequireClass);
+      ("require_constraint", RequireConstraint);
       ("newtype_super_bounds", NewtypeSuperBounds);
       ("package", Package);
       ("require_package", RequirePackage);

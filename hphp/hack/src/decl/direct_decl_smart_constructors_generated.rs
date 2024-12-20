@@ -226,6 +226,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> SmartConstructors for DirectDec
         <Self as FlattenSmartConstructors>::make_require_clause(self, keyword, kind, name, semicolon)
     }
 
+    fn make_require_clause_constraint(&mut self, keyword: Self::Output, this: Self::Output, operator: Self::Output, name: Self::Output, semicolon: Self::Output) -> Self::Output {
+        <Self as FlattenSmartConstructors>::make_require_clause_constraint(self, keyword, this, operator, name, semicolon)
+    }
+
     fn make_const_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, keyword: Self::Output, type_specifier: Self::Output, declarators: Self::Output, semicolon: Self::Output) -> Self::Output {
         <Self as FlattenSmartConstructors>::make_const_declaration(self, attribute_spec, modifiers, keyword, type_specifier, declarators, semicolon)
     }

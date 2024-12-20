@@ -400,6 +400,13 @@ struct
         require_name: t;
         require_semicolon: t;
       }
+    | RequireClauseConstraint of {
+        require_constraint_keyword: t;
+        require_constraint_this: t;
+        require_constraint_operator: t;
+        require_constraint_name: t;
+        require_constraint_semicolon: t;
+      }
     | ConstDeclaration of {
         const_attribute_spec: t;
         const_modifiers: t;

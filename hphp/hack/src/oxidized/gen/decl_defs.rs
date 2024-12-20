@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<c4fbc475a0d68c9dfc1e82a34b05ee06>>
+// @generated SignedSource<<253316a775d683aef1d4b00a359db3ba>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -231,6 +231,11 @@ pub struct DeclClassType {
     /// requirements are _not_ stored in `dc_req_ancestors` or
     /// `dc_req_ancestors_extends` fields.
     pub req_class_ancestors: Vec<Requirement>,
+    /// dc_req_this_as_ancestors gathers all the `require this as`
+    /// requirements declared in ancestors.  Remark that `require this as`
+    /// requirements are _not_ stored in `dc_req_ancestors` or
+    /// `dc_req_ancestors_extends` fields.
+    pub req_this_as_ancestors: Vec<Requirement>,
     pub extends: s_set::SSet,
     pub sealed_whitelist: Option<s_set::SSet>,
     pub xhp_attr_deps: s_set::SSet,
@@ -245,4 +250,29 @@ pub struct DeclClassType {
     /// autocomplete results.
     pub sort_text: Option<String>,
     pub package: Option<aast_defs::PackageMembership>,
+}
+
+#[derive(
+    Clone,
+    Debug,
+    Deserialize,
+    Eq,
+    EqModuloPos,
+    FromOcamlRep,
+    Hash,
+    NoPosHash,
+    Ord,
+    PartialEq,
+    PartialOrd,
+    Serialize,
+    ToOcamlRep
+)]
+#[rust_to_ocaml(attr = "deriving show")]
+#[rust_to_ocaml(prefix = "cr_req_")]
+#[repr(C)]
+pub struct ClassRequirements {
+    pub ancestors: Vec<typing_defs::Requirement>,
+    pub ancestors_extends: s_set::SSet,
+    pub class_ancestors: Vec<typing_defs::Requirement>,
+    pub this_as_ancestors: Vec<typing_defs::Requirement>,
 }

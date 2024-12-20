@@ -453,6 +453,17 @@ impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
                     }
                 })
             },
+            RequireClauseConstraint(x) => {
+                get_index(5).and_then(|index| { match index {
+                        0 => Some(&x.keyword),
+                    1 => Some(&x.this),
+                    2 => Some(&x.operator),
+                    3 => Some(&x.name),
+                    4 => Some(&x.semicolon),
+                        _ => None,
+                    }
+                })
+            },
             ConstDeclaration(x) => {
                 get_index(6).and_then(|index| { match index {
                         0 => Some(&x.attribute_spec),

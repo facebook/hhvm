@@ -45,7 +45,7 @@ let check_require_class env class_pos tc (trait_pos, req_ty) =
   | None -> env
   | Some (_r, (_p, req_name), _paraml) ->
     (* in a `require class t;` trait constraint, t must be a non-generic class
-     * name.  Since lowering enforces _paraml to be empty, so it is safe to
+     * name.  Since lowering enforces _paraml to be empty, it is safe to
      * ignore _param here.  Additionally we enforce that the class that uses
      * the trait with a require class constraint does not have type parameters
      * and is final.
@@ -166,7 +166,7 @@ let check_class env class_pos tc =
   | Ast_defs.Cclass _ ->
     let env =
       List.fold
-        (Cls.all_ancestor_reqs tc)
+        (Cls.all_ancestor_req_this_as_requirements tc @ Cls.all_ancestor_reqs tc)
         ~f:(fun env req ->
           check_fulfillment env class_pos (Cls.get_ancestor tc) req)
         ~init:env

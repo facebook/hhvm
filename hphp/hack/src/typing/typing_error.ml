@@ -473,6 +473,12 @@ module Primary = struct
         req_pos: Pos_or_decl.t;
         req_name: string;
       }
+    | Unsatisfied_req_this_as of {
+        pos: Pos.t;
+        trait_pos: Pos_or_decl.t;
+        req_pos: Pos_or_decl.t;
+        req_name: string;
+      }
     | Req_class_not_final of {
         pos: Pos.t;
         trait_pos: Pos_or_decl.t;

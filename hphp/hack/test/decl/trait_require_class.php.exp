@@ -9,11 +9,11 @@
        sc_req_implements = [];
        sc_req_class =
        [(Rhint ([7:17-18]), (Tapply (([7:17-18], "\\C"), [])))];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package = None }));
+       sc_req_this_as = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\T2",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -26,11 +26,11 @@
         sc_req_class =
         [(Rhint ([11:17-18]), (Tapply (([11:17-18], "\\C"), [])));
           (Rhint ([12:17-18]), (Tapply (([12:17-18], "\\D"), [])))];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package = None }));
+        sc_req_this_as = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -40,11 +40,11 @@
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package = None }));
+        sc_req_this_as = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -54,9 +54,9 @@
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package = None }))
+        sc_req_this_as = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
   ]

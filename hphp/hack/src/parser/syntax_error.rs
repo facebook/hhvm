@@ -1240,6 +1240,9 @@ pub const dollar_sign_in_meth_caller_argument: Error =
 pub const require_class_applied_to_generic: Error =
     Cow::Borrowed("Require class cannot be used with a generic class");
 
+pub const require_this_as_applied_to_generic: Error =
+    Cow::Borrowed("Require this <: t cannot be used with a generic class");
+
 pub const invalid_enum_class_label_qualifier: Error = Cow::Borrowed(
     "Invalid label qualifier. Only names or qualified names are allowed at this position.",
 );

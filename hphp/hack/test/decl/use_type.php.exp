@@ -7,11 +7,11 @@
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = []; sc_methods = [];
-       sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-       sc_package = None }));
+       sc_req_this_as = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+       sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\C\\X",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -21,11 +21,11 @@
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
-        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
-        sc_package = None }));
+        sc_req_this_as = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
+        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
   ("\\D",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -36,11 +36,12 @@
         [(Rhint ([15:19-20]), (Tapply (([15:19-20], "\\NS\\C"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None; sc_package = None }));
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }));
   ("\\f",
    (Shallow_decl_defs.Fun
       { Typing_defs.fe_deprecated = None; fe_module = None;

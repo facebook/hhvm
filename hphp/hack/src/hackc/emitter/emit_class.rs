@@ -302,14 +302,17 @@ fn from_class_elt_requirements<'a>(class_: &'a ast::Class_) -> Vec<Requirement> 
     class_
         .reqs
         .iter()
-        .map(|ClassReq(h, req_kind)| {
+        .filter_map(|ClassReq(h, req_kind)| {
             let name = emit_type_hint::hint_to_class(h);
-            let kind = match *req_kind {
-                RequireKind::RequireExtends => TraitReqKind::MustExtend,
-                RequireKind::RequireImplements => TraitReqKind::MustImplement,
-                RequireKind::RequireClass => TraitReqKind::MustBeClass,
-            };
-            Requirement { name, kind }
+            let f = |kind| Some(Requirement { name, kind });
+            match *req_kind {
+                RequireKind::RequireExtends => f(TraitReqKind::MustExtend),
+                RequireKind::RequireImplements => f(TraitReqKind::MustImplement),
+                RequireKind::RequireClass => f(TraitReqKind::MustBeClass),
+                // `require this as C` is an experimental trait constraint
+                // TODO: export to HHVM to perform sanity checks at class load time
+                RequireKind::RequireThisAs => None,
+            }
         })
         .collect()
 }

@@ -2025,6 +2025,30 @@ end = struct
       [],
       User_error_flags.empty )
 
+  let unsatisfied_req_this_as pos trait_pos req_name req_pos =
+    let reasons =
+      lazy
+        (let r =
+           ( trait_pos,
+             "This requires to be a subtype of " ^ Render.strip_ns req_name )
+         in
+         if Pos_or_decl.equal trait_pos req_pos then
+           [r]
+         else
+           [r; (req_pos, "Required here")])
+    and claim =
+      lazy
+        ( pos,
+          "This class does not satisfy all the requirements of its traits or interfaces."
+        )
+    in
+    ( Error_code.UnsatisfiedReq,
+      claim,
+      reasons,
+      lazy Explanation.empty,
+      [],
+      User_error_flags.empty )
+
   let req_class_not_final pos trait_pos req_pos =
     let reasons =
       lazy
@@ -5513,6 +5537,8 @@ end = struct
       unsatisfied_req pos trait_pos req_name req_pos
     | Unsatisfied_req_class { pos; trait_pos; req_name; req_pos } ->
       unsatisfied_req_class pos trait_pos req_name req_pos
+    | Unsatisfied_req_this_as { pos; trait_pos; req_name; req_pos } ->
+      unsatisfied_req_this_as pos trait_pos req_name req_pos
     | Req_class_not_final { pos; trait_pos; req_pos } ->
       req_class_not_final pos trait_pos req_pos
     | Incompatible_reqs { pos; req_name; req_class_pos; req_extends_pos } ->

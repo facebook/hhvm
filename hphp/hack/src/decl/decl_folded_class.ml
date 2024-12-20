@@ -925,9 +925,15 @@ and class_decl
   let (extends, xhp_attr_deps, decl_errors) =
     get_class_parents_and_traits env c parents decl_errors
   in
-  let (req_ancestors, req_ancestors_extends, req_class_ancestors) =
+  let {
+    cr_req_ancestors;
+    cr_req_ancestors_extends;
+    cr_req_class_ancestors;
+    cr_req_this_as_ancestors;
+  } =
     Decl_requirements.get_class_requirements env parents c
   in
+
   let enum = c.sc_enum_type in
   let enum_inner_ty = SMap.find_opt SN.FB.tInner typeconsts in
   let is_enum_class = Ast_defs.is_c_enum_class c.sc_kind in
@@ -1022,9 +1028,10 @@ and class_decl
       dc_xhp_attr_deps = xhp_attr_deps;
       dc_xhp_enum_values = c.sc_xhp_enum_values;
       dc_xhp_marked_empty = c.sc_xhp_marked_empty;
-      dc_req_ancestors = req_ancestors;
-      dc_req_ancestors_extends = req_ancestors_extends;
-      dc_req_class_ancestors = req_class_ancestors;
+      dc_req_ancestors = cr_req_ancestors;
+      dc_req_ancestors_extends = cr_req_ancestors_extends;
+      dc_req_class_ancestors = cr_req_class_ancestors;
+      dc_req_this_as_ancestors = cr_req_this_as_ancestors;
       dc_enum_type = enum;
       dc_decl_errors = decl_errors;
       dc_docs_url = c.sc_docs_url;

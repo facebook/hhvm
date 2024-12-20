@@ -7,6 +7,7 @@
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
+       sc_req_this_as = [];
        sc_implements =
        [(Rhint ([4:24-42]),
          (Tapply (([4:24-42], "\\HH\\ClassAttribute"), [])))];
@@ -23,7 +24,7 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = [];
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
         sc_implements =
         [(Rhint ([7:26-44]),
           (Tapply (([7:26-44], "\\HH\\ClassAttribute"), [])))];
@@ -40,9 +41,10 @@
         sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
         sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
         sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-        sc_typeconsts = []; sc_props = []; sc_sprops = [];
-        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_req_this_as = []; sc_implements = [];
+        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_props = []; sc_sprops = []; sc_constructor = None;
+        sc_static_methods = []; sc_methods = [];
         sc_user_attributes =
         [{ Typing_defs_core.ua_name = ([10:10-15], "\\X\\Y\\Bar");
            ua_params = []; ua_raw_val = None };

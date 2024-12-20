@@ -848,6 +848,30 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Nest [name; t env semi];
           Newline;
         ]
+    | Syntax.RequireClauseConstraint
+        {
+          require_constraint_keyword = kw;
+          require_constraint_this = this;
+          require_constraint_operator = operator;
+          require_constraint_name = name;
+          require_constraint_semicolon = semi;
+        } ->
+      let name = t env name in
+      Concat
+        [
+          t env kw;
+          Space;
+          t env this;
+          Space;
+          t env operator;
+          Space;
+          (if has_split name then
+            SplitWith Cost.High
+          else
+            Nothing);
+          Nest [name; t env semi];
+          Newline;
+        ]
     | Syntax.ConstDeclaration
         {
           const_attribute_spec = attr;

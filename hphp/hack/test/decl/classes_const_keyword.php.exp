@@ -7,7 +7,8 @@
        sc_tparams = []; sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false;
+       sc_req_this_as = []; sc_implements = [];
+       sc_support_dynamic_type = false;
        sc_consts =
        [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
           scc_name = ([5:27-32], "CDICT");
@@ -60,8 +61,8 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = (Typing_defs.CCAbstract false);
            scc_name = ([13:22-35], "CABSTRACT_INT");
@@ -81,8 +82,8 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([17:18-22], "CVEC");
@@ -116,8 +117,8 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([22:27-34], "CDARRAY");
@@ -163,8 +164,8 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([29:13-17], "CINT");
@@ -196,8 +197,8 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([36:47-53], "CSHAPE");
@@ -228,8 +229,8 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([41:33-40], "COPTION");
@@ -265,8 +266,8 @@
         sc_tparams = []; sc_extends = []; sc_uses = [];
         sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false;
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false;
         sc_consts =
         [{ Shallow_decl_defs.scc_abstract = Typing_defs.CCConcrete;
            scc_name = ([45:32-42], "CCLASSNAME");

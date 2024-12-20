@@ -20,6 +20,7 @@ module Parents = struct
     req_extends: Typing_defs.decl_ty list;
     req_implements: Typing_defs.decl_ty list;
     req_class: Typing_defs.decl_ty list;
+    req_this_as: Typing_defs.decl_ty list;
     uses: Typing_defs.decl_ty list;
     xhp_attr_uses: Typing_defs.decl_ty list;
   }
@@ -31,8 +32,9 @@ module Parents = struct
       sc_implements;
       sc_req_extends;
       sc_req_implements;
-      sc_uses;
       sc_req_class;
+      sc_req_this_as;
+      sc_uses;
       sc_xhp_attr_uses;
       sc_mode = _;
       sc_final = _;
@@ -67,6 +69,7 @@ module Parents = struct
       req_extends = sc_req_extends;
       req_implements = sc_req_implements;
       req_class = sc_req_class;
+      req_this_as = sc_req_this_as;
       uses = sc_uses;
       xhp_attr_uses = sc_xhp_attr_uses;
     }
@@ -658,6 +661,8 @@ let diff_parents (c1 : Parents.t) (c2 : Parents.t) : parent_changes option =
           diff_type_lists c1.Parents.req_implements c2.Parents.req_implements;
         req_class_changes =
           diff_type_lists c1.Parents.req_class c2.Parents.req_class;
+        req_this_as_changes =
+          diff_type_lists c1.Parents.req_this_as c2.Parents.req_this_as;
         uses_changes = diff_type_lists c1.Parents.uses c2.Parents.uses;
         xhp_attr_changes =
           diff_type_lists c1.Parents.xhp_attr_uses c2.Parents.xhp_attr_uses;

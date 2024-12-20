@@ -269,6 +269,13 @@ module type Syntax_S = sig
         require_name: t;
         require_semicolon: t;
       }
+    | RequireClauseConstraint of {
+        require_constraint_keyword: t;
+        require_constraint_this: t;
+        require_constraint_operator: t;
+        require_constraint_name: t;
+        require_constraint_semicolon: t;
+      }
     | ConstDeclaration of {
         const_attribute_spec: t;
         const_modifiers: t;
@@ -1235,6 +1242,8 @@ module type Syntax_S = sig
 
   val make_require_clause : t -> t -> t -> t -> t
 
+  val make_require_clause_constraint : t -> t -> t -> t -> t -> t
+
   val make_const_declaration : t -> t -> t -> t -> t -> t -> t
 
   val make_constant_declarator : t -> t -> t
@@ -1613,6 +1622,8 @@ module type Syntax_S = sig
   val is_trait_use : t -> bool
 
   val is_require_clause : t -> bool
+
+  val is_require_clause_constraint : t -> bool
 
   val is_const_declaration : t -> bool
 

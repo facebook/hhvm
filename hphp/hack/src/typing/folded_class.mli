@@ -103,6 +103,12 @@ val all_ancestor_req_names : t -> string list
     *)
 val all_ancestor_req_class_requirements : t -> requirement list
 
+(** All the require this as requirements
+    * These requirements impose a non-strict subtype constraint 
+    * and are not included in all_ancestor_reqs or all_ancestor_req_names
+    *)
+val all_ancestor_req_this_as_requirements : t -> requirement list
+
 val get_const : t -> string -> class_const option
 
 val get_typeconst : t -> string -> typeconst_type option

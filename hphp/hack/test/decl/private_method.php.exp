@@ -7,9 +7,10 @@
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = []; sc_props = []; sc_sprops = [];
-       sc_constructor = None; sc_static_methods = [];
+       sc_req_this_as = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+       sc_props = []; sc_sprops = []; sc_constructor = None;
+       sc_static_methods = [];
        sc_methods =
        [{ Shallow_decl_defs.sm_name = ([4:22-23], "f");
           sm_type =
@@ -43,9 +44,10 @@
         sc_extends = [(Rhint ([7:17-18]), (Tapply (([7:17-18], "\\A"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
-        sc_props = []; sc_sprops = []; sc_constructor = None;
-        sc_static_methods = []; sc_methods = []; sc_user_attributes = [];
-        sc_enum_type = None; sc_docs_url = None; sc_package = None }))
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = []; sc_props = []; sc_sprops = [];
+        sc_constructor = None; sc_static_methods = []; sc_methods = [];
+        sc_user_attributes = []; sc_enum_type = None; sc_docs_url = None;
+        sc_package = None }))
   ]

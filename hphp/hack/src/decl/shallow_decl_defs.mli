@@ -137,6 +137,7 @@ type shallow_class = {
   sc_req_extends: decl_ty list;
   sc_req_implements: decl_ty list;
   sc_req_class: decl_ty list;
+  sc_req_this_as: decl_ty list;
   sc_implements: decl_ty list;
   sc_support_dynamic_type: bool;
   sc_consts: shallow_class_const list;

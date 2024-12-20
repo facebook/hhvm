@@ -919,6 +919,7 @@ and require_kind =
   | RequireExtends
   | RequireImplements
   | RequireClass
+  | RequireThisAs
 [@@transform.opaque]
 
 and emit_id =

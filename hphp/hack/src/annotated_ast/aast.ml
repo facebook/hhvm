@@ -62,32 +62,39 @@ let split_vars c_vars =
   in
   (List.rev statics, List.rev res)
 
-(* Splits `require`s into extends, implements, class *)
+(* Splits `require`s into extends, implements, class, constraint *)
 let split_reqs c_reqs =
-  let (extends, implements, class_) =
+  let (extends, implements, class_, this_as) =
     List.fold_left
-      (fun (extends, implements, class_) (h, require_kind) ->
+      (fun (extends, implements, class_, this_as) (h, require_kind) ->
         match require_kind with
-        | RequireExtends -> (h :: extends, implements, class_)
-        | RequireImplements -> (extends, h :: implements, class_)
-        | RequireClass -> (extends, implements, h :: class_))
-      ([], [], [])
+        | RequireExtends -> (h :: extends, implements, class_, this_as)
+        | RequireImplements -> (extends, h :: implements, class_, this_as)
+        | RequireClass -> (extends, implements, h :: class_, this_as)
+        | RequireThisAs -> (extends, implements, class_, h :: this_as))
+      ([], [], [], [])
       c_reqs
   in
-  (List.rev extends, List.rev implements, List.rev class_)
+  (List.rev extends, List.rev implements, List.rev class_, List.rev this_as)
 
 let partition_map_require_kind ~f trait_reqs =
-  let rec partition req_extends req_implements req_class c_reqs =
+  let rec partition req_extends req_implements req_class req_this_as c_reqs =
     match c_reqs with
-    | [] -> (List.rev req_extends, List.rev req_implements, List.rev req_class)
+    | [] ->
+      ( List.rev req_extends,
+        List.rev req_implements,
+        List.rev req_class,
+        List.rev req_this_as )
     | ((_, RequireExtends) as req) :: tl ->
-      partition (f req :: req_extends) req_implements req_class tl
+      partition (f req :: req_extends) req_implements req_class req_this_as tl
     | ((_, RequireImplements) as req) :: tl ->
-      partition req_extends (f req :: req_implements) req_class tl
+      partition req_extends (f req :: req_implements) req_class req_this_as tl
     | ((_, RequireClass) as req) :: tl ->
-      partition req_extends req_implements (f req :: req_class) tl
+      partition req_extends req_implements (f req :: req_class) req_this_as tl
+    | ((_, RequireThisAs) as req) :: tl ->
+      partition req_extends req_implements req_class (f req :: req_this_as) tl
   in
-  partition [] [] [] trait_reqs
+  partition [] [] [] [] trait_reqs
 
 (* extract the hint from a type annotation *)
 let hint_of_type_hint : 'ex. 'ex type_hint -> type_hint_ = snd

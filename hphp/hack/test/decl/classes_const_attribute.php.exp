@@ -7,8 +7,8 @@
        sc_extends = []; sc_uses = []; sc_xhp_attr_uses = [];
        sc_xhp_enum_values = {}; sc_xhp_marked_empty = false;
        sc_req_extends = []; sc_req_implements = []; sc_req_class = [];
-       sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
-       sc_typeconsts = [];
+       sc_req_this_as = []; sc_implements = [];
+       sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
        sc_props =
        [{ Shallow_decl_defs.sp_name = ([5:40-42], "p"); sp_xhp_attr = None;
           sp_type = (Rhint ([5:31-39]), (Tprim Tarraykey));
@@ -32,8 +32,9 @@
         sc_extends = [(Rhint ([8:17-18]), (Tapply (([8:17-18], "\\A"), [])))];
         sc_uses = []; sc_xhp_attr_uses = []; sc_xhp_enum_values = {};
         sc_xhp_marked_empty = false; sc_req_extends = [];
-        sc_req_implements = []; sc_req_class = []; sc_implements = [];
-        sc_support_dynamic_type = false; sc_consts = []; sc_typeconsts = [];
+        sc_req_implements = []; sc_req_class = []; sc_req_this_as = [];
+        sc_implements = []; sc_support_dynamic_type = false; sc_consts = [];
+        sc_typeconsts = [];
         sc_props =
         [{ Shallow_decl_defs.sp_name = ([9:26-28], "p"); sp_xhp_attr = None;
            sp_type = (Rhint ([9:22-25]), (Tprim Tint));

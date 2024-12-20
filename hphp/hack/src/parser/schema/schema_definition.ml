@@ -619,6 +619,22 @@ let schema : schema_node list =
         ];
     };
     {
+      kind_name = "RequireClauseConstraint";
+      type_name = "require_clause_constraint";
+      func_name = "require_clause_constraint";
+      description = "require_clause_constraint";
+      prefix = "require_constraint";
+      aggregates = [ClassBodyDeclaration];
+      fields =
+        [
+          ("keyword", Token);
+          ("this", Token);
+          ("operator", Token);
+          ("name", Aggregate Specifier);
+          ("semicolon", Token);
+        ];
+    };
+    {
       kind_name = "ConstDeclaration";
       type_name = "const_declaration";
       func_name = "const_declaration";

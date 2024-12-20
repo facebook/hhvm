@@ -1131,6 +1131,13 @@ where
         // require-class-clause:
         //   require  class  qualified-name  ;
         //
+        // The cases above return a RequireClause node
+        //
+        // require-constraint-clause:
+        //   require  this  <:  qualified name  ;
+        //
+        // This case returns a RequireClauseConstraint node
+        //
         // We must also parse "require extends :foo;"
         // TODO: What about "require extends :foo<int>;" ?
         // TODO: The spec is incomplete; we need to be able to parse
@@ -1144,24 +1151,44 @@ where
         // are missing.
         let req = self.assert_token(TokenKind::Require);
         let token_kind = self.peek_token_kind();
-        let req_kind = match token_kind {
+        match token_kind {
             TokenKind::Implements | TokenKind::Extends | TokenKind::Class => {
                 let req_kind_token = self.next_token();
-                self.sc_mut().make_token(req_kind_token)
+                let req_kind = self.sc_mut().make_token(req_kind_token);
+                let name = if self.is_next_xhp_class_name() {
+                    self.parse_simple_type_or_generic()
+                } else {
+                    self.parse_qualified_name_type()
+                };
+                let semi = self.require_semicolon();
+                self.sc_mut().make_require_clause(req, req_kind, name, semi)
+            }
+            TokenKind::This => {
+                let req_this_token = self.next_token();
+                let req_this = self.sc_mut().make_token(req_this_token);
+                let as_token = self.require_as();
+                let name = if self.is_next_xhp_class_name() {
+                    self.parse_simple_type_or_generic()
+                } else {
+                    self.parse_qualified_name_type()
+                };
+                let semi = self.require_semicolon();
+                self.sc_mut()
+                    .make_require_clause_constraint(req, req_this, as_token, name, semi)
             }
             _ => {
                 self.with_error(Errors::error1045, Vec::new());
                 let pos = self.pos();
-                self.sc_mut().make_missing(pos)
+                let req_kind = self.sc_mut().make_missing(pos);
+                let name = if self.is_next_xhp_class_name() {
+                    self.parse_simple_type_or_generic()
+                } else {
+                    self.parse_qualified_name_type()
+                };
+                let semi = self.require_semicolon();
+                self.sc_mut().make_require_clause(req, req_kind, name, semi)
             }
-        };
-        let name = if self.is_next_xhp_class_name() {
-            self.parse_simple_type_or_generic()
-        } else {
-            self.parse_qualified_name_type()
-        };
-        let semi = self.require_semicolon();
-        self.sc_mut().make_require_clause(req, req_kind, name, semi)
+        }
     }
 
     fn parse_methodish_or_property(&mut self, attribute_spec: S::Output) -> S::Output {

@@ -35,6 +35,7 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
             req_extends,
             req_implements,
             req_class,
+            req_this_as,
             implements,
             support_dynamic_type,
             consts,
@@ -105,6 +106,9 @@ impl<R: Reason> fmt::Debug for ShallowClass<R> {
         }
         if !req_class.is_empty() {
             s.field("req_class", req_class);
+        }
+        if !req_this_as.is_empty() {
+            s.field("req_this_as", req_this_as);
         }
         if !implements.is_empty() {
             s.field("implements", implements);
@@ -184,6 +188,7 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
             req_ancestors,
             req_ancestors_extends,
             req_class_ancestors,
+            req_this_as_ancestors,
             sealed_whitelist,
             deferred_init_members,
             decl_errors,
@@ -280,6 +285,9 @@ impl<R: Reason> fmt::Debug for FoldedClass<R> {
         }
         if !req_class_ancestors.is_empty() {
             s.field("req_class_ancestors", req_class_ancestors);
+        }
+        if !req_this_as_ancestors.is_empty() {
+            s.field("req_this_as_ancestors", req_class_ancestors);
         }
         if let Some(sealed_whitelist) = sealed_whitelist {
             s.field("sealed_whitelist", sealed_whitelist);

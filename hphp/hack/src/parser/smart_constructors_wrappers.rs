@@ -194,6 +194,9 @@ where S: SmartConstructors<State = St>,
     fn make_require_clause(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output) -> Self::Output {
         compose(SyntaxKind::RequireClause, self.s.make_require_clause(arg0.1, arg1.1, arg2.1, arg3.1))
     }
+    fn make_require_clause_constraint(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
+        compose(SyntaxKind::RequireClauseConstraint, self.s.make_require_clause_constraint(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1))
+    }
     fn make_const_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
         compose(SyntaxKind::ConstDeclaration, self.s.make_const_declaration(arg0.1, arg1.1, arg2.1, arg3.1, arg4.1, arg5.1))
     }

@@ -245,7 +245,8 @@ let container_defn source_text clss decl_id members fa =
   let (type_params, fa) = type_params source_text clss.c_tparams fa in
   let (module_, fa) = module_field clss.c_module clss.c_internal fa in
   let attributes = Build_fact.attributes source_text clss.c_user_attributes in
-  let (req_extends_hints, req_implements_hints, req_class_hints) =
+  (* T207902686: add Glean support for experimental require this as C constraints *)
+  let (req_extends_hints, req_implements_hints, req_class_hints, _) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
   let (require_extends, fa) =

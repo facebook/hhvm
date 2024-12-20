@@ -79,6 +79,7 @@ pub trait SmartConstructors: Clone {
     fn make_classish_body(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output) -> Self::Output;
     fn make_trait_use(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output) -> Self::Output;
     fn make_require_clause(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output) -> Self::Output;
+    fn make_require_clause_constraint(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output) -> Self::Output;
     fn make_const_declaration(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output) -> Self::Output;
     fn make_constant_declarator(&mut self, arg0: Self::Output, arg1: Self::Output) -> Self::Output;
     fn make_type_const_declaration(&mut self, arg0: Self::Output, arg1: Self::Output, arg2: Self::Output, arg3: Self::Output, arg4: Self::Output, arg5: Self::Output, arg6: Self::Output, arg7: Self::Output, arg8: Self::Output, arg9: Self::Output) -> Self::Output;

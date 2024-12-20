@@ -97,6 +97,7 @@ module WithToken (Token : TokenType) = struct
       | ClassishBody _ -> SyntaxKind.ClassishBody
       | TraitUse _ -> SyntaxKind.TraitUse
       | RequireClause _ -> SyntaxKind.RequireClause
+      | RequireClauseConstraint _ -> SyntaxKind.RequireClauseConstraint
       | ConstDeclaration _ -> SyntaxKind.ConstDeclaration
       | ConstantDeclarator _ -> SyntaxKind.ConstantDeclarator
       | TypeConstDeclaration _ -> SyntaxKind.TypeConstDeclaration
@@ -349,6 +350,9 @@ module WithToken (Token : TokenType) = struct
     let is_trait_use = has_kind SyntaxKind.TraitUse
 
     let is_require_clause = has_kind SyntaxKind.RequireClause
+
+    let is_require_clause_constraint =
+      has_kind SyntaxKind.RequireClauseConstraint
 
     let is_const_declaration = has_kind SyntaxKind.ConstDeclaration
 
@@ -1189,6 +1193,20 @@ module WithToken (Token : TokenType) = struct
         let acc = f acc require_kind in
         let acc = f acc require_name in
         let acc = f acc require_semicolon in
+        acc
+      | RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          } ->
+        let acc = f acc require_constraint_keyword in
+        let acc = f acc require_constraint_this in
+        let acc = f acc require_constraint_operator in
+        let acc = f acc require_constraint_name in
+        let acc = f acc require_constraint_semicolon in
         acc
       | ConstDeclaration
           {
@@ -3034,6 +3052,21 @@ module WithToken (Token : TokenType) = struct
       | RequireClause
           { require_keyword; require_kind; require_name; require_semicolon } ->
         [require_keyword; require_kind; require_name; require_semicolon]
+      | RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          } ->
+        [
+          require_constraint_keyword;
+          require_constraint_this;
+          require_constraint_operator;
+          require_constraint_name;
+          require_constraint_semicolon;
+        ]
       | ConstDeclaration
           {
             const_attribute_spec;
@@ -4803,6 +4836,21 @@ module WithToken (Token : TokenType) = struct
       | RequireClause
           { require_keyword; require_kind; require_name; require_semicolon } ->
         ["require_keyword"; "require_kind"; "require_name"; "require_semicolon"]
+      | RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          } ->
+        [
+          "require_constraint_keyword";
+          "require_constraint_this";
+          "require_constraint_operator";
+          "require_constraint_name";
+          "require_constraint_semicolon";
+        ]
       | ConstDeclaration
           {
             const_attribute_spec;
@@ -6710,6 +6758,22 @@ module WithToken (Token : TokenType) = struct
           [require_keyword; require_kind; require_name; require_semicolon] ) ->
         RequireClause
           { require_keyword; require_kind; require_name; require_semicolon }
+      | ( SyntaxKind.RequireClauseConstraint,
+          [
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          ] ) ->
+        RequireClauseConstraint
+          {
+            require_constraint_keyword;
+            require_constraint_this;
+            require_constraint_operator;
+            require_constraint_name;
+            require_constraint_semicolon;
+          }
       | ( SyntaxKind.ConstDeclaration,
           [
             const_attribute_spec;
@@ -8817,6 +8881,25 @@ module WithToken (Token : TokenType) = struct
         let syntax =
           RequireClause
             { require_keyword; require_kind; require_name; require_semicolon }
+        in
+        let value = ValueBuilder.value_from_syntax syntax in
+        make syntax value
+
+      let make_require_clause_constraint
+          require_constraint_keyword
+          require_constraint_this
+          require_constraint_operator
+          require_constraint_name
+          require_constraint_semicolon =
+        let syntax =
+          RequireClauseConstraint
+            {
+              require_constraint_keyword;
+              require_constraint_this;
+              require_constraint_operator;
+              require_constraint_name;
+              require_constraint_semicolon;
+            }
         in
         let value = ValueBuilder.value_from_syntax syntax in
         make syntax value

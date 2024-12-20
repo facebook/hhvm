@@ -74,6 +74,7 @@ let is_statement =
     | ClassishBody _
     | TraitUse _
     | RequireClause _
+    | RequireClauseConstraint _
     | ConstDeclaration _
     | ConstantDeclarator _
     | TypeConstDeclaration _

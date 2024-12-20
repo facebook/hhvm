@@ -60,6 +60,7 @@ pub trait SyntaxType<C>: SyntaxTypeBase<C>
     fn make_classish_body(ctx: &C, classish_body_left_brace: Self, classish_body_elements: Self, classish_body_right_brace: Self) -> Self;
     fn make_trait_use(ctx: &C, trait_use_keyword: Self, trait_use_names: Self, trait_use_semicolon: Self) -> Self;
     fn make_require_clause(ctx: &C, require_keyword: Self, require_kind: Self, require_name: Self, require_semicolon: Self) -> Self;
+    fn make_require_clause_constraint(ctx: &C, require_constraint_keyword: Self, require_constraint_this: Self, require_constraint_operator: Self, require_constraint_name: Self, require_constraint_semicolon: Self) -> Self;
     fn make_const_declaration(ctx: &C, const_attribute_spec: Self, const_modifiers: Self, const_keyword: Self, const_type_specifier: Self, const_declarators: Self, const_semicolon: Self) -> Self;
     fn make_constant_declarator(ctx: &C, constant_declarator_name: Self, constant_declarator_initializer: Self) -> Self;
     fn make_type_const_declaration(ctx: &C, type_const_attribute_spec: Self, type_const_modifiers: Self, type_const_keyword: Self, type_const_type_keyword: Self, type_const_name: Self, type_const_type_parameters: Self, type_const_type_constraints: Self, type_const_equal: Self, type_const_type_specifier: Self, type_const_semicolon: Self) -> Self;

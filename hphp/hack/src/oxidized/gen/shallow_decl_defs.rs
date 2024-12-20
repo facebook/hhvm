@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0f3d817aa306830e7d2776ee811b6d67>>
+// @generated SignedSource<<4daa44696eb43a3bd03831366cc45937>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -175,6 +175,7 @@ pub struct ShallowClass {
     pub req_extends: Vec<Ty>,
     pub req_implements: Vec<Ty>,
     pub req_class: Vec<Ty>,
+    pub req_this_as: Vec<Ty>,
     pub implements: Vec<Ty>,
     pub support_dynamic_type: bool,
     pub consts: Vec<ShallowClassConst>,

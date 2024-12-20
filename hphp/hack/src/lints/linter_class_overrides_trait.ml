@@ -114,7 +114,9 @@ let handler =
         List.filter_map
           ~f:(fun (u, k) ->
             match k with
-            | RequireClass -> trait_name_from_hint (snd u)
+            | RequireClass
+            | RequireThisAs ->
+              trait_name_from_hint (snd u)
             | RequireExtends
             | RequireImplements ->
               None)

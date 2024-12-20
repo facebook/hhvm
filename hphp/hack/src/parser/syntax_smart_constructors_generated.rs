@@ -250,6 +250,11 @@ where
         Self::Output::make_require_clause(self.state_mut(), arg0, arg1, arg2, arg3)
     }
 
+    fn make_require_clause_constraint(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output) -> Self::Output {
+        self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4]);
+        Self::Output::make_require_clause_constraint(self.state_mut(), arg0, arg1, arg2, arg3, arg4)
+    }
+
     fn make_const_declaration(&mut self, arg0 : Self::Output, arg1 : Self::Output, arg2 : Self::Output, arg3 : Self::Output, arg4 : Self::Output, arg5 : Self::Output) -> Self::Output {
         self.state_mut().next(&[&arg0, &arg1, &arg2, &arg3, &arg4, &arg5]);
         Self::Output::make_const_declaration(self.state_mut(), arg0, arg1, arg2, arg3, arg4, arg5)

@@ -269,6 +269,8 @@ type parent_changes = {
   req_implements_changes:
     unit NamedItemsListChange.t NamedItemsListChange.t option;
   req_class_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
+  req_this_as_changes:
+    unit NamedItemsListChange.t NamedItemsListChange.t option;
   uses_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
   xhp_attr_changes: unit NamedItemsListChange.t NamedItemsListChange.t option;
 }
@@ -392,6 +394,7 @@ module ClassShellChangeCategory = struct
       req_extends_changes_category: ListChange.t option;
       req_implements_changes_category: ListChange.t option;
       req_class_changes_category: ListChange.t option;
+      req_this_as_changes_category: ListChange.t option;
       uses_changes_category: ListChange.t option;
       xhp_attr_changes_category: ListChange.t option;
     }
@@ -404,6 +407,7 @@ module ClassShellChangeCategory = struct
           req_extends_changes;
           req_implements_changes;
           req_class_changes;
+          req_this_as_changes;
           uses_changes;
           xhp_attr_changes;
         } =
@@ -418,6 +422,8 @@ module ClassShellChangeCategory = struct
           Option.map ListChange.of_list_change_map req_implements_changes;
         req_class_changes_category =
           Option.map ListChange.of_list_change_map req_class_changes;
+        req_this_as_changes_category =
+          Option.map ListChange.of_list_change_map req_this_as_changes;
         uses_changes_category =
           Option.map ListChange.of_list_change_map uses_changes;
         xhp_attr_changes_category =

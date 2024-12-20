@@ -128,7 +128,9 @@ let handler =
     inherit Tast_visitor.handler_base
 
     method! at_class_ env c =
-      let (req_extends, req_implements, req_class) = split_reqs c.c_reqs in
+      let (req_extends, req_implements, req_class, req_this_as) =
+        split_reqs c.c_reqs
+      in
       List.iter c.c_uses ~f:(check_is_trait env);
       duplicated_used_traits (Env.tast_env_as_typing_env env) c;
       List.iter req_extends ~f:(check_is_class ~require_class_check:false env);
@@ -138,5 +140,6 @@ let handler =
       List.iter
         req_implements
         ~f:(check_is_interface (env, Nast_check_error.Vreq_implement));
-      List.iter req_class ~f:(check_is_class ~require_class_check:true env)
+      List.iter req_class ~f:(check_is_class ~require_class_check:true env);
+      List.iter req_this_as ~f:(check_is_class ~require_class_check:false env)
   end

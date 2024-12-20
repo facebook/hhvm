@@ -482,6 +482,18 @@ where
         Self::make(syntax, value)
     }
 
+    fn make_require_clause_constraint(ctx: &C, keyword: Self, this: Self, operator: Self, name: Self, semicolon: Self) -> Self {
+        let syntax = SyntaxVariant::RequireClauseConstraint(ctx.get_arena().alloc(RequireClauseConstraintChildren {
+            keyword,
+            this,
+            operator,
+            name,
+            semicolon,
+        }));
+        let value = V::from_values(syntax.iter_children().map(|child| &child.value));
+        Self::make(syntax, value)
+    }
+
     fn make_const_declaration(ctx: &C, attribute_spec: Self, modifiers: Self, keyword: Self, type_specifier: Self, declarators: Self, semicolon: Self) -> Self {
         let syntax = SyntaxVariant::ConstDeclaration(ctx.get_arena().alloc(ConstDeclarationChildren {
             attribute_spec,

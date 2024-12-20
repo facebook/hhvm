@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d6d60cfb61b08c6fb5392145cb333730>>
+// @generated SignedSource<<9627bbf2ac863eec80ce4134d9c2b60f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -91,6 +91,7 @@ pub enum FeatureName {
     MethodTraitDiamond,
     UpcastExpression,
     RequireClass,
+    RequireConstraint,
     NewtypeSuperBounds,
     Package,
     RequirePackage,

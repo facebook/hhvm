@@ -5530,6 +5530,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
 
             ParameterDeclaration(_) => self.param_default_decl_errors(node),
             RequireClause(_) => self.require_errors(node),
+            RequireClauseConstraint(_) => {
+                self.check_can_use_feature(node, &FeatureName::RequireConstraint)
+            }
             ClassishDeclaration(_) => {
                 self.classish_errors(node);
                 self.class_reified_param_errors(node);

@@ -8,7 +8,9 @@
 open Hh_prelude
 
 let on_class_ on_error (Aast.{ c_reqs; c_kind; _ } as c) ~ctx =
-  let (c_req_extends, c_req_implements, c_req_class) = Aast.split_reqs c_reqs in
+  let (c_req_extends, c_req_implements, c_req_class, c_req_this_as) =
+    Aast.split_reqs c_reqs
+  in
   let is_trait = Ast_defs.is_c_trait c_kind
   and is_interface = Ast_defs.is_c_interface c_kind in
   let err_req_impl =
@@ -23,6 +25,13 @@ let on_class_ on_error (Aast.{ c_reqs; c_kind; _ } as c) ~ctx =
     | (pos, _) :: _ when not is_trait ->
       Some (Naming_phase_error.naming @@ Naming_error.Invalid_require_class pos)
     | _ -> None
+  and err_req_this_as =
+    match c_req_this_as with
+    | (pos, _) :: _ when not is_trait ->
+      Some
+        (Naming_phase_error.naming
+        @@ Naming_error.Invalid_require_constraint pos)
+    | _ -> None
   and err_req_extends =
     match c_req_extends with
     | (pos, _) :: _ when not (is_trait || is_interface) ->
@@ -32,6 +41,7 @@ let on_class_ on_error (Aast.{ c_reqs; c_kind; _ } as c) ~ctx =
   in
   Option.iter ~f:on_error err_req_impl;
   Option.iter ~f:on_error err_req_class;
+  Option.iter ~f:on_error err_req_this_as;
   Option.iter ~f:on_error err_req_extends;
   (ctx, Ok c)
 

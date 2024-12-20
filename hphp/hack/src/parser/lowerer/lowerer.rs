@@ -5078,6 +5078,36 @@ fn p_type_constant<'a>(
     }
 }
 
+fn is_valid_trait_req_class_name<'a>(
+    hint: &ast::Hint,
+    c_name: S<'a>,
+    env: &mut Env<'a>,
+    is_this_as: bool,
+) -> bool {
+    use ast::Hint_;
+
+    let ast::Hint(_pos, hint_) = hint;
+    let error = if is_this_as {
+        &syntax_error::require_this_as_applied_to_generic
+    } else {
+        &syntax_error::require_class_applied_to_generic
+    };
+    match hint_.as_ref() {
+        Hint_::Happly(_, v) => {
+            if !(v.is_empty()) {
+                /* in a `require class t;` or `require this <: t;` trait constraint,
+                t must be a non-generic class name */
+                raise_parsing_error(c_name, env, error)
+            };
+            true
+        }
+        _ => {
+            raise_missing_syntax("class name", c_name, env);
+            false
+        }
+    }
+}
+
 /// Given an FFP `node` that represents a class element (e.g a
 /// property, a method or a class constant), lower it to the
 /// equivalent AAST representation and store in `class`.
@@ -5367,7 +5397,6 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
         }
         RequireClause(c) => {
             use aast::RequireKind::*;
-            use ast::Hint_;
             let hint = match p_hint(&c.name, env) {
                 Ok(hint) => hint,
                 Err(e) => {
@@ -5379,24 +5408,10 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 Some(TK::Implements) => Some(RequireImplements),
                 Some(TK::Extends) => Some(RequireExtends),
                 Some(TK::Class) => {
-                    let ast::Hint(_pos, hint_) = &hint;
-                    match hint_.as_ref() {
-                        Hint_::Happly(_, v) => {
-                            if !(v.is_empty()) {
-                                /* in a `require class t;` trait constraint,
-                                t must be a non-generic class name */
-                                raise_parsing_error(
-                                    &c.name,
-                                    env,
-                                    &syntax_error::require_class_applied_to_generic,
-                                )
-                            };
-                            Some(RequireClass)
-                        }
-                        _ => {
-                            raise_missing_syntax("class name", &c.name, env);
-                            None
-                        }
+                    if is_valid_trait_req_class_name(&hint, &c.name, env, false) {
+                        Some(RequireClass)
+                    } else {
+                        None
                     }
                 }
                 _ => {
@@ -5407,6 +5422,18 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
             if let Some(require_kind) = require_kind {
                 class.reqs.push(ClassReq(hint, require_kind));
             }
+        }
+        RequireClauseConstraint(c) => {
+            use aast::RequireKind::*;
+            let hint = match p_hint(&c.name, env) {
+                Ok(hint) => hint,
+                Err(e) => {
+                    emit_error(e, env);
+                    return;
+                }
+            };
+            is_valid_trait_req_class_name(&hint, &c.name, env, true);
+            class.reqs.push(ClassReq(hint, RequireThisAs));
         }
         XHPClassAttributeDeclaration(c) => {
             let attrs = could_map_emit_error(&c.attributes, env, p_xhp_class_attr);

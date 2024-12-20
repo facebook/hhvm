@@ -241,6 +241,10 @@ where
         Node(self.0.make_require_clause(keyword.0, kind.0, name.0, semicolon.0), self.1.make_require_clause(keyword.1, kind.1, name.1, semicolon.1))
     }
 
+    fn make_require_clause_constraint(&mut self, keyword: Self::Output, this: Self::Output, operator: Self::Output, name: Self::Output, semicolon: Self::Output) -> Self::Output {
+        Node(self.0.make_require_clause_constraint(keyword.0, this.0, operator.0, name.0, semicolon.0), self.1.make_require_clause_constraint(keyword.1, this.1, operator.1, name.1, semicolon.1))
+    }
+
     fn make_const_declaration(&mut self, attribute_spec: Self::Output, modifiers: Self::Output, keyword: Self::Output, type_specifier: Self::Output, declarators: Self::Output, semicolon: Self::Output) -> Self::Output {
         Node(self.0.make_const_declaration(attribute_spec.0, modifiers.0, keyword.0, type_specifier.0, declarators.0, semicolon.0), self.1.make_const_declaration(attribute_spec.1, modifiers.1, keyword.1, type_specifier.1, declarators.1, semicolon.1))
     }

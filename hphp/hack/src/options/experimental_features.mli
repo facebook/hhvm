@@ -37,6 +37,7 @@ type feature_name =
   | MethodTraitDiamond
   | UpcastExpression
   | RequireClass
+  | RequireConstraint
   | NewtypeSuperBounds
   | Package
   | RequirePackage

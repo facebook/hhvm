@@ -66,6 +66,7 @@ pub enum SyntaxVariant<'a, T, V> {
     ClassishBody(&'a ClassishBodyChildren<'a, T, V>),
     TraitUse(&'a TraitUseChildren<'a, T, V>),
     RequireClause(&'a RequireClauseChildren<'a, T, V>),
+    RequireClauseConstraint(&'a RequireClauseConstraintChildren<'a, T, V>),
     ConstDeclaration(&'a ConstDeclarationChildren<'a, T, V>),
     ConstantDeclarator(&'a ConstantDeclaratorChildren<'a, T, V>),
     TypeConstDeclaration(&'a TypeConstDeclarationChildren<'a, T, V>),
@@ -535,6 +536,15 @@ pub struct TraitUseChildren<'a, T, V> {
 pub struct RequireClauseChildren<'a, T, V> {
     pub keyword: Syntax<'a, T, V>,
     pub kind: Syntax<'a, T, V>,
+    pub name: Syntax<'a, T, V>,
+    pub semicolon: Syntax<'a, T, V>,
+}
+
+#[derive(Debug, Clone)]
+pub struct RequireClauseConstraintChildren<'a, T, V> {
+    pub keyword: Syntax<'a, T, V>,
+    pub this: Syntax<'a, T, V>,
+    pub operator: Syntax<'a, T, V>,
     pub name: Syntax<'a, T, V>,
     pub semicolon: Syntax<'a, T, V>,
 }

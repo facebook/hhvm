@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<f520ec94fe802cf76c0a05c34d3db527>>
+// @generated SignedSource<<3f5db01293f8bc7c1ac160894f130c46>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -301,6 +301,8 @@ pub enum NamingError {
     InvalidRequireExtends(pos::Pos),
     #[rust_to_ocaml(name = "Invalid_require_class")]
     InvalidRequireClass(pos::Pos),
+    #[rust_to_ocaml(name = "Invalid_require_constraint")]
+    InvalidRequireConstraint(pos::Pos),
     #[rust_to_ocaml(name = "Did_you_mean")]
     DidYouMean {
         pos: pos::Pos,

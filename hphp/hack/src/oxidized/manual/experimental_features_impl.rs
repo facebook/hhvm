@@ -28,6 +28,7 @@ impl FeatureName {
             MethodTraitDiamond => OngoingRelease,
             UpcastExpression => Unstable,
             RequireClass => OngoingRelease,
+            RequireConstraint => Unstable,
             NewtypeSuperBounds => Unstable,
             Package => OngoingRelease,
             RequirePackage => Unstable,

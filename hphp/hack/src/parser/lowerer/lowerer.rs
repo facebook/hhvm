@@ -3756,9 +3756,9 @@ fn is_polymorphic_context<'a>(env: &mut Env<'a>, hint: &ast::Hint, ignore_this: 
 
 fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
-        return context_hints
+        context_hints
             .iter()
-            .any(|c| is_polymorphic_context(env, c, false));
+            .any(|c| is_polymorphic_context(env, c, false))
     } else {
         false
     }
@@ -3766,10 +3766,10 @@ fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Context
 
 fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
-        return context_hints.iter().any(|hint| match &*hint.1 {
+        context_hints.iter().any(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned(id),
             _ => false,
-        });
+        })
     } else {
         false
     }
@@ -3777,10 +3777,10 @@ fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
 
 fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
-        return context_hints.iter().any(|hint| match &*hint.1 {
+        context_hints.iter().any(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned_or_defaults(id),
             _ => false,
-        });
+        })
     } else {
         true
     }
@@ -3788,10 +3788,10 @@ fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> boo
 
 fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = haystack {
-        return context_hints.iter().any(|hint| match &*hint.1 {
+        context_hints.iter().any(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => needles.iter().any(|&context| id == context),
             _ => false,
-        });
+        })
     } else {
         true
     }
@@ -3799,12 +3799,12 @@ fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool
 
 fn contexts_cannot_access_ic(haystack: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = haystack {
-        return context_hints.iter().all(|hint| match &*hint.1 {
+        context_hints.iter().all(|hint| match &*hint.1 {
             ast::Hint_::Happly(ast::Id(_, id), _) => {
                 sn::coeffects::is_any_without_implicit_policy_or_unsafe(id)
             }
             _ => false,
-        });
+        })
     } else {
         false // no context list -> implicit [defaults]
     }

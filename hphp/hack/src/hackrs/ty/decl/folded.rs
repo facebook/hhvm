@@ -64,7 +64,7 @@ pub struct FoldedElement {
 /// class B<Tb> extends A<Tb, int> {}
 /// class C extends B<string> {}
 /// ```
-
+///
 /// The method `A::test()` has the type `(function(Ta1, Ta2): void)` in the
 /// context of class `A`. However in the context of class `B`, it will have type
 /// `(function(Tb, int): void)`.

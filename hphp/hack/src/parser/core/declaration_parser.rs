@@ -1571,10 +1571,10 @@ where
         let token_kind = self.peek_token_kind();
         if token_kind == TokenKind::Readonly {
             let token = self.next_token();
-            return self.sc_mut().make_token(token);
+            self.sc_mut().make_token(token)
         } else {
             let pos = self.pos();
-            return self.sc_mut().make_missing(pos);
+            self.sc_mut().make_missing(pos)
         }
     }
 

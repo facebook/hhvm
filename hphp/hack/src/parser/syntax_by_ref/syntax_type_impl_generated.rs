@@ -27,7 +27,6 @@ use crate::{
 
 #[allow(clippy::assign_op_pattern)]
 #[allow(clippy::let_and_return)]
-
 impl<'a, C, T, V> SyntaxType<C> for Syntax<'a, T, V>
 where
     T: LexableToken + Copy,

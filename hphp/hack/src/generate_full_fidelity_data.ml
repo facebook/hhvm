@@ -433,7 +433,6 @@ use super::{
 
 #[allow(clippy::assign_op_pattern)]
 #[allow(clippy::let_and_return)]
-
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
     pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<'a, T, V>> {
         use SyntaxVariant::*;
@@ -512,7 +511,6 @@ use crate::{
 
 #[allow(clippy::assign_op_pattern)]
 #[allow(clippy::let_and_return)]
-
 impl<'a, C, T, V> SyntaxType<C> for Syntax<'a, T, V>
 where
     T: LexableToken + Copy,
@@ -704,7 +702,6 @@ use crate::syntax_kind::SyntaxKind;
 
 #[allow(clippy::assign_op_pattern)]
 #[allow(clippy::let_and_return)]
-
 impl<T, V, C> SyntaxType<C> for Syntax<T, V>
 where
     T: LexableToken,
@@ -714,7 +711,6 @@ SYNTAX_CONSTRUCTORS }
 
 #[allow(clippy::assign_op_pattern)]
 #[allow(clippy::let_and_return)]
-
 impl<T, V> Syntax<T, V>
 where
     T: LexableToken,
@@ -781,7 +777,6 @@ SYNTAX_VARIANT}
 
 #[allow(clippy::assign_op_pattern)]
 #[allow(clippy::let_and_return)]
-
 impl<'a, T, V> SyntaxChildrenIterator<'a, T, V> {
     pub fn next_impl(&mut self, direction : bool) -> Option<&'a Syntax<T, V>> {
         use SyntaxVariant::*;

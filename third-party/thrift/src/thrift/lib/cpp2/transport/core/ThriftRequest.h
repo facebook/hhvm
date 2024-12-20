@@ -549,7 +549,7 @@ class ThriftRequestCore : public ResponseChannelRequest {
                                              .getOverloadPolicy()) {
                 overloadPolicy->onRequestLoadshed();
                 terminateInteraction = !overloadPolicy->allowNewRequest();
-              };
+              }
             }
           }
         }

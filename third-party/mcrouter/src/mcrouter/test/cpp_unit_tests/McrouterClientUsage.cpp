@@ -97,24 +97,29 @@ TEST(CarbonRouterClient, basicUsageSameThreadClient) {
   client->setProxyIndex(0);
 
   bool replyReceived = false;
-  eventBase.runInEventBaseThread([client = client.get(), &replyReceived]() {
-    // We must ensure that req will remain alive all the way through the reply
-    // callback given to client->send(). This demonstrates one way of ensuring
-    // this.
-    auto req = std::make_unique<McGetRequest>("key");
-    auto reqRawPtr = req.get();
-    client->send(
-        *reqRawPtr,
-        [req = std::move(req), &replyReceived](
-            const McGetRequest&, McGetReply&& reply) {
-          EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result_ref());
-          replyReceived = true;
-        });
-  });
+  folly::fibers::Baton baton;
+
+  eventBase.runInEventBaseThread(
+      [client = client.get(), &replyReceived, &baton]() {
+        // We must ensure that req will remain alive all the way through the
+        // reply callback given to client->send(). This demonstrates one way of
+        // ensuring this.
+        auto req = std::make_unique<McGetRequest>("key");
+        auto reqRawPtr = req.get();
+        client->send(
+            *reqRawPtr,
+            [req = std::move(req), &replyReceived, &baton](
+                const McGetRequest&, McGetReply&& reply) {
+              EXPECT_EQ(carbon::Result::NOTFOUND, *reply.result_ref());
+              replyReceived = true;
+              baton.post();
+            });
+      });
 
   // Wait for proxy threads to complete outstanding requests and exit
   // gracefully. This ensures graceful destruction of the static
   // CarbonRouterInstance instance.
+  baton.wait();
   router->shutdown();
   ioThreadPool.reset();
   EXPECT_TRUE(replyReceived);

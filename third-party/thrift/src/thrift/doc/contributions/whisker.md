@@ -502,7 +502,7 @@ Whisker `{{#let}}` statements allow binding the result of an `expression` to an 
 
 The `expression` is eagerly evaluated exactly once and the name becomes accessible in the lexical scope of the `{{#let}}` statements.
 
-The primary purpose of `{{#let}}` statements is to simply complex `expression`s by breaking them down into smaller parts.
+The primary purpose of `{{#let}}` statements is to simplify complex `expression`s by breaking them down into smaller parts.
 
 <Example>
 

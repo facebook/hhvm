@@ -368,6 +368,22 @@ class render_engine {
         });
   }
 
+  void visit(const ast::let_statement& let_statement) {
+    whisker::visit(
+        eval_context_.bind_local(
+            let_statement.id.name, evaluate(let_statement.value)),
+        [](std::monostate) {
+          // The binding was successful
+        },
+        [&](const eval_name_already_bound_error& err) {
+          diags_.error(
+              let_statement.loc.begin,
+              "Name '{}' is already bound in the current scope.",
+              err.name());
+          throw abort_rendering();
+        });
+  }
+
   void visit(const ast::interpolation& interpolation) {
     const object& value = evaluate(interpolation.content);
 

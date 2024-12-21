@@ -627,6 +627,62 @@ TEST_F(RenderTest, and_or_short_circuit) {
   }
 }
 
+TEST_F(RenderTest, let_statement) {
+  auto result = render(
+      "{{#let cond = (not false_value)}}\n"
+      "{{#if cond}}\n"
+      "  {{#let cond = some_text}}\n"
+      "  {{cond}}\n"
+      "{{/if cond}}\n"
+      "{{#if cond}}\n"
+      "  Outer scope was not overwritten!\n"
+      "{{/if cond}}\n",
+      w::map(
+          {{"false_value", w::boolean(false)},
+           {"some_text", w::string("some text")}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "  some text\n"
+      "  Outer scope was not overwritten!\n");
+}
+
+TEST_F(RenderTest, let_statement_loop) {
+  auto result = render(
+      "{{#array}}\n"
+      "  {{#let element = .}}\n"
+      "  {{element.value}}\n"
+      "{{/array}}\n",
+      w::map(
+          {{"array",
+            w::array({
+                w::map({{"value", w::i64(2)}}),
+                w::map({{"value", w::string("foo")}}),
+                w::map({{"value", w::string("bar")}}),
+            })}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "  2\n"
+      "  foo\n"
+      "  bar\n");
+}
+
+TEST_F(RenderTest, let_statement_rebinding_error) {
+  auto result = render(
+      "{{#let cond = (not false_value)}}\n"
+      "{{#let cond = false_value}}\n",
+      w::map({{"false_value", w::boolean(false)}}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Name 'cond' is already bound in the current scope.",
+          path_to_file,
+          2)));
+}
+
 TEST_F(RenderTest, printable_types_strict_failure) {
   {
     auto result = render(

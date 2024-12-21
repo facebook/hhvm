@@ -440,7 +440,7 @@ class standalone_lines_scanner {
   // stripped when standalone.
   enum class standalone_compatible_kind {
     comment, // "{{!"
-    block, // "{{#", "{{^", or "{{"/"}
+    block_or_statement, // "{{#", "{{^", or "{{"/"}
     partial_apply, // "{{>"
     ineligible // "{{variable}} for example
   };
@@ -459,7 +459,7 @@ class standalone_lines_scanner {
       case tok::pound:
       case tok::caret:
       case tok::slash:
-        kind = standalone_compatible_kind::block;
+        kind = standalone_compatible_kind::block_or_statement;
         break;
       case tok::gt:
         kind = standalone_compatible_kind::partial_apply;
@@ -755,8 +755,11 @@ class parser {
       ast::interpolation,
       ast::section_block,
       ast::conditional_block,
+      ast::let_statement,
       ast::partial_apply>;
-  // template → { interpolation | section-block | partial-apply }
+  // template → { interpolation | block | statement | partial-apply }
+  // block → { section-block | conditional-block }
+  // statement → { let-statement }
   parse_result<template_body> parse_template(parser_scan_window scan) {
     assert(scan.empty());
     if (scan.peek().kind != tok::open) {
@@ -781,13 +784,17 @@ class parser {
       templ = std::move(variable).consume_and_advance(&scan);
     } else if (parse_result conditional_block = parse_conditional_block(scan)) {
       templ = std::move(conditional_block).consume_and_advance(&scan);
+    } else if (parse_result let_statement = parse_let_statement(scan)) {
+      templ = std::move(let_statement).consume_and_advance(&scan);
     } else if (parse_result section_block = parse_section_block(scan)) {
       templ = std::move(section_block).consume_and_advance(&scan);
     } else if (parse_result partial_apply = parse_partial_apply(scan)) {
       templ = std::move(partial_apply).consume_and_advance(&scan);
     }
     if (!templ.has_value()) {
-      report_expected(scan, "variable, block, or partial-apply in template");
+      report_expected(
+          scan,
+          "interpolation, block, statement, or partial-apply in template");
     }
     return {std::move(*templ), scan};
   }
@@ -1026,6 +1033,53 @@ class parser {
     }
 
     return {{scan.with_start(scan_start).range(), std::move(func)}, scan};
+  }
+
+  // let-statement →
+  //   { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
+  parse_result<ast::let_statement> parse_let_statement(
+      parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    if (!try_consume_token(&scan, tok::pound)) {
+      return no_parse_result();
+    }
+    if (!try_consume_token(&scan, tok::kw_let)) {
+      return no_parse_result();
+    }
+
+    const token& id = scan.peek();
+    if (id.kind != tok::identifier) {
+      report_expected(scan, "identifier in let-statement");
+    }
+    scan.advance();
+
+    if (!try_consume_token(&scan, tok::eq)) {
+      report_expected(scan, fmt::format("{} in let-statement", tok::eq));
+    }
+
+    scan = scan.make_fresh();
+    parse_result expression = parse_expression(scan);
+    if (!expression.has_value()) {
+      report_expected(scan, "expression in let-statement");
+    }
+    ast::expression value = std::move(expression).consume_and_advance(&scan);
+
+    if (!try_consume_token(&scan, tok::close)) {
+      report_expected(
+          scan, fmt::format("{} to close let-statement", tok::close));
+    }
+
+    return {
+        ast::let_statement{
+            scan.with_start(scan_start).range(),
+            ast::identifier{id.range, std::string(id.string_value())},
+            std::move(value)},
+        scan};
   }
 
   // conditional-block →

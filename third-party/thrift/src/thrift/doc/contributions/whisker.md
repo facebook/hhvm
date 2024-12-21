@@ -489,10 +489,6 @@ with-block-close → { "{{" ~ "/" ~ "with" ~ "}}" }
 
 ### Let Statements
 
-:::warning
-`{{#let}}` statements have not been implemented yet.
-:::
-
 Whisker `{{#let}}` statements allow binding the result of an `expression` to an *identifier* in the [current scope](#scopes). A simple `{{#let}}` statement might look like:
 
 ```handlebars
@@ -563,7 +559,7 @@ The `{{#let}}` statement will evaluate repeatedly since every iteration of the `
 <Grammar>
 
 ```
-let → { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
+let-statement → { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
 ```
 
 </Grammar>

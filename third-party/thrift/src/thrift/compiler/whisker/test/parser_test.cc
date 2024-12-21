@@ -617,6 +617,93 @@ TEST_F(ParserTest, unclosed_partial_apply) {
           1)));
 }
 
+TEST_F(ParserTest, let_statement) {
+  auto ast = parse_ast("{{#let foo = (not true_value)}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- let-statement <line:1:1, col:32>\n"
+      "| `- identifier 'foo'\n"
+      "| `- expression <line:1:14, col:30> '(not true_value)'\n");
+}
+
+TEST_F(ParserTest, let_statement_dotted_name) {
+  auto ast = parse_ast("{{#let foo.bar = (not true_value)}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `=` in let-statement but found `.`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, let_statement_missing_id) {
+  auto ast = parse_ast("{{#let (not true_value)}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier in let-statement but found `(`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, let_statement_missing_eq) {
+  auto ast = parse_ast("{{#let foo (not true_value)}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `=` in let-statement but found `(`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, let_statement_missing_expression) {
+  auto ast = parse_ast("{{#let foo =}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression in let-statement but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, let_statement_missing_eq_and_expression) {
+  auto ast = parse_ast("{{#let foo}}");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `=` in let-statement but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, let_statement_missing_close) {
+  auto ast = parse_ast("{{#let foo = (not true_value)");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to close let-statement but found EOF",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, let_statement_keyword) {
+  auto ast = parse_ast("{{#let let = (not true_value)");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier in let-statement but found `let`",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, comment) {
   auto ast = parse_ast("Hello{{! #$^& random text }}world");
 

@@ -32,6 +32,7 @@ struct section_block;
 struct conditional_block;
 struct partial_apply;
 struct interpolation;
+struct let_statement;
 
 /**
  * The top-level types of constructs allowed in a Whisker source file.
@@ -43,6 +44,7 @@ using body = std::variant<
     interpolation,
     section_block,
     conditional_block,
+    let_statement,
     partial_apply>;
 using bodies = std::vector<body>;
 
@@ -128,6 +130,7 @@ struct expression {
 
   std::string to_string() const;
 };
+
 /**
  * A top-level use of an expression within a template body. It is similar to
  * expression except its source_range includes the surrounding "{{ }}".
@@ -137,6 +140,17 @@ struct interpolation {
   expression content;
 
   std::string to_string() const { return content.to_string(); }
+};
+
+/**
+ * A Whisker construct for binding an expression to a name. The expression is
+ * evaluated exactly once.
+ */
+struct let_statement {
+  source_range loc;
+
+  identifier id;
+  expression value;
 };
 
 /**

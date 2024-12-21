@@ -125,6 +125,12 @@ struct ast_visitor {
         location(interpolation.loc),
         interpolation.to_string());
   }
+  void visit(const ast::let_statement& let_statement, tree_printer::scope scope)
+      const {
+    scope.println(" let-statement {}", location(let_statement.loc));
+    visit(let_statement.id, scope.open_property());
+    visit(let_statement.value, scope.open_property());
+  }
   // Prevent implicit conversion to ast::body. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing
   // overload for one of the alternatives in the variant.

@@ -1162,8 +1162,7 @@ class cpp_mstch_type : public mstch_type {
       if (!next->is_container()) {
         continue;
       }
-      if (false) {
-      } else if (next->is_list()) {
+      if (next->is_list()) {
         queue.push(static_cast<const t_list*>(next)->get_elem_type());
       } else if (next->is_set()) {
         queue.push(static_cast<const t_set*>(next)->get_elem_type());

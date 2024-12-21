@@ -1179,11 +1179,7 @@ class mstch_field : public mstch_base {
         return item.second->get_integer() == action;
       }
     }
-    if (action == def && annotation->value()->get_map().size() == 0) {
-      return true;
-    }
-
-    return false;
+    return action == def && annotation->value()->get_map().empty();
   }
 
  protected:
@@ -1267,11 +1263,7 @@ class mstch_enum : public mstch_base {
         return item.second->get_integer() == action;
       }
     }
-    if (action == def && annotation->value()->get_map().size() == 0) {
-      return true;
-    }
-
-    return false;
+    return action == def && annotation->value()->get_map().empty();
   }
   mstch::node thrift_uri() { return enum_->uri(); }
 

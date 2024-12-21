@@ -48,6 +48,13 @@ using body = std::variant<
     partial_apply>;
 using bodies = std::vector<body>;
 
+// Defines operator!= in terms of operator==
+// Remove in C++20 which introduces comparison operator synthesis
+#define WHISKER_DEFINE_OPERATOR_INEQUALITY(type)             \
+  friend bool operator!=(const type& lhs, const type& rhs) { \
+    return !(lhs == rhs);                                    \
+  }
+
 /**
  * The root node of a Whisker AST representing a source file.
  */
@@ -93,6 +100,16 @@ struct comment {
 struct identifier {
   source_range loc;
   std::string name;
+
+  /**
+   * Determines if two identifiers are syntactically equivalent, excluding
+   * their location in source code.
+   */
+  friend bool operator==(const identifier& lhs, const identifier& rhs) {
+    return lhs.name == rhs.name;
+  }
+  // Remove in C++20 which introduces comparison operator synthesis
+  WHISKER_DEFINE_OPERATOR_INEQUALITY(identifier)
 };
 
 /**
@@ -104,8 +121,23 @@ struct identifier {
 struct variable_lookup {
   source_range loc;
   // this_ref is a special case: {{.}} referring to the current object.
-  struct this_ref {};
+  struct this_ref {
+    // Remove in C++20 which introduces comparison operator synthesis
+    friend bool operator==(const this_ref&, const this_ref&) { return true; }
+    WHISKER_DEFINE_OPERATOR_INEQUALITY(this_ref)
+  };
   std::variant<this_ref, std::vector<identifier>> chain;
+
+  /**
+   * Determines if two variable lookups are syntactically equivalent, excluding
+   * their location in source code.
+   */
+  friend bool operator==(
+      const variable_lookup& lhs, const variable_lookup& rhs) {
+    return lhs.chain == rhs.chain;
+  }
+  // Remove in C++20 which introduces comparison operator synthesis
+  WHISKER_DEFINE_OPERATOR_INEQUALITY(variable_lookup)
 
   std::string chain_string() const;
 };
@@ -117,17 +149,57 @@ struct variable_lookup {
 struct expression {
   source_range loc;
   struct function_call {
-    struct not_tag {};
+    /**
+     * The `(not arg1)` function.
+     */
+    struct not_tag {
+      // Remove in C++20 which introduces comparison operator synthesis
+      friend bool operator==(const not_tag&, const not_tag&) { return true; }
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(not_tag)
+    };
     struct and_or_tag {}; // for convenience of writing matchers
-    struct and_tag : and_or_tag {};
-    struct or_tag : and_or_tag {};
+    /**
+     * The `(and arg1 ... argN)` function.
+     */
+    struct and_tag : and_or_tag {
+      // Remove in C++20 which introduces comparison operator synthesis
+      friend bool operator==(const and_tag&, const and_tag&) { return true; }
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(and_tag)
+    };
+    /**
+     * The `(or arg1 ... argN)` function.
+     */
+    struct or_tag : and_or_tag {
+      // Remove in C++20 which introduces comparison operator synthesis
+      friend bool operator==(const or_tag&, const or_tag&) { return true; }
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(or_tag)
+    };
     std::variant<not_tag, and_tag, or_tag> which;
     std::vector<expression> args;
+
+    friend bool operator==(const function_call& lhs, const function_call& rhs) {
+      return std::tie(lhs.which, lhs.args) == std::tie(rhs.which, rhs.args);
+    }
+    // Remove in C++20 which introduces comparison operator synthesis
+    WHISKER_DEFINE_OPERATOR_INEQUALITY(function_call)
 
     std::string_view name() const;
   };
   std::variant<variable_lookup, function_call> content;
 
+  /**
+   * Determines if two expressions are syntactically equivalent, excluding their
+   * location in source code.
+   */
+  friend bool operator==(const expression& lhs, const expression& rhs) {
+    return lhs.content == rhs.content;
+  }
+  // Remove in C++20 which introduces comparison operator synthesis
+  WHISKER_DEFINE_OPERATOR_INEQUALITY(expression)
+
+  /**
+   * Returns a human-readable text representation of the expression.
+   */
   std::string to_string() const;
 };
 
@@ -228,5 +300,7 @@ struct partial_apply {
 
   std::string path_string() const;
 };
+
+#undef WHISKER_DEFINE_OPERATOR_INEQUALITY
 
 } // namespace whisker::ast

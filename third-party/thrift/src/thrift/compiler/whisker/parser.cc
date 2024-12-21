@@ -942,7 +942,7 @@ class parser {
         std::move(lookup_at_close).consume_and_advance(&scan);
 
     bool should_fail = false;
-    if (open.chain_string() != close.chain_string()) {
+    if (open != close) {
       should_fail = true;
       report_error(
           scan,
@@ -1153,7 +1153,7 @@ class parser {
           fmt::format("expression to close if-block '{}'", open.to_string()));
     }
     ast::expression close = {std::move(condition).consume_and_advance(&scan)};
-    if (close.to_string() != open.to_string()) {
+    if (close != open) {
       report_fatal_error(
           scan,
           "conditional-block opening '{}' does not match closing '{}'",

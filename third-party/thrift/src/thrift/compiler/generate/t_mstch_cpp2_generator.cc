@@ -2936,7 +2936,77 @@ void t_mstch_cpp2_generator::fill_validator_visitors(
   validator.add_field_visitor(validate_lazy_fields);
 }
 
-THRIFT_REGISTER_GENERATOR(mstch_cpp2, "cpp2", "");
+THRIFT_REGISTER_GENERATOR(
+    mstch_cpp2, "cpp2", R"(    (NOTE: the list below may not be exhaustive)
+    any
+      Register types with the AnyRegistry.
+    client_cpp_splits={[<service name:str>:<split count:int>[,...]*]}
+      Enable splitting of client method .cpp files (into N
+      *.async_client_split.cpp" files). The given split count cannot be greater
+      than the number of methods in the corresponding service. See also
+      types_cpp_splits below.
+    deprecated_clear
+      Use the deprecated semantics for "clearing" Thrift structs, which assigns
+      the *standard* default value instead of the *intrinsic* defaults (see
+      https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/index.md#default-values).
+    deprecated_enforce_required
+      Enforce required fields (deprecated since 2019).
+    deprecated_public_required_fields
+      Make member variables corresponding to required fields public instead of
+      private. In addition to exposing directly the field (which is unsafe to
+      begin with), this prevents the generation of the reference accessors
+      that do not have the _ref() suffix.
+    deprecated_terse_writes
+      Enable deprecated terse writes, which are discouraged in favor of
+      @thrift.TerseWrite. See:
+      https://github.com/facebook/fbthrift/blob/main/thrift/doc/idl/field-qualifiers.md#terse-writes-compiler-option
+    frozen[=packed]
+      Enable frozen structs. If the packed parameter is given, structure members
+      will be packed with an alignment of 1 (i.e., #pragma pack(push, 1)).
+      NOTE: this capability is not actively maintained. Use at your own risks.
+    frozen2
+      Enable frozen2 (see https://fburl.com/thrift_frozen2).
+      NOTE: this capability is not actively maintained. Use at your own risks.
+    includes=<extra_include:str>:...
+      Add cpp_include for each of the given values.
+    include_prefix
+      Override the "include prefix" for all generated files, i.e. the directory
+      from which application code should include headers, typically:
+      <include_prefix>/gen-cpp2/...
+    json
+      Enable SimpleJson serialization.
+    no_getters_setters
+      Do not generate (deprecated) field getter and setter methods, even when
+      it would be possible to do so. This is enouraged, and eventually will be
+      enabled by default as getters and setters are deprecated in favor of field
+      references (i.e., field() or field_ref() methods). Other conditions that
+      would prevent getters/setters from being generated (even if this option is
+      not enabled) include if the corresponding field: is a reference field
+      (@cpp.Ref, cpp[2].ref_[type]), is adapted (@cpp.Adapter), is lazy
+      (@cpp.Lazy), has a @cpp.FieldIntercaptor or is terse.
+    no_metadata
+      Generate empty metadata, do not generate _metadata.cpp.
+    py3cpp
+      if specified, output folder is "gen-py3cpp" instead of "gen-cpp2".
+    reflection
+      Enable the generation of "old-type" (a.k.a. "fatal") reflection for Thrift
+      types. This is deprecated in favor of always-on reflection (see
+      https://fburl.com/thrift-cpp-reflection). Note: the name "fatal" comes
+      from the name of the Facebook Template Library, see:
+      https://github.com/facebook/fatal/blob/main/README.md
+    single_file_service
+      Generate all RPC services and client code in a single file, respectively.
+    sync_methods_return_try
+      Generate (deprecated) sync code for RPC methods that returns a folly::Try.
+    tablebased
+      Enable the table-based serialization.
+    types_cpp_splits=<split_count:int>
+      Enable splitting of type .cpp files (into the given number of files).
+      Cannot be greater than the number of objects. See also client_cpp_splits
+      above.
+)"
+
+);
 
 } // namespace
 } // namespace apache::thrift::compiler

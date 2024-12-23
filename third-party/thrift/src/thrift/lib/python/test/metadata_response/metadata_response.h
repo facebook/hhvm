@@ -23,9 +23,7 @@
 #include <thrift/lib/python/server/PythonAsyncProcessor.h>
 #include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
-namespace thrift {
-namespace python {
-namespace test {
+namespace thrift::python::test {
 
 folly::SemiFuture<std::unique_ptr<folly::IOBuf>> get_serialized_metadata(
     std::shared_ptr<apache::thrift::AsyncProcessorFactory> factory) {
@@ -39,6 +37,4 @@ folly::SemiFuture<std::unique_ptr<folly::IOBuf>> get_serialized_metadata(
   });
 }
 
-} // namespace test
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python::test

@@ -18,9 +18,7 @@
 
 #include <thrift/lib/cpp/TProcessorEventHandler.h>
 
-namespace thrift {
-namespace python {
-namespace test {
+namespace thrift::python::test {
 
 class TestClientEventHandler : public apache::thrift::TProcessorEventHandler {
  public:
@@ -33,6 +31,4 @@ class TestClientEventHandler : public apache::thrift::TProcessorEventHandler {
  private:
   bool preWriteCalled_ = false;
 };
-} // namespace test
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python::test

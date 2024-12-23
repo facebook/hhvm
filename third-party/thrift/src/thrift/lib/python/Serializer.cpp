@@ -22,9 +22,7 @@
 #include <thrift/lib/cpp2/protocol/SimpleJSONProtocol.h>
 #include <thrift/lib/python/types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
+namespace apache::thrift::python {
 
 using apache::thrift::protocol::PROTOCOL_TYPES;
 
@@ -91,6 +89,4 @@ size_t mutable_deserialize(
       dynamicStructInfo, buf, getListObjectItemBase(object), protocol);
 }
 
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python

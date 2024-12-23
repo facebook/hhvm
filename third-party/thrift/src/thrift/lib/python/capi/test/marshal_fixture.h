@@ -26,9 +26,7 @@
 #include <thrift/lib/python/capi/extractor.h>
 #include <thrift/lib/python/capi/types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
+namespace apache::thrift::python {
 
 using capi::Bytes;
 using capi::list;
@@ -163,6 +161,4 @@ inline PyObject* __make_unicode_val_map(PyObject* obj) {
   return nullptr;
 }
 
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python

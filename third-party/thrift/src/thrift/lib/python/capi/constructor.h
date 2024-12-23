@@ -25,10 +25,7 @@
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 /**
  * Series of functions to convert a native type T into a Python object
  *
@@ -243,7 +240,4 @@ struct Constructor<map<KeyT, ValT, CppT>>
   }
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

@@ -22,10 +22,7 @@
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 
 /**
  * These apis allow conversion between C++ thrift objects and their
@@ -89,7 +86,4 @@ CppThrift python_to_cpp_throws(PyObject* obj) {
   folly::python::handlePythonError("python_to_cpp Extractor error: ");
 }
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

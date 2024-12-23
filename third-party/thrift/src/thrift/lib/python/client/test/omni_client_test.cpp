@@ -50,7 +50,7 @@ class TestServiceHandler
     : virtual public apache::thrift::ServiceHandler<TestService> {
  public:
   TestServiceHandler() {}
-  virtual ~TestServiceHandler() override {}
+  ~TestServiceHandler() override {}
   int add(int num1, int num2) override { return num1 + num2; }
   void oneway() override {}
   void readHeader(

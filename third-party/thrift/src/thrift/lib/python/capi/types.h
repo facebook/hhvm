@@ -27,10 +27,7 @@
 #include <folly/Preprocessor.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 
 #define __CAPI_LOCATED_ERROR_IMPL(MESSAGE, LINE) \
   __FILE__ ":" FOLLY_PP_STRINGIZE(LINE) ": " MESSAGE
@@ -183,7 +180,4 @@ struct native<map<K, V, CppT>> {
   using type = CppT;
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

@@ -17,10 +17,7 @@
 #include <folly/python/iobuf.h>
 #include <thrift/lib/python/capi/constructor.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 
 // In simplest case, returning nullptr via cython signals an error, so no
 // need to check capi for error in cpp.
@@ -67,7 +64,4 @@ PyObject* Constructor<std::unique_ptr<folly::IOBuf>>::operator()(
   return folly::python::make_python_iobuf(std::move(val));
 }
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

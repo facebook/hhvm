@@ -24,11 +24,7 @@
 #include <thrift/lib/cpp2/Thrift.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
-namespace detail {
+namespace apache::thrift::python::capi::detail {
 namespace {
 
 template <typename W>
@@ -123,8 +119,4 @@ T deserialize_iobuf_to_adapted(std::unique_ptr<folly::IOBuf>&& buf) {
  */
 void handle_protocol_error(const apache::thrift::TProtocolException& e);
 
-} // namespace detail
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi::detail

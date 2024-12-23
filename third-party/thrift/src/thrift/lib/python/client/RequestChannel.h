@@ -21,9 +21,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace thrift {
-namespace python {
-namespace client {
+namespace thrift::python::client {
 
 class ChannelFactory {
  public:
@@ -118,6 +116,4 @@ class DefaultChannelFactory : public ChannelFactory {
   ~DefaultChannelFactory() override = default;
 };
 
-} // namespace client
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python::client

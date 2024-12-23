@@ -21,10 +21,7 @@
 #include <thrift/lib/python/capi/constructor.h>
 #include <thrift/lib/python/capi/extractor.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 
 template <typename CppThrift>
 PyObject* py3_to_python(std::shared_ptr<CppThrift> cppThrift) {
@@ -46,7 +43,4 @@ std::shared_ptr<CppThrift> python_to_py3(PyObject* obj) {
   return nullptr;
 }
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

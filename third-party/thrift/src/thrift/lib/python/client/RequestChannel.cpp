@@ -24,9 +24,7 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/python/client/ssl.h>
 
-namespace thrift {
-namespace python {
-namespace client {
+namespace thrift::python::client {
 
 using namespace apache::thrift;
 
@@ -198,6 +196,4 @@ apache::thrift::RequestChannel::Ptr ChannelFactory::sync_createThriftChannelSSL(
   return std::move(future.wait().value());
 }
 
-} // namespace client
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python::client

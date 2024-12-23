@@ -26,10 +26,7 @@
 #include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/python/capi/types.h>
 
-namespace apache {
-namespace thrift {
-namespace python {
-namespace capi {
+namespace apache::thrift::python::capi {
 
 // Using an ExtractorResult lets us accommodate two different error handling
 // strategies:
@@ -388,7 +385,4 @@ struct Extractor<map<KeyT, ValT, CppT>>
   }
 };
 
-} // namespace capi
-} // namespace python
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift::python::capi

@@ -24,8 +24,7 @@
 
 #if FOLLY_HAS_COROUTINES
 
-namespace thrift {
-namespace python {
+namespace thrift::python {
 
 void cancelPythonIterator(PyObject*);
 
@@ -75,8 +74,7 @@ folly::coro::AsyncGenerator<TChunk&&> toAsyncGenerator(
         }
       });
 }
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python
 
 #else /* !FOLLY_HAS_COROUTINES */
 #error  Thrift sink type support needs C++ coroutines, which are not currently available. \

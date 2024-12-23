@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp2/async/HeaderClientChannel.h>
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 
-namespace thrift {
-namespace python {
-namespace client {
+namespace thrift::python::client {
 
 apache::thrift::RequestChannel::Ptr createHeaderChannel(
     folly::AsyncTransport::UniquePtr sock,
@@ -95,6 +93,4 @@ void ConnectHandler::connectErr(
   promise_.setException(TTransportException(ex));
 }
 
-} // namespace client
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python::client

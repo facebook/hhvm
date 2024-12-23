@@ -19,8 +19,7 @@
 #include <thrift/lib/python/server/PythonAsyncProcessorFactory.h>
 #include <thrift/lib/python/server/server_api.h> // @manual
 
-namespace thrift {
-namespace python {
+namespace thrift::python {
 
 namespace {
 
@@ -145,5 +144,4 @@ PythonAsyncProcessorFactory::create(
           std::move(pythonMetadataForRpcKind)));
 }
 
-} // namespace python
-} // namespace thrift
+} // namespace thrift::python

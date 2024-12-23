@@ -72,3 +72,14 @@ function thrift_protocol_read_binary_struct(
   string $obj_typename,
   int $options = 0,
 ): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function thrift_protocol_write_compact_struct(
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
+  int $version = 2,
+): HH\FIXME\MISSING_RETURN_TYPE;
+<<__PHPStdLib>>
+function thrift_protocol_write_binary_struct(
+  HH\FIXME\MISSING_PARAM_TYPE $transportobj,
+  HH\FIXME\MISSING_PARAM_TYPE $request_struct,
+): HH\FIXME\MISSING_RETURN_TYPE;

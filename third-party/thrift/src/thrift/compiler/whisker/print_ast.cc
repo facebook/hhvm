@@ -90,6 +90,12 @@ struct ast_visitor {
       visit(else_clause->body_elements, else_scope.open_node());
     }
   }
+  void visit(
+      const ast::with_block& with_block, tree_printer::scope scope) const {
+    scope.println(" with-block {}", location(with_block.loc));
+    visit(with_block.value, scope.open_property());
+    visit(with_block.body_elements, scope.open_node());
+  }
   void visit(const ast::partial_apply& partial_apply, tree_printer::scope scope)
       const {
     scope.println(

@@ -564,6 +564,37 @@ class render_engine {
     }
   }
 
+  void visit(const ast::with_block& with_block) {
+    const ast::expression& expr = with_block.value;
+    object value = evaluate(expr);
+    value.visit(
+        [&](const map&) {
+          // maps can be de-structured.
+        },
+        [&](const native_object::ptr& o) {
+          // map-like native objects can be de-structured.
+          if (o->as_map_like() == nullptr) {
+            diags_.error(
+                expr.loc.begin,
+                "Expression '{}' is a native_object which is not map-like. The encountered value is:\n{}",
+                expr.to_string(),
+                to_string(value));
+            throw abort_rendering();
+          }
+        },
+        [&](auto&&) {
+          diags_.error(
+              expr.loc.begin,
+              "Expression '{}' does not evaluate to a map. The encountered value is:\n{}",
+              expr.to_string(),
+              to_string(value));
+          throw abort_rendering();
+        });
+    eval_context_.push_scope(value);
+    visit(with_block.body_elements);
+    eval_context_.pop_scope();
+  }
+
   void visit(const ast::partial_apply& partial_apply) {
     std::vector<std::string> path;
     path.reserve(partial_apply.path.parts.size());

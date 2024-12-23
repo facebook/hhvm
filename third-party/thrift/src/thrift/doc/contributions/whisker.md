@@ -446,10 +446,6 @@ Whisker `{{#each}}` blocks are based on [EmberJS `{{#each}}`](https://guides.emb
 
 ### With Blocks
 
-:::warning
-`{{#with}}` blocks have not been implemented yet.
-:::
-
 Whisker supports a block type for de-structuring: `{{#with}}`. A typical de-structuring block might look like:
 
 ```handlebars

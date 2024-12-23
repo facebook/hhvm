@@ -30,6 +30,7 @@ struct newline;
 struct comment;
 struct section_block;
 struct conditional_block;
+struct with_block;
 struct partial_apply;
 struct interpolation;
 struct let_statement;
@@ -44,6 +45,7 @@ using body = std::variant<
     interpolation,
     section_block,
     conditional_block,
+    with_block,
     let_statement,
     partial_apply>;
 using bodies = std::vector<body>;
@@ -257,6 +259,18 @@ struct conditional_block {
     bodies body_elements;
   };
   std::optional<else_block> else_clause;
+};
+
+/**
+ * A Whisker construct for "de-structuring" a map-like object.
+ * This matches Handlebars:
+ *   https://handlebarsjs.com/guide/builtin-helpers.html#with
+ */
+struct with_block {
+  source_range loc;
+
+  expression value;
+  bodies body_elements;
 };
 
 /*

@@ -755,6 +755,7 @@ class parser {
       ast::interpolation,
       ast::section_block,
       ast::conditional_block,
+      ast::with_block,
       ast::let_statement,
       ast::partial_apply>;
   // template → { interpolation | block | statement | partial-apply }
@@ -784,6 +785,8 @@ class parser {
       templ = std::move(variable).consume_and_advance(&scan);
     } else if (parse_result conditional_block = parse_conditional_block(scan)) {
       templ = std::move(conditional_block).consume_and_advance(&scan);
+    } else if (parse_result with_block = parse_with_block(scan)) {
+      templ = std::move(with_block).consume_and_advance(&scan);
     } else if (parse_result let_statement = parse_let_statement(scan)) {
       templ = std::move(let_statement).consume_and_advance(&scan);
     } else if (parse_result section_block = parse_section_block(scan)) {
@@ -1169,6 +1172,54 @@ class parser {
             std::move(open),
             std::move(bodies),
             std::move(else_block),
+        },
+        scan};
+  }
+
+  // with-block       → { with-block-open ~ body* ~ with-block-close }
+  // with-block-open  → { "{{" ~ "#" ~ "with" ~ expression ~ "}}" }
+  // with-block-close → { "{{" ~ "/" ~ "with" ~ "}}" }
+  parse_result<ast::with_block> parse_with_block(parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!(try_consume_token(&scan, tok::open) &&
+          try_consume_token(&scan, tok::pound) &&
+          try_consume_token(&scan, tok::kw_with))) {
+      return no_parse_result();
+    }
+    scan = scan.make_fresh();
+
+    parse_result value = parse_expression(scan);
+    if (!value.has_value()) {
+      report_expected(scan, fmt::format("expression to open with-block"));
+    }
+    ast::expression expr = std::move(value).consume_and_advance(&scan);
+    if (!try_consume_token(&scan, tok::close)) {
+      report_expected(scan, fmt::format("{} to open with-block", tok::close));
+    }
+    scan = scan.make_fresh();
+
+    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
+
+    const auto expect_on_close = [&](tok kind) {
+      if (!try_consume_token(&scan, kind)) {
+        report_expected(
+            scan,
+            fmt::format("{} to close with-block '{}'", kind, expr.to_string()));
+      }
+    };
+
+    expect_on_close(tok::open);
+    expect_on_close(tok::slash);
+    expect_on_close(tok::kw_with);
+    expect_on_close(tok::close);
+
+    return {
+        ast::with_block{
+            scan.with_start(scan_start).range(),
+            std::move(expr),
+            std::move(bodies),
         },
         scan};
   }

@@ -26,7 +26,35 @@ namespace w = whisker::make;
 namespace whisker {
 
 namespace {
+
 class empty_native_object : public native_object {};
+
+/**
+ * When looking up a property, always returns a whisker::string that is the
+ * property name repeated twice.
+ */
+class double_property_name
+    : public native_object,
+      public native_object::map_like,
+      public std::enable_shared_from_this<double_property_name> {
+ public:
+  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+    return shared_from_this();
+  }
+
+  const object* lookup_property(std::string_view id) const override {
+    if (auto cached = cached_.find(id); cached != cached_.end()) {
+      return &cached->second;
+    }
+    auto [result, inserted] =
+        cached_.insert({std::string(id), w::string(fmt::format("{0}{0}", id))});
+    assert(inserted);
+    return &result->second;
+  }
+
+  mutable std::map<std::string, object, std::less<>> cached_;
+};
+
 } // namespace
 
 TEST_F(RenderTest, basic) {
@@ -681,6 +709,72 @@ TEST_F(RenderTest, let_statement_rebinding_error) {
           "Name 'cond' is already bound in the current scope.",
           path_to_file,
           2)));
+}
+
+TEST_F(RenderTest, with_block) {
+  auto result = render(
+      "{{#with news}}\n"
+      "  {{#if has-update?}}\n"
+      "    Stuff is {{foo}} happening!\n"
+      "  {{/if has-update?}}\n"
+      "{{/with}}\n",
+      w::map(
+          {{"news",
+            w::map(
+                {{"has-update?", w::boolean(true)},
+                 {"foo", w::string("now")}})}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "    Stuff is now happening!\n");
+}
+
+TEST_F(RenderTest, with_not_map) {
+  auto result = render(
+      "{{#with news}}\n"
+      "{{/with}}\n",
+      w::map({{"news", w::array({w::i64(0)})}}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Expression 'news' does not evaluate to a map. The encountered value is:\n"
+          "array (size=1)\n"
+          "`-[0]\n"
+          "  |-i64(0)\n",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, with_map_like_native_object) {
+  auto result = render(
+      "{{#with doubler}}\n"
+      "{{foo}} {{bar}}\n"
+      "{{#with .}}\n"
+      "{{baz}}\n"
+      "{{/with}}\n"
+      "{{/with}}\n",
+      w::map({{"doubler", w::make_native_object<double_property_name>()}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(
+      *result,
+      "foofoo barbar\n"
+      "bazbaz\n");
+}
+
+TEST_F(RenderTest, with_not_map_like_native_object) {
+  auto result = render(
+      "{{#with empty}}\n"
+      "{{/with}}\n",
+      w::map({{"empty", w::make_native_object<empty_native_object>()}}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Expression 'empty' is a native_object which is not map-like. The encountered value is:\n"
+          "<native_object>\n",
+          path_to_file,
+          1)));
 }
 
 TEST_F(RenderTest, printable_types_strict_failure) {

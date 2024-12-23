@@ -704,6 +704,64 @@ TEST_F(ParserTest, let_statement_keyword) {
           1)));
 }
 
+TEST_F(ParserTest, with_block) {
+  auto ast = parse_ast(
+      "{{#with foo.bar}}\n"
+      "{{bar}}\n"
+      "{{/with}}\n");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- with-block <line:1:1, line:3:10>\n"
+      "| `- expression <line:1:9, col:16> 'foo.bar'\n"
+      "| |- interpolation <line:2:1, col:8> 'bar'\n"
+      "| |- newline <line:2:8, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, with_block_no_expression) {
+  auto ast = parse_ast(
+      "{{#with}}\n"
+      "{{bar}}\n"
+      "{{/with}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression to open with-block but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, with_block_multiple_expression) {
+  auto ast = parse_ast(
+      "{{#with foo.bar bar.baz}}\n"
+      "{{bar}}\n"
+      "{{/with}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to open with-block but found identifier",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, with_block_missing_close) {
+  auto ast = parse_ast(
+      "{{#with foo.bar}}\n"
+      "{{bar}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `{{` to close with-block 'foo.bar' but found EOF",
+          path_to_file(1),
+          3)));
+}
+
 TEST_F(ParserTest, comment) {
   auto ast = parse_ast("Hello{{! #$^& random text }}world");
 

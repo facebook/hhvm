@@ -591,6 +591,7 @@ module.exports = {
             ],
           },
           'fb/contributions/linter',
+          'fb/contributions/bots',
           'fb/contributions/oss',
           'fb/contributions/troubleshooting',
           'fb/contributions/xplat',

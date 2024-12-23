@@ -31,9 +31,7 @@ namespace {
 void rtrim(std::string& s) {
   s.erase(
       std::find_if(
-          s.rbegin(),
-          s.rend(),
-          [](int ch) { return !(ch == ' ' || ch == ','); })
+          s.rbegin(), s.rend(), [](int ch) { return ch != ' ' && ch != ','; })
           .base(),
       s.end());
 }
@@ -102,7 +100,7 @@ std::ostream& json_quote_ascii(std::ostream& o, const std::string& s) {
       // clang-format on
       default: {
         uint8_t b = static_cast<uint8_t>(c);
-        if (!(b >= 0x20 && b < 0x80)) {
+        if (b < 0x20 || b >= 0x80) {
           constexpr auto hex = "0123456789abcdef";
           auto c1 = static_cast<char>(hex[(b >> 4) & 0x0f]);
           auto c0 = static_cast<char>(hex[(b >> 0) & 0x0f]);

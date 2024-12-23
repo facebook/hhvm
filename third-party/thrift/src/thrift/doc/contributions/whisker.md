@@ -193,8 +193,8 @@ Every `expression` produces an `object`. However, not all `object`s are *printab
 <Grammar>
 
 ```
-interpolation → "{{" ~ expression ~ "}}"
-expression → { literal | variable | function-call }
+interpolation → { "{{" ~ expression ~ "}}" }
+expression    → { literal | variable | function-call }
 
 literal             → { string-literal | i64-literal | boolean-literal | null-literal }
 variable            → { "." | (identifier ~ ("." ~ identifier)*) }
@@ -232,7 +232,9 @@ keyword → {
 id_prefix → { alpha |        | '_' | '$' }
 id_suffix → { alpha | digits | '_' | '$' | '-' | '+' | ':' | '?' | '/' }
 
-builtin-call → { ("not" ~ expression) | (("and" | "or") ~ expression ~ expression ~ expression*) }
+builtin-call → {
+  ("not" ~ expression) |
+  (("and" | "or") ~ expression ~ expression+) }
 ```
 
 </Grammar>

@@ -155,7 +155,7 @@ partial-apply → { <see below> }
 
 </Grammar>
 
-### Interpolations
+### Interpolations & Expressions
 
 An `interpolation` causes the result of an `expression` to be rendered into the output at the position of the enclosing `{{ ... }}`.
 
@@ -190,6 +190,29 @@ Whisker includes a set of *keywords* that are reserved. These cannot be used as 
 
 Every `expression` produces an `object`. However, not all `object`s are *printable*. The top-level `expression` in a `template` **must** be *printable*. `expression`s passed as arguments in a function call do **not** need be *printable*. See the [*data model*](#data-model) for details.
 
+<Example>
+
+```handlebars title=example.whisker
+{{foo.bar}}
+{{! scoped property access }}
+
+{{ (not true) }}
+{{! `false` }}
+
+{{ (uppercase "Hello") }}
+{{! "HELLO" }}
+
+{{ (int-to-string 16 format="hex")}}
+{{! "0x10" }}
+
+{{!--
+  Named arguments (like `format="hex"`) must follow after all
+  positional arguments (like `16`).
+}}
+```
+
+</Example>
+
 <Grammar>
 
 ```
@@ -198,7 +221,7 @@ expression    → { literal | variable | function-call }
 
 literal             → { string-literal | i64-literal | boolean-literal | null-literal }
 variable            → { "." | (identifier ~ ("." ~ identifier)*) }
-function-call       → { "(" ~ ((variable ~ expression*) | builtin-call) ~ ")" }
+function-call       → { "(" ~ (builtin-call | user-defined-call) ~ ")" }
 
 string-literal  → { <see above> }
 i64-literal     → { <see above> }
@@ -235,6 +258,15 @@ id_suffix → { alpha | digits | '_' | '$' | '-' | '+' | ':' | '?' | '/' }
 builtin-call → {
   ("not" ~ expression) |
   (("and" | "or") ~ expression ~ expression+) }
+
+user-defined-call → {
+  user-defined-call-lookup ~
+  positional-argument* ~
+  named-argument* }
+
+user-defined-call-lookup → { variable }
+positional-argument      → { expression }
+named-argument           → { identifier ~ "=" ~ expression }
 ```
 
 </Grammar>

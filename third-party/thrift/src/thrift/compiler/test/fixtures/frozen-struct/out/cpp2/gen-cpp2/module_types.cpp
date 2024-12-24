@@ -134,12 +134,30 @@ bool ModuleA::operator<([[maybe_unused]] const ModuleA& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t ModuleA::get_i32Field() const {
+  return __fbthrift_field_i32Field;
+}
+
+::std::int32_t& ModuleA::set_i32Field(::std::int32_t i32Field_) {
+  i32Field_ref() = i32Field_;
+  return __fbthrift_field_i32Field;
+}
+
+const ::std::string& ModuleA::get_strField() const& {
+  return __fbthrift_field_strField;
+}
+
+::std::string ModuleA::get_strField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_strField);
+}
+
 const ::std::vector<::std::int16_t>& ModuleA::get_listField() const& {
   return __fbthrift_field_listField;
 }
 
 ::std::vector<::std::int16_t> ModuleA::get_listField() && {
-  return std::move(__fbthrift_field_listField);
+  return static_cast<::std::vector<::std::int16_t>&&>(__fbthrift_field_listField);
 }
 
 const ::std::map<::std::string, ::std::int32_t>& ModuleA::get_mapField() const& {
@@ -147,7 +165,7 @@ const ::std::map<::std::string, ::std::int32_t>& ModuleA::get_mapField() const& 
 }
 
 ::std::map<::std::string, ::std::int32_t> ModuleA::get_mapField() && {
-  return std::move(__fbthrift_field_mapField);
+  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_mapField);
 }
 
 const ::some::ns::IncludedA& ModuleA::get_inclAField() const& {
@@ -155,7 +173,7 @@ const ::some::ns::IncludedA& ModuleA::get_inclAField() const& {
 }
 
 ::some::ns::IncludedA ModuleA::get_inclAField() && {
-  return std::move(__fbthrift_field_inclAField);
+  return static_cast<::some::ns::IncludedA&&>(__fbthrift_field_inclAField);
 }
 
 const ::some::ns::IncludedB& ModuleA::get_inclBField() const& {
@@ -163,9 +181,8 @@ const ::some::ns::IncludedB& ModuleA::get_inclBField() const& {
 }
 
 ::some::ns::IncludedB ModuleA::get_inclBField() && {
-  return std::move(__fbthrift_field_inclBField);
+  return static_cast<::some::ns::IncludedB&&>(__fbthrift_field_inclBField);
 }
-
 
 void swap([[maybe_unused]] ModuleA& a, [[maybe_unused]] ModuleA& b) {
   using ::std::swap;
@@ -265,6 +282,24 @@ bool ModuleB::operator<([[maybe_unused]] const ModuleB& rhs) const {
 }
 
 
+::std::int32_t ModuleB::get_i32Field() const {
+  return __fbthrift_field_i32Field;
+}
+
+::std::int32_t& ModuleB::set_i32Field(::std::int32_t i32Field_) {
+  i32Field_ref() = i32Field_;
+  return __fbthrift_field_i32Field;
+}
+
+::some::ns::EnumB ModuleB::get_inclEnumB() const {
+  return __fbthrift_field_inclEnumB;
+}
+
+::some::ns::EnumB& ModuleB::set_inclEnumB(::some::ns::EnumB inclEnumB_) {
+  inclEnumB_ref() = inclEnumB_;
+  return __fbthrift_field_inclEnumB;
+}
+
 void swap([[maybe_unused]] ModuleB& a, [[maybe_unused]] ModuleB& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_i32Field, b.__fbthrift_field_i32Field);
@@ -344,6 +379,15 @@ bool DirectlyAdapted::operator<([[maybe_unused]] const DirectlyAdapted& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t DirectlyAdapted::get_field() const {
+  return __fbthrift_field_field;
+}
+
+::std::int32_t& DirectlyAdapted::set_field(::std::int32_t field_) {
+  field_ref() = field_;
+  return __fbthrift_field_field;
+}
 
 void swap([[maybe_unused]] DirectlyAdapted& a, [[maybe_unused]] DirectlyAdapted& b) {
   using ::std::swap;

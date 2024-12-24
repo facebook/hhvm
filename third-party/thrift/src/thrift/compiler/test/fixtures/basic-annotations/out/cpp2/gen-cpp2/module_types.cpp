@@ -109,6 +109,14 @@ bool MyStructNestedAnnotation::operator<([[maybe_unused]] const MyStructNestedAn
 }
 
 
+const ::std::string& MyStructNestedAnnotation::get_name() const& {
+  return __fbthrift_field_name;
+}
+
+::std::string MyStructNestedAnnotation::get_name() && {
+  return static_cast<::std::string&&>(__fbthrift_field_name);
+}
+
 void swap([[maybe_unused]] MyStructNestedAnnotation& a, [[maybe_unused]] MyStructNestedAnnotation& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
@@ -474,14 +482,72 @@ bool YourStruct::operator<([[maybe_unused]] const YourStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int64_t YourStruct::get_majorVer() const {
+  return __fbthrift_field_majorVer;
+}
+
+::std::int64_t& YourStruct::set_majorVer(::std::int64_t majorVer_) {
+  majorVer_ref() = majorVer_;
+  return __fbthrift_field_majorVer;
+}
+
+const ::std::string& YourStruct::get_abstract() const& {
+  return __fbthrift_field_abstract;
+}
+
+::std::string YourStruct::get_abstract() && {
+  return static_cast<::std::string&&>(__fbthrift_field_abstract);
+}
+
+const ::std::string& YourStruct::get_annotation_with_quote() const& {
+  return __fbthrift_field_annotation_with_quote;
+}
+
+::std::string YourStruct::get_annotation_with_quote() && {
+  return static_cast<::std::string&&>(__fbthrift_field_annotation_with_quote);
+}
+
+const ::std::string& YourStruct::get_class_() const& {
+  return __fbthrift_field_class_;
+}
+
+::std::string YourStruct::get_class_() && {
+  return static_cast<::std::string&&>(__fbthrift_field_class_);
+}
+
+const ::std::string& YourStruct::get_annotation_with_trailing_comma() const& {
+  return __fbthrift_field_annotation_with_trailing_comma;
+}
+
+::std::string YourStruct::get_annotation_with_trailing_comma() && {
+  return static_cast<::std::string&&>(__fbthrift_field_annotation_with_trailing_comma);
+}
+
+const ::std::string& YourStruct::get_empty_annotations() const& {
+  return __fbthrift_field_empty_annotations;
+}
+
+::std::string YourStruct::get_empty_annotations() && {
+  return static_cast<::std::string&&>(__fbthrift_field_empty_annotations);
+}
+
+::cpp2::YourEnum YourStruct::get_my_enum() const {
+  return __fbthrift_field_my_enum;
+}
+
+::cpp2::YourEnum& YourStruct::set_my_enum(::cpp2::YourEnum my_enum_) {
+  my_enum_ref() = my_enum_;
+  return __fbthrift_field_my_enum;
+}
+
 const ::cpp2::list_string_6884& YourStruct::get_cpp_type_annotation() const& {
   return __fbthrift_field_cpp_type_annotation;
 }
 
 ::cpp2::list_string_6884 YourStruct::get_cpp_type_annotation() && {
-  return std::move(__fbthrift_field_cpp_type_annotation);
+  return static_cast<::cpp2::list_string_6884&&>(__fbthrift_field_cpp_type_annotation);
 }
-
 
 void swap([[maybe_unused]] YourStruct& a, [[maybe_unused]] YourStruct& b) {
   using ::std::swap;
@@ -600,6 +666,23 @@ bool SecretStruct::operator<([[maybe_unused]] const SecretStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int64_t SecretStruct::get_id() const {
+  return __fbthrift_field_id;
+}
+
+::std::int64_t& SecretStruct::set_id(::std::int64_t id_) {
+  id_ref() = id_;
+  return __fbthrift_field_id;
+}
+
+const ::std::string& SecretStruct::get_password() const& {
+  return __fbthrift_field_password;
+}
+
+::std::string SecretStruct::get_password() && {
+  return static_cast<::std::string&&>(__fbthrift_field_password);
+}
 
 void swap([[maybe_unused]] SecretStruct& a, [[maybe_unused]] SecretStruct& b) {
   using ::std::swap;

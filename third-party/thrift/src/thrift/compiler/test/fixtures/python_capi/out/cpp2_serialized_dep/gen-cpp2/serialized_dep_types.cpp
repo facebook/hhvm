@@ -111,6 +111,39 @@ bool SerializedStruct::operator<([[maybe_unused]] const SerializedStruct& rhs) c
 }
 
 
+const ::std::string& SerializedStruct::get_s() const& {
+  return __fbthrift_field_s;
+}
+
+::std::string SerializedStruct::get_s() && {
+  return static_cast<::std::string&&>(__fbthrift_field_s);
+}
+
+::std::int32_t SerializedStruct::get_i() const {
+  return __fbthrift_field_i;
+}
+
+::std::int32_t& SerializedStruct::set_i(::std::int32_t i_) {
+  i_ref() = i_;
+  return __fbthrift_field_i;
+}
+
+const ::std::string* SerializedStruct::get_os() const& {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+::std::string* SerializedStruct::get_os() & {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+const ::std::string& SerializedStruct::get_rs() const& {
+  return __fbthrift_field_rs;
+}
+
+::std::string SerializedStruct::get_rs() && {
+  return static_cast<::std::string&&>(__fbthrift_field_rs);
+}
+
 void swap([[maybe_unused]] SerializedStruct& a, [[maybe_unused]] SerializedStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
@@ -362,6 +395,30 @@ bool SerializedError::operator<([[maybe_unused]] const SerializedError& rhs) con
 }
 
 
+const ::std::string& SerializedError::get_msg() const& {
+  return __fbthrift_field_msg;
+}
+
+::std::string SerializedError::get_msg() && {
+  return static_cast<::std::string&&>(__fbthrift_field_msg);
+}
+
+const ::std::string* SerializedError::get_os() const& {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+::std::string* SerializedError::get_os() & {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+const ::std::string& SerializedError::get_rs() const& {
+  return __fbthrift_field_rs;
+}
+
+::std::string SerializedError::get_rs() && {
+  return static_cast<::std::string&&>(__fbthrift_field_rs);
+}
+
 void swap([[maybe_unused]] SerializedError& a, [[maybe_unused]] SerializedError& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_msg, b.__fbthrift_field_msg);
@@ -479,6 +536,39 @@ bool MarshalStruct::operator<([[maybe_unused]] const MarshalStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& MarshalStruct::get_s() const& {
+  return __fbthrift_field_s;
+}
+
+::std::string MarshalStruct::get_s() && {
+  return static_cast<::std::string&&>(__fbthrift_field_s);
+}
+
+::std::int32_t MarshalStruct::get_i() const {
+  return __fbthrift_field_i;
+}
+
+::std::int32_t& MarshalStruct::set_i(::std::int32_t i_) {
+  i_ref() = i_;
+  return __fbthrift_field_i;
+}
+
+const ::std::string* MarshalStruct::get_os() const& {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+::std::string* MarshalStruct::get_os() & {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+const ::std::string& MarshalStruct::get_rs() const& {
+  return __fbthrift_field_rs;
+}
+
+::std::string MarshalStruct::get_rs() && {
+  return static_cast<::std::string&&>(__fbthrift_field_rs);
+}
 
 void swap([[maybe_unused]] MarshalStruct& a, [[maybe_unused]] MarshalStruct& b) {
   using ::std::swap;
@@ -730,6 +820,30 @@ bool MarshalError::operator<([[maybe_unused]] const MarshalError& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& MarshalError::get_msg() const& {
+  return __fbthrift_field_msg;
+}
+
+::std::string MarshalError::get_msg() && {
+  return static_cast<::std::string&&>(__fbthrift_field_msg);
+}
+
+const ::std::string* MarshalError::get_os() const& {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+::std::string* MarshalError::get_os() & {
+  return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
+}
+
+const ::std::string& MarshalError::get_rs() const& {
+  return __fbthrift_field_rs;
+}
+
+::std::string MarshalError::get_rs() && {
+  return static_cast<::std::string&&>(__fbthrift_field_rs);
+}
 
 void swap([[maybe_unused]] MarshalError& a, [[maybe_unused]] MarshalError& b) {
   using ::std::swap;

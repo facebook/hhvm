@@ -99,6 +99,42 @@ bool Color::operator<([[maybe_unused]] const Color& rhs) const {
 }
 
 
+double Color::get_red() const {
+  return __fbthrift_field_red;
+}
+
+double& Color::set_red(double red_) {
+  red_ref() = red_;
+  return __fbthrift_field_red;
+}
+
+double Color::get_green() const {
+  return __fbthrift_field_green;
+}
+
+double& Color::set_green(double green_) {
+  green_ref() = green_;
+  return __fbthrift_field_green;
+}
+
+double Color::get_blue() const {
+  return __fbthrift_field_blue;
+}
+
+double& Color::set_blue(double blue_) {
+  blue_ref() = blue_;
+  return __fbthrift_field_blue;
+}
+
+double Color::get_alpha() const {
+  return __fbthrift_field_alpha;
+}
+
+double& Color::set_alpha(double alpha_) {
+  alpha_ref() = alpha_;
+  return __fbthrift_field_alpha;
+}
+
 void swap([[maybe_unused]] Color& a, [[maybe_unused]] Color& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_red, b.__fbthrift_field_red);
@@ -219,14 +255,51 @@ bool Vehicle::operator<([[maybe_unused]] const Vehicle& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::cpp2::Color& Vehicle::get_color() const& {
   return __fbthrift_field_color;
 }
 
 ::cpp2::Color Vehicle::get_color() && {
-  return std::move(__fbthrift_field_color);
+  return static_cast<::cpp2::Color&&>(__fbthrift_field_color);
 }
 
+const ::std::string* Vehicle::get_licensePlate() const& {
+  return licensePlate_ref().has_value() ? std::addressof(__fbthrift_field_licensePlate) : nullptr;
+}
+
+::std::string* Vehicle::get_licensePlate() & {
+  return licensePlate_ref().has_value() ? std::addressof(__fbthrift_field_licensePlate) : nullptr;
+}
+
+const ::std::string* Vehicle::get_description() const& {
+  return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
+}
+
+::std::string* Vehicle::get_description() & {
+  return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
+}
+
+const ::std::string* Vehicle::get_name() const& {
+  return name_ref().has_value() ? std::addressof(__fbthrift_field_name) : nullptr;
+}
+
+::std::string* Vehicle::get_name() & {
+  return name_ref().has_value() ? std::addressof(__fbthrift_field_name) : nullptr;
+}
+
+const bool* Vehicle::get_hasAC() const& {
+  return hasAC_ref().has_value() ? std::addressof(__fbthrift_field_hasAC) : nullptr;
+}
+
+bool* Vehicle::get_hasAC() & {
+  return hasAC_ref().has_value() ? std::addressof(__fbthrift_field_hasAC) : nullptr;
+}
+
+bool& Vehicle::set_hasAC(bool hasAC_) {
+  hasAC_ref() = hasAC_;
+  return __fbthrift_field_hasAC;
+}
 
 void swap([[maybe_unused]] Vehicle& a, [[maybe_unused]] Vehicle& b) {
   using ::std::swap;
@@ -383,6 +456,45 @@ bool Person::operator<([[maybe_unused]] const Person& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::cpp2::PersonID Person::get_id() const {
+  return __fbthrift_field_id;
+}
+
+::cpp2::PersonID& Person::set_id(::cpp2::PersonID id_) {
+  id_ref() = id_;
+  return __fbthrift_field_id;
+}
+
+const ::std::string& Person::get_name() const& {
+  return __fbthrift_field_name;
+}
+
+::std::string Person::get_name() && {
+  return static_cast<::std::string&&>(__fbthrift_field_name);
+}
+
+const ::std::int16_t* Person::get_age() const& {
+  return age_ref().has_value() ? std::addressof(__fbthrift_field_age) : nullptr;
+}
+
+::std::int16_t* Person::get_age() & {
+  return age_ref().has_value() ? std::addressof(__fbthrift_field_age) : nullptr;
+}
+
+::std::int16_t& Person::set_age(::std::int16_t age_) {
+  age_ref() = age_;
+  return __fbthrift_field_age;
+}
+
+const ::std::string* Person::get_address() const& {
+  return address_ref().has_value() ? std::addressof(__fbthrift_field_address) : nullptr;
+}
+
+::std::string* Person::get_address() & {
+  return address_ref().has_value() ? std::addressof(__fbthrift_field_address) : nullptr;
+}
+
 const ::cpp2::Color* Person::get_favoriteColor() const& {
   return favoriteColor_ref().has_value() ? std::addressof(__fbthrift_field_favoriteColor) : nullptr;
 }
@@ -399,12 +511,38 @@ const ::std::set<::cpp2::PersonID>* Person::get_friends() const& {
   return friends_ref().has_value() ? std::addressof(__fbthrift_field_friends) : nullptr;
 }
 
+const ::cpp2::PersonID* Person::get_bestFriend() const& {
+  return bestFriend_ref().has_value() ? std::addressof(__fbthrift_field_bestFriend) : nullptr;
+}
+
+::cpp2::PersonID* Person::get_bestFriend() & {
+  return bestFriend_ref().has_value() ? std::addressof(__fbthrift_field_bestFriend) : nullptr;
+}
+
+::cpp2::PersonID& Person::set_bestFriend(::cpp2::PersonID bestFriend_) {
+  bestFriend_ref() = bestFriend_;
+  return __fbthrift_field_bestFriend;
+}
+
 const ::std::map<::cpp2::Animal, ::std::string>* Person::get_petNames() const& {
   return petNames_ref().has_value() ? std::addressof(__fbthrift_field_petNames) : nullptr;
 }
 
 ::std::map<::cpp2::Animal, ::std::string>* Person::get_petNames() & {
   return petNames_ref().has_value() ? std::addressof(__fbthrift_field_petNames) : nullptr;
+}
+
+const ::cpp2::Animal* Person::get_afraidOfAnimal() const& {
+  return afraidOfAnimal_ref().has_value() ? std::addressof(__fbthrift_field_afraidOfAnimal) : nullptr;
+}
+
+::cpp2::Animal* Person::get_afraidOfAnimal() & {
+  return afraidOfAnimal_ref().has_value() ? std::addressof(__fbthrift_field_afraidOfAnimal) : nullptr;
+}
+
+::cpp2::Animal& Person::set_afraidOfAnimal(::cpp2::Animal afraidOfAnimal_) {
+  afraidOfAnimal_ref() = afraidOfAnimal_;
+  return __fbthrift_field_afraidOfAnimal;
 }
 
 const ::std::vector<::cpp2::Vehicle>* Person::get_vehicles() const& {
@@ -414,7 +552,6 @@ const ::std::vector<::cpp2::Vehicle>* Person::get_vehicles() const& {
 ::std::vector<::cpp2::Vehicle>* Person::get_vehicles() & {
   return vehicles_ref().has_value() ? std::addressof(__fbthrift_field_vehicles) : nullptr;
 }
-
 
 void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
   using ::std::swap;

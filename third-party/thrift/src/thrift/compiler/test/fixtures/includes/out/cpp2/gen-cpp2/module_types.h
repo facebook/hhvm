@@ -325,16 +325,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIncludedInt" } */
   [[deprecated("Use `FOO.MyIncludedInt().value();` instead of `FOO.get_MyIncludedInt();`")]]
-  ::cpp2::IncludedInt64 get_MyIncludedInt() const {
-    return __fbthrift_field_MyIncludedInt;
-  }
+  ::cpp2::IncludedInt64 get_MyIncludedInt() const;
 
   /** Glean { "field": "MyIncludedInt" } */
   [[deprecated("Use `FOO.MyIncludedInt() = BAR;` instead of `FOO.set_MyIncludedInt(BAR);`")]]
-  ::cpp2::IncludedInt64& set_MyIncludedInt(::cpp2::IncludedInt64 MyIncludedInt_) {
-    MyIncludedInt_ref() = MyIncludedInt_;
-    return __fbthrift_field_MyIncludedInt;
-  }
+  ::cpp2::IncludedInt64& set_MyIncludedInt(::cpp2::IncludedInt64 MyIncludedInt_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

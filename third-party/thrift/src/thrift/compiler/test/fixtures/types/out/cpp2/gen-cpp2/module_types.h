@@ -849,15 +849,11 @@ class decorated_struct final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  const ::std::string& get_field() const& {
-    return __fbthrift_field_field;
-  }
+  const ::std::string& get_field() const&;
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::string get_field() && {
-    return std::move(__fbthrift_field_field);
-  }
+  ::std::string get_field() &&;
 
   /** Glean { "field": "field" } */
   template <typename T_decorated_struct_field_struct_setter = ::std::string>
@@ -1846,16 +1842,11 @@ class VirtualStruct  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2067,29 +2058,19 @@ class MyStructWithForwardRefEnum final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::apache::thrift::fixtures::types::MyForwardRefEnum get_a() const {
-    return __fbthrift_field_a;
-  }
+  ::apache::thrift::fixtures::types::MyForwardRefEnum get_a() const;
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
-  ::apache::thrift::fixtures::types::MyForwardRefEnum& set_a(::apache::thrift::fixtures::types::MyForwardRefEnum a_) {
-    a_ref() = a_;
-    return __fbthrift_field_a;
-  }
+  ::apache::thrift::fixtures::types::MyForwardRefEnum& set_a(::apache::thrift::fixtures::types::MyForwardRefEnum a_);
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  ::apache::thrift::fixtures::types::MyForwardRefEnum get_b() const {
-    return __fbthrift_field_b;
-  }
+  ::apache::thrift::fixtures::types::MyForwardRefEnum get_b() const;
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
-  ::apache::thrift::fixtures::types::MyForwardRefEnum& set_b(::apache::thrift::fixtures::types::MyForwardRefEnum b_) {
-    b_ref() = b_;
-    return __fbthrift_field_b;
-  }
+  ::apache::thrift::fixtures::types::MyForwardRefEnum& set_b(::apache::thrift::fixtures::types::MyForwardRefEnum b_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2301,29 +2282,19 @@ class TrivialNumeric final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::std::int32_t get_a() const {
-    return __fbthrift_field_a;
-  }
+  ::std::int32_t get_a() const;
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a() = BAR;` instead of `FOO.set_a(BAR);`")]]
-  ::std::int32_t& set_a(::std::int32_t a_) {
-    a_ref() = a_;
-    return __fbthrift_field_a;
-  }
+  ::std::int32_t& set_a(::std::int32_t a_);
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  bool get_b() const {
-    return __fbthrift_field_b;
-  }
+  bool get_b() const;
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b() = BAR;` instead of `FOO.set_b(BAR);`")]]
-  bool& set_b(bool b_) {
-    b_ref() = b_;
-    return __fbthrift_field_b;
-  }
+  bool& set_b(bool b_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2535,16 +2506,11 @@ class TrivialNestedWithDefault final  {
 
   /** Glean { "field": "z" } */
   [[deprecated("Use `FOO.z().value();` instead of `FOO.get_z();`")]]
-  ::std::int32_t get_z() const {
-    return __fbthrift_field_z;
-  }
+  ::std::int32_t get_z() const;
 
   /** Glean { "field": "z" } */
   [[deprecated("Use `FOO.z() = BAR;` instead of `FOO.set_z(BAR);`")]]
-  ::std::int32_t& set_z(::std::int32_t z_) {
-    z_ref() = z_;
-    return __fbthrift_field_z;
-  }
+  ::std::int32_t& set_z(::std::int32_t z_);
 
   /** Glean { "field": "n" } */
   [[deprecated("Use `FOO.n().value();` instead of `FOO.get_n();`")]]
@@ -2772,15 +2738,11 @@ class ComplexString final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  const ::std::string& get_a() const& {
-    return __fbthrift_field_a;
-  }
+  const ::std::string& get_a() const&;
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::std::string get_a() && {
-    return std::move(__fbthrift_field_a);
-  }
+  ::std::string get_a() &&;
 
   /** Glean { "field": "a" } */
   template <typename T_ComplexString_a_struct_setter = ::std::string>
@@ -3016,15 +2978,11 @@ class ComplexNestedWithDefault final  {
 
   /** Glean { "field": "z" } */
   [[deprecated("Use `FOO.z().value();` instead of `FOO.get_z();`")]]
-  const ::std::string& get_z() const& {
-    return __fbthrift_field_z;
-  }
+  const ::std::string& get_z() const&;
 
   /** Glean { "field": "z" } */
   [[deprecated("Use `FOO.z().value();` instead of `FOO.get_z();`")]]
-  ::std::string get_z() && {
-    return std::move(__fbthrift_field_z);
-  }
+  ::std::string get_z() &&;
 
   /** Glean { "field": "z" } */
   template <typename T_ComplexNestedWithDefault_z_struct_setter = ::std::string>
@@ -3416,68 +3374,43 @@ class MinPadding final  {
 
   /** Glean { "field": "small" } */
   [[deprecated("Use `FOO.small().value();` instead of `FOO.get_small();`")]]
-  ::std::int8_t get_small() const {
-    return __fbthrift_field_small;
-  }
+  ::std::int8_t get_small() const;
 
   /** Glean { "field": "small" } */
   [[deprecated("Use `FOO.small() = BAR;` instead of `FOO.set_small(BAR);`")]]
-  ::std::int8_t& set_small(::std::int8_t small_) {
-    small_ref() = small_;
-    return __fbthrift_field_small;
-  }
+  ::std::int8_t& set_small(::std::int8_t small_);
 
   /** Glean { "field": "big" } */
   [[deprecated("Use `FOO.big().value();` instead of `FOO.get_big();`")]]
-  ::std::int64_t get_big() const {
-    return __fbthrift_field_big;
-  }
+  ::std::int64_t get_big() const;
 
   /** Glean { "field": "big" } */
   [[deprecated("Use `FOO.big() = BAR;` instead of `FOO.set_big(BAR);`")]]
-  ::std::int64_t& set_big(::std::int64_t big_) {
-    big_ref() = big_;
-    return __fbthrift_field_big;
-  }
+  ::std::int64_t& set_big(::std::int64_t big_);
 
   /** Glean { "field": "medium" } */
   [[deprecated("Use `FOO.medium().value();` instead of `FOO.get_medium();`")]]
-  ::std::int16_t get_medium() const {
-    return __fbthrift_field_medium;
-  }
+  ::std::int16_t get_medium() const;
 
   /** Glean { "field": "medium" } */
   [[deprecated("Use `FOO.medium() = BAR;` instead of `FOO.set_medium(BAR);`")]]
-  ::std::int16_t& set_medium(::std::int16_t medium_) {
-    medium_ref() = medium_;
-    return __fbthrift_field_medium;
-  }
+  ::std::int16_t& set_medium(::std::int16_t medium_);
 
   /** Glean { "field": "biggish" } */
   [[deprecated("Use `FOO.biggish().value();` instead of `FOO.get_biggish();`")]]
-  ::std::int32_t get_biggish() const {
-    return __fbthrift_field_biggish;
-  }
+  ::std::int32_t get_biggish() const;
 
   /** Glean { "field": "biggish" } */
   [[deprecated("Use `FOO.biggish() = BAR;` instead of `FOO.set_biggish(BAR);`")]]
-  ::std::int32_t& set_biggish(::std::int32_t biggish_) {
-    biggish_ref() = biggish_;
-    return __fbthrift_field_biggish;
-  }
+  ::std::int32_t& set_biggish(::std::int32_t biggish_);
 
   /** Glean { "field": "tiny" } */
   [[deprecated("Use `FOO.tiny().value();` instead of `FOO.get_tiny();`")]]
-  ::std::int8_t get_tiny() const {
-    return __fbthrift_field_tiny;
-  }
+  ::std::int8_t get_tiny() const;
 
   /** Glean { "field": "tiny" } */
   [[deprecated("Use `FOO.tiny() = BAR;` instead of `FOO.set_tiny(BAR);`")]]
-  ::std::int8_t& set_tiny(::std::int8_t tiny_) {
-    tiny_ref() = tiny_;
-    return __fbthrift_field_tiny;
-  }
+  ::std::int8_t& set_tiny(::std::int8_t tiny_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -4251,28 +4184,19 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
+  const ::std::string& get_MyStringField() const&;
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() && {
-    return std::move(__fbthrift_field_MyStringField);
-  }
+  ::std::string get_MyStringField() &&;
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
@@ -4284,16 +4208,11 @@ class MyStruct final  {
 
   /** Glean { "field": "majorVer" } */
   [[deprecated("Use `FOO.majorVer().value();` instead of `FOO.get_majorVer();`")]]
-  ::std::int64_t get_majorVer() const {
-    return __fbthrift_field_majorVer;
-  }
+  ::std::int64_t get_majorVer() const;
 
   /** Glean { "field": "majorVer" } */
   [[deprecated("Use `FOO.majorVer() = BAR;` instead of `FOO.set_majorVer(BAR);`")]]
-  ::std::int64_t& set_majorVer(::std::int64_t majorVer_) {
-    majorVer_ref() = majorVer_;
-    return __fbthrift_field_majorVer;
-  }
+  ::std::int64_t& set_majorVer(::std::int64_t majorVer_);
 
   /** Glean { "field": "data" } */
   [[deprecated("Use `FOO.data().value();` instead of `FOO.get_data();`")]]
@@ -4468,16 +4387,11 @@ class Renamed final  {
 
   /** Glean { "field": "bar" } */
   [[deprecated("Use `FOO.bar().value();` instead of `FOO.get_bar();`")]]
-  ::std::int64_t get_bar() const {
-    return __fbthrift_field_bar;
-  }
+  ::std::int64_t get_bar() const;
 
   /** Glean { "field": "bar" } */
   [[deprecated("Use `FOO.bar() = BAR;` instead of `FOO.set_bar(BAR);`")]]
-  ::std::int64_t& set_bar(::std::int64_t bar_) {
-    bar_ref() = bar_;
-    return __fbthrift_field_bar;
-  }
+  ::std::int64_t& set_bar(::std::int64_t bar_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -4689,15 +4603,11 @@ class AnnotatedTypes final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  const ::apache::thrift::fixtures::types::TBinary_8623& get_binary_field() const& {
-    return __fbthrift_field_binary_field;
-  }
+  const ::apache::thrift::fixtures::types::TBinary_8623& get_binary_field() const&;
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  ::apache::thrift::fixtures::types::TBinary_8623 get_binary_field() && {
-    return std::move(__fbthrift_field_binary_field);
-  }
+  ::apache::thrift::fixtures::types::TBinary_8623 get_binary_field() &&;
 
   /** Glean { "field": "binary_field" } */
   template <typename T_AnnotatedTypes_binary_field_struct_setter = ::apache::thrift::fixtures::types::TBinary_8623>
@@ -5089,8 +4999,6 @@ class ForwardUsageRoot final  {
   [[deprecated("Use `FOO.ForwardUsageStruct().value();` instead of `FOO.get_ForwardUsageStruct();`")]]
   ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() &;
 
-  /** Glean { "field": "ForwardUsageStruct" } */
-  [[deprecated("Use `FOO.ForwardUsageStruct().value();` instead of `FOO.get_ForwardUsageStruct();`")]]
   ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() && = delete;
 
   /** Glean { "field": "ForwardUsageStruct" } */
@@ -5417,8 +5325,6 @@ class IncompleteMap final  {
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* get_field() &;
 
-  /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* get_field() && = delete;
 
   /** Glean { "field": "field" } */
@@ -5793,8 +5699,6 @@ class CompleteMap final  {
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* get_field() &;
 
-  /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* get_field() && = delete;
 
   /** Glean { "field": "field" } */
@@ -5969,8 +5873,6 @@ class IncompleteList final  {
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* get_field() &;
 
-  /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* get_field() && = delete;
 
   /** Glean { "field": "field" } */
@@ -6345,8 +6247,6 @@ class CompleteList final  {
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* get_field() &;
 
-  /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* get_field() && = delete;
 
   /** Glean { "field": "field" } */
@@ -6521,8 +6421,6 @@ class AdaptedList final  {
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* get_field() &;
 
-  /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* get_field() && = delete;
 
   /** Glean { "field": "field" } */
@@ -7026,8 +6924,6 @@ class DependentAdaptedList final  {
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* get_field() &;
 
-  /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* get_field() && = delete;
 
   /** Glean { "field": "field" } */
@@ -7591,15 +7487,11 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_string" } */
   [[deprecated("Use `FOO.aa_string().value();` instead of `FOO.get_aa_string();`")]]
-  const ::apache::thrift::fixtures::types::string_5252& get_aa_string() const& {
-    return __fbthrift_field_aa_string;
-  }
+  const ::apache::thrift::fixtures::types::string_5252& get_aa_string() const&;
 
   /** Glean { "field": "aa_string" } */
   [[deprecated("Use `FOO.aa_string().value();` instead of `FOO.get_aa_string();`")]]
-  ::apache::thrift::fixtures::types::string_5252 get_aa_string() && {
-    return std::move(__fbthrift_field_aa_string);
-  }
+  ::apache::thrift::fixtures::types::string_5252 get_aa_string() &&;
 
   /** Glean { "field": "aa_string" } */
   template <typename T_AllocatorAware_aa_string_struct_setter = ::apache::thrift::fixtures::types::string_5252>
@@ -7611,16 +7503,11 @@ class AllocatorAware final  {
 
   /** Glean { "field": "not_a_container" } */
   [[deprecated("Use `FOO.not_a_container().value();` instead of `FOO.get_not_a_container();`")]]
-  ::std::int32_t get_not_a_container() const {
-    return __fbthrift_field_not_a_container;
-  }
+  ::std::int32_t get_not_a_container() const;
 
   /** Glean { "field": "not_a_container" } */
   [[deprecated("Use `FOO.not_a_container() = BAR;` instead of `FOO.set_not_a_container(BAR);`")]]
-  ::std::int32_t& set_not_a_container(::std::int32_t not_a_container_) {
-    not_a_container_ref() = not_a_container_;
-    return __fbthrift_field_not_a_container;
-  }
+  ::std::int32_t& set_not_a_container(::std::int32_t not_a_container_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -7854,16 +7741,11 @@ class AllocatorAware2 final  {
 
   /** Glean { "field": "not_a_container" } */
   [[deprecated("Use `FOO.not_a_container().value();` instead of `FOO.get_not_a_container();`")]]
-  ::std::int32_t get_not_a_container() const {
-    return __fbthrift_field_not_a_container;
-  }
+  ::std::int32_t get_not_a_container() const;
 
   /** Glean { "field": "not_a_container" } */
   [[deprecated("Use `FOO.not_a_container() = BAR;` instead of `FOO.set_not_a_container(BAR);`")]]
-  ::std::int32_t& set_not_a_container(::std::int32_t not_a_container_) {
-    not_a_container_ref() = not_a_container_;
-    return __fbthrift_field_not_a_container;
-  }
+  ::std::int32_t& set_not_a_container(::std::int32_t not_a_container_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -8127,42 +8009,27 @@ class TypedefStruct final  {
 
   /** Glean { "field": "i32_field" } */
   [[deprecated("Use `FOO.i32_field().value();` instead of `FOO.get_i32_field();`")]]
-  ::std::int32_t get_i32_field() const {
-    return __fbthrift_field_i32_field;
-  }
+  ::std::int32_t get_i32_field() const;
 
   /** Glean { "field": "i32_field" } */
   [[deprecated("Use `FOO.i32_field() = BAR;` instead of `FOO.set_i32_field(BAR);`")]]
-  ::std::int32_t& set_i32_field(::std::int32_t i32_field_) {
-    i32_field_ref() = i32_field_;
-    return __fbthrift_field_i32_field;
-  }
+  ::std::int32_t& set_i32_field(::std::int32_t i32_field_);
 
   /** Glean { "field": "IntTypedef_field" } */
   [[deprecated("Use `FOO.IntTypedef_field().value();` instead of `FOO.get_IntTypedef_field();`")]]
-  ::apache::thrift::fixtures::types::IntTypedef get_IntTypedef_field() const {
-    return __fbthrift_field_IntTypedef_field;
-  }
+  ::apache::thrift::fixtures::types::IntTypedef get_IntTypedef_field() const;
 
   /** Glean { "field": "IntTypedef_field" } */
   [[deprecated("Use `FOO.IntTypedef_field() = BAR;` instead of `FOO.set_IntTypedef_field(BAR);`")]]
-  ::apache::thrift::fixtures::types::IntTypedef& set_IntTypedef_field(::apache::thrift::fixtures::types::IntTypedef IntTypedef_field_) {
-    IntTypedef_field_ref() = IntTypedef_field_;
-    return __fbthrift_field_IntTypedef_field;
-  }
+  ::apache::thrift::fixtures::types::IntTypedef& set_IntTypedef_field(::apache::thrift::fixtures::types::IntTypedef IntTypedef_field_);
 
   /** Glean { "field": "UintTypedef_field" } */
   [[deprecated("Use `FOO.UintTypedef_field().value();` instead of `FOO.get_UintTypedef_field();`")]]
-  ::apache::thrift::fixtures::types::UintTypedef get_UintTypedef_field() const {
-    return __fbthrift_field_UintTypedef_field;
-  }
+  ::apache::thrift::fixtures::types::UintTypedef get_UintTypedef_field() const;
 
   /** Glean { "field": "UintTypedef_field" } */
   [[deprecated("Use `FOO.UintTypedef_field() = BAR;` instead of `FOO.set_UintTypedef_field(BAR);`")]]
-  ::apache::thrift::fixtures::types::UintTypedef& set_UintTypedef_field(::apache::thrift::fixtures::types::UintTypedef UintTypedef_field_) {
-    UintTypedef_field_ref() = UintTypedef_field_;
-    return __fbthrift_field_UintTypedef_field;
-  }
+  ::apache::thrift::fixtures::types::UintTypedef& set_UintTypedef_field(::apache::thrift::fixtures::types::UintTypedef UintTypedef_field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -8321,16 +8188,11 @@ class StructWithDoubleUnderscores final  {
 
   /** Glean { "field": "__field" } */
   [[deprecated("Use `FOO.__field().value();` instead of `FOO.get___field();`")]]
-  ::std::int32_t get___field() const {
-    return __fbthrift_field___field;
-  }
+  ::std::int32_t get___field() const;
 
   /** Glean { "field": "__field" } */
   [[deprecated("Use `FOO.__field() = BAR;` instead of `FOO.set___field(BAR);`")]]
-  ::std::int32_t& set___field(::std::int32_t __field_) {
-    __field_ref() = __field_;
-    return __fbthrift_field___field;
-  }
+  ::std::int32_t& set___field(::std::int32_t __field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

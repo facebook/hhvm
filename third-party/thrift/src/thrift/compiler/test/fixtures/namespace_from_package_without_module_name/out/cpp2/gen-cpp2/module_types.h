@@ -179,16 +179,11 @@ class Foo final  {
 
   /** Glean { "field": "MyInt" } */
   [[deprecated("Use `FOO.MyInt().value();` instead of `FOO.get_MyInt();`")]]
-  ::std::int64_t get_MyInt() const {
-    return __fbthrift_field_MyInt;
-  }
+  ::std::int64_t get_MyInt() const;
 
   /** Glean { "field": "MyInt" } */
   [[deprecated("Use `FOO.MyInt() = BAR;` instead of `FOO.set_MyInt(BAR);`")]]
-  ::std::int64_t& set_MyInt(::std::int64_t MyInt_) {
-    MyInt_ref() = MyInt_;
-    return __fbthrift_field_MyInt;
-  }
+  ::std::int64_t& set_MyInt(::std::int64_t MyInt_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

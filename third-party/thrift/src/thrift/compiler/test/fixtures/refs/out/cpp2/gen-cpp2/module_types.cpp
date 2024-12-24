@@ -712,14 +712,14 @@ bool StructWithUnion::operator<([[maybe_unused]] const StructWithUnion& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::cpp2::MyField& StructWithUnion::get_f() const& {
   return __fbthrift_field_f;
 }
 
 ::cpp2::MyField StructWithUnion::get_f() && {
-  return std::move(__fbthrift_field_f);
+  return static_cast<::cpp2::MyField&&>(__fbthrift_field_f);
 }
-
 
 void swap([[maybe_unused]] StructWithUnion& a, [[maybe_unused]] StructWithUnion& b) {
   using ::std::swap;
@@ -831,6 +831,7 @@ bool RecursiveStruct::operator<([[maybe_unused]] const RecursiveStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() const& {
   return mes_ref().has_value() ? std::addressof(__fbthrift_field_mes) : nullptr;
 }
@@ -838,7 +839,6 @@ const ::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() const& 
 ::std::vector<::cpp2::RecursiveStruct>* RecursiveStruct::get_mes() & {
   return mes_ref().has_value() ? std::addressof(__fbthrift_field_mes) : nullptr;
 }
-
 
 void swap([[maybe_unused]] RecursiveStruct& a, [[maybe_unused]] RecursiveStruct& b) {
   using ::std::swap;

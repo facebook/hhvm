@@ -92,6 +92,14 @@ bool EchoRequest::operator<([[maybe_unused]] const EchoRequest& rhs) const {
 }
 
 
+const ::std::string& EchoRequest::get_text() const& {
+  return __fbthrift_field_text;
+}
+
+::std::string EchoRequest::get_text() && {
+  return static_cast<::std::string&&>(__fbthrift_field_text);
+}
+
 void swap([[maybe_unused]] EchoRequest& a, [[maybe_unused]] EchoRequest& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_text, b.__fbthrift_field_text);
@@ -188,6 +196,14 @@ bool EchoResponse::operator<([[maybe_unused]] const EchoResponse& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& EchoResponse::get_text() const& {
+  return __fbthrift_field_text;
+}
+
+::std::string EchoResponse::get_text() && {
+  return static_cast<::std::string&&>(__fbthrift_field_text);
+}
 
 void swap([[maybe_unused]] EchoResponse& a, [[maybe_unused]] EchoResponse& b) {
   using ::std::swap;

@@ -165,6 +165,57 @@ bool Internship::operator<([[maybe_unused]] const Internship& rhs) const {
 }
 
 
+::std::int32_t Internship::get_weeks() const {
+  return __fbthrift_field_weeks;
+}
+
+::std::int32_t& Internship::set_weeks(::std::int32_t weeks_) {
+  weeks_ref() = weeks_;
+  return __fbthrift_field_weeks;
+}
+
+const ::std::string& Internship::get_title() const& {
+  return __fbthrift_field_title;
+}
+
+::std::string Internship::get_title() && {
+  return static_cast<::std::string&&>(__fbthrift_field_title);
+}
+
+const ::cpp2::Company* Internship::get_employer() const& {
+  return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
+}
+
+::cpp2::Company* Internship::get_employer() & {
+  return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
+}
+
+::cpp2::Company& Internship::set_employer(::cpp2::Company employer_) {
+  employer_ref() = employer_;
+  return __fbthrift_field_employer;
+}
+
+const double* Internship::get_compensation() const& {
+  return compensation_ref().has_value() ? std::addressof(__fbthrift_field_compensation) : nullptr;
+}
+
+double* Internship::get_compensation() & {
+  return compensation_ref().has_value() ? std::addressof(__fbthrift_field_compensation) : nullptr;
+}
+
+double& Internship::set_compensation(double compensation_) {
+  compensation_ref() = compensation_;
+  return __fbthrift_field_compensation;
+}
+
+const ::std::string* Internship::get_school() const& {
+  return school_ref().has_value() ? std::addressof(__fbthrift_field_school) : nullptr;
+}
+
+::std::string* Internship::get_school() & {
+  return school_ref().has_value() ? std::addressof(__fbthrift_field_school) : nullptr;
+}
+
 void swap([[maybe_unused]] Internship& a, [[maybe_unused]] Internship& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_weeks, b.__fbthrift_field_weeks);
@@ -246,6 +297,24 @@ bool Range::operator<([[maybe_unused]] const Range& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t Range::get_min() const {
+  return __fbthrift_field_min;
+}
+
+::std::int32_t& Range::set_min(::std::int32_t min_) {
+  min_ref() = min_;
+  return __fbthrift_field_min;
+}
+
+::std::int32_t Range::get_max() const {
+  return __fbthrift_field_max;
+}
+
+::std::int32_t& Range::set_max(::std::int32_t max_) {
+  max_ref() = max_;
+  return __fbthrift_field_max;
+}
 
 void swap([[maybe_unused]] Range& a, [[maybe_unused]] Range& b) {
   using ::std::swap;
@@ -350,6 +419,23 @@ bool struct1::operator<([[maybe_unused]] const struct1& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t struct1::get_a() const {
+  return __fbthrift_field_a;
+}
+
+::std::int32_t& struct1::set_a(::std::int32_t a_) {
+  a_ref() = a_;
+  return __fbthrift_field_a;
+}
+
+const ::std::string& struct1::get_b() const& {
+  return __fbthrift_field_b;
+}
+
+::std::string struct1::get_b() && {
+  return static_cast<::std::string&&>(__fbthrift_field_b);
+}
 
 void swap([[maybe_unused]] struct1& a, [[maybe_unused]] struct1& b) {
   using ::std::swap;
@@ -464,12 +550,30 @@ bool struct2::operator<([[maybe_unused]] const struct2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t struct2::get_a() const {
+  return __fbthrift_field_a;
+}
+
+::std::int32_t& struct2::set_a(::std::int32_t a_) {
+  a_ref() = a_;
+  return __fbthrift_field_a;
+}
+
+const ::std::string& struct2::get_b() const& {
+  return __fbthrift_field_b;
+}
+
+::std::string struct2::get_b() && {
+  return static_cast<::std::string&&>(__fbthrift_field_b);
+}
+
 const ::cpp2::struct1& struct2::get_c() const& {
   return __fbthrift_field_c;
 }
 
 ::cpp2::struct1 struct2::get_c() && {
-  return std::move(__fbthrift_field_c);
+  return static_cast<::cpp2::struct1&&>(__fbthrift_field_c);
 }
 
 const ::std::vector<::std::int32_t>& struct2::get_d() const& {
@@ -477,9 +581,8 @@ const ::std::vector<::std::int32_t>& struct2::get_d() const& {
 }
 
 ::std::vector<::std::int32_t> struct2::get_d() && {
-  return std::move(__fbthrift_field_d);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_d);
 }
-
 
 void swap([[maybe_unused]] struct2& a, [[maybe_unused]] struct2& b) {
   using ::std::swap;
@@ -597,14 +700,31 @@ bool struct3::operator<([[maybe_unused]] const struct3& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& struct3::get_a() const& {
+  return __fbthrift_field_a;
+}
+
+::std::string struct3::get_a() && {
+  return static_cast<::std::string&&>(__fbthrift_field_a);
+}
+
+::std::int32_t struct3::get_b() const {
+  return __fbthrift_field_b;
+}
+
+::std::int32_t& struct3::set_b(::std::int32_t b_) {
+  b_ref() = b_;
+  return __fbthrift_field_b;
+}
+
 const ::cpp2::struct2& struct3::get_c() const& {
   return __fbthrift_field_c;
 }
 
 ::cpp2::struct2 struct3::get_c() && {
-  return std::move(__fbthrift_field_c);
+  return static_cast<::cpp2::struct2&&>(__fbthrift_field_c);
 }
-
 
 void swap([[maybe_unused]] struct3& a, [[maybe_unused]] struct3& b) {
   using ::std::swap;
@@ -714,6 +834,41 @@ bool struct4::operator<([[maybe_unused]] const struct4& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t struct4::get_a() const {
+  return __fbthrift_field_a;
+}
+
+::std::int32_t& struct4::set_a(::std::int32_t a_) {
+  a_ref() = a_;
+  return __fbthrift_field_a;
+}
+
+const double* struct4::get_b() const& {
+  return b_ref().has_value() ? std::addressof(__fbthrift_field_b) : nullptr;
+}
+
+double* struct4::get_b() & {
+  return b_ref().has_value() ? std::addressof(__fbthrift_field_b) : nullptr;
+}
+
+double& struct4::set_b(double b_) {
+  b_ref() = b_;
+  return __fbthrift_field_b;
+}
+
+const ::std::int8_t* struct4::get_c() const& {
+  return c_ref().has_value() ? std::addressof(__fbthrift_field_c) : nullptr;
+}
+
+::std::int8_t* struct4::get_c() & {
+  return c_ref().has_value() ? std::addressof(__fbthrift_field_c) : nullptr;
+}
+
+::std::int8_t& struct4::set_c(::std::int8_t c_) {
+  c_ref() = c_;
+  return __fbthrift_field_c;
+}
 
 void swap([[maybe_unused]] struct4& a, [[maybe_unused]] struct4& b) {
   using ::std::swap;

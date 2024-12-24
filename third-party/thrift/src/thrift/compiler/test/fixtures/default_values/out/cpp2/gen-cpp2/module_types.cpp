@@ -77,6 +77,15 @@ bool TrivialStruct::operator<([[maybe_unused]] const TrivialStruct& rhs) const {
 }
 
 
+::std::int32_t TrivialStruct::get_int_value() const {
+  return __fbthrift_field_int_value;
+}
+
+::std::int32_t& TrivialStruct::set_int_value(::std::int32_t int_value_) {
+  int_value_ref() = int_value_;
+  return __fbthrift_field_int_value;
+}
+
 void swap([[maybe_unused]] TrivialStruct& a, [[maybe_unused]] TrivialStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_int_value, b.__fbthrift_field_int_value);
@@ -171,12 +180,44 @@ bool StructWithNoCustomDefaultValues::operator<([[maybe_unused]] const StructWit
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t StructWithNoCustomDefaultValues::get_unqualified_integer() const {
+  return __fbthrift_field_unqualified_integer;
+}
+
+::std::int32_t& StructWithNoCustomDefaultValues::set_unqualified_integer(::std::int32_t unqualified_integer_) {
+  unqualified_integer_ref() = unqualified_integer_;
+  return __fbthrift_field_unqualified_integer;
+}
+
+const ::std::int32_t* StructWithNoCustomDefaultValues::get_optional_integer() const& {
+  return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+}
+
+::std::int32_t* StructWithNoCustomDefaultValues::get_optional_integer() & {
+  return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+}
+
+::std::int32_t& StructWithNoCustomDefaultValues::set_optional_integer(::std::int32_t optional_integer_) {
+  optional_integer_ref() = optional_integer_;
+  return __fbthrift_field_optional_integer;
+}
+
+::std::int32_t StructWithNoCustomDefaultValues::get_required_integer() const {
+  return __fbthrift_field_required_integer;
+}
+
+::std::int32_t& StructWithNoCustomDefaultValues::set_required_integer(::std::int32_t required_integer_) {
+  required_integer_ref() = required_integer_;
+  return __fbthrift_field_required_integer;
+}
+
 const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithNoCustomDefaultValues::get_unqualified_struct() const& {
   return __fbthrift_field_unqualified_struct;
 }
 
 ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct StructWithNoCustomDefaultValues::get_unqualified_struct() && {
-  return std::move(__fbthrift_field_unqualified_struct);
+  return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct&&>(__fbthrift_field_unqualified_struct);
 }
 
 const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithNoCustomDefaultValues::get_optional_struct() const& {
@@ -192,9 +233,8 @@ const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruc
 }
 
 ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct StructWithNoCustomDefaultValues::get_required_struct() && {
-  return std::move(__fbthrift_field_required_struct);
+  return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct&&>(__fbthrift_field_required_struct);
 }
-
 
 void swap([[maybe_unused]] StructWithNoCustomDefaultValues& a, [[maybe_unused]] StructWithNoCustomDefaultValues& b) {
   using ::std::swap;
@@ -313,12 +353,44 @@ bool StructWithCustomDefaultValues::operator<([[maybe_unused]] const StructWithC
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t StructWithCustomDefaultValues::get_unqualified_integer() const {
+  return __fbthrift_field_unqualified_integer;
+}
+
+::std::int32_t& StructWithCustomDefaultValues::set_unqualified_integer(::std::int32_t unqualified_integer_) {
+  unqualified_integer_ref() = unqualified_integer_;
+  return __fbthrift_field_unqualified_integer;
+}
+
+const ::std::int32_t* StructWithCustomDefaultValues::get_optional_integer() const& {
+  return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+}
+
+::std::int32_t* StructWithCustomDefaultValues::get_optional_integer() & {
+  return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
+}
+
+::std::int32_t& StructWithCustomDefaultValues::set_optional_integer(::std::int32_t optional_integer_) {
+  optional_integer_ref() = optional_integer_;
+  return __fbthrift_field_optional_integer;
+}
+
+::std::int32_t StructWithCustomDefaultValues::get_required_integer() const {
+  return __fbthrift_field_required_integer;
+}
+
+::std::int32_t& StructWithCustomDefaultValues::set_required_integer(::std::int32_t required_integer_) {
+  required_integer_ref() = required_integer_;
+  return __fbthrift_field_required_integer;
+}
+
 const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct& StructWithCustomDefaultValues::get_unqualified_struct() const& {
   return __fbthrift_field_unqualified_struct;
 }
 
 ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct StructWithCustomDefaultValues::get_unqualified_struct() && {
-  return std::move(__fbthrift_field_unqualified_struct);
+  return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct&&>(__fbthrift_field_unqualified_struct);
 }
 
 const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* StructWithCustomDefaultValues::get_optional_struct() const& {
@@ -334,9 +406,8 @@ const ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruc
 }
 
 ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct StructWithCustomDefaultValues::get_required_struct() && {
-  return std::move(__fbthrift_field_required_struct);
+  return static_cast<::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct&&>(__fbthrift_field_required_struct);
 }
-
 
 void swap([[maybe_unused]] StructWithCustomDefaultValues& a, [[maybe_unused]] StructWithCustomDefaultValues& b) {
   using ::std::swap;

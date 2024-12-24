@@ -106,12 +106,13 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::std::vector<double>& Foo::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
 ::std::vector<double> Foo::get_field1() && {
-  return std::move(__fbthrift_field_field1);
+  return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
 }
 
 const ::std::vector<::std::int32_t>& Foo::get_field2() const& {
@@ -119,7 +120,7 @@ const ::std::vector<::std::int32_t>& Foo::get_field2() const& {
 }
 
 ::std::vector<::std::int32_t> Foo::get_field2() && {
-  return std::move(__fbthrift_field_field2);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field2);
 }
 
 const ::std::vector<double>& Foo::get_field3() const& {
@@ -127,7 +128,7 @@ const ::std::vector<double>& Foo::get_field3() const& {
 }
 
 ::std::vector<double> Foo::get_field3() && {
-  return std::move(__fbthrift_field_field3);
+  return static_cast<::std::vector<double>&&>(__fbthrift_field_field3);
 }
 
 const ::std::vector<::std::int32_t>& Foo::get_field4() const& {
@@ -135,9 +136,8 @@ const ::std::vector<::std::int32_t>& Foo::get_field4() const& {
 }
 
 ::std::vector<::std::int32_t> Foo::get_field4() && {
-  return std::move(__fbthrift_field_field4);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field4);
 }
-
 
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
@@ -384,12 +384,13 @@ bool LazyFoo::operator<([[maybe_unused]] const LazyFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::std::vector<double>& LazyFoo::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
 ::std::vector<double> LazyFoo::get_field1() && {
-  return std::move(__fbthrift_field_field1);
+  return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
 }
 
 const ::std::vector<::std::int32_t>& LazyFoo::get_field2() const& {
@@ -397,9 +398,8 @@ const ::std::vector<::std::int32_t>& LazyFoo::get_field2() const& {
 }
 
 ::std::vector<::std::int32_t> LazyFoo::get_field2() && {
-  return std::move(__fbthrift_field_field2);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field2);
 }
-
 
 void swap([[maybe_unused]] LazyFoo& a, [[maybe_unused]] LazyFoo& b) {
   using ::std::swap;
@@ -523,6 +523,7 @@ bool OptionalFoo::operator<([[maybe_unused]] const OptionalFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::std::vector<double>* OptionalFoo::get_field1() const& {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
@@ -554,7 +555,6 @@ const ::std::vector<::std::int32_t>* OptionalFoo::get_field4() const& {
 ::std::vector<::std::int32_t>* OptionalFoo::get_field4() & {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
-
 
 void swap([[maybe_unused]] OptionalFoo& a, [[maybe_unused]] OptionalFoo& b) {
   using ::std::swap;
@@ -802,6 +802,7 @@ bool OptionalLazyFoo::operator<([[maybe_unused]] const OptionalLazyFoo& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::std::vector<double>* OptionalLazyFoo::get_field1() const& {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
@@ -817,7 +818,6 @@ const ::std::vector<::std::int32_t>* OptionalLazyFoo::get_field2() const& {
 ::std::vector<::std::int32_t>* OptionalLazyFoo::get_field2() & {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
-
 
 void swap([[maybe_unused]] OptionalLazyFoo& a, [[maybe_unused]] OptionalLazyFoo& b) {
   using ::std::swap;
@@ -1543,12 +1543,22 @@ bool IndexedFoo::operator<([[maybe_unused]] const IndexedFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+double IndexedFoo::get_serialized_data_size() const {
+  return __fbthrift_field_serialized_data_size;
+}
+
+double& IndexedFoo::set_serialized_data_size(double serialized_data_size_) {
+  serialized_data_size_ref() = serialized_data_size_;
+  return __fbthrift_field_serialized_data_size;
+}
+
 const ::std::vector<double>& IndexedFoo::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
 ::std::vector<double> IndexedFoo::get_field1() && {
-  return std::move(__fbthrift_field_field1);
+  return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
 }
 
 const ::std::vector<::std::int32_t>& IndexedFoo::get_field2() const& {
@@ -1556,7 +1566,7 @@ const ::std::vector<::std::int32_t>& IndexedFoo::get_field2() const& {
 }
 
 ::std::vector<::std::int32_t> IndexedFoo::get_field2() && {
-  return std::move(__fbthrift_field_field2);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field2);
 }
 
 const ::std::vector<double>& IndexedFoo::get_field3() const& {
@@ -1564,7 +1574,7 @@ const ::std::vector<double>& IndexedFoo::get_field3() const& {
 }
 
 ::std::vector<double> IndexedFoo::get_field3() && {
-  return std::move(__fbthrift_field_field3);
+  return static_cast<::std::vector<double>&&>(__fbthrift_field_field3);
 }
 
 const ::std::vector<::std::int32_t>& IndexedFoo::get_field4() const& {
@@ -1572,7 +1582,7 @@ const ::std::vector<::std::int32_t>& IndexedFoo::get_field4() const& {
 }
 
 ::std::vector<::std::int32_t> IndexedFoo::get_field4() && {
-  return std::move(__fbthrift_field_field4);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field4);
 }
 
 const ::std::map<::std::int16_t, ::std::int64_t>& IndexedFoo::get_field_id_to_size() const& {
@@ -1580,9 +1590,8 @@ const ::std::map<::std::int16_t, ::std::int64_t>& IndexedFoo::get_field_id_to_si
 }
 
 ::std::map<::std::int16_t, ::std::int64_t> IndexedFoo::get_field_id_to_size() && {
-  return std::move(__fbthrift_field_field_id_to_size);
+  return static_cast<::std::map<::std::int16_t, ::std::int64_t>&&>(__fbthrift_field_field_id_to_size);
 }
-
 
 void swap([[maybe_unused]] IndexedFoo& a, [[maybe_unused]] IndexedFoo& b) {
   using ::std::swap;
@@ -1711,6 +1720,16 @@ bool OptionalIndexedFoo::operator<([[maybe_unused]] const OptionalIndexedFoo& rh
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+double OptionalIndexedFoo::get_serialized_data_size() const {
+  return __fbthrift_field_serialized_data_size;
+}
+
+double& OptionalIndexedFoo::set_serialized_data_size(double serialized_data_size_) {
+  serialized_data_size_ref() = serialized_data_size_;
+  return __fbthrift_field_serialized_data_size;
+}
+
 const ::std::vector<double>* OptionalIndexedFoo::get_field1() const& {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
@@ -1748,9 +1767,8 @@ const ::std::map<::std::int16_t, ::std::int64_t>& OptionalIndexedFoo::get_field_
 }
 
 ::std::map<::std::int16_t, ::std::int64_t> OptionalIndexedFoo::get_field_id_to_size() && {
-  return std::move(__fbthrift_field_field_id_to_size);
+  return static_cast<::std::map<::std::int16_t, ::std::int64_t>&&>(__fbthrift_field_field_id_to_size);
 }
-
 
 void swap([[maybe_unused]] OptionalIndexedFoo& a, [[maybe_unused]] OptionalIndexedFoo& b) {
   using ::std::swap;

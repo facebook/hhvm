@@ -195,15 +195,11 @@ class MyStruct final  {
 
   /** Glean { "field": "myString" } */
   [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
-  const ::std::string& get_myString() const& {
-    return __fbthrift_field_myString;
-  }
+  const ::std::string& get_myString() const&;
 
   /** Glean { "field": "myString" } */
   [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
-  ::std::string get_myString() && {
-    return std::move(__fbthrift_field_myString);
-  }
+  ::std::string get_myString() &&;
 
   /** Glean { "field": "myString" } */
   template <typename T_MyStruct_myString_struct_setter = ::std::string>
@@ -607,15 +603,11 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "myString" } */
   [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
-  const ::std::string& get_myString() const& {
-    return __fbthrift_field_myString;
-  }
+  const ::std::string& get_myString() const&;
 
   /** Glean { "field": "myString" } */
   [[deprecated("Use `FOO.myString().value();` instead of `FOO.get_myString();`")]]
-  ::std::string get_myString() && {
-    return std::move(__fbthrift_field_myString);
-  }
+  ::std::string get_myString() &&;
 
   /** Glean { "field": "myString" } */
   template <typename T_MyException_myString_struct_setter = ::std::string>

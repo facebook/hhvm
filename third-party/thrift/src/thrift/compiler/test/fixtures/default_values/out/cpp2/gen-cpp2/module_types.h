@@ -241,16 +241,11 @@ class TrivialStruct final  {
 
   /** Glean { "field": "int_value" } */
   [[deprecated("Use `FOO.int_value().value();` instead of `FOO.get_int_value();`")]]
-  ::std::int32_t get_int_value() const {
-    return __fbthrift_field_int_value;
-  }
+  ::std::int32_t get_int_value() const;
 
   /** Glean { "field": "int_value" } */
   [[deprecated("Use `FOO.int_value() = BAR;` instead of `FOO.set_int_value(BAR);`")]]
-  ::std::int32_t& set_int_value(::std::int32_t int_value_) {
-    int_value_ref() = int_value_;
-    return __fbthrift_field_int_value;
-  }
+  ::std::int32_t& set_int_value(::std::int32_t int_value_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -671,52 +666,33 @@ class StructWithNoCustomDefaultValues final  {
 
   /** Glean { "field": "unqualified_integer" } */
   [[deprecated("Use `FOO.unqualified_integer().value();` instead of `FOO.get_unqualified_integer();`")]]
-  ::std::int32_t get_unqualified_integer() const {
-    return __fbthrift_field_unqualified_integer;
-  }
+  ::std::int32_t get_unqualified_integer() const;
 
   /** Glean { "field": "unqualified_integer" } */
   [[deprecated("Use `FOO.unqualified_integer() = BAR;` instead of `FOO.set_unqualified_integer(BAR);`")]]
-  ::std::int32_t& set_unqualified_integer(::std::int32_t unqualified_integer_) {
-    unqualified_integer_ref() = unqualified_integer_;
-    return __fbthrift_field_unqualified_integer;
-  }
+  ::std::int32_t& set_unqualified_integer(::std::int32_t unqualified_integer_);
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
-  const ::std::int32_t* get_optional_integer() const& {
-    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
-  }
+  const ::std::int32_t* get_optional_integer() const&;
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
-  ::std::int32_t* get_optional_integer() & {
-    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
-  }
+  ::std::int32_t* get_optional_integer() &;
 
-  /** Glean { "field": "optional_integer" } */
-  [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   ::std::int32_t* get_optional_integer() && = delete;
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer() = BAR;` instead of `FOO.set_optional_integer(BAR);`")]]
-  ::std::int32_t& set_optional_integer(::std::int32_t optional_integer_) {
-    optional_integer_ref() = optional_integer_;
-    return __fbthrift_field_optional_integer;
-  }
+  ::std::int32_t& set_optional_integer(::std::int32_t optional_integer_);
 
   /** Glean { "field": "required_integer" } */
   [[deprecated("Use `FOO.required_integer().value();` instead of `FOO.get_required_integer();`")]]
-  ::std::int32_t get_required_integer() const {
-    return __fbthrift_field_required_integer;
-  }
+  ::std::int32_t get_required_integer() const;
 
   /** Glean { "field": "required_integer" } */
   [[deprecated("Use `FOO.required_integer() = BAR;` instead of `FOO.set_required_integer(BAR);`")]]
-  ::std::int32_t& set_required_integer(::std::int32_t required_integer_) {
-    required_integer_ref() = required_integer_;
-    return __fbthrift_field_required_integer;
-  }
+  ::std::int32_t& set_required_integer(::std::int32_t required_integer_);
 
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value();` instead of `FOO.get_unqualified_struct();`")]]
@@ -742,8 +718,6 @@ class StructWithNoCustomDefaultValues final  {
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() &;
 
-  /** Glean { "field": "optional_struct" } */
-  [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() && = delete;
 
   /** Glean { "field": "optional_struct" } */
@@ -1192,52 +1166,33 @@ class StructWithCustomDefaultValues final  {
 
   /** Glean { "field": "unqualified_integer" } */
   [[deprecated("Use `FOO.unqualified_integer().value();` instead of `FOO.get_unqualified_integer();`")]]
-  ::std::int32_t get_unqualified_integer() const {
-    return __fbthrift_field_unqualified_integer;
-  }
+  ::std::int32_t get_unqualified_integer() const;
 
   /** Glean { "field": "unqualified_integer" } */
   [[deprecated("Use `FOO.unqualified_integer() = BAR;` instead of `FOO.set_unqualified_integer(BAR);`")]]
-  ::std::int32_t& set_unqualified_integer(::std::int32_t unqualified_integer_) {
-    unqualified_integer_ref() = unqualified_integer_;
-    return __fbthrift_field_unqualified_integer;
-  }
+  ::std::int32_t& set_unqualified_integer(::std::int32_t unqualified_integer_);
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
-  const ::std::int32_t* get_optional_integer() const& {
-    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
-  }
+  const ::std::int32_t* get_optional_integer() const&;
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
-  ::std::int32_t* get_optional_integer() & {
-    return optional_integer_ref().has_value() ? std::addressof(__fbthrift_field_optional_integer) : nullptr;
-  }
+  ::std::int32_t* get_optional_integer() &;
 
-  /** Glean { "field": "optional_integer" } */
-  [[deprecated("Use `FOO.optional_integer().value();` instead of `FOO.get_optional_integer();`")]]
   ::std::int32_t* get_optional_integer() && = delete;
 
   /** Glean { "field": "optional_integer" } */
   [[deprecated("Use `FOO.optional_integer() = BAR;` instead of `FOO.set_optional_integer(BAR);`")]]
-  ::std::int32_t& set_optional_integer(::std::int32_t optional_integer_) {
-    optional_integer_ref() = optional_integer_;
-    return __fbthrift_field_optional_integer;
-  }
+  ::std::int32_t& set_optional_integer(::std::int32_t optional_integer_);
 
   /** Glean { "field": "required_integer" } */
   [[deprecated("Use `FOO.required_integer().value();` instead of `FOO.get_required_integer();`")]]
-  ::std::int32_t get_required_integer() const {
-    return __fbthrift_field_required_integer;
-  }
+  ::std::int32_t get_required_integer() const;
 
   /** Glean { "field": "required_integer" } */
   [[deprecated("Use `FOO.required_integer() = BAR;` instead of `FOO.set_required_integer(BAR);`")]]
-  ::std::int32_t& set_required_integer(::std::int32_t required_integer_) {
-    required_integer_ref() = required_integer_;
-    return __fbthrift_field_required_integer;
-  }
+  ::std::int32_t& set_required_integer(::std::int32_t required_integer_);
 
   /** Glean { "field": "unqualified_struct" } */
   [[deprecated("Use `FOO.unqualified_struct().value();` instead of `FOO.get_unqualified_struct();`")]]
@@ -1263,8 +1218,6 @@ class StructWithCustomDefaultValues final  {
   [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() &;
 
-  /** Glean { "field": "optional_struct" } */
-  [[deprecated("Use `FOO.optional_struct().value();` instead of `FOO.get_optional_struct();`")]]
   ::facebook::thrift::compiler::test::fixtures::default_values::TrivialStruct* get_optional_struct() && = delete;
 
   /** Glean { "field": "optional_struct" } */

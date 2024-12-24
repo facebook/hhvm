@@ -487,55 +487,35 @@ class Color final  {
 
   /** Glean { "field": "red" } */
   [[deprecated("Use `FOO.red().value();` instead of `FOO.get_red();`")]]
-  double get_red() const {
-    return __fbthrift_field_red;
-  }
+  double get_red() const;
 
   /** Glean { "field": "red" } */
   [[deprecated("Use `FOO.red() = BAR;` instead of `FOO.set_red(BAR);`")]]
-  double& set_red(double red_) {
-    red_ref() = red_;
-    return __fbthrift_field_red;
-  }
+  double& set_red(double red_);
 
   /** Glean { "field": "green" } */
   [[deprecated("Use `FOO.green().value();` instead of `FOO.get_green();`")]]
-  double get_green() const {
-    return __fbthrift_field_green;
-  }
+  double get_green() const;
 
   /** Glean { "field": "green" } */
   [[deprecated("Use `FOO.green() = BAR;` instead of `FOO.set_green(BAR);`")]]
-  double& set_green(double green_) {
-    green_ref() = green_;
-    return __fbthrift_field_green;
-  }
+  double& set_green(double green_);
 
   /** Glean { "field": "blue" } */
   [[deprecated("Use `FOO.blue().value();` instead of `FOO.get_blue();`")]]
-  double get_blue() const {
-    return __fbthrift_field_blue;
-  }
+  double get_blue() const;
 
   /** Glean { "field": "blue" } */
   [[deprecated("Use `FOO.blue() = BAR;` instead of `FOO.set_blue(BAR);`")]]
-  double& set_blue(double blue_) {
-    blue_ref() = blue_;
-    return __fbthrift_field_blue;
-  }
+  double& set_blue(double blue_);
 
   /** Glean { "field": "alpha" } */
   [[deprecated("Use `FOO.alpha().value();` instead of `FOO.get_alpha();`")]]
-  double get_alpha() const {
-    return __fbthrift_field_alpha;
-  }
+  double get_alpha() const;
 
   /** Glean { "field": "alpha" } */
   [[deprecated("Use `FOO.alpha() = BAR;` instead of `FOO.set_alpha(BAR);`")]]
-  double& set_alpha(double alpha_) {
-    alpha_ref() = alpha_;
-    return __fbthrift_field_alpha;
-  }
+  double& set_alpha(double alpha_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -918,18 +898,12 @@ class Vehicle final  {
 
   /** Glean { "field": "licensePlate" } */
   [[deprecated("Use `FOO.licensePlate().value();` instead of `FOO.get_licensePlate();`")]]
-  const ::std::string* get_licensePlate() const& {
-    return licensePlate_ref().has_value() ? std::addressof(__fbthrift_field_licensePlate) : nullptr;
-  }
+  const ::std::string* get_licensePlate() const&;
 
   /** Glean { "field": "licensePlate" } */
   [[deprecated("Use `FOO.licensePlate().value();` instead of `FOO.get_licensePlate();`")]]
-  ::std::string* get_licensePlate() & {
-    return licensePlate_ref().has_value() ? std::addressof(__fbthrift_field_licensePlate) : nullptr;
-  }
+  ::std::string* get_licensePlate() &;
 
-  /** Glean { "field": "licensePlate" } */
-  [[deprecated("Use `FOO.licensePlate().value();` instead of `FOO.get_licensePlate();`")]]
   ::std::string* get_licensePlate() && = delete;
 
   /** Glean { "field": "licensePlate" } */
@@ -942,18 +916,12 @@ class Vehicle final  {
 
   /** Glean { "field": "description" } */
   [[deprecated("Use `FOO.description().value();` instead of `FOO.get_description();`")]]
-  const ::std::string* get_description() const& {
-    return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
-  }
+  const ::std::string* get_description() const&;
 
   /** Glean { "field": "description" } */
   [[deprecated("Use `FOO.description().value();` instead of `FOO.get_description();`")]]
-  ::std::string* get_description() & {
-    return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
-  }
+  ::std::string* get_description() &;
 
-  /** Glean { "field": "description" } */
-  [[deprecated("Use `FOO.description().value();` instead of `FOO.get_description();`")]]
   ::std::string* get_description() && = delete;
 
   /** Glean { "field": "description" } */
@@ -966,18 +934,12 @@ class Vehicle final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string* get_name() const& {
-    return name_ref().has_value() ? std::addressof(__fbthrift_field_name) : nullptr;
-  }
+  const ::std::string* get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string* get_name() & {
-    return name_ref().has_value() ? std::addressof(__fbthrift_field_name) : nullptr;
-  }
+  ::std::string* get_name() &;
 
-  /** Glean { "field": "name" } */
-  [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   ::std::string* get_name() && = delete;
 
   /** Glean { "field": "name" } */
@@ -990,26 +952,17 @@ class Vehicle final  {
 
   /** Glean { "field": "hasAC" } */
   [[deprecated("Use `FOO.hasAC().value();` instead of `FOO.get_hasAC();`")]]
-  const bool* get_hasAC() const& {
-    return hasAC_ref().has_value() ? std::addressof(__fbthrift_field_hasAC) : nullptr;
-  }
+  const bool* get_hasAC() const&;
 
   /** Glean { "field": "hasAC" } */
   [[deprecated("Use `FOO.hasAC().value();` instead of `FOO.get_hasAC();`")]]
-  bool* get_hasAC() & {
-    return hasAC_ref().has_value() ? std::addressof(__fbthrift_field_hasAC) : nullptr;
-  }
+  bool* get_hasAC() &;
 
-  /** Glean { "field": "hasAC" } */
-  [[deprecated("Use `FOO.hasAC().value();` instead of `FOO.get_hasAC();`")]]
   bool* get_hasAC() && = delete;
 
   /** Glean { "field": "hasAC" } */
   [[deprecated("Use `FOO.hasAC() = BAR;` instead of `FOO.set_hasAC(BAR);`")]]
-  bool& set_hasAC(bool hasAC_) {
-    hasAC_ref() = hasAC_;
-    return __fbthrift_field_hasAC;
-  }
+  bool& set_hasAC(bool hasAC_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1636,28 +1589,19 @@ class Person final  {
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id().value();` instead of `FOO.get_id();`")]]
-  ::cpp2::PersonID get_id() const {
-    return __fbthrift_field_id;
-  }
+  ::cpp2::PersonID get_id() const;
 
   /** Glean { "field": "id" } */
   [[deprecated("Use `FOO.id() = BAR;` instead of `FOO.set_id(BAR);`")]]
-  ::cpp2::PersonID& set_id(::cpp2::PersonID id_) {
-    id_ref() = id_;
-    return __fbthrift_field_id;
-  }
+  ::cpp2::PersonID& set_id(::cpp2::PersonID id_);
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return std::move(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_Person_name_struct_setter = ::std::string>
@@ -1669,41 +1613,26 @@ class Person final  {
 
   /** Glean { "field": "age" } */
   [[deprecated("Use `FOO.age().value();` instead of `FOO.get_age();`")]]
-  const ::std::int16_t* get_age() const& {
-    return age_ref().has_value() ? std::addressof(__fbthrift_field_age) : nullptr;
-  }
+  const ::std::int16_t* get_age() const&;
 
   /** Glean { "field": "age" } */
   [[deprecated("Use `FOO.age().value();` instead of `FOO.get_age();`")]]
-  ::std::int16_t* get_age() & {
-    return age_ref().has_value() ? std::addressof(__fbthrift_field_age) : nullptr;
-  }
+  ::std::int16_t* get_age() &;
 
-  /** Glean { "field": "age" } */
-  [[deprecated("Use `FOO.age().value();` instead of `FOO.get_age();`")]]
   ::std::int16_t* get_age() && = delete;
 
   /** Glean { "field": "age" } */
   [[deprecated("Use `FOO.age() = BAR;` instead of `FOO.set_age(BAR);`")]]
-  ::std::int16_t& set_age(::std::int16_t age_) {
-    age_ref() = age_;
-    return __fbthrift_field_age;
-  }
+  ::std::int16_t& set_age(::std::int16_t age_);
 
   /** Glean { "field": "address" } */
   [[deprecated("Use `FOO.address().value();` instead of `FOO.get_address();`")]]
-  const ::std::string* get_address() const& {
-    return address_ref().has_value() ? std::addressof(__fbthrift_field_address) : nullptr;
-  }
+  const ::std::string* get_address() const&;
 
   /** Glean { "field": "address" } */
   [[deprecated("Use `FOO.address().value();` instead of `FOO.get_address();`")]]
-  ::std::string* get_address() & {
-    return address_ref().has_value() ? std::addressof(__fbthrift_field_address) : nullptr;
-  }
+  ::std::string* get_address() &;
 
-  /** Glean { "field": "address" } */
-  [[deprecated("Use `FOO.address().value();` instead of `FOO.get_address();`")]]
   ::std::string* get_address() && = delete;
 
   /** Glean { "field": "address" } */
@@ -1722,8 +1651,6 @@ class Person final  {
   [[deprecated("Use `FOO.favoriteColor().value();` instead of `FOO.get_favoriteColor();`")]]
   ::cpp2::Color* get_favoriteColor() &;
 
-  /** Glean { "field": "favoriteColor" } */
-  [[deprecated("Use `FOO.favoriteColor().value();` instead of `FOO.get_favoriteColor();`")]]
   ::cpp2::Color* get_favoriteColor() && = delete;
 
   /** Glean { "field": "favoriteColor" } */
@@ -1742,8 +1669,6 @@ class Person final  {
   [[deprecated("Use `FOO.friends().value();` instead of `FOO.get_friends();`")]]
   ::std::set<::cpp2::PersonID>* get_friends() &;
 
-  /** Glean { "field": "friends" } */
-  [[deprecated("Use `FOO.friends().value();` instead of `FOO.get_friends();`")]]
   ::std::set<::cpp2::PersonID>* get_friends() && = delete;
 
   /** Glean { "field": "friends" } */
@@ -1756,26 +1681,17 @@ class Person final  {
 
   /** Glean { "field": "bestFriend" } */
   [[deprecated("Use `FOO.bestFriend().value();` instead of `FOO.get_bestFriend();`")]]
-  const ::cpp2::PersonID* get_bestFriend() const& {
-    return bestFriend_ref().has_value() ? std::addressof(__fbthrift_field_bestFriend) : nullptr;
-  }
+  const ::cpp2::PersonID* get_bestFriend() const&;
 
   /** Glean { "field": "bestFriend" } */
   [[deprecated("Use `FOO.bestFriend().value();` instead of `FOO.get_bestFriend();`")]]
-  ::cpp2::PersonID* get_bestFriend() & {
-    return bestFriend_ref().has_value() ? std::addressof(__fbthrift_field_bestFriend) : nullptr;
-  }
+  ::cpp2::PersonID* get_bestFriend() &;
 
-  /** Glean { "field": "bestFriend" } */
-  [[deprecated("Use `FOO.bestFriend().value();` instead of `FOO.get_bestFriend();`")]]
   ::cpp2::PersonID* get_bestFriend() && = delete;
 
   /** Glean { "field": "bestFriend" } */
   [[deprecated("Use `FOO.bestFriend() = BAR;` instead of `FOO.set_bestFriend(BAR);`")]]
-  ::cpp2::PersonID& set_bestFriend(::cpp2::PersonID bestFriend_) {
-    bestFriend_ref() = bestFriend_;
-    return __fbthrift_field_bestFriend;
-  }
+  ::cpp2::PersonID& set_bestFriend(::cpp2::PersonID bestFriend_);
 
   /** Glean { "field": "petNames" } */
   [[deprecated("Use `FOO.petNames().value();` instead of `FOO.get_petNames();`")]]
@@ -1785,8 +1701,6 @@ class Person final  {
   [[deprecated("Use `FOO.petNames().value();` instead of `FOO.get_petNames();`")]]
   ::std::map<::cpp2::Animal, ::std::string>* get_petNames() &;
 
-  /** Glean { "field": "petNames" } */
-  [[deprecated("Use `FOO.petNames().value();` instead of `FOO.get_petNames();`")]]
   ::std::map<::cpp2::Animal, ::std::string>* get_petNames() && = delete;
 
   /** Glean { "field": "petNames" } */
@@ -1799,26 +1713,17 @@ class Person final  {
 
   /** Glean { "field": "afraidOfAnimal" } */
   [[deprecated("Use `FOO.afraidOfAnimal().value();` instead of `FOO.get_afraidOfAnimal();`")]]
-  const ::cpp2::Animal* get_afraidOfAnimal() const& {
-    return afraidOfAnimal_ref().has_value() ? std::addressof(__fbthrift_field_afraidOfAnimal) : nullptr;
-  }
+  const ::cpp2::Animal* get_afraidOfAnimal() const&;
 
   /** Glean { "field": "afraidOfAnimal" } */
   [[deprecated("Use `FOO.afraidOfAnimal().value();` instead of `FOO.get_afraidOfAnimal();`")]]
-  ::cpp2::Animal* get_afraidOfAnimal() & {
-    return afraidOfAnimal_ref().has_value() ? std::addressof(__fbthrift_field_afraidOfAnimal) : nullptr;
-  }
+  ::cpp2::Animal* get_afraidOfAnimal() &;
 
-  /** Glean { "field": "afraidOfAnimal" } */
-  [[deprecated("Use `FOO.afraidOfAnimal().value();` instead of `FOO.get_afraidOfAnimal();`")]]
   ::cpp2::Animal* get_afraidOfAnimal() && = delete;
 
   /** Glean { "field": "afraidOfAnimal" } */
   [[deprecated("Use `FOO.afraidOfAnimal() = BAR;` instead of `FOO.set_afraidOfAnimal(BAR);`")]]
-  ::cpp2::Animal& set_afraidOfAnimal(::cpp2::Animal afraidOfAnimal_) {
-    afraidOfAnimal_ref() = afraidOfAnimal_;
-    return __fbthrift_field_afraidOfAnimal;
-  }
+  ::cpp2::Animal& set_afraidOfAnimal(::cpp2::Animal afraidOfAnimal_);
 
   /** Glean { "field": "vehicles" } */
   [[deprecated("Use `FOO.vehicles().value();` instead of `FOO.get_vehicles();`")]]
@@ -1828,8 +1733,6 @@ class Person final  {
   [[deprecated("Use `FOO.vehicles().value();` instead of `FOO.get_vehicles();`")]]
   ::std::vector<::cpp2::Vehicle>* get_vehicles() &;
 
-  /** Glean { "field": "vehicles" } */
-  [[deprecated("Use `FOO.vehicles().value();` instead of `FOO.get_vehicles();`")]]
   ::std::vector<::cpp2::Vehicle>* get_vehicles() && = delete;
 
   /** Glean { "field": "vehicles" } */

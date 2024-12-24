@@ -121,6 +121,78 @@ bool Limits::operator<([[maybe_unused]] const Limits& rhs) const {
 }
 
 
+::std::int64_t Limits::get_max_i64_field() const {
+  return __fbthrift_field_max_i64_field;
+}
+
+::std::int64_t& Limits::set_max_i64_field(::std::int64_t max_i64_field_) {
+  max_i64_field_ref() = max_i64_field_;
+  return __fbthrift_field_max_i64_field;
+}
+
+::std::int64_t Limits::get_min_i64_field() const {
+  return __fbthrift_field_min_i64_field;
+}
+
+::std::int64_t& Limits::set_min_i64_field(::std::int64_t min_i64_field_) {
+  min_i64_field_ref() = min_i64_field_;
+  return __fbthrift_field_min_i64_field;
+}
+
+::std::int32_t Limits::get_max_i32_field() const {
+  return __fbthrift_field_max_i32_field;
+}
+
+::std::int32_t& Limits::set_max_i32_field(::std::int32_t max_i32_field_) {
+  max_i32_field_ref() = max_i32_field_;
+  return __fbthrift_field_max_i32_field;
+}
+
+::std::int32_t Limits::get_min_i32_field() const {
+  return __fbthrift_field_min_i32_field;
+}
+
+::std::int32_t& Limits::set_min_i32_field(::std::int32_t min_i32_field_) {
+  min_i32_field_ref() = min_i32_field_;
+  return __fbthrift_field_min_i32_field;
+}
+
+::std::int16_t Limits::get_max_i16_field() const {
+  return __fbthrift_field_max_i16_field;
+}
+
+::std::int16_t& Limits::set_max_i16_field(::std::int16_t max_i16_field_) {
+  max_i16_field_ref() = max_i16_field_;
+  return __fbthrift_field_max_i16_field;
+}
+
+::std::int16_t Limits::get_min_i16_field() const {
+  return __fbthrift_field_min_i16_field;
+}
+
+::std::int16_t& Limits::set_min_i16_field(::std::int16_t min_i16_field_) {
+  min_i16_field_ref() = min_i16_field_;
+  return __fbthrift_field_min_i16_field;
+}
+
+::std::int8_t Limits::get_max_byte_field() const {
+  return __fbthrift_field_max_byte_field;
+}
+
+::std::int8_t& Limits::set_max_byte_field(::std::int8_t max_byte_field_) {
+  max_byte_field_ref() = max_byte_field_;
+  return __fbthrift_field_max_byte_field;
+}
+
+::std::int8_t Limits::get_min_byte_field() const {
+  return __fbthrift_field_min_byte_field;
+}
+
+::std::int8_t& Limits::set_min_byte_field(::std::int8_t min_byte_field_) {
+  min_byte_field_ref() = min_byte_field_;
+  return __fbthrift_field_min_byte_field;
+}
+
 void swap([[maybe_unused]] Limits& a, [[maybe_unused]] Limits& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_max_i64_field, b.__fbthrift_field_max_i64_field);

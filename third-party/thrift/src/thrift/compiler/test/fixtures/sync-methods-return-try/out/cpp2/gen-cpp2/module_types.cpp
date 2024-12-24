@@ -344,6 +344,14 @@ bool InitialResponse::operator<([[maybe_unused]] const InitialResponse& rhs) con
 }
 
 
+const ::std::string& InitialResponse::get_content() const& {
+  return __fbthrift_field_content;
+}
+
+::std::string InitialResponse::get_content() && {
+  return static_cast<::std::string&&>(__fbthrift_field_content);
+}
+
 void swap([[maybe_unused]] InitialResponse& a, [[maybe_unused]] InitialResponse& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_content, b.__fbthrift_field_content);
@@ -440,6 +448,14 @@ bool FinalResponse::operator<([[maybe_unused]] const FinalResponse& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& FinalResponse::get_content() const& {
+  return __fbthrift_field_content;
+}
+
+::std::string FinalResponse::get_content() && {
+  return static_cast<::std::string&&>(__fbthrift_field_content);
+}
 
 void swap([[maybe_unused]] FinalResponse& a, [[maybe_unused]] FinalResponse& b) {
   using ::std::swap;
@@ -538,6 +554,14 @@ bool SinkPayload::operator<([[maybe_unused]] const SinkPayload& rhs) const {
 }
 
 
+const ::std::string& SinkPayload::get_content() const& {
+  return __fbthrift_field_content;
+}
+
+::std::string SinkPayload::get_content() && {
+  return static_cast<::std::string&&>(__fbthrift_field_content);
+}
+
 void swap([[maybe_unused]] SinkPayload& a, [[maybe_unused]] SinkPayload& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_content, b.__fbthrift_field_content);
@@ -634,6 +658,14 @@ bool CompatibleWithKeywordSink::operator<([[maybe_unused]] const CompatibleWithK
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& CompatibleWithKeywordSink::get_sink() const& {
+  return __fbthrift_field_sink;
+}
+
+::std::string CompatibleWithKeywordSink::get_sink() && {
+  return static_cast<::std::string&&>(__fbthrift_field_sink);
+}
 
 void swap([[maybe_unused]] CompatibleWithKeywordSink& a, [[maybe_unused]] CompatibleWithKeywordSink& b) {
   using ::std::swap;
@@ -732,6 +764,14 @@ bool InitialException::operator<([[maybe_unused]] const InitialException& rhs) c
 }
 
 
+const ::std::string& InitialException::get_reason() const& {
+  return __fbthrift_field_reason;
+}
+
+::std::string InitialException::get_reason() && {
+  return static_cast<::std::string&&>(__fbthrift_field_reason);
+}
+
 void swap([[maybe_unused]] InitialException& a, [[maybe_unused]] InitialException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_reason, b.__fbthrift_field_reason);
@@ -828,6 +868,14 @@ bool SinkException1::operator<([[maybe_unused]] const SinkException1& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& SinkException1::get_reason() const& {
+  return __fbthrift_field_reason;
+}
+
+::std::string SinkException1::get_reason() && {
+  return static_cast<::std::string&&>(__fbthrift_field_reason);
+}
 
 void swap([[maybe_unused]] SinkException1& a, [[maybe_unused]] SinkException1& b) {
   using ::std::swap;
@@ -927,6 +975,15 @@ bool SinkException2::operator<([[maybe_unused]] const SinkException2& rhs) const
 }
 
 
+::std::int64_t SinkException2::get_reason() const {
+  return __fbthrift_field_reason;
+}
+
+::std::int64_t& SinkException2::set_reason(::std::int64_t reason_) {
+  reason_ref() = reason_;
+  return __fbthrift_field_reason;
+}
+
 void swap([[maybe_unused]] SinkException2& a, [[maybe_unused]] SinkException2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_reason, b.__fbthrift_field_reason);
@@ -1023,6 +1080,14 @@ bool StreamItem::operator<([[maybe_unused]] const StreamItem& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& StreamItem::get_content() const& {
+  return __fbthrift_field_content;
+}
+
+::std::string StreamItem::get_content() && {
+  return static_cast<::std::string&&>(__fbthrift_field_content);
+}
 
 void swap([[maybe_unused]] StreamItem& a, [[maybe_unused]] StreamItem& b) {
   using ::std::swap;

@@ -165,12 +165,44 @@ bool containerStruct2::operator<([[maybe_unused]] const containerStruct2& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+bool containerStruct2::get_fieldA() const {
+  return __fbthrift_field_fieldA;
+}
+
+bool& containerStruct2::set_fieldA(bool fieldA_) {
+  fieldA_ref() = fieldA_;
+  return __fbthrift_field_fieldA;
+}
+
+bool containerStruct2::get_req_fieldA() const {
+  return __fbthrift_field_req_fieldA;
+}
+
+bool& containerStruct2::set_req_fieldA(bool req_fieldA_) {
+  req_fieldA_ref() = req_fieldA_;
+  return __fbthrift_field_req_fieldA;
+}
+
+const bool* containerStruct2::get_opt_fieldA() const& {
+  return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
+}
+
+bool* containerStruct2::get_opt_fieldA() & {
+  return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
+}
+
+bool& containerStruct2::set_opt_fieldA(bool opt_fieldA_) {
+  opt_fieldA_ref() = opt_fieldA_;
+  return __fbthrift_field_opt_fieldA;
+}
+
 const ::std::map<::std::string, bool>& containerStruct2::get_fieldB() const& {
   return __fbthrift_field_fieldB;
 }
 
 ::std::map<::std::string, bool> containerStruct2::get_fieldB() && {
-  return std::move(__fbthrift_field_fieldB);
+  return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_fieldB);
 }
 
 const ::std::map<::std::string, bool>& containerStruct2::get_req_fieldB() const& {
@@ -178,7 +210,7 @@ const ::std::map<::std::string, bool>& containerStruct2::get_req_fieldB() const&
 }
 
 ::std::map<::std::string, bool> containerStruct2::get_req_fieldB() && {
-  return std::move(__fbthrift_field_req_fieldB);
+  return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_req_fieldB);
 }
 
 const ::std::map<::std::string, bool>* containerStruct2::get_opt_fieldB() const& {
@@ -194,7 +226,7 @@ const ::std::set<::std::int32_t>& containerStruct2::get_fieldC() const& {
 }
 
 ::std::set<::std::int32_t> containerStruct2::get_fieldC() && {
-  return std::move(__fbthrift_field_fieldC);
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
 const ::std::set<::std::int32_t>& containerStruct2::get_req_fieldC() const& {
@@ -202,7 +234,7 @@ const ::std::set<::std::int32_t>& containerStruct2::get_req_fieldC() const& {
 }
 
 ::std::set<::std::int32_t> containerStruct2::get_req_fieldC() && {
-  return std::move(__fbthrift_field_req_fieldC);
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_req_fieldC);
 }
 
 const ::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() const& {
@@ -213,6 +245,37 @@ const ::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() const& {
   return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
+const ::std::string& containerStruct2::get_fieldD() const& {
+  return __fbthrift_field_fieldD;
+}
+
+::std::string containerStruct2::get_fieldD() && {
+  return static_cast<::std::string&&>(__fbthrift_field_fieldD);
+}
+
+const ::std::string& containerStruct2::get_fieldE() const& {
+  return __fbthrift_field_fieldE;
+}
+
+::std::string containerStruct2::get_fieldE() && {
+  return static_cast<::std::string&&>(__fbthrift_field_fieldE);
+}
+
+const ::std::string& containerStruct2::get_req_fieldE() const& {
+  return __fbthrift_field_req_fieldE;
+}
+
+::std::string containerStruct2::get_req_fieldE() && {
+  return static_cast<::std::string&&>(__fbthrift_field_req_fieldE);
+}
+
+const ::std::string* containerStruct2::get_opt_fieldE() const& {
+  return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
+}
+
+::std::string* containerStruct2::get_opt_fieldE() & {
+  return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
+}
 
 void swap([[maybe_unused]] containerStruct2& a, [[maybe_unused]] containerStruct2& b) {
   using ::std::swap;

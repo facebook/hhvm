@@ -583,107 +583,67 @@ class Limits final  {
 
   /** Glean { "field": "max_i64_field" } */
   [[deprecated("Use `FOO.max_i64_field().value();` instead of `FOO.get_max_i64_field();`")]]
-  ::std::int64_t get_max_i64_field() const {
-    return __fbthrift_field_max_i64_field;
-  }
+  ::std::int64_t get_max_i64_field() const;
 
   /** Glean { "field": "max_i64_field" } */
   [[deprecated("Use `FOO.max_i64_field() = BAR;` instead of `FOO.set_max_i64_field(BAR);`")]]
-  ::std::int64_t& set_max_i64_field(::std::int64_t max_i64_field_) {
-    max_i64_field_ref() = max_i64_field_;
-    return __fbthrift_field_max_i64_field;
-  }
+  ::std::int64_t& set_max_i64_field(::std::int64_t max_i64_field_);
 
   /** Glean { "field": "min_i64_field" } */
   [[deprecated("Use `FOO.min_i64_field().value();` instead of `FOO.get_min_i64_field();`")]]
-  ::std::int64_t get_min_i64_field() const {
-    return __fbthrift_field_min_i64_field;
-  }
+  ::std::int64_t get_min_i64_field() const;
 
   /** Glean { "field": "min_i64_field" } */
   [[deprecated("Use `FOO.min_i64_field() = BAR;` instead of `FOO.set_min_i64_field(BAR);`")]]
-  ::std::int64_t& set_min_i64_field(::std::int64_t min_i64_field_) {
-    min_i64_field_ref() = min_i64_field_;
-    return __fbthrift_field_min_i64_field;
-  }
+  ::std::int64_t& set_min_i64_field(::std::int64_t min_i64_field_);
 
   /** Glean { "field": "max_i32_field" } */
   [[deprecated("Use `FOO.max_i32_field().value();` instead of `FOO.get_max_i32_field();`")]]
-  ::std::int32_t get_max_i32_field() const {
-    return __fbthrift_field_max_i32_field;
-  }
+  ::std::int32_t get_max_i32_field() const;
 
   /** Glean { "field": "max_i32_field" } */
   [[deprecated("Use `FOO.max_i32_field() = BAR;` instead of `FOO.set_max_i32_field(BAR);`")]]
-  ::std::int32_t& set_max_i32_field(::std::int32_t max_i32_field_) {
-    max_i32_field_ref() = max_i32_field_;
-    return __fbthrift_field_max_i32_field;
-  }
+  ::std::int32_t& set_max_i32_field(::std::int32_t max_i32_field_);
 
   /** Glean { "field": "min_i32_field" } */
   [[deprecated("Use `FOO.min_i32_field().value();` instead of `FOO.get_min_i32_field();`")]]
-  ::std::int32_t get_min_i32_field() const {
-    return __fbthrift_field_min_i32_field;
-  }
+  ::std::int32_t get_min_i32_field() const;
 
   /** Glean { "field": "min_i32_field" } */
   [[deprecated("Use `FOO.min_i32_field() = BAR;` instead of `FOO.set_min_i32_field(BAR);`")]]
-  ::std::int32_t& set_min_i32_field(::std::int32_t min_i32_field_) {
-    min_i32_field_ref() = min_i32_field_;
-    return __fbthrift_field_min_i32_field;
-  }
+  ::std::int32_t& set_min_i32_field(::std::int32_t min_i32_field_);
 
   /** Glean { "field": "max_i16_field" } */
   [[deprecated("Use `FOO.max_i16_field().value();` instead of `FOO.get_max_i16_field();`")]]
-  ::std::int16_t get_max_i16_field() const {
-    return __fbthrift_field_max_i16_field;
-  }
+  ::std::int16_t get_max_i16_field() const;
 
   /** Glean { "field": "max_i16_field" } */
   [[deprecated("Use `FOO.max_i16_field() = BAR;` instead of `FOO.set_max_i16_field(BAR);`")]]
-  ::std::int16_t& set_max_i16_field(::std::int16_t max_i16_field_) {
-    max_i16_field_ref() = max_i16_field_;
-    return __fbthrift_field_max_i16_field;
-  }
+  ::std::int16_t& set_max_i16_field(::std::int16_t max_i16_field_);
 
   /** Glean { "field": "min_i16_field" } */
   [[deprecated("Use `FOO.min_i16_field().value();` instead of `FOO.get_min_i16_field();`")]]
-  ::std::int16_t get_min_i16_field() const {
-    return __fbthrift_field_min_i16_field;
-  }
+  ::std::int16_t get_min_i16_field() const;
 
   /** Glean { "field": "min_i16_field" } */
   [[deprecated("Use `FOO.min_i16_field() = BAR;` instead of `FOO.set_min_i16_field(BAR);`")]]
-  ::std::int16_t& set_min_i16_field(::std::int16_t min_i16_field_) {
-    min_i16_field_ref() = min_i16_field_;
-    return __fbthrift_field_min_i16_field;
-  }
+  ::std::int16_t& set_min_i16_field(::std::int16_t min_i16_field_);
 
   /** Glean { "field": "max_byte_field" } */
   [[deprecated("Use `FOO.max_byte_field().value();` instead of `FOO.get_max_byte_field();`")]]
-  ::std::int8_t get_max_byte_field() const {
-    return __fbthrift_field_max_byte_field;
-  }
+  ::std::int8_t get_max_byte_field() const;
 
   /** Glean { "field": "max_byte_field" } */
   [[deprecated("Use `FOO.max_byte_field() = BAR;` instead of `FOO.set_max_byte_field(BAR);`")]]
-  ::std::int8_t& set_max_byte_field(::std::int8_t max_byte_field_) {
-    max_byte_field_ref() = max_byte_field_;
-    return __fbthrift_field_max_byte_field;
-  }
+  ::std::int8_t& set_max_byte_field(::std::int8_t max_byte_field_);
 
   /** Glean { "field": "min_byte_field" } */
   [[deprecated("Use `FOO.min_byte_field().value();` instead of `FOO.get_min_byte_field();`")]]
-  ::std::int8_t get_min_byte_field() const {
-    return __fbthrift_field_min_byte_field;
-  }
+  ::std::int8_t get_min_byte_field() const;
 
   /** Glean { "field": "min_byte_field" } */
   [[deprecated("Use `FOO.min_byte_field() = BAR;` instead of `FOO.set_min_byte_field(BAR);`")]]
-  ::std::int8_t& set_min_byte_field(::std::int8_t min_byte_field_) {
-    min_byte_field_ref() = min_byte_field_;
-    return __fbthrift_field_min_byte_field;
-  }
+  ::std::int8_t& set_min_byte_field(::std::int8_t min_byte_field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

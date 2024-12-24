@@ -24,7 +24,7 @@ futures = { version = "0.3.30", features = ["async-await", "compat"] }
 scope = { version = "0.0.1+unstable", path = "../../scope" }
 scope_services = { version = "0.0.1+unstable", path = "../../scope/services" }
 thrift__types = { package = "thrift", version = "0.0.1+unstable", path = ".." }
-tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
+tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [build-dependencies]
 thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

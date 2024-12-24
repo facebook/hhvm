@@ -23,7 +23,7 @@ fbthrift = { version = "0.0.1+unstable", path = "../../../.." }
 futures = { version = "0.3.30", features = ["async-await", "compat"] }
 test_deprecated_optional_with_default_is_some_if__clients = { package = "test_deprecated_optional_with_default_is_some_if_clients", version = "0.0.1+unstable", path = "../clients" }
 test_deprecated_optional_with_default_is_some_if__types = { package = "test_deprecated_optional_with_default_is_some_if", version = "0.0.1+unstable", path = ".." }
-tracing = { version = "0.1.40", features = ["attributes", "valuable"] }
+tracing = { version = "0.1.41", features = ["attributes", "valuable"] }
 
 [build-dependencies]
 thrift_compiler = { version = "0.1.0", git = "https://github.com/facebookexperimental/rust-shed.git", branch = "main" }

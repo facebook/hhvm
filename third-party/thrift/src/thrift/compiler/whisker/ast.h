@@ -34,6 +34,7 @@ struct with_block;
 struct partial_apply;
 struct interpolation;
 struct let_statement;
+struct pragma_statement;
 
 /**
  * The top-level types of constructs allowed in a Whisker source file.
@@ -47,6 +48,7 @@ using body = std::variant<
     conditional_block,
     with_block,
     let_statement,
+    pragma_statement,
     partial_apply>;
 using bodies = std::vector<body>;
 
@@ -225,6 +227,20 @@ struct let_statement {
 
   identifier id;
   expression value;
+};
+
+/**
+ * A Whisker construct for changing rendering behavior.
+ */
+struct pragma_statement {
+  enum class pragmas {
+    single_line,
+  };
+  source_range loc;
+
+  pragmas pragma;
+
+  std::string_view to_string() const;
 };
 
 /**

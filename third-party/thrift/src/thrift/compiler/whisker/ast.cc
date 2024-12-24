@@ -86,4 +86,11 @@ std::string_view expression::function_call::name() const {
       [&](function_call::or_tag) { return "or"; });
 }
 
+std::string_view pragma_statement::to_string() const {
+  switch (pragma) {
+    case pragma_statement::pragmas::single_line:
+      return "single-line";
+  }
+}
+
 } // namespace whisker::ast

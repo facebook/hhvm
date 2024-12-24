@@ -45,6 +45,7 @@
   WHISKER_KEYWORD(and)     \
   WHISKER_KEYWORD(or)      \
   WHISKER_KEYWORD(not)     \
+  WHISKER_KEYWORD(pragma)  \
   WHISKER_KEYWORD(with)    \
   WHISKER_KEYWORD(this)    \
   WHISKER_KEYWORD(define)  \

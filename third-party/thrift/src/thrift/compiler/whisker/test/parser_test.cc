@@ -704,6 +704,26 @@ TEST_F(ParserTest, let_statement_keyword) {
           1)));
 }
 
+TEST_F(ParserTest, pragma_single_line) {
+  auto ast = parse_ast("{{#pragma single-line}}\n");
+  EXPECT_THAT(diagnostics, testing::IsEmpty());
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- pragma-statement `single-line` <line:1:1, col:24>\n");
+}
+
+TEST_F(ParserTest, pragma_unrecognized) {
+  auto ast = parse_ast("{{#pragma unrecognized}}\n");
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unknown pragma `unrecognized`",
+          path_to_file(1),
+          1)));
+}
+
 TEST_F(ParserTest, with_block) {
   auto ast = parse_ast(
       "{{#with foo.bar}}\n"

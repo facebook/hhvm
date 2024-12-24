@@ -82,6 +82,7 @@ enum class tok : unsigned {
   kw_and,
   kw_or,
   kw_not,
+  kw_pragma,
 
   // Reserved Words (may be used in the future):
   kw_with,

@@ -27,6 +27,7 @@
 #include <iterator>
 #include <map>
 #include <optional>
+
 #include <utility>
 #include <variant>
 #include <vector>
@@ -757,10 +758,11 @@ class parser {
       ast::conditional_block,
       ast::with_block,
       ast::let_statement,
+      ast::pragma_statement,
       ast::partial_apply>;
   // template → { interpolation | block | statement | partial-apply }
   // block → { section-block | conditional-block }
-  // statement → { let-statement }
+  // statement → { let-statement | pragma-statement }
   parse_result<template_body> parse_template(parser_scan_window scan) {
     assert(scan.empty());
     if (scan.peek().kind != tok::open) {
@@ -789,6 +791,8 @@ class parser {
       templ = std::move(with_block).consume_and_advance(&scan);
     } else if (parse_result let_statement = parse_let_statement(scan)) {
       templ = std::move(let_statement).consume_and_advance(&scan);
+    } else if (parse_result pragma_statement = parse_pragma_statement(scan)) {
+      templ = std::move(pragma_statement).consume_and_advance(&scan);
     } else if (parse_result section_block = parse_section_block(scan)) {
       templ = std::move(section_block).consume_and_advance(&scan);
     } else if (parse_result partial_apply = parse_partial_apply(scan)) {
@@ -1082,6 +1086,45 @@ class parser {
             scan.with_start(scan_start).range(),
             ast::identifier{id.range, std::string(id.string_value())},
             std::move(value)},
+        scan};
+  }
+
+  // pragma-statement → { "{{" ~ "#" ~ "pragma" ~ identifier ~ "}}" }
+  parse_result<ast::pragma_statement> parse_pragma_statement(
+      parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!try_consume_token(&scan, tok::open)) {
+      return no_parse_result();
+    }
+    if (!try_consume_token(&scan, tok::pound)) {
+      return no_parse_result();
+    }
+    if (!try_consume_token(&scan, tok::kw_pragma)) {
+      return no_parse_result();
+    }
+
+    const token& id = scan.peek();
+    if (id.kind != tok::identifier) {
+      report_expected(scan, "identifier in pragma-statement");
+    }
+    scan.advance();
+
+    ast::pragma_statement::pragmas pragma;
+    if (id.string_value() == "single-line") {
+      pragma = ast::pragma_statement::pragmas::single_line;
+    } else {
+      report_error(scan, "unknown pragma `{}`", id.string_value());
+    }
+
+    if (!try_consume_token(&scan, tok::close)) {
+      report_expected(
+          scan, fmt::format("{} to close pragma-statement", tok::close));
+    }
+
+    return {
+        ast::pragma_statement{scan.with_start(scan_start).range(), pragma},
         scan};
   }
 

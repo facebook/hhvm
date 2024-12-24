@@ -1313,4 +1313,32 @@ TEST_F(RenderTest, globals_shadowing) {
   EXPECT_EQ(*result, "good\n");
 }
 
+TEST_F(RenderTest, pragma_single_line) {
+  auto result = render(
+      "{{#pragma single-line}}\n"
+      "This\n"
+      " is\n"
+      "{{! comment}}\n"
+      " all\n"
+      " one\n"
+      " line\n",
+      w::map({}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "This is all one line");
+
+  // Test that the pragma is scoped to the active partial/template.
+  result = render(
+      "{{#pragma single-line}}\n"
+      "This\n"
+      " is\n"
+      "{{> partial }}\n"
+      " all\n"
+      " one\n"
+      " line\n",
+      w::map({}),
+      partials({{"partial", "\nnot\n!\n"}}));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
+  EXPECT_EQ(*result, "This is\nnot\n!\n all one line");
+}
+
 } // namespace whisker

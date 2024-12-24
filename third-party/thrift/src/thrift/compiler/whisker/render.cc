@@ -23,6 +23,7 @@
 #include <exception>
 #include <functional>
 #include <ostream>
+#include <stack>
 #include <string>
 #include <vector>
 
@@ -256,7 +257,11 @@ class render_engine {
   }
 
   void visit(const ast::text& text) { out_.write(text); }
-  void visit(const ast::newline& newline) { out_.write(newline); }
+  void visit(const ast::newline& newline) {
+    if (!skip_newlines_.top()) {
+      out_.write(newline);
+    }
+  }
   void visit(const ast::comment&) {
     // comments are not rendered in the output
   }
@@ -382,6 +387,15 @@ class render_engine {
               err.name());
           throw abort_rendering();
         });
+  }
+
+  void visit(const ast::pragma_statement& pragma_statement) {
+    using pragma = ast::pragma_statement::pragmas;
+    switch (pragma_statement.pragma) {
+      case pragma::single_line:
+        skip_newlines_.top() = true;
+        break;
+    }
   }
 
   void visit(const ast::interpolation& interpolation) {
@@ -564,6 +578,29 @@ class render_engine {
     }
   }
 
+  /**
+   * An RAII guard that disables printing newlines. This supports the
+   * single-line pragma for partials.
+   */
+  auto make_single_line_guard(bool enabled) {
+    class single_line_guard {
+     public:
+      explicit single_line_guard(render_engine& engine, bool skip)
+          : engine_(engine) {
+        engine_.skip_newlines_.push(skip);
+      }
+      ~single_line_guard() { engine_.skip_newlines_.pop(); }
+      single_line_guard(single_line_guard&& other) = delete;
+      single_line_guard& operator=(single_line_guard&& other) = delete;
+      single_line_guard(const single_line_guard& other) = delete;
+      single_line_guard& operator=(const single_line_guard& other) = delete;
+
+     private:
+      render_engine& engine_;
+    };
+    return single_line_guard{*this, enabled};
+  }
+
   void visit(const ast::with_block& with_block) {
     const ast::expression& expr = with_block.value;
     object value = evaluate(expr);
@@ -625,6 +662,7 @@ class render_engine {
     // execute within the scope where they are invoked.
     auto indent_guard =
         out_.make_indent_guard(partial_apply.standalone_offset_within_line);
+    auto single_line_guard = make_single_line_guard(false);
     visit(resolved_partial->body_elements);
   }
 
@@ -632,6 +670,7 @@ class render_engine {
   eval_context eval_context_;
   diagnostics_engine& diags_;
   render_options opts_;
+  std::stack<bool> skip_newlines_{{false}};
 };
 
 } // namespace

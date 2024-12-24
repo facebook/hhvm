@@ -594,6 +594,38 @@ let-statement → { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
 
 </Grammar>
 
+### Pragma Statements
+
+Whisker `{{#pragma}}` statements allow modifying rendering behavior for the current template or partial.
+
+Currently the only pragma supported is `single-line`, which suppresses all newlines in the current partial.
+
+<Example>
+
+```handlebars
+{{#pragma single-line}}
+This
+ is
+ all
+ one
+ line
+.
+```
+
+```text title=Output
+This is all one line.
+```
+
+</Example>
+
+<Grammar>
+
+```
+pragma-statement → { "{{" ~ "#" ~ "pragma" ~ ( "single-line" ) ~ "}}" }
+```
+
+</Grammar>
+
 ### Partial Blocks
 
 :::warning

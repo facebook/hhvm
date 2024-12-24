@@ -137,6 +137,14 @@ struct ast_visitor {
     visit(let_statement.id, scope.open_property());
     visit(let_statement.value, scope.open_property());
   }
+  void visit(
+      const ast::pragma_statement& pragma_statement,
+      tree_printer::scope scope) const {
+    scope.println(
+        " pragma-statement `{}` {}",
+        pragma_statement.to_string(),
+        location(pragma_statement.loc));
+  }
   // Prevent implicit conversion to ast::body. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing
   // overload for one of the alternatives in the variant.

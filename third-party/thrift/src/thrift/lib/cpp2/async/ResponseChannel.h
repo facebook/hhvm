@@ -158,6 +158,12 @@ class ResponseChannelRequest {
 
   virtual ~ResponseChannelRequest() = default;
 
+  // Get queue timeout for this request. So any owner who wants to enqueue this
+  // request before processing can schedule timeout.
+  virtual std::chrono::milliseconds getQueueTimeoutMs() const {
+    return std::chrono::milliseconds(0);
+  }
+
   bool getShouldStartProcessing() {
     if (!tryStartProcessing()) {
       return false;

@@ -398,6 +398,10 @@ class ThriftRequestCore : public ResponseChannelRequest {
     }
   }
 
+  std::chrono::milliseconds getQueueTimeoutMs() const final {
+    return queueTimeout_.value;
+  }
+
   ResponseRpcMetadata makeResponseRpcMetadata(
       transport::THeader::StringToStringMap&& writeHeaders,
       std::optional<ProxiedPayloadMetadata> proxiedPayloadMetadata,

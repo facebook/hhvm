@@ -16,9 +16,11 @@
 
 }}{{!
 This is the metaclass for Thrift exception
-}}{{#program:generate_mutable_types}}{{!
-}}_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta{{!
-}}{{/program:generate_mutable_types}}{{!
-}}{{#program:generate_immutable_types}}{{!
-}}_fbthrift_python_exceptions.GeneratedErrorMeta{{!
-}}{{/program:generate_immutable_types}}
+}}
+{{#pragma single-line}}
+{{#program:generate_mutable_types}}
+_fbthrift_python_mutable_exceptions.MutableGeneratedErrorMeta
+{{/program:generate_mutable_types}}
+{{#program:generate_immutable_types}}
+_fbthrift_python_exceptions.GeneratedErrorMeta
+{{/program:generate_immutable_types}}

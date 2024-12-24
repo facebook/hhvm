@@ -16,9 +16,11 @@
 
 }}{{!
 This is the base class for Thrift struct
-}}{{#program:generate_mutable_types}}{{!
-}}_fbthrift_python_mutable_types.MutableStruct{{!
-}}{{/program:generate_mutable_types}}{{!
-}}{{#program:generate_immutable_types}}{{!
-}}_fbthrift_python_types.Struct{{!
-}}{{/program:generate_immutable_types}}
+}}
+{{#pragma single-line}}
+{{#program:generate_mutable_types}}
+_fbthrift_python_mutable_types.MutableStruct
+{{/program:generate_mutable_types}}
+{{#program:generate_immutable_types}}
+_fbthrift_python_types.Struct
+{{/program:generate_immutable_types}}

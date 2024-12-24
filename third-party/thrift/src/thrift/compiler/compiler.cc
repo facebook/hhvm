@@ -31,6 +31,8 @@
 #else
 #include <unistd.h>
 #endif
+#include <stdio.h>
+#include <algorithm>
 #include <ctime>
 #include <filesystem>
 #include <fstream>
@@ -78,12 +80,15 @@ constexpr bool bundle_annotations() {
 }
 
 /**
- * Display the usage message.
+ * Display the usage message to the given C stream.
+ *
+ * @param stream See https://en.cppreference.com/w/c/io/FILE
  */
-void usage() {
-  fprintf(stderr, R"(Usage: thrift [options] file
+void printUsageTo(FILE* stream) {
+  fprintf(stream, R"(Usage: thrift [options] file
 
 Options:
+  --help      Print this message to stdout and exit (successfully).
   -o dir      Set the output directory for gen-* packages (default: current
               directory).
               At most one of this option (-o) or -out (see below) can be
@@ -144,12 +149,32 @@ Available generators (and options):
   for (const auto& gen : generator_registry::get_generators()) {
     const generator_factory& generator_factory = *gen.second;
     fmt::print(
-        stderr,
+        stream,
         "  {} ({}):\n{}",
         generator_factory.name(),
         generator_factory.long_name(),
         generator_factory.documentation());
   }
+}
+
+/**
+ * Display the usage message to the standard error stream.
+ */
+void printUsageError() {
+  printUsageTo(stderr);
+}
+
+/**
+ * If `arguments` includes "--help" (in any position), prints usage message
+ * to STDOUT and returns true. Otherwise returns false.
+ */
+bool maybeHandleHelpInvocation(const std::vector<std::string>& arguments) {
+  if (std::find(arguments.begin(), arguments.end(), "--help") ==
+      arguments.end()) {
+    return false;
+  }
+  printUsageTo(stdout);
+  return true;
 }
 
 bool isPathSeparator(const char& c) {
@@ -185,7 +210,7 @@ const std::string* consume_next_arg(
         arg_name,
         arguments[arg_i].c_str(),
         arguments[arg_i + 1].c_str());
-    usage();
+    printUsageError();
     return nullptr;
   }
   return &arguments[++arg_i];
@@ -206,7 +231,7 @@ const std::string* consume_next_arg(
 std::string parse_flag(const std::string& argument) {
   if (argument.size() < 2 || argument[0] != '-' || (argument == "--")) {
     fprintf(stderr, "!!! Expected flag, got: %s\n\n", argument.c_str());
-    usage();
+    printUsageError();
     return {};
   }
 
@@ -233,14 +258,14 @@ bool validate_params(const gen_params& gparams) {
   const bool skip_gen = gparams.skip_gen;
   if (has_targets && skip_gen) {
     fprintf(stderr, "!!! Cannot specify both --skip-gen and --gen.\n\n");
-    usage();
+    printUsageError();
     return false;
   }
   if (!has_targets && !skip_gen) {
     fprintf(
         stderr,
         "!!! No output language(s) specified: need --gen or --skip-gen.\n\n");
-    usage();
+    printUsageError();
     return false;
   }
   // Exactly one of skip_gen and has_targets is true => valid.
@@ -286,7 +311,7 @@ std::string parse_args(
   // Check for necessary arguments, you gotta have at least a filename and
   // an output language flag.
   if (arguments.size() < 3 && gparams.targets.empty()) {
-    usage();
+    printUsageError();
     return {};
   }
 
@@ -361,7 +386,7 @@ std::string parse_args(
 
       if (!gparams.out_path.empty()) {
         fprintf(stderr, "!!! Cannot specify both -o and --out.\n\n");
-        usage();
+        printUsageError();
         return {};
       }
 
@@ -397,14 +422,14 @@ std::string parse_args(
         } else {
           fprintf(
               stderr, "!!! Unrecognized validator: %s\n\n", validator.c_str());
-          usage();
+          printUsageError();
           return {};
         }
       }
     } else {
       fprintf(
           stderr, "!!! Unrecognized option: %s\n\n", arguments[arg_i].c_str());
-      usage();
+      printUsageError();
       return {};
     }
   }
@@ -516,7 +541,7 @@ std::unique_ptr<t_generator> create_generator(
       generator_name, program, program_bundle, diags);
   if (generator == nullptr) {
     fmt::print(stderr, "Error: Invalid generator name: {}\n", generator_name);
-    usage();
+    printUsageError();
     return nullptr;
   }
   generator->process_options(
@@ -852,6 +877,13 @@ std::unique_ptr<t_program_bundle> parse_and_get_program(
 compile_result compile(
     const std::vector<std::string>& arguments, source_manager& source_mgr) {
   compile_result result;
+
+  // If --help is explicitly passed, print (non-error) usage and return
+  // successfully.
+  if (maybeHandleHelpInvocation(arguments)) {
+    result.retcode = compile_retcode::success;
+    return result;
+  }
 
   // Parse arguments.
   parsing_params pparams;

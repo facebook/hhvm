@@ -33,6 +33,7 @@
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}} get_{{field:cpp_name}}() const;
   {{#else}}
+  {{#if type:resolves_to_container_or_struct?}}
 
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
@@ -41,6 +42,20 @@
   {{> common/field_docblock}}
   [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
   {{type:cpp_type}} get_{{field:cpp_name}}() &&;
+  {{#else}}
+
+  {{> common/field_docblock}}
+  [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
+  const {{type:cpp_type}}& get_{{field:cpp_name}}() const& {
+    return {{field:cpp_storage_name}};
+  }
+
+  {{> common/field_docblock}}
+  [[deprecated("Use `FOO.{{field:cpp_name}}().value();` instead of `FOO.get_{{field:cpp_name}}();`")]]
+  {{type:cpp_type}} get_{{field:cpp_name}}() && {
+    return static_cast<{{type:cpp_type}}&&>({{field:cpp_storage_name}});
+  }
+  {{/if type:resolves_to_container_or_struct?}}
   {{/if type:resolves_to_fixed_size?}}
 {{/if field:optional?}}
 {{#if type:resolves_to_fixed_size?}}

@@ -222,14 +222,6 @@ bool decorated_struct::operator<([[maybe_unused]] const decorated_struct& rhs) c
 }
 
 
-const ::std::string& decorated_struct::get_field() const& {
-  return __fbthrift_field_field;
-}
-
-::std::string decorated_struct::get_field() && {
-  return static_cast<::std::string&&>(__fbthrift_field_field);
-}
-
 void swap([[maybe_unused]] decorated_struct& a, [[maybe_unused]] decorated_struct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
@@ -1073,14 +1065,6 @@ bool ComplexString::operator<([[maybe_unused]] const ComplexString& rhs) const {
 }
 
 
-const ::std::string& ComplexString::get_a() const& {
-  return __fbthrift_field_a;
-}
-
-::std::string ComplexString::get_a() && {
-  return static_cast<::std::string&&>(__fbthrift_field_a);
-}
-
 const ::std::map<::std::string, ::std::int32_t>& ComplexString::get_b() const& {
   return __fbthrift_field_b;
 }
@@ -1197,14 +1181,6 @@ bool ComplexNestedWithDefault::operator<([[maybe_unused]] const ComplexNestedWit
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& ComplexNestedWithDefault::get_z() const& {
-  return __fbthrift_field_z;
-}
-
-::std::string ComplexNestedWithDefault::get_z() && {
-  return static_cast<::std::string&&>(__fbthrift_field_z);
-}
 
 const ::apache::thrift::fixtures::types::ComplexString& ComplexNestedWithDefault::get_n() const& {
   return __fbthrift_field_n;
@@ -1631,14 +1607,6 @@ bool MyStruct::__fbthrift_is_empty() const {
   return __fbthrift_field_MyIntField;
 }
 
-const ::std::string& MyStruct::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyStruct::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
 ::std::int64_t MyStruct::get_majorVer() const {
   return __fbthrift_field_majorVer;
 }
@@ -1930,14 +1898,6 @@ bool AnnotatedTypes::operator<([[maybe_unused]] const AnnotatedTypes& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::apache::thrift::fixtures::types::TBinary_8623& AnnotatedTypes::get_binary_field() const& {
-  return __fbthrift_field_binary_field;
-}
-
-::apache::thrift::fixtures::types::TBinary_8623 AnnotatedTypes::get_binary_field() && {
-  return static_cast<::apache::thrift::fixtures::types::TBinary_8623&&>(__fbthrift_field_binary_field);
-}
 
 const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& AnnotatedTypes::get_list_field() const& {
   return __fbthrift_field_list_field;
@@ -3690,14 +3650,6 @@ const ::apache::thrift::fixtures::types::map_i32_i32_9565& AllocatorAware::get_a
 
 ::apache::thrift::fixtures::types::map_i32_i32_9565 AllocatorAware::get_aa_map() && {
   return static_cast<::apache::thrift::fixtures::types::map_i32_i32_9565&&>(__fbthrift_field_aa_map);
-}
-
-const ::apache::thrift::fixtures::types::string_5252& AllocatorAware::get_aa_string() const& {
-  return __fbthrift_field_aa_string;
-}
-
-::apache::thrift::fixtures::types::string_5252 AllocatorAware::get_aa_string() && {
-  return static_cast<::apache::thrift::fixtures::types::string_5252&&>(__fbthrift_field_aa_string);
 }
 
 ::std::int32_t AllocatorAware::get_not_a_container() const {

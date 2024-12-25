@@ -1032,14 +1032,6 @@ const ::py3::simple::SimpleStruct& ComplexStruct::get_structTwo() const& {
   return __fbthrift_field_an_integer;
 }
 
-const ::std::string& ComplexStruct::get_name() const& {
-  return __fbthrift_field_name;
-}
-
-::std::string ComplexStruct::get_name() && {
-  return static_cast<::std::string&&>(__fbthrift_field_name);
-}
-
 ::py3::simple::AnEnum ComplexStruct::get_an_enum() const {
   return __fbthrift_field_an_enum;
 }
@@ -1047,38 +1039,6 @@ const ::std::string& ComplexStruct::get_name() const& {
 ::py3::simple::AnEnum& ComplexStruct::set_an_enum(::py3::simple::AnEnum an_enum_) {
   an_enum_ref() = an_enum_;
   return __fbthrift_field_an_enum;
-}
-
-const ::std::string& ComplexStruct::get_some_bytes() const& {
-  return __fbthrift_field_some_bytes;
-}
-
-::std::string ComplexStruct::get_some_bytes() && {
-  return static_cast<::std::string&&>(__fbthrift_field_some_bytes);
-}
-
-const ::std::string& ComplexStruct::get_from() const& {
-  return __fbthrift_field_from;
-}
-
-::std::string ComplexStruct::get_from() && {
-  return static_cast<::std::string&&>(__fbthrift_field_from);
-}
-
-const ::std::string& ComplexStruct::get_cdef() const& {
-  return __fbthrift_field_cdef;
-}
-
-::std::string ComplexStruct::get_cdef() && {
-  return static_cast<::std::string&&>(__fbthrift_field_cdef);
-}
-
-const ::py3::simple::foo_bar& ComplexStruct::get_bytes_with_cpp_type() const& {
-  return __fbthrift_field_bytes_with_cpp_type;
-}
-
-::py3::simple::foo_bar ComplexStruct::get_bytes_with_cpp_type() && {
-  return static_cast<::py3::simple::foo_bar&&>(__fbthrift_field_bytes_with_cpp_type);
 }
 
 void swap([[maybe_unused]] ComplexStruct& a, [[maybe_unused]] ComplexStruct& b) {
@@ -1481,22 +1441,6 @@ bool CustomFields::operator==([[maybe_unused]] const CustomFields& rhs) const {
   return __fbthrift_field_double_field;
 }
 
-const ::MyType& CustomFields::get_string_field() const& {
-  return __fbthrift_field_string_field;
-}
-
-::MyType CustomFields::get_string_field() && {
-  return static_cast<::MyType&&>(__fbthrift_field_string_field);
-}
-
-const ::MyType& CustomFields::get_binary_field() const& {
-  return __fbthrift_field_binary_field;
-}
-
-::MyType CustomFields::get_binary_field() && {
-  return static_cast<::MyType&&>(__fbthrift_field_binary_field);
-}
-
 const ::MyType& CustomFields::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
@@ -1704,22 +1648,6 @@ bool CustomTypedefFields::operator==([[maybe_unused]] const CustomTypedefFields&
 ::py3::simple::CustomDouble& CustomTypedefFields::set_double_field(::py3::simple::CustomDouble double_field_) {
   double_field_ref() = double_field_;
   return __fbthrift_field_double_field;
-}
-
-const ::py3::simple::CustomString& CustomTypedefFields::get_string_field() const& {
-  return __fbthrift_field_string_field;
-}
-
-::py3::simple::CustomString CustomTypedefFields::get_string_field() && {
-  return static_cast<::py3::simple::CustomString&&>(__fbthrift_field_string_field);
-}
-
-const ::py3::simple::CustomBinary& CustomTypedefFields::get_binary_field() const& {
-  return __fbthrift_field_binary_field;
-}
-
-::py3::simple::CustomBinary CustomTypedefFields::get_binary_field() && {
-  return static_cast<::py3::simple::CustomBinary&&>(__fbthrift_field_binary_field);
 }
 
 const ::py3::simple::CustomList& CustomTypedefFields::get_list_field() const& {

@@ -204,14 +204,6 @@ bool structured_annotation_inline::operator<([[maybe_unused]] const structured_a
   return __fbthrift_field_count;
 }
 
-const ::std::string& structured_annotation_inline::get_name() const& {
-  return __fbthrift_field_name;
-}
-
-::std::string structured_annotation_inline::get_name() && {
-  return static_cast<::std::string&&>(__fbthrift_field_name);
-}
-
 void swap([[maybe_unused]] structured_annotation_inline& a, [[maybe_unused]] structured_annotation_inline& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_count, b.__fbthrift_field_count);
@@ -314,14 +306,6 @@ bool structured_annotation_with_default::operator<([[maybe_unused]] const struct
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& structured_annotation_with_default::get_name() const& {
-  return __fbthrift_field_name;
-}
-
-::std::string structured_annotation_with_default::get_name() && {
-  return static_cast<::std::string&&>(__fbthrift_field_name);
-}
 
 void swap([[maybe_unused]] structured_annotation_with_default& a, [[maybe_unused]] structured_annotation_with_default& b) {
   using ::std::swap;
@@ -445,14 +429,6 @@ bool structured_annotation_recursive::operator<([[maybe_unused]] const structure
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& structured_annotation_recursive::get_name() const& {
-  return __fbthrift_field_name;
-}
-
-::std::string structured_annotation_recursive::get_name() && {
-  return static_cast<::std::string&&>(__fbthrift_field_name);
-}
 
 const ::test::fixtures::basic-structured-annotations::structured_annotation_forward& structured_annotation_recursive::get_forward() const& {
   return __fbthrift_field_forward;
@@ -673,14 +649,6 @@ bool structured_annotation_nested::operator<([[maybe_unused]] const structured_a
 }
 
 
-const ::std::string& structured_annotation_nested::get_name() const& {
-  return __fbthrift_field_name;
-}
-
-::std::string structured_annotation_nested::get_name() && {
-  return static_cast<::std::string&&>(__fbthrift_field_name);
-}
-
 const ::test::fixtures::basic-structured-annotations::structured_annotation_with_default& structured_annotation_nested::get_nest() const& {
   return __fbthrift_field_nest;
 }
@@ -823,22 +791,6 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return __fbthrift_field_annotated_field;
 }
 
-const ::test::fixtures::basic-structured-annotations::annotated_inline_string& MyStruct::get_annotated_type() const& {
-  return __fbthrift_field_annotated_type;
-}
-
-::test::fixtures::basic-structured-annotations::annotated_inline_string MyStruct::get_annotated_type() && {
-  return static_cast<::test::fixtures::basic-structured-annotations::annotated_inline_string&&>(__fbthrift_field_annotated_type);
-}
-
-const ::std::string& MyStruct::get_annotated_recursive() const& {
-  return __fbthrift_field_annotated_recursive;
-}
-
-::std::string MyStruct::get_annotated_recursive() && {
-  return static_cast<::std::string&&>(__fbthrift_field_annotated_recursive);
-}
-
 ::std::int64_t MyStruct::get_annotated_nested() const {
   return __fbthrift_field_annotated_nested;
 }
@@ -951,14 +903,6 @@ bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& MyException::get_context() const& {
-  return __fbthrift_field_context;
-}
-
-::std::string MyException::get_context() && {
-  return static_cast<::std::string&&>(__fbthrift_field_context);
-}
 
 void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   using ::std::swap;

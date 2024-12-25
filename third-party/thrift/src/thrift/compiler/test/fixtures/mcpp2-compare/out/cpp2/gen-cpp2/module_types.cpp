@@ -514,44 +514,12 @@ bool& MyStruct::set_MyBoolField(bool MyBoolField_) {
   return __fbthrift_field_MyIntField;
 }
 
-const ::std::string& MyStruct::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyStruct::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
-const ::std::string& MyStruct::get_MyStringField2() const& {
-  return __fbthrift_field_MyStringField2;
-}
-
-::std::string MyStruct::get_MyStringField2() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField2);
-}
-
-const ::std::string& MyStruct::get_MyBinaryField() const& {
-  return __fbthrift_field_MyBinaryField;
-}
-
-::std::string MyStruct::get_MyBinaryField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField);
-}
-
 const ::std::string* MyStruct::get_MyBinaryField2() const& {
   return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
 }
 
 ::std::string* MyStruct::get_MyBinaryField2() & {
   return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
-}
-
-const ::std::string& MyStruct::get_MyBinaryField3() const& {
-  return __fbthrift_field_MyBinaryField3;
-}
-
-::std::string MyStruct::get_MyBinaryField3() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField3);
 }
 
 const ::std::vector<::std::string>& MyStruct::get_MyBinaryListField4() const& {
@@ -1410,22 +1378,6 @@ bool AnException::operator<([[maybe_unused]] const AnException& rhs) const {
   return __fbthrift_field_req_code;
 }
 
-const ::std::string& AnException::get_message2() const& {
-  return __fbthrift_field_message2;
-}
-
-::std::string AnException::get_message2() && {
-  return static_cast<::std::string&&>(__fbthrift_field_message2);
-}
-
-const ::std::string& AnException::get_req_message() const& {
-  return __fbthrift_field_req_message;
-}
-
-::std::string AnException::get_req_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_req_message);
-}
-
 const ::std::vector<::std::int32_t>& AnException::get_exception_list() const& {
   return __fbthrift_field_exception_list;
 }
@@ -1683,14 +1635,6 @@ bool AnotherException::operator<([[maybe_unused]] const AnotherException& rhs) c
 ::std::int32_t& AnotherException::set_req_code(::std::int32_t req_code_) {
   req_code_ref() = req_code_;
   return __fbthrift_field_req_code;
-}
-
-const ::std::string& AnotherException::get_message() const& {
-  return __fbthrift_field_message;
-}
-
-::std::string AnotherException::get_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_message);
 }
 
 void swap([[maybe_unused]] AnotherException& a, [[maybe_unused]] AnotherException& b) {
@@ -2038,30 +1982,6 @@ const ::std::set<::std::int32_t>* containerStruct::get_opt_fieldC() const& {
   return opt_fieldC_ref().has_value() ? std::addressof(opt_fieldC) : nullptr;
 }
 
-const ::std::string& containerStruct::get_fieldD() const& {
-  return fieldD;
-}
-
-::std::string containerStruct::get_fieldD() && {
-  return static_cast<::std::string&&>(fieldD);
-}
-
-const ::std::string& containerStruct::get_fieldE() const& {
-  return fieldE;
-}
-
-::std::string containerStruct::get_fieldE() && {
-  return static_cast<::std::string&&>(fieldE);
-}
-
-const ::std::string& containerStruct::get_req_fieldE() const& {
-  return req_fieldE;
-}
-
-::std::string containerStruct::get_req_fieldE() && {
-  return static_cast<::std::string&&>(req_fieldE);
-}
-
 const ::std::string* containerStruct::get_opt_fieldE() const& {
   return opt_fieldE_ref().has_value() ? std::addressof(opt_fieldE) : nullptr;
 }
@@ -2337,14 +2257,6 @@ const ::std::map<::std::string, ::std::int32_t>& containerStruct::get_fieldAE() 
 
 ::std::map<::std::string, ::std::int32_t> containerStruct::get_fieldAE() && {
   return static_cast<::std::map<::std::string, ::std::int32_t>&&>(fieldAE);
-}
-
-const ::some::valid::ns::IndirectionD& containerStruct::get_fieldSD() const& {
-  return fieldSD;
-}
-
-::some::valid::ns::IndirectionD containerStruct::get_fieldSD() && {
-  return static_cast<::some::valid::ns::IndirectionD&&>(fieldSD);
 }
 
 void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct& b) {
@@ -2877,22 +2789,6 @@ const ::some::valid::ns::UnorderedMapStruct& AnnotatedStruct::get_map_struct_typ
   return static_cast<::some::valid::ns::UnorderedMapStruct&&>(map_struct_type);
 }
 
-const ::some::valid::ns::IOBuf& AnnotatedStruct::get_iobuf_type() const& {
-  return iobuf_type;
-}
-
-::some::valid::ns::IOBuf AnnotatedStruct::get_iobuf_type() && {
-  return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type);
-}
-
-const ::some::valid::ns::IOBufPtr& AnnotatedStruct::get_iobuf_ptr() const& {
-  return iobuf_ptr;
-}
-
-::some::valid::ns::IOBufPtr AnnotatedStruct::get_iobuf_ptr() && {
-  return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr);
-}
-
 const std::list<::std::int32_t>& AnnotatedStruct::get_list_i32_template() const& {
   return list_i32_template;
 }
@@ -2980,22 +2876,6 @@ const ::std::set<::some::valid::ns::IndirectionC>& AnnotatedStruct::get_indirect
 
 ::std::set<::some::valid::ns::IndirectionC> AnnotatedStruct::get_indirection_c() && {
   return static_cast<::std::set<::some::valid::ns::IndirectionC>&&>(indirection_c);
-}
-
-const ::some::valid::ns::IOBuf& AnnotatedStruct::get_iobuf_type_val() const& {
-  return iobuf_type_val;
-}
-
-::some::valid::ns::IOBuf AnnotatedStruct::get_iobuf_type_val() && {
-  return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type_val);
-}
-
-const ::some::valid::ns::IOBufPtr& AnnotatedStruct::get_iobuf_ptr_val() const& {
-  return iobuf_ptr_val;
-}
-
-::some::valid::ns::IOBufPtr AnnotatedStruct::get_iobuf_ptr_val() && {
-  return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr_val);
 }
 
 const ::some::valid::ns::containerStruct& AnnotatedStruct::get_struct_struct() const& {

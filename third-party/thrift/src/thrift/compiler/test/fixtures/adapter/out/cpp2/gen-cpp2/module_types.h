@@ -3513,11 +3513,15 @@ class MyAnnotation final  {
 
   /** Glean { "field": "signature" } */
   [[deprecated("Use `FOO.signature().value();` instead of `FOO.get_signature();`")]]
-  const ::std::string& get_signature() const&;
+  const ::std::string& get_signature() const& {
+    return __fbthrift_field_signature;
+  }
 
   /** Glean { "field": "signature" } */
   [[deprecated("Use `FOO.signature().value();` instead of `FOO.get_signature();`")]]
-  ::std::string get_signature() &&;
+  ::std::string get_signature() && {
+    return static_cast<::std::string&&>(__fbthrift_field_signature);
+  }
 
   /** Glean { "field": "signature" } */
   template <typename T_MyAnnotation_signature_struct_setter = ::std::string>
@@ -4577,11 +4581,15 @@ class Config final  {
 
   /** Glean { "field": "path" } */
   [[deprecated("Use `FOO.path().value();` instead of `FOO.get_path();`")]]
-  const ::std::string& get_path() const&;
+  const ::std::string& get_path() const& {
+    return __fbthrift_field_path;
+  }
 
   /** Glean { "field": "path" } */
   [[deprecated("Use `FOO.path().value();` instead of `FOO.get_path();`")]]
-  ::std::string get_path() &&;
+  ::std::string get_path() && {
+    return static_cast<::std::string&&>(__fbthrift_field_path);
+  }
 
   /** Glean { "field": "path" } */
   template <typename T_Config_path_struct_setter = ::std::string>
@@ -5431,11 +5439,15 @@ class AdaptTestStruct final  {
 
   /** Glean { "field": "meta" } */
   [[deprecated("Use `FOO.meta().value();` instead of `FOO.get_meta();`")]]
-  const ::std::string& get_meta() const&;
+  const ::std::string& get_meta() const& {
+    return __fbthrift_field_meta;
+  }
 
   /** Glean { "field": "meta" } */
   [[deprecated("Use `FOO.meta().value();` instead of `FOO.get_meta();`")]]
-  ::std::string get_meta() &&;
+  ::std::string get_meta() && {
+    return static_cast<::std::string&&>(__fbthrift_field_meta);
+  }
 
   /** Glean { "field": "meta" } */
   template <typename T_AdaptTestStruct_meta_struct_setter = ::std::string>
@@ -9406,11 +9418,15 @@ class Person final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const&;
+  const ::std::string& get_name() const& {
+    return __fbthrift_field_name;
+  }
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() &&;
+  ::std::string get_name() && {
+    return static_cast<::std::string&&>(__fbthrift_field_name);
+  }
 
   /** Glean { "field": "name" } */
   template <typename T_Person_name_struct_setter = ::std::string>
@@ -9578,11 +9594,15 @@ class Person2 final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const&;
+  const ::std::string& get_name() const& {
+    return __fbthrift_field_name;
+  }
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() &&;
+  ::std::string get_name() && {
+    return static_cast<::std::string&&>(__fbthrift_field_name);
+  }
 
   /** Glean { "field": "name" } */
   template <typename T_Person2_name_struct_setter = ::std::string>

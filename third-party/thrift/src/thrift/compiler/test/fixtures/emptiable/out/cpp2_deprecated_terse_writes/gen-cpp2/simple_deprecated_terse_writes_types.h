@@ -1202,11 +1202,15 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  const ::std::string& get_string_field() const&;
+  const ::std::string& get_string_field() const& {
+    return __fbthrift_field_string_field;
+  }
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  ::std::string get_string_field() &&;
+  ::std::string get_string_field() && {
+    return static_cast<::std::string&&>(__fbthrift_field_string_field);
+  }
 
   /** Glean { "field": "string_field" } */
   template <typename T_EmptiableStruct_string_field_struct_setter = ::std::string>
@@ -1218,11 +1222,15 @@ class EmptiableStruct final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  const ::std::string& get_binary_field() const&;
+  const ::std::string& get_binary_field() const& {
+    return __fbthrift_field_binary_field;
+  }
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  ::std::string get_binary_field() &&;
+  ::std::string get_binary_field() && {
+    return static_cast<::std::string&&>(__fbthrift_field_binary_field);
+  }
 
   /** Glean { "field": "binary_field" } */
   template <typename T_EmptiableStruct_binary_field_struct_setter = ::std::string>
@@ -2195,11 +2203,15 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  const ::std::string& get_string_field() const&;
+  const ::std::string& get_string_field() const& {
+    return __fbthrift_field_string_field;
+  }
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  ::std::string get_string_field() &&;
+  ::std::string get_string_field() && {
+    return static_cast<::std::string&&>(__fbthrift_field_string_field);
+  }
 
   /** Glean { "field": "string_field" } */
   template <typename T_NotEmptiableStruct_string_field_struct_setter = ::std::string>
@@ -2211,11 +2223,15 @@ class NotEmptiableStruct final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  const ::std::string& get_binary_field() const&;
+  const ::std::string& get_binary_field() const& {
+    return __fbthrift_field_binary_field;
+  }
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  ::std::string get_binary_field() &&;
+  ::std::string get_binary_field() && {
+    return static_cast<::std::string&&>(__fbthrift_field_binary_field);
+  }
 
   /** Glean { "field": "binary_field" } */
   template <typename T_NotEmptiableStruct_binary_field_struct_setter = ::std::string>

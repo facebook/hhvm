@@ -135,14 +135,6 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return __fbthrift_field_MyIntField;
 }
 
-const ::std::string& MyStruct::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyStruct::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
 const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }

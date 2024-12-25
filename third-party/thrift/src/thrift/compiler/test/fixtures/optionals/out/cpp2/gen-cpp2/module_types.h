@@ -1597,11 +1597,15 @@ class Person final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const&;
+  const ::std::string& get_name() const& {
+    return __fbthrift_field_name;
+  }
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() &&;
+  ::std::string get_name() && {
+    return static_cast<::std::string&&>(__fbthrift_field_name);
+  }
 
   /** Glean { "field": "name" } */
   template <typename T_Person_name_struct_setter = ::std::string>

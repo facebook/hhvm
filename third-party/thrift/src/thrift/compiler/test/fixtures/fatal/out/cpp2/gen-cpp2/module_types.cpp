@@ -631,14 +631,6 @@ bool structA::operator<([[maybe_unused]] const structA& rhs) const {
   return __fbthrift_field_a;
 }
 
-const ::std::string& structA::get_b() const& {
-  return __fbthrift_field_b;
-}
-
-::std::string structA::get_b() && {
-  return static_cast<::std::string&&>(__fbthrift_field_b);
-}
-
 void swap([[maybe_unused]] structA& a, [[maybe_unused]] structA& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
@@ -1161,14 +1153,6 @@ bool structC::operator<([[maybe_unused]] const structC& rhs) const {
 ::std::int32_t& structC::set_a(::std::int32_t a_) {
   a_ref() = a_;
   return __fbthrift_field_a;
-}
-
-const ::std::string& structC::get_b() const& {
-  return __fbthrift_field_b;
-}
-
-::std::string structC::get_b() && {
-  return static_cast<::std::string&&>(__fbthrift_field_b);
 }
 
 double structC::get_c() const {
@@ -1824,14 +1808,6 @@ bool struct2::operator<([[maybe_unused]] const struct2& rhs) const {
   return __fbthrift_field_fieldA;
 }
 
-const ::std::string& struct2::get_fieldB() const& {
-  return __fbthrift_field_fieldB;
-}
-
-::std::string struct2::get_fieldB() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldB);
-}
-
 ::test_cpp2::cpp_reflection::enum1 struct2::get_fieldC() const {
   return __fbthrift_field_fieldC;
 }
@@ -2082,14 +2058,6 @@ bool struct3::operator<([[maybe_unused]] const struct3& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& struct3::get_fieldB() const& {
-  return __fbthrift_field_fieldB;
-}
-
-::std::string struct3::get_fieldB() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldB);
-}
 
 ::test_cpp2::cpp_reflection::enum1 struct3::get_fieldC() const {
   return __fbthrift_field_fieldC;
@@ -2720,14 +2688,6 @@ bool struct_binary::operator<([[maybe_unused]] const struct_binary& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& struct_binary::get_bi() const& {
-  return __fbthrift_field_bi;
-}
-
-::std::string struct_binary::get_bi() && {
-  return static_cast<::std::string&&>(__fbthrift_field_bi);
-}
 
 void swap([[maybe_unused]] struct_binary& a, [[maybe_unused]] struct_binary& b) {
   using ::std::swap;
@@ -4024,14 +3984,6 @@ bool struct_with_indirections::operator<([[maybe_unused]] const struct_with_indi
 ::test_cpp2::cpp_reflection::HasAResult& struct_with_indirections::set_result(::test_cpp2::cpp_reflection::HasAResult result_) {
   result_ref() = result_;
   return __fbthrift_field_result;
-}
-
-const ::test_cpp2::cpp_reflection::HasAPhrase& struct_with_indirections::get_phrase() const& {
-  return __fbthrift_field_phrase;
-}
-
-::test_cpp2::cpp_reflection::HasAPhrase struct_with_indirections::get_phrase() && {
-  return static_cast<::test_cpp2::cpp_reflection::HasAPhrase&&>(__fbthrift_field_phrase);
 }
 
 void swap([[maybe_unused]] struct_with_indirections& a, [[maybe_unused]] struct_with_indirections& b) {

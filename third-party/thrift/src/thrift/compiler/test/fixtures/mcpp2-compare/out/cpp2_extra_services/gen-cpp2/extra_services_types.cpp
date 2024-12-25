@@ -245,30 +245,6 @@ const ::std::set<::std::int32_t>* containerStruct2::get_opt_fieldC() const& {
   return opt_fieldC_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldC) : nullptr;
 }
 
-const ::std::string& containerStruct2::get_fieldD() const& {
-  return __fbthrift_field_fieldD;
-}
-
-::std::string containerStruct2::get_fieldD() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldD);
-}
-
-const ::std::string& containerStruct2::get_fieldE() const& {
-  return __fbthrift_field_fieldE;
-}
-
-::std::string containerStruct2::get_fieldE() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldE);
-}
-
-const ::std::string& containerStruct2::get_req_fieldE() const& {
-  return __fbthrift_field_req_fieldE;
-}
-
-::std::string containerStruct2::get_req_fieldE() && {
-  return static_cast<::std::string&&>(__fbthrift_field_req_fieldE);
-}
-
 const ::std::string* containerStruct2::get_opt_fieldE() const& {
   return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
 }

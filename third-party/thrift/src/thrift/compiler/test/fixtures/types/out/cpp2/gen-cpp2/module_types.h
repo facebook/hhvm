@@ -849,11 +849,15 @@ class decorated_struct final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  const ::std::string& get_field() const&;
+  const ::std::string& get_field() const& {
+    return __fbthrift_field_field;
+  }
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::string get_field() &&;
+  ::std::string get_field() && {
+    return static_cast<::std::string&&>(__fbthrift_field_field);
+  }
 
   /** Glean { "field": "field" } */
   template <typename T_decorated_struct_field_struct_setter = ::std::string>
@@ -2738,11 +2742,15 @@ class ComplexString final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  const ::std::string& get_a() const&;
+  const ::std::string& get_a() const& {
+    return __fbthrift_field_a;
+  }
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::std::string get_a() &&;
+  ::std::string get_a() && {
+    return static_cast<::std::string&&>(__fbthrift_field_a);
+  }
 
   /** Glean { "field": "a" } */
   template <typename T_ComplexString_a_struct_setter = ::std::string>
@@ -2978,11 +2986,15 @@ class ComplexNestedWithDefault final  {
 
   /** Glean { "field": "z" } */
   [[deprecated("Use `FOO.z().value();` instead of `FOO.get_z();`")]]
-  const ::std::string& get_z() const&;
+  const ::std::string& get_z() const& {
+    return __fbthrift_field_z;
+  }
 
   /** Glean { "field": "z" } */
   [[deprecated("Use `FOO.z().value();` instead of `FOO.get_z();`")]]
-  ::std::string get_z() &&;
+  ::std::string get_z() && {
+    return static_cast<::std::string&&>(__fbthrift_field_z);
+  }
 
   /** Glean { "field": "z" } */
   template <typename T_ComplexNestedWithDefault_z_struct_setter = ::std::string>
@@ -4192,11 +4204,15 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const&;
+  const ::std::string& get_MyStringField() const& {
+    return __fbthrift_field_MyStringField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() &&;
+  ::std::string get_MyStringField() && {
+    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
+  }
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
@@ -4603,11 +4619,15 @@ class AnnotatedTypes final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  const ::apache::thrift::fixtures::types::TBinary_8623& get_binary_field() const&;
+  const ::apache::thrift::fixtures::types::TBinary_8623& get_binary_field() const& {
+    return __fbthrift_field_binary_field;
+  }
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  ::apache::thrift::fixtures::types::TBinary_8623 get_binary_field() &&;
+  ::apache::thrift::fixtures::types::TBinary_8623 get_binary_field() && {
+    return static_cast<::apache::thrift::fixtures::types::TBinary_8623&&>(__fbthrift_field_binary_field);
+  }
 
   /** Glean { "field": "binary_field" } */
   template <typename T_AnnotatedTypes_binary_field_struct_setter = ::apache::thrift::fixtures::types::TBinary_8623>
@@ -7487,11 +7507,15 @@ class AllocatorAware final  {
 
   /** Glean { "field": "aa_string" } */
   [[deprecated("Use `FOO.aa_string().value();` instead of `FOO.get_aa_string();`")]]
-  const ::apache::thrift::fixtures::types::string_5252& get_aa_string() const&;
+  const ::apache::thrift::fixtures::types::string_5252& get_aa_string() const& {
+    return __fbthrift_field_aa_string;
+  }
 
   /** Glean { "field": "aa_string" } */
   [[deprecated("Use `FOO.aa_string().value();` instead of `FOO.get_aa_string();`")]]
-  ::apache::thrift::fixtures::types::string_5252 get_aa_string() &&;
+  ::apache::thrift::fixtures::types::string_5252 get_aa_string() && {
+    return static_cast<::apache::thrift::fixtures::types::string_5252&&>(__fbthrift_field_aa_string);
+  }
 
   /** Glean { "field": "aa_string" } */
   template <typename T_AllocatorAware_aa_string_struct_setter = ::apache::thrift::fixtures::types::string_5252>

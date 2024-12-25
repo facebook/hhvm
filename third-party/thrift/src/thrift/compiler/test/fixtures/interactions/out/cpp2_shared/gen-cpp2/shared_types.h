@@ -236,11 +236,15 @@ class DoSomethingResult final  {
 
   /** Glean { "field": "s_res" } */
   [[deprecated("Use `FOO.s_res().value();` instead of `FOO.get_s_res();`")]]
-  const ::std::string& get_s_res() const&;
+  const ::std::string& get_s_res() const& {
+    return __fbthrift_field_s_res;
+  }
 
   /** Glean { "field": "s_res" } */
   [[deprecated("Use `FOO.s_res().value();` instead of `FOO.get_s_res();`")]]
-  ::std::string get_s_res() &&;
+  ::std::string get_s_res() && {
+    return static_cast<::std::string&&>(__fbthrift_field_s_res);
+  }
 
   /** Glean { "field": "s_res" } */
   template <typename T_DoSomethingResult_s_res_struct_setter = ::std::string>

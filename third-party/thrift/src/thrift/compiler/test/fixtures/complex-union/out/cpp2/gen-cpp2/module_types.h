@@ -1645,11 +1645,15 @@ class Val final  {
 
   /** Glean { "field": "strVal" } */
   [[deprecated("Use `FOO.strVal().value();` instead of `FOO.get_strVal();`")]]
-  const ::std::string& get_strVal() const&;
+  const ::std::string& get_strVal() const& {
+    return __fbthrift_field_strVal;
+  }
 
   /** Glean { "field": "strVal" } */
   [[deprecated("Use `FOO.strVal().value();` instead of `FOO.get_strVal();`")]]
-  ::std::string get_strVal() &&;
+  ::std::string get_strVal() && {
+    return static_cast<::std::string&&>(__fbthrift_field_strVal);
+  }
 
   /** Glean { "field": "strVal" } */
   template <typename T_Val_strVal_struct_setter = ::std::string>

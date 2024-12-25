@@ -144,14 +144,6 @@ bool ModuleA::operator<([[maybe_unused]] const ModuleA& rhs) const {
   return __fbthrift_field_i32Field;
 }
 
-const ::std::string& ModuleA::get_strField() const& {
-  return __fbthrift_field_strField;
-}
-
-::std::string ModuleA::get_strField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_strField);
-}
-
 const ::std::vector<::std::int16_t>& ModuleA::get_listField() const& {
   return __fbthrift_field_listField;
 }

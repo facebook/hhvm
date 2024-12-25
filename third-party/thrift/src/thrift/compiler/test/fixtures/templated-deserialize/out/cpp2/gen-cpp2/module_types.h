@@ -1706,11 +1706,15 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  const ::std::string& get_fieldD() const&;
+  const ::std::string& get_fieldD() const& {
+    return __fbthrift_field_fieldD;
+  }
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  ::std::string get_fieldD() &&;
+  ::std::string get_fieldD() && {
+    return static_cast<::std::string&&>(__fbthrift_field_fieldD);
+  }
 
   /** Glean { "field": "fieldD" } */
   template <typename T_containerStruct_fieldD_struct_setter = ::std::string>
@@ -1722,11 +1726,15 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  const ::std::string& get_fieldE() const&;
+  const ::std::string& get_fieldE() const& {
+    return __fbthrift_field_fieldE;
+  }
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  ::std::string get_fieldE() &&;
+  ::std::string get_fieldE() && {
+    return static_cast<::std::string&&>(__fbthrift_field_fieldE);
+  }
 
   /** Glean { "field": "fieldE" } */
   template <typename T_containerStruct_fieldE_struct_setter = ::std::string>

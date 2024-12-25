@@ -599,22 +599,6 @@ double& FieldLevelTerseStruct::set_double_field(double double_field_) {
   return __fbthrift_field_double_field;
 }
 
-const ::std::string& FieldLevelTerseStruct::get_string_field() const& {
-  return __fbthrift_field_string_field;
-}
-
-::std::string FieldLevelTerseStruct::get_string_field() && {
-  return static_cast<::std::string&&>(__fbthrift_field_string_field);
-}
-
-const ::std::string& FieldLevelTerseStruct::get_binary_field() const& {
-  return __fbthrift_field_binary_field;
-}
-
-::std::string FieldLevelTerseStruct::get_binary_field() && {
-  return static_cast<::std::string&&>(__fbthrift_field_binary_field);
-}
-
 ::facebook::thrift::test::terse_write::deprecated::MyEnum FieldLevelTerseStruct::get_enum_field() const {
   return __fbthrift_field_enum_field;
 }

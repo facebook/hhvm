@@ -672,11 +672,15 @@ class Internship final  {
 
   /** Glean { "field": "title" } */
   [[deprecated("Use `FOO.title().value();` instead of `FOO.get_title();`")]]
-  const ::std::string& get_title() const&;
+  const ::std::string& get_title() const& {
+    return __fbthrift_field_title;
+  }
 
   /** Glean { "field": "title" } */
   [[deprecated("Use `FOO.title().value();` instead of `FOO.get_title();`")]]
-  ::std::string get_title() &&;
+  ::std::string get_title() && {
+    return static_cast<::std::string&&>(__fbthrift_field_title);
+  }
 
   /** Glean { "field": "title" } */
   template <typename T_Internship_title_struct_setter = ::std::string>
@@ -1170,11 +1174,15 @@ class struct1 final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  const ::std::string& get_b() const&;
+  const ::std::string& get_b() const& {
+    return __fbthrift_field_b;
+  }
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  ::std::string get_b() &&;
+  ::std::string get_b() && {
+    return static_cast<::std::string&&>(__fbthrift_field_b);
+  }
 
   /** Glean { "field": "b" } */
   template <typename T_struct1_b_struct_setter = ::std::string>
@@ -1505,11 +1513,15 @@ class struct2 final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  const ::std::string& get_b() const&;
+  const ::std::string& get_b() const& {
+    return __fbthrift_field_b;
+  }
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  ::std::string get_b() &&;
+  ::std::string get_b() && {
+    return static_cast<::std::string&&>(__fbthrift_field_b);
+  }
 
   /** Glean { "field": "b" } */
   template <typename T_struct2_b_struct_setter = ::std::string>
@@ -1812,11 +1824,15 @@ class struct3 final  {
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  const ::std::string& get_a() const&;
+  const ::std::string& get_a() const& {
+    return __fbthrift_field_a;
+  }
 
   /** Glean { "field": "a" } */
   [[deprecated("Use `FOO.a().value();` instead of `FOO.get_a();`")]]
-  ::std::string get_a() &&;
+  ::std::string get_a() && {
+    return static_cast<::std::string&&>(__fbthrift_field_a);
+  }
 
   /** Glean { "field": "a" } */
   template <typename T_struct3_a_struct_setter = ::std::string>

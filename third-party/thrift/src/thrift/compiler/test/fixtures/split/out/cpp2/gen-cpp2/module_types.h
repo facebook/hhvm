@@ -700,11 +700,15 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const&;
+  const ::std::string& get_MyStringField() const& {
+    return __fbthrift_field_MyStringField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() &&;
+  ::std::string get_MyStringField() && {
+    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
+  }
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>

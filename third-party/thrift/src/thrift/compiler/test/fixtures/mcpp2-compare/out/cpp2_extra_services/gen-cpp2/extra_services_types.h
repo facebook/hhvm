@@ -994,11 +994,15 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  const ::std::string& get_fieldD() const&;
+  const ::std::string& get_fieldD() const& {
+    return __fbthrift_field_fieldD;
+  }
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  ::std::string get_fieldD() &&;
+  ::std::string get_fieldD() && {
+    return static_cast<::std::string&&>(__fbthrift_field_fieldD);
+  }
 
   /** Glean { "field": "fieldD" } */
   template <typename T_containerStruct2_fieldD_struct_setter = ::std::string>
@@ -1010,11 +1014,15 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  const ::std::string& get_fieldE() const&;
+  const ::std::string& get_fieldE() const& {
+    return __fbthrift_field_fieldE;
+  }
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  ::std::string get_fieldE() &&;
+  ::std::string get_fieldE() && {
+    return static_cast<::std::string&&>(__fbthrift_field_fieldE);
+  }
 
   /** Glean { "field": "fieldE" } */
   template <typename T_containerStruct2_fieldE_struct_setter = ::std::string>
@@ -1026,11 +1034,15 @@ class containerStruct2 final  {
 
   /** Glean { "field": "req_fieldE" } */
   [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
-  const ::std::string& get_req_fieldE() const&;
+  const ::std::string& get_req_fieldE() const& {
+    return __fbthrift_field_req_fieldE;
+  }
 
   /** Glean { "field": "req_fieldE" } */
   [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
-  ::std::string get_req_fieldE() &&;
+  ::std::string get_req_fieldE() && {
+    return static_cast<::std::string&&>(__fbthrift_field_req_fieldE);
+  }
 
   /** Glean { "field": "req_fieldE" } */
   template <typename T_containerStruct2_req_fieldE_struct_setter = ::std::string>

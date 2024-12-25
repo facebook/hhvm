@@ -646,22 +646,6 @@ bool TWrapped::operator<([[maybe_unused]] const TWrapped& rhs) const {
 }
 
 
-const ::std::string& TWrapped::get_fieldA() const& {
-  return __fbthrift_field_fieldA;
-}
-
-::std::string TWrapped::get_fieldA() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldA);
-}
-
-const ::std::string& TWrapped::get_fieldB() const& {
-  return __fbthrift_field_fieldB;
-}
-
-::std::string TWrapped::get_fieldB() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldB);
-}
-
 void swap([[maybe_unused]] TWrapped& a, [[maybe_unused]] TWrapped& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);

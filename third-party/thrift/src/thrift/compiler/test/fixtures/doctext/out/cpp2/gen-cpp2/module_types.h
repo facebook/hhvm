@@ -715,11 +715,15 @@ class FOLLY_EXPORT Bang : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string& get_message() const&;
+  const ::std::string& get_message() const& {
+    return __fbthrift_field_message;
+  }
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string get_message() &&;
+  ::std::string get_message() && {
+    return static_cast<::std::string&&>(__fbthrift_field_message);
+  }
 
   /** Glean { "field": "message" } */
   template <typename T_Bang_message_struct_setter = ::std::string>

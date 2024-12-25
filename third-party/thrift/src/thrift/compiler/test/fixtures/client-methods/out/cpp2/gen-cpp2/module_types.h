@@ -185,11 +185,15 @@ class EchoRequest final  {
 
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
-  const ::std::string& get_text() const&;
+  const ::std::string& get_text() const& {
+    return __fbthrift_field_text;
+  }
 
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
-  ::std::string get_text() &&;
+  ::std::string get_text() && {
+    return static_cast<::std::string&&>(__fbthrift_field_text);
+  }
 
   /** Glean { "field": "text" } */
   template <typename T_EchoRequest_text_struct_setter = ::std::string>
@@ -356,11 +360,15 @@ class EchoResponse final  {
 
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
-  const ::std::string& get_text() const&;
+  const ::std::string& get_text() const& {
+    return __fbthrift_field_text;
+  }
 
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
-  ::std::string get_text() &&;
+  ::std::string get_text() && {
+    return static_cast<::std::string&&>(__fbthrift_field_text);
+  }
 
   /** Glean { "field": "text" } */
   template <typename T_EchoResponse_text_struct_setter = ::std::string>

@@ -122,14 +122,6 @@ bool CustomException::operator<([[maybe_unused]] const CustomException& rhs) con
 }
 
 
-const ::std::string& CustomException::get_name() const& {
-  return __fbthrift_field_name;
-}
-
-::std::string CustomException::get_name() && {
-  return static_cast<::std::string&&>(__fbthrift_field_name);
-}
-
 ::cpp2::Result CustomException::get_result() const {
   return __fbthrift_field_result;
 }

@@ -109,13 +109,12 @@ bool TerseFoo::operator<([[maybe_unused]] const TerseFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<double>& TerseFoo::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
 ::std::vector<double> TerseFoo::get_field1() && {
-  return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
+  return std::move(__fbthrift_field_field1);
 }
 
 const ::std::vector<::std::int32_t>& TerseFoo::get_field2() const& {
@@ -123,7 +122,7 @@ const ::std::vector<::std::int32_t>& TerseFoo::get_field2() const& {
 }
 
 ::std::vector<::std::int32_t> TerseFoo::get_field2() && {
-  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field2);
+  return std::move(__fbthrift_field_field2);
 }
 
 const ::std::vector<double>& TerseFoo::get_field3() const& {
@@ -131,7 +130,7 @@ const ::std::vector<double>& TerseFoo::get_field3() const& {
 }
 
 ::std::vector<double> TerseFoo::get_field3() && {
-  return static_cast<::std::vector<double>&&>(__fbthrift_field_field3);
+  return std::move(__fbthrift_field_field3);
 }
 
 const ::std::vector<::std::int32_t>& TerseFoo::get_field4() const& {
@@ -139,8 +138,9 @@ const ::std::vector<::std::int32_t>& TerseFoo::get_field4() const& {
 }
 
 ::std::vector<::std::int32_t> TerseFoo::get_field4() && {
-  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field4);
+  return std::move(__fbthrift_field_field4);
 }
+
 
 void swap([[maybe_unused]] TerseFoo& a, [[maybe_unused]] TerseFoo& b) {
   using ::std::swap;
@@ -388,13 +388,12 @@ bool TerseLazyFoo::operator<([[maybe_unused]] const TerseLazyFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<double>& TerseLazyFoo::get_field1() const& {
   return __fbthrift_field_field1;
 }
 
 ::std::vector<double> TerseLazyFoo::get_field1() && {
-  return static_cast<::std::vector<double>&&>(__fbthrift_field_field1);
+  return std::move(__fbthrift_field_field1);
 }
 
 const ::std::vector<::std::int32_t>& TerseLazyFoo::get_field2() const& {
@@ -402,8 +401,9 @@ const ::std::vector<::std::int32_t>& TerseLazyFoo::get_field2() const& {
 }
 
 ::std::vector<::std::int32_t> TerseLazyFoo::get_field2() && {
-  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_field2);
+  return std::move(__fbthrift_field_field2);
 }
+
 
 void swap([[maybe_unused]] TerseLazyFoo& a, [[maybe_unused]] TerseLazyFoo& b) {
   using ::std::swap;
@@ -527,7 +527,6 @@ bool TerseOptionalFoo::operator<([[maybe_unused]] const TerseOptionalFoo& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<double>* TerseOptionalFoo::get_field1() const& {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
@@ -559,6 +558,7 @@ const ::std::vector<::std::int32_t>* TerseOptionalFoo::get_field4() const& {
 ::std::vector<::std::int32_t>* TerseOptionalFoo::get_field4() & {
   return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
 }
+
 
 void swap([[maybe_unused]] TerseOptionalFoo& a, [[maybe_unused]] TerseOptionalFoo& b) {
   using ::std::swap;
@@ -806,7 +806,6 @@ bool TerseOptionalLazyFoo::operator<([[maybe_unused]] const TerseOptionalLazyFoo
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<double>* TerseOptionalLazyFoo::get_field1() const& {
   return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
 }
@@ -822,6 +821,7 @@ const ::std::vector<::std::int32_t>* TerseOptionalLazyFoo::get_field2() const& {
 ::std::vector<::std::int32_t>* TerseOptionalLazyFoo::get_field2() & {
   return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
 }
+
 
 void swap([[maybe_unused]] TerseOptionalLazyFoo& a, [[maybe_unused]] TerseOptionalLazyFoo& b) {
   using ::std::swap;

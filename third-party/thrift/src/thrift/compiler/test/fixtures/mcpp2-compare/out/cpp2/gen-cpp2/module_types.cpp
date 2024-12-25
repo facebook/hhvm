@@ -212,15 +212,6 @@ bool ASimpleStruct::operator==([[maybe_unused]] const ASimpleStruct& rhs) const 
 }
 
 
-::std::int64_t ASimpleStruct::get_boolField() const {
-  return __fbthrift_field_boolField;
-}
-
-::std::int64_t& ASimpleStruct::set_boolField(::std::int64_t boolField_) {
-  boolField_ref() = boolField_;
-  return __fbthrift_field_boolField;
-}
-
 void swap([[maybe_unused]] ASimpleStruct& a, [[maybe_unused]] ASimpleStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_boolField, b.__fbthrift_field_boolField);
@@ -302,15 +293,6 @@ bool ASimpleStructNoexcept::operator<([[maybe_unused]] const ASimpleStructNoexce
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int64_t ASimpleStructNoexcept::get_boolField() const {
-  return __fbthrift_field_boolField;
-}
-
-::std::int64_t& ASimpleStructNoexcept::set_boolField(::std::int64_t boolField_) {
-  boolField_ref() = boolField_;
-  return __fbthrift_field_boolField;
-}
 
 void swap([[maybe_unused]] ASimpleStructNoexcept& a, [[maybe_unused]] ASimpleStructNoexcept& b) {
   using ::std::swap;
@@ -495,71 +477,12 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-bool MyStruct::get_MyBoolField() const {
-  return __fbthrift_field_MyBoolField;
-}
-
-bool& MyStruct::set_MyBoolField(bool MyBoolField_) {
-  MyBoolField_ref() = MyBoolField_;
-  return __fbthrift_field_MyBoolField;
-}
-
-::std::int64_t MyStruct::get_MyIntField() const {
-  return __fbthrift_field_MyIntField;
-}
-
-::std::int64_t& MyStruct::set_MyIntField(::std::int64_t MyIntField_) {
-  MyIntField_ref() = MyIntField_;
-  return __fbthrift_field_MyIntField;
-}
-
-const ::std::string& MyStruct::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyStruct::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
-const ::std::string& MyStruct::get_MyStringField2() const& {
-  return __fbthrift_field_MyStringField2;
-}
-
-::std::string MyStruct::get_MyStringField2() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField2);
-}
-
-const ::std::string& MyStruct::get_MyBinaryField() const& {
-  return __fbthrift_field_MyBinaryField;
-}
-
-::std::string MyStruct::get_MyBinaryField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField);
-}
-
-const ::std::string* MyStruct::get_MyBinaryField2() const& {
-  return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
-}
-
-::std::string* MyStruct::get_MyBinaryField2() & {
-  return MyBinaryField2_ref().has_value() ? std::addressof(__fbthrift_field_MyBinaryField2) : nullptr;
-}
-
-const ::std::string& MyStruct::get_MyBinaryField3() const& {
-  return __fbthrift_field_MyBinaryField3;
-}
-
-::std::string MyStruct::get_MyBinaryField3() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField3);
-}
-
 const ::std::vector<::std::string>& MyStruct::get_MyBinaryListField4() const& {
   return __fbthrift_field_MyBinaryListField4;
 }
 
 ::std::vector<::std::string> MyStruct::get_MyBinaryListField4() && {
-  return static_cast<::std::vector<::std::string>&&>(__fbthrift_field_MyBinaryListField4);
+  return std::move(__fbthrift_field_MyBinaryListField4);
 }
 
 const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& MyStruct::get_MyMapEnumAndInt() const& {
@@ -567,8 +490,9 @@ const ::std::map<::some::valid::ns::MyEnumA, ::std::string>& MyStruct::get_MyMap
 }
 
 ::std::map<::some::valid::ns::MyEnumA, ::std::string> MyStruct::get_MyMapEnumAndInt() && {
-  return static_cast<::std::map<::some::valid::ns::MyEnumA, ::std::string>&&>(__fbthrift_field_MyMapEnumAndInt);
+  return std::move(__fbthrift_field_MyMapEnumAndInt);
 }
+
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
@@ -1391,47 +1315,12 @@ bool AnException::operator<([[maybe_unused]] const AnException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int32_t AnException::get_code() const {
-  return __fbthrift_field_code;
-}
-
-::std::int32_t& AnException::set_code(::std::int32_t code_) {
-  code_ref() = code_;
-  return __fbthrift_field_code;
-}
-
-::std::int32_t AnException::get_req_code() const {
-  return __fbthrift_field_req_code;
-}
-
-::std::int32_t& AnException::set_req_code(::std::int32_t req_code_) {
-  req_code_ref() = req_code_;
-  return __fbthrift_field_req_code;
-}
-
-const ::std::string& AnException::get_message2() const& {
-  return __fbthrift_field_message2;
-}
-
-::std::string AnException::get_message2() && {
-  return static_cast<::std::string&&>(__fbthrift_field_message2);
-}
-
-const ::std::string& AnException::get_req_message() const& {
-  return __fbthrift_field_req_message;
-}
-
-::std::string AnException::get_req_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_req_message);
-}
-
 const ::std::vector<::std::int32_t>& AnException::get_exception_list() const& {
   return __fbthrift_field_exception_list;
 }
 
 ::std::vector<::std::int32_t> AnException::get_exception_list() && {
-  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_exception_list);
+  return std::move(__fbthrift_field_exception_list);
 }
 
 const ::std::set<::std::int64_t>& AnException::get_exception_set() const& {
@@ -1439,7 +1328,7 @@ const ::std::set<::std::int64_t>& AnException::get_exception_set() const& {
 }
 
 ::std::set<::std::int64_t> AnException::get_exception_set() && {
-  return static_cast<::std::set<::std::int64_t>&&>(__fbthrift_field_exception_set);
+  return std::move(__fbthrift_field_exception_set);
 }
 
 const ::std::map<::std::string, ::std::int32_t>& AnException::get_exception_map() const& {
@@ -1447,7 +1336,7 @@ const ::std::map<::std::string, ::std::int32_t>& AnException::get_exception_map(
 }
 
 ::std::map<::std::string, ::std::int32_t> AnException::get_exception_map() && {
-  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_exception_map);
+  return std::move(__fbthrift_field_exception_map);
 }
 
 const ::std::map<::std::string, ::std::int32_t>& AnException::get_req_exception_map() const& {
@@ -1455,16 +1344,7 @@ const ::std::map<::std::string, ::std::int32_t>& AnException::get_req_exception_
 }
 
 ::std::map<::std::string, ::std::int32_t> AnException::get_req_exception_map() && {
-  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_req_exception_map);
-}
-
-::some::valid::ns::MyEnumA AnException::get_enum_field() const {
-  return __fbthrift_field_enum_field;
-}
-
-::some::valid::ns::MyEnumA& AnException::set_enum_field(::some::valid::ns::MyEnumA enum_field_) {
-  enum_field_ref() = enum_field_;
-  return __fbthrift_field_enum_field;
+  return std::move(__fbthrift_field_req_exception_map);
 }
 
 const ::std::vector<::some::valid::ns::MyEnumA>& AnException::get_enum_container() const& {
@@ -1472,7 +1352,7 @@ const ::std::vector<::some::valid::ns::MyEnumA>& AnException::get_enum_container
 }
 
 ::std::vector<::some::valid::ns::MyEnumA> AnException::get_enum_container() && {
-  return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(__fbthrift_field_enum_container);
+  return std::move(__fbthrift_field_enum_container);
 }
 
 const ::some::valid::ns::MyStruct& AnException::get_a_struct() const& {
@@ -1480,7 +1360,7 @@ const ::some::valid::ns::MyStruct& AnException::get_a_struct() const& {
 }
 
 ::some::valid::ns::MyStruct AnException::get_a_struct() && {
-  return static_cast<::some::valid::ns::MyStruct&&>(__fbthrift_field_a_struct);
+  return std::move(__fbthrift_field_a_struct);
 }
 
 const ::std::set<::some::valid::ns::MyStruct>& AnException::get_a_set_struct() const& {
@@ -1488,7 +1368,7 @@ const ::std::set<::some::valid::ns::MyStruct>& AnException::get_a_set_struct() c
 }
 
 ::std::set<::some::valid::ns::MyStruct> AnException::get_a_set_struct() && {
-  return static_cast<::std::set<::some::valid::ns::MyStruct>&&>(__fbthrift_field_a_set_struct);
+  return std::move(__fbthrift_field_a_set_struct);
 }
 
 const ::std::vector<::some::valid::ns::SimpleUnion>& AnException::get_a_union_list() const& {
@@ -1496,7 +1376,7 @@ const ::std::vector<::some::valid::ns::SimpleUnion>& AnException::get_a_union_li
 }
 
 ::std::vector<::some::valid::ns::SimpleUnion> AnException::get_a_union_list() && {
-  return static_cast<::std::vector<::some::valid::ns::SimpleUnion>&&>(__fbthrift_field_a_union_list);
+  return std::move(__fbthrift_field_a_union_list);
 }
 
 const ::some::valid::ns::unionTypeDef& AnException::get_union_typedef() const& {
@@ -1504,7 +1384,7 @@ const ::some::valid::ns::unionTypeDef& AnException::get_union_typedef() const& {
 }
 
 ::some::valid::ns::unionTypeDef AnException::get_union_typedef() && {
-  return static_cast<::some::valid::ns::unionTypeDef&&>(__fbthrift_field_union_typedef);
+  return std::move(__fbthrift_field_union_typedef);
 }
 
 const ::std::vector<::some::valid::ns::unionTypeDef>& AnException::get_a_union_typedef_list() const& {
@@ -1512,8 +1392,9 @@ const ::std::vector<::some::valid::ns::unionTypeDef>& AnException::get_a_union_t
 }
 
 ::std::vector<::some::valid::ns::unionTypeDef> AnException::get_a_union_typedef_list() && {
-  return static_cast<::std::vector<::some::valid::ns::unionTypeDef>&&>(__fbthrift_field_a_union_typedef_list);
+  return std::move(__fbthrift_field_a_union_typedef_list);
 }
+
 
 void swap([[maybe_unused]] AnException& a, [[maybe_unused]] AnException& b) {
   using ::std::swap;
@@ -1666,32 +1547,6 @@ bool AnotherException::operator<([[maybe_unused]] const AnotherException& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int32_t AnotherException::get_code() const {
-  return __fbthrift_field_code;
-}
-
-::std::int32_t& AnotherException::set_code(::std::int32_t code_) {
-  code_ref() = code_;
-  return __fbthrift_field_code;
-}
-
-::std::int32_t AnotherException::get_req_code() const {
-  return __fbthrift_field_req_code;
-}
-
-::std::int32_t& AnotherException::set_req_code(::std::int32_t req_code_) {
-  req_code_ref() = req_code_;
-  return __fbthrift_field_req_code;
-}
-
-const ::std::string& AnotherException::get_message() const& {
-  return __fbthrift_field_message;
-}
-
-::std::string AnotherException::get_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_message);
-}
 
 void swap([[maybe_unused]] AnotherException& a, [[maybe_unused]] AnotherException& b) {
   using ::std::swap;
@@ -1958,44 +1813,12 @@ bool containerStruct::operator<([[maybe_unused]] const containerStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-bool containerStruct::get_fieldA() const {
-  return fieldA;
-}
-
-bool& containerStruct::set_fieldA(bool fieldA_) {
-  fieldA_ref() = fieldA_;
-  return fieldA;
-}
-
-bool containerStruct::get_req_fieldA() const {
-  return req_fieldA;
-}
-
-bool& containerStruct::set_req_fieldA(bool req_fieldA_) {
-  req_fieldA_ref() = req_fieldA_;
-  return req_fieldA;
-}
-
-const bool* containerStruct::get_opt_fieldA() const& {
-  return opt_fieldA_ref().has_value() ? std::addressof(opt_fieldA) : nullptr;
-}
-
-bool* containerStruct::get_opt_fieldA() & {
-  return opt_fieldA_ref().has_value() ? std::addressof(opt_fieldA) : nullptr;
-}
-
-bool& containerStruct::set_opt_fieldA(bool opt_fieldA_) {
-  opt_fieldA_ref() = opt_fieldA_;
-  return opt_fieldA;
-}
-
 const ::std::map<::std::string, bool>& containerStruct::get_fieldB() const& {
   return fieldB;
 }
 
 ::std::map<::std::string, bool> containerStruct::get_fieldB() && {
-  return static_cast<::std::map<::std::string, bool>&&>(fieldB);
+  return std::move(fieldB);
 }
 
 const ::std::map<::std::string, bool>& containerStruct::get_req_fieldB() const& {
@@ -2003,7 +1826,7 @@ const ::std::map<::std::string, bool>& containerStruct::get_req_fieldB() const& 
 }
 
 ::std::map<::std::string, bool> containerStruct::get_req_fieldB() && {
-  return static_cast<::std::map<::std::string, bool>&&>(req_fieldB);
+  return std::move(req_fieldB);
 }
 
 const ::std::map<::std::string, bool>* containerStruct::get_opt_fieldB() const& {
@@ -2019,7 +1842,7 @@ const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& {
 }
 
 ::std::set<::std::int32_t> containerStruct::get_fieldC() && {
-  return static_cast<::std::set<::std::int32_t>&&>(fieldC);
+  return std::move(fieldC);
 }
 
 const ::std::set<::std::int32_t>& containerStruct::get_req_fieldC() const& {
@@ -2027,7 +1850,7 @@ const ::std::set<::std::int32_t>& containerStruct::get_req_fieldC() const& {
 }
 
 ::std::set<::std::int32_t> containerStruct::get_req_fieldC() && {
-  return static_cast<::std::set<::std::int32_t>&&>(req_fieldC);
+  return std::move(req_fieldC);
 }
 
 const ::std::set<::std::int32_t>* containerStruct::get_opt_fieldC() const& {
@@ -2038,44 +1861,12 @@ const ::std::set<::std::int32_t>* containerStruct::get_opt_fieldC() const& {
   return opt_fieldC_ref().has_value() ? std::addressof(opt_fieldC) : nullptr;
 }
 
-const ::std::string& containerStruct::get_fieldD() const& {
-  return fieldD;
-}
-
-::std::string containerStruct::get_fieldD() && {
-  return static_cast<::std::string&&>(fieldD);
-}
-
-const ::std::string& containerStruct::get_fieldE() const& {
-  return fieldE;
-}
-
-::std::string containerStruct::get_fieldE() && {
-  return static_cast<::std::string&&>(fieldE);
-}
-
-const ::std::string& containerStruct::get_req_fieldE() const& {
-  return req_fieldE;
-}
-
-::std::string containerStruct::get_req_fieldE() && {
-  return static_cast<::std::string&&>(req_fieldE);
-}
-
-const ::std::string* containerStruct::get_opt_fieldE() const& {
-  return opt_fieldE_ref().has_value() ? std::addressof(opt_fieldE) : nullptr;
-}
-
-::std::string* containerStruct::get_opt_fieldE() & {
-  return opt_fieldE_ref().has_value() ? std::addressof(opt_fieldE) : nullptr;
-}
-
 const ::std::vector<::std::vector<::std::int32_t>>& containerStruct::get_fieldF() const& {
   return fieldF;
 }
 
 ::std::vector<::std::vector<::std::int32_t>> containerStruct::get_fieldF() && {
-  return static_cast<::std::vector<::std::vector<::std::int32_t>>&&>(fieldF);
+  return std::move(fieldF);
 }
 
 const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& containerStruct::get_fieldG() const& {
@@ -2083,7 +1874,7 @@ const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::stri
 }
 
 ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> containerStruct::get_fieldG() && {
-  return static_cast<::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>&&>(fieldG);
+  return std::move(fieldG);
 }
 
 const ::std::vector<::std::set<::std::int32_t>>& containerStruct::get_fieldH() const& {
@@ -2091,16 +1882,7 @@ const ::std::vector<::std::set<::std::int32_t>>& containerStruct::get_fieldH() c
 }
 
 ::std::vector<::std::set<::std::int32_t>> containerStruct::get_fieldH() && {
-  return static_cast<::std::vector<::std::set<::std::int32_t>>&&>(fieldH);
-}
-
-bool containerStruct::get_fieldI() const {
-  return fieldI;
-}
-
-bool& containerStruct::set_fieldI(bool fieldI_) {
-  fieldI_ref() = fieldI_;
-  return fieldI;
+  return std::move(fieldH);
 }
 
 const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct::get_fieldJ() const& {
@@ -2108,7 +1890,7 @@ const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct:
 }
 
 ::std::map<::std::string, ::std::vector<::std::int32_t>> containerStruct::get_fieldJ() && {
-  return static_cast<::std::map<::std::string, ::std::vector<::std::int32_t>>&&>(fieldJ);
+  return std::move(fieldJ);
 }
 
 const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& containerStruct::get_fieldK() const& {
@@ -2116,7 +1898,7 @@ const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>
 }
 
 ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> containerStruct::get_fieldK() && {
-  return static_cast<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>&&>(fieldK);
+  return std::move(fieldK);
 }
 
 const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() const& {
@@ -2124,7 +1906,7 @@ const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() co
 }
 
 ::std::set<::std::set<::std::set<bool>>> containerStruct::get_fieldL() && {
-  return static_cast<::std::set<::std::set<::std::set<bool>>>&&>(fieldL);
+  return std::move(fieldL);
 }
 
 const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& containerStruct::get_fieldM() const& {
@@ -2132,16 +1914,7 @@ const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::ve
 }
 
 ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> containerStruct::get_fieldM() && {
-  return static_cast<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>&&>(fieldM);
-}
-
-::some::valid::ns::simpleTypeDef containerStruct::get_fieldN() const {
-  return fieldN;
-}
-
-::some::valid::ns::simpleTypeDef& containerStruct::set_fieldN(::some::valid::ns::simpleTypeDef fieldN_) {
-  fieldN_ref() = fieldN_;
-  return fieldN;
+  return std::move(fieldM);
 }
 
 const ::some::valid::ns::complexStructTypeDef& containerStruct::get_fieldO() const& {
@@ -2149,7 +1922,7 @@ const ::some::valid::ns::complexStructTypeDef& containerStruct::get_fieldO() con
 }
 
 ::some::valid::ns::complexStructTypeDef containerStruct::get_fieldO() && {
-  return static_cast<::some::valid::ns::complexStructTypeDef&&>(fieldO);
+  return std::move(fieldO);
 }
 
 const ::std::vector<::some::valid::ns::mostComplexTypeDef>& containerStruct::get_fieldP() const& {
@@ -2157,56 +1930,7 @@ const ::std::vector<::some::valid::ns::mostComplexTypeDef>& containerStruct::get
 }
 
 ::std::vector<::some::valid::ns::mostComplexTypeDef> containerStruct::get_fieldP() && {
-  return static_cast<::std::vector<::some::valid::ns::mostComplexTypeDef>&&>(fieldP);
-}
-
-::some::valid::ns::MyEnumA containerStruct::get_fieldQ() const {
-  return fieldQ;
-}
-
-::some::valid::ns::MyEnumA& containerStruct::set_fieldQ(::some::valid::ns::MyEnumA fieldQ_) {
-  fieldQ_ref() = fieldQ_;
-  return fieldQ;
-}
-
-::some::valid::ns::MyEnumA containerStruct::get_fieldR() const {
-  return fieldR;
-}
-
-::some::valid::ns::MyEnumA& containerStruct::set_fieldR(::some::valid::ns::MyEnumA fieldR_) {
-  fieldR_ref() = fieldR_;
-  return fieldR;
-}
-
-::some::valid::ns::MyEnumA containerStruct::get_req_fieldR() const {
-  return req_fieldR;
-}
-
-::some::valid::ns::MyEnumA& containerStruct::set_req_fieldR(::some::valid::ns::MyEnumA req_fieldR_) {
-  req_fieldR_ref() = req_fieldR_;
-  return req_fieldR;
-}
-
-const ::some::valid::ns::MyEnumA* containerStruct::get_opt_fieldR() const& {
-  return opt_fieldR_ref().has_value() ? std::addressof(opt_fieldR) : nullptr;
-}
-
-::some::valid::ns::MyEnumA* containerStruct::get_opt_fieldR() & {
-  return opt_fieldR_ref().has_value() ? std::addressof(opt_fieldR) : nullptr;
-}
-
-::some::valid::ns::MyEnumA& containerStruct::set_opt_fieldR(::some::valid::ns::MyEnumA opt_fieldR_) {
-  opt_fieldR_ref() = opt_fieldR_;
-  return opt_fieldR;
-}
-
-::some::valid::ns::MyEnumA containerStruct::get_fieldS() const {
-  return fieldS;
-}
-
-::some::valid::ns::MyEnumA& containerStruct::set_fieldS(::some::valid::ns::MyEnumA fieldS_) {
-  fieldS_ref() = fieldS_;
-  return fieldS;
+  return std::move(fieldP);
 }
 
 const ::std::vector<::some::valid::ns::MyEnumA>& containerStruct::get_fieldT() const& {
@@ -2214,7 +1938,7 @@ const ::std::vector<::some::valid::ns::MyEnumA>& containerStruct::get_fieldT() c
 }
 
 ::std::vector<::some::valid::ns::MyEnumA> containerStruct::get_fieldT() && {
-  return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(fieldT);
+  return std::move(fieldT);
 }
 
 const ::std::vector<::some::valid::ns::MyEnumA>& containerStruct::get_fieldU() const& {
@@ -2222,7 +1946,7 @@ const ::std::vector<::some::valid::ns::MyEnumA>& containerStruct::get_fieldU() c
 }
 
 ::std::vector<::some::valid::ns::MyEnumA> containerStruct::get_fieldU() && {
-  return static_cast<::std::vector<::some::valid::ns::MyEnumA>&&>(fieldU);
+  return std::move(fieldU);
 }
 
 const ::some::valid::ns::MyStruct& containerStruct::get_fieldV() const& {
@@ -2230,7 +1954,7 @@ const ::some::valid::ns::MyStruct& containerStruct::get_fieldV() const& {
 }
 
 ::some::valid::ns::MyStruct containerStruct::get_fieldV() && {
-  return static_cast<::some::valid::ns::MyStruct&&>(fieldV);
+  return std::move(fieldV);
 }
 
 const ::some::valid::ns::MyStruct& containerStruct::get_req_fieldV() const& {
@@ -2238,7 +1962,7 @@ const ::some::valid::ns::MyStruct& containerStruct::get_req_fieldV() const& {
 }
 
 ::some::valid::ns::MyStruct containerStruct::get_req_fieldV() && {
-  return static_cast<::some::valid::ns::MyStruct&&>(req_fieldV);
+  return std::move(req_fieldV);
 }
 
 const ::some::valid::ns::MyStruct* containerStruct::get_opt_fieldV() const& {
@@ -2254,7 +1978,7 @@ const ::std::set<::some::valid::ns::MyStruct>& containerStruct::get_fieldW() con
 }
 
 ::std::set<::some::valid::ns::MyStruct> containerStruct::get_fieldW() && {
-  return static_cast<::std::set<::some::valid::ns::MyStruct>&&>(fieldW);
+  return std::move(fieldW);
 }
 
 const ::some::valid::ns::ComplexUnion& containerStruct::get_fieldX() const& {
@@ -2262,7 +1986,7 @@ const ::some::valid::ns::ComplexUnion& containerStruct::get_fieldX() const& {
 }
 
 ::some::valid::ns::ComplexUnion containerStruct::get_fieldX() && {
-  return static_cast<::some::valid::ns::ComplexUnion&&>(fieldX);
+  return std::move(fieldX);
 }
 
 const ::some::valid::ns::ComplexUnion& containerStruct::get_req_fieldX() const& {
@@ -2270,7 +1994,7 @@ const ::some::valid::ns::ComplexUnion& containerStruct::get_req_fieldX() const& 
 }
 
 ::some::valid::ns::ComplexUnion containerStruct::get_req_fieldX() && {
-  return static_cast<::some::valid::ns::ComplexUnion&&>(req_fieldX);
+  return std::move(req_fieldX);
 }
 
 const ::some::valid::ns::ComplexUnion* containerStruct::get_opt_fieldX() const& {
@@ -2286,7 +2010,7 @@ const ::std::vector<::some::valid::ns::ComplexUnion>& containerStruct::get_field
 }
 
 ::std::vector<::some::valid::ns::ComplexUnion> containerStruct::get_fieldY() && {
-  return static_cast<::std::vector<::some::valid::ns::ComplexUnion>&&>(fieldY);
+  return std::move(fieldY);
 }
 
 const ::some::valid::ns::unionTypeDef& containerStruct::get_fieldZ() const& {
@@ -2294,7 +2018,7 @@ const ::some::valid::ns::unionTypeDef& containerStruct::get_fieldZ() const& {
 }
 
 ::some::valid::ns::unionTypeDef containerStruct::get_fieldZ() && {
-  return static_cast<::some::valid::ns::unionTypeDef&&>(fieldZ);
+  return std::move(fieldZ);
 }
 
 const ::std::vector<::some::valid::ns::unionTypeDef>& containerStruct::get_fieldAA() const& {
@@ -2302,7 +2026,7 @@ const ::std::vector<::some::valid::ns::unionTypeDef>& containerStruct::get_field
 }
 
 ::std::vector<::some::valid::ns::unionTypeDef> containerStruct::get_fieldAA() && {
-  return static_cast<::std::vector<::some::valid::ns::unionTypeDef>&&>(fieldAA);
+  return std::move(fieldAA);
 }
 
 const ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>& containerStruct::get_fieldAB() const& {
@@ -2310,25 +2034,7 @@ const ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::Indirection
 }
 
 ::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC> containerStruct::get_fieldAB() && {
-  return static_cast<::std::map<::some::valid::ns::IndirectionB, ::some::valid::ns::IndirectionC>&&>(fieldAB);
-}
-
-::some::valid::ns::MyEnumB containerStruct::get_fieldAC() const {
-  return fieldAC;
-}
-
-::some::valid::ns::MyEnumB& containerStruct::set_fieldAC(::some::valid::ns::MyEnumB fieldAC_) {
-  fieldAC_ref() = fieldAC_;
-  return fieldAC;
-}
-
-::a::different::ns::AnEnum containerStruct::get_fieldAD() const {
-  return fieldAD;
-}
-
-::a::different::ns::AnEnum& containerStruct::set_fieldAD(::a::different::ns::AnEnum fieldAD_) {
-  fieldAD_ref() = fieldAD_;
-  return fieldAD;
+  return std::move(fieldAB);
 }
 
 const ::std::map<::std::string, ::std::int32_t>& containerStruct::get_fieldAE() const& {
@@ -2336,16 +2042,9 @@ const ::std::map<::std::string, ::std::int32_t>& containerStruct::get_fieldAE() 
 }
 
 ::std::map<::std::string, ::std::int32_t> containerStruct::get_fieldAE() && {
-  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(fieldAE);
+  return std::move(fieldAE);
 }
 
-const ::some::valid::ns::IndirectionD& containerStruct::get_fieldSD() const& {
-  return fieldSD;
-}
-
-::some::valid::ns::IndirectionD containerStruct::get_fieldSD() && {
-  return static_cast<::some::valid::ns::IndirectionD&&>(fieldSD);
-}
 
 void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct& b) {
   using ::std::swap;
@@ -2581,22 +2280,12 @@ bool MyIncludedStruct::operator<([[maybe_unused]] const MyIncludedStruct& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::a::different::ns::IncludedInt64 MyIncludedStruct::get_MyIncludedInt() const {
-  return __fbthrift_field_MyIncludedInt;
-}
-
-::a::different::ns::IncludedInt64& MyIncludedStruct::set_MyIncludedInt(::a::different::ns::IncludedInt64 MyIncludedInt_) {
-  MyIncludedInt_ref() = MyIncludedInt_;
-  return __fbthrift_field_MyIncludedInt;
-}
-
 const ::some::valid::ns::AStruct& MyIncludedStruct::get_MyIncludedStruct() const& {
   return __fbthrift_field_MyIncludedStruct;
 }
 
 ::some::valid::ns::AStruct MyIncludedStruct::get_MyIncludedStruct() && {
-  return static_cast<::some::valid::ns::AStruct&&>(__fbthrift_field_MyIncludedStruct);
+  return std::move(__fbthrift_field_MyIncludedStruct);
 }
 
 const ::some::valid::ns::AStruct& MyIncludedStruct::get_ARequiredField() const& {
@@ -2604,8 +2293,9 @@ const ::some::valid::ns::AStruct& MyIncludedStruct::get_ARequiredField() const& 
 }
 
 ::some::valid::ns::AStruct MyIncludedStruct::get_ARequiredField() && {
-  return static_cast<::some::valid::ns::AStruct&&>(__fbthrift_field_ARequiredField);
+  return std::move(__fbthrift_field_ARequiredField);
 }
+
 
 void swap([[maybe_unused]] MyIncludedStruct& a, [[maybe_unused]] MyIncludedStruct& b) {
   using ::std::swap;
@@ -2827,22 +2517,12 @@ bool AnnotatedStruct::operator==([[maybe_unused]] const AnnotatedStruct& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-
 const ::some::valid::ns::containerStruct& AnnotatedStruct::get_no_annotation() const& {
   return no_annotation;
 }
 
 ::some::valid::ns::containerStruct AnnotatedStruct::get_no_annotation() && {
-  return static_cast<::some::valid::ns::containerStruct&&>(no_annotation);
-}
-
-::some::valid::ns::CppFakeI32 AnnotatedStruct::get_base_type() const {
-  return base_type;
-}
-
-::some::valid::ns::CppFakeI32& AnnotatedStruct::set_base_type(::some::valid::ns::CppFakeI32 base_type_) {
-  base_type_ref() = base_type_;
-  return base_type;
+  return std::move(no_annotation);
 }
 
 const ::some::valid::ns::FollySmallVectorI64& AnnotatedStruct::get_list_type() const& {
@@ -2850,7 +2530,7 @@ const ::some::valid::ns::FollySmallVectorI64& AnnotatedStruct::get_list_type() c
 }
 
 ::some::valid::ns::FollySmallVectorI64 AnnotatedStruct::get_list_type() && {
-  return static_cast<::some::valid::ns::FollySmallVectorI64&&>(list_type);
+  return std::move(list_type);
 }
 
 const ::some::valid::ns::SortedVectorSetString& AnnotatedStruct::get_set_type() const& {
@@ -2858,7 +2538,7 @@ const ::some::valid::ns::SortedVectorSetString& AnnotatedStruct::get_set_type() 
 }
 
 ::some::valid::ns::SortedVectorSetString AnnotatedStruct::get_set_type() && {
-  return static_cast<::some::valid::ns::SortedVectorSetString&&>(set_type);
+  return std::move(set_type);
 }
 
 const ::some::valid::ns::FakeMap& AnnotatedStruct::get_map_type() const& {
@@ -2866,7 +2546,7 @@ const ::some::valid::ns::FakeMap& AnnotatedStruct::get_map_type() const& {
 }
 
 ::some::valid::ns::FakeMap AnnotatedStruct::get_map_type() && {
-  return static_cast<::some::valid::ns::FakeMap&&>(map_type);
+  return std::move(map_type);
 }
 
 const ::some::valid::ns::UnorderedMapStruct& AnnotatedStruct::get_map_struct_type() const& {
@@ -2874,23 +2554,7 @@ const ::some::valid::ns::UnorderedMapStruct& AnnotatedStruct::get_map_struct_typ
 }
 
 ::some::valid::ns::UnorderedMapStruct AnnotatedStruct::get_map_struct_type() && {
-  return static_cast<::some::valid::ns::UnorderedMapStruct&&>(map_struct_type);
-}
-
-const ::some::valid::ns::IOBuf& AnnotatedStruct::get_iobuf_type() const& {
-  return iobuf_type;
-}
-
-::some::valid::ns::IOBuf AnnotatedStruct::get_iobuf_type() && {
-  return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type);
-}
-
-const ::some::valid::ns::IOBufPtr& AnnotatedStruct::get_iobuf_ptr() const& {
-  return iobuf_ptr;
-}
-
-::some::valid::ns::IOBufPtr AnnotatedStruct::get_iobuf_ptr() && {
-  return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr);
+  return std::move(map_struct_type);
 }
 
 const std::list<::std::int32_t>& AnnotatedStruct::get_list_i32_template() const& {
@@ -2898,7 +2562,7 @@ const std::list<::std::int32_t>& AnnotatedStruct::get_list_i32_template() const&
 }
 
 std::list<::std::int32_t> AnnotatedStruct::get_list_i32_template() && {
-  return static_cast<std::list<::std::int32_t>&&>(list_i32_template);
+  return std::move(list_i32_template);
 }
 
 const std::deque<::std::string>& AnnotatedStruct::get_list_string_template() const& {
@@ -2906,7 +2570,7 @@ const std::deque<::std::string>& AnnotatedStruct::get_list_string_template() con
 }
 
 std::deque<::std::string> AnnotatedStruct::get_list_string_template() && {
-  return static_cast<std::deque<::std::string>&&>(list_string_template);
+  return std::move(list_string_template);
 }
 
 const folly::sorted_vector_set<::std::string>& AnnotatedStruct::get_set_template() const& {
@@ -2914,7 +2578,7 @@ const folly::sorted_vector_set<::std::string>& AnnotatedStruct::get_set_template
 }
 
 folly::sorted_vector_set<::std::string> AnnotatedStruct::get_set_template() && {
-  return static_cast<folly::sorted_vector_set<::std::string>&&>(set_template);
+  return std::move(set_template);
 }
 
 const folly::sorted_vector_map<::std::int64_t, ::std::string>& AnnotatedStruct::get_map_template() const& {
@@ -2922,7 +2586,7 @@ const folly::sorted_vector_map<::std::int64_t, ::std::string>& AnnotatedStruct::
 }
 
 folly::sorted_vector_map<::std::int64_t, ::std::string> AnnotatedStruct::get_map_template() && {
-  return static_cast<folly::sorted_vector_map<::std::int64_t, ::std::string>&&>(map_template);
+  return std::move(map_template);
 }
 
 const ::some::valid::ns::std_list& AnnotatedStruct::get_typedef_list_template() const& {
@@ -2930,7 +2594,7 @@ const ::some::valid::ns::std_list& AnnotatedStruct::get_typedef_list_template() 
 }
 
 ::some::valid::ns::std_list AnnotatedStruct::get_typedef_list_template() && {
-  return static_cast<::some::valid::ns::std_list&&>(typedef_list_template);
+  return std::move(typedef_list_template);
 }
 
 const ::some::valid::ns::std_deque& AnnotatedStruct::get_typedef_deque_template() const& {
@@ -2938,7 +2602,7 @@ const ::some::valid::ns::std_deque& AnnotatedStruct::get_typedef_deque_template(
 }
 
 ::some::valid::ns::std_deque AnnotatedStruct::get_typedef_deque_template() && {
-  return static_cast<::some::valid::ns::std_deque&&>(typedef_deque_template);
+  return std::move(typedef_deque_template);
 }
 
 const ::some::valid::ns::folly_set& AnnotatedStruct::get_typedef_set_template() const& {
@@ -2946,7 +2610,7 @@ const ::some::valid::ns::folly_set& AnnotatedStruct::get_typedef_set_template() 
 }
 
 ::some::valid::ns::folly_set AnnotatedStruct::get_typedef_set_template() && {
-  return static_cast<::some::valid::ns::folly_set&&>(typedef_set_template);
+  return std::move(typedef_set_template);
 }
 
 const ::some::valid::ns::folly_map& AnnotatedStruct::get_typedef_map_template() const& {
@@ -2954,16 +2618,7 @@ const ::some::valid::ns::folly_map& AnnotatedStruct::get_typedef_map_template() 
 }
 
 ::some::valid::ns::folly_map AnnotatedStruct::get_typedef_map_template() && {
-  return static_cast<::some::valid::ns::folly_map&&>(typedef_map_template);
-}
-
-::some::valid::ns::IndirectionA AnnotatedStruct::get_indirection_a() const {
-  return indirection_a;
-}
-
-::some::valid::ns::IndirectionA& AnnotatedStruct::set_indirection_a(::some::valid::ns::IndirectionA indirection_a_) {
-  indirection_a_ref() = indirection_a_;
-  return indirection_a;
+  return std::move(typedef_map_template);
 }
 
 const ::std::vector<::some::valid::ns::IndirectionB>& AnnotatedStruct::get_indirection_b() const& {
@@ -2971,7 +2626,7 @@ const ::std::vector<::some::valid::ns::IndirectionB>& AnnotatedStruct::get_indir
 }
 
 ::std::vector<::some::valid::ns::IndirectionB> AnnotatedStruct::get_indirection_b() && {
-  return static_cast<::std::vector<::some::valid::ns::IndirectionB>&&>(indirection_b);
+  return std::move(indirection_b);
 }
 
 const ::std::set<::some::valid::ns::IndirectionC>& AnnotatedStruct::get_indirection_c() const& {
@@ -2979,23 +2634,7 @@ const ::std::set<::some::valid::ns::IndirectionC>& AnnotatedStruct::get_indirect
 }
 
 ::std::set<::some::valid::ns::IndirectionC> AnnotatedStruct::get_indirection_c() && {
-  return static_cast<::std::set<::some::valid::ns::IndirectionC>&&>(indirection_c);
-}
-
-const ::some::valid::ns::IOBuf& AnnotatedStruct::get_iobuf_type_val() const& {
-  return iobuf_type_val;
-}
-
-::some::valid::ns::IOBuf AnnotatedStruct::get_iobuf_type_val() && {
-  return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type_val);
-}
-
-const ::some::valid::ns::IOBufPtr& AnnotatedStruct::get_iobuf_ptr_val() const& {
-  return iobuf_ptr_val;
-}
-
-::some::valid::ns::IOBufPtr AnnotatedStruct::get_iobuf_ptr_val() && {
-  return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr_val);
+  return std::move(indirection_c);
 }
 
 const ::some::valid::ns::containerStruct& AnnotatedStruct::get_struct_struct() const& {
@@ -3003,8 +2642,9 @@ const ::some::valid::ns::containerStruct& AnnotatedStruct::get_struct_struct() c
 }
 
 ::some::valid::ns::containerStruct AnnotatedStruct::get_struct_struct() && {
-  return static_cast<::some::valid::ns::containerStruct&&>(struct_struct);
+  return std::move(struct_struct);
 }
+
 
 void swap([[maybe_unused]] AnnotatedStruct& a, [[maybe_unused]] AnnotatedStruct& b) {
   using ::std::swap;
@@ -3253,13 +2893,12 @@ bool ComplexContainerStruct::operator<([[maybe_unused]] const ComplexContainerSt
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::map<::std::string, ::some::valid::ns::IOBuf>& ComplexContainerStruct::get_map_of_iobufs() const& {
   return __fbthrift_field_map_of_iobufs;
 }
 
 ::std::map<::std::string, ::some::valid::ns::IOBuf> ComplexContainerStruct::get_map_of_iobufs() && {
-  return static_cast<::std::map<::std::string, ::some::valid::ns::IOBuf>&&>(__fbthrift_field_map_of_iobufs);
+  return std::move(__fbthrift_field_map_of_iobufs);
 }
 
 const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& ComplexContainerStruct::get_map_of_iobuf_ptrs() const& {
@@ -3267,8 +2906,9 @@ const ::std::map<::std::string, ::some::valid::ns::IOBufPtr>& ComplexContainerSt
 }
 
 ::std::map<::std::string, ::some::valid::ns::IOBufPtr> ComplexContainerStruct::get_map_of_iobuf_ptrs() && {
-  return static_cast<::std::map<::std::string, ::some::valid::ns::IOBufPtr>&&>(__fbthrift_field_map_of_iobuf_ptrs);
+  return std::move(__fbthrift_field_map_of_iobuf_ptrs);
 }
+
 
 void swap([[maybe_unused]] ComplexContainerStruct& a, [[maybe_unused]] ComplexContainerStruct& b) {
   using ::std::swap;
@@ -3356,24 +2996,6 @@ bool FloatStruct::operator<([[maybe_unused]] const FloatStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-float FloatStruct::get_floatField() const {
-  return __fbthrift_field_floatField;
-}
-
-float& FloatStruct::set_floatField(float floatField_) {
-  floatField_ref() = floatField_;
-  return __fbthrift_field_floatField;
-}
-
-double FloatStruct::get_doubleField() const {
-  return __fbthrift_field_doubleField;
-}
-
-double& FloatStruct::set_doubleField(double doubleField_) {
-  doubleField_ref() = doubleField_;
-  return __fbthrift_field_doubleField;
-}
 
 void swap([[maybe_unused]] FloatStruct& a, [[maybe_unused]] FloatStruct& b) {
   using ::std::swap;
@@ -3590,15 +3212,6 @@ bool AllRequiredNoExceptMoveCtrStruct::operator<([[maybe_unused]] const AllRequi
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int64_t AllRequiredNoExceptMoveCtrStruct::get_intField() const {
-  return __fbthrift_field_intField;
-}
-
-::std::int64_t& AllRequiredNoExceptMoveCtrStruct::set_intField(::std::int64_t intField_) {
-  intField_ref() = intField_;
-  return __fbthrift_field_intField;
-}
 
 void swap([[maybe_unused]] AllRequiredNoExceptMoveCtrStruct& a, [[maybe_unused]] AllRequiredNoExceptMoveCtrStruct& b) {
   using ::std::swap;

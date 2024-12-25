@@ -87,7 +87,6 @@ bool A::operator==([[maybe_unused]] const A& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
-
 const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map() const& {
   return some_map_ref().has_value() ? std::addressof(__fbthrift_field_some_map) : nullptr;
 }
@@ -95,6 +94,7 @@ const std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some
 std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* A::get_some_map() & {
   return some_map_ref().has_value() ? std::addressof(__fbthrift_field_some_map) : nullptr;
 }
+
 
 void swap([[maybe_unused]] A& a, [[maybe_unused]] A& b) {
   using ::std::swap;
@@ -179,19 +179,6 @@ bool B::operator<([[maybe_unused]] const B& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::int32_t* B::get_field() const& {
-  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
-}
-
-::std::int32_t* B::get_field() & {
-  return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
-}
-
-::std::int32_t& B::set_field(::std::int32_t field_) {
-  field_ref() = field_;
-  return __fbthrift_field_field;
-}
 
 void swap([[maybe_unused]] B& a, [[maybe_unused]] B& b) {
   using ::std::swap;

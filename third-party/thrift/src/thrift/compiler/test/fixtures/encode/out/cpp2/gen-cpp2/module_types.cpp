@@ -94,15 +94,6 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
 }
 
 
-::std::int32_t Foo::get_field() const {
-  return __fbthrift_field_field;
-}
-
-::std::int32_t& Foo::set_field(::std::int32_t field_) {
-  field_ref() = field_;
-  return __fbthrift_field_field;
-}
-
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
@@ -203,14 +194,14 @@ bool Bar::operator<([[maybe_unused]] const Bar& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<::facebook::thrift::test::AdaptedFoo>& Bar::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
 ::std::vector<::facebook::thrift::test::AdaptedFoo> Bar::get_list_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_field);
+  return std::move(__fbthrift_field_list_field);
 }
+
 
 void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
   using ::std::swap;
@@ -317,13 +308,12 @@ bool Baz::operator<([[maybe_unused]] const Baz& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<::facebook::thrift::test::AdaptedFoo>& Baz::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
 ::std::vector<::facebook::thrift::test::AdaptedFoo> Baz::get_list_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_field);
+  return std::move(__fbthrift_field_list_field);
 }
 
 const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& Baz::get_nested_list_field() const& {
@@ -331,8 +321,9 @@ const ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>& Baz::g
 }
 
 ::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>> Baz::get_nested_list_field() && {
-  return static_cast<::std::vector<::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_nested_list_field);
+  return std::move(__fbthrift_field_nested_list_field);
 }
+
 
 void swap([[maybe_unused]] Baz& a, [[maybe_unused]] Baz& b) {
   using ::std::swap;
@@ -520,31 +511,12 @@ bool OpEncodeStruct::operator<([[maybe_unused]] const OpEncodeStruct& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int32_t OpEncodeStruct::get_int_field() const {
-  return __fbthrift_field_int_field;
-}
-
-::std::int32_t& OpEncodeStruct::set_int_field(::std::int32_t int_field_) {
-  int_field_ref() = int_field_;
-  return __fbthrift_field_int_field;
-}
-
-::facebook::thrift::test::Enum OpEncodeStruct::get_enum_field() const {
-  return __fbthrift_field_enum_field;
-}
-
-::facebook::thrift::test::Enum& OpEncodeStruct::set_enum_field(::facebook::thrift::test::Enum enum_field_) {
-  enum_field_ref() = enum_field_;
-  return __fbthrift_field_enum_field;
-}
-
 const ::facebook::thrift::test::Foo& OpEncodeStruct::get_foo_field() const& {
   return __fbthrift_field_foo_field;
 }
 
 ::facebook::thrift::test::Foo OpEncodeStruct::get_foo_field() && {
-  return static_cast<::facebook::thrift::test::Foo&&>(__fbthrift_field_foo_field);
+  return std::move(__fbthrift_field_foo_field);
 }
 
 const ::std::vector<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_list_field() const& {
@@ -552,7 +524,7 @@ const ::std::vector<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_l
 }
 
 ::std::vector<::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_list_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_field);
+  return std::move(__fbthrift_field_list_field);
 }
 
 const ::std::vector<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_list_cpp_type_field() const& {
@@ -560,7 +532,7 @@ const ::std::vector<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_l
 }
 
 ::std::vector<::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_list_cpp_type_field() && {
-  return static_cast<::std::vector<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_list_cpp_type_field);
+  return std::move(__fbthrift_field_list_cpp_type_field);
 }
 
 const ::std::set<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_set_field() const& {
@@ -568,7 +540,7 @@ const ::std::set<::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_set_
 }
 
 ::std::set<::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_set_field() && {
-  return static_cast<::std::set<::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_set_field);
+  return std::move(__fbthrift_field_set_field);
 }
 
 const ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>& OpEncodeStruct::get_map_field() const& {
@@ -576,7 +548,7 @@ const ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test:
 }
 
 ::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo> OpEncodeStruct::get_map_field() && {
-  return static_cast<::std::map<::facebook::thrift::test::AdaptedFoo, ::facebook::thrift::test::AdaptedFoo>&&>(__fbthrift_field_map_field);
+  return std::move(__fbthrift_field_map_field);
 }
 
 const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>& OpEncodeStruct::get_nested_field() const& {
@@ -584,7 +556,7 @@ const ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::Adapted
 }
 
 ::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>> OpEncodeStruct::get_nested_field() && {
-  return static_cast<::std::map<::std::int32_t, ::std::vector<::facebook::thrift::test::AdaptedFoo>>&&>(__fbthrift_field_nested_field);
+  return std::move(__fbthrift_field_nested_field);
 }
 
 const ::facebook::thrift::test::Bar& OpEncodeStruct::get_bar_field() const& {
@@ -592,8 +564,9 @@ const ::facebook::thrift::test::Bar& OpEncodeStruct::get_bar_field() const& {
 }
 
 ::facebook::thrift::test::Bar OpEncodeStruct::get_bar_field() && {
-  return static_cast<::facebook::thrift::test::Bar&&>(__fbthrift_field_bar_field);
+  return std::move(__fbthrift_field_bar_field);
 }
+
 
 void swap([[maybe_unused]] OpEncodeStruct& a, [[maybe_unused]] OpEncodeStruct& b) {
   using ::std::swap;

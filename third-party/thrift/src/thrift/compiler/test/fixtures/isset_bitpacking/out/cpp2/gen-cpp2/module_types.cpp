@@ -113,53 +113,6 @@ bool Default::operator<([[maybe_unused]] const Default& rhs) const {
 }
 
 
-const ::std::int32_t* Default::get_field1() const& {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t* Default::get_field1() & {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t& Default::set_field1(::std::int32_t field1_) {
-  field1_ref() = field1_;
-  return __fbthrift_field_field1;
-}
-
-const ::std::int32_t* Default::get_field2() const& {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t* Default::get_field2() & {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t& Default::set_field2(::std::int32_t field2_) {
-  field2_ref() = field2_;
-  return __fbthrift_field_field2;
-}
-
-const ::std::string* Default::get_field3() const& {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-::std::string* Default::get_field3() & {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-const double* Default::get_field4() const& {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double* Default::get_field4() & {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double& Default::set_field4(double field4_) {
-  field4_ref() = field4_;
-  return __fbthrift_field_field4;
-}
-
 void swap([[maybe_unused]] Default& a, [[maybe_unused]] Default& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
@@ -280,53 +233,6 @@ bool NonAtomic::operator<([[maybe_unused]] const NonAtomic& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::int32_t* NonAtomic::get_field1() const& {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t* NonAtomic::get_field1() & {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t& NonAtomic::set_field1(::std::int32_t field1_) {
-  field1_ref() = field1_;
-  return __fbthrift_field_field1;
-}
-
-const ::std::int32_t* NonAtomic::get_field2() const& {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t* NonAtomic::get_field2() & {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t& NonAtomic::set_field2(::std::int32_t field2_) {
-  field2_ref() = field2_;
-  return __fbthrift_field_field2;
-}
-
-const ::std::string* NonAtomic::get_field3() const& {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-::std::string* NonAtomic::get_field3() & {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-const double* NonAtomic::get_field4() const& {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double* NonAtomic::get_field4() & {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double& NonAtomic::set_field4(double field4_) {
-  field4_ref() = field4_;
-  return __fbthrift_field_field4;
-}
 
 void swap([[maybe_unused]] NonAtomic& a, [[maybe_unused]] NonAtomic& b) {
   using ::std::swap;
@@ -449,53 +355,6 @@ bool Atomic::operator<([[maybe_unused]] const Atomic& rhs) const {
 }
 
 
-const ::std::int32_t* Atomic::get_field1() const& {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t* Atomic::get_field1() & {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t& Atomic::set_field1(::std::int32_t field1_) {
-  field1_ref() = field1_;
-  return __fbthrift_field_field1;
-}
-
-const ::std::int32_t* Atomic::get_field2() const& {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t* Atomic::get_field2() & {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t& Atomic::set_field2(::std::int32_t field2_) {
-  field2_ref() = field2_;
-  return __fbthrift_field_field2;
-}
-
-const ::std::string* Atomic::get_field3() const& {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-::std::string* Atomic::get_field3() & {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-const double* Atomic::get_field4() const& {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double* Atomic::get_field4() & {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double& Atomic::set_field4(double field4_) {
-  field4_ref() = field4_;
-  return __fbthrift_field_field4;
-}
-
 void swap([[maybe_unused]] Atomic& a, [[maybe_unused]] Atomic& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
@@ -616,53 +475,6 @@ bool AtomicFoo::operator<([[maybe_unused]] const AtomicFoo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::int32_t* AtomicFoo::get_field1() const& {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t* AtomicFoo::get_field1() & {
-  return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
-}
-
-::std::int32_t& AtomicFoo::set_field1(::std::int32_t field1_) {
-  field1_ref() = field1_;
-  return __fbthrift_field_field1;
-}
-
-const ::std::int32_t* AtomicFoo::get_field2() const& {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t* AtomicFoo::get_field2() & {
-  return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
-}
-
-::std::int32_t& AtomicFoo::set_field2(::std::int32_t field2_) {
-  field2_ref() = field2_;
-  return __fbthrift_field_field2;
-}
-
-const ::std::string* AtomicFoo::get_field3() const& {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-::std::string* AtomicFoo::get_field3() & {
-  return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
-}
-
-const double* AtomicFoo::get_field4() const& {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double* AtomicFoo::get_field4() & {
-  return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
-}
-
-double& AtomicFoo::set_field4(double field4_) {
-  field4_ref() = field4_;
-  return __fbthrift_field_field4;
-}
 
 void swap([[maybe_unused]] AtomicFoo& a, [[maybe_unused]] AtomicFoo& b) {
   using ::std::swap;

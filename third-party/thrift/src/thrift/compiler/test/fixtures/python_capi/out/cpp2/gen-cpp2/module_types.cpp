@@ -167,48 +167,12 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int64_t MyStruct::get_inty() const {
-  return __fbthrift_field_inty;
-}
-
-::std::int64_t& MyStruct::set_inty(::std::int64_t inty_) {
-  inty_ref() = inty_;
-  return __fbthrift_field_inty;
-}
-
-const ::std::string& MyStruct::get_stringy() const& {
-  return __fbthrift_field_stringy;
-}
-
-::std::string MyStruct::get_stringy() && {
-  return static_cast<::std::string&&>(__fbthrift_field_stringy);
-}
-
 const ::test::fixtures::python_capi::MyDataItem& MyStruct::get_myItemy() const& {
   return __fbthrift_field_myItemy;
 }
 
 ::test::fixtures::python_capi::MyDataItem MyStruct::get_myItemy() && {
-  return static_cast<::test::fixtures::python_capi::MyDataItem&&>(__fbthrift_field_myItemy);
-}
-
-::test::fixtures::python_capi::MyEnum MyStruct::get_myEnumy() const {
-  return __fbthrift_field_myEnumy;
-}
-
-::test::fixtures::python_capi::MyEnum& MyStruct::set_myEnumy(::test::fixtures::python_capi::MyEnum myEnumy_) {
-  myEnumy_ref() = myEnumy_;
-  return __fbthrift_field_myEnumy;
-}
-
-bool MyStruct::get_boulet() const {
-  return __fbthrift_field_boulet;
-}
-
-bool& MyStruct::set_boulet(bool boulet_) {
-  boulet_ref() = boulet_;
-  return __fbthrift_field_boulet;
+  return std::move(__fbthrift_field_myItemy);
 }
 
 const ::std::vector<float>& MyStruct::get_floatListy() const& {
@@ -216,7 +180,7 @@ const ::std::vector<float>& MyStruct::get_floatListy() const& {
 }
 
 ::std::vector<float> MyStruct::get_floatListy() && {
-  return static_cast<::std::vector<float>&&>(__fbthrift_field_floatListy);
+  return std::move(__fbthrift_field_floatListy);
 }
 
 const ::std::map<::std::string, ::std::string>& MyStruct::get_strMappy() const& {
@@ -224,7 +188,7 @@ const ::std::map<::std::string, ::std::string>& MyStruct::get_strMappy() const& 
 }
 
 ::std::map<::std::string, ::std::string> MyStruct::get_strMappy() && {
-  return static_cast<::std::map<::std::string, ::std::string>&&>(__fbthrift_field_strMappy);
+  return std::move(__fbthrift_field_strMappy);
 }
 
 const ::std::set<::std::int32_t>& MyStruct::get_intSetty() const& {
@@ -232,8 +196,9 @@ const ::std::set<::std::int32_t>& MyStruct::get_intSetty() const& {
 }
 
 ::std::set<::std::int32_t> MyStruct::get_intSetty() && {
-  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_intSetty);
+  return std::move(__fbthrift_field_intSetty);
 }
+
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
@@ -348,14 +313,6 @@ bool MyDataItem::operator<([[maybe_unused]] const MyDataItem& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& MyDataItem::get_s() const& {
-  return __fbthrift_field_s;
-}
-
-::std::string MyDataItem::get_s() && {
-  return static_cast<::std::string&&>(__fbthrift_field_s);
-}
 
 void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
   using ::std::swap;
@@ -540,23 +497,6 @@ bool DoubledPair::operator<([[maybe_unused]] const DoubledPair& rhs) const {
 }
 
 
-const ::std::string& DoubledPair::get_s() const& {
-  return __fbthrift_field_s;
-}
-
-::std::string DoubledPair::get_s() && {
-  return static_cast<::std::string&&>(__fbthrift_field_s);
-}
-
-::std::int32_t DoubledPair::get_x() const {
-  return __fbthrift_field_x;
-}
-
-::std::int32_t& DoubledPair::set_x(::std::int32_t x_) {
-  x_ref() = x_;
-  return __fbthrift_field_x;
-}
-
 void swap([[maybe_unused]] DoubledPair& a, [[maybe_unused]] DoubledPair& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_s, b.__fbthrift_field_s);
@@ -679,14 +619,6 @@ bool StringPair::operator<([[maybe_unused]] const StringPair& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& StringPair::get_normal() const& {
-  return __fbthrift_field_normal;
-}
-
-::std::string StringPair::get_normal() && {
-  return static_cast<::std::string&&>(__fbthrift_field_normal);
-}
 
 void swap([[maybe_unused]] StringPair& a, [[maybe_unused]] StringPair& b) {
   using ::std::swap;
@@ -968,87 +900,12 @@ bool PrimitiveStruct::operator<([[maybe_unused]] const PrimitiveStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-bool PrimitiveStruct::get_booly() const {
-  return __fbthrift_field_booly;
-}
-
-bool& PrimitiveStruct::set_booly(bool booly_) {
-  booly_ref() = booly_;
-  return __fbthrift_field_booly;
-}
-
-::test::fixtures::python_capi::signed_byte PrimitiveStruct::get_charry() const {
-  return __fbthrift_field_charry;
-}
-
-::test::fixtures::python_capi::signed_byte& PrimitiveStruct::set_charry(::test::fixtures::python_capi::signed_byte charry_) {
-  charry_ref() = charry_;
-  return __fbthrift_field_charry;
-}
-
-uint16_t PrimitiveStruct::get_shortay() const {
-  return __fbthrift_field_shortay;
-}
-
-uint16_t& PrimitiveStruct::set_shortay(uint16_t shortay_) {
-  shortay_ref() = shortay_;
-  return __fbthrift_field_shortay;
-}
-
-::std::int32_t PrimitiveStruct::get_inty() const {
-  return __fbthrift_field_inty;
-}
-
-::std::int32_t& PrimitiveStruct::set_inty(::std::int32_t inty_) {
-  inty_ref() = inty_;
-  return __fbthrift_field_inty;
-}
-
-uint64_t PrimitiveStruct::get_longy() const {
-  return __fbthrift_field_longy;
-}
-
-uint64_t& PrimitiveStruct::set_longy(uint64_t longy_) {
-  longy_ref() = longy_;
-  return __fbthrift_field_longy;
-}
-
-const float* PrimitiveStruct::get_floaty() const& {
-  return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
-}
-
-float* PrimitiveStruct::get_floaty() & {
-  return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
-}
-
-float& PrimitiveStruct::set_floaty(float floaty_) {
-  floaty_ref() = floaty_;
-  return __fbthrift_field_floaty;
-}
-
-const ::test::fixtures::python_capi::IOBuf& PrimitiveStruct::get_buffy() const& {
-  return __fbthrift_field_buffy;
-}
-
-::test::fixtures::python_capi::IOBuf PrimitiveStruct::get_buffy() && {
-  return static_cast<::test::fixtures::python_capi::IOBuf&&>(__fbthrift_field_buffy);
-}
-
-const ::test::fixtures::python_capi::IOBufPtr& PrimitiveStruct::get_pointbuffy() const& {
-  return __fbthrift_field_pointbuffy;
-}
-
-::test::fixtures::python_capi::IOBufPtr PrimitiveStruct::get_pointbuffy() && {
-  return static_cast<::test::fixtures::python_capi::IOBufPtr&&>(__fbthrift_field_pointbuffy);
-}
-
 const ::test::fixtures::python_capi::MyStruct& PrimitiveStruct::get_patched_struct() const& {
   return __fbthrift_field_patched_struct;
 }
 
 ::test::fixtures::python_capi::MyStruct PrimitiveStruct::get_patched_struct() && {
-  return static_cast<::test::fixtures::python_capi::MyStruct&&>(__fbthrift_field_patched_struct);
+  return std::move(__fbthrift_field_patched_struct);
 }
 
 const ::test::fixtures::python_capi::VapidStruct& PrimitiveStruct::get_empty_struct() const& {
@@ -1056,23 +913,7 @@ const ::test::fixtures::python_capi::VapidStruct& PrimitiveStruct::get_empty_str
 }
 
 ::test::fixtures::python_capi::VapidStruct PrimitiveStruct::get_empty_struct() && {
-  return static_cast<::test::fixtures::python_capi::VapidStruct&&>(__fbthrift_field_empty_struct);
-}
-
-const folly::fbstring& PrimitiveStruct::get_fbstring() const& {
-  return __fbthrift_field_fbstring;
-}
-
-folly::fbstring PrimitiveStruct::get_fbstring() && {
-  return static_cast<folly::fbstring&&>(__fbthrift_field_fbstring);
-}
-
-const ::apache::thrift::ManagedStringViewWithConversions& PrimitiveStruct::get_managed_string_view() const& {
-  return __fbthrift_field_managed_string_view;
-}
-
-::apache::thrift::ManagedStringViewWithConversions PrimitiveStruct::get_managed_string_view() && {
-  return static_cast<::apache::thrift::ManagedStringViewWithConversions&&>(__fbthrift_field_managed_string_view);
+  return std::move(__fbthrift_field_empty_struct);
 }
 
 const ::test::fixtures::python_capi::SomeError& PrimitiveStruct::get_some_error() const& {
@@ -1080,8 +921,9 @@ const ::test::fixtures::python_capi::SomeError& PrimitiveStruct::get_some_error(
 }
 
 ::test::fixtures::python_capi::SomeError PrimitiveStruct::get_some_error() && {
-  return static_cast<::test::fixtures::python_capi::SomeError&&>(__fbthrift_field_some_error);
+  return std::move(__fbthrift_field_some_error);
 }
+
 
 void swap([[maybe_unused]] PrimitiveStruct& a, [[maybe_unused]] PrimitiveStruct& b) {
   using ::std::swap;
@@ -1248,13 +1090,12 @@ bool AdaptedFields::operator<([[maybe_unused]] const AdaptedFields& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<::apache::thrift::type::FieldId>& AdaptedFields::get_list_adapted_int() const& {
   return __fbthrift_field_list_adapted_int;
 }
 
 ::std::vector<::apache::thrift::type::FieldId> AdaptedFields::get_list_adapted_int() && {
-  return static_cast<::std::vector<::apache::thrift::type::FieldId>&&>(__fbthrift_field_list_adapted_int);
+  return std::move(__fbthrift_field_list_adapted_int);
 }
 
 const ::apache::thrift::type::AnnotationIds& AdaptedFields::get_set_adapted_int() const& {
@@ -1262,8 +1103,9 @@ const ::apache::thrift::type::AnnotationIds& AdaptedFields::get_set_adapted_int(
 }
 
 ::apache::thrift::type::AnnotationIds AdaptedFields::get_set_adapted_int() && {
-  return static_cast<::apache::thrift::type::AnnotationIds&&>(__fbthrift_field_set_adapted_int);
+  return std::move(__fbthrift_field_set_adapted_int);
 }
+
 
 void swap([[maybe_unused]] AdaptedFields& a, [[maybe_unused]] AdaptedFields& b) {
   using ::std::swap;
@@ -1405,13 +1247,12 @@ bool ListStruct::operator<([[maybe_unused]] const ListStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<bool>& ListStruct::get_boolz() const& {
   return __fbthrift_field_boolz;
 }
 
 ::std::vector<bool> ListStruct::get_boolz() && {
-  return static_cast<::std::vector<bool>&&>(__fbthrift_field_boolz);
+  return std::move(__fbthrift_field_boolz);
 }
 
 const ::std::vector<::std::int64_t>* ListStruct::get_intz() const& {
@@ -1427,7 +1268,7 @@ const std::deque<::std::string>& ListStruct::get_encoded() const& {
 }
 
 std::deque<::std::string> ListStruct::get_encoded() && {
-  return static_cast<std::deque<::std::string>&&>(__fbthrift_field_encoded);
+  return std::move(__fbthrift_field_encoded);
 }
 
 const std::deque<uint64_t>& ListStruct::get_uidz() const& {
@@ -1435,7 +1276,7 @@ const std::deque<uint64_t>& ListStruct::get_uidz() const& {
 }
 
 std::deque<uint64_t> ListStruct::get_uidz() && {
-  return static_cast<std::deque<uint64_t>&&>(__fbthrift_field_uidz);
+  return std::move(__fbthrift_field_uidz);
 }
 
 const ::std::vector<::std::vector<double>>& ListStruct::get_matrix() const& {
@@ -1443,7 +1284,7 @@ const ::std::vector<::std::vector<double>>& ListStruct::get_matrix() const& {
 }
 
 ::std::vector<::std::vector<double>> ListStruct::get_matrix() && {
-  return static_cast<::std::vector<::std::vector<double>>&&>(__fbthrift_field_matrix);
+  return std::move(__fbthrift_field_matrix);
 }
 
 const folly::small_vector<folly::small_vector<uint8_t>>& ListStruct::get_ucharz() const& {
@@ -1451,7 +1292,7 @@ const folly::small_vector<folly::small_vector<uint8_t>>& ListStruct::get_ucharz(
 }
 
 folly::small_vector<folly::small_vector<uint8_t>> ListStruct::get_ucharz() && {
-  return static_cast<folly::small_vector<folly::small_vector<uint8_t>>&&>(__fbthrift_field_ucharz);
+  return std::move(__fbthrift_field_ucharz);
 }
 
 const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& ListStruct::get_voxels() const& {
@@ -1459,7 +1300,7 @@ const folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>& ListStruct::ge
 }
 
 folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>> ListStruct::get_voxels() && {
-  return static_cast<folly::fbvector<folly::fbvector<folly::fbvector<uint8_t>>>&&>(__fbthrift_field_voxels);
+  return std::move(__fbthrift_field_voxels);
 }
 
 const ::std::vector<::test::fixtures::python_capi::IOBufPtr>& ListStruct::get_buf_ptrs() const& {
@@ -1467,8 +1308,9 @@ const ::std::vector<::test::fixtures::python_capi::IOBufPtr>& ListStruct::get_bu
 }
 
 ::std::vector<::test::fixtures::python_capi::IOBufPtr> ListStruct::get_buf_ptrs() && {
-  return static_cast<::std::vector<::test::fixtures::python_capi::IOBufPtr>&&>(__fbthrift_field_buf_ptrs);
+  return std::move(__fbthrift_field_buf_ptrs);
 }
+
 
 void swap([[maybe_unused]] ListStruct& a, [[maybe_unused]] ListStruct& b) {
   using ::std::swap;
@@ -1607,13 +1449,12 @@ bool SetStruct::operator<([[maybe_unused]] const SetStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::set<::test::fixtures::python_capi::MyEnum>& SetStruct::get_enumz() const& {
   return __fbthrift_field_enumz;
 }
 
 ::std::set<::test::fixtures::python_capi::MyEnum> SetStruct::get_enumz() && {
-  return static_cast<::std::set<::test::fixtures::python_capi::MyEnum>&&>(__fbthrift_field_enumz);
+  return std::move(__fbthrift_field_enumz);
 }
 
 const ::std::set<::std::int32_t>* SetStruct::get_intz() const& {
@@ -1629,7 +1470,7 @@ const std::unordered_set<::std::string>& SetStruct::get_encoded() const& {
 }
 
 std::unordered_set<::std::string> SetStruct::get_encoded() && {
-  return static_cast<std::unordered_set<::std::string>&&>(__fbthrift_field_encoded);
+  return std::move(__fbthrift_field_encoded);
 }
 
 const std::unordered_set<uint64_t>& SetStruct::get_uidz() const& {
@@ -1637,7 +1478,7 @@ const std::unordered_set<uint64_t>& SetStruct::get_uidz() const& {
 }
 
 std::unordered_set<uint64_t> SetStruct::get_uidz() && {
-  return static_cast<std::unordered_set<uint64_t>&&>(__fbthrift_field_uidz);
+  return std::move(__fbthrift_field_uidz);
 }
 
 const folly::F14FastSet<uint8_t>& SetStruct::get_charz() const& {
@@ -1645,7 +1486,7 @@ const folly::F14FastSet<uint8_t>& SetStruct::get_charz() const& {
 }
 
 folly::F14FastSet<uint8_t> SetStruct::get_charz() && {
-  return static_cast<folly::F14FastSet<uint8_t>&&>(__fbthrift_field_charz);
+  return std::move(__fbthrift_field_charz);
 }
 
 const ::std::vector<::std::set<::std::int64_t>>& SetStruct::get_setz() const& {
@@ -1653,8 +1494,9 @@ const ::std::vector<::std::set<::std::int64_t>>& SetStruct::get_setz() const& {
 }
 
 ::std::vector<::std::set<::std::int64_t>> SetStruct::get_setz() && {
-  return static_cast<::std::vector<::std::set<::std::int64_t>>&&>(__fbthrift_field_setz);
+  return std::move(__fbthrift_field_setz);
 }
+
 
 void swap([[maybe_unused]] SetStruct& a, [[maybe_unused]] SetStruct& b) {
   using ::std::swap;
@@ -1826,13 +1668,12 @@ bool MapStruct::operator<([[maybe_unused]] const MapStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>& MapStruct::get_enumz() const& {
   return __fbthrift_field_enumz;
 }
 
 ::std::map<::test::fixtures::python_capi::MyEnum, ::std::string> MapStruct::get_enumz() && {
-  return static_cast<::std::map<::test::fixtures::python_capi::MyEnum, ::std::string>&&>(__fbthrift_field_enumz);
+  return std::move(__fbthrift_field_enumz);
 }
 
 const ::std::map<::std::int32_t, ::std::string>* MapStruct::get_intz() const& {
@@ -1848,7 +1689,7 @@ const std::unordered_map<::std::string, double>& MapStruct::get_encoded() const&
 }
 
 std::unordered_map<::std::string, double> MapStruct::get_encoded() && {
-  return static_cast<std::unordered_map<::std::string, double>&&>(__fbthrift_field_encoded);
+  return std::move(__fbthrift_field_encoded);
 }
 
 const std::unordered_map<uint64_t, float>& MapStruct::get_flotz() const& {
@@ -1856,7 +1697,7 @@ const std::unordered_map<uint64_t, float>& MapStruct::get_flotz() const& {
 }
 
 std::unordered_map<uint64_t, float> MapStruct::get_flotz() && {
-  return static_cast<std::unordered_map<uint64_t, float>&&>(__fbthrift_field_flotz);
+  return std::move(__fbthrift_field_flotz);
 }
 
 const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& MapStruct::get_map_list() const& {
@@ -1864,7 +1705,7 @@ const ::std::vector<::std::map<::std::int32_t, ::std::int64_t>>& MapStruct::get_
 }
 
 ::std::vector<::std::map<::std::int32_t, ::std::int64_t>> MapStruct::get_map_list() && {
-  return static_cast<::std::vector<::std::map<::std::int32_t, ::std::int64_t>>&&>(__fbthrift_field_map_list);
+  return std::move(__fbthrift_field_map_list);
 }
 
 const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& MapStruct::get_list_map() const& {
@@ -1872,7 +1713,7 @@ const ::std::map<::std::int32_t, ::std::vector<::std::int64_t>>& MapStruct::get_
 }
 
 ::std::map<::std::int32_t, ::std::vector<::std::int64_t>> MapStruct::get_list_map() && {
-  return static_cast<::std::map<::std::int32_t, ::std::vector<::std::int64_t>>&&>(__fbthrift_field_list_map);
+  return std::move(__fbthrift_field_list_map);
 }
 
 const folly::F14FastMap<int, folly::fbvector<double>>& MapStruct::get_fast_list_map() const& {
@@ -1880,7 +1721,7 @@ const folly::F14FastMap<int, folly::fbvector<double>>& MapStruct::get_fast_list_
 }
 
 folly::F14FastMap<int, folly::fbvector<double>> MapStruct::get_fast_list_map() && {
-  return static_cast<folly::F14FastMap<int, folly::fbvector<double>>&&>(__fbthrift_field_fast_list_map);
+  return std::move(__fbthrift_field_fast_list_map);
 }
 
 const ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& MapStruct::get_buf_map() const& {
@@ -1888,7 +1729,7 @@ const ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>& MapStr
 }
 
 ::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr> MapStruct::get_buf_map() && {
-  return static_cast<::std::map<::std::string, ::test::fixtures::python_capi::IOBufPtr>&&>(__fbthrift_field_buf_map);
+  return std::move(__fbthrift_field_buf_map);
 }
 
 const ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>& MapStruct::get_unsigned_list_map() const& {
@@ -1896,8 +1737,9 @@ const ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixt
 }
 
 ::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>> MapStruct::get_unsigned_list_map() && {
-  return static_cast<::std::map<::test::fixtures::python_capi::ui64, ::std::vector<::test::fixtures::python_capi::ui64>>&&>(__fbthrift_field_unsigned_list_map);
+  return std::move(__fbthrift_field_unsigned_list_map);
 }
+
 
 void swap([[maybe_unused]] MapStruct& a, [[maybe_unused]] MapStruct& b) {
   using ::std::swap;
@@ -2060,31 +1902,12 @@ bool ComposeStruct::operator<([[maybe_unused]] const ComposeStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::test::fixtures::python_capi::MyEnum ComposeStruct::get_enum_() const {
-  return __fbthrift_field_enum_;
-}
-
-::test::fixtures::python_capi::MyEnum& ComposeStruct::set_enum_(::test::fixtures::python_capi::MyEnum enum__) {
-  enum__ref() = enum__;
-  return __fbthrift_field_enum_;
-}
-
-::test::fixtures::python_capi::NormalDecentEnum ComposeStruct::get_renamed_() const {
-  return __fbthrift_field_renamed_;
-}
-
-::test::fixtures::python_capi::NormalDecentEnum& ComposeStruct::set_renamed_(::test::fixtures::python_capi::NormalDecentEnum renamed__) {
-  renamed__ref() = renamed__;
-  return __fbthrift_field_renamed_;
-}
-
 const ::test::fixtures::python_capi::PrimitiveStruct& ComposeStruct::get_primitive() const& {
   return __fbthrift_field_primitive;
 }
 
 ::test::fixtures::python_capi::PrimitiveStruct ComposeStruct::get_primitive() && {
-  return static_cast<::test::fixtures::python_capi::PrimitiveStruct&&>(__fbthrift_field_primitive);
+  return std::move(__fbthrift_field_primitive);
 }
 
 const ::test::fixtures::python_capi::DepStruct& ComposeStruct::get_xstruct() const& {
@@ -2092,16 +1915,7 @@ const ::test::fixtures::python_capi::DepStruct& ComposeStruct::get_xstruct() con
 }
 
 ::test::fixtures::python_capi::DepStruct ComposeStruct::get_xstruct() && {
-  return static_cast<::test::fixtures::python_capi::DepStruct&&>(__fbthrift_field_xstruct);
-}
-
-::test::fixtures::python_capi::DepEnum ComposeStruct::get_xenum() const {
-  return __fbthrift_field_xenum;
-}
-
-::test::fixtures::python_capi::DepEnum& ComposeStruct::set_xenum(::test::fixtures::python_capi::DepEnum xenum_) {
-  xenum_ref() = xenum_;
-  return __fbthrift_field_xenum;
+  return std::move(__fbthrift_field_xstruct);
 }
 
 const ::test::fixtures::python_capi::SerializedStruct& ComposeStruct::get_serial_struct() const& {
@@ -2109,7 +1923,7 @@ const ::test::fixtures::python_capi::SerializedStruct& ComposeStruct::get_serial
 }
 
 ::test::fixtures::python_capi::SerializedStruct ComposeStruct::get_serial_struct() && {
-  return static_cast<::test::fixtures::python_capi::SerializedStruct&&>(__fbthrift_field_serial_struct);
+  return std::move(__fbthrift_field_serial_struct);
 }
 
 const ::std::vector<::test::fixtures::python_capi::DepStruct>& ComposeStruct::get_friends() const& {
@@ -2117,7 +1931,7 @@ const ::std::vector<::test::fixtures::python_capi::DepStruct>& ComposeStruct::ge
 }
 
 ::std::vector<::test::fixtures::python_capi::DepStruct> ComposeStruct::get_friends() && {
-  return static_cast<::std::vector<::test::fixtures::python_capi::DepStruct>&&>(__fbthrift_field_friends);
+  return std::move(__fbthrift_field_friends);
 }
 
 const ::test::fixtures::python_capi::SerializedUnion& ComposeStruct::get_serial_union() const& {
@@ -2125,7 +1939,7 @@ const ::test::fixtures::python_capi::SerializedUnion& ComposeStruct::get_serial_
 }
 
 ::test::fixtures::python_capi::SerializedUnion ComposeStruct::get_serial_union() && {
-  return static_cast<::test::fixtures::python_capi::SerializedUnion&&>(__fbthrift_field_serial_union);
+  return std::move(__fbthrift_field_serial_union);
 }
 
 const ::test::fixtures::python_capi::SerializedError& ComposeStruct::get_serial_error() const& {
@@ -2133,8 +1947,9 @@ const ::test::fixtures::python_capi::SerializedError& ComposeStruct::get_serial_
 }
 
 ::test::fixtures::python_capi::SerializedError ComposeStruct::get_serial_error() && {
-  return static_cast<::test::fixtures::python_capi::SerializedError&&>(__fbthrift_field_serial_error);
+  return std::move(__fbthrift_field_serial_error);
 }
+
 
 void swap([[maybe_unused]] ComposeStruct& a, [[maybe_unused]] ComposeStruct& b) {
   using ::std::swap;

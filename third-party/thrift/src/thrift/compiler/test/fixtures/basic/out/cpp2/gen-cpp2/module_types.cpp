@@ -173,66 +173,12 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int64_t MyStruct::get_MyIntField() const {
-  return __fbthrift_field_MyIntField;
-}
-
-::std::int64_t& MyStruct::set_MyIntField(::std::int64_t MyIntField_) {
-  MyIntField_ref() = MyIntField_;
-  return __fbthrift_field_MyIntField;
-}
-
-const ::std::string& MyStruct::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyStruct::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
 const ::test::fixtures::basic::MyDataItemAlias& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }
 
 ::test::fixtures::basic::MyDataItemAlias MyStruct::get_MyDataField() && {
-  return static_cast<::test::fixtures::basic::MyDataItemAlias&&>(__fbthrift_field_MyDataField);
-}
-
-::test::fixtures::basic::MyEnum MyStruct::get_myEnum() const {
-  return __fbthrift_field_myEnum;
-}
-
-::test::fixtures::basic::MyEnum& MyStruct::set_myEnum(::test::fixtures::basic::MyEnum myEnum_) {
-  myEnum_ref() = myEnum_;
-  return __fbthrift_field_myEnum;
-}
-
-bool MyStruct::get_oneway() const {
-  return __fbthrift_field_oneway;
-}
-
-bool& MyStruct::set_oneway(bool oneway_) {
-  oneway_ref() = oneway_;
-  return __fbthrift_field_oneway;
-}
-
-bool MyStruct::get_readonly() const {
-  return __fbthrift_field_readonly;
-}
-
-bool& MyStruct::set_readonly(bool readonly_) {
-  readonly_ref() = readonly_;
-  return __fbthrift_field_readonly;
-}
-
-bool MyStruct::get_idempotent() const {
-  return __fbthrift_field_idempotent;
-}
-
-bool& MyStruct::set_idempotent(bool idempotent_) {
-  idempotent_ref() = idempotent_;
-  return __fbthrift_field_idempotent;
+  return std::move(__fbthrift_field_MyDataField);
 }
 
 const ::std::set<float>& MyStruct::get_floatSet() const& {
@@ -240,16 +186,9 @@ const ::std::set<float>& MyStruct::get_floatSet() const& {
 }
 
 ::std::set<float> MyStruct::get_floatSet() && {
-  return static_cast<::std::set<float>&&>(__fbthrift_field_floatSet);
+  return std::move(__fbthrift_field_floatSet);
 }
 
-const ::std::string& MyStruct::get_no_hack_codegen_field() const& {
-  return __fbthrift_field_no_hack_codegen_field;
-}
-
-::std::string MyStruct::get_no_hack_codegen_field() && {
-  return static_cast<::std::string&&>(__fbthrift_field_no_hack_codegen_field);
-}
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
@@ -375,13 +314,12 @@ bool Containers::operator<([[maybe_unused]] const Containers& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<::std::int32_t>& Containers::get_I32List() const& {
   return __fbthrift_field_I32List;
 }
 
 ::std::vector<::std::int32_t> Containers::get_I32List() && {
-  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_I32List);
+  return std::move(__fbthrift_field_I32List);
 }
 
 const ::std::set<::std::string>& Containers::get_StringSet() const& {
@@ -389,7 +327,7 @@ const ::std::set<::std::string>& Containers::get_StringSet() const& {
 }
 
 ::std::set<::std::string> Containers::get_StringSet() && {
-  return static_cast<::std::set<::std::string>&&>(__fbthrift_field_StringSet);
+  return std::move(__fbthrift_field_StringSet);
 }
 
 const ::std::map<::std::string, ::std::int64_t>& Containers::get_StringToI64Map() const& {
@@ -397,8 +335,9 @@ const ::std::map<::std::string, ::std::int64_t>& Containers::get_StringToI64Map(
 }
 
 ::std::map<::std::string, ::std::int64_t> Containers::get_StringToI64Map() && {
-  return static_cast<::std::map<::std::string, ::std::int64_t>&&>(__fbthrift_field_StringToI64Map);
+  return std::move(__fbthrift_field_StringToI64Map);
 }
+
 
 void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
   using ::std::swap;
@@ -761,30 +700,12 @@ bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int64_t MyException::get_MyIntField() const {
-  return __fbthrift_field_MyIntField;
-}
-
-::std::int64_t& MyException::set_MyIntField(::std::int64_t MyIntField_) {
-  MyIntField_ref() = MyIntField_;
-  return __fbthrift_field_MyIntField;
-}
-
-const ::std::string& MyException::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyException::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
 const ::test::fixtures::basic::MyStruct& MyException::get_myStruct() const& {
   return __fbthrift_field_myStruct;
 }
 
 ::test::fixtures::basic::MyStruct MyException::get_myStruct() && {
-  return static_cast<::test::fixtures::basic::MyStruct&&>(__fbthrift_field_myStruct);
+  return std::move(__fbthrift_field_myStruct);
 }
 
 const ::test::fixtures::basic::MyUnion& MyException::get_myUnion() const& {
@@ -792,8 +713,9 @@ const ::test::fixtures::basic::MyUnion& MyException::get_myUnion() const& {
 }
 
 ::test::fixtures::basic::MyUnion MyException::get_myUnion() && {
-  return static_cast<::test::fixtures::basic::MyUnion&&>(__fbthrift_field_myUnion);
+  return std::move(__fbthrift_field_myUnion);
 }
+
 
 void swap([[maybe_unused]] MyException& a, [[maybe_unused]] MyException& b) {
   using ::std::swap;
@@ -930,30 +852,12 @@ bool MyExceptionWithMessage::operator<([[maybe_unused]] const MyExceptionWithMes
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int64_t MyExceptionWithMessage::get_MyIntField() const {
-  return __fbthrift_field_MyIntField;
-}
-
-::std::int64_t& MyExceptionWithMessage::set_MyIntField(::std::int64_t MyIntField_) {
-  MyIntField_ref() = MyIntField_;
-  return __fbthrift_field_MyIntField;
-}
-
-const ::std::string& MyExceptionWithMessage::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyExceptionWithMessage::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
 const ::test::fixtures::basic::MyStruct& MyExceptionWithMessage::get_myStruct() const& {
   return __fbthrift_field_myStruct;
 }
 
 ::test::fixtures::basic::MyStruct MyExceptionWithMessage::get_myStruct() && {
-  return static_cast<::test::fixtures::basic::MyStruct&&>(__fbthrift_field_myStruct);
+  return std::move(__fbthrift_field_myStruct);
 }
 
 const ::test::fixtures::basic::MyUnion& MyExceptionWithMessage::get_myUnion() const& {
@@ -961,8 +865,9 @@ const ::test::fixtures::basic::MyUnion& MyExceptionWithMessage::get_myUnion() co
 }
 
 ::test::fixtures::basic::MyUnion MyExceptionWithMessage::get_myUnion() && {
-  return static_cast<::test::fixtures::basic::MyUnion&&>(__fbthrift_field_myUnion);
+  return std::move(__fbthrift_field_myUnion);
 }
+
 
 void swap([[maybe_unused]] MyExceptionWithMessage& a, [[maybe_unused]] MyExceptionWithMessage& b) {
   using ::std::swap;
@@ -1060,15 +965,6 @@ bool ReservedKeyword::operator<([[maybe_unused]] const ReservedKeyword& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int32_t ReservedKeyword::get_reserved_field() const {
-  return __fbthrift_field_reserved_field;
-}
-
-::std::int32_t& ReservedKeyword::set_reserved_field(::std::int32_t reserved_field_) {
-  reserved_field_ref() = reserved_field_;
-  return __fbthrift_field_reserved_field;
-}
 
 void swap([[maybe_unused]] ReservedKeyword& a, [[maybe_unused]] ReservedKeyword& b) {
   using ::std::swap;

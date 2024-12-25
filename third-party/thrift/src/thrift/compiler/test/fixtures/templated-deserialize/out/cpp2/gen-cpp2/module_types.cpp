@@ -93,24 +93,6 @@ bool SmallStruct::operator<([[maybe_unused]] const SmallStruct& rhs) const {
 }
 
 
-bool SmallStruct::get_small_A() const {
-  return __fbthrift_field_small_A;
-}
-
-bool& SmallStruct::set_small_A(bool small_A_) {
-  small_A_ref() = small_A_;
-  return __fbthrift_field_small_A;
-}
-
-::std::int32_t SmallStruct::get_small_B() const {
-  return __fbthrift_field_small_B;
-}
-
-::std::int32_t& SmallStruct::set_small_B(::std::int32_t small_B_) {
-  small_B_ref() = small_B_;
-  return __fbthrift_field_small_B;
-}
-
 void swap([[maybe_unused]] SmallStruct& a, [[maybe_unused]] SmallStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_small_A, b.__fbthrift_field_small_A);
@@ -363,22 +345,12 @@ bool containerStruct::operator<([[maybe_unused]] const containerStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-bool containerStruct::get_fieldA() const {
-  return __fbthrift_field_fieldA;
-}
-
-bool& containerStruct::set_fieldA(bool fieldA_) {
-  fieldA_ref() = fieldA_;
-  return __fbthrift_field_fieldA;
-}
-
 const ::std::map<::std::string, bool>& containerStruct::get_fieldB() const& {
   return __fbthrift_field_fieldB;
 }
 
 ::std::map<::std::string, bool> containerStruct::get_fieldB() && {
-  return static_cast<::std::map<::std::string, bool>&&>(__fbthrift_field_fieldB);
+  return std::move(__fbthrift_field_fieldB);
 }
 
 const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& {
@@ -386,23 +358,7 @@ const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& {
 }
 
 ::std::set<::std::int32_t> containerStruct::get_fieldC() && {
-  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldC);
-}
-
-const ::std::string& containerStruct::get_fieldD() const& {
-  return __fbthrift_field_fieldD;
-}
-
-::std::string containerStruct::get_fieldD() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldD);
-}
-
-const ::std::string& containerStruct::get_fieldE() const& {
-  return __fbthrift_field_fieldE;
-}
-
-::std::string containerStruct::get_fieldE() && {
-  return static_cast<::std::string&&>(__fbthrift_field_fieldE);
+  return std::move(__fbthrift_field_fieldC);
 }
 
 const ::std::vector<::std::vector<::std::vector<::std::int32_t>>>& containerStruct::get_fieldF() const& {
@@ -410,7 +366,7 @@ const ::std::vector<::std::vector<::std::vector<::std::int32_t>>>& containerStru
 }
 
 ::std::vector<::std::vector<::std::vector<::std::int32_t>>> containerStruct::get_fieldF() && {
-  return static_cast<::std::vector<::std::vector<::std::vector<::std::int32_t>>>&&>(__fbthrift_field_fieldF);
+  return std::move(__fbthrift_field_fieldF);
 }
 
 const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>& containerStruct::get_fieldG() const& {
@@ -418,7 +374,7 @@ const ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::stri
 }
 
 ::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>> containerStruct::get_fieldG() && {
-  return static_cast<::std::map<::std::string, ::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>&&>(__fbthrift_field_fieldG);
+  return std::move(__fbthrift_field_fieldG);
 }
 
 const ::std::vector<::std::set<::std::int32_t>>& containerStruct::get_fieldH() const& {
@@ -426,16 +382,7 @@ const ::std::vector<::std::set<::std::int32_t>>& containerStruct::get_fieldH() c
 }
 
 ::std::vector<::std::set<::std::int32_t>> containerStruct::get_fieldH() && {
-  return static_cast<::std::vector<::std::set<::std::int32_t>>&&>(__fbthrift_field_fieldH);
-}
-
-bool containerStruct::get_fieldI() const {
-  return __fbthrift_field_fieldI;
-}
-
-bool& containerStruct::set_fieldI(bool fieldI_) {
-  fieldI_ref() = fieldI_;
-  return __fbthrift_field_fieldI;
+  return std::move(__fbthrift_field_fieldH);
 }
 
 const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct::get_fieldJ() const& {
@@ -443,7 +390,7 @@ const ::std::map<::std::string, ::std::vector<::std::int32_t>>& containerStruct:
 }
 
 ::std::map<::std::string, ::std::vector<::std::int32_t>> containerStruct::get_fieldJ() && {
-  return static_cast<::std::map<::std::string, ::std::vector<::std::int32_t>>&&>(__fbthrift_field_fieldJ);
+  return std::move(__fbthrift_field_fieldJ);
 }
 
 const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& containerStruct::get_fieldK() const& {
@@ -451,7 +398,7 @@ const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>
 }
 
 ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>> containerStruct::get_fieldK() && {
-  return static_cast<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>&&>(__fbthrift_field_fieldK);
+  return std::move(__fbthrift_field_fieldK);
 }
 
 const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() const& {
@@ -459,7 +406,7 @@ const ::std::set<::std::set<::std::set<bool>>>& containerStruct::get_fieldL() co
 }
 
 ::std::set<::std::set<::std::set<bool>>> containerStruct::get_fieldL() && {
-  return static_cast<::std::set<::std::set<::std::set<bool>>>&&>(__fbthrift_field_fieldL);
+  return std::move(__fbthrift_field_fieldL);
 }
 
 const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& containerStruct::get_fieldM() const& {
@@ -467,7 +414,7 @@ const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::ve
 }
 
 ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> containerStruct::get_fieldM() && {
-  return static_cast<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>&&>(__fbthrift_field_fieldM);
+  return std::move(__fbthrift_field_fieldM);
 }
 
 const ::std::vector<::cpp2::IndirectionA>& containerStruct::get_fieldN() const& {
@@ -475,7 +422,7 @@ const ::std::vector<::cpp2::IndirectionA>& containerStruct::get_fieldN() const& 
 }
 
 ::std::vector<::cpp2::IndirectionA> containerStruct::get_fieldN() && {
-  return static_cast<::std::vector<::cpp2::IndirectionA>&&>(__fbthrift_field_fieldN);
+  return std::move(__fbthrift_field_fieldN);
 }
 
 const ::std::vector<::cpp2::IndirectionB>& containerStruct::get_fieldO() const& {
@@ -483,7 +430,7 @@ const ::std::vector<::cpp2::IndirectionB>& containerStruct::get_fieldO() const& 
 }
 
 ::std::vector<::cpp2::IndirectionB> containerStruct::get_fieldO() && {
-  return static_cast<::std::vector<::cpp2::IndirectionB>&&>(__fbthrift_field_fieldO);
+  return std::move(__fbthrift_field_fieldO);
 }
 
 const ::std::vector<::cpp2::IndirectionC>& containerStruct::get_fieldP() const& {
@@ -491,17 +438,9 @@ const ::std::vector<::cpp2::IndirectionC>& containerStruct::get_fieldP() const& 
 }
 
 ::std::vector<::cpp2::IndirectionC> containerStruct::get_fieldP() && {
-  return static_cast<::std::vector<::cpp2::IndirectionC>&&>(__fbthrift_field_fieldP);
+  return std::move(__fbthrift_field_fieldP);
 }
 
-::cpp2::MyEnumA containerStruct::get_fieldQ() const {
-  return __fbthrift_field_fieldQ;
-}
-
-::cpp2::MyEnumA& containerStruct::set_fieldQ(::cpp2::MyEnumA fieldQ_) {
-  fieldQ_ref() = fieldQ_;
-  return __fbthrift_field_fieldQ;
-}
 
 void swap([[maybe_unused]] containerStruct& a, [[maybe_unused]] containerStruct& b) {
   using ::std::swap;

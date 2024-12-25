@@ -413,40 +413,64 @@ class Default final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
+  /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
-  ::std::int32_t& set_field1(::std::int32_t field1_);
+  ::std::int32_t& set_field1(::std::int32_t field1_) {
+    field1_ref() = field1_;
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
+  /** Glean { "field": "field2" } */
+  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::std::int32_t& set_field2(::std::int32_t field2_);
+  ::std::int32_t& set_field2(::std::int32_t field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
+  /** Glean { "field": "field3" } */
+  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
 
   /** Glean { "field": "field3" } */
@@ -459,17 +483,26 @@ class Default final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  double* get_field4() &;
+  double* get_field4() & {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
+  /** Glean { "field": "field4" } */
+  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
-  double& set_field4(double field4_);
+  double& set_field4(double field4_) {
+    field4_ref() = field4_;
+    return __fbthrift_field_field4;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -784,40 +817,64 @@ class NonAtomic final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
+  /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
-  ::std::int32_t& set_field1(::std::int32_t field1_);
+  ::std::int32_t& set_field1(::std::int32_t field1_) {
+    field1_ref() = field1_;
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
+  /** Glean { "field": "field2" } */
+  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::std::int32_t& set_field2(::std::int32_t field2_);
+  ::std::int32_t& set_field2(::std::int32_t field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
+  /** Glean { "field": "field3" } */
+  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
 
   /** Glean { "field": "field3" } */
@@ -830,17 +887,26 @@ class NonAtomic final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  double* get_field4() &;
+  double* get_field4() & {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
+  /** Glean { "field": "field4" } */
+  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
-  double& set_field4(double field4_);
+  double& set_field4(double field4_) {
+    field4_ref() = field4_;
+    return __fbthrift_field_field4;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1155,40 +1221,64 @@ class Atomic final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
+  /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
-  ::std::int32_t& set_field1(::std::int32_t field1_);
+  ::std::int32_t& set_field1(::std::int32_t field1_) {
+    field1_ref() = field1_;
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
+  /** Glean { "field": "field2" } */
+  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::std::int32_t& set_field2(::std::int32_t field2_);
+  ::std::int32_t& set_field2(::std::int32_t field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
+  /** Glean { "field": "field3" } */
+  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
 
   /** Glean { "field": "field3" } */
@@ -1201,17 +1291,26 @@ class Atomic final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  double* get_field4() &;
+  double* get_field4() & {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
+  /** Glean { "field": "field4" } */
+  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
-  double& set_field4(double field4_);
+  double& set_field4(double field4_) {
+    field4_ref() = field4_;
+    return __fbthrift_field_field4;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1526,40 +1625,64 @@ class AtomicFoo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  const ::std::int32_t* get_field1() const&;
+  const ::std::int32_t* get_field1() const& {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::int32_t* get_field1() &;
+  ::std::int32_t* get_field1() & {
+    return field1_ref().has_value() ? std::addressof(__fbthrift_field_field1) : nullptr;
+  }
 
+  /** Glean { "field": "field1" } */
+  [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
   ::std::int32_t* get_field1() && = delete;
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
-  ::std::int32_t& set_field1(::std::int32_t field1_);
+  ::std::int32_t& set_field1(::std::int32_t field1_) {
+    field1_ref() = field1_;
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  const ::std::int32_t* get_field2() const&;
+  const ::std::int32_t* get_field2() const& {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::std::int32_t* get_field2() &;
+  ::std::int32_t* get_field2() & {
+    return field2_ref().has_value() ? std::addressof(__fbthrift_field_field2) : nullptr;
+  }
 
+  /** Glean { "field": "field2" } */
+  [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
   ::std::int32_t* get_field2() && = delete;
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::std::int32_t& set_field2(::std::int32_t field2_);
+  ::std::int32_t& set_field2(::std::int32_t field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  const ::std::string* get_field3() const&;
+  const ::std::string* get_field3() const& {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::std::string* get_field3() &;
+  ::std::string* get_field3() & {
+    return field3_ref().has_value() ? std::addressof(__fbthrift_field_field3) : nullptr;
+  }
 
+  /** Glean { "field": "field3" } */
+  [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
   ::std::string* get_field3() && = delete;
 
   /** Glean { "field": "field3" } */
@@ -1572,17 +1695,26 @@ class AtomicFoo final  {
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  const double* get_field4() const&;
+  const double* get_field4() const& {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
-  double* get_field4() &;
+  double* get_field4() & {
+    return field4_ref().has_value() ? std::addressof(__fbthrift_field_field4) : nullptr;
+  }
 
+  /** Glean { "field": "field4" } */
+  [[deprecated("Use `FOO.field4().value();` instead of `FOO.get_field4();`")]]
   double* get_field4() && = delete;
 
   /** Glean { "field": "field4" } */
   [[deprecated("Use `FOO.field4() = BAR;` instead of `FOO.set_field4(BAR);`")]]
-  double& set_field4(double field4_);
+  double& set_field4(double field4_) {
+    field4_ref() = field4_;
+    return __fbthrift_field_field4;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

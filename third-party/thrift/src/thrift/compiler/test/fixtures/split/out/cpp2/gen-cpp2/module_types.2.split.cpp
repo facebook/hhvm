@@ -125,67 +125,14 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int64_t MyStruct::get_MyIntField() const {
-  return __fbthrift_field_MyIntField;
-}
-
-::std::int64_t& MyStruct::set_MyIntField(::std::int64_t MyIntField_) {
-  MyIntField_ref() = MyIntField_;
-  return __fbthrift_field_MyIntField;
-}
-
-const ::std::string& MyStruct::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyStruct::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
 const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }
 
 ::cpp2::MyDataItem MyStruct::get_MyDataField() && {
-  return static_cast<::cpp2::MyDataItem&&>(__fbthrift_field_MyDataField);
+  return std::move(__fbthrift_field_MyDataField);
 }
 
-::cpp2::MyEnum MyStruct::get_myEnum() const {
-  return __fbthrift_field_myEnum;
-}
-
-::cpp2::MyEnum& MyStruct::set_myEnum(::cpp2::MyEnum myEnum_) {
-  myEnum_ref() = myEnum_;
-  return __fbthrift_field_myEnum;
-}
-
-bool MyStruct::get_oneway() const {
-  return __fbthrift_field_oneway;
-}
-
-bool& MyStruct::set_oneway(bool oneway_) {
-  oneway_ref() = oneway_;
-  return __fbthrift_field_oneway;
-}
-
-bool MyStruct::get_readonly() const {
-  return __fbthrift_field_readonly;
-}
-
-bool& MyStruct::set_readonly(bool readonly_) {
-  readonly_ref() = readonly_;
-  return __fbthrift_field_readonly;
-}
-
-bool MyStruct::get_idempotent() const {
-  return __fbthrift_field_idempotent;
-}
-
-bool& MyStruct::set_idempotent(bool idempotent_) {
-  idempotent_ref() = idempotent_;
-  return __fbthrift_field_idempotent;
-}
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;

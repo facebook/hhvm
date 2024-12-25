@@ -930,19 +930,28 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const;
+  ::std::int64_t get_MyIntField() const {
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
+    MyIntField_ref() = MyIntField_;
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const&;
+  const ::std::string& get_MyStringField() const& {
+    return __fbthrift_field_MyStringField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() &&;
+  ::std::string get_MyStringField() && {
+    return std::move(__fbthrift_field_MyStringField);
+  }
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
@@ -970,35 +979,55 @@ class MyStruct final  {
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
-  ::test::fixtures::basic::MyEnum get_myEnum() const;
+  ::test::fixtures::basic::MyEnum get_myEnum() const {
+    return __fbthrift_field_myEnum;
+  }
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
-  ::test::fixtures::basic::MyEnum& set_myEnum(::test::fixtures::basic::MyEnum myEnum_);
+  ::test::fixtures::basic::MyEnum& set_myEnum(::test::fixtures::basic::MyEnum myEnum_) {
+    myEnum_ref() = myEnum_;
+    return __fbthrift_field_myEnum;
+  }
 
   /** Glean { "field": "oneway" } */
   [[deprecated("Use `FOO.oneway().value();` instead of `FOO.get_oneway();`")]]
-  bool get_oneway() const;
+  bool get_oneway() const {
+    return __fbthrift_field_oneway;
+  }
 
   /** Glean { "field": "oneway" } */
   [[deprecated("Use `FOO.oneway() = BAR;` instead of `FOO.set_oneway(BAR);`")]]
-  bool& set_oneway(bool oneway_);
+  bool& set_oneway(bool oneway_) {
+    oneway_ref() = oneway_;
+    return __fbthrift_field_oneway;
+  }
 
   /** Glean { "field": "readonly" } */
   [[deprecated("Use `FOO.readonly().value();` instead of `FOO.get_readonly();`")]]
-  bool get_readonly() const;
+  bool get_readonly() const {
+    return __fbthrift_field_readonly;
+  }
 
   /** Glean { "field": "readonly" } */
   [[deprecated("Use `FOO.readonly() = BAR;` instead of `FOO.set_readonly(BAR);`")]]
-  bool& set_readonly(bool readonly_);
+  bool& set_readonly(bool readonly_) {
+    readonly_ref() = readonly_;
+    return __fbthrift_field_readonly;
+  }
 
   /** Glean { "field": "idempotent" } */
   [[deprecated("Use `FOO.idempotent().value();` instead of `FOO.get_idempotent();`")]]
-  bool get_idempotent() const;
+  bool get_idempotent() const {
+    return __fbthrift_field_idempotent;
+  }
 
   /** Glean { "field": "idempotent" } */
   [[deprecated("Use `FOO.idempotent() = BAR;` instead of `FOO.set_idempotent(BAR);`")]]
-  bool& set_idempotent(bool idempotent_);
+  bool& set_idempotent(bool idempotent_) {
+    idempotent_ref() = idempotent_;
+    return __fbthrift_field_idempotent;
+  }
 
   /** Glean { "field": "floatSet" } */
   [[deprecated("Use `FOO.floatSet().value();` instead of `FOO.get_floatSet();`")]]
@@ -1018,11 +1047,15 @@ class MyStruct final  {
 
   /** Glean { "field": "no_hack_codegen_field" } */
   [[deprecated("Use `FOO.no_hack_codegen_field().value();` instead of `FOO.get_no_hack_codegen_field();`")]]
-  const ::std::string& get_no_hack_codegen_field() const&;
+  const ::std::string& get_no_hack_codegen_field() const& {
+    return __fbthrift_field_no_hack_codegen_field;
+  }
 
   /** Glean { "field": "no_hack_codegen_field" } */
   [[deprecated("Use `FOO.no_hack_codegen_field().value();` instead of `FOO.get_no_hack_codegen_field();`")]]
-  ::std::string get_no_hack_codegen_field() &&;
+  ::std::string get_no_hack_codegen_field() && {
+    return std::move(__fbthrift_field_no_hack_codegen_field);
+  }
 
   /** Glean { "field": "no_hack_codegen_field" } */
   template <typename T_MyStruct_no_hack_codegen_field_struct_setter = ::std::string>
@@ -2123,19 +2156,28 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const;
+  ::std::int64_t get_MyIntField() const {
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
+    MyIntField_ref() = MyIntField_;
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const&;
+  const ::std::string& get_MyStringField() const& {
+    return __fbthrift_field_MyStringField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() &&;
+  ::std::string get_MyStringField() && {
+    return std::move(__fbthrift_field_MyStringField);
+  }
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyException_MyStringField_struct_setter = ::std::string>
@@ -2502,19 +2544,28 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const;
+  ::std::int64_t get_MyIntField() const {
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
+    MyIntField_ref() = MyIntField_;
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const&;
+  const ::std::string& get_MyStringField() const& {
+    return __fbthrift_field_MyStringField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() &&;
+  ::std::string get_MyStringField() && {
+    return std::move(__fbthrift_field_MyStringField);
+  }
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyExceptionWithMessage_MyStringField_struct_setter = ::std::string>
@@ -2717,11 +2768,16 @@ class ReservedKeyword final  {
 
   /** Glean { "field": "reserved_field" } */
   [[deprecated("Use `FOO.reserved_field().value();` instead of `FOO.get_reserved_field();`")]]
-  ::std::int32_t get_reserved_field() const;
+  ::std::int32_t get_reserved_field() const {
+    return __fbthrift_field_reserved_field;
+  }
 
   /** Glean { "field": "reserved_field" } */
   [[deprecated("Use `FOO.reserved_field() = BAR;` instead of `FOO.set_reserved_field(BAR);`")]]
-  ::std::int32_t& set_reserved_field(::std::int32_t reserved_field_);
+  ::std::int32_t& set_reserved_field(::std::int32_t reserved_field_) {
+    reserved_field_ref() = reserved_field_;
+    return __fbthrift_field_reserved_field;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

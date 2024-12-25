@@ -90,13 +90,12 @@ bool Struct::operator<([[maybe_unused]] const Struct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::module0::Struct& Struct::get_first() const& {
   return __fbthrift_field_first;
 }
 
 ::module0::Struct Struct::get_first() && {
-  return static_cast<::module0::Struct&&>(__fbthrift_field_first);
+  return std::move(__fbthrift_field_first);
 }
 
 const ::module1::Struct& Struct::get_second() const& {
@@ -104,8 +103,9 @@ const ::module1::Struct& Struct::get_second() const& {
 }
 
 ::module1::Struct Struct::get_second() && {
-  return static_cast<::module1::Struct&&>(__fbthrift_field_second);
+  return std::move(__fbthrift_field_second);
 }
+
 
 void swap([[maybe_unused]] Struct& a, [[maybe_unused]] Struct& b) {
   using ::std::swap;
@@ -215,23 +215,14 @@ bool BigStruct::operator<([[maybe_unused]] const BigStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::module2::Struct& BigStruct::get_s() const& {
   return __fbthrift_field_s;
 }
 
 ::module2::Struct BigStruct::get_s() && {
-  return static_cast<::module2::Struct&&>(__fbthrift_field_s);
+  return std::move(__fbthrift_field_s);
 }
 
-::std::int32_t BigStruct::get_id() const {
-  return __fbthrift_field_id;
-}
-
-::std::int32_t& BigStruct::set_id(::std::int32_t id_) {
-  id_ref() = id_;
-  return __fbthrift_field_id;
-}
 
 void swap([[maybe_unused]] BigStruct& a, [[maybe_unused]] BigStruct& b) {
   using ::std::swap;

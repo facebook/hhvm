@@ -704,11 +704,15 @@ class MyDataItem final  {
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
-  const ::std::string& get_s() const&;
+  const ::std::string& get_s() const& {
+    return __fbthrift_field_s;
+  }
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
-  ::std::string get_s() &&;
+  ::std::string get_s() && {
+    return std::move(__fbthrift_field_s);
+  }
 
   /** Glean { "field": "s" } */
   template <typename T_MyDataItem_s_struct_setter = ::std::string>
@@ -1240,19 +1244,28 @@ class MyStruct final  {
 
   /** Glean { "field": "inty" } */
   [[deprecated("Use `FOO.inty().value();` instead of `FOO.get_inty();`")]]
-  ::std::int64_t get_inty() const;
+  ::std::int64_t get_inty() const {
+    return __fbthrift_field_inty;
+  }
 
   /** Glean { "field": "inty" } */
   [[deprecated("Use `FOO.inty() = BAR;` instead of `FOO.set_inty(BAR);`")]]
-  ::std::int64_t& set_inty(::std::int64_t inty_);
+  ::std::int64_t& set_inty(::std::int64_t inty_) {
+    inty_ref() = inty_;
+    return __fbthrift_field_inty;
+  }
 
   /** Glean { "field": "stringy" } */
   [[deprecated("Use `FOO.stringy().value();` instead of `FOO.get_stringy();`")]]
-  const ::std::string& get_stringy() const&;
+  const ::std::string& get_stringy() const& {
+    return __fbthrift_field_stringy;
+  }
 
   /** Glean { "field": "stringy" } */
   [[deprecated("Use `FOO.stringy().value();` instead of `FOO.get_stringy();`")]]
-  ::std::string get_stringy() &&;
+  ::std::string get_stringy() && {
+    return std::move(__fbthrift_field_stringy);
+  }
 
   /** Glean { "field": "stringy" } */
   template <typename T_MyStruct_stringy_struct_setter = ::std::string>
@@ -1280,19 +1293,29 @@ class MyStruct final  {
 
   /** Glean { "field": "myEnumy" } */
   [[deprecated("Use `FOO.myEnumy().value();` instead of `FOO.get_myEnumy();`")]]
-  ::test::fixtures::python_capi::MyEnum get_myEnumy() const;
+  ::test::fixtures::python_capi::MyEnum get_myEnumy() const {
+    return __fbthrift_field_myEnumy;
+  }
 
   /** Glean { "field": "myEnumy" } */
   [[deprecated("Use `FOO.myEnumy() = BAR;` instead of `FOO.set_myEnumy(BAR);`")]]
-  ::test::fixtures::python_capi::MyEnum& set_myEnumy(::test::fixtures::python_capi::MyEnum myEnumy_);
+  ::test::fixtures::python_capi::MyEnum& set_myEnumy(::test::fixtures::python_capi::MyEnum myEnumy_) {
+    myEnumy_ref() = myEnumy_;
+    return __fbthrift_field_myEnumy;
+  }
 
   /** Glean { "field": "boulet" } */
   [[deprecated("Use `FOO.boulet().value();` instead of `FOO.get_boulet();`")]]
-  bool get_boulet() const;
+  bool get_boulet() const {
+    return __fbthrift_field_boulet;
+  }
 
   /** Glean { "field": "boulet" } */
   [[deprecated("Use `FOO.boulet() = BAR;` instead of `FOO.set_boulet(BAR);`")]]
-  bool& set_boulet(bool boulet_);
+  bool& set_boulet(bool boulet_) {
+    boulet_ref() = boulet_;
+    return __fbthrift_field_boulet;
+  }
 
   /** Glean { "field": "floatListy" } */
   [[deprecated("Use `FOO.floatListy().value();` instead of `FOO.get_floatListy();`")]]
@@ -1653,11 +1676,15 @@ class DoubledPair final  {
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
-  const ::std::string& get_s() const&;
+  const ::std::string& get_s() const& {
+    return __fbthrift_field_s;
+  }
 
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
-  ::std::string get_s() &&;
+  ::std::string get_s() && {
+    return std::move(__fbthrift_field_s);
+  }
 
   /** Glean { "field": "s" } */
   template <typename T_DoubledPair_s_struct_setter = ::std::string>
@@ -1669,11 +1696,16 @@ class DoubledPair final  {
 
   /** Glean { "field": "x" } */
   [[deprecated("Use `FOO.x().value();` instead of `FOO.get_x();`")]]
-  ::std::int32_t get_x() const;
+  ::std::int32_t get_x() const {
+    return __fbthrift_field_x;
+  }
 
   /** Glean { "field": "x" } */
   [[deprecated("Use `FOO.x() = BAR;` instead of `FOO.set_x(BAR);`")]]
-  ::std::int32_t& set_x(::std::int32_t x_);
+  ::std::int32_t& set_x(::std::int32_t x_) {
+    x_ref() = x_;
+    return __fbthrift_field_x;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1887,11 +1919,15 @@ class StringPair final  {
 
   /** Glean { "field": "normal" } */
   [[deprecated("Use `FOO.normal().value();` instead of `FOO.get_normal();`")]]
-  const ::std::string& get_normal() const&;
+  const ::std::string& get_normal() const& {
+    return __fbthrift_field_normal;
+  }
 
   /** Glean { "field": "normal" } */
   [[deprecated("Use `FOO.normal().value();` instead of `FOO.get_normal();`")]]
-  ::std::string get_normal() &&;
+  ::std::string get_normal() && {
+    return std::move(__fbthrift_field_normal);
+  }
 
   /** Glean { "field": "normal" } */
   template <typename T_StringPair_normal_struct_setter = ::std::string>
@@ -2936,65 +2972,103 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "booly" } */
   [[deprecated("Use `FOO.booly().value();` instead of `FOO.get_booly();`")]]
-  bool get_booly() const;
+  bool get_booly() const {
+    return __fbthrift_field_booly;
+  }
 
   /** Glean { "field": "booly" } */
   [[deprecated("Use `FOO.booly() = BAR;` instead of `FOO.set_booly(BAR);`")]]
-  bool& set_booly(bool booly_);
+  bool& set_booly(bool booly_) {
+    booly_ref() = booly_;
+    return __fbthrift_field_booly;
+  }
 
   /** Glean { "field": "charry" } */
   [[deprecated("Use `FOO.charry().value();` instead of `FOO.get_charry();`")]]
-  ::test::fixtures::python_capi::signed_byte get_charry() const;
+  ::test::fixtures::python_capi::signed_byte get_charry() const {
+    return __fbthrift_field_charry;
+  }
 
   /** Glean { "field": "charry" } */
   [[deprecated("Use `FOO.charry() = BAR;` instead of `FOO.set_charry(BAR);`")]]
-  ::test::fixtures::python_capi::signed_byte& set_charry(::test::fixtures::python_capi::signed_byte charry_);
+  ::test::fixtures::python_capi::signed_byte& set_charry(::test::fixtures::python_capi::signed_byte charry_) {
+    charry_ref() = charry_;
+    return __fbthrift_field_charry;
+  }
 
   /** Glean { "field": "shortay" } */
   [[deprecated("Use `FOO.shortay().value();` instead of `FOO.get_shortay();`")]]
-  uint16_t get_shortay() const;
+  uint16_t get_shortay() const {
+    return __fbthrift_field_shortay;
+  }
 
   /** Glean { "field": "shortay" } */
   [[deprecated("Use `FOO.shortay() = BAR;` instead of `FOO.set_shortay(BAR);`")]]
-  uint16_t& set_shortay(uint16_t shortay_);
+  uint16_t& set_shortay(uint16_t shortay_) {
+    shortay_ref() = shortay_;
+    return __fbthrift_field_shortay;
+  }
 
   /** Glean { "field": "inty" } */
   [[deprecated("Use `FOO.inty().value();` instead of `FOO.get_inty();`")]]
-  ::std::int32_t get_inty() const;
+  ::std::int32_t get_inty() const {
+    return __fbthrift_field_inty;
+  }
 
   /** Glean { "field": "inty" } */
   [[deprecated("Use `FOO.inty() = BAR;` instead of `FOO.set_inty(BAR);`")]]
-  ::std::int32_t& set_inty(::std::int32_t inty_);
+  ::std::int32_t& set_inty(::std::int32_t inty_) {
+    inty_ref() = inty_;
+    return __fbthrift_field_inty;
+  }
 
   /** Glean { "field": "longy" } */
   [[deprecated("Use `FOO.longy().value();` instead of `FOO.get_longy();`")]]
-  uint64_t get_longy() const;
+  uint64_t get_longy() const {
+    return __fbthrift_field_longy;
+  }
 
   /** Glean { "field": "longy" } */
   [[deprecated("Use `FOO.longy() = BAR;` instead of `FOO.set_longy(BAR);`")]]
-  uint64_t& set_longy(uint64_t longy_);
+  uint64_t& set_longy(uint64_t longy_) {
+    longy_ref() = longy_;
+    return __fbthrift_field_longy;
+  }
 
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty().value();` instead of `FOO.get_floaty();`")]]
-  const float* get_floaty() const&;
+  const float* get_floaty() const& {
+    return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
+  }
 
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty().value();` instead of `FOO.get_floaty();`")]]
-  float* get_floaty() &;
+  float* get_floaty() & {
+    return floaty_ref().has_value() ? std::addressof(__fbthrift_field_floaty) : nullptr;
+  }
 
+  /** Glean { "field": "floaty" } */
+  [[deprecated("Use `FOO.floaty().value();` instead of `FOO.get_floaty();`")]]
   float* get_floaty() && = delete;
 
   /** Glean { "field": "floaty" } */
   [[deprecated("Use `FOO.floaty() = BAR;` instead of `FOO.set_floaty(BAR);`")]]
-  float& set_floaty(float floaty_);
+  float& set_floaty(float floaty_) {
+    floaty_ref() = floaty_;
+    return __fbthrift_field_floaty;
+  }
 
   /** Glean { "field": "buffy" } */
   [[deprecated("Use `FOO.buffy().value();` instead of `FOO.get_buffy();`")]]
-  const ::test::fixtures::python_capi::IOBuf& get_buffy() const&;
+  const ::test::fixtures::python_capi::IOBuf& get_buffy() const& {
+    return __fbthrift_field_buffy;
+  }
 
   /** Glean { "field": "buffy" } */
   [[deprecated("Use `FOO.buffy().value();` instead of `FOO.get_buffy();`")]]
-  ::test::fixtures::python_capi::IOBuf get_buffy() &&;
+  ::test::fixtures::python_capi::IOBuf get_buffy() && {
+    return std::move(__fbthrift_field_buffy);
+  }
 
   /** Glean { "field": "buffy" } */
   template <typename T_PrimitiveStruct_buffy_struct_setter = ::test::fixtures::python_capi::IOBuf>
@@ -3006,11 +3080,15 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "pointbuffy" } */
   [[deprecated("Use `FOO.pointbuffy().value();` instead of `FOO.get_pointbuffy();`")]]
-  const ::test::fixtures::python_capi::IOBufPtr& get_pointbuffy() const&;
+  const ::test::fixtures::python_capi::IOBufPtr& get_pointbuffy() const& {
+    return __fbthrift_field_pointbuffy;
+  }
 
   /** Glean { "field": "pointbuffy" } */
   [[deprecated("Use `FOO.pointbuffy().value();` instead of `FOO.get_pointbuffy();`")]]
-  ::test::fixtures::python_capi::IOBufPtr get_pointbuffy() &&;
+  ::test::fixtures::python_capi::IOBufPtr get_pointbuffy() && {
+    return std::move(__fbthrift_field_pointbuffy);
+  }
 
   /** Glean { "field": "pointbuffy" } */
   template <typename T_PrimitiveStruct_pointbuffy_struct_setter = ::test::fixtures::python_capi::IOBufPtr>
@@ -3054,11 +3132,15 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "fbstring" } */
   [[deprecated("Use `FOO.fbstring().value();` instead of `FOO.get_fbstring();`")]]
-  const folly::fbstring& get_fbstring() const&;
+  const folly::fbstring& get_fbstring() const& {
+    return __fbthrift_field_fbstring;
+  }
 
   /** Glean { "field": "fbstring" } */
   [[deprecated("Use `FOO.fbstring().value();` instead of `FOO.get_fbstring();`")]]
-  folly::fbstring get_fbstring() &&;
+  folly::fbstring get_fbstring() && {
+    return std::move(__fbthrift_field_fbstring);
+  }
 
   /** Glean { "field": "fbstring" } */
   template <typename T_PrimitiveStruct_fbstring_struct_setter = folly::fbstring>
@@ -3070,11 +3152,15 @@ class PrimitiveStruct final  {
 
   /** Glean { "field": "managed_string_view" } */
   [[deprecated("Use `FOO.managed_string_view().value();` instead of `FOO.get_managed_string_view();`")]]
-  const ::apache::thrift::ManagedStringViewWithConversions& get_managed_string_view() const&;
+  const ::apache::thrift::ManagedStringViewWithConversions& get_managed_string_view() const& {
+    return __fbthrift_field_managed_string_view;
+  }
 
   /** Glean { "field": "managed_string_view" } */
   [[deprecated("Use `FOO.managed_string_view().value();` instead of `FOO.get_managed_string_view();`")]]
-  ::apache::thrift::ManagedStringViewWithConversions get_managed_string_view() &&;
+  ::apache::thrift::ManagedStringViewWithConversions get_managed_string_view() && {
+    return std::move(__fbthrift_field_managed_string_view);
+  }
 
   /** Glean { "field": "managed_string_view" } */
   template <typename T_PrimitiveStruct_managed_string_view_struct_setter = ::apache::thrift::ManagedStringViewWithConversions>
@@ -4036,6 +4122,8 @@ class ListStruct final  {
   [[deprecated("Use `FOO.intz().value();` instead of `FOO.get_intz();`")]]
   ::std::vector<::std::int64_t>* get_intz() &;
 
+  /** Glean { "field": "intz" } */
+  [[deprecated("Use `FOO.intz().value();` instead of `FOO.get_intz();`")]]
   ::std::vector<::std::int64_t>* get_intz() && = delete;
 
   /** Glean { "field": "intz" } */
@@ -4634,6 +4722,8 @@ class SetStruct final  {
   [[deprecated("Use `FOO.intz().value();` instead of `FOO.get_intz();`")]]
   ::std::set<::std::int32_t>* get_intz() &;
 
+  /** Glean { "field": "intz" } */
+  [[deprecated("Use `FOO.intz().value();` instead of `FOO.get_intz();`")]]
   ::std::set<::std::int32_t>* get_intz() && = delete;
 
   /** Glean { "field": "intz" } */
@@ -5355,6 +5445,8 @@ class MapStruct final  {
   [[deprecated("Use `FOO.intz().value();` instead of `FOO.get_intz();`")]]
   ::std::map<::std::int32_t, ::std::string>* get_intz() &;
 
+  /** Glean { "field": "intz" } */
+  [[deprecated("Use `FOO.intz().value();` instead of `FOO.get_intz();`")]]
   ::std::map<::std::int32_t, ::std::string>* get_intz() && = delete;
 
   /** Glean { "field": "intz" } */
@@ -6099,19 +6191,29 @@ class ComposeStruct final  {
 
   /** Glean { "field": "enum_" } */
   [[deprecated("Use `FOO.enum_().value();` instead of `FOO.get_enum_();`")]]
-  ::test::fixtures::python_capi::MyEnum get_enum_() const;
+  ::test::fixtures::python_capi::MyEnum get_enum_() const {
+    return __fbthrift_field_enum_;
+  }
 
   /** Glean { "field": "enum_" } */
   [[deprecated("Use `FOO.enum_() = BAR;` instead of `FOO.set_enum_(BAR);`")]]
-  ::test::fixtures::python_capi::MyEnum& set_enum_(::test::fixtures::python_capi::MyEnum enum__);
+  ::test::fixtures::python_capi::MyEnum& set_enum_(::test::fixtures::python_capi::MyEnum enum__) {
+    enum__ref() = enum__;
+    return __fbthrift_field_enum_;
+  }
 
   /** Glean { "field": "renamed_" } */
   [[deprecated("Use `FOO.renamed_().value();` instead of `FOO.get_renamed_();`")]]
-  ::test::fixtures::python_capi::NormalDecentEnum get_renamed_() const;
+  ::test::fixtures::python_capi::NormalDecentEnum get_renamed_() const {
+    return __fbthrift_field_renamed_;
+  }
 
   /** Glean { "field": "renamed_" } */
   [[deprecated("Use `FOO.renamed_() = BAR;` instead of `FOO.set_renamed_(BAR);`")]]
-  ::test::fixtures::python_capi::NormalDecentEnum& set_renamed_(::test::fixtures::python_capi::NormalDecentEnum renamed__);
+  ::test::fixtures::python_capi::NormalDecentEnum& set_renamed_(::test::fixtures::python_capi::NormalDecentEnum renamed__) {
+    renamed__ref() = renamed__;
+    return __fbthrift_field_renamed_;
+  }
 
   /** Glean { "field": "primitive" } */
   [[deprecated("Use `FOO.primitive().value();` instead of `FOO.get_primitive();`")]]
@@ -6147,11 +6249,16 @@ class ComposeStruct final  {
 
   /** Glean { "field": "xenum" } */
   [[deprecated("Use `FOO.xenum().value();` instead of `FOO.get_xenum();`")]]
-  ::test::fixtures::python_capi::DepEnum get_xenum() const;
+  ::test::fixtures::python_capi::DepEnum get_xenum() const {
+    return __fbthrift_field_xenum;
+  }
 
   /** Glean { "field": "xenum" } */
   [[deprecated("Use `FOO.xenum() = BAR;` instead of `FOO.set_xenum(BAR);`")]]
-  ::test::fixtures::python_capi::DepEnum& set_xenum(::test::fixtures::python_capi::DepEnum xenum_);
+  ::test::fixtures::python_capi::DepEnum& set_xenum(::test::fixtures::python_capi::DepEnum xenum_) {
+    xenum_ref() = xenum_;
+    return __fbthrift_field_xenum;
+  }
 
   /** Glean { "field": "serial_struct" } */
   [[deprecated("Use `FOO.serial_struct().value();` instead of `FOO.get_serial_struct();`")]]

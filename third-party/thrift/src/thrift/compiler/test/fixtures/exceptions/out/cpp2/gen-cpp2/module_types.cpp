@@ -92,14 +92,6 @@ bool Fiery::operator<([[maybe_unused]] const Fiery& rhs) const {
 }
 
 
-const ::std::string& Fiery::get_message() const& {
-  return __fbthrift_field_message;
-}
-
-::std::string Fiery::get_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_message);
-}
-
 void swap([[maybe_unused]] Fiery& a, [[maybe_unused]] Fiery& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
@@ -199,14 +191,6 @@ bool Serious::operator<([[maybe_unused]] const Serious& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string* Serious::get_sonnet() const& {
-  return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
-}
-
-::std::string* Serious::get_sonnet() & {
-  return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
-}
 
 void swap([[maybe_unused]] Serious& a, [[maybe_unused]] Serious& b) {
   using ::std::swap;
@@ -314,22 +298,6 @@ bool ComplexFieldNames::operator<([[maybe_unused]] const ComplexFieldNames& rhs)
 }
 
 
-const ::std::string& ComplexFieldNames::get_error_message() const& {
-  return __fbthrift_field_error_message;
-}
-
-::std::string ComplexFieldNames::get_error_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_error_message);
-}
-
-const ::std::string& ComplexFieldNames::get_internal_error_message() const& {
-  return __fbthrift_field_internal_error_message;
-}
-
-::std::string ComplexFieldNames::get_internal_error_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_internal_error_message);
-}
-
 void swap([[maybe_unused]] ComplexFieldNames& a, [[maybe_unused]] ComplexFieldNames& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_error_message, b.__fbthrift_field_error_message);
@@ -436,22 +404,6 @@ bool CustomFieldNames::operator<([[maybe_unused]] const CustomFieldNames& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& CustomFieldNames::get_error_message() const& {
-  return __fbthrift_field_error_message;
-}
-
-::std::string CustomFieldNames::get_error_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_error_message);
-}
-
-const ::std::string& CustomFieldNames::get_internal_error_message() const& {
-  return __fbthrift_field_internal_error_message;
-}
-
-::std::string CustomFieldNames::get_internal_error_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_internal_error_message);
-}
 
 void swap([[maybe_unused]] CustomFieldNames& a, [[maybe_unused]] CustomFieldNames& b) {
   using ::std::swap;
@@ -561,23 +513,6 @@ bool ExceptionWithPrimitiveField::operator<([[maybe_unused]] const ExceptionWith
 }
 
 
-const ::std::string& ExceptionWithPrimitiveField::get_message() const& {
-  return __fbthrift_field_message;
-}
-
-::std::string ExceptionWithPrimitiveField::get_message() && {
-  return static_cast<::std::string&&>(__fbthrift_field_message);
-}
-
-::std::int32_t ExceptionWithPrimitiveField::get_error_code() const {
-  return __fbthrift_field_error_code;
-}
-
-::std::int32_t& ExceptionWithPrimitiveField::set_error_code(::std::int32_t error_code_) {
-  error_code_ref() = error_code_;
-  return __fbthrift_field_error_code;
-}
-
 void swap([[maybe_unused]] ExceptionWithPrimitiveField& a, [[maybe_unused]] ExceptionWithPrimitiveField& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
@@ -685,23 +620,6 @@ bool ExceptionWithStructuredAnnotation::operator<([[maybe_unused]] const Excepti
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& ExceptionWithStructuredAnnotation::get_message_field() const& {
-  return __fbthrift_field_message_field;
-}
-
-::std::string ExceptionWithStructuredAnnotation::get_message_field() && {
-  return static_cast<::std::string&&>(__fbthrift_field_message_field);
-}
-
-::std::int32_t ExceptionWithStructuredAnnotation::get_error_code() const {
-  return __fbthrift_field_error_code;
-}
-
-::std::int32_t& ExceptionWithStructuredAnnotation::set_error_code(::std::int32_t error_code_) {
-  error_code_ref() = error_code_;
-  return __fbthrift_field_error_code;
-}
 
 void swap([[maybe_unused]] ExceptionWithStructuredAnnotation& a, [[maybe_unused]] ExceptionWithStructuredAnnotation& b) {
   using ::std::swap;

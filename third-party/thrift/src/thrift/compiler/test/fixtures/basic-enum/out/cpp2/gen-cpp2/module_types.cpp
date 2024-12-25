@@ -144,24 +144,6 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
 }
 
 
-::test::fixtures::enumstrict::MyEnum MyStruct::get_myEnum() const {
-  return __fbthrift_field_myEnum;
-}
-
-::test::fixtures::enumstrict::MyEnum& MyStruct::set_myEnum(::test::fixtures::enumstrict::MyEnum myEnum_) {
-  myEnum_ref() = myEnum_;
-  return __fbthrift_field_myEnum;
-}
-
-::test::fixtures::enumstrict::MyBigEnum MyStruct::get_myBigEnum() const {
-  return __fbthrift_field_myBigEnum;
-}
-
-::test::fixtures::enumstrict::MyBigEnum& MyStruct::set_myBigEnum(::test::fixtures::enumstrict::MyBigEnum myBigEnum_) {
-  myBigEnum_ref() = myBigEnum_;
-  return __fbthrift_field_myBigEnum;
-}
-
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_myEnum, b.__fbthrift_field_myEnum);

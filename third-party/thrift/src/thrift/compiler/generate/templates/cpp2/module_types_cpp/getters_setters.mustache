@@ -15,8 +15,8 @@
   limitations under the License.
 
 }}{{#struct:fields?}}{{#struct:fields}}{{#field:type}}{{#field:has_deprecated_accessors?}}
-{{#if field:optional?}}
-
+{{#type:resolves_to_container_or_struct?}}
+{{#field:optional?}}
 const {{type:cpp_type}}* {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const& {
   return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
 }
@@ -24,28 +24,17 @@ const {{type:cpp_type}}* {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}(
 {{type:cpp_type}}* {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() & {
   return {{field:cpp_name}}_ref().has_value() ? std::addressof({{field:cpp_storage_name}}) : nullptr;
 }
-{{#else}}
-{{#if type:resolves_to_fixed_size?}}
 
-{{type:cpp_type}} {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const {
-  return {{field:cpp_storage_name}};
-}
-{{#else}}
-
+{{/field:optional?}}
+{{^field:optional?}}
 const {{type:cpp_type}}& {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() const& {
   return {{field:cpp_storage_name}};
 }
 
 {{type:cpp_type}} {{struct:cpp_underlying_name}}::get_{{field:cpp_name}}() && {
-  return static_cast<{{type:cpp_type}}&&>({{field:cpp_storage_name}});
+  return std::move({{field:cpp_storage_name}});
 }
-{{/if type:resolves_to_fixed_size?}}
-{{/if field:optional?}}
-{{#if type:resolves_to_fixed_size?}}
 
-{{type:cpp_type}}& {{struct:cpp_underlying_name}}::set_{{field:cpp_name}}({{type:cpp_type}} {{field:cpp_name}}_) {
-  {{field:cpp_name}}_ref() = {{field:cpp_name}}_;
-  return {{field:cpp_storage_name}};
-}
-{{/if type:resolves_to_fixed_size?}}
+{{/field:optional?}}
+{{/type:resolves_to_container_or_struct?}}
 {{/field:has_deprecated_accessors?}}{{/field:type}}{{/struct:fields}}{{/struct:fields?}}

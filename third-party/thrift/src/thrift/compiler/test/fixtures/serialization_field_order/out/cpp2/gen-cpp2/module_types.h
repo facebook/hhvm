@@ -310,27 +310,42 @@ class Foo final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::int32_t get_field1() const;
+  ::std::int32_t get_field1() const {
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
-  ::std::int32_t& set_field1(::std::int32_t field1_);
+  ::std::int32_t& set_field1(::std::int32_t field1_) {
+    field1_ref() = field1_;
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::std::int32_t get_field2() const;
+  ::std::int32_t get_field2() const {
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::std::int32_t& set_field2(::std::int32_t field2_);
+  ::std::int32_t& set_field2(::std::int32_t field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::std::int32_t get_field3() const;
+  ::std::int32_t get_field3() const {
+    return __fbthrift_field_field3;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
-  ::std::int32_t& set_field3(::std::int32_t field3_);
+  ::std::int32_t& set_field3(::std::int32_t field3_) {
+    field3_ref() = field3_;
+    return __fbthrift_field_field3;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -594,27 +609,42 @@ class Foo2 final  {
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1().value();` instead of `FOO.get_field1();`")]]
-  ::std::int32_t get_field1() const;
+  ::std::int32_t get_field1() const {
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field1" } */
   [[deprecated("Use `FOO.field1() = BAR;` instead of `FOO.set_field1(BAR);`")]]
-  ::std::int32_t& set_field1(::std::int32_t field1_);
+  ::std::int32_t& set_field1(::std::int32_t field1_) {
+    field1_ref() = field1_;
+    return __fbthrift_field_field1;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2().value();` instead of `FOO.get_field2();`")]]
-  ::std::int32_t get_field2() const;
+  ::std::int32_t get_field2() const {
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field2" } */
   [[deprecated("Use `FOO.field2() = BAR;` instead of `FOO.set_field2(BAR);`")]]
-  ::std::int32_t& set_field2(::std::int32_t field2_);
+  ::std::int32_t& set_field2(::std::int32_t field2_) {
+    field2_ref() = field2_;
+    return __fbthrift_field_field2;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
-  ::std::int32_t get_field3() const;
+  ::std::int32_t get_field3() const {
+    return __fbthrift_field_field3;
+  }
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3() = BAR;` instead of `FOO.set_field3(BAR);`")]]
-  ::std::int32_t& set_field3(::std::int32_t field3_);
+  ::std::int32_t& set_field3(::std::int32_t field3_) {
+    field3_ref() = field3_;
+    return __fbthrift_field_field3;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

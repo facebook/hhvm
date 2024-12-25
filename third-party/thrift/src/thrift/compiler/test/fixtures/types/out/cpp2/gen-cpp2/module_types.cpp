@@ -222,14 +222,6 @@ bool decorated_struct::operator<([[maybe_unused]] const decorated_struct& rhs) c
 }
 
 
-const ::std::string& decorated_struct::get_field() const& {
-  return __fbthrift_field_field;
-}
-
-::std::string decorated_struct::get_field() && {
-  return static_cast<::std::string&&>(__fbthrift_field_field);
-}
-
 void swap([[maybe_unused]] decorated_struct& a, [[maybe_unused]] decorated_struct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
@@ -365,13 +357,12 @@ bool ContainerStruct::operator<([[maybe_unused]] const ContainerStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {
   return __fbthrift_field_fieldA;
 }
 
 ::std::vector<::std::int32_t> ContainerStruct::get_fieldA() && {
-  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_fieldA);
+  return std::move(__fbthrift_field_fieldA);
 }
 
 const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& {
@@ -379,7 +370,7 @@ const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& {
 }
 
 std::list<::std::int32_t> ContainerStruct::get_fieldB() && {
-  return static_cast<std::list<::std::int32_t>&&>(__fbthrift_field_fieldB);
+  return std::move(__fbthrift_field_fieldB);
 }
 
 const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& {
@@ -387,7 +378,7 @@ const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& {
 }
 
 std::deque<::std::int32_t> ContainerStruct::get_fieldC() && {
-  return static_cast<std::deque<::std::int32_t>&&>(__fbthrift_field_fieldC);
+  return std::move(__fbthrift_field_fieldC);
 }
 
 const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& {
@@ -395,7 +386,7 @@ const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& {
 }
 
 folly::fbvector<::std::int32_t> ContainerStruct::get_fieldD() && {
-  return static_cast<folly::fbvector<::std::int32_t>&&>(__fbthrift_field_fieldD);
+  return std::move(__fbthrift_field_fieldD);
 }
 
 const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& {
@@ -403,7 +394,7 @@ const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& 
 }
 
 folly::small_vector<::std::int32_t> ContainerStruct::get_fieldE() && {
-  return static_cast<folly::small_vector<::std::int32_t>&&>(__fbthrift_field_fieldE);
+  return std::move(__fbthrift_field_fieldE);
 }
 
 const ::apache::thrift::fixtures::types::set_i32_7194& ContainerStruct::get_fieldF() const& {
@@ -411,7 +402,7 @@ const ::apache::thrift::fixtures::types::set_i32_7194& ContainerStruct::get_fiel
 }
 
 ::apache::thrift::fixtures::types::set_i32_7194 ContainerStruct::get_fieldF() && {
-  return static_cast<::apache::thrift::fixtures::types::set_i32_7194&&>(__fbthrift_field_fieldF);
+  return std::move(__fbthrift_field_fieldF);
 }
 
 const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& {
@@ -419,7 +410,7 @@ const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::
 }
 
 folly::sorted_vector_map<::std::int32_t, ::std::string> ContainerStruct::get_fieldG() && {
-  return static_cast<folly::sorted_vector_map<::std::int32_t, ::std::string>&&>(__fbthrift_field_fieldG);
+  return std::move(__fbthrift_field_fieldG);
 }
 
 const ::apache::thrift::fixtures::types::SomeMap& ContainerStruct::get_fieldH() const& {
@@ -427,8 +418,9 @@ const ::apache::thrift::fixtures::types::SomeMap& ContainerStruct::get_fieldH() 
 }
 
 ::apache::thrift::fixtures::types::SomeMap ContainerStruct::get_fieldH() && {
-  return static_cast<::apache::thrift::fixtures::types::SomeMap&&>(__fbthrift_field_fieldH);
+  return std::move(__fbthrift_field_fieldH);
 }
+
 
 void swap([[maybe_unused]] ContainerStruct& a, [[maybe_unused]] ContainerStruct& b) {
   using ::std::swap;
@@ -537,14 +529,14 @@ bool CppTypeStruct::operator<([[maybe_unused]] const CppTypeStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const std::list<int32_t>& CppTypeStruct::get_fieldA() const& {
   return __fbthrift_field_fieldA;
 }
 
 std::list<int32_t> CppTypeStruct::get_fieldA() && {
-  return static_cast<std::list<int32_t>&&>(__fbthrift_field_fieldA);
+  return std::move(__fbthrift_field_fieldA);
 }
+
 
 void swap([[maybe_unused]] CppTypeStruct& a, [[maybe_unused]] CppTypeStruct& b) {
   using ::std::swap;
@@ -641,15 +633,6 @@ bool VirtualStruct::operator<([[maybe_unused]] const VirtualStruct& rhs) const {
 }
 
 
-::std::int64_t VirtualStruct::get_MyIntField() const {
-  return __fbthrift_field_MyIntField;
-}
-
-::std::int64_t& VirtualStruct::set_MyIntField(::std::int64_t MyIntField_) {
-  MyIntField_ref() = MyIntField_;
-  return __fbthrift_field_MyIntField;
-}
-
 void swap([[maybe_unused]] VirtualStruct& a, [[maybe_unused]] VirtualStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);
@@ -734,24 +717,6 @@ bool MyStructWithForwardRefEnum::operator<([[maybe_unused]] const MyStructWithFo
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::apache::thrift::fixtures::types::MyForwardRefEnum MyStructWithForwardRefEnum::get_a() const {
-  return __fbthrift_field_a;
-}
-
-::apache::thrift::fixtures::types::MyForwardRefEnum& MyStructWithForwardRefEnum::set_a(::apache::thrift::fixtures::types::MyForwardRefEnum a_) {
-  a_ref() = a_;
-  return __fbthrift_field_a;
-}
-
-::apache::thrift::fixtures::types::MyForwardRefEnum MyStructWithForwardRefEnum::get_b() const {
-  return __fbthrift_field_b;
-}
-
-::apache::thrift::fixtures::types::MyForwardRefEnum& MyStructWithForwardRefEnum::set_b(::apache::thrift::fixtures::types::MyForwardRefEnum b_) {
-  b_ref() = b_;
-  return __fbthrift_field_b;
-}
 
 void swap([[maybe_unused]] MyStructWithForwardRefEnum& a, [[maybe_unused]] MyStructWithForwardRefEnum& b) {
   using ::std::swap;
@@ -839,24 +804,6 @@ bool TrivialNumeric::operator<([[maybe_unused]] const TrivialNumeric& rhs) const
 }
 
 
-::std::int32_t TrivialNumeric::get_a() const {
-  return __fbthrift_field_a;
-}
-
-::std::int32_t& TrivialNumeric::set_a(::std::int32_t a_) {
-  a_ref() = a_;
-  return __fbthrift_field_a;
-}
-
-bool TrivialNumeric::get_b() const {
-  return __fbthrift_field_b;
-}
-
-bool& TrivialNumeric::set_b(bool b_) {
-  b_ref() = b_;
-  return __fbthrift_field_b;
-}
-
 void swap([[maybe_unused]] TrivialNumeric& a, [[maybe_unused]] TrivialNumeric& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
@@ -942,23 +889,14 @@ bool TrivialNestedWithDefault::operator<([[maybe_unused]] const TrivialNestedWit
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int32_t TrivialNestedWithDefault::get_z() const {
-  return __fbthrift_field_z;
-}
-
-::std::int32_t& TrivialNestedWithDefault::set_z(::std::int32_t z_) {
-  z_ref() = z_;
-  return __fbthrift_field_z;
-}
-
 const ::apache::thrift::fixtures::types::TrivialNumeric& TrivialNestedWithDefault::get_n() const& {
   return __fbthrift_field_n;
 }
 
 ::apache::thrift::fixtures::types::TrivialNumeric TrivialNestedWithDefault::get_n() && {
-  return static_cast<::apache::thrift::fixtures::types::TrivialNumeric&&>(__fbthrift_field_n);
+  return std::move(__fbthrift_field_n);
 }
+
 
 void swap([[maybe_unused]] TrivialNestedWithDefault& a, [[maybe_unused]] TrivialNestedWithDefault& b) {
   using ::std::swap;
@@ -1072,22 +1010,14 @@ bool ComplexString::operator<([[maybe_unused]] const ComplexString& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& ComplexString::get_a() const& {
-  return __fbthrift_field_a;
-}
-
-::std::string ComplexString::get_a() && {
-  return static_cast<::std::string&&>(__fbthrift_field_a);
-}
-
 const ::std::map<::std::string, ::std::int32_t>& ComplexString::get_b() const& {
   return __fbthrift_field_b;
 }
 
 ::std::map<::std::string, ::std::int32_t> ComplexString::get_b() && {
-  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_b);
+  return std::move(__fbthrift_field_b);
 }
+
 
 void swap([[maybe_unused]] ComplexString& a, [[maybe_unused]] ComplexString& b) {
   using ::std::swap;
@@ -1197,22 +1127,14 @@ bool ComplexNestedWithDefault::operator<([[maybe_unused]] const ComplexNestedWit
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::std::string& ComplexNestedWithDefault::get_z() const& {
-  return __fbthrift_field_z;
-}
-
-::std::string ComplexNestedWithDefault::get_z() && {
-  return static_cast<::std::string&&>(__fbthrift_field_z);
-}
-
 const ::apache::thrift::fixtures::types::ComplexString& ComplexNestedWithDefault::get_n() const& {
   return __fbthrift_field_n;
 }
 
 ::apache::thrift::fixtures::types::ComplexString ComplexNestedWithDefault::get_n() && {
-  return static_cast<::apache::thrift::fixtures::types::ComplexString&&>(__fbthrift_field_n);
+  return std::move(__fbthrift_field_n);
 }
+
 
 void swap([[maybe_unused]] ComplexNestedWithDefault& a, [[maybe_unused]] ComplexNestedWithDefault& b) {
   using ::std::swap;
@@ -1327,51 +1249,6 @@ bool MinPadding::operator<([[maybe_unused]] const MinPadding& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int8_t MinPadding::get_small() const {
-  return __fbthrift_field_small;
-}
-
-::std::int8_t& MinPadding::set_small(::std::int8_t small_) {
-  small_ref() = small_;
-  return __fbthrift_field_small;
-}
-
-::std::int64_t MinPadding::get_big() const {
-  return __fbthrift_field_big;
-}
-
-::std::int64_t& MinPadding::set_big(::std::int64_t big_) {
-  big_ref() = big_;
-  return __fbthrift_field_big;
-}
-
-::std::int16_t MinPadding::get_medium() const {
-  return __fbthrift_field_medium;
-}
-
-::std::int16_t& MinPadding::set_medium(::std::int16_t medium_) {
-  medium_ref() = medium_;
-  return __fbthrift_field_medium;
-}
-
-::std::int32_t MinPadding::get_biggish() const {
-  return __fbthrift_field_biggish;
-}
-
-::std::int32_t& MinPadding::set_biggish(::std::int32_t biggish_) {
-  biggish_ref() = biggish_;
-  return __fbthrift_field_biggish;
-}
-
-::std::int8_t MinPadding::get_tiny() const {
-  return __fbthrift_field_tiny;
-}
-
-::std::int8_t& MinPadding::set_tiny(::std::int8_t tiny_) {
-  tiny_ref() = tiny_;
-  return __fbthrift_field_tiny;
-}
 
 void swap([[maybe_unused]] MinPadding& a, [[maybe_unused]] MinPadding& b) {
   using ::std::swap;
@@ -1621,40 +1498,14 @@ bool MyStruct::__fbthrift_is_empty() const {
 
 
 
-
-::std::int64_t MyStruct::get_MyIntField() const {
-  return __fbthrift_field_MyIntField;
-}
-
-::std::int64_t& MyStruct::set_MyIntField(::std::int64_t MyIntField_) {
-  MyIntField_ref() = MyIntField_;
-  return __fbthrift_field_MyIntField;
-}
-
-const ::std::string& MyStruct::get_MyStringField() const& {
-  return __fbthrift_field_MyStringField;
-}
-
-::std::string MyStruct::get_MyStringField() && {
-  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-}
-
-::std::int64_t MyStruct::get_majorVer() const {
-  return __fbthrift_field_majorVer;
-}
-
-::std::int64_t& MyStruct::set_majorVer(::std::int64_t majorVer_) {
-  majorVer_ref() = majorVer_;
-  return __fbthrift_field_majorVer;
-}
-
 const ::apache::thrift::fixtures::types::MyDataItem& MyStruct::get_data() const& {
   return __fbthrift_field_data;
 }
 
 ::apache::thrift::fixtures::types::MyDataItem MyStruct::get_data() && {
-  return static_cast<::apache::thrift::fixtures::types::MyDataItem&&>(__fbthrift_field_data);
+  return std::move(__fbthrift_field_data);
 }
+
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
@@ -1816,15 +1667,6 @@ bool Renamed::operator<([[maybe_unused]] const Renamed& rhs) const {
 }
 
 
-::std::int64_t Renamed::get_bar() const {
-  return __fbthrift_field_bar;
-}
-
-::std::int64_t& Renamed::set_bar(::std::int64_t bar_) {
-  bar_ref() = bar_;
-  return __fbthrift_field_bar;
-}
-
 void swap([[maybe_unused]] Renamed& a, [[maybe_unused]] Renamed& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_bar, b.__fbthrift_field_bar);
@@ -1930,22 +1772,14 @@ bool AnnotatedTypes::operator<([[maybe_unused]] const AnnotatedTypes& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-const ::apache::thrift::fixtures::types::TBinary_8623& AnnotatedTypes::get_binary_field() const& {
-  return __fbthrift_field_binary_field;
-}
-
-::apache::thrift::fixtures::types::TBinary_8623 AnnotatedTypes::get_binary_field() && {
-  return static_cast<::apache::thrift::fixtures::types::TBinary_8623&&>(__fbthrift_field_binary_field);
-}
-
 const ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468& AnnotatedTypes::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
 ::apache::thrift::fixtures::types::SomeListOfTypeMap_2468 AnnotatedTypes::get_list_field() && {
-  return static_cast<::apache::thrift::fixtures::types::SomeListOfTypeMap_2468&&>(__fbthrift_field_list_field);
+  return std::move(__fbthrift_field_list_field);
 }
+
 
 void swap([[maybe_unused]] AnnotatedTypes& a, [[maybe_unused]] AnnotatedTypes& b) {
   using ::std::swap;
@@ -2065,7 +1899,6 @@ bool ForwardUsageRoot::operator<([[maybe_unused]] const ForwardUsageRoot& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::get_ForwardUsageStruct() const& {
   return ForwardUsageStruct_ref().has_value() ? std::addressof(__fbthrift_field_ForwardUsageStruct) : nullptr;
 }
@@ -2073,6 +1906,7 @@ const ::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::g
 ::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::get_ForwardUsageStruct() & {
   return ForwardUsageStruct_ref().has_value() ? std::addressof(__fbthrift_field_ForwardUsageStruct) : nullptr;
 }
+
 
 void swap([[maybe_unused]] ForwardUsageRoot& a, [[maybe_unused]] ForwardUsageRoot& b) {
   using ::std::swap;
@@ -2411,7 +2245,6 @@ bool IncompleteMap::operator<([[maybe_unused]] const IncompleteMap& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() const& {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
@@ -2419,6 +2252,7 @@ const ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMa
 ::std::map<::std::int32_t, ::apache::thrift::fixtures::types::IncompleteMapDep>* IncompleteMap::get_field() & {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
+
 
 void swap([[maybe_unused]] IncompleteMap& a, [[maybe_unused]] IncompleteMap& b) {
   using ::std::swap;
@@ -2601,7 +2435,6 @@ bool CompleteMap::operator<([[maybe_unused]] const CompleteMap& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() const& {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
@@ -2609,6 +2442,7 @@ const std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::Comp
 std::unordered_map<::std::int32_t, ::apache::thrift::fixtures::types::CompleteMapDep>* CompleteMap::get_field() & {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
+
 
 void swap([[maybe_unused]] CompleteMap& a, [[maybe_unused]] CompleteMap& b) {
   using ::std::swap;
@@ -2791,7 +2625,6 @@ bool IncompleteList::operator<([[maybe_unused]] const IncompleteList& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() const& {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
@@ -2799,6 +2632,7 @@ const ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* Incompl
 ::std::list<::apache::thrift::fixtures::types::IncompleteListDep>* IncompleteList::get_field() & {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
+
 
 void swap([[maybe_unused]] IncompleteList& a, [[maybe_unused]] IncompleteList& b) {
   using ::std::swap;
@@ -2981,7 +2815,6 @@ bool CompleteList::operator<([[maybe_unused]] const CompleteList& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() const& {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
@@ -2989,6 +2822,7 @@ const folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* C
 folly::small_vector<::apache::thrift::fixtures::types::CompleteListDep>* CompleteList::get_field() & {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
+
 
 void swap([[maybe_unused]] CompleteList& a, [[maybe_unused]] CompleteList& b) {
   using ::std::swap;
@@ -3171,7 +3005,6 @@ bool AdaptedList::operator<([[maybe_unused]] const AdaptedList& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() const& {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
@@ -3179,6 +3012,7 @@ const ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedL
 ::std::vector<::apache::thrift::fixtures::types::AdaptedListDep>* AdaptedList::get_field() & {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
+
 
 void swap([[maybe_unused]] AdaptedList& a, [[maybe_unused]] AdaptedList& b) {
   using ::std::swap;
@@ -3281,14 +3115,14 @@ bool AdaptedListDep::operator<([[maybe_unused]] const AdaptedListDep& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::apache::thrift::fixtures::types::AdaptedList& AdaptedListDep::get_field() const& {
   return __fbthrift_field_field;
 }
 
 ::apache::thrift::fixtures::types::AdaptedList AdaptedListDep::get_field() && {
-  return static_cast<::apache::thrift::fixtures::types::AdaptedList&&>(__fbthrift_field_field);
+  return std::move(__fbthrift_field_field);
 }
+
 
 void swap([[maybe_unused]] AdaptedListDep& a, [[maybe_unused]] AdaptedListDep& b) {
   using ::std::swap;
@@ -3397,7 +3231,6 @@ bool DependentAdaptedList::operator<([[maybe_unused]] const DependentAdaptedList
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() const& {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
@@ -3405,6 +3238,7 @@ const ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>*
 ::std::vector<::apache::thrift::fixtures::types::DependentAdaptedListDep>* DependentAdaptedList::get_field() & {
   return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
 }
+
 
 void swap([[maybe_unused]] DependentAdaptedList& a, [[maybe_unused]] DependentAdaptedList& b) {
   using ::std::swap;
@@ -3667,13 +3501,12 @@ bool AllocatorAware::operator<([[maybe_unused]] const AllocatorAware& rhs) const
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::apache::thrift::fixtures::types::list_i32_9187& AllocatorAware::get_aa_list() const& {
   return __fbthrift_field_aa_list;
 }
 
 ::apache::thrift::fixtures::types::list_i32_9187 AllocatorAware::get_aa_list() && {
-  return static_cast<::apache::thrift::fixtures::types::list_i32_9187&&>(__fbthrift_field_aa_list);
+  return std::move(__fbthrift_field_aa_list);
 }
 
 const ::apache::thrift::fixtures::types::set_i32_7070& AllocatorAware::get_aa_set() const& {
@@ -3681,7 +3514,7 @@ const ::apache::thrift::fixtures::types::set_i32_7070& AllocatorAware::get_aa_se
 }
 
 ::apache::thrift::fixtures::types::set_i32_7070 AllocatorAware::get_aa_set() && {
-  return static_cast<::apache::thrift::fixtures::types::set_i32_7070&&>(__fbthrift_field_aa_set);
+  return std::move(__fbthrift_field_aa_set);
 }
 
 const ::apache::thrift::fixtures::types::map_i32_i32_9565& AllocatorAware::get_aa_map() const& {
@@ -3689,25 +3522,9 @@ const ::apache::thrift::fixtures::types::map_i32_i32_9565& AllocatorAware::get_a
 }
 
 ::apache::thrift::fixtures::types::map_i32_i32_9565 AllocatorAware::get_aa_map() && {
-  return static_cast<::apache::thrift::fixtures::types::map_i32_i32_9565&&>(__fbthrift_field_aa_map);
+  return std::move(__fbthrift_field_aa_map);
 }
 
-const ::apache::thrift::fixtures::types::string_5252& AllocatorAware::get_aa_string() const& {
-  return __fbthrift_field_aa_string;
-}
-
-::apache::thrift::fixtures::types::string_5252 AllocatorAware::get_aa_string() && {
-  return static_cast<::apache::thrift::fixtures::types::string_5252&&>(__fbthrift_field_aa_string);
-}
-
-::std::int32_t AllocatorAware::get_not_a_container() const {
-  return __fbthrift_field_not_a_container;
-}
-
-::std::int32_t& AllocatorAware::set_not_a_container(::std::int32_t not_a_container_) {
-  not_a_container_ref() = not_a_container_;
-  return __fbthrift_field_not_a_container;
-}
 
 void swap([[maybe_unused]] AllocatorAware& a, [[maybe_unused]] AllocatorAware& b) {
   using ::std::swap;
@@ -3839,15 +3656,6 @@ bool AllocatorAware2::operator<([[maybe_unused]] const AllocatorAware2& rhs) con
 }
 
 
-::std::int32_t AllocatorAware2::get_not_a_container() const {
-  return __fbthrift_field_not_a_container;
-}
-
-::std::int32_t& AllocatorAware2::set_not_a_container(::std::int32_t not_a_container_) {
-  not_a_container_ref() = not_a_container_;
-  return __fbthrift_field_not_a_container;
-}
-
 void swap([[maybe_unused]] AllocatorAware2& a, [[maybe_unused]] AllocatorAware2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_not_a_container, b.__fbthrift_field_not_a_container);
@@ -3955,33 +3763,6 @@ bool TypedefStruct::operator<([[maybe_unused]] const TypedefStruct& rhs) const {
 }
 
 
-::std::int32_t TypedefStruct::get_i32_field() const {
-  return __fbthrift_field_i32_field;
-}
-
-::std::int32_t& TypedefStruct::set_i32_field(::std::int32_t i32_field_) {
-  i32_field_ref() = i32_field_;
-  return __fbthrift_field_i32_field;
-}
-
-::apache::thrift::fixtures::types::IntTypedef TypedefStruct::get_IntTypedef_field() const {
-  return __fbthrift_field_IntTypedef_field;
-}
-
-::apache::thrift::fixtures::types::IntTypedef& TypedefStruct::set_IntTypedef_field(::apache::thrift::fixtures::types::IntTypedef IntTypedef_field_) {
-  IntTypedef_field_ref() = IntTypedef_field_;
-  return __fbthrift_field_IntTypedef_field;
-}
-
-::apache::thrift::fixtures::types::UintTypedef TypedefStruct::get_UintTypedef_field() const {
-  return __fbthrift_field_UintTypedef_field;
-}
-
-::apache::thrift::fixtures::types::UintTypedef& TypedefStruct::set_UintTypedef_field(::apache::thrift::fixtures::types::UintTypedef UintTypedef_field_) {
-  UintTypedef_field_ref() = UintTypedef_field_;
-  return __fbthrift_field_UintTypedef_field;
-}
-
 void swap([[maybe_unused]] TypedefStruct& a, [[maybe_unused]] TypedefStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_i32_field, b.__fbthrift_field_i32_field);
@@ -4065,15 +3846,6 @@ bool StructWithDoubleUnderscores::operator<([[maybe_unused]] const StructWithDou
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
-::std::int32_t StructWithDoubleUnderscores::get___field() const {
-  return __fbthrift_field___field;
-}
-
-::std::int32_t& StructWithDoubleUnderscores::set___field(::std::int32_t __field_) {
-  __field_ref() = __field_;
-  return __fbthrift_field___field;
-}
 
 void swap([[maybe_unused]] StructWithDoubleUnderscores& a, [[maybe_unused]] StructWithDoubleUnderscores& b) {
   using ::std::swap;

@@ -236,19 +236,28 @@ class IncludedB final  {
 
   /** Glean { "field": "i32Field" } */
   [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
-  ::std::int32_t get_i32Field() const;
+  ::std::int32_t get_i32Field() const {
+    return __fbthrift_field_i32Field;
+  }
 
   /** Glean { "field": "i32Field" } */
   [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
-  ::std::int32_t& set_i32Field(::std::int32_t i32Field_);
+  ::std::int32_t& set_i32Field(::std::int32_t i32Field_) {
+    i32Field_ref() = i32Field_;
+    return __fbthrift_field_i32Field;
+  }
 
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
-  const ::std::string& get_strField() const&;
+  const ::std::string& get_strField() const& {
+    return __fbthrift_field_strField;
+  }
 
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
-  ::std::string get_strField() &&;
+  ::std::string get_strField() && {
+    return std::move(__fbthrift_field_strField);
+  }
 
   /** Glean { "field": "strField" } */
   template <typename T_IncludedB_strField_struct_setter = ::std::string>

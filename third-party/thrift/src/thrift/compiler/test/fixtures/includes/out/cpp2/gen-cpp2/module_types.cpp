@@ -95,13 +95,12 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
-
 const ::cpp2::Included& MyStruct::get_MyIncludedField() const& {
   return __fbthrift_field_MyIncludedField;
 }
 
 ::cpp2::Included MyStruct::get_MyIncludedField() && {
-  return static_cast<::cpp2::Included&&>(__fbthrift_field_MyIncludedField);
+  return std::move(__fbthrift_field_MyIncludedField);
 }
 
 const ::cpp2::Included& MyStruct::get_MyOtherIncludedField() const& {
@@ -109,17 +108,9 @@ const ::cpp2::Included& MyStruct::get_MyOtherIncludedField() const& {
 }
 
 ::cpp2::Included MyStruct::get_MyOtherIncludedField() && {
-  return static_cast<::cpp2::Included&&>(__fbthrift_field_MyOtherIncludedField);
+  return std::move(__fbthrift_field_MyOtherIncludedField);
 }
 
-::cpp2::IncludedInt64 MyStruct::get_MyIncludedInt() const {
-  return __fbthrift_field_MyIncludedInt;
-}
-
-::cpp2::IncludedInt64& MyStruct::set_MyIncludedInt(::cpp2::IncludedInt64 MyIncludedInt_) {
-  MyIncludedInt_ref() = MyIncludedInt_;
-  return __fbthrift_field_MyIncludedInt;
-}
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;

@@ -692,19 +692,28 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const;
+  ::std::int64_t get_MyIntField() const {
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
+    MyIntField_ref() = MyIntField_;
+    return __fbthrift_field_MyIntField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const&;
+  const ::std::string& get_MyStringField() const& {
+    return __fbthrift_field_MyStringField;
+  }
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() &&;
+  ::std::string get_MyStringField() && {
+    return std::move(__fbthrift_field_MyStringField);
+  }
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
@@ -732,35 +741,55 @@ class MyStruct final  {
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
-  ::cpp2::MyEnum get_myEnum() const;
+  ::cpp2::MyEnum get_myEnum() const {
+    return __fbthrift_field_myEnum;
+  }
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
-  ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_);
+  ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_) {
+    myEnum_ref() = myEnum_;
+    return __fbthrift_field_myEnum;
+  }
 
   /** Glean { "field": "oneway" } */
   [[deprecated("Use `FOO.oneway().value();` instead of `FOO.get_oneway();`")]]
-  bool get_oneway() const;
+  bool get_oneway() const {
+    return __fbthrift_field_oneway;
+  }
 
   /** Glean { "field": "oneway" } */
   [[deprecated("Use `FOO.oneway() = BAR;` instead of `FOO.set_oneway(BAR);`")]]
-  bool& set_oneway(bool oneway_);
+  bool& set_oneway(bool oneway_) {
+    oneway_ref() = oneway_;
+    return __fbthrift_field_oneway;
+  }
 
   /** Glean { "field": "readonly" } */
   [[deprecated("Use `FOO.readonly().value();` instead of `FOO.get_readonly();`")]]
-  bool get_readonly() const;
+  bool get_readonly() const {
+    return __fbthrift_field_readonly;
+  }
 
   /** Glean { "field": "readonly" } */
   [[deprecated("Use `FOO.readonly() = BAR;` instead of `FOO.set_readonly(BAR);`")]]
-  bool& set_readonly(bool readonly_);
+  bool& set_readonly(bool readonly_) {
+    readonly_ref() = readonly_;
+    return __fbthrift_field_readonly;
+  }
 
   /** Glean { "field": "idempotent" } */
   [[deprecated("Use `FOO.idempotent().value();` instead of `FOO.get_idempotent();`")]]
-  bool get_idempotent() const;
+  bool get_idempotent() const {
+    return __fbthrift_field_idempotent;
+  }
 
   /** Glean { "field": "idempotent" } */
   [[deprecated("Use `FOO.idempotent() = BAR;` instead of `FOO.set_idempotent(BAR);`")]]
-  bool& set_idempotent(bool idempotent_);
+  bool& set_idempotent(bool idempotent_) {
+    idempotent_ref() = idempotent_;
+    return __fbthrift_field_idempotent;
+  }
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

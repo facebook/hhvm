@@ -2274,15 +2274,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
+  const ::std::string& get_MyStringField() const&;
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-  }
+  ::std::string get_MyStringField() &&;
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
@@ -2294,15 +2290,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField2" } */
   [[deprecated("Use `FOO.MyStringField2().value();` instead of `FOO.get_MyStringField2();`")]]
-  const ::std::string& get_MyStringField2() const& {
-    return __fbthrift_field_MyStringField2;
-  }
+  const ::std::string& get_MyStringField2() const&;
 
   /** Glean { "field": "MyStringField2" } */
   [[deprecated("Use `FOO.MyStringField2().value();` instead of `FOO.get_MyStringField2();`")]]
-  ::std::string get_MyStringField2() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyStringField2);
-  }
+  ::std::string get_MyStringField2() &&;
 
   /** Glean { "field": "MyStringField2" } */
   template <typename T_MyStruct_MyStringField2_struct_setter = ::std::string>
@@ -2314,15 +2306,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyBinaryField" } */
   [[deprecated("Use `FOO.MyBinaryField().value();` instead of `FOO.get_MyBinaryField();`")]]
-  const ::std::string& get_MyBinaryField() const& {
-    return __fbthrift_field_MyBinaryField;
-  }
+  const ::std::string& get_MyBinaryField() const&;
 
   /** Glean { "field": "MyBinaryField" } */
   [[deprecated("Use `FOO.MyBinaryField().value();` instead of `FOO.get_MyBinaryField();`")]]
-  ::std::string get_MyBinaryField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField);
-  }
+  ::std::string get_MyBinaryField() &&;
 
   /** Glean { "field": "MyBinaryField" } */
   template <typename T_MyStruct_MyBinaryField_struct_setter = ::std::string>
@@ -2352,15 +2340,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyBinaryField3" } */
   [[deprecated("Use `FOO.MyBinaryField3().value();` instead of `FOO.get_MyBinaryField3();`")]]
-  const ::std::string& get_MyBinaryField3() const& {
-    return __fbthrift_field_MyBinaryField3;
-  }
+  const ::std::string& get_MyBinaryField3() const&;
 
   /** Glean { "field": "MyBinaryField3" } */
   [[deprecated("Use `FOO.MyBinaryField3().value();` instead of `FOO.get_MyBinaryField3();`")]]
-  ::std::string get_MyBinaryField3() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyBinaryField3);
-  }
+  ::std::string get_MyBinaryField3() &&;
 
   /** Glean { "field": "MyBinaryField3" } */
   template <typename T_MyStruct_MyBinaryField3_struct_setter = ::std::string>
@@ -3706,15 +3690,11 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message2" } */
   [[deprecated("Use `FOO.message2().value();` instead of `FOO.get_message2();`")]]
-  const ::std::string& get_message2() const& {
-    return __fbthrift_field_message2;
-  }
+  const ::std::string& get_message2() const&;
 
   /** Glean { "field": "message2" } */
   [[deprecated("Use `FOO.message2().value();` instead of `FOO.get_message2();`")]]
-  ::std::string get_message2() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message2);
-  }
+  ::std::string get_message2() &&;
 
   /** Glean { "field": "message2" } */
   template <typename T_AnException_message2_struct_setter = ::std::string>
@@ -3726,15 +3706,11 @@ class FOLLY_EXPORT AnException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "req_message" } */
   [[deprecated("Use `FOO.req_message().value();` instead of `FOO.get_req_message();`")]]
-  const ::std::string& get_req_message() const& {
-    return __fbthrift_field_req_message;
-  }
+  const ::std::string& get_req_message() const&;
 
   /** Glean { "field": "req_message" } */
   [[deprecated("Use `FOO.req_message().value();` instead of `FOO.get_req_message();`")]]
-  ::std::string get_req_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_req_message);
-  }
+  ::std::string get_req_message() &&;
 
   /** Glean { "field": "req_message" } */
   template <typename T_AnException_req_message_struct_setter = ::std::string>
@@ -6564,15 +6540,11 @@ class FOLLY_EXPORT AnotherException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string& get_message() const& {
-    return __fbthrift_field_message;
-  }
+  const ::std::string& get_message() const&;
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string get_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message);
-  }
+  ::std::string get_message() &&;
 
   /** Glean { "field": "message" } */
   template <typename T_AnotherException_message_struct_setter = ::std::string>
@@ -8106,15 +8078,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  const ::std::string& get_fieldD() const& {
-    return fieldD;
-  }
+  const ::std::string& get_fieldD() const&;
 
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
-  ::std::string get_fieldD() && {
-    return static_cast<::std::string&&>(fieldD);
-  }
+  ::std::string get_fieldD() &&;
 
   /** Glean { "field": "fieldD" } */
   template <typename T_containerStruct_fieldD_struct_setter = ::std::string>
@@ -8126,15 +8094,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  const ::std::string& get_fieldE() const& {
-    return fieldE;
-  }
+  const ::std::string& get_fieldE() const&;
 
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
-  ::std::string get_fieldE() && {
-    return static_cast<::std::string&&>(fieldE);
-  }
+  ::std::string get_fieldE() &&;
 
   /** Glean { "field": "fieldE" } */
   template <typename T_containerStruct_fieldE_struct_setter = ::std::string>
@@ -8146,15 +8110,11 @@ class containerStruct final  {
 
   /** Glean { "field": "req_fieldE" } */
   [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
-  const ::std::string& get_req_fieldE() const& {
-    return req_fieldE;
-  }
+  const ::std::string& get_req_fieldE() const&;
 
   /** Glean { "field": "req_fieldE" } */
   [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
-  ::std::string get_req_fieldE() && {
-    return static_cast<::std::string&&>(req_fieldE);
-  }
+  ::std::string get_req_fieldE() &&;
 
   /** Glean { "field": "req_fieldE" } */
   template <typename T_containerStruct_req_fieldE_struct_setter = ::std::string>
@@ -8634,15 +8594,11 @@ class containerStruct final  {
 
   /** Glean { "field": "fieldSD" } */
   [[deprecated("Use `FOO.fieldSD().value();` instead of `FOO.get_fieldSD();`")]]
-  const ::some::valid::ns::IndirectionD& get_fieldSD() const& {
-    return fieldSD;
-  }
+  const ::some::valid::ns::IndirectionD& get_fieldSD() const&;
 
   /** Glean { "field": "fieldSD" } */
   [[deprecated("Use `FOO.fieldSD().value();` instead of `FOO.get_fieldSD();`")]]
-  ::some::valid::ns::IndirectionD get_fieldSD() && {
-    return static_cast<::some::valid::ns::IndirectionD&&>(fieldSD);
-  }
+  ::some::valid::ns::IndirectionD get_fieldSD() &&;
 
   /** Glean { "field": "fieldSD" } */
   template <typename T_containerStruct_fieldSD_struct_setter = ::some::valid::ns::IndirectionD>
@@ -10295,15 +10251,11 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_type" } */
   [[deprecated("Use `FOO.iobuf_type().value();` instead of `FOO.get_iobuf_type();`")]]
-  const ::some::valid::ns::IOBuf& get_iobuf_type() const& {
-    return iobuf_type;
-  }
+  const ::some::valid::ns::IOBuf& get_iobuf_type() const&;
 
   /** Glean { "field": "iobuf_type" } */
   [[deprecated("Use `FOO.iobuf_type().value();` instead of `FOO.get_iobuf_type();`")]]
-  ::some::valid::ns::IOBuf get_iobuf_type() && {
-    return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type);
-  }
+  ::some::valid::ns::IOBuf get_iobuf_type() &&;
 
   /** Glean { "field": "iobuf_type" } */
   template <typename T_AnnotatedStruct_iobuf_type_struct_setter = ::some::valid::ns::IOBuf>
@@ -10315,15 +10267,11 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_ptr" } */
   [[deprecated("Use `FOO.iobuf_ptr().value();` instead of `FOO.get_iobuf_ptr();`")]]
-  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr() const& {
-    return iobuf_ptr;
-  }
+  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr() const&;
 
   /** Glean { "field": "iobuf_ptr" } */
   [[deprecated("Use `FOO.iobuf_ptr().value();` instead of `FOO.get_iobuf_ptr();`")]]
-  ::some::valid::ns::IOBufPtr get_iobuf_ptr() && {
-    return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr);
-  }
+  ::some::valid::ns::IOBufPtr get_iobuf_ptr() &&;
 
   /** Glean { "field": "iobuf_ptr" } */
   template <typename T_AnnotatedStruct_iobuf_ptr_struct_setter = ::some::valid::ns::IOBufPtr>
@@ -10503,15 +10451,11 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_type_val" } */
   [[deprecated("Use `FOO.iobuf_type_val().value();` instead of `FOO.get_iobuf_type_val();`")]]
-  const ::some::valid::ns::IOBuf& get_iobuf_type_val() const& {
-    return iobuf_type_val;
-  }
+  const ::some::valid::ns::IOBuf& get_iobuf_type_val() const&;
 
   /** Glean { "field": "iobuf_type_val" } */
   [[deprecated("Use `FOO.iobuf_type_val().value();` instead of `FOO.get_iobuf_type_val();`")]]
-  ::some::valid::ns::IOBuf get_iobuf_type_val() && {
-    return static_cast<::some::valid::ns::IOBuf&&>(iobuf_type_val);
-  }
+  ::some::valid::ns::IOBuf get_iobuf_type_val() &&;
 
   /** Glean { "field": "iobuf_type_val" } */
   template <typename T_AnnotatedStruct_iobuf_type_val_struct_setter = ::some::valid::ns::IOBuf>
@@ -10523,15 +10467,11 @@ class AnnotatedStruct  {
 
   /** Glean { "field": "iobuf_ptr_val" } */
   [[deprecated("Use `FOO.iobuf_ptr_val().value();` instead of `FOO.get_iobuf_ptr_val();`")]]
-  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr_val() const& {
-    return iobuf_ptr_val;
-  }
+  const ::some::valid::ns::IOBufPtr& get_iobuf_ptr_val() const&;
 
   /** Glean { "field": "iobuf_ptr_val" } */
   [[deprecated("Use `FOO.iobuf_ptr_val().value();` instead of `FOO.get_iobuf_ptr_val();`")]]
-  ::some::valid::ns::IOBufPtr get_iobuf_ptr_val() && {
-    return static_cast<::some::valid::ns::IOBufPtr&&>(iobuf_ptr_val);
-  }
+  ::some::valid::ns::IOBufPtr get_iobuf_ptr_val() &&;
 
   /** Glean { "field": "iobuf_ptr_val" } */
   template <typename T_AnnotatedStruct_iobuf_ptr_val_struct_setter = ::some::valid::ns::IOBufPtr>

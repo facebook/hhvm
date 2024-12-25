@@ -330,6 +330,14 @@ bool Bang::operator<([[maybe_unused]] const Bang& rhs) const {
 }
 
 
+const ::std::string& Bang::get_message() const& {
+  return __fbthrift_field_message;
+}
+
+::std::string Bang::get_message() && {
+  return static_cast<::std::string&&>(__fbthrift_field_message);
+}
+
 void swap([[maybe_unused]] Bang& a, [[maybe_unused]] Bang& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);

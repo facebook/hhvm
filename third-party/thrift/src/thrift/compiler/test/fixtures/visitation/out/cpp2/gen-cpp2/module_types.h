@@ -2558,15 +2558,11 @@ class structA final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  const ::std::string& get_b() const& {
-    return __fbthrift_field_b;
-  }
+  const ::std::string& get_b() const&;
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  ::std::string get_b() && {
-    return static_cast<::std::string&&>(__fbthrift_field_b);
-  }
+  ::std::string get_b() &&;
 
   /** Glean { "field": "b" } */
   template <typename T_structA_b_struct_setter = ::std::string>
@@ -4984,15 +4980,11 @@ class structC final  {
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  const ::std::string& get_b() const& {
-    return __fbthrift_field_b;
-  }
+  const ::std::string& get_b() const&;
 
   /** Glean { "field": "b" } */
   [[deprecated("Use `FOO.b().value();` instead of `FOO.get_b();`")]]
-  ::std::string get_b() && {
-    return static_cast<::std::string&&>(__fbthrift_field_b);
-  }
+  ::std::string get_b() &&;
 
   /** Glean { "field": "b" } */
   template <typename T_structC_b_struct_setter = ::std::string>
@@ -6386,15 +6378,11 @@ class struct2 final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  const ::std::string& get_fieldB() const& {
-    return __fbthrift_field_fieldB;
-  }
+  const ::std::string& get_fieldB() const&;
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  ::std::string get_fieldB() && {
-    return static_cast<::std::string&&>(__fbthrift_field_fieldB);
-  }
+  ::std::string get_fieldB() &&;
 
   /** Glean { "field": "fieldB" } */
   template <typename T_struct2_fieldB_struct_setter = ::std::string>
@@ -7517,15 +7505,11 @@ class struct3 final  {
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  const ::std::string& get_fieldB() const& {
-    return __fbthrift_field_fieldB;
-  }
+  const ::std::string& get_fieldB() const&;
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
-  ::std::string get_fieldB() && {
-    return static_cast<::std::string&&>(__fbthrift_field_fieldB);
-  }
+  ::std::string get_fieldB() &&;
 
   /** Glean { "field": "fieldB" } */
   template <typename T_struct3_fieldB_struct_setter = ::std::string>
@@ -8704,15 +8688,11 @@ class struct_binary final  {
 
   /** Glean { "field": "bi" } */
   [[deprecated("Use `FOO.bi().value();` instead of `FOO.get_bi();`")]]
-  const ::std::string& get_bi() const& {
-    return __fbthrift_field_bi;
-  }
+  const ::std::string& get_bi() const&;
 
   /** Glean { "field": "bi" } */
   [[deprecated("Use `FOO.bi().value();` instead of `FOO.get_bi();`")]]
-  ::std::string get_bi() && {
-    return static_cast<::std::string&&>(__fbthrift_field_bi);
-  }
+  ::std::string get_bi() &&;
 
   /** Glean { "field": "bi" } */
   template <typename T_struct_binary_bi_struct_setter = ::std::string>
@@ -13699,15 +13679,11 @@ class struct_with_indirections final  {
 
   /** Glean { "field": "phrase" } */
   [[deprecated("Use `FOO.phrase().value();` instead of `FOO.get_phrase();`")]]
-  const ::test_cpp2::cpp_reflection::HasAPhrase& get_phrase() const& {
-    return __fbthrift_field_phrase;
-  }
+  const ::test_cpp2::cpp_reflection::HasAPhrase& get_phrase() const&;
 
   /** Glean { "field": "phrase" } */
   [[deprecated("Use `FOO.phrase().value();` instead of `FOO.get_phrase();`")]]
-  ::test_cpp2::cpp_reflection::HasAPhrase get_phrase() && {
-    return static_cast<::test_cpp2::cpp_reflection::HasAPhrase&&>(__fbthrift_field_phrase);
-  }
+  ::test_cpp2::cpp_reflection::HasAPhrase get_phrase() &&;
 
   /** Glean { "field": "phrase" } */
   template <typename T_struct_with_indirections_phrase_struct_setter = ::test_cpp2::cpp_reflection::HasAPhrase>

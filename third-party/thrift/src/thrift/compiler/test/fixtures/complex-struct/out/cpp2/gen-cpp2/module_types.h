@@ -983,15 +983,11 @@ class MyStructFloatFieldThrowExp final  {
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
-  const ::std::string& get_myStringField() const& {
-    return __fbthrift_field_myStringField;
-  }
+  const ::std::string& get_myStringField() const&;
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
-  ::std::string get_myStringField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_myStringField);
-  }
+  ::std::string get_myStringField() &&;
 
   /** Glean { "field": "myStringField" } */
   template <typename T_MyStructFloatFieldThrowExp_myStringField_struct_setter = ::std::string>
@@ -2908,15 +2904,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
+  const ::std::string& get_MyStringField() const&;
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-  }
+  ::std::string get_MyStringField() &&;
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
@@ -3511,15 +3503,11 @@ class SimpleStruct final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return static_cast<::std::string&&>(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_SimpleStruct_name_struct_setter = ::std::string>
@@ -6733,15 +6721,11 @@ class defaultStruct final  {
 
   /** Glean { "field": "myBinaryDFset" } */
   [[deprecated("Use `FOO.myBinaryDFset().value();` instead of `FOO.get_myBinaryDFset();`")]]
-  const ::std::string& get_myBinaryDFset() const& {
-    return __fbthrift_field_myBinaryDFset;
-  }
+  const ::std::string& get_myBinaryDFset() const&;
 
   /** Glean { "field": "myBinaryDFset" } */
   [[deprecated("Use `FOO.myBinaryDFset().value();` instead of `FOO.get_myBinaryDFset();`")]]
-  ::std::string get_myBinaryDFset() && {
-    return static_cast<::std::string&&>(__fbthrift_field_myBinaryDFset);
-  }
+  ::std::string get_myBinaryDFset() &&;
 
   /** Glean { "field": "myBinaryDFset" } */
   template <typename T_defaultStruct_myBinaryDFset_struct_setter = ::std::string>
@@ -6753,15 +6737,11 @@ class defaultStruct final  {
 
   /** Glean { "field": "myBinary" } */
   [[deprecated("Use `FOO.myBinary().value();` instead of `FOO.get_myBinary();`")]]
-  const ::std::string& get_myBinary() const& {
-    return __fbthrift_field_myBinary;
-  }
+  const ::std::string& get_myBinary() const&;
 
   /** Glean { "field": "myBinary" } */
   [[deprecated("Use `FOO.myBinary().value();` instead of `FOO.get_myBinary();`")]]
-  ::std::string get_myBinary() && {
-    return static_cast<::std::string&&>(__fbthrift_field_myBinary);
-  }
+  ::std::string get_myBinary() &&;
 
   /** Glean { "field": "myBinary" } */
   template <typename T_defaultStruct_myBinary_struct_setter = ::std::string>
@@ -7576,15 +7556,11 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
-  const ::std::string& get_myStringField() const& {
-    return __fbthrift_field_myStringField;
-  }
+  const ::std::string& get_myStringField() const&;
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
-  ::std::string get_myStringField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_myStringField);
-  }
+  ::std::string get_myStringField() &&;
 
   /** Glean { "field": "myStringField" } */
   template <typename T_MyStructTypeDef_myStringField_struct_setter = ::std::string>
@@ -7596,15 +7572,11 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myStringTypedef" } */
   [[deprecated("Use `FOO.myStringTypedef().value();` instead of `FOO.get_myStringTypedef();`")]]
-  const ::cpp2::stringTypedef& get_myStringTypedef() const& {
-    return __fbthrift_field_myStringTypedef;
-  }
+  const ::cpp2::stringTypedef& get_myStringTypedef() const&;
 
   /** Glean { "field": "myStringTypedef" } */
   [[deprecated("Use `FOO.myStringTypedef().value();` instead of `FOO.get_myStringTypedef();`")]]
-  ::cpp2::stringTypedef get_myStringTypedef() && {
-    return static_cast<::cpp2::stringTypedef&&>(__fbthrift_field_myStringTypedef);
-  }
+  ::cpp2::stringTypedef get_myStringTypedef() &&;
 
   /** Glean { "field": "myStringTypedef" } */
   template <typename T_MyStructTypeDef_myStringTypedef_struct_setter = ::cpp2::stringTypedef>
@@ -8509,15 +8481,11 @@ class TypeRemapped final  {
 
   /** Glean { "field": "binaryTestBuffer" } */
   [[deprecated("Use `FOO.binaryTestBuffer().value();` instead of `FOO.get_binaryTestBuffer();`")]]
-  const ::cpp2::binary_4918& get_binaryTestBuffer() const& {
-    return __fbthrift_field_binaryTestBuffer;
-  }
+  const ::cpp2::binary_4918& get_binaryTestBuffer() const&;
 
   /** Glean { "field": "binaryTestBuffer" } */
   [[deprecated("Use `FOO.binaryTestBuffer().value();` instead of `FOO.get_binaryTestBuffer();`")]]
-  ::cpp2::binary_4918 get_binaryTestBuffer() && {
-    return static_cast<::cpp2::binary_4918&&>(__fbthrift_field_binaryTestBuffer);
-  }
+  ::cpp2::binary_4918 get_binaryTestBuffer() &&;
 
   /** Glean { "field": "binaryTestBuffer" } */
   template <typename T_TypeRemapped_binaryTestBuffer_struct_setter = ::cpp2::binary_4918>
@@ -8851,15 +8819,11 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string& get_message() const& {
-    return __fbthrift_field_message;
-  }
+  const ::std::string& get_message() const&;
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string get_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message);
-  }
+  ::std::string get_message() &&;
 
   /** Glean { "field": "message" } */
   template <typename T_reqXcep_message_struct_setter = ::std::string>
@@ -9553,15 +9517,11 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string& get_message() const& {
-    return __fbthrift_field_message;
-  }
+  const ::std::string& get_message() const&;
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string get_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message);
-  }
+  ::std::string get_message() &&;
 
   /** Glean { "field": "message" } */
   template <typename T_complexException_message_struct_setter = ::std::string>

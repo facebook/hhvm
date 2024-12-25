@@ -136,6 +136,14 @@ bool MyAnnotation::operator<([[maybe_unused]] const MyAnnotation& rhs) const {
 }
 
 
+const ::std::string& MyAnnotation::get_signature() const& {
+  return __fbthrift_field_signature;
+}
+
+::std::string MyAnnotation::get_signature() && {
+  return static_cast<::std::string&&>(__fbthrift_field_signature);
+}
+
 ::facebook::thrift::test::Color MyAnnotation::get_color() const {
   return __fbthrift_field_color;
 }
@@ -1576,6 +1584,14 @@ bool Config::operator<([[maybe_unused]] const Config& rhs) const {
 }
 
 
+const ::std::string& Config::get_path() const& {
+  return __fbthrift_field_path;
+}
+
+::std::string Config::get_path() && {
+  return static_cast<::std::string&&>(__fbthrift_field_path);
+}
+
 void swap([[maybe_unused]] Config& a, [[maybe_unused]] Config& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_path, b.__fbthrift_field_path);
@@ -1913,6 +1929,14 @@ bool AdaptTestStruct::operator<([[maybe_unused]] const AdaptTestStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& AdaptTestStruct::get_meta() const& {
+  return __fbthrift_field_meta;
+}
+
+::std::string AdaptTestStruct::get_meta() && {
+  return static_cast<::std::string&&>(__fbthrift_field_meta);
+}
 
 void swap([[maybe_unused]] AdaptTestStruct& a, [[maybe_unused]] AdaptTestStruct& b) {
   using ::std::swap;
@@ -4147,6 +4171,14 @@ bool Person::operator<([[maybe_unused]] const Person& rhs) const {
 }
 
 
+const ::std::string& Person::get_name() const& {
+  return __fbthrift_field_name;
+}
+
+::std::string Person::get_name() && {
+  return static_cast<::std::string&&>(__fbthrift_field_name);
+}
+
 void swap([[maybe_unused]] Person& a, [[maybe_unused]] Person& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_name, b.__fbthrift_field_name);
@@ -4247,6 +4279,14 @@ bool Person2::operator<([[maybe_unused]] const Person2& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& Person2::get_name() const& {
+  return __fbthrift_field_name;
+}
+
+::std::string Person2::get_name() && {
+  return static_cast<::std::string&&>(__fbthrift_field_name);
+}
 
 void swap([[maybe_unused]] Person2& a, [[maybe_unused]] Person2& b) {
   using ::std::swap;

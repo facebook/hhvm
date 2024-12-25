@@ -177,6 +177,14 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return __fbthrift_field_inty;
 }
 
+const ::std::string& MyStruct::get_stringy() const& {
+  return __fbthrift_field_stringy;
+}
+
+::std::string MyStruct::get_stringy() && {
+  return static_cast<::std::string&&>(__fbthrift_field_stringy);
+}
+
 const ::test::fixtures::python_capi::MyDataItem& MyStruct::get_myItemy() const& {
   return __fbthrift_field_myItemy;
 }
@@ -340,6 +348,14 @@ bool MyDataItem::operator<([[maybe_unused]] const MyDataItem& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& MyDataItem::get_s() const& {
+  return __fbthrift_field_s;
+}
+
+::std::string MyDataItem::get_s() && {
+  return static_cast<::std::string&&>(__fbthrift_field_s);
+}
 
 void swap([[maybe_unused]] MyDataItem& a, [[maybe_unused]] MyDataItem& b) {
   using ::std::swap;
@@ -524,6 +540,14 @@ bool DoubledPair::operator<([[maybe_unused]] const DoubledPair& rhs) const {
 }
 
 
+const ::std::string& DoubledPair::get_s() const& {
+  return __fbthrift_field_s;
+}
+
+::std::string DoubledPair::get_s() && {
+  return static_cast<::std::string&&>(__fbthrift_field_s);
+}
+
 ::std::int32_t DoubledPair::get_x() const {
   return __fbthrift_field_x;
 }
@@ -655,6 +679,14 @@ bool StringPair::operator<([[maybe_unused]] const StringPair& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& StringPair::get_normal() const& {
+  return __fbthrift_field_normal;
+}
+
+::std::string StringPair::get_normal() && {
+  return static_cast<::std::string&&>(__fbthrift_field_normal);
+}
 
 void swap([[maybe_unused]] StringPair& a, [[maybe_unused]] StringPair& b) {
   using ::std::swap;
@@ -995,6 +1027,22 @@ float& PrimitiveStruct::set_floaty(float floaty_) {
   return __fbthrift_field_floaty;
 }
 
+const ::test::fixtures::python_capi::IOBuf& PrimitiveStruct::get_buffy() const& {
+  return __fbthrift_field_buffy;
+}
+
+::test::fixtures::python_capi::IOBuf PrimitiveStruct::get_buffy() && {
+  return static_cast<::test::fixtures::python_capi::IOBuf&&>(__fbthrift_field_buffy);
+}
+
+const ::test::fixtures::python_capi::IOBufPtr& PrimitiveStruct::get_pointbuffy() const& {
+  return __fbthrift_field_pointbuffy;
+}
+
+::test::fixtures::python_capi::IOBufPtr PrimitiveStruct::get_pointbuffy() && {
+  return static_cast<::test::fixtures::python_capi::IOBufPtr&&>(__fbthrift_field_pointbuffy);
+}
+
 const ::test::fixtures::python_capi::MyStruct& PrimitiveStruct::get_patched_struct() const& {
   return __fbthrift_field_patched_struct;
 }
@@ -1009,6 +1057,22 @@ const ::test::fixtures::python_capi::VapidStruct& PrimitiveStruct::get_empty_str
 
 ::test::fixtures::python_capi::VapidStruct PrimitiveStruct::get_empty_struct() && {
   return static_cast<::test::fixtures::python_capi::VapidStruct&&>(__fbthrift_field_empty_struct);
+}
+
+const folly::fbstring& PrimitiveStruct::get_fbstring() const& {
+  return __fbthrift_field_fbstring;
+}
+
+folly::fbstring PrimitiveStruct::get_fbstring() && {
+  return static_cast<folly::fbstring&&>(__fbthrift_field_fbstring);
+}
+
+const ::apache::thrift::ManagedStringViewWithConversions& PrimitiveStruct::get_managed_string_view() const& {
+  return __fbthrift_field_managed_string_view;
+}
+
+::apache::thrift::ManagedStringViewWithConversions PrimitiveStruct::get_managed_string_view() && {
+  return static_cast<::apache::thrift::ManagedStringViewWithConversions&&>(__fbthrift_field_managed_string_view);
 }
 
 const ::test::fixtures::python_capi::SomeError& PrimitiveStruct::get_some_error() const& {

@@ -389,6 +389,22 @@ const ::std::set<::std::int32_t>& containerStruct::get_fieldC() const& {
   return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
+const ::std::string& containerStruct::get_fieldD() const& {
+  return __fbthrift_field_fieldD;
+}
+
+::std::string containerStruct::get_fieldD() && {
+  return static_cast<::std::string&&>(__fbthrift_field_fieldD);
+}
+
+const ::std::string& containerStruct::get_fieldE() const& {
+  return __fbthrift_field_fieldE;
+}
+
+::std::string containerStruct::get_fieldE() && {
+  return static_cast<::std::string&&>(__fbthrift_field_fieldE);
+}
+
 const ::std::vector<::std::vector<::std::vector<::std::int32_t>>>& containerStruct::get_fieldF() const& {
   return __fbthrift_field_fieldF;
 }

@@ -466,6 +466,14 @@ bool Person::operator<([[maybe_unused]] const Person& rhs) const {
   return __fbthrift_field_id;
 }
 
+const ::std::string& Person::get_name() const& {
+  return __fbthrift_field_name;
+}
+
+::std::string Person::get_name() && {
+  return static_cast<::std::string&&>(__fbthrift_field_name);
+}
+
 const ::std::int16_t* Person::get_age() const& {
   return age_ref().has_value() ? std::addressof(__fbthrift_field_age) : nullptr;
 }

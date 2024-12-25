@@ -868,15 +868,11 @@ class YourStruct final  {
 
   /** Glean { "field": "abstract" } */
   [[deprecated("Use `FOO.abstract().value();` instead of `FOO.get_abstract();`")]]
-  const ::std::string& get_abstract() const& {
-    return __fbthrift_field_abstract;
-  }
+  const ::std::string& get_abstract() const&;
 
   /** Glean { "field": "abstract" } */
   [[deprecated("Use `FOO.abstract().value();` instead of `FOO.get_abstract();`")]]
-  ::std::string get_abstract() && {
-    return static_cast<::std::string&&>(__fbthrift_field_abstract);
-  }
+  ::std::string get_abstract() &&;
 
   /** Glean { "field": "abstract" } */
   template <typename T_YourStruct_abstract_struct_setter = ::std::string>
@@ -888,15 +884,11 @@ class YourStruct final  {
 
   /** Glean { "field": "annotation_with_quote" } */
   [[deprecated("Use `FOO.annotation_with_quote().value();` instead of `FOO.get_annotation_with_quote();`")]]
-  const ::std::string& get_annotation_with_quote() const& {
-    return __fbthrift_field_annotation_with_quote;
-  }
+  const ::std::string& get_annotation_with_quote() const&;
 
   /** Glean { "field": "annotation_with_quote" } */
   [[deprecated("Use `FOO.annotation_with_quote().value();` instead of `FOO.get_annotation_with_quote();`")]]
-  ::std::string get_annotation_with_quote() && {
-    return static_cast<::std::string&&>(__fbthrift_field_annotation_with_quote);
-  }
+  ::std::string get_annotation_with_quote() &&;
 
   /** Glean { "field": "annotation_with_quote" } */
   template <typename T_YourStruct_annotation_with_quote_struct_setter = ::std::string>
@@ -908,15 +900,11 @@ class YourStruct final  {
 
   /** Glean { "field": "class_" } */
   [[deprecated("Use `FOO.class_().value();` instead of `FOO.get_class_();`")]]
-  const ::std::string& get_class_() const& {
-    return __fbthrift_field_class_;
-  }
+  const ::std::string& get_class_() const&;
 
   /** Glean { "field": "class_" } */
   [[deprecated("Use `FOO.class_().value();` instead of `FOO.get_class_();`")]]
-  ::std::string get_class_() && {
-    return static_cast<::std::string&&>(__fbthrift_field_class_);
-  }
+  ::std::string get_class_() &&;
 
   /** Glean { "field": "class_" } */
   template <typename T_YourStruct_class__struct_setter = ::std::string>
@@ -928,15 +916,11 @@ class YourStruct final  {
 
   /** Glean { "field": "annotation_with_trailing_comma" } */
   [[deprecated("Use `FOO.annotation_with_trailing_comma().value();` instead of `FOO.get_annotation_with_trailing_comma();`")]]
-  const ::std::string& get_annotation_with_trailing_comma() const& {
-    return __fbthrift_field_annotation_with_trailing_comma;
-  }
+  const ::std::string& get_annotation_with_trailing_comma() const&;
 
   /** Glean { "field": "annotation_with_trailing_comma" } */
   [[deprecated("Use `FOO.annotation_with_trailing_comma().value();` instead of `FOO.get_annotation_with_trailing_comma();`")]]
-  ::std::string get_annotation_with_trailing_comma() && {
-    return static_cast<::std::string&&>(__fbthrift_field_annotation_with_trailing_comma);
-  }
+  ::std::string get_annotation_with_trailing_comma() &&;
 
   /** Glean { "field": "annotation_with_trailing_comma" } */
   template <typename T_YourStruct_annotation_with_trailing_comma_struct_setter = ::std::string>
@@ -948,15 +932,11 @@ class YourStruct final  {
 
   /** Glean { "field": "empty_annotations" } */
   [[deprecated("Use `FOO.empty_annotations().value();` instead of `FOO.get_empty_annotations();`")]]
-  const ::std::string& get_empty_annotations() const& {
-    return __fbthrift_field_empty_annotations;
-  }
+  const ::std::string& get_empty_annotations() const&;
 
   /** Glean { "field": "empty_annotations" } */
   [[deprecated("Use `FOO.empty_annotations().value();` instead of `FOO.get_empty_annotations();`")]]
-  ::std::string get_empty_annotations() && {
-    return static_cast<::std::string&&>(__fbthrift_field_empty_annotations);
-  }
+  ::std::string get_empty_annotations() &&;
 
   /** Glean { "field": "empty_annotations" } */
   template <typename T_YourStruct_empty_annotations_struct_setter = ::std::string>
@@ -1154,15 +1134,11 @@ class MyStructNestedAnnotation final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return static_cast<::std::string&&>(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_MyStructNestedAnnotation_name_struct_setter = ::std::string>
@@ -1504,15 +1480,11 @@ class SecretStruct final  {
 
   /** Glean { "field": "password" } */
   [[deprecated("Use `FOO.password().value();` instead of `FOO.get_password();`")]]
-  const ::std::string& get_password() const& {
-    return __fbthrift_field_password;
-  }
+  const ::std::string& get_password() const&;
 
   /** Glean { "field": "password" } */
   [[deprecated("Use `FOO.password().value();` instead of `FOO.get_password();`")]]
-  ::std::string get_password() && {
-    return static_cast<::std::string&&>(__fbthrift_field_password);
-  }
+  ::std::string get_password() &&;
 
   /** Glean { "field": "password" } */
   template <typename T_SecretStruct_password_struct_setter = ::std::string>

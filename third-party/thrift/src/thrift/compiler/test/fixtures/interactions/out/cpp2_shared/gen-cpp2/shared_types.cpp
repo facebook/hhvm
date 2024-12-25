@@ -98,6 +98,14 @@ bool DoSomethingResult::operator<([[maybe_unused]] const DoSomethingResult& rhs)
 }
 
 
+const ::std::string& DoSomethingResult::get_s_res() const& {
+  return __fbthrift_field_s_res;
+}
+
+::std::string DoSomethingResult::get_s_res() && {
+  return static_cast<::std::string&&>(__fbthrift_field_s_res);
+}
+
 ::std::int32_t DoSomethingResult::get_i_res() const {
   return __fbthrift_field_i_res;
 }

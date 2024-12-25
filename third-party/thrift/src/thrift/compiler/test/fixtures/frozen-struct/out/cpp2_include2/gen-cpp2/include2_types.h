@@ -244,15 +244,11 @@ class IncludedB final  {
 
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
-  const ::std::string& get_strField() const& {
-    return __fbthrift_field_strField;
-  }
+  const ::std::string& get_strField() const&;
 
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
-  ::std::string get_strField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_strField);
-  }
+  ::std::string get_strField() &&;
 
   /** Glean { "field": "strField" } */
   template <typename T_IncludedB_strField_struct_setter = ::std::string>

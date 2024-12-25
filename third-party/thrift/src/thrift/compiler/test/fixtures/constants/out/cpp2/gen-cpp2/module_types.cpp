@@ -174,6 +174,14 @@ bool Internship::operator<([[maybe_unused]] const Internship& rhs) const {
   return __fbthrift_field_weeks;
 }
 
+const ::std::string& Internship::get_title() const& {
+  return __fbthrift_field_title;
+}
+
+::std::string Internship::get_title() && {
+  return static_cast<::std::string&&>(__fbthrift_field_title);
+}
+
 const ::cpp2::Company* Internship::get_employer() const& {
   return employer_ref().has_value() ? std::addressof(__fbthrift_field_employer) : nullptr;
 }
@@ -421,6 +429,14 @@ bool struct1::operator<([[maybe_unused]] const struct1& rhs) const {
   return __fbthrift_field_a;
 }
 
+const ::std::string& struct1::get_b() const& {
+  return __fbthrift_field_b;
+}
+
+::std::string struct1::get_b() && {
+  return static_cast<::std::string&&>(__fbthrift_field_b);
+}
+
 void swap([[maybe_unused]] struct1& a, [[maybe_unused]] struct1& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_a, b.__fbthrift_field_a);
@@ -542,6 +558,14 @@ bool struct2::operator<([[maybe_unused]] const struct2& rhs) const {
 ::std::int32_t& struct2::set_a(::std::int32_t a_) {
   a_ref() = a_;
   return __fbthrift_field_a;
+}
+
+const ::std::string& struct2::get_b() const& {
+  return __fbthrift_field_b;
+}
+
+::std::string struct2::get_b() && {
+  return static_cast<::std::string&&>(__fbthrift_field_b);
 }
 
 const ::cpp2::struct1& struct2::get_c() const& {
@@ -676,6 +700,14 @@ bool struct3::operator<([[maybe_unused]] const struct3& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& struct3::get_a() const& {
+  return __fbthrift_field_a;
+}
+
+::std::string struct3::get_a() && {
+  return static_cast<::std::string&&>(__fbthrift_field_a);
+}
 
 ::std::int32_t struct3::get_b() const {
   return __fbthrift_field_b;

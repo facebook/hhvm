@@ -245,6 +245,22 @@ double& StructWithDefaultStruct::set_double_field(double double_field_) {
   return __fbthrift_field_double_field;
 }
 
+const ::std::string& StructWithDefaultStruct::get_string_field() const& {
+  return __fbthrift_field_string_field;
+}
+
+::std::string StructWithDefaultStruct::get_string_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_string_field);
+}
+
+const ::std::string& StructWithDefaultStruct::get_binary_field() const& {
+  return __fbthrift_field_binary_field;
+}
+
+::std::string StructWithDefaultStruct::get_binary_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_binary_field);
+}
+
 ::apache::thrift::test::MyEnum StructWithDefaultStruct::get_enum_field() const {
   return __fbthrift_field_enum_field;
 }

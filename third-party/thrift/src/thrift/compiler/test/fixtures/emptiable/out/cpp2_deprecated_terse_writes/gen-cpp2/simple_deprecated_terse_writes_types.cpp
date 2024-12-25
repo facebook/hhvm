@@ -328,6 +328,22 @@ double& EmptiableStruct::set_double_field(double double_field_) {
   return __fbthrift_field_double_field;
 }
 
+const ::std::string& EmptiableStruct::get_string_field() const& {
+  return __fbthrift_field_string_field;
+}
+
+::std::string EmptiableStruct::get_string_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_string_field);
+}
+
+const ::std::string& EmptiableStruct::get_binary_field() const& {
+  return __fbthrift_field_binary_field;
+}
+
+::std::string EmptiableStruct::get_binary_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_binary_field);
+}
+
 ::apache::thrift::test::MyEnum EmptiableStruct::get_enum_field() const {
   return __fbthrift_field_enum_field;
 }
@@ -618,6 +634,22 @@ double NotEmptiableStruct::get_double_field() const {
 double& NotEmptiableStruct::set_double_field(double double_field_) {
   double_field_ref() = double_field_;
   return __fbthrift_field_double_field;
+}
+
+const ::std::string& NotEmptiableStruct::get_string_field() const& {
+  return __fbthrift_field_string_field;
+}
+
+::std::string NotEmptiableStruct::get_string_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_string_field);
+}
+
+const ::std::string& NotEmptiableStruct::get_binary_field() const& {
+  return __fbthrift_field_binary_field;
+}
+
+::std::string NotEmptiableStruct::get_binary_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_binary_field);
 }
 
 ::apache::thrift::test::MyEnum NotEmptiableStruct::get_enum_field() const {

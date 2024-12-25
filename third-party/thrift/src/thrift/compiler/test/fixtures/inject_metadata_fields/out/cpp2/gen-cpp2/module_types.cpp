@@ -92,6 +92,14 @@ bool Fields::operator<([[maybe_unused]] const Fields& rhs) const {
 }
 
 
+const ::std::string& Fields::get_injected_field() const& {
+  return __fbthrift_field_injected_field;
+}
+
+::std::string Fields::get_injected_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_injected_field);
+}
+
 void swap([[maybe_unused]] Fields& a, [[maybe_unused]] Fields& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_injected_field, b.__fbthrift_field_injected_field);
@@ -188,6 +196,14 @@ bool FieldsInjectedToEmptyStruct::operator<([[maybe_unused]] const FieldsInjecte
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& FieldsInjectedToEmptyStruct::get_injected_field() const& {
+  return __fbthrift_field_injected_field;
+}
+
+::std::string FieldsInjectedToEmptyStruct::get_injected_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_injected_field);
+}
 
 void swap([[maybe_unused]] FieldsInjectedToEmptyStruct& a, [[maybe_unused]] FieldsInjectedToEmptyStruct& b) {
   using ::std::swap;
@@ -290,6 +306,22 @@ bool FieldsInjectedToStruct::operator<([[maybe_unused]] const FieldsInjectedToSt
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& FieldsInjectedToStruct::get_string_field() const& {
+  return __fbthrift_field_string_field;
+}
+
+::std::string FieldsInjectedToStruct::get_string_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_string_field);
+}
+
+const ::std::string& FieldsInjectedToStruct::get_injected_field() const& {
+  return __fbthrift_field_injected_field;
+}
+
+::std::string FieldsInjectedToStruct::get_injected_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_injected_field);
+}
 
 void swap([[maybe_unused]] FieldsInjectedToStruct& a, [[maybe_unused]] FieldsInjectedToStruct& b) {
   using ::std::swap;
@@ -401,6 +433,22 @@ bool FieldsInjectedWithIncludedStruct::operator<([[maybe_unused]] const FieldsIn
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& FieldsInjectedWithIncludedStruct::get_string_field() const& {
+  return __fbthrift_field_string_field;
+}
+
+::std::string FieldsInjectedWithIncludedStruct::get_string_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_string_field);
+}
+
+const ::std::string& FieldsInjectedWithIncludedStruct::get_injected_field() const& {
+  return __fbthrift_field_injected_field;
+}
+
+::std::string FieldsInjectedWithIncludedStruct::get_injected_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_injected_field);
+}
 
 void swap([[maybe_unused]] FieldsInjectedWithIncludedStruct& a, [[maybe_unused]] FieldsInjectedWithIncludedStruct& b) {
   using ::std::swap;

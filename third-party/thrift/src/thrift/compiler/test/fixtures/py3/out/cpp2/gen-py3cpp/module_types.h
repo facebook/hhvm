@@ -2775,15 +2775,11 @@ class ComplexStruct final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return static_cast<::std::string&&>(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_ComplexStruct_name_struct_setter = ::std::string>
@@ -2803,15 +2799,11 @@ class ComplexStruct final  {
 
   /** Glean { "field": "some_bytes" } */
   [[deprecated("Use `FOO.some_bytes().value();` instead of `FOO.get_some_bytes();`")]]
-  const ::std::string& get_some_bytes() const& {
-    return __fbthrift_field_some_bytes;
-  }
+  const ::std::string& get_some_bytes() const&;
 
   /** Glean { "field": "some_bytes" } */
   [[deprecated("Use `FOO.some_bytes().value();` instead of `FOO.get_some_bytes();`")]]
-  ::std::string get_some_bytes() && {
-    return static_cast<::std::string&&>(__fbthrift_field_some_bytes);
-  }
+  ::std::string get_some_bytes() &&;
 
   /** Glean { "field": "some_bytes" } */
   template <typename T_ComplexStruct_some_bytes_struct_setter = ::std::string>
@@ -2823,15 +2815,11 @@ class ComplexStruct final  {
 
   /** Glean { "field": "from" } */
   [[deprecated("Use `FOO.from().value();` instead of `FOO.get_from();`")]]
-  const ::std::string& get_from() const& {
-    return __fbthrift_field_from;
-  }
+  const ::std::string& get_from() const&;
 
   /** Glean { "field": "from" } */
   [[deprecated("Use `FOO.from().value();` instead of `FOO.get_from();`")]]
-  ::std::string get_from() && {
-    return static_cast<::std::string&&>(__fbthrift_field_from);
-  }
+  ::std::string get_from() &&;
 
   /** Glean { "field": "from" } */
   template <typename T_ComplexStruct_from_struct_setter = ::std::string>
@@ -2843,15 +2831,11 @@ class ComplexStruct final  {
 
   /** Glean { "field": "cdef" } */
   [[deprecated("Use `FOO.cdef().value();` instead of `FOO.get_cdef();`")]]
-  const ::std::string& get_cdef() const& {
-    return __fbthrift_field_cdef;
-  }
+  const ::std::string& get_cdef() const&;
 
   /** Glean { "field": "cdef" } */
   [[deprecated("Use `FOO.cdef().value();` instead of `FOO.get_cdef();`")]]
-  ::std::string get_cdef() && {
-    return static_cast<::std::string&&>(__fbthrift_field_cdef);
-  }
+  ::std::string get_cdef() &&;
 
   /** Glean { "field": "cdef" } */
   template <typename T_ComplexStruct_cdef_struct_setter = ::std::string>
@@ -2863,15 +2847,11 @@ class ComplexStruct final  {
 
   /** Glean { "field": "bytes_with_cpp_type" } */
   [[deprecated("Use `FOO.bytes_with_cpp_type().value();` instead of `FOO.get_bytes_with_cpp_type();`")]]
-  const ::py3::simple::foo_bar& get_bytes_with_cpp_type() const& {
-    return __fbthrift_field_bytes_with_cpp_type;
-  }
+  const ::py3::simple::foo_bar& get_bytes_with_cpp_type() const&;
 
   /** Glean { "field": "bytes_with_cpp_type" } */
   [[deprecated("Use `FOO.bytes_with_cpp_type().value();` instead of `FOO.get_bytes_with_cpp_type();`")]]
-  ::py3::simple::foo_bar get_bytes_with_cpp_type() && {
-    return static_cast<::py3::simple::foo_bar&&>(__fbthrift_field_bytes_with_cpp_type);
-  }
+  ::py3::simple::foo_bar get_bytes_with_cpp_type() &&;
 
   /** Glean { "field": "bytes_with_cpp_type" } */
   template <typename T_ComplexStruct_bytes_with_cpp_type_struct_setter = ::py3::simple::foo_bar>
@@ -3866,15 +3846,11 @@ class CustomFields final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  const ::MyType& get_string_field() const& {
-    return __fbthrift_field_string_field;
-  }
+  const ::MyType& get_string_field() const&;
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  ::MyType get_string_field() && {
-    return static_cast<::MyType&&>(__fbthrift_field_string_field);
-  }
+  ::MyType get_string_field() &&;
 
   /** Glean { "field": "string_field" } */
   template <typename T_CustomFields_string_field_struct_setter = ::MyType>
@@ -3886,15 +3862,11 @@ class CustomFields final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  const ::MyType& get_binary_field() const& {
-    return __fbthrift_field_binary_field;
-  }
+  const ::MyType& get_binary_field() const&;
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  ::MyType get_binary_field() && {
-    return static_cast<::MyType&&>(__fbthrift_field_binary_field);
-  }
+  ::MyType get_binary_field() &&;
 
   /** Glean { "field": "binary_field" } */
   template <typename T_CustomFields_binary_field_struct_setter = ::MyType>
@@ -4565,15 +4537,11 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  const ::py3::simple::CustomString& get_string_field() const& {
-    return __fbthrift_field_string_field;
-  }
+  const ::py3::simple::CustomString& get_string_field() const&;
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
-  ::py3::simple::CustomString get_string_field() && {
-    return static_cast<::py3::simple::CustomString&&>(__fbthrift_field_string_field);
-  }
+  ::py3::simple::CustomString get_string_field() &&;
 
   /** Glean { "field": "string_field" } */
   template <typename T_CustomTypedefFields_string_field_struct_setter = ::py3::simple::CustomString>
@@ -4585,15 +4553,11 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  const ::py3::simple::CustomBinary& get_binary_field() const& {
-    return __fbthrift_field_binary_field;
-  }
+  const ::py3::simple::CustomBinary& get_binary_field() const&;
 
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
-  ::py3::simple::CustomBinary get_binary_field() && {
-    return static_cast<::py3::simple::CustomBinary&&>(__fbthrift_field_binary_field);
-  }
+  ::py3::simple::CustomBinary get_binary_field() &&;
 
   /** Glean { "field": "binary_field" } */
   template <typename T_CustomTypedefFields_binary_field_struct_setter = ::py3::simple::CustomBinary>

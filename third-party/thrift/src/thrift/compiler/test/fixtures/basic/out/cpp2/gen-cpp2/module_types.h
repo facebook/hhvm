@@ -938,15 +938,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
+  const ::std::string& get_MyStringField() const&;
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-  }
+  ::std::string get_MyStringField() &&;
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyStruct_MyStringField_struct_setter = ::std::string>
@@ -1022,15 +1018,11 @@ class MyStruct final  {
 
   /** Glean { "field": "no_hack_codegen_field" } */
   [[deprecated("Use `FOO.no_hack_codegen_field().value();` instead of `FOO.get_no_hack_codegen_field();`")]]
-  const ::std::string& get_no_hack_codegen_field() const& {
-    return __fbthrift_field_no_hack_codegen_field;
-  }
+  const ::std::string& get_no_hack_codegen_field() const&;
 
   /** Glean { "field": "no_hack_codegen_field" } */
   [[deprecated("Use `FOO.no_hack_codegen_field().value();` instead of `FOO.get_no_hack_codegen_field();`")]]
-  ::std::string get_no_hack_codegen_field() && {
-    return static_cast<::std::string&&>(__fbthrift_field_no_hack_codegen_field);
-  }
+  ::std::string get_no_hack_codegen_field() &&;
 
   /** Glean { "field": "no_hack_codegen_field" } */
   template <typename T_MyStruct_no_hack_codegen_field_struct_setter = ::std::string>
@@ -2139,15 +2131,11 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
+  const ::std::string& get_MyStringField() const&;
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-  }
+  ::std::string get_MyStringField() &&;
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyException_MyStringField_struct_setter = ::std::string>
@@ -2522,15 +2510,11 @@ class FOLLY_EXPORT MyExceptionWithMessage : public virtual apache::thrift::TExce
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  const ::std::string& get_MyStringField() const& {
-    return __fbthrift_field_MyStringField;
-  }
+  const ::std::string& get_MyStringField() const&;
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
-  ::std::string get_MyStringField() && {
-    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
-  }
+  ::std::string get_MyStringField() &&;
 
   /** Glean { "field": "MyStringField" } */
   template <typename T_MyExceptionWithMessage_MyStringField_struct_setter = ::std::string>

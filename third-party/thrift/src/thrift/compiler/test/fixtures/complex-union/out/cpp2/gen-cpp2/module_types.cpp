@@ -543,6 +543,14 @@ bool Val::operator<([[maybe_unused]] const Val& rhs) const {
 }
 
 
+const ::std::string& Val::get_strVal() const& {
+  return __fbthrift_field_strVal;
+}
+
+::std::string Val::get_strVal() && {
+  return static_cast<::std::string&&>(__fbthrift_field_strVal);
+}
+
 ::std::int32_t Val::get_intVal() const {
   return __fbthrift_field_intVal;
 }

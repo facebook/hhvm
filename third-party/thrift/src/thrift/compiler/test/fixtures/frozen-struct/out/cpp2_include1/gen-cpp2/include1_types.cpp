@@ -107,6 +107,14 @@ bool IncludedA::operator<([[maybe_unused]] const IncludedA& rhs) const {
   return __fbthrift_field_i32Field;
 }
 
+const ::std::string& IncludedA::get_strField() const& {
+  return __fbthrift_field_strField;
+}
+
+::std::string IncludedA::get_strField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_strField);
+}
+
 void swap([[maybe_unused]] IncludedA& a, [[maybe_unused]] IncludedA& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_i32Field, b.__fbthrift_field_i32Field);

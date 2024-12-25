@@ -235,15 +235,11 @@ class FOLLY_EXPORT Fiery : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string& get_message() const& {
-    return __fbthrift_field_message;
-  }
+  const ::std::string& get_message() const&;
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string get_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message);
-  }
+  ::std::string get_message() &&;
 
   /** Glean { "field": "message" } */
   template <typename T_Fiery_message_struct_setter = ::std::string>
@@ -657,15 +653,11 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
 
   /** Glean { "field": "error_message" } */
   [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
-  const ::std::string& get_error_message() const& {
-    return __fbthrift_field_error_message;
-  }
+  const ::std::string& get_error_message() const&;
 
   /** Glean { "field": "error_message" } */
   [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
-  ::std::string get_error_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_error_message);
-  }
+  ::std::string get_error_message() &&;
 
   /** Glean { "field": "error_message" } */
   template <typename T_ComplexFieldNames_error_message_struct_setter = ::std::string>
@@ -677,15 +669,11 @@ class FOLLY_EXPORT ComplexFieldNames : public virtual apache::thrift::TException
 
   /** Glean { "field": "internal_error_message" } */
   [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
-  const ::std::string& get_internal_error_message() const& {
-    return __fbthrift_field_internal_error_message;
-  }
+  const ::std::string& get_internal_error_message() const&;
 
   /** Glean { "field": "internal_error_message" } */
   [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
-  ::std::string get_internal_error_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_internal_error_message);
-  }
+  ::std::string get_internal_error_message() &&;
 
   /** Glean { "field": "internal_error_message" } */
   template <typename T_ComplexFieldNames_internal_error_message_struct_setter = ::std::string>
@@ -915,15 +903,11 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
 
   /** Glean { "field": "error_message" } */
   [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
-  const ::std::string& get_error_message() const& {
-    return __fbthrift_field_error_message;
-  }
+  const ::std::string& get_error_message() const&;
 
   /** Glean { "field": "error_message" } */
   [[deprecated("Use `FOO.error_message().value();` instead of `FOO.get_error_message();`")]]
-  ::std::string get_error_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_error_message);
-  }
+  ::std::string get_error_message() &&;
 
   /** Glean { "field": "error_message" } */
   template <typename T_CustomFieldNames_error_message_struct_setter = ::std::string>
@@ -935,15 +919,11 @@ class FOLLY_EXPORT CustomFieldNames : public virtual apache::thrift::TException 
 
   /** Glean { "field": "internal_error_message" } */
   [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
-  const ::std::string& get_internal_error_message() const& {
-    return __fbthrift_field_internal_error_message;
-  }
+  const ::std::string& get_internal_error_message() const&;
 
   /** Glean { "field": "internal_error_message" } */
   [[deprecated("Use `FOO.internal_error_message().value();` instead of `FOO.get_internal_error_message();`")]]
-  ::std::string get_internal_error_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_internal_error_message);
-  }
+  ::std::string get_internal_error_message() &&;
 
   /** Glean { "field": "internal_error_message" } */
   template <typename T_CustomFieldNames_internal_error_message_struct_setter = ::std::string>
@@ -1173,15 +1153,11 @@ class FOLLY_EXPORT ExceptionWithPrimitiveField : public virtual apache::thrift::
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string& get_message() const& {
-    return __fbthrift_field_message;
-  }
+  const ::std::string& get_message() const&;
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string get_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message);
-  }
+  ::std::string get_message() &&;
 
   /** Glean { "field": "message" } */
   template <typename T_ExceptionWithPrimitiveField_message_struct_setter = ::std::string>
@@ -1419,15 +1395,11 @@ class FOLLY_EXPORT ExceptionWithStructuredAnnotation : public virtual apache::th
 
   /** Glean { "field": "message_field" } */
   [[deprecated("Use `FOO.message_field().value();` instead of `FOO.get_message_field();`")]]
-  const ::std::string& get_message_field() const& {
-    return __fbthrift_field_message_field;
-  }
+  const ::std::string& get_message_field() const&;
 
   /** Glean { "field": "message_field" } */
   [[deprecated("Use `FOO.message_field().value();` instead of `FOO.get_message_field();`")]]
-  ::std::string get_message_field() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message_field);
-  }
+  ::std::string get_message_field() &&;
 
   /** Glean { "field": "message_field" } */
   template <typename T_ExceptionWithStructuredAnnotation_message_field_struct_setter = ::std::string>

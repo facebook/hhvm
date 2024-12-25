@@ -192,15 +192,11 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string& get_message() const& {
-    return __fbthrift_field_message;
-  }
+  const ::std::string& get_message() const&;
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string get_message() && {
-    return static_cast<::std::string&&>(__fbthrift_field_message);
-  }
+  ::std::string get_message() &&;
 
   /** Glean { "field": "message" } */
   template <typename T_CustomException_message_struct_setter = ::std::string>
@@ -371,15 +367,11 @@ class ShouldBeBoxed final  {
 
   /** Glean { "field": "sessionId" } */
   [[deprecated("Use `FOO.sessionId().value();` instead of `FOO.get_sessionId();`")]]
-  const ::std::string& get_sessionId() const& {
-    return __fbthrift_field_sessionId;
-  }
+  const ::std::string& get_sessionId() const&;
 
   /** Glean { "field": "sessionId" } */
   [[deprecated("Use `FOO.sessionId().value();` instead of `FOO.get_sessionId();`")]]
-  ::std::string get_sessionId() && {
-    return static_cast<::std::string&&>(__fbthrift_field_sessionId);
-  }
+  ::std::string get_sessionId() &&;
 
   /** Glean { "field": "sessionId" } */
   template <typename T_ShouldBeBoxed_sessionId_struct_setter = ::std::string>

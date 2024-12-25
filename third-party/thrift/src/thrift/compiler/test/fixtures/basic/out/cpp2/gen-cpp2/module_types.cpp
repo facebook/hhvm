@@ -183,6 +183,14 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return __fbthrift_field_MyIntField;
 }
 
+const ::std::string& MyStruct::get_MyStringField() const& {
+  return __fbthrift_field_MyStringField;
+}
+
+::std::string MyStruct::get_MyStringField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
+}
+
 const ::test::fixtures::basic::MyDataItemAlias& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }
@@ -233,6 +241,14 @@ const ::std::set<float>& MyStruct::get_floatSet() const& {
 
 ::std::set<float> MyStruct::get_floatSet() && {
   return static_cast<::std::set<float>&&>(__fbthrift_field_floatSet);
+}
+
+const ::std::string& MyStruct::get_no_hack_codegen_field() const& {
+  return __fbthrift_field_no_hack_codegen_field;
+}
+
+::std::string MyStruct::get_no_hack_codegen_field() && {
+  return static_cast<::std::string&&>(__fbthrift_field_no_hack_codegen_field);
 }
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
@@ -755,6 +771,14 @@ bool MyException::operator<([[maybe_unused]] const MyException& rhs) const {
   return __fbthrift_field_MyIntField;
 }
 
+const ::std::string& MyException::get_MyStringField() const& {
+  return __fbthrift_field_MyStringField;
+}
+
+::std::string MyException::get_MyStringField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
+}
+
 const ::test::fixtures::basic::MyStruct& MyException::get_myStruct() const& {
   return __fbthrift_field_myStruct;
 }
@@ -914,6 +938,14 @@ bool MyExceptionWithMessage::operator<([[maybe_unused]] const MyExceptionWithMes
 ::std::int64_t& MyExceptionWithMessage::set_MyIntField(::std::int64_t MyIntField_) {
   MyIntField_ref() = MyIntField_;
   return __fbthrift_field_MyIntField;
+}
+
+const ::std::string& MyExceptionWithMessage::get_MyStringField() const& {
+  return __fbthrift_field_MyStringField;
+}
+
+::std::string MyExceptionWithMessage::get_MyStringField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
 }
 
 const ::test::fixtures::basic::MyStruct& MyExceptionWithMessage::get_myStruct() const& {

@@ -490,15 +490,11 @@ class structured_annotation_inline final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return static_cast<::std::string&&>(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_inline_name_struct_setter = ::std::string>
@@ -666,15 +662,11 @@ class structured_annotation_with_default final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return static_cast<::std::string&&>(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_with_default_name_struct_setter = ::std::string>
@@ -1107,15 +1099,11 @@ class structured_annotation_recursive final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return static_cast<::std::string&&>(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_recursive_name_struct_setter = ::std::string>
@@ -1351,15 +1339,11 @@ class structured_annotation_nested final  {
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  const ::std::string& get_name() const& {
-    return __fbthrift_field_name;
-  }
+  const ::std::string& get_name() const&;
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
-  ::std::string get_name() && {
-    return static_cast<::std::string&&>(__fbthrift_field_name);
-  }
+  ::std::string get_name() &&;
 
   /** Glean { "field": "name" } */
   template <typename T_structured_annotation_nested_name_struct_setter = ::std::string>
@@ -1707,15 +1691,11 @@ class MyStruct final  {
 
   /** Glean { "field": "annotated_type" } */
   [[deprecated("Use `FOO.annotated_type().value();` instead of `FOO.get_annotated_type();`")]]
-  const ::test::fixtures::basic-structured-annotations::annotated_inline_string& get_annotated_type() const& {
-    return __fbthrift_field_annotated_type;
-  }
+  const ::test::fixtures::basic-structured-annotations::annotated_inline_string& get_annotated_type() const&;
 
   /** Glean { "field": "annotated_type" } */
   [[deprecated("Use `FOO.annotated_type().value();` instead of `FOO.get_annotated_type();`")]]
-  ::test::fixtures::basic-structured-annotations::annotated_inline_string get_annotated_type() && {
-    return static_cast<::test::fixtures::basic-structured-annotations::annotated_inline_string&&>(__fbthrift_field_annotated_type);
-  }
+  ::test::fixtures::basic-structured-annotations::annotated_inline_string get_annotated_type() &&;
 
   /** Glean { "field": "annotated_type" } */
   template <typename T_MyStruct_annotated_type_struct_setter = ::test::fixtures::basic-structured-annotations::annotated_inline_string>
@@ -1727,15 +1707,11 @@ class MyStruct final  {
 
   /** Glean { "field": "annotated_recursive" } */
   [[deprecated("Use `FOO.annotated_recursive().value();` instead of `FOO.get_annotated_recursive();`")]]
-  const ::std::string& get_annotated_recursive() const& {
-    return __fbthrift_field_annotated_recursive;
-  }
+  const ::std::string& get_annotated_recursive() const&;
 
   /** Glean { "field": "annotated_recursive" } */
   [[deprecated("Use `FOO.annotated_recursive().value();` instead of `FOO.get_annotated_recursive();`")]]
-  ::std::string get_annotated_recursive() && {
-    return static_cast<::std::string&&>(__fbthrift_field_annotated_recursive);
-  }
+  ::std::string get_annotated_recursive() &&;
 
   /** Glean { "field": "annotated_recursive" } */
   template <typename T_MyStruct_annotated_recursive_struct_setter = ::std::string>
@@ -1917,15 +1893,11 @@ class FOLLY_EXPORT MyException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "context" } */
   [[deprecated("Use `FOO.context().value();` instead of `FOO.get_context();`")]]
-  const ::std::string& get_context() const& {
-    return __fbthrift_field_context;
-  }
+  const ::std::string& get_context() const&;
 
   /** Glean { "field": "context" } */
   [[deprecated("Use `FOO.context().value();` instead of `FOO.get_context();`")]]
-  ::std::string get_context() && {
-    return static_cast<::std::string&&>(__fbthrift_field_context);
-  }
+  ::std::string get_context() &&;
 
   /** Glean { "field": "context" } */
   template <typename T_MyException_context_struct_setter = ::std::string>

@@ -145,6 +145,14 @@ bool MyStructFloatFieldThrowExp::operator<([[maybe_unused]] const MyStructFloatF
   return __fbthrift_field_MyByteField;
 }
 
+const ::std::string& MyStructFloatFieldThrowExp::get_myStringField() const& {
+  return __fbthrift_field_myStringField;
+}
+
+::std::string MyStructFloatFieldThrowExp::get_myStringField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_myStringField);
+}
+
 float MyStructFloatFieldThrowExp::get_myFloatField() const {
   return __fbthrift_field_myFloatField;
 }
@@ -525,6 +533,14 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return __fbthrift_field_MyIntField;
 }
 
+const ::std::string& MyStruct::get_MyStringField() const& {
+  return __fbthrift_field_MyStringField;
+}
+
+::std::string MyStruct::get_MyStringField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
+}
+
 const ::cpp2::MyDataItem& MyStruct::get_MyDataField() const& {
   return __fbthrift_field_MyDataField;
 }
@@ -897,6 +913,14 @@ bool SimpleStruct::operator<([[maybe_unused]] const SimpleStruct& rhs) const {
   return __fbthrift_field_age;
 }
 
+const ::std::string& SimpleStruct::get_name() const& {
+  return __fbthrift_field_name;
+}
+
+::std::string SimpleStruct::get_name() && {
+  return static_cast<::std::string&&>(__fbthrift_field_name);
+}
+
 void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_age, b.__fbthrift_field_age);
@@ -1173,6 +1197,22 @@ bool defaultStruct::operator<([[maybe_unused]] const defaultStruct& rhs) const {
 ::std::int32_t& defaultStruct::set_portNum(::std::int32_t portNum_) {
   portNum_ref() = portNum_;
   return __fbthrift_field_portNum;
+}
+
+const ::std::string& defaultStruct::get_myBinaryDFset() const& {
+  return __fbthrift_field_myBinaryDFset;
+}
+
+::std::string defaultStruct::get_myBinaryDFset() && {
+  return static_cast<::std::string&&>(__fbthrift_field_myBinaryDFset);
+}
+
+const ::std::string& defaultStruct::get_myBinary() const& {
+  return __fbthrift_field_myBinary;
+}
+
+::std::string defaultStruct::get_myBinary() && {
+  return static_cast<::std::string&&>(__fbthrift_field_myBinary);
 }
 
 ::std::int8_t defaultStruct::get_myByteDFSet() const {
@@ -1514,6 +1554,22 @@ bool MyStructTypeDef::operator<([[maybe_unused]] const MyStructTypeDef& rhs) con
 ::cpp2::longTypeDef& MyStructTypeDef::set_myLongTypeDef(::cpp2::longTypeDef myLongTypeDef_) {
   myLongTypeDef_ref() = myLongTypeDef_;
   return __fbthrift_field_myLongTypeDef;
+}
+
+const ::std::string& MyStructTypeDef::get_myStringField() const& {
+  return __fbthrift_field_myStringField;
+}
+
+::std::string MyStructTypeDef::get_myStringField() && {
+  return static_cast<::std::string&&>(__fbthrift_field_myStringField);
+}
+
+const ::cpp2::stringTypedef& MyStructTypeDef::get_myStringTypedef() const& {
+  return __fbthrift_field_myStringTypedef;
+}
+
+::cpp2::stringTypedef MyStructTypeDef::get_myStringTypedef() && {
+  return static_cast<::cpp2::stringTypedef&&>(__fbthrift_field_myStringTypedef);
 }
 
 const ::std::map<::std::int16_t, ::std::string>& MyStructTypeDef::get_myMapField() const& {
@@ -2498,6 +2554,14 @@ const ::cpp2::map_i32_FMap_6797& TypeRemapped::get_ioMap() const& {
   return __fbthrift_field_BigInteger;
 }
 
+const ::cpp2::binary_4918& TypeRemapped::get_binaryTestBuffer() const& {
+  return __fbthrift_field_binaryTestBuffer;
+}
+
+::cpp2::binary_4918 TypeRemapped::get_binaryTestBuffer() && {
+  return static_cast<::cpp2::binary_4918&&>(__fbthrift_field_binaryTestBuffer);
+}
+
 void swap([[maybe_unused]] TypeRemapped& a, [[maybe_unused]] TypeRemapped& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_lsMap, b.__fbthrift_field_lsMap);
@@ -2682,6 +2746,14 @@ bool reqXcep::operator<([[maybe_unused]] const reqXcep& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& reqXcep::get_message() const& {
+  return __fbthrift_field_message;
+}
+
+::std::string reqXcep::get_message() && {
+  return static_cast<::std::string&&>(__fbthrift_field_message);
+}
 
 ::std::int32_t reqXcep::get_errorCode() const {
   return __fbthrift_field_errorCode;
@@ -2940,6 +3012,14 @@ bool complexException::operator<([[maybe_unused]] const complexException& rhs) c
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::std::string& complexException::get_message() const& {
+  return __fbthrift_field_message;
+}
+
+::std::string complexException::get_message() && {
+  return static_cast<::std::string&&>(__fbthrift_field_message);
+}
 
 const ::std::vector<::std::string>& complexException::get_listStrings() const& {
   return __fbthrift_field_listStrings;

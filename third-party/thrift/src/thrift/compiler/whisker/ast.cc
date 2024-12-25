@@ -66,24 +66,31 @@ std::string partial_apply::path_string() const {
 
 std::string expression::to_string() const {
   return detail::variant_match(
-      content,
+      which,
       [](const variable_lookup& v) { return v.chain_string(); },
       [](const function_call& f) {
         std::string out = fmt::format("({}", f.name());
-        for (const auto& arg : f.args) {
+        for (const auto& arg : f.positional_arguments) {
           fmt::format_to(std::back_inserter(out), " {}", arg.to_string());
+        }
+        for (const auto& [name, arg] : f.named_arguments) {
+          fmt::format_to(
+              std::back_inserter(out), " {}={}", name, arg.value->to_string());
         }
         out += ")";
         return out;
       });
 }
 
-std::string_view expression::function_call::name() const {
+std::string expression::function_call::name() const {
   return detail::variant_match(
       which,
-      [&](function_call::not_tag) { return "not"; },
-      [&](function_call::and_tag) { return "and"; },
-      [&](function_call::or_tag) { return "or"; });
+      [](function_call::builtin_not) -> std::string { return "not"; },
+      [](function_call::builtin_and) -> std::string { return "and"; },
+      [](function_call::builtin_or) -> std::string { return "or"; },
+      [](const function_call::user_defined& f) -> std::string {
+        return f.name.chain_string();
+      });
 }
 
 std::string_view pragma_statement::to_string() const {

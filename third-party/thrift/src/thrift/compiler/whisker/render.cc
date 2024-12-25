@@ -342,33 +342,47 @@ class render_engine {
   }
 
   object evaluate(const ast::expression& expr) {
+    using function_call = ast::expression::function_call;
     return detail::variant_match(
-        expr.content,
+        expr.which,
         [&](const ast::variable_lookup& variable_lookup) {
           return lookup_variable(variable_lookup);
         },
-        [&](const ast::expression::function_call& func) {
+        [&](const function_call& func) {
           return detail::variant_match(
               func.which,
-              [&](ast::expression::function_call::not_tag) {
-                assert(func.args.size() == 1); // enforced by the parser
-                return object{!evaluate_as_bool(func.args[0])};
+              [&](function_call::builtin_not) -> object {
+                // enforced by the parser
+                assert(func.positional_arguments.size() == 1);
+                assert(func.named_arguments.empty());
+                return object{!evaluate_as_bool(func.positional_arguments[0])};
               },
-              [&](ast::expression::function_call::and_tag) {
-                for (const ast::expression& arg : func.args) {
+              [&](function_call::builtin_and) -> object {
+                // enforced by the parser
+                assert(func.named_arguments.empty());
+                for (const ast::expression& arg : func.positional_arguments) {
                   if (!evaluate_as_bool(arg)) {
                     return object{false};
                   }
                 }
                 return object{true};
               },
-              [&](ast::expression::function_call::or_tag) {
-                for (const ast::expression& arg : func.args) {
+              [&](function_call::builtin_or) -> object {
+                // enforced by the parser
+                assert(func.named_arguments.empty());
+                for (const ast::expression& arg : func.positional_arguments) {
                   if (evaluate_as_bool(arg)) {
                     return object{true};
                   }
                 }
                 return object{false};
+              },
+              [&](const function_call::user_defined& f) -> object {
+                diags_.error(
+                    f.name.loc.begin,
+                    "User-defined function '{}' not supported yet.",
+                    f.name.chain_string());
+                throw abort_rendering();
               });
         });
   }

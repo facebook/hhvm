@@ -512,9 +512,119 @@ TEST_F(ParserTest, conditional_block_not_wrong_arity) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "expected 1 argument for helper `not` but got 2",
+          "expected 1 argument for function 'not' but found 2",
           path_to_file(1),
           1)));
+}
+
+TEST_F(ParserTest, function_call) {
+  auto ast = parse_ast("{{ (uppercase (lowercase hello\tspace) world) }}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- interpolation <line:1:1, col:48> '(uppercase (lowercase hello space) world)'\n");
+}
+
+TEST_F(ParserTest, function_call_named_args) {
+  auto ast = parse_ast("{{ (str.concat hello world sep=comma) }}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- interpolation <line:1:1, col:41> '(str.concat hello world sep=comma)'\n");
+}
+
+TEST_F(ParserTest, function_call_named_args_only) {
+  auto ast = parse_ast("{{ (str.concat sep = comma) }}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- interpolation <line:1:1, col:31> '(str.concat sep=comma)'\n");
+}
+
+TEST_F(ParserTest, function_call_named_args_duplicate) {
+  auto ast =
+      parse_ast("{{ (str.concat hello world sep=comma foo=bar sep=baz) }}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "duplicate named argument 'sep' in function call 'str.concat'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, function_call_named_args_without_lookup) {
+  auto ast = parse_ast("{{ (sep=comma) }}");
+  // `sep` is parsed as the name
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier to precede `=` in named argument for function call 'sep'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, function_call_positional_args_after_named_args) {
+  auto ast = parse_ast("{{ (str.concat sep=comma hello world) }}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "unexpected positional argument 'hello' after named arguments in function call 'str.concat'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, function_call_named_args_not_identifier) {
+  auto ast = parse_ast("{{ (str.concat hello world word.sep=comma) }}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected identifier to precede `=` in named argument for function call 'str.concat'",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, function_call_named_args_for_builtins) {
+  {
+    auto ast = parse_ast("{{ (not foo sep=comma) }}");
+    EXPECT_FALSE(ast.has_value());
+    EXPECT_THAT(
+        diagnostics,
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "named arguments not allowed for function 'not'",
+            path_to_file(1),
+            1)));
+  }
+  {
+    auto ast = parse_ast("{{ (and foo bar sep=comma) }}");
+    EXPECT_FALSE(ast.has_value());
+    EXPECT_THAT(
+        diagnostics,
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "named arguments not allowed for function 'and'",
+            path_to_file(2),
+            1)));
+  }
+  {
+    auto ast = parse_ast("{{ (or foo bar sep=comma) }}");
+    EXPECT_FALSE(ast.has_value());
+    EXPECT_THAT(
+        diagnostics,
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "named arguments not allowed for function 'or'",
+            path_to_file(3),
+            1)));
+  }
 }
 
 TEST_F(ParserTest, basic_partial_apply) {

@@ -655,6 +655,18 @@ TEST_F(RenderTest, and_or_short_circuit) {
   }
 }
 
+TEST_F(RenderTest, user_defined_function) {
+  auto result = render("{{ (foo.bar hello world named=foo) }}\n", w::map({}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "User-defined function 'foo.bar' not supported yet.",
+          path_to_file,
+          1)));
+}
+
 TEST_F(RenderTest, let_statement) {
   auto result = render(
       "{{#let cond = (not false_value)}}\n"

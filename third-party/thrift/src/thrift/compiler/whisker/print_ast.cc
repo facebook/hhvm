@@ -18,10 +18,7 @@
 #include <thrift/compiler/whisker/print_ast.h>
 #include <thrift/compiler/whisker/tree_printer.h>
 
-#include <iterator>
-#include <memory>
 #include <ostream>
-#include <string_view>
 
 #include <fmt/core.h>
 

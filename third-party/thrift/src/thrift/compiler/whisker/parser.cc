@@ -995,51 +995,143 @@ class parser {
     if (!try_consume_token(&scan, tok::l_paren)) {
       return no_parse_result();
     }
+    scan = scan.make_fresh();
 
     function_call func;
+
     if (try_consume_token(&scan, tok::kw_not)) {
-      func.which = function_call::not_tag{};
+      func.which = function_call::builtin_not{};
     } else if (try_consume_token(&scan, tok::kw_and)) {
-      func.which = function_call::and_tag{};
+      func.which = function_call::builtin_and{};
     } else if (try_consume_token(&scan, tok::kw_or)) {
-      func.which = function_call::or_tag{};
+      func.which = function_call::builtin_or{};
+    } else if (parse_result lookup = parse_variable_lookup(scan)) {
+      func.which = function_call::user_defined{
+          std::move(lookup).consume_and_advance(&scan)};
     } else {
-      report_fatal_error(scan, "unrecognized function {}", scan.peek());
+      report_expected(scan, "function-lookup in function-call");
     }
 
-    while (parse_result cond = parse_expression(scan.make_fresh())) {
-      func.args.push_back(std::move(cond).consume_and_advance(&scan));
-    }
+    using named_argument_entry =
+        decltype(function_call::named_arguments)::value_type;
+    // argument → { positional-argument | named-argument }
+    // positional-argument → { expression }
+    // named-argument → { identifier ~ "=" ~ expression }
+    const auto parse_argument = [this, &func](parser_scan_window scan)
+        -> parse_result<std::variant<ast::expression, named_argument_entry>> {
+      assert(scan.empty());
+      const token& id = scan.peek();
+      if (id.kind == tok::identifier && scan.next().peek().kind == tok::eq) {
+        scan = scan.next(2).make_fresh();
+        if (parse_result expression = parse_expression(scan)) {
+          return {
+              named_argument_entry{
+                  id.string_value(),
+                  function_call::named_argument{
+                      ast::identifier{id.range, std::string(id.string_value())},
+                      std::make_unique<ast::expression>(
+                          std::move(expression).consume_and_advance(&scan))}},
+              scan};
+        }
+        report_expected(scan, "expression in named argument");
+      }
 
+      assert(scan.empty());
+      if (parse_result expression = parse_expression(scan)) {
+        return {
+            ast::expression{std::move(expression).consume_and_advance(&scan)},
+            scan};
+      }
+      if (scan.peek().kind == tok::eq) {
+        report_fatal_error(
+            scan,
+            "expected identifier to precede {} in named argument for function call '{}'",
+            tok::eq,
+            func.name());
+      }
+      return no_parse_result();
+    };
+
+    // All named arguments must be at the end of the argument list
+    bool named_arg_seen = false;
+    while (parse_result arg = parse_argument(scan.make_fresh())) {
+      auto arg_scan_start = scan;
+      detail::variant_match(
+          std::move(arg).consume_and_advance(&scan),
+          [&](ast::expression&& positional) {
+            if (named_arg_seen) {
+              report_fatal_error(
+                  scan,
+                  "unexpected positional argument '{}' after named arguments in function call '{}'",
+                  positional.to_string(),
+                  func.name());
+            }
+            func.positional_arguments.push_back(std::move(positional));
+          },
+          [&](named_argument_entry&& named) {
+            named_arg_seen = true;
+            std::string_view name = named.first;
+            if (const auto& [_, inserted] =
+                    func.named_arguments.insert(std::move(named));
+                !inserted) {
+              report_fatal_error(
+                  arg_scan_start,
+                  "duplicate named argument '{}' in function call '{}'",
+                  name,
+                  func.name());
+            }
+          });
+    }
+    scan = scan.make_fresh();
+
+    // Validate positional arguments
     detail::variant_match(
         func.which,
-        [&](function_call::not_tag) {
-          if (func.args.size() != 1) {
+        [&](const function_call::builtin_not&) {
+          if (func.positional_arguments.size() != 1) {
             report_fatal_error(
                 scan,
-                "expected 1 argument for helper `not` but got {}",
-                func.args.size());
+                "expected 1 argument for function 'not' but found {}",
+                func.positional_arguments.size());
           }
         },
-        [&](function_call::and_or_tag&) {
-          if (func.args.size() <= 1) {
+        [&](const function_call::builtin_binary_associative&) {
+          if (func.positional_arguments.size() <= 1) {
             report_fatal_error(
                 scan,
-                "expected at least 2 arguments for helper `{}` but got {}",
+                "expected at least 2 arguments for function '{}' but found {}",
                 func.name(),
-                func.args.size());
+                func.positional_arguments.size());
           }
+        },
+        [](const function_call::user_defined&) {
+          // User-defined functions can have any number of arguments
+        });
+
+    // Validate named arguments
+    detail::variant_match(
+        func.which,
+        [&](const function_call::builtin&) {
+          if (!func.named_arguments.empty()) {
+            report_fatal_error(
+                scan,
+                "named arguments not allowed for function '{}'",
+                func.name());
+          }
+        },
+        [](const function_call::user_defined&) {
+          // User-defined functions can have any number of named arguments
         });
 
     if (!try_consume_token(&scan, tok::r_paren)) {
-      report_fatal_error(
+      report_expected(
           scan,
-          "expected `)` to close helper `{}` but got `{}`",
-          func.name(),
-          scan.peek());
+          fmt::format("{} to close function '{}'", tok::r_paren, func.name()));
     }
 
-    return {{scan.with_start(scan_start).range(), std::move(func)}, scan};
+    return {
+        ast::expression{scan.with_start(scan_start).range(), std::move(func)},
+        scan};
   }
 
   // let-statement →

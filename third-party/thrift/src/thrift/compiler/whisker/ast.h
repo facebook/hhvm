@@ -18,6 +18,8 @@
 
 #include <thrift/compiler/whisker/source_location.h>
 
+#include <map>
+#include <memory>
 #include <optional>
 #include <string>
 #include <variant>
@@ -154,49 +156,121 @@ struct expression {
   source_range loc;
   struct function_call {
     /**
+     * Base class for all built-in functions.
+     */
+    struct builtin {};
+    /**
+     * Binary functions which are also associative and can be "chained", such as
+     * `(and arg1 ... argN)`, `(or arg1 ... argN)` etc.
+     */
+    struct builtin_binary_associative {};
+
+    /**
      * The `(not arg1)` function.
      */
-    struct not_tag {
+    struct builtin_not : builtin {
       // Remove in C++20 which introduces comparison operator synthesis
-      friend bool operator==(const not_tag&, const not_tag&) { return true; }
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(not_tag)
+      friend bool operator==(const builtin_not&, const builtin_not&) {
+        return true;
+      }
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_not)
     };
-    struct and_or_tag {}; // for convenience of writing matchers
+
     /**
      * The `(and arg1 ... argN)` function.
      */
-    struct and_tag : and_or_tag {
+    struct builtin_and : builtin, builtin_binary_associative {
       // Remove in C++20 which introduces comparison operator synthesis
-      friend bool operator==(const and_tag&, const and_tag&) { return true; }
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(and_tag)
+      friend bool operator==(const builtin_and&, const builtin_and&) {
+        return true;
+      }
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_and)
     };
+
     /**
      * The `(or arg1 ... argN)` function.
      */
-    struct or_tag : and_or_tag {
+    struct builtin_or : builtin, builtin_binary_associative {
       // Remove in C++20 which introduces comparison operator synthesis
-      friend bool operator==(const or_tag&, const or_tag&) { return true; }
-      WHISKER_DEFINE_OPERATOR_INEQUALITY(or_tag)
+      friend bool operator==(const builtin_or&, const builtin_or&) {
+        return true;
+      }
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(builtin_or)
     };
-    std::variant<not_tag, and_tag, or_tag> which;
-    std::vector<expression> args;
+
+    /**
+     * A user-defined function call whose name is variable (chain of
+     * identifiers).
+     *
+     * Example:
+     *   `(my_lib.snake_case "FooBar")` // "foo_bar"
+     */
+    struct user_defined {
+      variable_lookup name;
+
+      friend bool operator==(const user_defined& lhs, const user_defined& rhs) {
+        return lhs.name == rhs.name;
+      }
+      // Remove in C++20 which introduces comparison operator synthesis
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(user_defined)
+    };
+
+    std::variant<builtin_not, builtin_and, builtin_or, user_defined> which;
+
+    /**
+     * Unnamed arguments that are identified by their ordering in the function
+     * invocation.
+     */
+    std::vector<expression> positional_arguments;
+
+    struct named_argument {
+      identifier name;
+      // Using the heap to avoid mutually recursion with `expression`.
+      // Using std::shared_ptr so that this struct is copyable.
+      std::shared_ptr<expression> value;
+
+      friend bool operator==(
+          const named_argument& lhs, const named_argument& rhs) {
+        static const auto as_tuple = [](const named_argument& arg) {
+          return std::tie(arg.name, *arg.value);
+        };
+        return as_tuple(lhs) == as_tuple(rhs);
+      }
+      // Remove in C++20 which introduces comparison operator synthesis
+      WHISKER_DEFINE_OPERATOR_INEQUALITY(named_argument)
+    };
+    /**
+     * Named arguments that are identified by their name, with no restrictions
+     * on their ordering. Every argument must have a unique identifier. All
+     * named arguments must appear after all positional arguments.
+     *
+     * Using std::map for stable ordering when printing the AST.
+     */
+    std::map<std::string_view, named_argument> named_arguments;
+
+    /**
+     * The name of the function call lookup as seen in the source code.
+     */
+    std::string name() const;
 
     friend bool operator==(const function_call& lhs, const function_call& rhs) {
-      return std::tie(lhs.which, lhs.args) == std::tie(rhs.which, rhs.args);
+      static const auto as_tuple = [](const function_call& f) {
+        // Ignore the source range of the function call.
+        return std::tie(f.which, f.positional_arguments, f.named_arguments);
+      };
+      return as_tuple(lhs) == as_tuple(rhs);
     }
     // Remove in C++20 which introduces comparison operator synthesis
     WHISKER_DEFINE_OPERATOR_INEQUALITY(function_call)
-
-    std::string_view name() const;
   };
-  std::variant<variable_lookup, function_call> content;
+  std::variant<variable_lookup, function_call> which;
 
   /**
    * Determines if two expressions are syntactically equivalent, excluding their
    * location in source code.
    */
   friend bool operator==(const expression& lhs, const expression& rhs) {
-    return lhs.content == rhs.content;
+    return lhs.which == rhs.which;
   }
   // Remove in C++20 which introduces comparison operator synthesis
   WHISKER_DEFINE_OPERATOR_INEQUALITY(expression)

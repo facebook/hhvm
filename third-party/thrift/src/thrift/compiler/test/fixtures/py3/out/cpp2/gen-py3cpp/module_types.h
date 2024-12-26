@@ -349,12 +349,10 @@ template <> struct TEnumTraits<::py3::simple::AnEnum> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "AnEnum";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -382,12 +380,10 @@ template <> struct TEnumTraits<::py3::simple::AnEnumRenamed> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "AnEnumRenamed";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -415,12 +411,10 @@ template <> struct TEnumTraits<::py3::simple::Flags> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "Flags";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }

@@ -423,12 +423,10 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::has_bitwise_op
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "has_bitwise_ops";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -456,12 +454,10 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::is_unscoped> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "is_unscoped";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -489,12 +485,10 @@ template <> struct TEnumTraits<::apache::thrift::fixtures::types::MyForwardRefEn
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyForwardRefEnum";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }

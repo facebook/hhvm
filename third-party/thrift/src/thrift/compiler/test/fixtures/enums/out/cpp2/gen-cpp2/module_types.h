@@ -230,12 +230,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::Metasyntactic> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "Metasyntactic";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -263,12 +261,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum1> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyEnum1";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -296,12 +292,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum2> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyEnum2";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -329,12 +323,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum3> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyEnum3";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -362,12 +354,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyEnum4> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyEnum4";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -395,12 +385,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum1> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyBitmaskEnum1";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }
@@ -428,12 +416,10 @@ template <> struct TEnumTraits<::test::fixtures::enums::MyBitmaskEnum2> {
   static bool findName(type value, std::string_view* out) noexcept;
   static bool findValue(std::string_view name, type* out) noexcept;
 
-  template <class ...>
   FOLLY_ERASE static std::string_view typeName() noexcept {
     return "MyBitmaskEnum2";
   }
 
-  template <class ...>
   FOLLY_ERASE static constexpr std::string_view moduleName() noexcept {
     return "module";
   }

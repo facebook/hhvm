@@ -578,6 +578,17 @@ inline object boolean(boolean value) {
 }
 
 /**
+ * A whisker::object that represents the boolean `true`.
+ * This constant is useful for functions that return references.
+ */
+inline const object true_{whisker::boolean(true)};
+/**
+ * A whisker::object that represents the boolean `true`.
+ * This constant is useful for functions that return references.
+ */
+inline const object false_{whisker::boolean(false)};
+
+/**
  * Creates whisker::object with integral type.
  *
  * Postconditions:

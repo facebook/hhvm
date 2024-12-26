@@ -341,43 +341,52 @@ class render_engine {
         });
   }
 
-  object evaluate(const ast::expression& expr) {
+  std::shared_ptr<const object> evaluate(const ast::expression& expr) {
+    using object_ptr = std::shared_ptr<const object>;
+    static const auto as_ref = [](const object& o) -> object_ptr {
+      // Empty deleter here implies that the object is externally managed.
+      // Thus, the returned shared_ptr acts like a reference.
+      return object_ptr(std::shared_ptr<void>(), &o);
+    };
+
     using function_call = ast::expression::function_call;
     return detail::variant_match(
         expr.which,
-        [&](const ast::variable_lookup& variable_lookup) {
-          return lookup_variable(variable_lookup);
+        [&](const ast::variable_lookup& variable_lookup) -> object_ptr {
+          return as_ref(lookup_variable(variable_lookup));
         },
-        [&](const function_call& func) {
+        [&](const function_call& func) -> object_ptr {
           return detail::variant_match(
               func.which,
-              [&](function_call::builtin_not) -> object {
+              [&](function_call::builtin_not) -> object_ptr {
                 // enforced by the parser
                 assert(func.positional_arguments.size() == 1);
                 assert(func.named_arguments.empty());
-                return object{!evaluate_as_bool(func.positional_arguments[0])};
+                return evaluate_as_bool(func.positional_arguments[0])
+                    ? as_ref(whisker::make::false_)
+                    : as_ref(whisker::make::true_);
               },
-              [&](function_call::builtin_and) -> object {
+              [&](function_call::builtin_and) -> object_ptr {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const ast::expression& arg : func.positional_arguments) {
                   if (!evaluate_as_bool(arg)) {
-                    return object{false};
+                    return as_ref(whisker::make::false_);
                   }
                 }
-                return object{true};
+                return as_ref(whisker::make::true_);
               },
-              [&](function_call::builtin_or) -> object {
+              [&](function_call::builtin_or) -> object_ptr {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const ast::expression& arg : func.positional_arguments) {
                   if (evaluate_as_bool(arg)) {
-                    return object{true};
+                    return as_ref(whisker::make::true_);
                   }
                 }
-                return object{false};
+                return as_ref(whisker::make::false_);
               },
-              [&](const function_call::user_defined& f) -> object {
+              [&](const function_call::user_defined& f) -> object_ptr {
                 diags_.error(
                     f.name.loc.begin,
                     "User-defined function '{}' not supported yet.",
@@ -390,7 +399,7 @@ class render_engine {
   void visit(const ast::let_statement& let_statement) {
     whisker::visit(
         eval_context_.bind_local(
-            let_statement.id.name, evaluate(let_statement.value)),
+            let_statement.id.name, *evaluate(let_statement.value)),
         [](std::monostate) {
           // The binding was successful
         },
@@ -413,14 +422,14 @@ class render_engine {
   }
 
   void visit(const ast::interpolation& interpolation) {
-    const object& value = evaluate(interpolation.content);
+    std::shared_ptr<const object> result = evaluate(interpolation.content);
 
     const auto report_unprintable_message_only = [&](diagnostic_level level) {
       maybe_report(interpolation.loc, level, [&] {
         return fmt::format(
             "Object named '{}' is not printable. The encountered value is:\n{}",
             interpolation.to_string(),
-            to_string(value));
+            to_string(*result));
       });
     };
 
@@ -434,7 +443,7 @@ class render_engine {
     };
 
     // See render_options::strict_printable_types for printing rules
-    auto output = value.visit(
+    auto output = result->visit(
         [](const string& value) -> std::string { return value; },
         [](i64 value) -> std::string { return std::to_string(value); },
         [&](f64 value) -> std::string {
@@ -476,11 +485,11 @@ class render_engine {
     }
   }
   bool evaluate_as_bool(const ast::expression& expr) {
-    const object result = evaluate(expr);
-    return result.visit(
+    std::shared_ptr<const object> result = evaluate(expr);
+    return result->visit(
         [&](boolean value) { return value; },
         [&](const auto& value) {
-          maybe_report_boolean_coercion(expr, result);
+          maybe_report_boolean_coercion(expr, *result);
           return coerce_to_boolean(value);
         });
   }
@@ -630,8 +639,8 @@ class render_engine {
 
   void visit(const ast::with_block& with_block) {
     const ast::expression& expr = with_block.value;
-    object value = evaluate(expr);
-    value.visit(
+    std::shared_ptr<const object> result = evaluate(expr);
+    result->visit(
         [&](const map&) {
           // maps can be de-structured.
         },
@@ -642,7 +651,7 @@ class render_engine {
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not map-like. The encountered value is:\n{}",
                 expr.to_string(),
-                to_string(value));
+                to_string(*result));
             throw abort_rendering();
           }
         },
@@ -651,10 +660,10 @@ class render_engine {
               expr.loc.begin,
               "Expression '{}' does not evaluate to a map. The encountered value is:\n{}",
               expr.to_string(),
-              to_string(value));
+              to_string(*result));
           throw abort_rendering();
         });
-    eval_context_.push_scope(value);
+    eval_context_.push_scope(*result);
     visit(with_block.body_elements);
     eval_context_.pop_scope();
   }

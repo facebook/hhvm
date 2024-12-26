@@ -536,12 +536,15 @@ class parser {
     throw parse_error();
   }
 
+  template <typename... T>
   [[noreturn]] void report_expected(
-      const parser_scan_window& scan, std::string_view expected) {
+      const parser_scan_window& scan,
+      fmt::format_string<T...> msg,
+      T&&... args) {
     report_fatal_error(
         scan,
         "expected {} but found {}",
-        expected,
+        fmt::format(msg, std::forward<T>(args)...),
         to_string(scan.peek().kind));
   }
 
@@ -797,7 +800,7 @@ class parser {
         report_expected(scan, "comment text");
     }
     if (scan.peek().kind != tok::close) {
-      report_expected(scan, fmt::format("{} to close comment", tok::close));
+      report_expected(scan, "{} to close comment", tok::close);
     }
     scan.advance();
 
@@ -893,8 +896,7 @@ class parser {
     }
     ast::expression lookup = std::move(expression).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(
-          scan, fmt::format("{} to close interpolation", tok::close));
+      report_expected(scan, "{} to close interpolation", tok::close);
     }
     return {
         ast::interpolation{
@@ -965,8 +967,7 @@ class parser {
     ast::variable_lookup open =
         std::move(lookup_at_open).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(
-          scan, fmt::format("{} to open section-block", tok::close));
+      report_expected(scan, "{} to open section-block", tok::close);
     }
     scan = scan.make_fresh();
 
@@ -975,27 +976,24 @@ class parser {
     if (!try_consume_token(&scan, tok::open)) {
       report_expected(
           scan,
-          fmt::format(
-              "{} to close section-block '{}'",
-              tok::open,
-              open.chain_string()));
+          "{} to close section-block '{}'",
+          tok::open,
+          open.chain_string());
     }
     if (!try_consume_token(&scan, tok::slash)) {
       report_expected(
           scan,
-          fmt::format(
-              "{} to close section-block '{}'",
-              tok::slash,
-              open.chain_string()));
+          "{} to close section-block '{}'",
+          tok::slash,
+          open.chain_string());
     }
 
     parse_result lookup_at_close = parse_variable_lookup(scan.make_fresh());
     if (!lookup_at_close.has_value()) {
       report_expected(
           scan,
-          fmt::format(
-              "variable-lookup to close section-block '{}'",
-              open.chain_string()));
+          "variable-lookup to close section-block '{}'",
+          open.chain_string());
     }
     ast::variable_lookup close =
         std::move(lookup_at_close).consume_and_advance(&scan);
@@ -1177,8 +1175,7 @@ class parser {
 
     if (!try_consume_token(&scan, tok::r_paren)) {
       report_expected(
-          scan,
-          fmt::format("{} to close function '{}'", tok::r_paren, func.name()));
+          scan, "{} to close function '{}'", tok::r_paren, func.name());
     }
 
     return {
@@ -1210,7 +1207,7 @@ class parser {
     scan.advance();
 
     if (!try_consume_token(&scan, tok::eq)) {
-      report_expected(scan, fmt::format("{} in let-statement", tok::eq));
+      report_expected(scan, "{} in let-statement", tok::eq);
     }
 
     scan = scan.make_fresh();
@@ -1221,8 +1218,7 @@ class parser {
     ast::expression value = std::move(expression).consume_and_advance(&scan);
 
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(
-          scan, fmt::format("{} to close let-statement", tok::close));
+      report_expected(scan, "{} to close let-statement", tok::close);
     }
 
     return {
@@ -1263,8 +1259,7 @@ class parser {
     }
 
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(
-          scan, fmt::format("{} to close pragma-statement", tok::close));
+      report_expected(scan, "{} to close pragma-statement", tok::close);
     }
 
     return {
@@ -1300,11 +1295,11 @@ class parser {
 
     parse_result condition = parse_expression(scan);
     if (!condition.has_value()) {
-      report_expected(scan, fmt::format("expression to open if-block"));
+      report_expected(scan, "expression to open if-block");
     }
     ast::expression open = std::move(condition).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, fmt::format("{} to open if-block", tok::close));
+      report_expected(scan, "{} to open if-block", tok::close);
     }
     scan = scan.make_fresh();
 
@@ -1336,8 +1331,7 @@ class parser {
     const auto expect_on_close = [&](tok kind) {
       if (!try_consume_token(&scan, kind)) {
         report_expected(
-            scan,
-            fmt::format("{} to close if-block '{}'", kind, open.to_string()));
+            scan, "{} to close if-block '{}'", kind, open.to_string());
       }
     };
 
@@ -1347,8 +1341,7 @@ class parser {
     condition = parse_expression(scan.make_fresh());
     if (!condition.has_value()) {
       report_expected(
-          scan,
-          fmt::format("expression to close if-block '{}'", open.to_string()));
+          scan, "expression to close if-block '{}'", open.to_string());
     }
     ast::expression close = {std::move(condition).consume_and_advance(&scan)};
     if (close != open) {
@@ -1388,11 +1381,11 @@ class parser {
 
     parse_result value = parse_expression(scan);
     if (!value.has_value()) {
-      report_expected(scan, fmt::format("expression to open with-block"));
+      report_expected(scan, "expression to open with-block");
     }
     ast::expression expr = std::move(value).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, fmt::format("{} to open with-block", tok::close));
+      report_expected(scan, "{} to open with-block", tok::close);
     }
     scan = scan.make_fresh();
 
@@ -1401,8 +1394,7 @@ class parser {
     const auto expect_on_close = [&](tok kind) {
       if (!try_consume_token(&scan, kind)) {
         report_expected(
-            scan,
-            fmt::format("{} to close with-block '{}'", kind, expr.to_string()));
+            scan, "{} to close with-block '{}'", kind, expr.to_string());
       }
     };
 
@@ -1444,10 +1436,9 @@ class parser {
     if (!try_consume_token(&scan, tok::close)) {
       report_expected(
           scan,
-          fmt::format(
-              "{} to close partial-apply '{}'",
-              tok::close,
-              lookup.as_string()));
+          "{} to close partial-apply '{}'",
+          tok::close,
+          lookup.as_string());
     }
 
     return {

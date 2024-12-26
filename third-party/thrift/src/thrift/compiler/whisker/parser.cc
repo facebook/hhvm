@@ -619,11 +619,11 @@ class parser {
 
     parse_result condition = parse_expression(scan);
     if (!condition.has_value()) {
-      report_expected(scan, fmt::format("expression in else-if clause"));
+      report_expected(scan, "expression in else-if clause");
     }
     ast::expression cond = std::move(condition).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, fmt::format("{} in else-if clause", tok::close));
+      report_expected(scan, "{} in else-if clause", tok::close);
     }
     scan = scan.make_fresh();
 

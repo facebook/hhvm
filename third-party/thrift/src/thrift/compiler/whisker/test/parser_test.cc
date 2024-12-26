@@ -561,28 +561,6 @@ TEST_F(ParserTest, conditional_block_not_wrong_arity) {
           1)));
 }
 
-TEST_F(ParserTest, literals) {
-  auto ast = parse_ast(
-      "{{null}}\n"
-      "{{true}}\n"
-      "{{false}}\n"
-      "{{\"hello\\tworld\"}}\n"
-      "{{-1234}}\n");
-  EXPECT_EQ(
-      to_string(*ast),
-      "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:9> 'null'\n"
-      "|- newline <line:1:9, line:2:1> '\\n'\n"
-      "|- interpolation <line:2:1, col:9> 'true'\n"
-      "|- newline <line:2:9, line:3:1> '\\n'\n"
-      "|- interpolation <line:3:1, col:10> 'false'\n"
-      "|- newline <line:3:10, line:4:1> '\\n'\n"
-      "|- interpolation <line:4:1, col:19> '\"hello\\tworld\"'\n"
-      "|- newline <line:4:19, line:5:1> '\\n'\n"
-      "|- interpolation <line:5:1, col:10> '-1234'\n"
-      "|- newline <line:5:10, line:6:1> '\\n'\n");
-}
-
 TEST_F(ParserTest, function_call) {
   auto ast = parse_ast("{{ (uppercase (lowercase hello\tspace) world) }}");
   EXPECT_EQ(
@@ -592,11 +570,11 @@ TEST_F(ParserTest, function_call) {
 }
 
 TEST_F(ParserTest, function_call_named_args) {
-  auto ast = parse_ast(R"({{ (str.concat hello world sep=",") }})");
+  auto ast = parse_ast("{{ (str.concat hello world sep=comma) }}");
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:39> '(str.concat hello world sep=\",\")'\n");
+      "|- interpolation <line:1:1, col:41> '(str.concat hello world sep=comma)'\n");
 }
 
 TEST_F(ParserTest, function_call_named_args_only) {
@@ -621,7 +599,7 @@ TEST_F(ParserTest, function_call_named_args_duplicate) {
 }
 
 TEST_F(ParserTest, function_call_named_args_without_lookup) {
-  auto ast = parse_ast(R"({{ (sep=",") }})");
+  auto ast = parse_ast("{{ (sep=comma) }}");
   // `sep` is parsed as the name
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
@@ -634,7 +612,7 @@ TEST_F(ParserTest, function_call_named_args_without_lookup) {
 }
 
 TEST_F(ParserTest, function_call_positional_args_after_named_args) {
-  auto ast = parse_ast(R"({{ (str.concat sep="," hello world) }})");
+  auto ast = parse_ast("{{ (str.concat sep=comma hello world) }}");
   EXPECT_FALSE(ast.has_value());
   EXPECT_THAT(
       diagnostics,
@@ -659,7 +637,7 @@ TEST_F(ParserTest, function_call_named_args_not_identifier) {
 
 TEST_F(ParserTest, function_call_named_args_for_builtins) {
   {
-    auto ast = parse_ast("{{ (not foo ignore=1234) }}");
+    auto ast = parse_ast("{{ (not foo sep=comma) }}");
     EXPECT_FALSE(ast.has_value());
     EXPECT_THAT(
         diagnostics,
@@ -670,7 +648,7 @@ TEST_F(ParserTest, function_call_named_args_for_builtins) {
             1)));
   }
   {
-    auto ast = parse_ast("{{ (and foo bar ignore=1234) }}");
+    auto ast = parse_ast("{{ (and foo bar sep=comma) }}");
     EXPECT_FALSE(ast.has_value());
     EXPECT_THAT(
         diagnostics,
@@ -681,7 +659,7 @@ TEST_F(ParserTest, function_call_named_args_for_builtins) {
             1)));
   }
   {
-    auto ast = parse_ast("{{ (or foo bar ignore=1234) }}");
+    auto ast = parse_ast("{{ (or foo bar sep=comma) }}");
     EXPECT_FALSE(ast.has_value());
     EXPECT_THAT(
         diagnostics,

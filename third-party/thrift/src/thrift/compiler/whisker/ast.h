@@ -154,10 +154,6 @@ struct variable_lookup {
  */
 struct expression {
   source_range loc;
-
-  /**
-   * A function call expression like `(foo.bar "hello" "world")`.
-   */
   struct function_call {
     /**
      * Base class for all built-in functions.
@@ -267,61 +263,7 @@ struct expression {
     // Remove in C++20 which introduces comparison operator synthesis
     WHISKER_DEFINE_OPERATOR_INEQUALITY(function_call)
   };
-
-  struct string_literal {
-    std::string text;
-
-    friend bool operator==(
-        const string_literal& lhs, const string_literal& rhs) {
-      return lhs.text == rhs.text;
-    }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(string_literal)
-  };
-
-  struct i64_literal {
-    std::int64_t value;
-
-    friend bool operator==(const i64_literal& lhs, const i64_literal& rhs) {
-      return lhs.value == rhs.value;
-    }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(i64_literal)
-  };
-
-  struct null_literal {
-    friend bool operator==(const null_literal&, const null_literal&) {
-      return true;
-    }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(null_literal)
-  };
-
-  struct true_literal {
-    friend bool operator==(const true_literal&, const true_literal&) {
-      return true;
-    }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(true_literal)
-  };
-
-  struct false_literal {
-    friend bool operator==(const false_literal&, const false_literal&) {
-      return true;
-    }
-    // Remove in C++20 which introduces comparison operator synthesis
-    WHISKER_DEFINE_OPERATOR_INEQUALITY(false_literal)
-  };
-
-  std::variant<
-      string_literal,
-      i64_literal,
-      null_literal,
-      true_literal,
-      false_literal,
-      variable_lookup,
-      function_call>
-      which;
+  std::variant<variable_lookup, function_call> which;
 
   /**
    * Determines if two expressions are syntactically equivalent, excluding their

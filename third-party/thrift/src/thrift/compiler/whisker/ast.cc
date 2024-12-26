@@ -16,7 +16,6 @@
 
 #include <thrift/compiler/whisker/ast.h>
 #include <thrift/compiler/whisker/detail/overload.h>
-#include <thrift/compiler/whisker/detail/string.h>
 
 #include <fmt/core.h>
 #include <fmt/ranges.h>
@@ -68,13 +67,6 @@ std::string partial_apply::path_string() const {
 std::string expression::to_string() const {
   return detail::variant_match(
       which,
-      [](const string_literal& s) {
-        return fmt::format("\"{}\"", detail::escape(s.text));
-      },
-      [](const i64_literal& i) { return fmt::format("{}", i.value); },
-      [](const null_literal&) -> std::string { return "null"; },
-      [](const true_literal&) -> std::string { return "true"; },
-      [](const false_literal&) -> std::string { return "false"; },
       [](const variable_lookup& v) { return v.chain_string(); },
       [](const function_call& f) {
         std::string out = fmt::format("({}", f.name());

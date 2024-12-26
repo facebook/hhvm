@@ -702,7 +702,7 @@ TEST_F(RenderTest, user_defined_function) {
 
 TEST_F(RenderTest, let_statement) {
   auto result = render(
-      "{{#let cond = (not false)}}\n"
+      "{{#let cond = (not false_value)}}\n"
       "{{#if cond}}\n"
       "  {{#let cond = some_text}}\n"
       "  {{cond}}\n"
@@ -710,7 +710,9 @@ TEST_F(RenderTest, let_statement) {
       "{{#if cond}}\n"
       "  Outer scope was not overwritten!\n"
       "{{/if cond}}\n",
-      w::map({{"some_text", w::string("some text")}}));
+      w::map(
+          {{"false_value", w::boolean(false)},
+           {"some_text", w::string("some text")}}));
   EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(
       *result,
@@ -741,9 +743,9 @@ TEST_F(RenderTest, let_statement_loop) {
 
 TEST_F(RenderTest, let_statement_rebinding_error) {
   auto result = render(
-      "{{#let cond = (not false)}}\n"
-      "{{#let cond = false}}\n",
-      w::map({}));
+      "{{#let cond = (not false_value)}}\n"
+      "{{#let cond = false_value}}\n",
+      w::map({{"false_value", w::boolean(false)}}));
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
@@ -822,7 +824,9 @@ TEST_F(RenderTest, with_not_map_like_native_object) {
 
 TEST_F(RenderTest, printable_types_strict_failure) {
   {
-    auto result = render(R"({{-42}} {{"hello"}})", w::map({}));
+    auto result = render(
+        "{{i64}} {{string}}",
+        w::map({{"i64", w::i64(-42)}, {"string", w::string("hello")}}));
     EXPECT_EQ(*result, "-42 hello");
   }
   {
@@ -838,24 +842,24 @@ TEST_F(RenderTest, printable_types_strict_failure) {
     EXPECT_FALSE(result.has_value());
   }
   {
-    auto result = render("{{true}}", w::map({}));
+    auto result = render("{{bool}}", w::map({{"bool", w::boolean(true)}}));
     EXPECT_THAT(
         diagnostics(),
         testing::ElementsAre(diagnostic(
             diagnostic_level::error,
-            "Object named 'true' is not printable. The encountered value is:\n"
+            "Object named 'bool' is not printable. The encountered value is:\n"
             "true\n",
             path_to_file,
             1)));
     EXPECT_FALSE(result.has_value());
   }
   {
-    auto result = render("{{null}}", w::map({}));
+    auto result = render("{{null_}}", w::map({{"null_", w::null}}));
     EXPECT_THAT(
         diagnostics(),
         testing::ElementsAre(diagnostic(
             diagnostic_level::error,
-            "Object named 'null' is not printable. The encountered value is:\n"
+            "Object named 'null_' is not printable. The encountered value is:\n"
             "null\n",
             path_to_file,
             1)));
@@ -905,7 +909,9 @@ TEST_F(RenderTest, printable_types_warning) {
   strict_printable_types = diagnostic_level::warning;
 
   {
-    auto result = render(R"({{-42}} {{"hello"}})", w::map({}));
+    auto result = render(
+        "{{i64}} {{string}}",
+        w::map({{"i64", w::i64(-42)}, {"string", w::string("hello")}}));
     EXPECT_EQ(*result, "-42 hello");
   }
   {
@@ -921,24 +927,24 @@ TEST_F(RenderTest, printable_types_warning) {
     EXPECT_EQ(*result, "3.1415926");
   }
   {
-    auto result = render("{{false}}", w::map({}));
+    auto result = render("{{bool}}", w::map({{"bool", w::boolean(true)}}));
     EXPECT_THAT(
         diagnostics(),
         testing::ElementsAre(diagnostic(
             diagnostic_level::warning,
-            "Object named 'false' is not printable. The encountered value is:\n"
-            "false\n",
+            "Object named 'bool' is not printable. The encountered value is:\n"
+            "true\n",
             path_to_file,
             1)));
-    EXPECT_EQ(*result, "false");
+    EXPECT_EQ(*result, "true");
   }
   {
-    auto result = render("{{null}}", w::map({}));
+    auto result = render("{{null_}}", w::map({{"null_", w::null}}));
     EXPECT_THAT(
         diagnostics(),
         testing::ElementsAre(diagnostic(
             diagnostic_level::warning,
-            "Object named 'null' is not printable. The encountered value is:\n"
+            "Object named 'null_' is not printable. The encountered value is:\n"
             "null\n",
             path_to_file,
             1)));

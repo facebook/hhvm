@@ -352,21 +352,6 @@ class render_engine {
     using function_call = ast::expression::function_call;
     return detail::variant_match(
         expr.which,
-        [](const ast::expression::string_literal& s) -> object_ptr {
-          return std::make_shared<const object>(string(s.text));
-        },
-        [](const ast::expression::i64_literal& i) -> object_ptr {
-          return std::make_shared<const object>(i64(i.value));
-        },
-        [](const ast::expression::null_literal&) -> object_ptr {
-          return as_ref(whisker::make::null);
-        },
-        [](const ast::expression::true_literal&) -> object_ptr {
-          return as_ref(whisker::make::true_);
-        },
-        [](const ast::expression::false_literal&) -> object_ptr {
-          return as_ref(whisker::make::false_);
-        },
         [&](const ast::variable_lookup& variable_lookup) -> object_ptr {
           return as_ref(lookup_variable(variable_lookup));
         },

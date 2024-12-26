@@ -1029,46 +1029,16 @@ class parser {
         scan};
   }
 
-  // expression → { literal | variable-lookup | function-call }
+  // expression → { variable-lookup | function-call }
   parse_result<ast::expression> parse_expression(parser_scan_window scan) {
     assert(scan.empty());
     auto scan_start = scan.start;
-
-    using expression = ast::expression;
-    using function_call = expression::function_call;
-
-    // Parse literals
-    {
-      const token& t = scan.advance();
-      switch (t.kind) {
-        case tok::string_literal:
-          return {
-              expression{
-                  scan.range(),
-                  expression::string_literal{std::string(t.string_value())}},
-              scan};
-        case tok::i64_literal:
-          return {
-              expression{scan.range(), expression::i64_literal{t.i64_value()}},
-              scan};
-        case tok::kw_null:
-          return {expression{scan.range(), expression::null_literal{}}, scan};
-        case tok::kw_true:
-          return {expression{scan.range(), expression::true_literal{}}, scan};
-        case tok::kw_false:
-          return {expression{scan.range(), expression::false_literal{}}, scan};
-        default:
-          // Other tokens are not literals, so reset the scan.
-          scan = scan.with_head(scan_start);
-          break;
-      }
-      assert(scan.empty());
-    }
+    using function_call = ast::expression::function_call;
 
     if (parse_result lookup = parse_variable_lookup(scan)) {
       auto expr = std::move(lookup).consume_and_advance(&scan);
       return {
-          expression{scan.with_start(scan_start).range(), std::move(expr)},
+          ast::expression{scan.with_start(scan_start).range(), std::move(expr)},
           scan};
     }
 
@@ -1098,27 +1068,29 @@ class parser {
     // positional-argument → { expression }
     // named-argument → { identifier ~ "=" ~ expression }
     const auto parse_argument = [this, &func](parser_scan_window scan)
-        -> parse_result<std::variant<expression, named_argument_entry>> {
+        -> parse_result<std::variant<ast::expression, named_argument_entry>> {
       assert(scan.empty());
       const token& id = scan.peek();
       if (id.kind == tok::identifier && scan.next().peek().kind == tok::eq) {
         scan = scan.next(2).make_fresh();
-        if (parse_result expr = parse_expression(scan)) {
+        if (parse_result expression = parse_expression(scan)) {
           return {
               named_argument_entry{
                   id.string_value(),
                   function_call::named_argument{
                       ast::identifier{id.range, std::string(id.string_value())},
-                      std::make_unique<expression>(
-                          std::move(expr).consume_and_advance(&scan))}},
+                      std::make_unique<ast::expression>(
+                          std::move(expression).consume_and_advance(&scan))}},
               scan};
         }
         report_expected(scan, "expression in named argument");
       }
 
       assert(scan.empty());
-      if (parse_result expr = parse_expression(scan)) {
-        return {expression{std::move(expr).consume_and_advance(&scan)}, scan};
+      if (parse_result expression = parse_expression(scan)) {
+        return {
+            ast::expression{std::move(expression).consume_and_advance(&scan)},
+            scan};
       }
       if (scan.peek().kind == tok::eq) {
         report_fatal_error(

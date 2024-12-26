@@ -592,48 +592,6 @@ class parser {
     }
   }
 
-  // Parses the "{{#else if}}" clause which is a separator between two
-  // ast::bodies.
-  //
-  // else-if-block →
-  //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
-  parse_result<ast::conditional_block::else_if_block> parse_else_if_clause(
-      parser_scan_window scan) {
-    assert(scan.empty());
-    const auto scan_start = scan.start;
-
-    if (!(try_consume_token(&scan, tok::open) &&
-          try_consume_token(&scan, tok::pound))) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::kw_else)) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::kw_if)) {
-      return no_parse_result();
-    }
-    scan = scan.make_fresh();
-
-    parse_result condition = parse_expression(scan);
-    if (!condition.has_value()) {
-      report_expected(scan, fmt::format("expression in else-if clause"));
-    }
-    ast::expression cond = std::move(condition).consume_and_advance(&scan);
-    if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, fmt::format("{} in else-if clause", tok::close));
-    }
-    scan = scan.make_fresh();
-
-    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
-
-    return parse_result{
-        ast::conditional_block::else_if_block{
-            scan.with_start(scan_start).range(),
-            std::move(cond),
-            std::move(bodies)},
-        scan};
-  }
-
   // Parses the "{{#else}}" clause which is a separator between two ast::bodies.
   //
   // else-clause → { "{{" ~ "#" ~ "else" ~ "}}" }
@@ -645,16 +603,6 @@ class parser {
       return no_parse_result();
     }
     return {{}, scan};
-  }
-
-  // Parses the beginning of an "{{#else [if]" clause which is a separator
-  // between two ast::bodies.
-  //
-  // { "{{" ~ "#" ~ "else" }
-  bool peek_else_clause(parser_scan_window scan) {
-    return try_consume_token(&scan, tok::open) &&
-        try_consume_token(&scan, tok::pound) &&
-        try_consume_token(&scan, tok::kw_else);
   }
 
   // Returns an empty parse result if no body was found.
@@ -676,9 +624,9 @@ class parser {
         body = std::move(maybe_text).consume_and_advance(&scan);
       } else if (parse_result maybe_newline = parse_newline(scan)) {
         body = std::move(maybe_newline).consume_and_advance(&scan);
-      } else if (peek_else_clause(scan)) {
-        // The "{{#else [if]}}" clause marks the end of the current block (and
-        // the beginning of the next one).
+      } else if (parse_result else_clause = parse_else_clause(scan)) {
+        // The "{{#else}}" clause marks the end of the current block (and the
+        // beginning of the next one).
         break;
       } else if (parse_result templ = parse_template(scan)) {
         detail::variant_match(
@@ -1273,12 +1221,9 @@ class parser {
   }
 
   // conditional-block →
-  //   { cond-block-open ~ body* ~ else-if-block* ~ else-block? ~
-  //   cond-block-close }
+  //   { cond-block-open ~ body* ~ else-block? ~ cond-block-close }
   // cond-block-open →
   //   { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
-  // else-if-block →
-  //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
   // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
   // cond-block-close →
   //   { "{{" ~ "/" ~ "if" ~ expression ~ "}}" }
@@ -1309,11 +1254,6 @@ class parser {
     scan = scan.make_fresh();
 
     ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
-
-    std::vector<ast::conditional_block::else_if_block> else_if_blocks;
-    while (parse_result else_if = parse_else_if_clause(scan)) {
-      else_if_blocks.push_back(std::move(else_if).consume_and_advance(&scan));
-    }
 
     auto else_block =
         std::invoke([&]() -> std::optional<ast::conditional_block::else_block> {
@@ -1366,7 +1306,6 @@ class parser {
             scan.with_start(scan_start).range(),
             std::move(open),
             std::move(bodies),
-            std::move(else_if_blocks),
             std::move(else_block),
         },
         scan};

@@ -593,22 +593,9 @@ class render_engine {
       eval_context_.pop_scope();
     };
 
-    // Returns whether the else clause should be evaluated.
-    auto visit_else_if = [&](const ast::conditional_block& b) {
-      for (const auto& clause : b.else_if_clauses) {
-        if (evaluate_as_bool(clause.condition)) {
-          do_visit(clause.body_elements);
-          return true;
-        }
-      }
-      return false;
-    };
-
     const bool condition = evaluate_as_bool(conditional_block.condition);
     if (condition) {
       do_visit(conditional_block.body_elements);
-    } else if (visit_else_if(conditional_block)) {
-      // An else if clause was rendered.
     } else if (conditional_block.else_clause.has_value()) {
       do_visit(conditional_block.else_clause->body_elements);
     }

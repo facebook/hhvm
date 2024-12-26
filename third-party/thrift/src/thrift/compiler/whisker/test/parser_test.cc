@@ -472,50 +472,6 @@ TEST_F(ParserTest, conditional_block_mismatched_lookup) {
           5)));
 }
 
-TEST_F(ParserTest, conditional_block_else_if) {
-  auto ast = parse_ast(
-      "{{#if news.has-update?}}\n"
-      "  New stuff is happening!\n"
-      "{{#else if news.is-important?}}\n"
-      "  Important stuff is happening!\n"
-      "{{#else}}\n"
-      "  Nothing is happening!\n"
-      "{{/if news.has-update?}}");
-  EXPECT_THAT(diagnostics, testing::IsEmpty());
-  EXPECT_EQ(
-      to_string(*ast),
-      "root [path/to/test-1.whisker]\n"
-      "|- if-block <line:1:1, line:7:25>\n"
-      "| `- expression <line:1:7, col:23> 'news.has-update?'\n"
-      "| |- text <line:2:1, col:26> '  New stuff is happening!'\n"
-      "| |- newline <line:2:26, line:3:1> '\\n'\n"
-      "| `- else-if-block <line:3:1, line:5:1>\n"
-      "|   |- text <line:4:1, col:32> '  Important stuff is happening!'\n"
-      "|   |- newline <line:4:32, line:5:1> '\\n'\n"
-      "| `- else-block <line:5:1, line:7:1>\n"
-      "|   |- text <line:6:1, col:24> '  Nothing is happening!'\n"
-      "|   |- newline <line:6:24, line:7:1> '\\n'\n");
-}
-
-TEST_F(ParserTest, conditional_block_else_if_after_else) {
-  auto ast = parse_ast(
-      "{{#if news.has-update?}}\n"
-      "  New stuff is happening!\n"
-      "{{#else}}\n"
-      "  Nothing is happening!\n"
-      "{{#else if news.is-important?}}\n"
-      "  Important stuff is happening!\n"
-      "{{/if news.has-update?}}");
-  EXPECT_FALSE(ast.has_value());
-  EXPECT_THAT(
-      diagnostics,
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "expected `/` to close if-block 'news.has-update?' but found `#`",
-          path_to_file(1),
-          5)));
-}
-
 TEST_F(ParserTest, conditional_block_with_not) {
   auto ast = parse_ast(
       "{{#if (not news.has-update?)}}\n"

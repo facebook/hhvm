@@ -278,16 +278,14 @@ Whisker supports a conditionally rendering block type: `{{#if}}`. A typical cond
 ```handlebars
 {{#if person.hasName}}
 Greetings, {{person.name}}!
-{{#else if person.hasId}}
-Beep boop, {{person.id}}!
 {{#else}}
 I don't know who you are.
 {{/if person.hasName}}
 ```
 
-`{{#if}}` blocks **may** include any number of `{{# else if ...}}` statements followed by one optional `{{#else}}` statement. The body of the first condition to obtain will be rendered, otherwise the body following the `{{#else}}` statement if provided, otherwise an empty block.
+`{{#if}}` blocks can **optionally** include one `{{#else}}` statement. When omitted, the behavior matches an `{{#else}}` with an empty body.
 
-In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean`.
+In this example, `person.hasName` is the *condition*. The condition **must** be an `expression` that evaluates to a `boolean`. If its value is `true`, then the body before the `{{#else}}` is rendered. Otherwise, the body after the `{{#else}}` is rendered.
 
 The closing tag must exactly replicate the `expression` of the matching opening tag. This serves to improve readability of complex nested conditions.
 
@@ -327,9 +325,8 @@ I don't know who you are.
 <Grammar>
 
 ```
-if-block       → { if-block-open ~ body* ~ else-if-block* ~ else-block? ~ if-block-close }
+if-block       → { if-block-open ~ body* ~ else-block? ~ if-block-close }
 if-block-open  → { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
-else-if-block  → { "{{" ~ "#" ~ "else" ~ "if" ~ expression ~ "}}" ~ body* }
 else-block     → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
 if-block-close → { "{{" ~ "/" ~ "if" ~ expression ~ "}}" }
 ```

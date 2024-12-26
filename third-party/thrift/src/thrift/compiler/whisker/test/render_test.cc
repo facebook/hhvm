@@ -55,9 +55,6 @@ class double_property_name
   mutable std::map<std::string, object, std::less<>> cached_;
 };
 
-const auto T = w::boolean(true);
-const auto F = w::boolean(false);
-
 } // namespace
 
 TEST_F(RenderTest, basic) {
@@ -576,36 +573,6 @@ TEST_F(RenderTest, if_else_block) {
         "{{/if news.has-update?}}\n",
         w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
     EXPECT_EQ(*result, "Nothing is happening!\n");
-  }
-}
-
-TEST_F(RenderTest, else_if_blocks) {
-  const std::string template_text =
-      "{{#if a}}\n"
-      "a\n"
-      "{{#else if b}}\n"
-      "b\n"
-      "{{#else if c}}\n"
-      "c\n"
-      "{{#else}}\n"
-      "d\n"
-      "{{/if a}}\n";
-
-  {
-    auto result = render(template_text, w::map({{"a", T}}));
-    EXPECT_EQ(*result, "a\n");
-  }
-  {
-    auto result = render(template_text, w::map({{"a", F}, {"b", T}}));
-    EXPECT_EQ(*result, "b\n");
-  }
-  {
-    auto result = render(template_text, w::map({{"a", F}, {"b", F}, {"c", T}}));
-    EXPECT_EQ(*result, "c\n");
-  }
-  {
-    auto result = render(template_text, w::map({{"a", F}, {"b", F}, {"c", F}}));
-    EXPECT_EQ(*result, "d\n");
   }
 }
 

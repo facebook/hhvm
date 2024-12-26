@@ -69,13 +69,12 @@ class Buffer : boost::totally_ordered<Buffer> {
 
 } // namespace test
 
-namespace apache {
-namespace thrift {
+namespace apache::thrift {
 
 template <>
 class Cpp2Ops<test::Buffer> {
  public:
-  typedef test::Buffer Type;
+  using Type = test::Buffer;
   static constexpr protocol::TType thriftType() { return protocol::T_STRING; }
   template <class Protocol>
   static uint32_t write(Protocol* prot, const Type* value) {
@@ -95,5 +94,4 @@ class Cpp2Ops<test::Buffer> {
   }
 };
 
-} // namespace thrift
-} // namespace apache
+} // namespace apache::thrift

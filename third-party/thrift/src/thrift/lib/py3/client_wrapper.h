@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/async/AsyncClient.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
 
-namespace thrift {
-namespace py3 {
+namespace thrift::py3 {
 
 class ClientWrapper {
  protected:
@@ -57,5 +56,4 @@ class ClientWrapper {
   }
 };
 
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3

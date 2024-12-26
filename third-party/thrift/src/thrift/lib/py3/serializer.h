@@ -19,8 +19,7 @@
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 
-namespace thrift {
-namespace py3 {
+namespace thrift::py3 {
 using apache::thrift::protocol::PROTOCOL_TYPES;
 template <typename T>
 std::unique_ptr<folly::IOBuf> serialize(const T* obj, PROTOCOL_TYPES protocol) {
@@ -71,5 +70,4 @@ size_t deserialize(const folly::IOBuf* buf, T* obj, PROTOCOL_TYPES protocol) {
       LOG(FATAL) << "Bad serialization protocol " << uint8_t(protocol);
   }
 }
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3

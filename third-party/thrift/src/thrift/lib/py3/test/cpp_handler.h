@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/py3/test/gen-cpp2/TestingService.tcc>
 
-namespace thrift {
-namespace py3 {
-namespace test {
+namespace thrift::py3::test {
 
 class TestingService
     : public apache::thrift::ServiceHandler<cpp2::TestingService> {
@@ -38,6 +36,4 @@ class TestingService
   }
 };
 
-} // namespace test
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3::test

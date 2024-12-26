@@ -24,8 +24,7 @@
 #include <thrift/lib/cpp/server/TServerEventHandler.h>
 #include <thrift/lib/cpp2/server/RequestsRegistry.h>
 
-namespace thrift {
-namespace py3 {
+namespace thrift::py3 {
 using AddressHandler = folly::Function<void(folly::SocketAddress)>;
 
 template <class Ret, class... Args>
@@ -45,7 +44,7 @@ class Py3ServerEventHandler
       folly::Executor* executor, AddressHandler address_handler)
       : executor_(executor), address_handler_(std::move(address_handler)) {}
 
-  void preServe(const folly::SocketAddress* address) {
+  void preServe(const folly::SocketAddress* address) override {
     executor_->add([addr = *address, this]() mutable {
       address_handler_(std::move(addr));
     });
@@ -66,5 +65,4 @@ inline std::string getRequestId() {
   return {};
 }
 
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3

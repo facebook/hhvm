@@ -17,9 +17,7 @@
 #include <thrift/lib/py3/test/interactions/gen-cpp2/BlankService.h>
 #include <thrift/lib/py3/test/interactions/gen-cpp2/Calculator.h>
 
-namespace interactions {
-namespace test {
-namespace thrift {
+namespace interactions::test::thrift {
 struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
   struct SemiAdditionHandler
       : apache::thrift::ServiceHandler<Calculator>::AdditionIf {
@@ -60,6 +58,4 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
 };
 struct SemiBlankServiceHandler
     : apache::thrift::ServiceHandler<BlankServiceRenamed> {};
-} // namespace thrift
-} // namespace test
-} // namespace interactions
+} // namespace interactions::test::thrift

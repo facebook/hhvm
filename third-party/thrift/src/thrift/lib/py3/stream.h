@@ -33,8 +33,7 @@
 
 #if FOLLY_HAS_COROUTINES
 
-namespace thrift {
-namespace py3 {
+namespace thrift::py3 {
 
 template <typename T>
 class ClientBufferedStreamWrapper {
@@ -122,8 +121,7 @@ apache::thrift::ServerStream<StreamElement> createAsyncIteratorFromPyIterator(
         }
       });
 }
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3
 
 #else /* !FOLLY_HAS_COROUTINES */
 #error  Thrift stream type support needs C++ coroutines, which are not currently available. \

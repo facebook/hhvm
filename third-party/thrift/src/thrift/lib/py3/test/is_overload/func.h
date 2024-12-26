@@ -19,9 +19,7 @@
 #include <thrift/lib/cpp/transport/THeader.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 
-namespace thrift {
-namespace py3 {
-namespace test {
+namespace thrift::py3::test {
 
 bool isOverloaded(
     const apache::thrift::transport::THeader::StringToStringMap& /* headers */,
@@ -38,6 +36,4 @@ bool checkOverload(
   // otherwise, it will return no value
   return ret.hasValue();
 }
-} // namespace test
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3::test

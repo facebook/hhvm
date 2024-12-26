@@ -31,8 +31,7 @@
 #include <thrift/lib/cpp2/async/RocketClientChannel.h>
 #include <thrift/lib/py3/client_wrapper.h>
 
-namespace thrift {
-namespace py3 {
+namespace thrift::py3 {
 using RequestChannel_ptr = apache::thrift::RequestChannel::Ptr;
 
 /*
@@ -51,5 +50,4 @@ inline void destroyInEventBaseThread(RequestChannel_ptr&& ptr) {
   eb->runInEventBaseThread([ptr = std::move(ptr)] {});
 }
 
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3

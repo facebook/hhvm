@@ -30,8 +30,7 @@
 #include <thrift/lib/cpp/Thrift.h>
 #include <thrift/lib/cpp2/FieldRef.h>
 
-namespace thrift {
-namespace py3 {
+namespace thrift::py3 {
 
 template <typename T>
 std::shared_ptr<T> constant_shared_ptr(const T& x) {
@@ -184,5 +183,4 @@ PyObject* init_unicode_from_cpp(const T& str) {
   return PyUnicode_FromStringAndSize(str.data(), str.size());
 }
 
-} // namespace py3
-} // namespace thrift
+} // namespace thrift::py3

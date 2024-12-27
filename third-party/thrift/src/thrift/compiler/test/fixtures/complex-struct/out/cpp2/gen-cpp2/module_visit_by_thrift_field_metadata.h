@@ -395,6 +395,53 @@ struct VisitByFieldId<::cpp2::complexException> {
     }
   }
 };
+
+template <>
+struct VisitByFieldId<::cpp2::Containers> {
+  template <typename F, typename T>
+  void operator()([[maybe_unused]] F&& f, int32_t fieldId, [[maybe_unused]] T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).struct_list_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).union_list_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).enum_list_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).struct_set_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).union_set_ref());
+    case 6:
+      return f(5, static_cast<T&&>(t).enum_set_ref());
+    case 7:
+      return f(6, static_cast<T&&>(t).struct_map_ref());
+    case 8:
+      return f(7, static_cast<T&&>(t).union_map_ref());
+    case 9:
+      return f(8, static_cast<T&&>(t).enum_map_ref());
+    case 10:
+      return f(9, static_cast<T&&>(t).struct_map_2_ref());
+    case 11:
+      return f(10, static_cast<T&&>(t).union_map_2_ref());
+    case 12:
+      return f(11, static_cast<T&&>(t).enum_map_2_ref());
+    case 13:
+      return f(12, static_cast<T&&>(t).list_map_ref());
+    case 14:
+      return f(13, static_cast<T&&>(t).list_map_2_ref());
+    case 15:
+      return f(14, static_cast<T&&>(t).set_map_ref());
+    case 16:
+      return f(15, static_cast<T&&>(t).set_map_2_ref());
+    case 17:
+      return f(16, static_cast<T&&>(t).map_map_ref());
+    case 18:
+      return f(17, static_cast<T&&>(t).map_map_2_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::Containers");
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

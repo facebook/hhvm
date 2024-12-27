@@ -58,6 +58,9 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__complexException__tuple_pos[6] = {
     1, 2, 3, 4, 5, 6
   };
+  static constexpr std::int16_t _fbthrift__Containers__tuple_pos[18] = {
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
+  };
 } // namespace
 
 ExtractorResult<::cpp2::MyStructFloatFieldThrowExp>
@@ -2552,6 +2555,323 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *fbthrift_data,
           _fbthrift__complexException__tuple_pos[5],
           *_fbthrift__lsMap) == -1) {
+    return nullptr;
+  }
+  return std::move(fbthrift_data).release();
+}
+
+
+ExtractorResult<::cpp2::Containers>
+Extractor<::cpp2::Containers>::operator()(PyObject* obj) {
+  int tCheckResult = typeCheck(obj);
+  if (tCheckResult != 1) {
+      if (tCheckResult == 0) {
+        PyErr_SetString(PyExc_TypeError, "Not a Containers");
+      }
+      return extractorError<::cpp2::Containers>(
+          "Marshal error: Containers");
+  }
+  StrongRef fbThriftData(getThriftData(obj));
+  return Extractor<::apache::thrift::python::capi::ComposedStruct<
+      ::cpp2::Containers>>{}(*fbThriftData);
+}
+
+ExtractorResult<::cpp2::Containers>
+Extractor<::apache::thrift::python::capi::ComposedStruct<
+    ::cpp2::Containers>>::operator()(PyObject* fbThriftData) {
+  ::cpp2::Containers cpp;
+  std::optional<std::string_view> error;
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}.extractInto(
+      cpp.struct_list_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[0]),
+      error);
+  Extractor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}.extractInto(
+      cpp.union_list_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[1]),
+      error);
+  Extractor<list<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}.extractInto(
+      cpp.enum_list_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[2]),
+      error);
+  Extractor<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}.extractInto(
+      cpp.struct_set_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[3]),
+      error);
+  Extractor<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}.extractInto(
+      cpp.union_set_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[4]),
+      error);
+  Extractor<set<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}.extractInto(
+      cpp.enum_set_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[5]),
+      error);
+  Extractor<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int64_t>>{}.extractInto(
+      cpp.struct_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[6]),
+      error);
+  Extractor<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>, int64_t>>{}.extractInto(
+      cpp.union_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[7]),
+      error);
+  Extractor<map<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>, int64_t>>{}.extractInto(
+      cpp.enum_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[8]),
+      error);
+  Extractor<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}.extractInto(
+      cpp.struct_map_2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[9]),
+      error);
+  Extractor<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}.extractInto(
+      cpp.union_map_2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[10]),
+      error);
+  Extractor<map<int32_t, ::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}.extractInto(
+      cpp.enum_map_2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[11]),
+      error);
+  Extractor<map<list<int32_t>, int32_t>>{}.extractInto(
+      cpp.list_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[12]),
+      error);
+  Extractor<map<int32_t, list<int32_t>>>{}.extractInto(
+      cpp.list_map_2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[13]),
+      error);
+  Extractor<map<set<int32_t>, int32_t>>{}.extractInto(
+      cpp.set_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[14]),
+      error);
+  Extractor<map<int32_t, set<int32_t>>>{}.extractInto(
+      cpp.set_map_2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[15]),
+      error);
+  Extractor<map<map<int32_t, int32_t>, int32_t>>{}.extractInto(
+      cpp.map_map_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[16]),
+      error);
+  Extractor<map<int32_t, map<int32_t, int32_t>>>{}.extractInto(
+      cpp.map_map_2_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[17]),
+      error);
+  if (error) {
+    return folly::makeUnexpected(*error);
+  }
+  return cpp;
+}
+
+
+int Extractor<::cpp2::Containers>::typeCheck(PyObject* obj) {
+  if (!ensure_module_imported()) {
+    ::folly::python::handlePythonError(
+      "Module module import error");
+  }
+  int result =
+      can_extract__module__Containers(obj);
+  if (result < 0) {
+    ::folly::python::handlePythonError(
+      "Unexpected type check error: Containers");
+  }
+  return result;
+}
+
+
+PyObject* Constructor<::cpp2::Containers>::operator()(
+    const ::cpp2::Containers& val) {
+  if (!ensure_module_imported()) {
+    DCHECK(PyErr_Occurred() != nullptr);
+    return nullptr;
+  }
+  Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::Containers>> ctor;
+  StrongRef fbthrift_data(ctor(val));
+  if (!fbthrift_data) {
+    return nullptr;
+  }
+  return init__module__Containers(*fbthrift_data);
+}
+
+PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::Containers>>::operator()(
+    [[maybe_unused]] const ::cpp2::Containers& val) {
+  StrongRef fbthrift_data(createStructTuple(18));
+  StrongRef _fbthrift__struct_list(
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}
+    .constructFrom(val.struct_list_ref()));
+  if (!_fbthrift__struct_list ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[0],
+          *_fbthrift__struct_list) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__union_list(
+    Constructor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}
+    .constructFrom(val.union_list_ref()));
+  if (!_fbthrift__union_list ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[1],
+          *_fbthrift__union_list) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__enum_list(
+    Constructor<list<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}
+    .constructFrom(val.enum_list_ref()));
+  if (!_fbthrift__enum_list ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[2],
+          *_fbthrift__enum_list) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__struct_set(
+    Constructor<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}
+    .constructFrom(val.struct_set_ref()));
+  if (!_fbthrift__struct_set ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[3],
+          *_fbthrift__struct_set) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__union_set(
+    Constructor<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}
+    .constructFrom(val.union_set_ref()));
+  if (!_fbthrift__union_set ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[4],
+          *_fbthrift__union_set) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__enum_set(
+    Constructor<set<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}
+    .constructFrom(val.enum_set_ref()));
+  if (!_fbthrift__enum_set ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[5],
+          *_fbthrift__enum_set) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__struct_map(
+    Constructor<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int64_t>>{}
+    .constructFrom(val.struct_map_ref()));
+  if (!_fbthrift__struct_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[6],
+          *_fbthrift__struct_map) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__union_map(
+    Constructor<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>, int64_t>>{}
+    .constructFrom(val.union_map_ref()));
+  if (!_fbthrift__union_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[7],
+          *_fbthrift__union_map) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__enum_map(
+    Constructor<map<::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>, int64_t>>{}
+    .constructFrom(val.enum_map_ref()));
+  if (!_fbthrift__enum_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[8],
+          *_fbthrift__enum_map) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__struct_map_2(
+    Constructor<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}
+    .constructFrom(val.struct_map_2_ref()));
+  if (!_fbthrift__struct_map_2 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[9],
+          *_fbthrift__struct_map_2) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__union_map_2(
+    Constructor<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyUnion>>>{}
+    .constructFrom(val.union_map_2_ref()));
+  if (!_fbthrift__union_map_2 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[10],
+          *_fbthrift__union_map_2) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__enum_map_2(
+    Constructor<map<int32_t, ::apache::thrift::python::capi::ComposedEnum<::cpp2::MyEnum>>>{}
+    .constructFrom(val.enum_map_2_ref()));
+  if (!_fbthrift__enum_map_2 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[11],
+          *_fbthrift__enum_map_2) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_map(
+    Constructor<map<list<int32_t>, int32_t>>{}
+    .constructFrom(val.list_map_ref()));
+  if (!_fbthrift__list_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[12],
+          *_fbthrift__list_map) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_map_2(
+    Constructor<map<int32_t, list<int32_t>>>{}
+    .constructFrom(val.list_map_2_ref()));
+  if (!_fbthrift__list_map_2 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[13],
+          *_fbthrift__list_map_2) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_map(
+    Constructor<map<set<int32_t>, int32_t>>{}
+    .constructFrom(val.set_map_ref()));
+  if (!_fbthrift__set_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[14],
+          *_fbthrift__set_map) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_map_2(
+    Constructor<map<int32_t, set<int32_t>>>{}
+    .constructFrom(val.set_map_2_ref()));
+  if (!_fbthrift__set_map_2 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[15],
+          *_fbthrift__set_map_2) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__map_map(
+    Constructor<map<map<int32_t, int32_t>, int32_t>>{}
+    .constructFrom(val.map_map_ref()));
+  if (!_fbthrift__map_map ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[16],
+          *_fbthrift__map_map) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__map_map_2(
+    Constructor<map<int32_t, map<int32_t, int32_t>>>{}
+    .constructFrom(val.map_map_2_ref()));
+  if (!_fbthrift__map_map_2 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[17],
+          *_fbthrift__map_map_2) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

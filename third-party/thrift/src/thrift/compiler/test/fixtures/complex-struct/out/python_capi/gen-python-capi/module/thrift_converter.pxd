@@ -38,6 +38,8 @@ cdef extern from "thrift/compiler/test/fixtures/complex-struct/gen-cpp2/module_t
         coptXcep()
     cdef cppclass ccomplexException "::cpp2::complexException":
         ccomplexException()
+    cdef cppclass cContainers "::cpp2::Containers":
+        cContainers()
 
 cdef extern from "thrift/compiler/test/fixtures/complex-struct/gen-cpp2/module_types.h":
     cdef cppclass cMyEnum "::cpp2::MyEnum":
@@ -86,4 +88,7 @@ cdef object optXcep_from_cpp(const coptXcep& c_struct)
 
 cdef ccomplexException complexException_convert_to_cpp(object inst) except*
 cdef object complexException_from_cpp(const ccomplexException& c_struct)
+
+cdef cContainers Containers_convert_to_cpp(object inst) except*
+cdef object Containers_from_cpp(const cContainers& c_struct)
 

@@ -511,6 +511,70 @@ class complexException(_fbthrift_python_abstract_types.AbstractGeneratedError):
     def _to_py3(self) -> "module.types.complexException": ...  # type: ignore
     def _to_py_deprecated(self) -> "module.ttypes.complexException": ...  # type: ignore
 _fbthrift_complexException = complexException
+class Containers(_abc.ABC):
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def struct_list(self) -> _typing.Sequence[_fbthrift_MyStruct]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def union_list(self) -> _typing.Sequence[_fbthrift_MyUnion]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def enum_list(self) -> _typing.Sequence[_fbthrift_MyEnum]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def struct_set(self) -> _typing.AbstractSet[_fbthrift_MyStruct]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def union_set(self) -> _typing.AbstractSet[_fbthrift_MyUnion]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def enum_set(self) -> _typing.AbstractSet[_fbthrift_MyEnum]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def struct_map(self) -> _typing.Mapping[_fbthrift_MyStruct, int]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def union_map(self) -> _typing.Mapping[_fbthrift_MyUnion, int]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def enum_map(self) -> _typing.Mapping[_fbthrift_MyEnum, int]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def struct_map_2(self) -> _typing.Mapping[int, _fbthrift_MyStruct]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def union_map_2(self) -> _typing.Mapping[int, _fbthrift_MyUnion]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def enum_map_2(self) -> _typing.Mapping[int, _fbthrift_MyEnum]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def list_map(self) -> _typing.Mapping[_typing.Sequence[int], int]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def list_map_2(self) -> _typing.Mapping[int, _typing.Sequence[int]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def set_map(self) -> _typing.Mapping[_typing.AbstractSet[int], int]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def set_map_2(self) -> _typing.Mapping[int, _typing.AbstractSet[int]]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def map_map(self) -> _typing.Mapping[_typing.Mapping[int, int], int]: ...
+    @_fbthrift_property
+    @_abc.abstractmethod
+    def map_map_2(self) -> _typing.Mapping[int, _typing.Mapping[int, int]]: ...
+    @_abc.abstractmethod
+    def _to_mutable_python(self) -> "module.thrift_mutable_types.Containers": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_python(self) -> "module.thrift_types.Containers": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py3(self) -> "module.types.Containers": ...  # type: ignore
+    @_abc.abstractmethod
+    def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
+_fbthrift_Containers = Containers
 
 stringTypedef = str
 longTypeDef = int

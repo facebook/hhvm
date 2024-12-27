@@ -2762,6 +2762,397 @@ static_assert(
 
 } // namespace cpp2
 
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::cpp2::Containers>::translateFieldName(
+    std::string_view _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::cpp2::Containers>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+std::string_view Containers::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<Containers>::fields_names[folly::to_underlying(ord) - 1];
+}
+std::string_view Containers::__fbthrift_get_class_name() {
+  return apache::thrift::TStructDataStorage<Containers>::name;
+}
+
+Containers::Containers(const Containers&) = default;
+Containers& Containers::operator=(const Containers&) = default;
+Containers::Containers() {
+}
+
+
+Containers::~Containers() {}
+
+Containers::Containers([[maybe_unused]] Containers&& other) noexcept :
+    __fbthrift_field_struct_list(std::move(other.__fbthrift_field_struct_list)),
+    __fbthrift_field_union_list(std::move(other.__fbthrift_field_union_list)),
+    __fbthrift_field_enum_list(std::move(other.__fbthrift_field_enum_list)),
+    __fbthrift_field_struct_set(std::move(other.__fbthrift_field_struct_set)),
+    __fbthrift_field_union_set(std::move(other.__fbthrift_field_union_set)),
+    __fbthrift_field_enum_set(std::move(other.__fbthrift_field_enum_set)),
+    __fbthrift_field_struct_map(std::move(other.__fbthrift_field_struct_map)),
+    __fbthrift_field_union_map(std::move(other.__fbthrift_field_union_map)),
+    __fbthrift_field_enum_map(std::move(other.__fbthrift_field_enum_map)),
+    __fbthrift_field_struct_map_2(std::move(other.__fbthrift_field_struct_map_2)),
+    __fbthrift_field_union_map_2(std::move(other.__fbthrift_field_union_map_2)),
+    __fbthrift_field_enum_map_2(std::move(other.__fbthrift_field_enum_map_2)),
+    __fbthrift_field_list_map(std::move(other.__fbthrift_field_list_map)),
+    __fbthrift_field_list_map_2(std::move(other.__fbthrift_field_list_map_2)),
+    __fbthrift_field_set_map(std::move(other.__fbthrift_field_set_map)),
+    __fbthrift_field_set_map_2(std::move(other.__fbthrift_field_set_map_2)),
+    __fbthrift_field_map_map(std::move(other.__fbthrift_field_map_map)),
+    __fbthrift_field_map_map_2(std::move(other.__fbthrift_field_map_map_2)),
+    __isset(other.__isset) {
+}
+
+Containers& Containers::operator=([[maybe_unused]] Containers&& other) noexcept {
+    this->__fbthrift_field_struct_list = std::move(other.__fbthrift_field_struct_list);
+    this->__fbthrift_field_union_list = std::move(other.__fbthrift_field_union_list);
+    this->__fbthrift_field_enum_list = std::move(other.__fbthrift_field_enum_list);
+    this->__fbthrift_field_struct_set = std::move(other.__fbthrift_field_struct_set);
+    this->__fbthrift_field_union_set = std::move(other.__fbthrift_field_union_set);
+    this->__fbthrift_field_enum_set = std::move(other.__fbthrift_field_enum_set);
+    this->__fbthrift_field_struct_map = std::move(other.__fbthrift_field_struct_map);
+    this->__fbthrift_field_union_map = std::move(other.__fbthrift_field_union_map);
+    this->__fbthrift_field_enum_map = std::move(other.__fbthrift_field_enum_map);
+    this->__fbthrift_field_struct_map_2 = std::move(other.__fbthrift_field_struct_map_2);
+    this->__fbthrift_field_union_map_2 = std::move(other.__fbthrift_field_union_map_2);
+    this->__fbthrift_field_enum_map_2 = std::move(other.__fbthrift_field_enum_map_2);
+    this->__fbthrift_field_list_map = std::move(other.__fbthrift_field_list_map);
+    this->__fbthrift_field_list_map_2 = std::move(other.__fbthrift_field_list_map_2);
+    this->__fbthrift_field_set_map = std::move(other.__fbthrift_field_set_map);
+    this->__fbthrift_field_set_map_2 = std::move(other.__fbthrift_field_set_map_2);
+    this->__fbthrift_field_map_map = std::move(other.__fbthrift_field_map_map);
+    this->__fbthrift_field_map_map_2 = std::move(other.__fbthrift_field_map_map_2);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::cpp2::MyStruct> struct_list__arg, ::std::vector<::cpp2::MyUnion> union_list__arg, ::std::vector<::cpp2::MyEnum> enum_list__arg, ::std::set<::cpp2::MyStruct> struct_set__arg, ::std::set<::cpp2::MyUnion> union_set__arg, ::std::set<::cpp2::MyEnum> enum_set__arg, ::std::map<::cpp2::MyStruct, ::std::int64_t> struct_map__arg, ::std::map<::cpp2::MyUnion, ::std::int64_t> union_map__arg, ::std::map<::cpp2::MyEnum, ::std::int64_t> enum_map__arg, ::std::map<::std::int32_t, ::cpp2::MyStruct> struct_map_2__arg, ::std::map<::std::int32_t, ::cpp2::MyUnion> union_map_2__arg, ::std::map<::std::int32_t, ::cpp2::MyEnum> enum_map_2__arg, ::std::map<::std::vector<::std::int32_t>, ::std::int32_t> list_map__arg, ::std::map<::std::int32_t, ::std::vector<::std::int32_t>> list_map_2__arg, ::std::map<::std::set<::std::int32_t>, ::std::int32_t> set_map__arg, ::std::map<::std::int32_t, ::std::set<::std::int32_t>> set_map_2__arg, ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t> map_map__arg, ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>> map_map_2__arg) :
+    __fbthrift_field_struct_list(std::move(struct_list__arg)),
+    __fbthrift_field_union_list(std::move(union_list__arg)),
+    __fbthrift_field_enum_list(std::move(enum_list__arg)),
+    __fbthrift_field_struct_set(std::move(struct_set__arg)),
+    __fbthrift_field_union_set(std::move(union_set__arg)),
+    __fbthrift_field_enum_set(std::move(enum_set__arg)),
+    __fbthrift_field_struct_map(std::move(struct_map__arg)),
+    __fbthrift_field_union_map(std::move(union_map__arg)),
+    __fbthrift_field_enum_map(std::move(enum_map__arg)),
+    __fbthrift_field_struct_map_2(std::move(struct_map_2__arg)),
+    __fbthrift_field_union_map_2(std::move(union_map_2__arg)),
+    __fbthrift_field_enum_map_2(std::move(enum_map_2__arg)),
+    __fbthrift_field_list_map(std::move(list_map__arg)),
+    __fbthrift_field_list_map_2(std::move(list_map_2__arg)),
+    __fbthrift_field_set_map(std::move(set_map__arg)),
+    __fbthrift_field_set_map_2(std::move(set_map_2__arg)),
+    __fbthrift_field_map_map(std::move(map_map__arg)),
+    __fbthrift_field_map_map_2(std::move(map_map_2__arg)) { 
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
+  __isset.set(folly::index_constant<9>(), true);
+  __isset.set(folly::index_constant<10>(), true);
+  __isset.set(folly::index_constant<11>(), true);
+  __isset.set(folly::index_constant<12>(), true);
+  __isset.set(folly::index_constant<13>(), true);
+  __isset.set(folly::index_constant<14>(), true);
+  __isset.set(folly::index_constant<15>(), true);
+  __isset.set(folly::index_constant<16>(), true);
+  __isset.set(folly::index_constant<17>(), true);
+}
+
+
+void Containers::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_struct_list.clear();
+  this->__fbthrift_field_union_list.clear();
+  this->__fbthrift_field_enum_list.clear();
+  this->__fbthrift_field_struct_set.clear();
+  this->__fbthrift_field_union_set.clear();
+  this->__fbthrift_field_enum_set.clear();
+  this->__fbthrift_field_struct_map.clear();
+  this->__fbthrift_field_union_map.clear();
+  this->__fbthrift_field_enum_map.clear();
+  this->__fbthrift_field_struct_map_2.clear();
+  this->__fbthrift_field_union_map_2.clear();
+  this->__fbthrift_field_enum_map_2.clear();
+  this->__fbthrift_field_list_map.clear();
+  this->__fbthrift_field_list_map_2.clear();
+  this->__fbthrift_field_set_map.clear();
+  this->__fbthrift_field_set_map_2.clear();
+  this->__fbthrift_field_map_map.clear();
+  this->__fbthrift_field_map_map_2.clear();
+  __isset = {};
+}
+
+void Containers::__fbthrift_clear_terse_fields() {
+}
+
+bool Containers::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool Containers::operator==([[maybe_unused]] const Containers& rhs) const {
+  return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
+}
+
+bool Containers::operator<([[maybe_unused]] const Containers& rhs) const {
+  return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
+}
+
+const ::std::vector<::cpp2::MyStruct>& Containers::get_struct_list() const& {
+  return __fbthrift_field_struct_list;
+}
+
+::std::vector<::cpp2::MyStruct> Containers::get_struct_list() && {
+  return std::move(__fbthrift_field_struct_list);
+}
+
+const ::std::vector<::cpp2::MyUnion>& Containers::get_union_list() const& {
+  return __fbthrift_field_union_list;
+}
+
+::std::vector<::cpp2::MyUnion> Containers::get_union_list() && {
+  return std::move(__fbthrift_field_union_list);
+}
+
+const ::std::vector<::cpp2::MyEnum>& Containers::get_enum_list() const& {
+  return __fbthrift_field_enum_list;
+}
+
+::std::vector<::cpp2::MyEnum> Containers::get_enum_list() && {
+  return std::move(__fbthrift_field_enum_list);
+}
+
+const ::std::set<::cpp2::MyStruct>& Containers::get_struct_set() const& {
+  return __fbthrift_field_struct_set;
+}
+
+::std::set<::cpp2::MyStruct> Containers::get_struct_set() && {
+  return std::move(__fbthrift_field_struct_set);
+}
+
+const ::std::set<::cpp2::MyUnion>& Containers::get_union_set() const& {
+  return __fbthrift_field_union_set;
+}
+
+::std::set<::cpp2::MyUnion> Containers::get_union_set() && {
+  return std::move(__fbthrift_field_union_set);
+}
+
+const ::std::set<::cpp2::MyEnum>& Containers::get_enum_set() const& {
+  return __fbthrift_field_enum_set;
+}
+
+::std::set<::cpp2::MyEnum> Containers::get_enum_set() && {
+  return std::move(__fbthrift_field_enum_set);
+}
+
+const ::std::map<::cpp2::MyStruct, ::std::int64_t>& Containers::get_struct_map() const& {
+  return __fbthrift_field_struct_map;
+}
+
+::std::map<::cpp2::MyStruct, ::std::int64_t> Containers::get_struct_map() && {
+  return std::move(__fbthrift_field_struct_map);
+}
+
+const ::std::map<::cpp2::MyUnion, ::std::int64_t>& Containers::get_union_map() const& {
+  return __fbthrift_field_union_map;
+}
+
+::std::map<::cpp2::MyUnion, ::std::int64_t> Containers::get_union_map() && {
+  return std::move(__fbthrift_field_union_map);
+}
+
+const ::std::map<::cpp2::MyEnum, ::std::int64_t>& Containers::get_enum_map() const& {
+  return __fbthrift_field_enum_map;
+}
+
+::std::map<::cpp2::MyEnum, ::std::int64_t> Containers::get_enum_map() && {
+  return std::move(__fbthrift_field_enum_map);
+}
+
+const ::std::map<::std::int32_t, ::cpp2::MyStruct>& Containers::get_struct_map_2() const& {
+  return __fbthrift_field_struct_map_2;
+}
+
+::std::map<::std::int32_t, ::cpp2::MyStruct> Containers::get_struct_map_2() && {
+  return std::move(__fbthrift_field_struct_map_2);
+}
+
+const ::std::map<::std::int32_t, ::cpp2::MyUnion>& Containers::get_union_map_2() const& {
+  return __fbthrift_field_union_map_2;
+}
+
+::std::map<::std::int32_t, ::cpp2::MyUnion> Containers::get_union_map_2() && {
+  return std::move(__fbthrift_field_union_map_2);
+}
+
+const ::std::map<::std::int32_t, ::cpp2::MyEnum>& Containers::get_enum_map_2() const& {
+  return __fbthrift_field_enum_map_2;
+}
+
+::std::map<::std::int32_t, ::cpp2::MyEnum> Containers::get_enum_map_2() && {
+  return std::move(__fbthrift_field_enum_map_2);
+}
+
+const ::std::map<::std::vector<::std::int32_t>, ::std::int32_t>& Containers::get_list_map() const& {
+  return __fbthrift_field_list_map;
+}
+
+::std::map<::std::vector<::std::int32_t>, ::std::int32_t> Containers::get_list_map() && {
+  return std::move(__fbthrift_field_list_map);
+}
+
+const ::std::map<::std::int32_t, ::std::vector<::std::int32_t>>& Containers::get_list_map_2() const& {
+  return __fbthrift_field_list_map_2;
+}
+
+::std::map<::std::int32_t, ::std::vector<::std::int32_t>> Containers::get_list_map_2() && {
+  return std::move(__fbthrift_field_list_map_2);
+}
+
+const ::std::map<::std::set<::std::int32_t>, ::std::int32_t>& Containers::get_set_map() const& {
+  return __fbthrift_field_set_map;
+}
+
+::std::map<::std::set<::std::int32_t>, ::std::int32_t> Containers::get_set_map() && {
+  return std::move(__fbthrift_field_set_map);
+}
+
+const ::std::map<::std::int32_t, ::std::set<::std::int32_t>>& Containers::get_set_map_2() const& {
+  return __fbthrift_field_set_map_2;
+}
+
+::std::map<::std::int32_t, ::std::set<::std::int32_t>> Containers::get_set_map_2() && {
+  return std::move(__fbthrift_field_set_map_2);
+}
+
+const ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t>& Containers::get_map_map() const& {
+  return __fbthrift_field_map_map;
+}
+
+::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t> Containers::get_map_map() && {
+  return std::move(__fbthrift_field_map_map);
+}
+
+const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_map_map_2() const& {
+  return __fbthrift_field_map_map_2;
+}
+
+::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>> Containers::get_map_map_2() && {
+  return std::move(__fbthrift_field_map_map_2);
+}
+
+
+void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_struct_list, b.__fbthrift_field_struct_list);
+  swap(a.__fbthrift_field_union_list, b.__fbthrift_field_union_list);
+  swap(a.__fbthrift_field_enum_list, b.__fbthrift_field_enum_list);
+  swap(a.__fbthrift_field_struct_set, b.__fbthrift_field_struct_set);
+  swap(a.__fbthrift_field_union_set, b.__fbthrift_field_union_set);
+  swap(a.__fbthrift_field_enum_set, b.__fbthrift_field_enum_set);
+  swap(a.__fbthrift_field_struct_map, b.__fbthrift_field_struct_map);
+  swap(a.__fbthrift_field_union_map, b.__fbthrift_field_union_map);
+  swap(a.__fbthrift_field_enum_map, b.__fbthrift_field_enum_map);
+  swap(a.__fbthrift_field_struct_map_2, b.__fbthrift_field_struct_map_2);
+  swap(a.__fbthrift_field_union_map_2, b.__fbthrift_field_union_map_2);
+  swap(a.__fbthrift_field_enum_map_2, b.__fbthrift_field_enum_map_2);
+  swap(a.__fbthrift_field_list_map, b.__fbthrift_field_list_map);
+  swap(a.__fbthrift_field_list_map_2, b.__fbthrift_field_list_map_2);
+  swap(a.__fbthrift_field_set_map, b.__fbthrift_field_set_map);
+  swap(a.__fbthrift_field_set_map_2, b.__fbthrift_field_set_map_2);
+  swap(a.__fbthrift_field_map_map, b.__fbthrift_field_map_map);
+  swap(a.__fbthrift_field_map_map_2, b.__fbthrift_field_map_map_2);
+  swap(a.__isset, b.__isset);
+}
+
+template void Containers::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t Containers::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t Containers::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t Containers::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void Containers::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Containers::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Containers::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Containers::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::cpp2::MyStruct>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::variant>,
+        ::std::vector<::cpp2::MyUnion>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::set<::apache::thrift::type_class::structure>,
+        ::std::set<::cpp2::MyStruct>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::set<::apache::thrift::type_class::variant>,
+        ::std::set<::cpp2::MyUnion>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>,
+        ::std::map<::cpp2::MyStruct, ::std::int64_t>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::variant, ::apache::thrift::type_class::integral>,
+        ::std::map<::cpp2::MyUnion, ::std::int64_t>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
+        ::std::map<::std::int32_t, ::cpp2::MyStruct>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::variant>,
+        ::std::map<::std::int32_t, ::cpp2::MyUnion>>,
+    "inconsistent use of json option");
+
+} // namespace cpp2
+
 namespace cpp2 { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 }

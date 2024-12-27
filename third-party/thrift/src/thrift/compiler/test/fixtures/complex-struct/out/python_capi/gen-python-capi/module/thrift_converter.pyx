@@ -102,3 +102,9 @@ cdef ccomplexException complexException_convert_to_cpp(object inst) except *:
 cdef object complexException_from_cpp(const ccomplexException& c_struct):
     return cpp_to_python[ccomplexException](c_struct)
 
+cdef cContainers Containers_convert_to_cpp(object inst) except *:
+    return cmove(python_to_cpp[cContainers](inst))
+
+cdef object Containers_from_cpp(const cContainers& c_struct):
+    return cpp_to_python[cContainers](c_struct)
+

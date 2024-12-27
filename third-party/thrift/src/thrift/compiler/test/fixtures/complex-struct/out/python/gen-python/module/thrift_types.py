@@ -1891,6 +1891,248 @@ class complexException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
             return thrift.util.converter.to_py_struct(py_asyncio_types.complexException, self)
 _fbthrift_complexException = complexException
 
+class Containers(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        _fbthrift_python_types.FieldInfo(
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "struct_list",  # name
+            "struct_list",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(MyStruct)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "union_list",  # name
+            "union_list",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.StructTypeInfo(MyUnion)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "enum_list",  # name
+            "enum_list",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.EnumTypeInfo(MyEnum)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            4,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "struct_set",  # name
+            "struct_set",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.StructTypeInfo(MyStruct)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            5,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "union_set",  # name
+            "union_set",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.StructTypeInfo(MyUnion)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            6,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "enum_set",  # name
+            "enum_set",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.EnumTypeInfo(MyEnum)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            7,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "struct_map",  # name
+            "struct_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.StructTypeInfo(MyStruct), _fbthrift_python_types.typeinfo_i64),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "union_map",  # name
+            "union_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.StructTypeInfo(MyUnion), _fbthrift_python_types.typeinfo_i64),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            9,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "enum_map",  # name
+            "enum_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.EnumTypeInfo(MyEnum), _fbthrift_python_types.typeinfo_i64),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            10,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "struct_map_2",  # name
+            "struct_map_2",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(MyStruct)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            11,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "union_map_2",  # name
+            "union_map_2",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(MyUnion)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            12,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "enum_map_2",  # name
+            "enum_map_2",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.EnumTypeInfo(MyEnum)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            13,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_map",  # name
+            "list_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32), _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            14,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_map_2",  # name
+            "list_map_2",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.ListTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            15,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_map",  # name
+            "set_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32), _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            16,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_map_2",  # name
+            "set_map_2",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.SetTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            17,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_map",  # name
+            "map_map",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32), _fbthrift_python_types.typeinfo_i32),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            18,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_map_2",  # name
+            "map_map_2",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.Containers"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return None
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_Containers()
+
+    def _to_python(self):
+        return self
+
+    def _to_mutable_python(self):
+        import thrift.python.mutable_converter
+        import importlib
+        mutable_types = importlib.import_module("module.thrift_mutable_types")
+        return thrift.python.mutable_converter.to_mutable_python_struct_or_union(mutable_types.Containers, self)
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("module.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.Containers, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        try:
+            py_deprecated_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_deprecated_types.Containers, self)
+        except ModuleNotFoundError:
+            py_asyncio_types = importlib.import_module("module.ttypes")
+            return thrift.util.converter.to_py_struct(py_asyncio_types.Containers, self)
+
+_fbthrift_ABCMeta.register(_fbthrift_abstract_types.Containers, Containers)
+_fbthrift_Containers = Containers
+
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
@@ -1959,6 +2201,10 @@ def _fbthrift_metadata__exception_complexException():
     return module.thrift_metadata.gen_metadata_exception_complexException()
 
 
+def _fbthrift_metadata__struct_Containers():
+    return module.thrift_metadata.gen_metadata_struct_Containers()
+
+
 _fbthrift_all_structs = [
     MyStructFloatFieldThrowExp,
     MyStructMapFloatThrowExp,
@@ -1975,6 +2221,7 @@ _fbthrift_all_structs = [
     reqXcep,
     optXcep,
     complexException,
+    Containers,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 

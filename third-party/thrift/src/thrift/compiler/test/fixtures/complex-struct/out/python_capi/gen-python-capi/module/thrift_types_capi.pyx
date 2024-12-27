@@ -124,6 +124,13 @@ cdef api int can_extract__module__complexException(object __obj) except -1:
 cdef api object init__module__complexException(object data):
     return __thrift_types.complexException._fbthrift_create(data)
 
+cdef api int can_extract__module__Containers(object __obj) except -1:
+    return 1 if isinstance(__obj, __thrift_types.Containers) else 0
+
+
+cdef api object init__module__Containers(object data):
+    return __thrift_types.Containers._fbthrift_create(data)
+
 cdef api int can_extract__module__MyEnum(object __obj) except -1:
     return 1 if isinstance(__obj, __thrift_types.MyEnum) else 0
 

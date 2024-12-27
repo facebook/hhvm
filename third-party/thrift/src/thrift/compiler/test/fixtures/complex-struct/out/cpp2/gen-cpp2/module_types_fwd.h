@@ -25,6 +25,7 @@ class emptyXcep;
 class reqXcep;
 class optXcep;
 class complexException;
+class Containers;
 } // namespace cpp2
 // END forward_declare
 

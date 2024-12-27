@@ -98,6 +98,11 @@ class StructMetadata<::cpp2::complexException> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::cpp2::Containers> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class ExceptionMetadata<::cpp2::emptyXcep> {
  public:
   static void gen(ThriftMetadata& metadata);

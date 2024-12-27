@@ -226,6 +226,31 @@ struct ForEachField<::cpp2::complexException> {
     f(5, static_cast<T&&>(t).lsMap_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::cpp2::Containers> {
+  template <typename F, typename... T>
+  void operator()([[maybe_unused]] F&& f, [[maybe_unused]] T&&... t) const {
+    f(0, static_cast<T&&>(t).struct_list_ref()...);
+    f(1, static_cast<T&&>(t).union_list_ref()...);
+    f(2, static_cast<T&&>(t).enum_list_ref()...);
+    f(3, static_cast<T&&>(t).struct_set_ref()...);
+    f(4, static_cast<T&&>(t).union_set_ref()...);
+    f(5, static_cast<T&&>(t).enum_set_ref()...);
+    f(6, static_cast<T&&>(t).struct_map_ref()...);
+    f(7, static_cast<T&&>(t).union_map_ref()...);
+    f(8, static_cast<T&&>(t).enum_map_ref()...);
+    f(9, static_cast<T&&>(t).struct_map_2_ref()...);
+    f(10, static_cast<T&&>(t).union_map_2_ref()...);
+    f(11, static_cast<T&&>(t).enum_map_2_ref()...);
+    f(12, static_cast<T&&>(t).list_map_ref()...);
+    f(13, static_cast<T&&>(t).list_map_2_ref()...);
+    f(14, static_cast<T&&>(t).set_map_ref()...);
+    f(15, static_cast<T&&>(t).set_map_2_ref()...);
+    f(16, static_cast<T&&>(t).map_map_ref()...);
+    f(17, static_cast<T&&>(t).map_map_2_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

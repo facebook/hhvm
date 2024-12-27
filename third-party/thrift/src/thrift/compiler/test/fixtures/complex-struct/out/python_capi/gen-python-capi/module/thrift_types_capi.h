@@ -484,6 +484,37 @@ struct Constructor<::apache::thrift::python::capi::ComposedStruct<
 };
 
 template <>
+struct Extractor<::cpp2::Containers>
+    : public BaseExtractor<::cpp2::Containers> {
+  static const bool kUsingMarshal = true;
+  ExtractorResult<::cpp2::Containers> operator()(PyObject* obj);
+  int typeCheck(PyObject* obj);
+};
+
+template <>
+struct Extractor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::Containers>>
+    : public BaseExtractor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::Containers>> {
+  ExtractorResult<::cpp2::Containers> operator()(PyObject* obj);
+};
+
+template <>
+struct Constructor<::cpp2::Containers>
+    : public BaseConstructor<::cpp2::Containers> {
+  static const bool kUsingMarshal = true;
+  PyObject* operator()(const ::cpp2::Containers& val);
+};
+
+template <>
+struct Constructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::Containers>>
+    : public BaseConstructor<::apache::thrift::python::capi::ComposedStruct<
+        ::cpp2::Containers>> {
+  PyObject* operator()(const ::cpp2::Containers& val);
+};
+
+template <>
 struct Extractor<::cpp2::MyEnum>
     : public BaseExtractor<::cpp2::MyEnum> {
   ExtractorResult<::cpp2::MyEnum> operator()(PyObject* obj);

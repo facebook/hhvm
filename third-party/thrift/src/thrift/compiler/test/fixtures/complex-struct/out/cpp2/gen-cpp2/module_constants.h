@@ -24,8 +24,8 @@ namespace module_constants {
   /** Glean {"constant": "constEnumUnion"} */
   ::cpp2::MyUnion const& constEnumUnion();
 
-  FOLLY_EXPORT ::std::string_view _fbthrift_schema_711abdb343f078bf();
-  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_711abdb343f078bf_includes();
+  FOLLY_EXPORT ::std::string_view _fbthrift_schema_26752209a8354ec6();
+  FOLLY_EXPORT ::folly::Range<const ::std::string_view*> _fbthrift_schema_26752209a8354ec6_includes();
 
 } // namespace module_constants
 } // namespace cpp2

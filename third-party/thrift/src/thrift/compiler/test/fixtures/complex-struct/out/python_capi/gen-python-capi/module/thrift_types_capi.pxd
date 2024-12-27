@@ -88,6 +88,11 @@ cdef api int can_extract__module__complexException(object) except -1
 
 cdef api object init__module__complexException(object data)
 
+cdef api int can_extract__module__Containers(object) except -1
+
+
+cdef api object init__module__Containers(object data)
+
 cdef api int can_extract__module__MyEnum(object) except -1
 
 cdef api object construct__module__MyEnum(int64_t)

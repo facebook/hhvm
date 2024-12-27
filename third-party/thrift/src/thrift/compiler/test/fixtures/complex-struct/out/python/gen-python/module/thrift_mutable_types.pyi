@@ -1178,6 +1178,169 @@ class complexException(_fbthrift_python_mutable_exceptions.MutableGeneratedError
     def _to_py_deprecated(self) -> "module.ttypes.complexException": ...  # type: ignore
 _fbthrift_complexException = complexException
 
+class _fbthrift_compatible_with_Containers:
+    pass
+
+
+class Containers(_fbthrift_python_mutable_types.MutableStruct, _fbthrift_compatible_with_Containers, _fbthrift_python_abstract_types.Containers):
+
+    @property
+    def struct_list(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyStruct]: ...
+    @struct_list.setter
+    def struct_list(self, value: _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyStruct] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+
+
+    @property
+    def union_list(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyUnion]: ...
+    @union_list.setter
+    def union_list(self, value: _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyUnion] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+
+
+    @property
+    def enum_list(self) -> _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyEnum]: ...
+    @enum_list.setter
+    def enum_list(self, value: _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyEnum] | _fbthrift_python_mutable_types._ThriftListWrapper) -> None: ...
+
+
+    @property
+    def struct_set(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyStruct]: ...
+    @struct_set.setter
+    def struct_set(self, value: _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyStruct] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
+
+
+    @property
+    def union_set(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyUnion]: ...
+    @union_set.setter
+    def union_set(self, value: _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyUnion] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
+
+
+    @property
+    def enum_set(self) -> _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyEnum]: ...
+    @enum_set.setter
+    def enum_set(self, value: _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper) -> None: ...
+
+
+    @property
+    def struct_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyStruct, int]: ...
+    @struct_map.setter
+    def struct_map(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyStruct, int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def union_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyUnion, int]: ...
+    @union_map.setter
+    def union_map(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyUnion, int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def enum_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, int]: ...
+    @enum_map.setter
+    def enum_map(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def struct_map_2(self) -> _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyStruct]: ...
+    @struct_map_2.setter
+    def struct_map_2(self, value: _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def union_map_2(self) -> _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyUnion]: ...
+    @union_map_2.setter
+    def union_map_2(self, value: _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyUnion] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def enum_map_2(self) -> _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyEnum]: ...
+    @enum_map_2.setter
+    def enum_map_2(self, value: _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyEnum] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def list_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableList[int], int]: ...
+    @list_map.setter
+    def list_map(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableList[int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def list_map_2(self) -> _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]]: ...
+    @list_map_2.setter
+    def list_map_2(self, value: _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def set_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableSet[int], int]: ...
+    @set_map.setter
+    def set_map(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableSet[int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def set_map_2(self) -> _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableSet[int]]: ...
+    @set_map_2.setter
+    def set_map_2(self, value: _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableSet[int]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def map_map(self) -> _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableMap[int, int], int]: ...
+    @map_map.setter
+    def map_map(self, value: _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableMap[int, int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+
+    @property
+    def map_map_2(self) -> _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableMap[int, int]]: ...
+    @map_map_2.setter
+    def map_map_2(self, value: _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableMap[int, int]] | _fbthrift_python_mutable_types._ThriftMapWrapper) -> None: ...
+
+    def __init__(
+        self, *,
+        struct_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_MyStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        union_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_MyUnion] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        enum_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        struct_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyStruct] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        union_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyUnion] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        enum_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        struct_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyStruct, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        union_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyUnion, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        enum_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        struct_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_MyStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        union_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_MyUnion] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        enum_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        list_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableList[int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        list_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        set_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableSet[int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        set_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableSet[int]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        map_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableMap[int, int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        map_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableMap[int, int]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        struct_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_MyStruct] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        union_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_MyUnion] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        enum_list: _typing.Optional[_fbthrift_python_mutable_containers.MutableList[_fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftListWrapper]=...,
+        struct_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyStruct] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        union_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyUnion] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        enum_set: _typing.Optional[_fbthrift_python_mutable_containers.MutableSet[_fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftSetWrapper]=...,
+        struct_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyStruct, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        union_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyUnion, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        enum_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        struct_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_MyStruct] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        union_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_MyUnion] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        enum_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_compatible_with_MyEnum] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        list_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableList[int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        list_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        set_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableSet[int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        set_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableSet[int]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        map_map: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableMap[int, int], int] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...,
+        map_map_2: _typing.Optional[_fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableMap[int, int]] | _fbthrift_python_mutable_types._ThriftMapWrapper]=...
+    ) -> _typing.Self: ...
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_python_mutable_containers.MutableList[_fbthrift_MyStruct], _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyUnion], _fbthrift_python_mutable_containers.MutableList[_fbthrift_MyEnum], _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyStruct], _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyUnion], _fbthrift_python_mutable_containers.MutableSet[_fbthrift_MyEnum], _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyStruct, int], _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyUnion, int], _fbthrift_python_mutable_containers.MutableMap[_fbthrift_MyEnum, int], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyStruct], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyUnion], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_MyEnum], _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableList[int], int], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableList[int]], _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableSet[int], int], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableSet[int]], _fbthrift_python_mutable_containers.MutableMap[_fbthrift_python_mutable_containers.MutableMap[int, int], int], _fbthrift_python_mutable_containers.MutableMap[int, _fbthrift_python_mutable_containers.MutableMap[int, int]]]]]: ...
+    def _to_python(self) -> "module.thrift_types.Containers": ...  # type: ignore
+    def _to_mutable_python(self) -> _typing.Self: ...
+    def _to_py3(self) -> "module.types.Containers": ...  # type: ignore
+    def _to_py_deprecated(self) -> "module.ttypes.Containers": ...  # type: ignore
+_fbthrift_Containers = Containers
+
 
 DEFAULT_PORT_NUM: int = ...
 

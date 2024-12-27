@@ -343,6 +343,14 @@ struct conditional_block {
   expression condition;
   bodies body_elements;
 
+  // Any {{#else if}} clauses, if present.
+  struct else_if_block {
+    source_range loc;
+    expression condition;
+    bodies body_elements;
+  };
+  std::vector<else_if_block> else_if_clauses;
+
   // The {{#else}} clause, if present.
   struct else_block {
     source_range loc;

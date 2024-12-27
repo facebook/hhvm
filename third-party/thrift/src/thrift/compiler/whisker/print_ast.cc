@@ -81,6 +81,12 @@ struct ast_visitor {
     visit(conditional_block.condition, scope.open_property());
     visit(conditional_block.body_elements, scope.open_node());
 
+    for (const auto& else_if_clause : conditional_block.else_if_clauses) {
+      auto else_if_scope = scope.open_property();
+      else_if_scope.println(" else-if-block {}", location(else_if_clause.loc));
+      visit(else_if_clause.body_elements, else_if_scope.open_node());
+    }
+
     if (auto else_clause = conditional_block.else_clause) {
       auto else_scope = scope.open_property();
       else_scope.println(" else-block {}", location(else_clause->loc));

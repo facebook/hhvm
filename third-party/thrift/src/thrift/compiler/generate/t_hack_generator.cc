@@ -127,6 +127,11 @@ class t_hack_generator : public t_concat_generator {
     arrays_ = option_is_specified(options, "arrays");
     no_use_hack_collections_ =
         option_is_specified(options, "no_use_hack_collections");
+    // Set the future state of compiler options based on the current state.
+    // A subsequent change will remove the current compiler options.
+    hack_collections_ = !arrays_ && !no_use_hack_collections_;
+    legacy_arrays_ = no_use_hack_collections_;
+
     nullable_everything_ = option_is_specified(options, "nullable_everything");
     const_collections_ = option_is_specified(options, "const_collections");
     enum_extratype_ = option_is_specified(options, "enum_extratype");
@@ -1194,7 +1199,13 @@ class t_hack_generator : public t_concat_generator {
   /**
    * True to never use hack collection objects. Only used for migrations
    */
+  bool legacy_arrays_;
   bool no_use_hack_collections_;
+
+  /**
+   * True to use hack collection objects.
+   */
+  bool hack_collections_;
 
   /**
    * True to force client methods to accept null arguments. Only used for

@@ -43,7 +43,7 @@ class double_property_name
       public native_object::map_like,
       public std::enable_shared_from_this<double_property_name> {
  public:
-  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+  native_object::map_like::ptr as_map_like() const override {
     return shared_from_this();
   }
 
@@ -72,7 +72,7 @@ class delegate_to : public native_object,
       : delegate_(std::move(delegate)) {}
 
  private:
-  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+  native_object::map_like::ptr as_map_like() const override {
     return shared_from_this();
   }
 

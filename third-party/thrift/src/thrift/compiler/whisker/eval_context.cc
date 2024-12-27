@@ -66,7 +66,7 @@ class global_scope_object
   explicit global_scope_object(map properties)
       : properties_(std::move(properties)) {}
 
-  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+  native_object::map_like::ptr as_map_like() const override {
     return shared_from_this();
   }
 

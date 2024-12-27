@@ -341,67 +341,61 @@ class render_engine {
         });
   }
 
-  std::shared_ptr<const object> evaluate(const ast::expression& expr) {
-    using object_ptr = std::shared_ptr<const object>;
-    static const auto as_ref = [](const object& o) -> object_ptr {
-      // Empty deleter here implies that the object is externally managed.
-      // Thus, the returned shared_ptr acts like a reference.
-      return object_ptr(std::shared_ptr<void>(), &o);
-    };
-
-    using function_call = ast::expression::function_call;
+  object::ptr evaluate(const ast::expression& expr) {
+    using expression = ast::expression;
+    using function_call = expression::function_call;
     return detail::variant_match(
         expr.which,
-        [](const ast::expression::string_literal& s) -> object_ptr {
-          return std::make_shared<const object>(string(s.text));
+        [](const expression::string_literal& s) -> object::ptr {
+          return object::managed(whisker::make::string(s.text));
         },
-        [](const ast::expression::i64_literal& i) -> object_ptr {
-          return std::make_shared<const object>(i64(i.value));
+        [](const expression::i64_literal& i) -> object::ptr {
+          return object::managed(whisker::make::i64(i.value));
         },
-        [](const ast::expression::null_literal&) -> object_ptr {
-          return as_ref(whisker::make::null);
+        [](const expression::null_literal&) -> object::ptr {
+          return object::as_ref(whisker::make::null);
         },
-        [](const ast::expression::true_literal&) -> object_ptr {
-          return as_ref(whisker::make::true_);
+        [](const expression::true_literal&) -> object::ptr {
+          return object::as_ref(whisker::make::true_);
         },
-        [](const ast::expression::false_literal&) -> object_ptr {
-          return as_ref(whisker::make::false_);
+        [](const expression::false_literal&) -> object::ptr {
+          return object::as_ref(whisker::make::false_);
         },
-        [&](const ast::variable_lookup& variable_lookup) -> object_ptr {
-          return as_ref(lookup_variable(variable_lookup));
+        [&](const ast::variable_lookup& variable_lookup) -> object::ptr {
+          return object::as_ref(lookup_variable(variable_lookup));
         },
-        [&](const function_call& func) -> object_ptr {
+        [&](const function_call& func) -> object::ptr {
           return detail::variant_match(
               func.which,
-              [&](function_call::builtin_not) -> object_ptr {
+              [&](function_call::builtin_not) -> object::ptr {
                 // enforced by the parser
                 assert(func.positional_arguments.size() == 1);
                 assert(func.named_arguments.empty());
                 return evaluate_as_bool(func.positional_arguments[0])
-                    ? as_ref(whisker::make::false_)
-                    : as_ref(whisker::make::true_);
+                    ? object::as_ref(whisker::make::false_)
+                    : object::as_ref(whisker::make::true_);
               },
-              [&](function_call::builtin_and) -> object_ptr {
+              [&](function_call::builtin_and) -> object::ptr {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
-                for (const ast::expression& arg : func.positional_arguments) {
+                for (const expression& arg : func.positional_arguments) {
                   if (!evaluate_as_bool(arg)) {
-                    return as_ref(whisker::make::false_);
+                    return object::as_ref(whisker::make::false_);
                   }
                 }
-                return as_ref(whisker::make::true_);
+                return object::as_ref(whisker::make::true_);
               },
-              [&](function_call::builtin_or) -> object_ptr {
+              [&](function_call::builtin_or) -> object::ptr {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
-                for (const ast::expression& arg : func.positional_arguments) {
+                for (const expression& arg : func.positional_arguments) {
                   if (evaluate_as_bool(arg)) {
-                    return as_ref(whisker::make::true_);
+                    return object::as_ref(whisker::make::true_);
                   }
                 }
-                return as_ref(whisker::make::false_);
+                return object::as_ref(whisker::make::false_);
               },
-              [&](const function_call::user_defined& f) -> object_ptr {
+              [&](const function_call::user_defined& f) -> object::ptr {
                 diags_.error(
                     f.name.loc.begin,
                     "User-defined function '{}' not supported yet.",
@@ -437,7 +431,7 @@ class render_engine {
   }
 
   void visit(const ast::interpolation& interpolation) {
-    std::shared_ptr<const object> result = evaluate(interpolation.content);
+    object::ptr result = evaluate(interpolation.content);
 
     const auto report_unprintable_message_only = [&](diagnostic_level level) {
       maybe_report(interpolation.loc, level, [&] {
@@ -500,7 +494,7 @@ class render_engine {
     }
   }
   bool evaluate_as_bool(const ast::expression& expr) {
-    std::shared_ptr<const object> result = evaluate(expr);
+    object::ptr result = evaluate(expr);
     return result->visit(
         [&](boolean value) { return value; },
         [&](const auto& value) {
@@ -654,7 +648,7 @@ class render_engine {
 
   void visit(const ast::with_block& with_block) {
     const ast::expression& expr = with_block.value;
-    std::shared_ptr<const object> result = evaluate(expr);
+    object::ptr result = evaluate(expr);
     result->visit(
         [&](const map&) {
           // maps can be de-structured.

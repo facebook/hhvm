@@ -105,6 +105,20 @@ struct object_print_options {
 };
 
 /**
+ * A shared_ptr which represents a (possibly) managed object.
+ *
+ * When storing a raw pointer, maybe_managed_ptr does not manage the pointer's
+ * lifetime, i.e. never calls `free` on the pointer.
+ *
+ * When storing a shared_ptr, maybe_managed_ptr will release the shared_ptr
+ * upon its own destruction.
+ *
+ * See `folly::MaybeManagedPtr`.
+ */
+template <typename T>
+using maybe_managed_ptr = std::shared_ptr<const T>;
+
+/**
  * A native_object is the most powerful type in Whisker. Its properties and
  * behavior are defined by highly customizable C++ code.
  *
@@ -133,6 +147,7 @@ class native_object {
    */
   class map_like {
    public:
+    using ptr = maybe_managed_ptr<const map_like>;
     virtual ~map_like() = default;
     /**
      * Searches for a property on an object whose name matches the provided
@@ -168,17 +183,14 @@ class native_object {
    *                       public native_object::map_like,
    *                       public std::enable_shared_from_this<my_object> {
    *      public:
-   *       std::shared_ptr<const native_object::map_like> as_map_like()
-   *           const override {
+   *       native_object::map_like:ptr as_map_like() const override {
    *         return shared_from_this();
    *       }
    *
    *       // Implement map-like functions...
    *     };
    */
-  virtual std::shared_ptr<const native_object::map_like> as_map_like() const {
-    return nullptr;
-  }
+  virtual native_object::map_like::ptr as_map_like() const { return nullptr; }
 
   /**
    * A class that allows "array-like" random access over an underlying sequence
@@ -186,6 +198,7 @@ class native_object {
    */
   class array_like {
    public:
+    using ptr = maybe_managed_ptr<const array_like>;
     virtual ~array_like() = default;
     /**
      * Returns the number of elements in the sequence.
@@ -214,16 +227,14 @@ class native_object {
    *                       public native_object::array_like,
    *                       public std::enable_shared_from_this<my_object> {
    *      public:
-   *       std::shared_ptr<const native_object::array_like> as_array_like()
-   *           const override {
+   *       native_object::array_like::ptr as_array_like() const override {
    *         return shared_from_this();
    *       }
    *
    *       // Implement array-like functions...
    *     };
    */
-  virtual std::shared_ptr<const native_object::array_like> as_array_like()
-      const {
+  virtual native_object::array_like::ptr as_array_like() const {
     return nullptr;
   }
 
@@ -311,6 +322,28 @@ class object final : private detail::object_base<object> {
   base&& steal_variant() & { return std::move(*this); }
 
  public:
+  using ptr = maybe_managed_ptr<object>;
+
+  /**
+   * Returns a shared_ptr which is an unmanaged reference to the provided
+   * object.
+   *
+   * The caller must guarantee that underlying object is kept alive for the
+   * duration of an expression evaluation in which the object is used.
+   */
+  static ptr as_ref(const object& o) {
+    return ptr(std::shared_ptr<void>(), &o);
+  }
+  static ptr as_ref(object&&) = delete;
+
+  /**
+   * Returns a shared_ptr which directly owns a copy of the provided object.
+   * This allows native_function to return values that are dynamically computed.
+   */
+  static ptr managed(object&& o) {
+    return std::make_shared<const object>(std::move(o));
+  }
+
   /* implicit */ object(null = {}) : base(std::in_place_type<null>) {}
   explicit object(boolean value) : base(bool(value)) {}
   explicit object(i64 value) : base(value) {}

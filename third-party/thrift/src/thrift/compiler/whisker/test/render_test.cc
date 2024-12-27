@@ -38,7 +38,7 @@ class double_property_name
       public native_object::map_like,
       public std::enable_shared_from_this<double_property_name> {
  public:
-  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+  native_object::map_like::ptr as_map_like() const override {
     return shared_from_this();
   }
 
@@ -204,8 +204,7 @@ TEST_F(RenderTest, section_block_array_iterable_native_object) {
     explicit array_like_native_object(array values)
         : values_(std::move(values)) {}
 
-    std::shared_ptr<const native_object::array_like> as_array_like()
-        const override {
+    native_object::array_like::ptr as_array_like() const override {
       return shared_from_this();
     }
     std::size_t size() const override { return values_.size(); }
@@ -294,8 +293,7 @@ TEST_F(RenderTest, section_block_map_like_native_object) {
    public:
     explicit map_like_native_object(map values) : values_(std::move(values)) {}
 
-    std::shared_ptr<const native_object::map_like> as_map_like()
-        const override {
+    native_object::map_like::ptr as_map_like() const override {
       return shared_from_this();
     }
 

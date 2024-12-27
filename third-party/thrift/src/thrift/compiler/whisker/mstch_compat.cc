@@ -42,8 +42,7 @@ class mstch_array_proxy final
       : proxied_(std::move(array)) {}
 
  private:
-  std::shared_ptr<const native_object::array_like> as_array_like()
-      const override {
+  native_object::array_like::ptr as_array_like() const override {
     return shared_from_this();
   }
 
@@ -106,7 +105,7 @@ class mstch_map_proxy final
   explicit mstch_map_proxy(mstch_map&& map) : proxied_(std::move(map)) {}
 
  private:
-  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+  native_object::map_like::ptr as_map_like() const override {
     return shared_from_this();
   }
 
@@ -176,7 +175,7 @@ class mstch_object_proxy
   explicit mstch_object_proxy(std::shared_ptr<mstch_object>&& obj)
       : proxied_(std::move(obj)) {}
 
-  std::shared_ptr<const native_object::map_like> as_map_like() const override {
+  native_object::map_like::ptr as_map_like() const override {
     return shared_from_this();
   }
 

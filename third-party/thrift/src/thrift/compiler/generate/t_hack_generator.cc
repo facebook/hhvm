@@ -1386,12 +1386,12 @@ void t_hack_generator::generate_json_container(
       indent(out) << container << " = Vector {};\n";
     }
   } else if (ttype->is_set()) {
-    if (arrays_) {
-      indent(out) << container << " = keyset[];\n";
-    } else if (arraysets_) {
+    if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
       indent(out) << container << " = dict[];\n";
-    } else {
+    } else if (hack_collections_) {
       indent(out) << container << " = Set {};\n";
+    } else {
+      indent(out) << container << " = keyset[];\n";
     }
   }
   indent(out) << "foreach(" << json << " as " << key << " => " << value
@@ -1435,12 +1435,12 @@ void t_hack_generator::generate_json_set_element(
   t_field felem(tset->get_elem_type(), elem);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &felem, "", "", value);
-  if (arrays_) {
-    indent(out) << prefix_thrift << " []= " << elem << ";\n";
-  } else if (arraysets_) {
+  if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
     indent(out) << prefix_thrift << "[" << elem << "] = true;\n";
-  } else {
+  } else if (hack_collections_) {
     indent(out) << prefix_thrift << "->add(" << elem << ");\n";
+  } else {
+    indent(out) << prefix_thrift << " []= " << elem << ";\n";
   }
 }
 
@@ -2305,12 +2305,12 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
       dval = "Vector {}";
     }
   } else if (type->is_set()) {
-    if (arrays_) {
-      dval = "keyset[]";
-    } else if (arraysets_) {
+    if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
       dval = "dict[]";
-    } else {
+    } else if (hack_collections_) {
       dval = "Set {}";
+    } else {
+      dval = "keyset[]";
     }
   }
   return dval;
@@ -2988,7 +2988,6 @@ void t_hack_generator::generate_php_type_spec(
       }
     }
     indent(out) << "'class' => " << sname << "::class,\n";
-
   } else if (const auto* tmap = dynamic_cast<const t_map*>(t)) {
     const t_type* ktype = tmap->get_key_type();
     const t_type* vtype = tmap->get_val_type();
@@ -3005,31 +3004,30 @@ void t_hack_generator::generate_php_type_spec(
     indent(out) << "'vtype' => " << type_to_enum(vtype) << ",\n";
     generate_php_type_spec_shape_elt_helper(out, "key", ktype, depth);
     generate_php_type_spec_shape_elt_helper(out, "val", vtype, depth);
-    if (arrays_) {
-      indent(out) << "'format' => 'harray',\n";
-    } else if (no_use_hack_collections_) {
+    if (legacy_arrays_) {
       indent(out) << "'format' => 'array',\n";
-    } else {
+    } else if (hack_collections_) {
       indent(out) << "'format' => 'collection',\n";
+    } else {
+      indent(out) << "'format' => 'harray',\n";
     }
   } else if (const auto* tlist = dynamic_cast<const t_list*>(t)) {
     const t_type* etype = tlist->get_elem_type();
     indent(out) << "'etype' => " << type_to_enum(etype) << ",\n";
     generate_php_type_spec_shape_elt_helper(out, "elem", etype, depth);
-    if (arrays_) {
-      indent(out) << "'format' => 'harray',\n";
-    } else if (no_use_hack_collections_) {
+    if (legacy_arrays_) {
       indent(out) << "'format' => 'array',\n";
-    } else {
+    } else if (hack_collections_) {
       indent(out) << "'format' => 'collection',\n";
+    } else {
+      indent(out) << "'format' => 'harray',\n";
     }
   } else if (const auto* tset = dynamic_cast<const t_set*>(t)) {
     const t_type* etype = tset->get_elem_type();
     if (find_hack_adapter(etype)) {
       throw std::runtime_error(
-          "using hack.adapter annotation with set keys is not supported yet");
+          "using hack.Adapter annotation with set keys is not supported yet");
     }
-
     auto [wrapper, name, ns] = find_hack_wrapper(etype);
     if (wrapper) {
       throw std::runtime_error(
@@ -3037,12 +3035,12 @@ void t_hack_generator::generate_php_type_spec(
     }
     indent(out) << "'etype' => " << type_to_enum(etype) << ",\n";
     generate_php_type_spec_shape_elt_helper(out, "elem", etype, depth);
-    if (arrays_) {
-      indent(out) << "'format' => 'harray',\n";
-    } else if (arraysets_) {
+    if (arraysets_ && (hack_collections_ || legacy_arrays_)) {
       indent(out) << "'format' => 'array',\n";
-    } else {
+    } else if (hack_collections_) {
       indent(out) << "'format' => 'collection',\n";
+    } else {
+      indent(out) << "'format' => 'harray',\n";
     }
   } else {
     throw std::runtime_error(
@@ -7444,12 +7442,12 @@ std::string t_hack_generator::declare_field(
         result += " = Vector {}";
       }
     } else if (type->is_set()) {
-      if (arrays_) {
-        result += " = keyset[]";
-      } else if (arraysets_) {
+      if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
         result += " = dict[]";
-      } else {
+      } else if (hack_collections_) {
         result += " = Set {}";
+      } else {
+        result += " = keyset[]";
       }
     } else if (type->is_struct() || type->is_exception()) {
       if (obj) {

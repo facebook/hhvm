@@ -85,16 +85,14 @@ struct is_cpp_ref_field_terse<{{struct:cpp_fullname}},::apache::thrift::type::fi
 
 {{> module_types_h/hash_and_equal_to}}
 
-{{> common/namespace_cpp2_begin}}
+namespace {{program:qualified_namespace}} {
 {{#program:structs}}
 {{#struct:is_directly_adapted?}}
 {{^struct:dependent_direct_adapter?}}
-
 using {{struct:cpp_name}} = {{struct:cpp_underlying_type}};
 {{/struct:dependent_direct_adapter?}}
 {{/struct:is_directly_adapted?}}
 {{/program:structs}}
-
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
@@ -376,8 +374,7 @@ using {{struct:cpp_name}} = {{struct:cpp_underlying_type}};
 {{/is_struct?}}
 {{/program:structs_and_typedefs}}
 
-{{> common/namespace_cpp2_end}}
-
+} // namespace {{program:qualified_namespace}}
 {{#program:frozen?}}{{#program:structs}}
 {{> module_types_h/frozen}}
 

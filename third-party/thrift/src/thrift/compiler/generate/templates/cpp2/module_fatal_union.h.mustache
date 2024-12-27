@@ -30,8 +30,7 @@
 
 #include <type_traits>
 
-{{> common/namespace_cpp2_begin}}
-
+namespace {{program:qualified_namespace}} {
 
 namespace __fbthrift_refl {
 namespace __fbthrift_refl_impl = ::apache::thrift::detail::reflection_impl;
@@ -211,4 +210,4 @@ FATAL_REGISTER_VARIANT_TRAITS(
   >
 );
 {{/struct:union?}}{{/program:structs}}
-{{> common/namespace_cpp2_end}}
+} // namespace {{program:qualified_namespace}}

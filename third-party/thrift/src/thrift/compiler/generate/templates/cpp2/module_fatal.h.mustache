@@ -25,8 +25,7 @@
 #include <fatal/type/sequence.h>
 
 #include "{{program:include_prefix}}{{program:name}}_types.h"
-{{> common/namespace_cpp2_begin}}
-
+namespace {{program:qualified_namespace}} {
 
 namespace __fbthrift_refl {
 
@@ -117,4 +116,4 @@ class {{program:name}}_tags {
   using services = __fbthrift_services;
 };
 
-{{> common/namespace_cpp2_end}}
+} // namespace {{program:qualified_namespace}}

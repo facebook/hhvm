@@ -16,8 +16,7 @@
 
 }}// BEGIN declare_enums
 {{#program:enums?}}
-{{> common/namespace_cpp2_begin}}
-
+namespace {{program:qualified_namespace}} {
 {{#program:enums}}
 
 {{> common/enum_docblock }}
@@ -33,8 +32,7 @@ enum {{^enum:cpp_is_unscoped}}class {{/enum:cpp_is_unscoped}}{{enum:cpp_name}}{{
 
 {{/program:enums}}
 
-{{> common/namespace_cpp2_end}}
-
+} // namespace {{program:qualified_namespace}}
 
 namespace std {
 {{#program:enums}}

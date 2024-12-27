@@ -65,8 +65,8 @@ void TccStructTraits<::facebook::thrift::compiler::test::fixtures::any::detail::
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::compiler::test::fixtures::any {namespace detail {
-
+namespace facebook::thrift::compiler::test::fixtures::any {
+namespace detail {
 
 const char* MyStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/any/MyStruct";

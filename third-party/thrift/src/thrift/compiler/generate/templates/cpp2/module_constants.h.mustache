@@ -22,8 +22,7 @@
 
 #include "{{program:include_prefix}}{{program:name}}_types.h"
 
-{{> common/namespace_cpp2_begin}}
-
+namespace {{program:qualified_namespace}} {
 {{> common/program_docblock}}
 namespace {{program:name}}_constants {
 
@@ -57,4 +56,4 @@ namespace {{program:name}}_constants {
   FOLLY_EXPORT ::folly::Range<const ::std::string_view*> {{program:schema_name}}_includes();
 
 } // namespace {{program:name}}_constants
-{{> common/namespace_cpp2_end}}
+} // namespace {{program:qualified_namespace}}

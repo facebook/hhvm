@@ -28,8 +28,7 @@
 [[maybe_unused]] static constexpr std::string_view kModuleName = "{{program:name}}";
 
 {{#program:any?}}
-{{> common/namespace_cpp2_begin}}
-
+namespace {{program:qualified_namespace}} {
 // Static-init time registration for dynamically-linked libraries.
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
@@ -49,8 +48,7 @@ void __fbthrift_static_init_{{struct:cpp_underlying_name}}() {
 }
 {{/struct:any?}}
 {{/program:split_structs}}
-{{> common/namespace_cpp2_end}}
-
+} // namespace {{program:qualified_namespace}}
 {{/program:any?}}
 {{> module_types_cpp/declare_enums}}
 {{#program:tablebased?}}
@@ -102,11 +100,10 @@ FOLLY_POP_WARNING
 {{> module_types_cpp/declare_union_types}}
 {{/struct:union?}}
 
-{{> common/namespace_cpp2_begin}}
+namespace {{program:qualified_namespace}} {
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
 {{/struct:extra_namespace}}
-
 
 {{#struct:thrift_uri}}
 const char* {{struct:cpp_underlying_name}}::__fbthrift_thrift_uri() {
@@ -255,13 +252,12 @@ static_assert(
 {{#struct:extra_namespace}}
 } // namespace {{struct:extra_namespace}}
 {{/struct:extra_namespace}}
-{{> common/namespace_cpp2_end}}
-
+} // namespace {{program:qualified_namespace}}
 {{/program:split_structs}}{{!
 
 }}{{! Validate adapters in typedefs and fields. }}
 
-{{> common/namespace_cpp2_begin}} namespace {
+namespace {{program:qualified_namespace}} { namespace {
 [[maybe_unused]] FOLLY_ERASE void validateAdapters() {
 {{#program:split_structs}}{{#struct:fields}}
 {{#field:cpp_first_adapter}}{{#field:type}}
@@ -275,10 +271,8 @@ static_assert(
 {{/type:cpp_adapter}}
 {{/typedef:type}}{{/program:typedefs}}
 }
-}{{> common/namespace_cpp2_end}}
-{{!
-
-}}{{#program:tablebased?}}
+}} // namespace {{program:qualified_namespace}}
+{{#program:tablebased?}}
 
 namespace apache {
 namespace thrift {

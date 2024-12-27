@@ -23,8 +23,7 @@
 #include <thrift/lib/cpp2/gen/module_sinit_cpp.h>
 {{/program:has_schema?}}
 
-{{> common/namespace_cpp2_begin}}
-
+namespace {{program:qualified_namespace}} {
 // Call all static init functions.
 //
 // If this file is always linked (e.g. link_whole), it will force
@@ -65,6 +64,5 @@ struct StaticInit {
 StaticInit staticInit;
 
 }
-{{> common/namespace_cpp2_end}}
-
+} // namespace {{program:qualified_namespace}}
 {{/program:needs_sinit?}}

@@ -26,8 +26,7 @@
 {{> module_types_tcc/tcc_struct_traits}}
 {{/program:tablebased?}}
 
-{{> common/namespace_cpp2_begin}}
-
+namespace {{program:qualified_namespace}} {
 {{#program:structs}}
 {{#struct:extra_namespace}}
 namespace {{struct:extra_namespace}} {
@@ -68,4 +67,4 @@ extern template uint32_t {{struct:cpp_underlying_name}}::serializedSizeZC<>(apac
 
 {{/program:structs}}
 
-{{> common/namespace_cpp2_end}}
+} // namespace {{program:qualified_namespace}}

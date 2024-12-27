@@ -579,7 +579,6 @@ template<> struct equal_to<typename ::apache::thrift::fixtures::types::decorated
 // END hash_and_equal_to
 namespace apache::thrift::fixtures::types {
 using AdaptedListDep = detail::AdaptedListDep;
-
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;

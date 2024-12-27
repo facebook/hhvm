@@ -345,6 +345,8 @@ class cpp_mstch_program : public mstch_program {
     register_cached_methods(
         this,
         {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
+         {"program:qualified_namespace",
+          &cpp_mstch_program::qualified_namespace},
          {"program:namespace_cpp2", &cpp_mstch_program::namespace_cpp2},
          {"program:include_prefix", &cpp_mstch_program::include_prefix},
          {"program:cpp_declare_hash?", &cpp_mstch_program::cpp_declare_hash},
@@ -460,7 +462,9 @@ class cpp_mstch_program : public mstch_program {
     }
     return mstch::map{{"fatal_strings:items", a}};
   }
-
+  mstch::node qualified_namespace() {
+    return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(program_);
+  }
   mstch::node namespace_cpp2() {
     return t_mstch_cpp2_generator::get_namespace_array(program_);
   }
@@ -809,6 +813,8 @@ class cpp_mstch_service : public mstch_service {
             {"service:autogen_path", &cpp_mstch_service::autogen_path},
             {"service:include_prefix", &cpp_mstch_service::include_prefix},
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
+            {"service:qualified_namespace",
+             &cpp_mstch_service::qualified_namespace},
             {"service:namespace_cpp2", &cpp_mstch_service::namespace_cpp2},
             {"service:oneway_functions", &cpp_mstch_service::oneway_functions},
             {"service:oneways?", &cpp_mstch_service::has_oneway},
@@ -860,6 +866,10 @@ class cpp_mstch_service : public mstch_service {
       a.push_back(make_mstch_program_cached(program, context_));
     }
     return a;
+  }
+  mstch::node qualified_namespace() {
+    return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(
+        service_->program());
   }
   mstch::node namespace_cpp2() {
     return t_mstch_cpp2_generator::get_namespace_array(service_->program());

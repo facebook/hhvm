@@ -851,8 +851,8 @@ void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdapted>::transla
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {namespace detail {
-
+namespace facebook::thrift::test {
+namespace detail {
 
 const char* DirectlyAdapted::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/DirectlyAdapted";
@@ -935,8 +935,8 @@ void TccStructTraits<::facebook::thrift::test::detail::IndependentDirectlyAdapte
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {namespace detail {
-
+namespace facebook::thrift::test {
+namespace detail {
 
 const char* IndependentDirectlyAdapted::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/IndependentDirectlyAdapted";
@@ -2619,8 +2619,8 @@ void TccStructTraits<::facebook::thrift::test::detail::DirectlyAdaptedStruct>::t
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {namespace detail {
-
+namespace facebook::thrift::test {
+namespace detail {
 
 const char* DirectlyAdaptedStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/DirectlyAdaptedStruct";
@@ -3205,8 +3205,8 @@ void TccStructTraits<::facebook::thrift::test::detail::DeclaredAfterStruct>::tra
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {namespace detail {
-
+namespace facebook::thrift::test {
+namespace detail {
 
 const char* DeclaredAfterStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/DeclaredAfterStruct";
@@ -3446,8 +3446,8 @@ void TccStructTraits<::facebook::thrift::test::detail::HeapAllocated>::translate
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {namespace detail {
-
+namespace facebook::thrift::test {
+namespace detail {
 
 const char* HeapAllocated::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/HeapAllocated";
@@ -3795,8 +3795,8 @@ void TccStructTraits<::facebook::thrift::test::detail::TransitiveAdapted>::trans
 } // namespace thrift
 } // namespace apache
 
-namespace facebook::thrift::test {namespace detail {
-
+namespace facebook::thrift::test {
+namespace detail {
 
 const char* TransitiveAdapted::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/test/TransitiveAdapted";

@@ -604,8 +604,8 @@ bool TEnumTraits<::py3::simple::detail::AdaptedUnion::Type>::findValue(std::stri
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace py3::simple {namespace detail {
-
+namespace py3::simple {
+namespace detail {
 
 std::string_view AdaptedUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

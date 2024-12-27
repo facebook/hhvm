@@ -55,8 +55,7 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 {{> service_cpp/service_interface_impl}}
 {{/service:interactions}}
 
-{{> common/namespace_cpp2_begin}}
-
+namespace {{service:qualified_namespace}} {
 
 {{> service_cpp/service_null_impl}}
 
@@ -81,4 +80,4 @@ void {{service:cpp_name}}AsyncProcessor::executeRequest(apache::thrift::ServerRe
 {{#service:interactions?}}
 {{> service_cpp/interaction_constructor_map}}
 {{/service:interactions?}}
-{{> common/namespace_cpp2_end}}
+} // namespace {{service:qualified_namespace}}

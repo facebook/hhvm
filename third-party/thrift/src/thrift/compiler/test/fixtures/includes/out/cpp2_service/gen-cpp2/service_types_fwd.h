@@ -7,5 +7,4 @@
 #pragma once
 
 // BEGIN forward_declare
-
 // END forward_declare

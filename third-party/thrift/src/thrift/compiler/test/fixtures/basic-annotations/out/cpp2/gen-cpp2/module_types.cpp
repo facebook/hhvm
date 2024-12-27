@@ -161,8 +161,8 @@ bool TEnumTraits<::cpp2::detail::YourUnion::Type>::findValue(std::string_view na
   return ::apache::thrift::detail::st::enum_find_value(name, out);
 }
 }} // apache::thrift
-namespace cpp2 {namespace detail {
-
+namespace cpp2 {
+namespace detail {
 
 std::string_view YourUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -263,8 +263,8 @@ void TccStructTraits<::cpp2::detail::YourException>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace cpp2 {namespace detail {
-
+namespace cpp2 {
+namespace detail {
 
 std::string_view YourException::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
@@ -349,8 +349,8 @@ void TccStructTraits<::cpp2::detail::YourStruct>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace cpp2 {namespace detail {
-
+namespace cpp2 {
+namespace detail {
 
 const char* YourStruct::__fbthrift_thrift_uri() {
   return "facebook.com/thrift/compiler/test/fixtures/basic-annotations/src/module/MyStruct";

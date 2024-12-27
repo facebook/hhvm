@@ -665,7 +665,6 @@ struct is_cpp_ref_field_optional<::facebook::thrift::test::CircularStruct,::apac
 // END hash_and_equal_to
 namespace facebook::thrift::test {
 using IndependentDirectlyAdapted = ::my::Type;
-
 using ::apache::thrift::detail::operator!=;
 using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;

@@ -3059,8 +3059,8 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::AdaptedListDep>:
 } // namespace thrift
 } // namespace apache
 
-namespace apache::thrift::fixtures::types {namespace detail {
-
+namespace apache::thrift::fixtures::types {
+namespace detail {
 
 const char* AdaptedListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/AdaptedListDep";
@@ -3285,8 +3285,8 @@ void TccStructTraits<::apache::thrift::fixtures::types::detail::DependentAdapted
 } // namespace thrift
 } // namespace apache
 
-namespace apache::thrift::fixtures::types {namespace detail {
-
+namespace apache::thrift::fixtures::types {
+namespace detail {
 
 const char* DependentAdaptedListDep::__fbthrift_thrift_uri() {
   return "apache.org/thrift/fixtures/types/DependentAdaptedListDep";

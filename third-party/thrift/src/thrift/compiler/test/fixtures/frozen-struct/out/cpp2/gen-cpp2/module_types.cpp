@@ -305,8 +305,8 @@ void TccStructTraits<::some::ns::detail::DirectlyAdapted>::translateFieldName(
 } // namespace thrift
 } // namespace apache
 
-namespace some::ns {namespace detail {
-
+namespace some::ns {
+namespace detail {
 
 std::string_view DirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
   if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }

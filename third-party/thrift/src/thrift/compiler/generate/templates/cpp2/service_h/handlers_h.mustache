@@ -18,12 +18,11 @@
 
 }}
 
-{{> common/namespace_cpp2_begin}}
-
+namespace {{service:qualified_namespace}} {
 {{> service_h/service_null}}
 
 
 {{> service_h/async_processor}}
 
 
-{{> common/namespace_cpp2_end}}
+} // namespace {{service:qualified_namespace}}

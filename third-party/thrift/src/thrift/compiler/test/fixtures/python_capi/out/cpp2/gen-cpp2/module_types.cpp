@@ -428,8 +428,8 @@ void TccStructTraits<::test::fixtures::python_capi::detail::DoubledPair>::transl
 } // namespace thrift
 } // namespace apache
 
-namespace test::fixtures::python_capi {namespace detail {
-
+namespace test::fixtures::python_capi {
+namespace detail {
 
 const char* DoubledPair::__fbthrift_thrift_uri() {
   return "test.dev/fixtures/python_capi/DoubledPair";

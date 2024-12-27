@@ -14,7 +14,6 @@
 
 // END declare_enums
 // BEGIN forward_declare
-
 // END forward_declare
 namespace apache::thrift::detail::annotation {
 } // namespace apache::thrift::detail::annotation

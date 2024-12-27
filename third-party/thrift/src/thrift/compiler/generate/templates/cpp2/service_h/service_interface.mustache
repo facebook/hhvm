@@ -15,15 +15,13 @@
   limitations under the License.
 
 }}
-{{> common/namespace_cpp2_begin}}
-
+namespace {{service:qualified_namespace}} {
 class {{service:cpp_name}};
 class {{service:cpp_name}}AsyncProcessor;
 
 {{> service_h/service_info_holder}}
 
-{{> common/namespace_cpp2_end}}
-
+} // namespace {{service:qualified_namespace}}
 
 namespace apache::thrift {
 template <>
@@ -60,7 +58,6 @@ class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual p
 
 } // namespace apache::thrift
 
-{{> common/namespace_cpp2_begin}}
-
+namespace {{service:qualified_namespace}} {
 using {{service:cpp_name}}SvIf [[deprecated("Use apache::thrift::ServiceHandler<{{service:cpp_name}}> instead")]] = ::apache::thrift::ServiceHandler<{{service:cpp_name}}>;
-{{> common/namespace_cpp2_end}}
+} // namespace {{service:qualified_namespace}}

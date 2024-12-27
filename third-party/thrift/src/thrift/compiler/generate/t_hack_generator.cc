@@ -185,16 +185,18 @@ class t_hack_generator : public t_concat_generator {
   std::string render_const_value(
       const t_type* type,
       const t_const_value* value,
-      bool immutable_collections = false,
-      bool ignore_wrapper = false);
+      bool immutable_collections,
+      bool ignore_wrapper,
+      bool force_arrays);
   std::string render_const_value_helper(
       const t_type* type,
       const t_const_value* value,
       std::ostream& temp_var_initializations_out,
       t_name_generator& namer,
-      bool immutable_collections = false,
-      bool ignore_wrapper = false,
-      bool structured_annotations = false);
+      bool immutable_collections,
+      bool ignore_wrapper,
+      bool structured_annotations,
+      bool force_arrays);
   std::string render_default_value(const t_type* type);
 
   /**
@@ -1757,13 +1759,14 @@ void t_hack_generator::generate_enum(const t_enum* tenum) {
            << "\\tmeta_ThriftEnum {\n";
   indent_up();
 
-  bool saved_arrays_ = arrays_;
-  arrays_ = true;
   f_types_ << indent() << "return "
            << render_const_value(
-                  tmeta_ThriftEnum_type(), enum_to_tmeta(tenum).get())
+                  tmeta_ThriftEnum_type(),
+                  enum_to_tmeta(tenum).get(),
+                  /*immutable_collections*/ false,
+                  /*ignore_wrapper*/ false,
+                  /*force_arrays*/ true)
            << ";\n";
-  arrays_ = saved_arrays_;
 
   indent_down();
   f_types_ << indent() << "}\n\n";
@@ -1845,10 +1848,16 @@ void t_hack_generator::generate_const(const t_const* tconst) {
     indent_up();
     consts_out << indent() << "return ";
   }
-  consts_out
-      << render_const_value_helper(
-             type, value, consts_temp_var_initializations_out, namer, true)
-      << ";\n";
+  consts_out << render_const_value_helper(
+                    type,
+                    value,
+                    consts_temp_var_initializations_out,
+                    namer,
+                    /*immutable_collections*/ true,
+                    /*ignore_wrapper*/ false,
+                    /*structured_annotations*/ false,
+                    /*force_arrays*/ false)
+             << ";\n";
 
   f_consts_ << consts_temp_var_initializations_out.str();
   f_consts_ << consts_out.str();
@@ -1897,7 +1906,8 @@ std::string t_hack_generator::render_const_value(
     const t_type* type,
     const t_const_value* value,
     bool immutable_collections,
-    bool ignore_wrapper) {
+    bool ignore_wrapper,
+    bool force_arrays) {
   std::ostringstream out;
   std::ostringstream initialization_out;
   t_name_generator namer;
@@ -1907,7 +1917,9 @@ std::string t_hack_generator::render_const_value(
       initialization_out,
       namer,
       immutable_collections,
-      ignore_wrapper);
+      ignore_wrapper,
+      /*structured_annotations*/ false,
+      force_arrays);
   out << initialization_out.str();
   out << const_val;
   return out.str();
@@ -1920,7 +1932,8 @@ std::string t_hack_generator::render_const_value_helper(
     t_name_generator& namer,
     bool immutable_collections,
     bool ignore_wrapper,
-    bool structured_annotations) {
+    bool structured_annotations,
+    bool force_arrays) {
   std::ostringstream out;
   if (const auto* ttypedef = dynamic_cast<const t_placeholder_typedef*>(type)) {
     type = ttypedef->get_type();
@@ -1932,7 +1945,10 @@ std::string t_hack_generator::render_const_value_helper(
         value,
         temp_var_initializations_out,
         namer,
-        immutable_collections);
+        immutable_collections,
+        /*ignore_wrapper*/ false,
+        /*structured_annotations*/ false,
+        force_arrays);
     if (ignore_wrapper) {
       return val;
     }
@@ -2027,7 +2043,8 @@ std::string t_hack_generator::render_const_value_helper(
               namer,
               false,
               false,
-              structured_annotations);
+              structured_annotations,
+              force_arrays);
           if (field_wrapper) {
             inner << ");\n";
           } else {
@@ -2069,18 +2086,20 @@ std::string t_hack_generator::render_const_value_helper(
                              k,
                              temp_var_initializations_out,
                              namer,
-                             false, // immutable_collections
-                             false, // ignore_wrapper
-                             structured_annotations)
+                             /*immutable_collections*/ false,
+                             /*ignore_wrapper*/ false,
+                             structured_annotations,
+                             force_arrays)
                       << " => "
                       << render_const_value_helper(
                              field.get_type(),
                              v,
                              temp_var_initializations_out,
                              namer,
-                             false, // immutable_collections
-                             false, // ignore_wrapper
-                             structured_annotations)
+                             /*immutable_collections*/ false,
+                             /*ignore_wrapper*/ false,
+                             structured_annotations,
+                             force_arrays)
                       << ",\n";
         }
       }
@@ -2095,7 +2114,8 @@ std::string t_hack_generator::render_const_value_helper(
   } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
     const t_type* ktype = tmap->get_key_type();
     const t_type* vtype = tmap->get_val_type();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
+        force_arrays) {
       out << "dict[\n";
     } else {
       out << (immutable_collections ? "Imm" : "") << "Map {\n";
@@ -2112,8 +2132,9 @@ std::string t_hack_generator::render_const_value_helper(
             temp_var_initializations_out,
             namer,
             immutable_collections,
-            false, // ignore_wrapper
-            structured_annotations);
+            /*ignore_wrapper*/ false,
+            structured_annotations,
+            force_arrays);
         out << " => ";
         out << render_const_value_helper(
             vtype,
@@ -2121,20 +2142,23 @@ std::string t_hack_generator::render_const_value_helper(
             temp_var_initializations_out,
             namer,
             immutable_collections,
-            false, // ignore_wrapper
-            structured_annotations);
+            /*ignore_wrapper*/ false,
+            structured_annotations,
+            force_arrays);
         out << ",\n";
       }
     }
     indent_down();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
+        force_arrays) {
       indent(out) << "]";
     } else {
       indent(out) << "}";
     }
   } else if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
     const t_type* etype = tlist->get_elem_type();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
+        force_arrays) {
       out << "vec[\n";
     } else {
       out << (immutable_collections ? "Imm" : "") << "Vector {\n";
@@ -2148,12 +2172,14 @@ std::string t_hack_generator::render_const_value_helper(
           temp_var_initializations_out,
           namer,
           immutable_collections,
-          false, // ignore_wrapper
-          structured_annotations);
+          /*ignore_wrapper*/ false,
+          structured_annotations,
+          force_arrays);
       out << ",\n";
     }
     indent_down();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations) {
+    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
+        force_arrays) {
       indent(out) << "]";
     } else {
       indent(out) << "}";
@@ -2162,7 +2188,7 @@ std::string t_hack_generator::render_const_value_helper(
     const t_type* etype = tset->get_elem_type();
     indent_up();
     const auto& vals = value->get_list_or_empty_map();
-    if (arrays_ || structured_annotations) {
+    if (arrays_ || structured_annotations || force_arrays) {
       out << "keyset[\n";
       for (const auto* val : vals) {
         out << indent();
@@ -2172,8 +2198,9 @@ std::string t_hack_generator::render_const_value_helper(
             temp_var_initializations_out,
             namer,
             immutable_collections,
-            false, // ignore_wrapper
-            structured_annotations);
+            /*ignore_wrapper*/ false,
+            structured_annotations,
+            force_arrays);
         out << ",\n";
       }
       indent_down();
@@ -2188,8 +2215,9 @@ std::string t_hack_generator::render_const_value_helper(
             temp_var_initializations_out,
             namer,
             immutable_collections,
-            false, // ignore_wrapper
-            structured_annotations);
+            /*ignore_wrapper*/ false,
+            structured_annotations,
+            force_arrays);
         out << " => true";
         out << ",\n";
       }
@@ -2205,8 +2233,9 @@ std::string t_hack_generator::render_const_value_helper(
             temp_var_initializations_out,
             namer,
             immutable_collections,
-            false, // ignore_wrapper
-            structured_annotations);
+            /*ignore_wrapper*/ false,
+            structured_annotations,
+            force_arrays);
         out << ",\n";
       }
       indent_down();
@@ -3395,7 +3424,12 @@ bool t_hack_generator::field_is_nullable(
   const t_type* t = field->type()->get_true_type();
   if (field->default_value() != nullptr &&
       !(t->is_struct() || t->is_exception())) {
-    dval = render_const_value(t, field->default_value());
+    dval = render_const_value(
+        t,
+        field->default_value(),
+        /*immutable_collections*/ false,
+        /*ignore_wrapper*/ false,
+        /*force_arrays*/ false);
   } else {
     dval = render_default_value(t);
   }
@@ -4528,7 +4562,12 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   bool is_exception = tstruct->is_exception();
   if (field.default_value() != nullptr &&
       !(t->is_struct() || t->is_exception() || skip_custom_default)) {
-    dval = render_const_value(t, field.default_value());
+    dval = render_const_value(
+        t,
+        field.default_value(),
+        /*immutable_collections*/ false,
+        /*ignore_wrapper*/ false,
+        /*force_arrays*/ false);
   } else if (
       tstruct->is_exception() &&
       (field.name() == "code" || field.name() == "line")) {
@@ -4743,15 +4782,15 @@ void t_hack_generator::generate_php_struct_metadata_method(
       << " {\n";
   indent_up();
 
-  bool saved_arrays_ = arrays_;
-  arrays_ = true;
   out << indent() << "return "
       << render_const_value(
              is_exception ? tmeta_ThriftException_type()
                           : tmeta_ThriftStruct_type(),
-             struct_to_tmeta(tstruct, is_exception).get())
+             struct_to_tmeta(tstruct, is_exception).get(),
+             /*immutable_collections*/ false,
+             /*ignore_wrapper*/ false,
+             /*force_arrays*/ true)
       << ";\n";
-  arrays_ = saved_arrays_;
 
   indent_down();
   out << indent() << "}\n\n";
@@ -5052,9 +5091,10 @@ std::string t_hack_generator::render_structured_annotations(
                          annotation.value(),
                          temp_var_initializations_out,
                          namer,
-                         false, // immutable_collections
-                         true, // ignore_wrapper
-                         true) // structured_annotations
+                         /*immutable_collections*/ false,
+                         /*ignore_wrapper*/ true,
+                         /*structured_annotations*/ true,
+                         /*force_arrays*/ false)
                   << ",\n";
     }
     indent_down();
@@ -5911,12 +5951,13 @@ void t_hack_generator::generate_service_helpers(
              << "\\tmeta_ThriftService {\n";
   indent_up();
 
-  bool saved_arrays_ = arrays_;
-  arrays_ = true;
   f_service_ << indent() << "return "
              << render_const_value(
                     tmeta_ThriftService_type(),
-                    service_to_tmeta(tservice).get())
+                    service_to_tmeta(tservice).get(),
+                    /*immutable_collections*/ false,
+                    /*ignore_wrapper*/ false,
+                    /*force_arrays*/ true)
              << ";\n";
 
   indent_down();
@@ -5929,7 +5970,6 @@ void t_hack_generator::generate_service_helpers(
   indent_up();
 
   f_service_ << render_service_metadata_response(tservice, mangle);
-  arrays_ = saved_arrays_;
 
   indent_down();
   f_service_ << indent() << "}\n\n";

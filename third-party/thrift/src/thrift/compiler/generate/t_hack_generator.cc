@@ -1374,16 +1374,16 @@ void t_hack_generator::generate_json_container(
 
   indent(out) << json << " = " << prefix_json << ";\n";
   if (ttype->is_map()) {
-    if (arrays_ || no_use_hack_collections_) {
-      indent(out) << container << " = dict[];\n";
-    } else {
+    if (hack_collections_) {
       indent(out) << container << " = Map {};\n";
+    } else {
+      indent(out) << container << " = dict[];\n";
     }
   } else if (ttype->is_list()) {
-    if (arrays_ || no_use_hack_collections_) {
-      indent(out) << container << " = vec[];\n";
-    } else {
+    if (hack_collections_) {
       indent(out) << container << " = Vector {};\n";
+    } else {
+      indent(out) << container << " = vec[];\n";
     }
   } else if (ttype->is_set()) {
     if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
@@ -2127,8 +2127,7 @@ std::string t_hack_generator::render_const_value_helper(
   } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
     const t_type* ktype = tmap->get_key_type();
     const t_type* vtype = tmap->get_val_type();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
-        force_arrays) {
+    if (!hack_collections_ || structured_annotations || force_arrays) {
       out << "dict[\n";
     } else {
       out << (immutable_collections ? "Imm" : "") << "Map {\n";
@@ -2162,16 +2161,14 @@ std::string t_hack_generator::render_const_value_helper(
       }
     }
     indent_down();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
-        force_arrays) {
+    if (!hack_collections_ || structured_annotations || force_arrays) {
       indent(out) << "]";
     } else {
       indent(out) << "}";
     }
   } else if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
     const t_type* etype = tlist->get_elem_type();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
-        force_arrays) {
+    if (!hack_collections_ || structured_annotations || force_arrays) {
       out << "vec[\n";
     } else {
       out << (immutable_collections ? "Imm" : "") << "Vector {\n";
@@ -2191,8 +2188,7 @@ std::string t_hack_generator::render_const_value_helper(
       out << ",\n";
     }
     indent_down();
-    if (arrays_ || no_use_hack_collections_ || structured_annotations ||
-        force_arrays) {
+    if (!hack_collections_ || structured_annotations || force_arrays) {
       indent(out) << "]";
     } else {
       indent(out) << "}";
@@ -2296,16 +2292,16 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
       dval = "null";
     }
   } else if (type->is_map()) {
-    if (arrays_ || no_use_hack_collections_) {
-      dval = "dict[]";
-    } else {
+    if (hack_collections_) {
       dval = "Map {}";
+    } else {
+      dval = "dict[]";
     }
   } else if (type->is_list()) {
-    if (arrays_ || no_use_hack_collections_) {
-      dval = "vec[]";
-    } else {
+    if (hack_collections_) {
       dval = "Vector {}";
+    } else {
+      dval = "vec[]";
     }
   } else if (type->is_set()) {
     if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
@@ -3296,7 +3292,7 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
     indent(out) << ")";
     indent_down();
   }
-  if (!arrays_ && !no_use_hack_collections_) {
+  if (hack_collections_) {
     out << " |> new Map($$)";
   }
 }
@@ -3326,14 +3322,14 @@ void t_hack_generator::generate_hack_array_from_shape_lambda(
     indent(out) << ")";
     indent_down();
   }
-  if (!arrays_ && !no_use_hack_collections_) {
+  if (hack_collections_) {
     out << " |> new Vector($$)";
   }
 }
 
 void t_hack_generator::generate_hack_array_from_shape_lambda(
     std::ostream& out, t_name_generator&, const t_set*) {
-  if (!arrays_ && !no_use_hack_collections_ && !arraysets_) {
+  if (hack_collections_ && !arraysets_) {
     out << "\n";
     indent_up();
     indent(out) << "|> new Set(Keyset\\keys($$))";
@@ -3499,7 +3495,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
     if (find_hack_field_adapter(field) || find_hack_adapter(field.get_type())) {
       inner << source.str();
     } else if (t->is_set()) {
-      if (arraysets_ || arrays_ || no_use_hack_collections_) {
+      if (arraysets_ || !hack_collections_) {
         inner << source.str();
       } else {
         is_simple_shape_index = false;
@@ -3565,27 +3561,7 @@ void t_hack_generator::generate_php_struct_shape_methods(
       val << fieldRef << ",\n";
     } else if (t->is_container()) {
       if (t->is_map() || t->is_list()) {
-        if (arrays_ || no_use_hack_collections_) {
-          val << fieldRef;
-          if (type_has_nested_struct(t)) {
-            val << "\n";
-            indent_up();
-            indent(val) << "|> ";
-            if (nullable) {
-              val << "$$ === null \n";
-              indent_up();
-              indent(val) << "? null \n";
-              indent(val) << ": ";
-            }
-            generate_shape_from_hack_array_lambda(val, ngen, t);
-            if (nullable) {
-              indent_down();
-            }
-            indent_down();
-          } else {
-            val << ",\n";
-          }
-        } else {
+        if (hack_collections_) {
           const t_type* val_type = nullptr;
           if (t->is_map()) {
             val_type = static_cast<const t_map*>(t)->get_val_type();
@@ -3612,8 +3588,28 @@ void t_hack_generator::generate_php_struct_shape_methods(
           } else {
             val << generate_to_array_method(t, fieldRef) << ",\n";
           }
+        } else {
+          val << fieldRef;
+          if (type_has_nested_struct(t)) {
+            val << "\n";
+            indent_up();
+            indent(val) << "|> ";
+            if (nullable) {
+              val << "$$ === null \n";
+              indent_up();
+              indent(val) << "? null \n";
+              indent(val) << ": ";
+            }
+            generate_shape_from_hack_array_lambda(val, ngen, t);
+            if (nullable) {
+              indent_down();
+            }
+            indent_down();
+          } else {
+            val << ",\n";
+          }
         }
-      } else if (arraysets_ || arrays_ || no_use_hack_collections_) {
+      } else if (arraysets_ || !hack_collections_) {
         val << fieldRef << ",\n";
       } else {
         if (nullable) {
@@ -3683,7 +3679,7 @@ bool t_hack_generator::
   }
   if (ttype->is_container()) {
     if (ttype->is_set()) {
-      if (arraysets_ || arrays_ || no_use_hack_collections_) {
+      if (arraysets_ || !hack_collections_) {
         out << val;
       } else {
         out << "new Set(Keyset\\keys(" << val << "))";
@@ -3708,14 +3704,14 @@ bool t_hack_generator::
           out << "self::__stringifyMapKeys(\n" << indent();
         }
       }
-      if (!(arrays_ || no_use_hack_collections_)) {
+      if (hack_collections_) {
         prefix = prefix + "new Map(";
         suffix = ")" + suffix;
       }
       val_type = static_cast<const t_map*>(ttype)->get_val_type();
     } else {
       container_type = "Vec\\";
-      if (!(arrays_ || no_use_hack_collections_)) {
+      if (hack_collections_) {
         prefix = "new Vector(";
         suffix = ")";
       }
@@ -3824,7 +3820,7 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
     }
   } else if (ttype->is_container()) {
     if (ttype->is_set()) {
-      if (arraysets_ || arrays_ || no_use_hack_collections_) {
+      if (arraysets_ || !hack_collections_) {
         out << val;
       } else {
         out << "ThriftUtil::toDArray(Dict\\fill_keys(";
@@ -3839,7 +3835,7 @@ bool t_hack_generator::generate_php_struct_async_toShape_method_helper(
 
     if (ttype->is_map()) {
       container_prefix = "Dict\\";
-      if (array_migration_ && !(arrays_ || no_use_hack_collections_)) {
+      if (array_migration_ && hack_collections_) {
         use_to_darray_conv = true;
         indent_up();
         out << "ThriftUtil::toDArray(\n" << indent();
@@ -6576,8 +6572,7 @@ std::string t_hack_generator::get_container_keyword(
     hack_collection = immutable_collections ? "\\ConstVector" : "Vector";
   }
 
-  if (arrays_ || no_use_hack_collections_ ||
-      variations[TypeToTypehintVariations::IS_SHAPE]) {
+  if (!hack_collections_ || variations[TypeToTypehintVariations::IS_SHAPE]) {
     return hack_array;
   }
   return hack_collection;
@@ -7112,16 +7107,16 @@ void t_hack_generator::_generate_sendImpl_arg(
   val_type = val_type->get_true_type();
   if (val_type->is_container() && !val_type->is_set()) {
     if (t->is_map()) {
-      if (arrays_ || no_use_hack_collections_) {
-        out << "Dict\\map(" << var << ", ";
-      } else {
+      if (hack_collections_) {
         out << "(new Map(" << var << "))->map(";
+      } else {
+        out << "Dict\\map(" << var << ", ";
       }
     } else if (t->is_list()) {
-      if (arrays_ || no_use_hack_collections_) {
-        out << "Vec\\map(" << var << ", ";
-      } else {
+      if (hack_collections_) {
         out << "(new Vector(" << var << "))->map(";
+      } else {
+        out << "Vec\\map(" << var << ", ";
       }
     } else if (t->is_set()) {
       throw std::runtime_error("Sets can't have nested containers");
@@ -7142,16 +7137,16 @@ void t_hack_generator::_generate_sendImpl_arg(
     // the parens around the collections are unnecessary but I'm leaving them
     // so that I don't end up changing literally all files
     if (t->is_map()) {
-      if (arrays_ || no_use_hack_collections_) {
-        out << "dict(" << var << ")";
-      } else {
+      if (hack_collections_) {
         out << "new Map(" << var << ")";
+      } else {
+        out << "dict(" << var << ")";
       }
     } else if (t->is_list()) {
-      if (arrays_ || no_use_hack_collections_) {
-        out << "vec(" << var << ")";
-      } else {
+      if (hack_collections_) {
         out << "new Vector(" << var << ")";
+      } else {
+        out << "vec(" << var << ")";
       }
     } else if (t->is_set()) {
       out << var;
@@ -7433,16 +7428,16 @@ std::string t_hack_generator::declare_field(
     } else if (type->is_enum()) {
       result += " = null";
     } else if (type->is_map()) {
-      if (arrays_ || no_use_hack_collections_) {
-        result += " = dict[]";
-      } else {
+      if (hack_collections_) {
         result += " = Map {}";
+      } else {
+        result += " = dict[]";
       }
     } else if (type->is_list()) {
-      if (arrays_ || no_use_hack_collections_) {
-        result += " = vec[]";
-      } else {
+      if (hack_collections_) {
         result += " = Vector {}";
+      } else {
+        result += " = vec[]";
       }
     } else if (type->is_set()) {
       if (arraysets_ && (legacy_arrays_ || hack_collections_)) {

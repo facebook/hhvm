@@ -1891,8 +1891,10 @@ bool t_hack_generator::is_hack_const_type(const t_type* type) {
   type = type->get_true_type();
   if (type->is_primitive_type() || type->is_enum()) {
     return true;
-  } else if (arrays_ && type->is_container()) {
-    if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
+  } else if (type->is_container()) {
+    if (legacy_arrays_ || hack_collections_) {
+      return false;
+    } else if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
       return is_hack_const_type(tlist->get_elem_type());
     } else if (const auto* tset = dynamic_cast<const t_set*>(type)) {
       return is_hack_const_type(tset->get_elem_type());
@@ -2199,7 +2201,8 @@ std::string t_hack_generator::render_const_value_helper(
     const t_type* etype = tset->get_elem_type();
     indent_up();
     const auto& vals = value->get_list_or_empty_map();
-    if (arrays_ || structured_annotations || force_arrays) {
+    if ((!legacy_arrays_ && !hack_collections_) || structured_annotations ||
+        force_arrays) {
       out << "keyset[\n";
       for (const auto* val : vals) {
         out << indent();
@@ -6693,7 +6696,7 @@ std::string t_hack_generator::type_to_typehint(
     if (arraysets_) {
       prefix = "dict";
       suffix = ", bool>";
-    } else if (arrays_) {
+    } else if (!legacy_arrays_ && !hack_collections_) {
       prefix = "keyset";
     } else if (arraysets_ || variations[TypeToTypehintVariations::IS_SHAPE]) {
       prefix = "dict";

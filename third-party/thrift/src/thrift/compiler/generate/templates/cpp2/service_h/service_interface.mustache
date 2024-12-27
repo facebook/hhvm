@@ -25,7 +25,7 @@ class {{service:cpp_name}}AsyncProcessor;
 
 namespace apache::thrift {
 template <>
-class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public {{> common/namespace_cpp2}}{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
+class ServiceHandler<{{service:qualified_name}}> : {{#service:extends}}virtual public ::{{service:qualified_namespace}}::{{service:cpp_name}}SvIf{{/service:extends}}{{^service:extends}}public apache::thrift::ServerInterface{{/service:extends}} {
  public:
   std::string_view getGeneratedName() const override { return "{{service:name}}"; }
 {{#service:thrift_uri}}

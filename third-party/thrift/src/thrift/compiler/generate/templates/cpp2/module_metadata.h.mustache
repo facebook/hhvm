@@ -40,14 +40,14 @@ namespace md {
 {{#program:enums}}
 {{^program:no_metadata?}}
 template <>
-class EnumMetadata<{{> common/namespace_cpp2}}{{enum:cpp_name}}> {
+class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}> {
  public:
   static void gen(ThriftMetadata& metadata);
 };
 {{/program:no_metadata?}}
 {{#program:no_metadata?}}
 template <>
-class EnumMetadata<{{> common/namespace_cpp2}}{{enum:cpp_name}}>
+class EnumMetadata<::{{program:qualified_namespace}}::{{enum:cpp_name}}>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;

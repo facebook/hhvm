@@ -280,10 +280,10 @@ namespace detail {
 {{#program:split_enums}}
 const ::apache::thrift::detail::TypeInfo TypeToInfo<
     apache::thrift::type_class::enumeration,
-    {{> common/namespace_cpp2}}{{enum:cpp_name}}>::typeInfo = {
+    ::{{program:qualified_namespace}}::{{enum:cpp_name}}>::typeInfo = {
   /* .type */ apache::thrift::protocol::TType::T_I32,
-  /* .get */ get<std::int32_t, {{> common/namespace_cpp2}}{{enum:cpp_name}}>,
-  /* .set */ reinterpret_cast<VoidFuncPtr>(set<{{> common/namespace_cpp2}}{{enum:cpp_name}}, std::int32_t>),
+  /* .get */ get<std::int32_t, ::{{program:qualified_namespace}}::{{enum:cpp_name}}>,
+  /* .set */ reinterpret_cast<VoidFuncPtr>(set<::{{program:qualified_namespace}}::{{enum:cpp_name}}, std::int32_t>),
   /* .typeExt */ nullptr,
 };
 {{/program:split_enums}}
@@ -294,7 +294,7 @@ const ::apache::thrift::detail::TypeInfo TypeToInfo<
   /* .type */ ::apache::thrift::protocol::TType::T_STRUCT,
   /* .get */ nullptr,
   /* .set */ nullptr,
-  /* .typeExt */ &{{> common/namespace_cpp2 }}__fbthrift_struct_info_{{struct:cpp_underlying_name}},
+  /* .typeExt */ &::{{program:qualified_namespace}}::__fbthrift_struct_info_{{struct:cpp_underlying_name}},
 };
 {{/program:split_structs}}
 }}} // namespace apache::thrift::detail

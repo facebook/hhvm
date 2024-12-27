@@ -180,7 +180,7 @@ void {{struct:cpp_underlying_name}}::readNoXfer(Protocol_* iprot) {
   ::apache::thrift::detail::read(
     iprot,
     ::apache::thrift::detail::toStructInfo(
-      {{> common/namespace_cpp2}}__fbthrift_struct_info_{{struct:cpp_underlying_name}}
+      ::{{program:qualified_namespace}}::__fbthrift_struct_info_{{struct:cpp_underlying_name}}
     ),
     this);
 }

@@ -290,7 +290,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   return {serializeResponse("{{> common/function_name}}", &prot, ctx, result), std::move(sinkConsumerImpl)};
 {{/function:sink?}}
 {{^function:stream?}}{{^function:sink?}}
-  {{> common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
+  ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
 {{^type:void?}}
   result.get<0>().value = const_cast<{{function:cpp_return_type}}*>(&_return);
   result.setIsSet(0, true);
@@ -305,7 +305,7 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
     return;
   }
 {{#function:exceptions?}}
-  {{> common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
+  ::{{service:qualified_namespace}}::{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
 {{/function:exceptions?}}
 {{#function:exceptions}}
   if (ew.with_exception([&]({{#field:type}} ::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {

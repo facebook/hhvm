@@ -274,8 +274,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     opts.allowed_undefined_variables = {
         "program:autogen_path",
         "service:autogen_path",
-        "program:qualified_namespace",
-        "service:qualified_namespace",
         "field:fatal_annotations?",
         "value:enable_referencing?",
     };

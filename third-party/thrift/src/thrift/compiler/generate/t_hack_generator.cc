@@ -3221,7 +3221,7 @@ void t_hack_generator::generate_php_struct_shape_collection_value_lambda(
   if (t->is_struct()) {
     out << "$" << tmp << "->__toShape(),\n";
   } else if (t->is_set()) {
-    if (arraysets_ || no_use_hack_collections_) {
+    if (arraysets_ || legacy_arrays_) {
       out << "dict($" << tmp << "),\n";
     } else {
       out << "ThriftUtil::toDArray(Dict\\fill_keys($" << tmp
@@ -6935,7 +6935,7 @@ void t_hack_generator::_generate_service_client(
       continue;
     }
     _generate_service_client_child_fn(out, tservice, function);
-    if (no_use_hack_collections_) {
+    if (legacy_arrays_) {
       _generate_service_client_child_fn(
           out,
           tservice,

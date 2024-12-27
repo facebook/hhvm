@@ -274,8 +274,8 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
     opts.allowed_undefined_variables = {
         "program:autogen_path",
         "service:autogen_path",
-        "program:namespace_cpp2",
-        "service:namespace_cpp2",
+        "program:qualified_namespace",
+        "service:qualified_namespace",
         "field:fatal_annotations?",
         "value:enable_referencing?",
     };
@@ -297,7 +297,6 @@ class t_mstch_cpp2_generator : public t_mstch_generator {
   void fill_validator_visitors(ast_validator&) const override;
   static std::string get_cpp2_namespace(const t_program* program);
   static std::string get_cpp2_unprefixed_namespace(const t_program* program);
-  static mstch::array get_namespace_array(const t_program* program);
   static mstch::array cpp_includes(const t_program* program);
   static mstch::node include_prefix(
       const t_program* program, std::map<std::string, std::string>& options);
@@ -347,7 +346,6 @@ class cpp_mstch_program : public mstch_program {
         {{"program:cpp_includes", &cpp_mstch_program::cpp_includes},
          {"program:qualified_namespace",
           &cpp_mstch_program::qualified_namespace},
-         {"program:namespace_cpp2", &cpp_mstch_program::namespace_cpp2},
          {"program:include_prefix", &cpp_mstch_program::include_prefix},
          {"program:cpp_declare_hash?", &cpp_mstch_program::cpp_declare_hash},
          {"program:thrift_includes", &cpp_mstch_program::thrift_includes},
@@ -464,9 +462,6 @@ class cpp_mstch_program : public mstch_program {
   }
   mstch::node qualified_namespace() {
     return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(program_);
-  }
-  mstch::node namespace_cpp2() {
-    return t_mstch_cpp2_generator::get_namespace_array(program_);
   }
   mstch::node cpp_includes() {
     mstch::array includes = t_mstch_cpp2_generator::cpp_includes(program_);
@@ -815,7 +810,6 @@ class cpp_mstch_service : public mstch_service {
             {"service:thrift_includes", &cpp_mstch_service::thrift_includes},
             {"service:qualified_namespace",
              &cpp_mstch_service::qualified_namespace},
-            {"service:namespace_cpp2", &cpp_mstch_service::namespace_cpp2},
             {"service:oneway_functions", &cpp_mstch_service::oneway_functions},
             {"service:oneways?", &cpp_mstch_service::has_oneway},
             {"service:cpp_includes", &cpp_mstch_service::cpp_includes},
@@ -870,9 +864,6 @@ class cpp_mstch_service : public mstch_service {
   mstch::node qualified_namespace() {
     return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(
         service_->program());
-  }
-  mstch::node namespace_cpp2() {
-    return t_mstch_cpp2_generator::get_namespace_array(service_->program());
   }
   mstch::node oneway_functions() {
     std::vector<const t_function*> oneway_functions;
@@ -1099,7 +1090,7 @@ class cpp_mstch_type : public mstch_type {
             {"type:cpp_template", &cpp_mstch_type::cpp_template},
             {"type:cpp_indirection?", &cpp_mstch_type::cpp_indirection},
             {"type:non_empty_struct?", &cpp_mstch_type::is_non_empty_struct},
-            {"type:namespace_cpp2", &cpp_mstch_type::namespace_cpp2},
+            {"type:qualified_namespace", &cpp_mstch_type::qualified_namespace},
             {"type:cpp_declare_hash", &cpp_mstch_type::cpp_declare_hash},
             {"type:cpp_declare_equal_to",
              &cpp_mstch_type::cpp_declare_equal_to},
@@ -1215,8 +1206,9 @@ class cpp_mstch_type : public mstch_type {
     auto as_struct = dynamic_cast<const t_struct*>(resolved_type_);
     return as_struct && as_struct->has_fields();
   }
-  mstch::node namespace_cpp2() {
-    return t_mstch_cpp2_generator::get_namespace_array(type_->program());
+  mstch::node qualified_namespace() {
+    return t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(
+        type_->program());
   }
   mstch::node type_class() { return cpp2::get_gen_type_class(*resolved_type_); }
   mstch::node type_tag() {
@@ -2725,22 +2717,6 @@ std::string t_mstch_cpp2_generator::get_cpp2_namespace(
 /* static */ std::string t_mstch_cpp2_generator::get_cpp2_unprefixed_namespace(
     const t_program* program) {
   return cpp2::get_gen_unprefixed_namespace(*program);
-}
-
-mstch::array t_mstch_cpp2_generator::get_namespace_array(
-    const t_program* program) {
-  const auto v = cpp2::get_gen_namespace_components(*program);
-  mstch::array a;
-  for (auto it = v.begin(); it != v.end(); ++it) {
-    mstch::map m;
-    m.emplace("namespace:name", *it);
-    a.push_back(m);
-  }
-  for (auto itr = a.begin(); itr != a.end(); ++itr) {
-    std::get<mstch::map>(*itr).emplace("first?", itr == a.begin());
-    std::get<mstch::map>(*itr).emplace("last?", std::next(itr) == a.end());
-  }
-  return a;
 }
 
 mstch::array t_mstch_cpp2_generator::cpp_includes(const t_program* program) {

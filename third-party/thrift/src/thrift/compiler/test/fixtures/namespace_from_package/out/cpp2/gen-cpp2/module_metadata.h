@@ -11,11 +11,9 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/namespace_from_package/gen-cpp2/module_types.h"
 
-namespace test {
-namespace namespace_from_package {
-namespace module {
+namespace test::namespace_from_package::module {
 class TestService;
-}}} // namespace test::namespace_from_package::module
+} // namespace test::namespace_from_package::module
 
 namespace apache {
 namespace thrift {

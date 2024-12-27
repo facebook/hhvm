@@ -32,7 +32,7 @@ Reference other constants:
     }}{{#value:referenceable?}}{{!
       }}{{#value:owning_const}}{{!
         }}{{#constant:program}}{{!
-          }}{{#program:namespace_cpp2}}::{{namespace:name}}{{#last?}}::{{/last?}}{{/program:namespace_cpp2}}{{program:name}}_constants::{{constant:name}}(){{!
+          }}::{{program:qualified_namespace}}::{{program:name}}_constants::{{constant:name}}(){{!
         }}{{/constant:program}}{{!
       }}{{/value:owning_const}}{{!
     }}{{/value:referenceable?}}{{!

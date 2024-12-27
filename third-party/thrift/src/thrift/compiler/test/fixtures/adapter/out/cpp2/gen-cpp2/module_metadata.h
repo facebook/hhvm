@@ -11,16 +11,12 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/module_types.h"
 
-namespace facebook {
-namespace thrift {
-namespace test {
+namespace facebook::thrift::test {
 class Service;
-}}} // namespace facebook::thrift::test
-namespace facebook {
-namespace thrift {
-namespace test {
+} // namespace facebook::thrift::test
+namespace facebook::thrift::test {
 class AdapterService;
-}}} // namespace facebook::thrift::test
+} // namespace facebook::thrift::test
 
 namespace apache {
 namespace thrift {

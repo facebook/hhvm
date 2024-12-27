@@ -14,4 +14,14 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 
-}}::{{#program:namespace_cpp2}}{{namespace:name}}{{^last?}}::{{/last?}}{{/program:namespace_cpp2}}{{> common/service_namespace_cpp2}}::
+}}
+{{#pragma single-line}}
+::
+{{#if program:qualified_namespace}}
+{{program:qualified_namespace}}
+{{/if program:qualified_namespace}}
+
+{{#if service:qualified_namespace}}
+{{service:qualified_namespace}}
+{{/if service:qualified_namespace}}
+::

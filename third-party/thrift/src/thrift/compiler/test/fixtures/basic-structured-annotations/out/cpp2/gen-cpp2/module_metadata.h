@@ -13,11 +13,9 @@
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/included_metadata.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/namespaced_metadata.h"
 
-namespace test {
-namespace fixtures {
-namespace basic-structured-annotations {
+namespace test::fixtures::basic-structured-annotations {
 class MyService;
-}}} // namespace test::fixtures::basic-structured-annotations
+} // namespace test::fixtures::basic-structured-annotations
 
 namespace apache {
 namespace thrift {

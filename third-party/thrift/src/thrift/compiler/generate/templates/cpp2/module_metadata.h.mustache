@@ -27,9 +27,9 @@
 {{/program:thrift_includes}}
 
 {{#program:services}}
-{{> common/service_namespace_cpp2_begin }}
+namespace {{service:qualified_namespace}} {
 class {{service:cpp_name}};
-{{> common/service_namespace_cpp2_end }}
+} // namespace {{service:qualified_namespace}}
 {{/program:services}}
 
 namespace apache {

@@ -12,21 +12,15 @@
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/mcpp2-compare/gen-cpp2/includes_metadata.h"
 
-namespace some {
-namespace valid {
-namespace ns {
+namespace some::valid::ns {
 class EmptyService;
-}}} // namespace some::valid::ns
-namespace some {
-namespace valid {
-namespace ns {
+} // namespace some::valid::ns
+namespace some::valid::ns {
 class ReturnService;
-}}} // namespace some::valid::ns
-namespace some {
-namespace valid {
-namespace ns {
+} // namespace some::valid::ns
+namespace some::valid::ns {
 class ParamService;
-}}} // namespace some::valid::ns
+} // namespace some::valid::ns
 
 namespace apache {
 namespace thrift {

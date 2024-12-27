@@ -231,7 +231,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   struct ExMapType {
     bool operator()(StreamPResultType& res, folly::exception_wrapper ew) {
       {{#function:stream_exceptions}}
-      if (ew.with_exception([&]({{#field:type}}{{> common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
+      if (ew.with_exception([&]({{#field:type}} ::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {
             res.get<{{field:index_plus_one}}>().ref() = e;
             res.setIsSet({{field:index_plus_one}}, true);
           })) {
@@ -261,7 +261,7 @@ std::pair<apache::thrift::SerializedResponse, apache::thrift::detail::SinkConsum
   struct ExMapType {
     bool operator()(FinalResponsePResultType& res, folly::exception_wrapper ew) {
       {{#function:sink_final_response_exceptions}}
-      if (ew.with_exception([&]({{#field:type}}{{> common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
+      if (ew.with_exception([&]({{#field:type}} ::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {
             res.get<{{field:index_plus_one}}>().ref() = e;
             res.setIsSet({{field:index_plus_one}}, true);
           })) {
@@ -308,12 +308,12 @@ void {{service:parent_service_cpp_name}}AsyncProcessor::throw_wrapped_{{function
   {{> common/namespace_cpp2}}{{service:parent_service_cpp_name}}_{{function:prefixed_name}}_presult result;
 {{/function:exceptions?}}
 {{#function:exceptions}}
-  if (ew.with_exception([&]({{#field:type}}{{> common/type_namespace_cpp2}}{{type:name}}{{/field:type}}& e) {
+  if (ew.with_exception([&]({{#field:type}} ::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}& e) {
     if (ctx) {
       ctx->userExceptionWrapped(true, ew);
     }
     ::apache::thrift::util::appendExceptionToHeader(ew, *reqCtx);
-    ::apache::thrift::util::appendErrorClassificationToHeader<{{#field:type}}{{> common/type_namespace_cpp2}}{{type:name}}{{/field:type}}>(ew, *reqCtx);
+    ::apache::thrift::util::appendErrorClassificationToHeader<{{#field:type}} ::{{type:qualified_namespace}}::{{type:name}}{{/field:type}}>(ew, *reqCtx);
 {{#function:cpp_void?}}
     result.get<{{field:index}}>().ref() = e;
     result.setIsSet({{field:index}}, true);

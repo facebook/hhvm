@@ -28,6 +28,7 @@
 #include <folly/container/F14Map.h>
 #include <folly/container/F14Set.h>
 
+#include <bitset>
 #include <filesystem>
 #include <memory>
 #include <set>

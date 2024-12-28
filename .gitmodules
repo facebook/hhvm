@@ -19,3 +19,6 @@
 [submodule "xed-xed"]
 	path = third-party/xed/xed
 	url = https://github.com/intelxed/xed.git
+[submodule "third-party/mvfst/src"]
+	path = third-party/mvfst/src
+	url = https://github.com/facebook/mvfst.git

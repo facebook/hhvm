@@ -1,0 +1,26 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a878c7c47..17784f783 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -51,7 +51,7 @@ find_package(Boost 1.62
+ )
+ find_package(fmt REQUIRED)
+ find_package(folly REQUIRED)
+-find_package(Fizz REQUIRED)
++find_package(fizz REQUIRED)
+ find_package(Glog REQUIRED)
+ find_package(Threads)
+ 
+diff --git a/cmake/mvfst-config.cmake.in b/cmake/mvfst-config.cmake.in
+index d2f89b48e..773f21188 100644
+--- a/cmake/mvfst-config.cmake.in
++++ b/cmake/mvfst-config.cmake.in
+@@ -18,7 +18,7 @@
+ 
+ include(CMakeFindDependencyMacro)
+ find_dependency(folly)
+-find_dependency(Fizz)
++find_dependency(fizz)
+ find_dependency(Threads)
+ find_dependency(Boost COMPONENTS iostreams system thread filesystem regex context)
+ 

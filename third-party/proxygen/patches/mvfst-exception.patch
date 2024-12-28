@@ -1,0 +1,12 @@
+diff --git a/proxygen/lib/CMakeLists.txt b/proxygen/lib/CMakeLists.txt
+index 74a028454..fb69ab1e6 100644
+--- a/proxygen/lib/CMakeLists.txt
++++ b/proxygen/lib/CMakeLists.txt
+@@ -100,6 +100,7 @@ set(
+   mvfst::mvfst_server
+   mvfst::mvfst_codec_types
+   mvfst::mvfst_state_machine
++  mvfst::mvfst_exception
+ )
+ 
+ add_library(

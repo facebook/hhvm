@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
 #include <iterator>
 #include <map>
 #include <memory>
@@ -17259,7 +17260,7 @@ void make_class_infos_local(
     }
   );
   capacities.clear();
-  capacities.shrink_to_fit();
+  //capacities.shrink_to_fit();
 
   // Different threads can touch the same FuncInfo when adding to the
   // func family list, so use sharded locking scheme.

@@ -185,7 +185,7 @@ File::File(bool nonblocking /* = true */,
 { }
 
 File::~File() {
-  if (m_data.unique()) {
+  if (m_data.use_count() == 1) {
     File::close();
   }
   m_data.reset();

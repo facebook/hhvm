@@ -11,4 +11,6 @@
 #  . $BUILD_DIR/hphp/hack/dev_env_rust_only.sh
 
 . "@CMAKE_CURRENT_BINARY_DIR@/dev_env_common.sh"
-# Nothing else to do for rust :)
+
+# Export OCaml variables, needed by ocamlrep
+eval $(opam env)

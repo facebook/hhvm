@@ -23,7 +23,8 @@ ExternalProject_Add(
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"
-    <SOURCE_DIR>/wangle/cmake/FindBoost.cmake
+    <SOURCE_DIR>/wangle/cmake/FindBoost.cmake &&
+    patch -p1 --force < "${CMAKE_CURRENT_SOURCE_DIR}/patches/mvfst-exception.patch"
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
@@ -47,10 +48,11 @@ ExternalProject_Add(
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
 
-    "-DFizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
+    "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
     "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
+    "-Dmvfst_DIR=${MVFST_INSTALL_DIR}/lib/cmake/mvfst"
 
     "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -I${JEMALLOC_INCLUDE_DIR}"
 )
@@ -62,6 +64,7 @@ set(
   fmt
   folly
   wangle
+  mvfst
 )
 add_dependencies(bundled_proxygen ${PROXYGEN_DEPS})
 add_library(proxygen INTERFACE)
@@ -70,7 +73,7 @@ target_include_directories(proxygen INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(
   proxygen
   INTERFACE
-  ${PROXYGEN_DEPS} ${OPENSSL_LIBRARIES}
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}proxygen${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  ${PROXYGEN_DEPS} ${OPENSSL_LIBRARIES}
 )
 set(PROXYGEN_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

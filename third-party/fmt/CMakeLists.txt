@@ -31,6 +31,7 @@ else()
       -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
       -DCMAKE_OSX_SYSROOT=${CMAKE_OSX_SYSROOT}
+      -DFMT_TEST=Off
   )
   cmake_minimum_required(VERSION 2.8.0)
   ExternalProject_get_property(bundled_fmt INSTALL_DIR)

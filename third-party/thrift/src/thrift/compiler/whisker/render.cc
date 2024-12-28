@@ -189,6 +189,9 @@ bool coerce_to_boolean(const native_object::ptr& value) {
   }
   return false;
 }
+bool coerce_to_boolean(const native_function::ptr&) {
+  return true;
+}
 bool coerce_to_boolean(const map&) {
   return true;
 }
@@ -395,12 +398,49 @@ class render_engine {
                 }
                 return object::as_ref(whisker::make::false_);
               },
-              [&](const function_call::user_defined& f) -> object::ptr {
-                diags_.error(
-                    f.name.loc.begin,
-                    "User-defined function '{}' not supported yet.",
-                    f.name.chain_string());
-                throw abort_rendering();
+              [&](const function_call::user_defined& user_defined)
+                  -> object::ptr {
+                const ast::variable_lookup& name = user_defined.name;
+                const object& lookup_result = lookup_variable(name);
+                if (!lookup_result.is_native_function()) {
+                  diags_.error(
+                      name.loc.begin,
+                      "Object '{}' is not a function. The encountered value is:\n{}",
+                      name.chain_string(),
+                      to_string(lookup_result));
+                  throw abort_rendering();
+                }
+                const native_function::ptr& f =
+                    lookup_result.as_native_function();
+
+                native_function::context::positional_arguments positional_args;
+                positional_args.reserve(func.positional_arguments.size());
+                for (const expression& arg : func.positional_arguments) {
+                  positional_args.push_back(evaluate(arg));
+                }
+
+                native_function::context::named_arguments named_args;
+                for (const auto& [arg_name, entry] : func.named_arguments) {
+                  [[maybe_unused]] const auto& [_, inserted] =
+                      named_args.emplace(arg_name, evaluate(*entry.value));
+                  assert(inserted);
+                }
+
+                native_function::context ctx{
+                    expr.loc,
+                    diags_,
+                    std::move(positional_args),
+                    std::move(named_args)};
+                try {
+                  return f->invoke(std::move(ctx));
+                } catch (const native_function::fatal_error& err) {
+                  diags_.error(
+                      name.loc.begin,
+                      "Function '{}' threw an error:\n{}",
+                      name.chain_string(),
+                      err.what());
+                  throw abort_rendering();
+                }
               });
         });
   }

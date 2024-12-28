@@ -686,16 +686,192 @@ TEST_F(RenderTest, and_or_short_circuit) {
   }
 }
 
+namespace {
+namespace functions {
+
+/**
+ * Adds i64 together. If the 'negate' argument is true, then the final result is
+ * negated.
+ */
+class add : public native_function {
+  object::ptr invoke(context ctx) override {
+    ctx.declare_named_arguments({"negate"});
+    const bool negate = [&] {
+      auto arg = ctx.named_argument<boolean>("negate", context::optional);
+      return arg == nullptr ? false : *arg;
+    }();
+    i64 result = 0;
+    for (std::size_t i = 0; i < ctx.arity(); ++i) {
+      result += *ctx.argument<i64>(i);
+    }
+    return object::managed(w::i64(negate ? -result : result));
+  }
+};
+
+/**
+ * Returns a boolean indicating if two i64 are equal or not.
+ */
+class i64_eq : public native_function {
+  object::ptr invoke(context ctx) override {
+    ctx.declare_arity(2);
+    ctx.declare_named_arguments({});
+    i64 a = *ctx.argument<i64>(0);
+    i64 b = *ctx.argument<i64>(1);
+    return object::managed(w::boolean(a == b));
+  }
+};
+
+/**
+ * Concatenates a sequences of strings together. If the 'sep' argument is
+ * provided, then it is used as the delimiter between elements.
+ */
+class str_concat : public native_function {
+  object::ptr invoke(context ctx) override {
+    ctx.declare_named_arguments({"sep"});
+    const std::string sep = [&] {
+      auto arg = ctx.named_argument<string>("sep", context::optional);
+      return arg == nullptr ? "" : *arg;
+    }();
+    string result;
+    for (std::size_t i = 0; i < ctx.arity(); ++i) {
+      if (i != 0) {
+        result += sep;
+      }
+      result += *ctx.argument<string>(i);
+    }
+    return object::managed(w::string(std::move(result)));
+  }
+};
+
+} // namespace functions
+} // namespace
+
 TEST_F(RenderTest, user_defined_function) {
-  auto result = render("{{ (foo.bar hello world named=foo) }}\n", w::map({}));
+  {
+    auto result = render(
+        "{{ (lib.add hello world negate=true) }}\n",
+        w::map({
+            {"lib",
+             w::map({
+                 {"add", w::make_native_function<functions::add>()},
+             })},
+            {"hello", w::i64(1)},
+            {"world", w::i64(2)},
+        }));
+    EXPECT_EQ(*result, "-3\n");
+  }
+  {
+    auto result = render(
+        "{{#if (i64-eq 100 100)}}\n"
+        "100 is, in fact, 100\n"
+        "{{/if (i64-eq 100 100)}}\n"
+
+        "{{#if (not (i64-eq 0 -1))}}\n"
+        "0 is NOT -1\n"
+        "{{/if (not (i64-eq 0 -1))}}\n",
+        w::map({
+            {"i64-eq", w::make_native_function<functions::i64_eq>()},
+        }));
+    EXPECT_EQ(
+        *result,
+        "100 is, in fact, 100\n"
+        "0 is NOT -1\n");
+  }
+}
+
+TEST_F(RenderTest, user_defined_function_type_error) {
+  auto result = render(
+      "{{ (add 1 true) }}\n",
+      w::map({
+          {"add", w::make_native_function<functions::add>()},
+      }));
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "User-defined function 'foo.bar' not supported yet.",
+          "Function 'add' threw an error:\n"
+          "Argument at index 1 is of an unexpected type.",
           path_to_file,
           1)));
+}
+
+TEST_F(RenderTest, user_defined_function_named_argument_type_error) {
+  auto result = render(
+      "{{ (add 1 2 negate=1) }}\n",
+      w::map({
+          {"add", w::make_native_function<functions::add>()},
+      }));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Function 'add' threw an error:\n"
+          "Named argument 'negate' is of an unexpected type.",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, user_defined_function_arity_error) {
+  {
+    auto result = render(
+        "{{ (i64-eq 1) }}\n",
+        w::map({
+            {"i64-eq", w::make_native_function<functions::i64_eq>()},
+        }));
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'i64-eq' threw an error:\n"
+            "Expected 2 argument(s) but got 1",
+            path_to_file,
+            1)));
+  }
+  {
+    auto result = render(
+        "{{ (i64-eq 1 2 3) }}\n",
+        w::map({
+            {"i64-eq", w::make_native_function<functions::i64_eq>()},
+        }));
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'i64-eq' threw an error:\n"
+            "Expected 2 argument(s) but got 3",
+            path_to_file,
+            1)));
+  }
+}
+
+TEST_F(RenderTest, user_defined_function_named_argument_error) {
+  auto result = render(
+      "{{ (add 1 2 unknown=true foo=false negate=true) }}\n",
+      w::map({
+          {"add", w::make_native_function<functions::add>()},
+      }));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Function 'add' threw an error:\n"
+          "Unknown named argument(s) provided: foo, unknown.",
+          path_to_file,
+          1)));
+}
+
+TEST_F(RenderTest, user_defined_function_nested) {
+  auto result = render(
+      R"({{ (concat
+        (concat "James" "Bond" sep=" ")
+        (concat "Alan" "Turing" sep=" ")
+        sep=", "
+      ) }})",
+      w::map({{"concat", w::make_native_function<functions::str_concat>()}}));
+  EXPECT_EQ(*result, "James Bond, Alan Turing");
 }
 
 TEST_F(RenderTest, let_statement) {

@@ -18,7 +18,12 @@
 
 #include <cassert>
 #include <ostream>
+#include <set>
 #include <sstream>
+#include <type_traits>
+
+#include <fmt/core.h>
+#include <fmt/ranges.h>
 
 namespace whisker {
 
@@ -40,6 +45,9 @@ class to_string_visitor {
         [&](const map& m) { visit_maybe_truncate(m, std::move(scope)); },
         [&](const native_object::ptr& o) {
           visit_maybe_truncate(o, std::move(scope));
+        },
+        [&](const native_function::ptr& f) {
+          visit_maybe_truncate(f, std::move(scope));
         },
         // All other types are printed inline so no truncation is necessary.
         [&](auto&& alternative) { visit(alternative, std::move(scope)); });
@@ -105,6 +113,11 @@ class to_string_visitor {
     o->print_to(std::move(scope), opts_);
   }
 
+  void visit(const native_function::ptr& f, tree_printer::scope scope) const {
+    require_within_max_depth(scope);
+    f->print_to(std::move(scope), opts_);
+  }
+
   [[nodiscard]] bool at_max_depth(const tree_printer::scope& scope) const {
     return scope.semantic_depth() == opts_.max_depth;
   }
@@ -126,6 +139,48 @@ void native_object::print_to(
 
 bool native_object::operator==(const native_object& other) const {
   return &other == this;
+}
+
+maybe_managed_ptr<object> native_function::context::named_argument(
+    std::string_view name, named_argument_presence presence) const {
+  auto arg = named_args_.find(name);
+  if (arg == named_args_.end()) {
+    if (presence == named_argument_presence::optional) {
+      return nullptr;
+    }
+    error("Missing named argument '{}'.", name);
+  }
+  return arg->second;
+}
+
+void native_function::context::do_warning(std::string msg) const {
+  diags_.get().warning(loc_.begin, "{}", std::move(msg));
+}
+
+void native_function::context::declare_arity(std::size_t expected) const {
+  if (arity() != expected) {
+    error("Expected {} argument(s) but got {}", expected, arity());
+  }
+}
+
+void native_function::context::declare_named_arguments(
+    std::initializer_list<std::string_view> expected) const {
+  // Using std::set so that the error message is deterministic.
+  std::set<std::string_view> names;
+  for (const auto& [name, _] : named_args_) {
+    names.insert(name);
+  }
+  for (const auto& name : expected) {
+    names.erase(name);
+  }
+  if (!names.empty()) {
+    error("Unknown named argument(s) provided: {}.", fmt::join(names, ", "));
+  }
+}
+
+void native_function::print_to(
+    tree_printer::scope scope, const object_print_options&) const {
+  scope.println("<native_function>");
 }
 
 std::string to_string(const object& obj, const object_print_options& options) {

@@ -20,18 +20,24 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <initializer_list>
 #include <iosfwd>
 #include <limits>
 #include <map>
 #include <memory>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
 
 #include <thrift/compiler/whisker/detail/overload.h>
+#include <thrift/compiler/whisker/diagnostic.h>
+#include <thrift/compiler/whisker/source_location.h>
 #include <thrift/compiler/whisker/tree_printer.h>
+
+#include <fmt/core.h>
 
 namespace whisker {
 
@@ -258,6 +264,235 @@ class native_object {
   virtual bool operator==(const native_object& other) const;
 };
 
+/**
+ *
+ * A native_function represents a user-defined function in Whisker. Its behavior
+ * is defined by highly customizable C++ code but its inputs and output are
+ * whisker::object.
+ *
+ * A native_function implementation must implement the `invoke` member function.
+ * This function receives a `context` object, which contains information about:
+ *   - arguments (positional or named)
+ *   - source location
+ *   - diagnostics printing
+ */
+class native_function {
+ public:
+  using ptr = std::shared_ptr<native_function>;
+  virtual ~native_function() = default;
+
+  class context;
+  /**
+   * The implementation-defined behavior for this function.
+   *
+   * Whisker's renderer calls this function when evaluating expressions.
+   *
+   * Example:
+   *
+   *     class i64_eq : public native_function {
+   *       object::ptr invoke(context ctx) override {
+   *         ctx.declare_arity(2);
+   *         ctx.declare_named_arguments({});
+   *         i64 a = *ctx.argument<i64>(0);
+   *         i64 b = *ctx.argument<i64>(1);
+   *         return object::managed(whisker::make::boolean(a == b));
+   *       }
+   *     };
+   *
+   *     {{ (i64_eq 42 42) }}
+   *     {{! Produces true }}
+   *
+   * Example (variadic, named arguments):
+   *
+   *     class str_concat : public native_function {
+   *       object::ptr invoke(context ctx) override {
+   *         ctx.declare_named_arguments({"sep"});
+   *         const std::string sep = [&] {
+   *           auto arg = ctx.named_argument<string>("sep", context::optional);
+   *           return arg == nullptr ? "" : *arg;
+   *         }();
+   *         string result;
+   *         for (std::size_t i = 0; i < ctx.arity(); ++i) {
+   *           if (i != 0) {
+   *             result += sep;
+   *           }
+   *           result += *ctx.argument<string>(i);
+   *         }
+   *         return object::managed(
+   *             whisker::make::string(std::move(result)));
+   *       }
+   *     };
+   *
+   *     {{ (str_concat "apache" "thrift" "test" sep="::") }}
+   *     {{! Produces "apache::thrift::test" }}
+   *
+   * native_function is a low-level API and its context API provides some basic
+   * type-checking facilities. For complex native_function implementations, a
+   * higher-level DSL would be useful.
+   *
+   * Postconditions:
+   *  - The returned object is non-null.
+   */
+  virtual maybe_managed_ptr<object> invoke(context) = 0;
+
+  /**
+   * An exception that can be thrown to indicate a fatal error in function
+   * evaluation. See `context::error(...)` for more details.
+   */
+  struct fatal_error : std::runtime_error {
+    using std::runtime_error::runtime_error;
+  };
+
+  /**
+   * A class that provides information about the executing function to
+   * invoke(...).
+   *
+   * This includes:
+   *   - Access to positional and named arguments to the function call
+   *   - The ability to output diagnostics
+   *   - The source location of the function call
+   */
+  class context {
+   public:
+    /**
+     * An ordered list of positional argument values. The position is equal to
+     * the index in this vector.
+     */
+    using positional_arguments = std::vector<std::shared_ptr<const object>>;
+    /**
+     * A map of argument names to their values. The names are guaranteed to be a
+     * valid Whisker identifier.
+     */
+    using named_arguments =
+        std::unordered_map<std::string_view, std::shared_ptr<const object>>;
+
+    context(
+        source_range loc,
+        diagnostics_engine& diags,
+        positional_arguments&& positional_args,
+        named_arguments&& named_args)
+        : loc_(std::move(loc)),
+          diags_(diags),
+          positional_args_(std::move(positional_args)),
+          named_args_(std::move(named_args)) {}
+
+    context(const context&) = delete;
+    context& operator=(const context&) = delete;
+    context(context&&) = default;
+    context& operator=(context&&) = default;
+    ~context() noexcept = default;
+
+    /**
+     * Returns the number of positional arguments to this function call.
+     * Note that named arguments do not affect the arity.
+     */
+    std::size_t arity() const noexcept { return positional_args_.size(); }
+    const positional_arguments& arguments() const { return positional_args_; }
+
+    /**
+     * Signals the intent of a named argument. Named arguments are often used as
+     * options, but not always.
+     */
+    enum class named_argument_presence : bool {
+      required,
+      optional,
+    };
+    // For convenience, we make these names available in class scope.
+    static constexpr named_argument_presence required =
+        named_argument_presence::required;
+    static constexpr named_argument_presence optional =
+        named_argument_presence::optional;
+
+    /**
+     * Returns a pointer to a named argument, if present.
+     *
+     * If the argument is not present and presence is required, then this throws
+     * an error. Otherwise, returns nullptr.
+     */
+    maybe_managed_ptr<object> named_argument(
+        std::string_view name,
+        named_argument_presence = named_argument_presence::required) const;
+    /**
+     * Returns a pointer to a named argument, checked against the desired type
+     * `T`, if present.
+     *
+     * If the argument is not present and presence is required, then this throws
+     * an error. Otherwise, returns nullptr.
+     *
+     * If the argument is present but is not of type `T`, then this throws an
+     * error.
+     */
+    template <typename T>
+    maybe_managed_ptr<T> named_argument(
+        std::string_view name,
+        named_argument_presence = named_argument_presence::required) const;
+
+    /**
+     * Returns a pointer to a positional argument.
+     *
+     * If the argument is not of type `T`, then this throws an error.
+     *
+     * Preconditions:
+     *  - index < arity()
+     *
+     * Postconditions:
+     *   - The returned object is non-null.
+     */
+    template <typename T>
+    maybe_managed_ptr<T> argument(std::size_t index) const;
+
+    /**
+     * Logs a fatal error in function evaluation.
+     *
+     * Calling this function will prevent further evaluation of this function
+     * and cause text rendering to fail.
+     */
+    template <typename... T>
+    [[noreturn]] void error(fmt::format_string<T...> msg, T&&... args) const {
+      throw fatal_error{fmt::format(msg, std::forward<T>(args)...)};
+    }
+
+    /**
+     * Logs a non-fatal warning in function evaluation.
+     */
+    template <typename... T>
+    void warning(fmt::format_string<T...> msg, T&&... args) const {
+      this->do_warning(fmt::format(msg, std::forward<T>(args)...));
+    }
+
+    /**
+     * Throws an error if arity() != expected. Otherwise, this a no-op.
+     */
+    void declare_arity(std::size_t expected) const;
+    /**
+     * Throws an error if the set of named arguments contains any names not
+     * provided here. This can catch typos in function calls. Otherwise, this is
+     * a no-op.
+     *
+     * Note that the named arguments at runtime must be a *subset* of the set
+     * provided here, NOT an exact match. This is because named arguments may be
+     * optional.
+     */
+    void declare_named_arguments(
+        std::initializer_list<std::string_view> expected) const;
+
+   private:
+    void do_warning(std::string msg) const;
+
+    source_range loc_;
+    std::reference_wrapper<diagnostics_engine> diags_;
+    positional_arguments positional_args_;
+    named_arguments named_args_;
+  };
+  static_assert(std::is_move_constructible_v<context>);
+
+  /**
+   * Creates a string representation to described this function, primarily for
+   * debugging and diagnostic purposes.
+   */
+  virtual void print_to(tree_printer::scope, const object_print_options&) const;
+};
+
 namespace detail {
 // This only exists to form a kind-of recursive std::variant with the help of
 // forward declared types.
@@ -269,6 +504,7 @@ using object_base = std::variant<
     string,
     boolean,
     native_object::ptr,
+    native_function::ptr,
     std::vector<Self>,
     std::map<std::string, Self, std::less<>>>;
 
@@ -308,12 +544,6 @@ class object final : private detail::object_base<object> {
     return std::holds_alternative<T>(*this);
   }
 
-  template <typename T>
-  decltype(auto) as() const {
-    assert(!valueless_by_exception());
-    return std::get<T>(*this);
-  }
-
   // This function moves out the base variant object which would normally leave
   // the object in a partially moved-from state. However, moving a variant
   // performs a move on the contained alternative, meaniong that assigning to
@@ -322,6 +552,18 @@ class object final : private detail::object_base<object> {
   base&& steal_variant() & { return std::move(*this); }
 
  public:
+  template <typename T>
+  bool is() const noexcept {
+    assert(!valueless_by_exception());
+    return std::holds_alternative<T>(*this);
+  }
+
+  template <typename T>
+  decltype(auto) as() const {
+    assert(!valueless_by_exception());
+    return std::get<T>(*this);
+  }
+
   using ptr = maybe_managed_ptr<object>;
 
   /**
@@ -351,6 +593,9 @@ class object final : private detail::object_base<object> {
   explicit object(string&& value) : base(std::move(value)) {}
   explicit object(native_object::ptr&& value) : base(std::move(value)) {
     assert(as_native_object() != nullptr);
+  }
+  explicit object(native_function::ptr&& value) : base(std::move(value)) {
+    assert(as_native_function() != nullptr);
   }
   explicit object(map&& value) : base(std::move(value)) {}
   explicit object(array&& value) : base(std::move(value)) {}
@@ -399,6 +644,13 @@ class object final : private detail::object_base<object> {
   }
   bool is_native_object() const noexcept {
     return holds_alternative<native_object::ptr>();
+  }
+
+  const native_function::ptr& as_native_function() const {
+    return as<native_function::ptr>();
+  }
+  bool is_native_function() const noexcept {
+    return holds_alternative<native_function::ptr>();
   }
 
   const array& as_array() const { return as<array>(); }
@@ -461,6 +713,16 @@ class object final : private detail::object_base<object> {
   // whisker::object is not allowed to have a nullptr native_object
   friend bool operator==(const object&, std::nullptr_t) = delete;
   friend bool operator==(std::nullptr_t, const object&) = delete;
+
+  friend bool operator==(
+      const object& lhs, const native_function::ptr& rhs) noexcept {
+    return lhs.is_native_function() && rhs != nullptr &&
+        lhs.as_native_function() == rhs;
+  }
+  friend bool operator==(
+      const native_function::ptr& lhs, const object& rhs) noexcept {
+    return rhs == lhs;
+  }
 
   friend bool operator==(const object& lhs, const array& rhs) noexcept {
     return lhs.is_array() && lhs.as_array() == rhs;
@@ -536,6 +798,15 @@ class object final : private detail::object_base<object> {
   friend bool operator!=(const object&, std::nullptr_t) = delete;
   friend bool operator!=(std::nullptr_t, const object&) = delete;
 
+  friend bool operator!=(
+      const object& lhs, const native_function::ptr& rhs) noexcept {
+    return !(lhs == rhs);
+  }
+  friend bool operator!=(
+      const native_function::ptr& lhs, const object& rhs) noexcept {
+    return !(lhs == rhs);
+  }
+
   friend bool operator!=(const object& lhs, const array& rhs) noexcept {
     return !(lhs == rhs);
   }
@@ -554,6 +825,31 @@ class object final : private detail::object_base<object> {
     return !(lhs == rhs);
   }
 };
+
+template <typename T>
+maybe_managed_ptr<T> native_function::context::named_argument(
+    std::string_view name, named_argument_presence presence) const {
+  const object::ptr& o = this->named_argument(name, presence);
+  if (o == nullptr) {
+    assert(presence == named_argument_presence::optional);
+    return nullptr;
+  }
+  if (!o->is<T>()) {
+    // Ideally, we want to output a string representation of the types here.
+    error("Named argument '{}' is of an unexpected type.", name);
+  }
+  return maybe_managed_ptr<T>(o, std::addressof(o->as<T>()));
+}
+
+template <typename T>
+maybe_managed_ptr<T> native_function::context::argument(size_t index) const {
+  const object::ptr& o = positional_args_.at(index);
+  if (!o->is<T>()) {
+    // Ideally, we want to output a string representation of the types here.
+    error("Argument at index {} is of an unexpected type.", index);
+  }
+  return maybe_managed_ptr<T>(o, std::addressof(o->as<T>()));
+}
 
 /**
  * An alternative to to_string() that allows printing a whisker::object within
@@ -728,6 +1024,29 @@ inline object native_object(native_object::ptr value) {
 template <typename T, typename... Args>
 object make_native_object(Args&&... args) {
   return native_object(std::make_shared<T>(std::forward<Args>(args)...));
+}
+
+/**
+ * Creates whisker::object with a backing native_function.
+ *
+ * Postconditions:
+ *   object::is_native_function() == true
+ *   object::as_native_function() == value
+ */
+inline object native_function(native_function::ptr value) {
+  return object(std::move(value));
+}
+
+/**
+ * Creates a native_function::ptr of a concrete type with the given arguments.
+ *
+ * Postconditions:
+ *   object::is_native_function() == true
+ *   object::as_native_function() == value
+ */
+template <typename T, typename... Args>
+object make_native_function(Args&&... args) {
+  return native_function(std::make_shared<T>(std::forward<Args>(args)...));
 }
 
 } // namespace make

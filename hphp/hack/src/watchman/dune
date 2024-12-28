@@ -20,7 +20,7 @@
  (name watchman_utils)
  (wrapped false)
  (modules watchman_utils)
- (libraries hh_json logging utils_core)
+ (libraries hg hh_json logging utils_core)
  (preprocess
   (pps lwt_ppx ppx_deriving.std)))
 

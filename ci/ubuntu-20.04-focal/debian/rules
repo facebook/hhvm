@@ -9,7 +9,10 @@ override_dh_auto_configure:
 	-Wno-dev \
 	-DCMAKE_INSTALL_PREFIX=/opt/hhvm/$(DEB_VERSION_UPSTREAM) \
 	-DMYSQL_UNIX_SOCK_ADDR=/var/run/mysqld/mysqld.sock \
-	-DCMAKE_BUILD_TYPE=RelWithDebInfo
+	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+	-DENABLE_EXTENSION_MCRYPT=Off \
+	-DENABLE_EXTENSION_ASYNC_MYSQL=Off \
+	-DENABLE_MCROUTER=Off
 
 override_dh_auto_build:
 	dh_auto_build -- -j1 hack hack_rust_ffi_bridge_targets hhbc_ast_cbindgen hack_dune

@@ -54,6 +54,8 @@ add_subdirectory(fmt)
 add_subdirectory(jemalloc)
 add_subdirectory(libsodium)
 add_subdirectory(zstd)
+add_subdirectory(gflags)
+add_subdirectory(glog)
 
 add_subdirectory(folly)
 

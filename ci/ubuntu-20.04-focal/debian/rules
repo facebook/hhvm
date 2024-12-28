@@ -21,8 +21,8 @@ override_dh_auto_configure:
 	-DENABLE_EXTENSION_SOAP=Off
 
 override_dh_auto_build:
-	dh_auto_build -- -j1 hack hack_rust_ffi_bridge_targets hhbc_ast_cbindgen hack_dune
-	dh_auto_build -- -j8
+	dh_auto_build --no-parallel -- hack hack_rust_ffi_bridge_targets hhbc_ast_cbindgen hack_dune || dh_auto_build --no-parallel -- hack hack_rust_ffi_bridge_targets hhbc_ast_cbindgen hack_dune
+	dh_auto_build --parallel
 
 override_dh_strip:
 	dh_strip --dbg-package=hhvm-nightly-dbg

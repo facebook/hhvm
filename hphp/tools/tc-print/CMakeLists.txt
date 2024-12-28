@@ -29,6 +29,7 @@ else()
 endif()
 
 add_executable(tc-print ${TC_PRINT_CXX_SOURCES})
+add_dependencies(tc-print hhvm)
 target_link_libraries(tc-print ${HHVM_LINK_LIBRARIES})
 link_object_libraries(tc-print ${HHVM_WHOLE_ARCHIVE_LIBRARIES})
 embed_all_systemlibs(tc-print "${CMAKE_CURRENT_BINARY_DIR}/../.."

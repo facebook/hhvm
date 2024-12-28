@@ -51,6 +51,7 @@ ExternalProject_Add(
     "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
+    "-Dmvfst_DIR=${MVFST_INSTALL_DIR}/lib/cmake/mvfst"
 
     "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -I${JEMALLOC_INCLUDE_DIR}"
 )
@@ -62,6 +63,7 @@ set(
   fmt
   folly
   wangle
+  mvfst
 )
 add_dependencies(bundled_proxygen ${PROXYGEN_DEPS})
 add_library(proxygen INTERFACE)
@@ -70,7 +72,7 @@ target_include_directories(proxygen INTERFACE "${INSTALL_DIR}/include")
 target_link_libraries(
   proxygen
   INTERFACE
-  ${PROXYGEN_DEPS} ${OPENSSL_LIBRARIES}
   "${INSTALL_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}proxygen${CMAKE_STATIC_LIBRARY_SUFFIX}"
+  ${PROXYGEN_DEPS} ${OPENSSL_LIBRARIES}
 )
 set(PROXYGEN_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

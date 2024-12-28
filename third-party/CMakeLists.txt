@@ -65,6 +65,7 @@ list(APPEND EXTRA_INCLUDE_PATHS "${TP_DIR}/fatal")
 add_subdirectory(brotli) # Required by fizz
 add_subdirectory(fizz)
 add_subdirectory(wangle)
+add_subdirectory(mvfst)
 add_subdirectory(proxygen)
 add_subdirectory(thrift)
 

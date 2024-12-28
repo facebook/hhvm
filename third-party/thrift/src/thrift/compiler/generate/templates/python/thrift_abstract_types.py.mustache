@@ -53,6 +53,7 @@ class {{> structs/unadapted_name}}({{!
         }}{{^struct:exception?}}_abc.ABC{{/struct:exception?}}{{!
         }}{{#struct:exception?}}_fbthrift_python_abstract_types.AbstractGeneratedError{{/struct:exception?}}):
     {{#struct:fields_ordered_by_id}}
+    {{^field:is_invariant_container_type?}}
     @_fbthrift_property
 {{!
     This (mis-)alignment is necessary to ensure that the abstract method annotation aligns with the def on the next line
@@ -60,6 +61,7 @@ class {{> structs/unadapted_name}}({{!
 }}
 {{> fields/maybe_abstract_method_annotation}}
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
+    {{/field:is_invariant_container_type?}}
     {{/struct:fields_ordered_by_id}}
     {{#struct:legacy_api?}}
 {{> fields/maybe_abstract_method_annotation}}

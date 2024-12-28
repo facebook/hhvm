@@ -875,6 +875,8 @@ class python_mstch_field : public mstch_field {
              &python_mstch_field::user_default_value},
             {"field:has_adapter?", &python_mstch_field::adapter},
             {"field:is_container_type", &python_mstch_field::is_container_type},
+            {"field:is_invariant_container_type?",
+             &python_mstch_field::is_invariant_container_type},
         });
   }
 
@@ -931,6 +933,19 @@ class python_mstch_field : public mstch_field {
     const auto* type = field_->get_type();
     return type->get_true_type()->is_list() ||
         type->get_true_type()->is_map() || type->get_true_type()->is_set();
+  }
+
+  mstch::node is_invariant_container_type() {
+    const auto* type = field_->get_type()->get_true_type();
+    if (type->is_map()) {
+      // Mapping is invariant in its key type
+      const auto* key_type =
+          dynamic_cast<const t_map*>(type)->get_key_type()->get_true_type();
+      return key_type->is_struct() || key_type->is_union() ||
+          key_type->is_exception() || key_type->is_container();
+    }
+
+    return false;
   }
 
  private:

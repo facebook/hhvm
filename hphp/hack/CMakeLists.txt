@@ -221,6 +221,14 @@ add_custom_target(
 add_library("hhbc_ast_header" INTERFACE)
 add_dependencies("hhbc_ast_header" "hhbc_ast_cbindgen")
 
+add_custom_target(hackc_options)
+include(HHVMRenderConfigSpecification)
+HHVM_RENDER_CONFIG_SPECIFICATION(
+  hackc_options
+  TYPE hackc
+  OUTPUT_PATH "${CMAKE_BINARY_DIR}/hphp/hack/src/hackc/compile"
+)
+
 set(
   FFI_CRATES
   "package_ffi"

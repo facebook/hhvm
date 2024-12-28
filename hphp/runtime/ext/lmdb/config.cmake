@@ -4,4 +4,6 @@ HHVM_DEFINE_EXTENSION("lmdb"
     ext_lmdb.cpp
   DEPENDS
     libLmdb
+  SYSTEMLIB
+    ext_lmdb.php
 )

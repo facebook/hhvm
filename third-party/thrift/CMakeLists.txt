@@ -22,11 +22,11 @@ find_package(FLEX REQUIRED)
 # Thrift uses `%code`, which isn't in 2.x
 find_package(BISON 3.0 REQUIRED)
 
-
 ExternalProject_Add(
   bundled_thrift
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/
   BUILD_ALWAYS ON
+  PATCH_COMMAND patch -p1 --force < ${CMAKE_CURRENT_SOURCE_DIR}/patches/no-cpp2-tests.patch
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake
@@ -57,9 +57,12 @@ ExternalProject_Add(
     "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
+    "-Dmvfst_DIR=${MVFST_INSTALL_DIR}/lib/cmake/mvfst"
 
     "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
     "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} ${CMAKE_CXX_FLAGS}"
+
+    -Denable_tests=OFF
 )
 ExternalProject_Get_property(bundled_thrift INSTALL_DIR)
 
@@ -68,6 +71,7 @@ set(
   fizz
   fmt
   folly
+  mvfst
   proxygen
   wangle
   zstd

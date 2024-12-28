@@ -12,7 +12,12 @@ override_dh_auto_configure:
 	-DCMAKE_BUILD_TYPE=RelWithDebInfo \
 	-DENABLE_EXTENSION_MCRYPT=Off \
 	-DENABLE_EXTENSION_ASYNC_MYSQL=Off \
-	-DENABLE_MCROUTER=Off
+	-DENABLE_MCROUTER=Off \
+	-DENABLE_EXTENSION_FB=Off \
+	-DENABLE_EXTENSION_MYSQL=Off \
+	-DENABLE_EXTENSION_OPENSSL=Off \
+	-DENABLE_EXTENSION_LIBXML=Off \
+	-DENABLE_EXTENSION_SOAP=Off
 
 override_dh_auto_build:
 	dh_auto_build -- -j1 hack hack_rust_ffi_bridge_targets hhbc_ast_cbindgen hack_dune

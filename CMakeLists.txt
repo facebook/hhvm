@@ -5,6 +5,9 @@ cmake_policy(SET CMP0045 NEW)
 # ditto for add_dependencies(): https://cmake.org/cmake/help/v3.0/policy/CMP0046.html
 cmake_policy(SET CMP0046 NEW)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # This needs to be done before any languages are enabled or
 # projects are created.
 INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")

@@ -83,6 +83,9 @@ if (FASTLZ_INCLUDE_DIR)
   include_directories(${FASTLZ_INCLUDE_DIR})
 endif()
 
+# ldap
+find_package(Ldap)
+
 # ICU
 find_package(ICU REQUIRED)
 if (ICU_FOUND)

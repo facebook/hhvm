@@ -23,7 +23,8 @@ ExternalProject_Add(
   PATCH_COMMAND
     "${CMAKE_COMMAND}" -E copy
     "${CMAKE_SOURCE_DIR}/CMake/FindBoost.cmake"
-    <SOURCE_DIR>/wangle/cmake/FindBoost.cmake
+    <SOURCE_DIR>/wangle/cmake/FindBoost.cmake &&
+    patch -p1 --force < "${CMAKE_CURRENT_SOURCE_DIR}/patches/mvfst-exception.patch"
   CMAKE_ARGS
     "-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}"
     -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/CMake

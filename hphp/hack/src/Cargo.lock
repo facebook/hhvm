@@ -2022,6 +2022,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "cc",
+ "clap 4.5.20",
  "convert_case 0.4.0",
  "nom",
 ]

@@ -32,7 +32,7 @@ jobs:
       env:
         DISTRO: ubuntu-20.04-focal
         IS_NIGHTLY: 1
-        CLANG_VERSION: 12
+        CLANG_VERSION: 17
     steps:
     - name: Installing dependencies to bootstrap env
       run: apt update -y && apt install -y git wget lsb-release software-properties-common gpg

@@ -42,6 +42,10 @@ jobs:
         chmod +x llvm.sh
         # Note: Keep this version in sync with the one in the Debian control file.
         ./llvm.sh ${CLANG_VERSION}
+
+        # Manually install libc++ as well.
+        # Don't use ./llvm.sh ${CLANG_VERSION} all to avoid pulling in a broken libunwind.
+        apt-get install -y libc++-${CLANG_VERSION}-dev libc++abi-${CLANG_VERSION}-dev
     - name: Making LLVM the default compiler
       run: |
         if [ -f /etc/alternatives/cc ]

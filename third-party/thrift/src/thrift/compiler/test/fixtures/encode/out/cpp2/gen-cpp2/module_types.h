@@ -312,16 +312,11 @@ class Foo final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t get_field() const {
-    return __fbthrift_field_field;
-  }
+  ::std::int32_t get_field() const;
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
+  ::std::int32_t& set_field(::std::int32_t field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1465,29 +1460,19 @@ class OpEncodeStruct final  {
 
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field().value();` instead of `FOO.get_int_field();`")]]
-  ::std::int32_t get_int_field() const {
-    return __fbthrift_field_int_field;
-  }
+  ::std::int32_t get_int_field() const;
 
   /** Glean { "field": "int_field" } */
   [[deprecated("Use `FOO.int_field() = BAR;` instead of `FOO.set_int_field(BAR);`")]]
-  ::std::int32_t& set_int_field(::std::int32_t int_field_) {
-    int_field_ref() = int_field_;
-    return __fbthrift_field_int_field;
-  }
+  ::std::int32_t& set_int_field(::std::int32_t int_field_);
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field().value();` instead of `FOO.get_enum_field();`")]]
-  ::facebook::thrift::test::Enum get_enum_field() const {
-    return __fbthrift_field_enum_field;
-  }
+  ::facebook::thrift::test::Enum get_enum_field() const;
 
   /** Glean { "field": "enum_field" } */
   [[deprecated("Use `FOO.enum_field() = BAR;` instead of `FOO.set_enum_field(BAR);`")]]
-  ::facebook::thrift::test::Enum& set_enum_field(::facebook::thrift::test::Enum enum_field_) {
-    enum_field_ref() = enum_field_;
-    return __fbthrift_field_enum_field;
-  }
+  ::facebook::thrift::test::Enum& set_enum_field(::facebook::thrift::test::Enum enum_field_);
 
   /** Glean { "field": "foo_field" } */
   [[deprecated("Use `FOO.foo_field().value();` instead of `FOO.get_foo_field();`")]]

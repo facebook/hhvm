@@ -199,7 +199,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string get_message() && {
-    return std::move(__fbthrift_field_message);
+    return static_cast<::std::string&&>(__fbthrift_field_message);
   }
 
   /** Glean { "field": "message" } */
@@ -378,7 +378,7 @@ class ShouldBeBoxed final  {
   /** Glean { "field": "sessionId" } */
   [[deprecated("Use `FOO.sessionId().value();` instead of `FOO.get_sessionId();`")]]
   ::std::string get_sessionId() && {
-    return std::move(__fbthrift_field_sessionId);
+    return static_cast<::std::string&&>(__fbthrift_field_sessionId);
   }
 
   /** Glean { "field": "sessionId" } */

@@ -2215,8 +2215,6 @@ class RecursiveStruct final  {
   [[deprecated("Use `FOO.mes().value();` instead of `FOO.get_mes();`")]]
   ::std::vector<::cpp2::RecursiveStruct>* get_mes() &;
 
-  /** Glean { "field": "mes" } */
-  [[deprecated("Use `FOO.mes().value();` instead of `FOO.get_mes();`")]]
   ::std::vector<::cpp2::RecursiveStruct>* get_mes() && = delete;
 
   /** Glean { "field": "mes" } */

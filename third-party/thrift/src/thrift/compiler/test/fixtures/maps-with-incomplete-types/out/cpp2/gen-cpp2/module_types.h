@@ -184,26 +184,17 @@ class B final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  const ::std::int32_t* get_field() const& {
-    return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
-  }
+  const ::std::int32_t* get_field() const&;
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t* get_field() & {
-    return field_ref().has_value() ? std::addressof(__fbthrift_field_field) : nullptr;
-  }
+  ::std::int32_t* get_field() &;
 
-  /** Glean { "field": "field" } */
-  [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
   ::std::int32_t* get_field() && = delete;
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
+  ::std::int32_t& set_field(::std::int32_t field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -368,8 +359,6 @@ class A final  {
   [[deprecated("Use `FOO.some_map().value();` instead of `FOO.get_some_map();`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() &;
 
-  /** Glean { "field": "some_map" } */
-  [[deprecated("Use `FOO.some_map().value();` instead of `FOO.get_some_map();`")]]
   std::unordered_map<::std::int32_t, ::apache::thrift::test::B>* get_some_map() && = delete;
 
   /** Glean { "field": "some_map" } */

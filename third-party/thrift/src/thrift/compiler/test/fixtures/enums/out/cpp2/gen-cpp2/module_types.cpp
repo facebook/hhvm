@@ -232,14 +232,41 @@ bool SomeStruct::operator<([[maybe_unused]] const SomeStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::test::fixtures::enums::Metasyntactic SomeStruct::get_reasonable() const {
+  return __fbthrift_field_reasonable;
+}
+
+::test::fixtures::enums::Metasyntactic& SomeStruct::set_reasonable(::test::fixtures::enums::Metasyntactic reasonable_) {
+  reasonable_ref() = reasonable_;
+  return __fbthrift_field_reasonable;
+}
+
+::test::fixtures::enums::Metasyntactic SomeStruct::get_fine() const {
+  return __fbthrift_field_fine;
+}
+
+::test::fixtures::enums::Metasyntactic& SomeStruct::set_fine(::test::fixtures::enums::Metasyntactic fine_) {
+  fine_ref() = fine_;
+  return __fbthrift_field_fine;
+}
+
+::test::fixtures::enums::Metasyntactic SomeStruct::get_questionable() const {
+  return __fbthrift_field_questionable;
+}
+
+::test::fixtures::enums::Metasyntactic& SomeStruct::set_questionable(::test::fixtures::enums::Metasyntactic questionable_) {
+  questionable_ref() = questionable_;
+  return __fbthrift_field_questionable;
+}
+
 const ::std::set<::std::int32_t>& SomeStruct::get_tags() const& {
   return __fbthrift_field_tags;
 }
 
 ::std::set<::std::int32_t> SomeStruct::get_tags() && {
-  return std::move(__fbthrift_field_tags);
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_tags);
 }
-
 
 void swap([[maybe_unused]] SomeStruct& a, [[maybe_unused]] SomeStruct& b) {
   using ::std::swap;
@@ -334,6 +361,42 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::test::fixtures::enums::MyEnum2 MyStruct::get_me2_3() const {
+  return __fbthrift_field_me2_3;
+}
+
+::test::fixtures::enums::MyEnum2& MyStruct::set_me2_3(::test::fixtures::enums::MyEnum2 me2_3_) {
+  me2_3_ref() = me2_3_;
+  return __fbthrift_field_me2_3;
+}
+
+::test::fixtures::enums::MyEnum3 MyStruct::get_me3_n3() const {
+  return __fbthrift_field_me3_n3;
+}
+
+::test::fixtures::enums::MyEnum3& MyStruct::set_me3_n3(::test::fixtures::enums::MyEnum3 me3_n3_) {
+  me3_n3_ref() = me3_n3_;
+  return __fbthrift_field_me3_n3;
+}
+
+::test::fixtures::enums::MyEnum1 MyStruct::get_me1_t1() const {
+  return __fbthrift_field_me1_t1;
+}
+
+::test::fixtures::enums::MyEnum1& MyStruct::set_me1_t1(::test::fixtures::enums::MyEnum1 me1_t1_) {
+  me1_t1_ref() = me1_t1_;
+  return __fbthrift_field_me1_t1;
+}
+
+::test::fixtures::enums::MyEnum1 MyStruct::get_me1_t2() const {
+  return __fbthrift_field_me1_t2;
+}
+
+::test::fixtures::enums::MyEnum1& MyStruct::set_me1_t2(::test::fixtures::enums::MyEnum1 me1_t2_) {
+  me1_t2_ref() = me1_t2_;
+  return __fbthrift_field_me1_t2;
+}
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;

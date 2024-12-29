@@ -264,12 +264,85 @@ bool EmptiableStruct::operator<([[maybe_unused]] const EmptiableStruct& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+bool EmptiableStruct::get_bool_field() const {
+  return __fbthrift_field_bool_field;
+}
+
+bool& EmptiableStruct::set_bool_field(bool bool_field_) {
+  bool_field_ref() = bool_field_;
+  return __fbthrift_field_bool_field;
+}
+
+::std::int8_t EmptiableStruct::get_byte_field() const {
+  return __fbthrift_field_byte_field;
+}
+
+::std::int8_t& EmptiableStruct::set_byte_field(::std::int8_t byte_field_) {
+  byte_field_ref() = byte_field_;
+  return __fbthrift_field_byte_field;
+}
+
+::std::int16_t EmptiableStruct::get_short_field() const {
+  return __fbthrift_field_short_field;
+}
+
+::std::int16_t& EmptiableStruct::set_short_field(::std::int16_t short_field_) {
+  short_field_ref() = short_field_;
+  return __fbthrift_field_short_field;
+}
+
+::std::int32_t EmptiableStruct::get_int_field() const {
+  return __fbthrift_field_int_field;
+}
+
+::std::int32_t& EmptiableStruct::set_int_field(::std::int32_t int_field_) {
+  int_field_ref() = int_field_;
+  return __fbthrift_field_int_field;
+}
+
+::std::int64_t EmptiableStruct::get_long_field() const {
+  return __fbthrift_field_long_field;
+}
+
+::std::int64_t& EmptiableStruct::set_long_field(::std::int64_t long_field_) {
+  long_field_ref() = long_field_;
+  return __fbthrift_field_long_field;
+}
+
+float EmptiableStruct::get_float_field() const {
+  return __fbthrift_field_float_field;
+}
+
+float& EmptiableStruct::set_float_field(float float_field_) {
+  float_field_ref() = float_field_;
+  return __fbthrift_field_float_field;
+}
+
+double EmptiableStruct::get_double_field() const {
+  return __fbthrift_field_double_field;
+}
+
+double& EmptiableStruct::set_double_field(double double_field_) {
+  double_field_ref() = double_field_;
+  return __fbthrift_field_double_field;
+}
+
+::apache::thrift::test::MyEnum EmptiableStruct::get_enum_field() const {
+  return __fbthrift_field_enum_field;
+}
+
+::apache::thrift::test::MyEnum& EmptiableStruct::set_enum_field(::apache::thrift::test::MyEnum enum_field_) {
+  enum_field_ref() = enum_field_;
+  return __fbthrift_field_enum_field;
+}
+
 const ::std::vector<::std::int16_t>& EmptiableStruct::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
 ::std::vector<::std::int16_t> EmptiableStruct::get_list_field() && {
-  return std::move(__fbthrift_field_list_field);
+  return static_cast<::std::vector<::std::int16_t>&&>(__fbthrift_field_list_field);
 }
 
 const ::std::set<::std::int16_t>& EmptiableStruct::get_set_field() const& {
@@ -277,7 +350,7 @@ const ::std::set<::std::int16_t>& EmptiableStruct::get_set_field() const& {
 }
 
 ::std::set<::std::int16_t> EmptiableStruct::get_set_field() && {
-  return std::move(__fbthrift_field_set_field);
+  return static_cast<::std::set<::std::int16_t>&&>(__fbthrift_field_set_field);
 }
 
 const ::std::map<::std::int16_t, ::std::int16_t>& EmptiableStruct::get_map_field() const& {
@@ -285,7 +358,7 @@ const ::std::map<::std::int16_t, ::std::int16_t>& EmptiableStruct::get_map_field
 }
 
 ::std::map<::std::int16_t, ::std::int16_t> EmptiableStruct::get_map_field() && {
-  return std::move(__fbthrift_field_map_field);
+  return static_cast<::std::map<::std::int16_t, ::std::int16_t>&&>(__fbthrift_field_map_field);
 }
 
 const ::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() const& {
@@ -295,7 +368,6 @@ const ::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() cons
 ::apache::thrift::test::MyStruct* EmptiableStruct::get_struct_field() & {
   return struct_field_ref().has_value() ? std::addressof(__fbthrift_field_struct_field) : nullptr;
 }
-
 
 void swap([[maybe_unused]] EmptiableStruct& a, [[maybe_unused]] EmptiableStruct& b) {
   using ::std::swap;
@@ -484,12 +556,85 @@ bool NotEmptiableStruct::operator<([[maybe_unused]] const NotEmptiableStruct& rh
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+bool NotEmptiableStruct::get_bool_field() const {
+  return __fbthrift_field_bool_field;
+}
+
+bool& NotEmptiableStruct::set_bool_field(bool bool_field_) {
+  bool_field_ref() = bool_field_;
+  return __fbthrift_field_bool_field;
+}
+
+::std::int8_t NotEmptiableStruct::get_byte_field() const {
+  return __fbthrift_field_byte_field;
+}
+
+::std::int8_t& NotEmptiableStruct::set_byte_field(::std::int8_t byte_field_) {
+  byte_field_ref() = byte_field_;
+  return __fbthrift_field_byte_field;
+}
+
+::std::int16_t NotEmptiableStruct::get_short_field() const {
+  return __fbthrift_field_short_field;
+}
+
+::std::int16_t& NotEmptiableStruct::set_short_field(::std::int16_t short_field_) {
+  short_field_ref() = short_field_;
+  return __fbthrift_field_short_field;
+}
+
+::std::int32_t NotEmptiableStruct::get_int_field() const {
+  return __fbthrift_field_int_field;
+}
+
+::std::int32_t& NotEmptiableStruct::set_int_field(::std::int32_t int_field_) {
+  int_field_ref() = int_field_;
+  return __fbthrift_field_int_field;
+}
+
+::std::int64_t NotEmptiableStruct::get_long_field() const {
+  return __fbthrift_field_long_field;
+}
+
+::std::int64_t& NotEmptiableStruct::set_long_field(::std::int64_t long_field_) {
+  long_field_ref() = long_field_;
+  return __fbthrift_field_long_field;
+}
+
+float NotEmptiableStruct::get_float_field() const {
+  return __fbthrift_field_float_field;
+}
+
+float& NotEmptiableStruct::set_float_field(float float_field_) {
+  float_field_ref() = float_field_;
+  return __fbthrift_field_float_field;
+}
+
+double NotEmptiableStruct::get_double_field() const {
+  return __fbthrift_field_double_field;
+}
+
+double& NotEmptiableStruct::set_double_field(double double_field_) {
+  double_field_ref() = double_field_;
+  return __fbthrift_field_double_field;
+}
+
+::apache::thrift::test::MyEnum NotEmptiableStruct::get_enum_field() const {
+  return __fbthrift_field_enum_field;
+}
+
+::apache::thrift::test::MyEnum& NotEmptiableStruct::set_enum_field(::apache::thrift::test::MyEnum enum_field_) {
+  enum_field_ref() = enum_field_;
+  return __fbthrift_field_enum_field;
+}
+
 const ::std::vector<::std::int16_t>& NotEmptiableStruct::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
 ::std::vector<::std::int16_t> NotEmptiableStruct::get_list_field() && {
-  return std::move(__fbthrift_field_list_field);
+  return static_cast<::std::vector<::std::int16_t>&&>(__fbthrift_field_list_field);
 }
 
 const ::std::set<::std::int16_t>& NotEmptiableStruct::get_set_field() const& {
@@ -497,7 +642,7 @@ const ::std::set<::std::int16_t>& NotEmptiableStruct::get_set_field() const& {
 }
 
 ::std::set<::std::int16_t> NotEmptiableStruct::get_set_field() && {
-  return std::move(__fbthrift_field_set_field);
+  return static_cast<::std::set<::std::int16_t>&&>(__fbthrift_field_set_field);
 }
 
 const ::std::map<::std::int16_t, ::std::int16_t>& NotEmptiableStruct::get_map_field() const& {
@@ -505,7 +650,7 @@ const ::std::map<::std::int16_t, ::std::int16_t>& NotEmptiableStruct::get_map_fi
 }
 
 ::std::map<::std::int16_t, ::std::int16_t> NotEmptiableStruct::get_map_field() && {
-  return std::move(__fbthrift_field_map_field);
+  return static_cast<::std::map<::std::int16_t, ::std::int16_t>&&>(__fbthrift_field_map_field);
 }
 
 const ::apache::thrift::test::MyStruct& NotEmptiableStruct::get_struct_field() const& {
@@ -513,9 +658,8 @@ const ::apache::thrift::test::MyStruct& NotEmptiableStruct::get_struct_field() c
 }
 
 ::apache::thrift::test::MyStruct NotEmptiableStruct::get_struct_field() && {
-  return std::move(__fbthrift_field_struct_field);
+  return static_cast<::apache::thrift::test::MyStruct&&>(__fbthrift_field_struct_field);
 }
-
 
 void swap([[maybe_unused]] NotEmptiableStruct& a, [[maybe_unused]] NotEmptiableStruct& b) {
   using ::std::swap;

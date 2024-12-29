@@ -564,7 +564,7 @@ class InitialResponse final  {
   /** Glean { "field": "content" } */
   [[deprecated("Use `FOO.content().value();` instead of `FOO.get_content();`")]]
   ::std::string get_content() && {
-    return std::move(__fbthrift_field_content);
+    return static_cast<::std::string&&>(__fbthrift_field_content);
   }
 
   /** Glean { "field": "content" } */
@@ -739,7 +739,7 @@ class FinalResponse final  {
   /** Glean { "field": "content" } */
   [[deprecated("Use `FOO.content().value();` instead of `FOO.get_content();`")]]
   ::std::string get_content() && {
-    return std::move(__fbthrift_field_content);
+    return static_cast<::std::string&&>(__fbthrift_field_content);
   }
 
   /** Glean { "field": "content" } */
@@ -914,7 +914,7 @@ class SinkPayload final  {
   /** Glean { "field": "content" } */
   [[deprecated("Use `FOO.content().value();` instead of `FOO.get_content();`")]]
   ::std::string get_content() && {
-    return std::move(__fbthrift_field_content);
+    return static_cast<::std::string&&>(__fbthrift_field_content);
   }
 
   /** Glean { "field": "content" } */
@@ -1089,7 +1089,7 @@ class CompatibleWithKeywordSink final  {
   /** Glean { "field": "sink" } */
   [[deprecated("Use `FOO.sink().value();` instead of `FOO.get_sink();`")]]
   ::std::string get_sink() && {
-    return std::move(__fbthrift_field_sink);
+    return static_cast<::std::string&&>(__fbthrift_field_sink);
   }
 
   /** Glean { "field": "sink" } */
@@ -1270,7 +1270,7 @@ class FOLLY_EXPORT InitialException : public virtual apache::thrift::TException 
   /** Glean { "field": "reason" } */
   [[deprecated("Use `FOO.reason().value();` instead of `FOO.get_reason();`")]]
   ::std::string get_reason() && {
-    return std::move(__fbthrift_field_reason);
+    return static_cast<::std::string&&>(__fbthrift_field_reason);
   }
 
   /** Glean { "field": "reason" } */
@@ -1455,7 +1455,7 @@ class FOLLY_EXPORT SinkException1 : public virtual apache::thrift::TException {
   /** Glean { "field": "reason" } */
   [[deprecated("Use `FOO.reason().value();` instead of `FOO.get_reason();`")]]
   ::std::string get_reason() && {
-    return std::move(__fbthrift_field_reason);
+    return static_cast<::std::string&&>(__fbthrift_field_reason);
   }
 
   /** Glean { "field": "reason" } */
@@ -1633,16 +1633,11 @@ class FOLLY_EXPORT SinkException2 : public virtual apache::thrift::TException {
 
   /** Glean { "field": "reason" } */
   [[deprecated("Use `FOO.reason().value();` instead of `FOO.get_reason();`")]]
-  ::std::int64_t get_reason() const {
-    return __fbthrift_field_reason;
-  }
+  ::std::int64_t get_reason() const;
 
   /** Glean { "field": "reason" } */
   [[deprecated("Use `FOO.reason() = BAR;` instead of `FOO.set_reason(BAR);`")]]
-  ::std::int64_t& set_reason(::std::int64_t reason_) {
-    reason_ref() = reason_;
-    return __fbthrift_field_reason;
-  }
+  ::std::int64_t& set_reason(::std::int64_t reason_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1812,7 +1807,7 @@ class StreamItem final  {
   /** Glean { "field": "content" } */
   [[deprecated("Use `FOO.content().value();` instead of `FOO.get_content();`")]]
   ::std::string get_content() && {
-    return std::move(__fbthrift_field_content);
+    return static_cast<::std::string&&>(__fbthrift_field_content);
   }
 
   /** Glean { "field": "content" } */

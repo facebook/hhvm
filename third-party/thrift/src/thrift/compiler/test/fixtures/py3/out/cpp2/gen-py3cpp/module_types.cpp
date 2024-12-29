@@ -144,6 +144,15 @@ bool SimpleException::operator<([[maybe_unused]] const SimpleException& rhs) con
 }
 
 
+::std::int16_t SimpleException::get_err_code() const {
+  return __fbthrift_field_err_code;
+}
+
+::std::int16_t& SimpleException::set_err_code(::std::int16_t err_code_) {
+  err_code_ref() = err_code_;
+  return __fbthrift_field_err_code;
+}
+
 void swap([[maybe_unused]] SimpleException& a, [[maybe_unused]] SimpleException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_err_code, b.__fbthrift_field_err_code);
@@ -251,6 +260,14 @@ bool OptionalRefStruct::operator<([[maybe_unused]] const OptionalRefStruct& rhs)
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+const ::py3::simple::IOBufPtr* OptionalRefStruct::get_optional_blob() const& {
+  return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
+}
+
+::py3::simple::IOBufPtr* OptionalRefStruct::get_optional_blob() & {
+  return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
+}
 
 void swap([[maybe_unused]] OptionalRefStruct& a, [[maybe_unused]] OptionalRefStruct& b) {
   using ::std::swap;
@@ -392,14 +409,86 @@ bool SimpleStruct::operator==([[maybe_unused]] const SimpleStruct& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
+
+bool SimpleStruct::get_is_on() const {
+  return __fbthrift_field_is_on;
+}
+
+bool& SimpleStruct::set_is_on(bool is_on_) {
+  is_on_ref() = is_on_;
+  return __fbthrift_field_is_on;
+}
+
+::std::int8_t SimpleStruct::get_tiny_int() const {
+  return __fbthrift_field_tiny_int;
+}
+
+::std::int8_t& SimpleStruct::set_tiny_int(::std::int8_t tiny_int_) {
+  tiny_int_ref() = tiny_int_;
+  return __fbthrift_field_tiny_int;
+}
+
+::std::int16_t SimpleStruct::get_small_int() const {
+  return __fbthrift_field_small_int;
+}
+
+::std::int16_t& SimpleStruct::set_small_int(::std::int16_t small_int_) {
+  small_int_ref() = small_int_;
+  return __fbthrift_field_small_int;
+}
+
+::std::int32_t SimpleStruct::get_nice_sized_int() const {
+  return __fbthrift_field_nice_sized_int;
+}
+
+::std::int32_t& SimpleStruct::set_nice_sized_int(::std::int32_t nice_sized_int_) {
+  nice_sized_int_ref() = nice_sized_int_;
+  return __fbthrift_field_nice_sized_int;
+}
+
+::std::int64_t SimpleStruct::get_big_int() const {
+  return __fbthrift_field_big_int;
+}
+
+::std::int64_t& SimpleStruct::set_big_int(::std::int64_t big_int_) {
+  big_int_ref() = big_int_;
+  return __fbthrift_field_big_int;
+}
+
+double SimpleStruct::get_real() const {
+  return __fbthrift_field_real;
+}
+
+double& SimpleStruct::set_real(double real_) {
+  real_ref() = real_;
+  return __fbthrift_field_real;
+}
+
+float SimpleStruct::get_smaller_real() const {
+  return __fbthrift_field_smaller_real;
+}
+
+float& SimpleStruct::set_smaller_real(float smaller_real_) {
+  smaller_real_ref() = smaller_real_;
+  return __fbthrift_field_smaller_real;
+}
+
 const ::std::unordered_map<::std::int32_t, ::std::int32_t>& SimpleStruct::get_something() const& {
   return __fbthrift_field_something;
 }
 
 ::std::unordered_map<::std::int32_t, ::std::int32_t> SimpleStruct::get_something() && {
-  return std::move(__fbthrift_field_something);
+  return static_cast<::std::unordered_map<::std::int32_t, ::std::int32_t>&&>(__fbthrift_field_something);
 }
 
+::std::int16_t SimpleStruct::get_hidden_field() const {
+  return __fbthrift_field_hidden_field;
+}
+
+::std::int16_t& SimpleStruct::set_hidden_field(::std::int16_t hidden_field_) {
+  hidden_field_ref() = hidden_field_;
+  return __fbthrift_field_hidden_field;
+}
 
 void swap([[maybe_unused]] SimpleStruct& a, [[maybe_unused]] SimpleStruct& b) {
   using ::std::swap;
@@ -527,12 +616,13 @@ bool HiddenTypeFieldsStruct::operator==([[maybe_unused]] const HiddenTypeFieldsS
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
+
 const ::std::vector<::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field2() const& {
   return __fbthrift_field_field2;
 }
 
 ::std::vector<::py3::simple::AdaptedTypeDef> HiddenTypeFieldsStruct::get_field2() && {
-  return std::move(__fbthrift_field_field2);
+  return static_cast<::std::vector<::py3::simple::AdaptedTypeDef>&&>(__fbthrift_field_field2);
 }
 
 const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& HiddenTypeFieldsStruct::get_field3() const& {
@@ -540,9 +630,8 @@ const ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>& Hidde
 }
 
 ::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef> HiddenTypeFieldsStruct::get_field3() && {
-  return std::move(__fbthrift_field_field3);
+  return static_cast<::std::unordered_map<::std::int32_t, ::py3::simple::AdaptedTypeDef>&&>(__fbthrift_field_field3);
 }
-
 
 void swap([[maybe_unused]] HiddenTypeFieldsStruct& a, [[maybe_unused]] HiddenTypeFieldsStruct& b) {
   using ::std::swap;
@@ -774,6 +863,15 @@ bool HiddenException::operator<([[maybe_unused]] const HiddenException& rhs) con
 }
 
 
+::std::int16_t HiddenException::get_test() const {
+  return __fbthrift_field_test;
+}
+
+::std::int16_t& HiddenException::set_test(::std::int16_t test_) {
+  test_ref() = test_;
+  return __fbthrift_field_test;
+}
+
 void swap([[maybe_unused]] HiddenException& a, [[maybe_unused]] HiddenException& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_test, b.__fbthrift_field_test);
@@ -908,12 +1006,13 @@ bool ComplexStruct::operator==([[maybe_unused]] const ComplexStruct& rhs) const 
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
+
 const ::py3::simple::SimpleStruct& ComplexStruct::get_structOne() const& {
   return __fbthrift_field_structOne;
 }
 
 ::py3::simple::SimpleStruct ComplexStruct::get_structOne() && {
-  return std::move(__fbthrift_field_structOne);
+  return static_cast<::py3::simple::SimpleStruct&&>(__fbthrift_field_structOne);
 }
 
 const ::py3::simple::SimpleStruct& ComplexStruct::get_structTwo() const& {
@@ -921,9 +1020,26 @@ const ::py3::simple::SimpleStruct& ComplexStruct::get_structTwo() const& {
 }
 
 ::py3::simple::SimpleStruct ComplexStruct::get_structTwo() && {
-  return std::move(__fbthrift_field_structTwo);
+  return static_cast<::py3::simple::SimpleStruct&&>(__fbthrift_field_structTwo);
 }
 
+::std::int32_t ComplexStruct::get_an_integer() const {
+  return __fbthrift_field_an_integer;
+}
+
+::std::int32_t& ComplexStruct::set_an_integer(::std::int32_t an_integer_) {
+  an_integer_ref() = an_integer_;
+  return __fbthrift_field_an_integer;
+}
+
+::py3::simple::AnEnum ComplexStruct::get_an_enum() const {
+  return __fbthrift_field_an_enum;
+}
+
+::py3::simple::AnEnum& ComplexStruct::set_an_enum(::py3::simple::AnEnum an_enum_) {
+  an_enum_ref() = an_enum_;
+  return __fbthrift_field_an_enum;
+}
 
 void swap([[maybe_unused]] ComplexStruct& a, [[maybe_unused]] ComplexStruct& b) {
   using ::std::swap;
@@ -1147,14 +1263,14 @@ bool BinaryUnionStruct::__fbthrift_is_empty() const {
 
 
 
+
 const ::py3::simple::BinaryUnion& BinaryUnionStruct::get_u() const& {
   return __fbthrift_field_u;
 }
 
 ::py3::simple::BinaryUnion BinaryUnionStruct::get_u() && {
-  return std::move(__fbthrift_field_u);
+  return static_cast<::py3::simple::BinaryUnion&&>(__fbthrift_field_u);
 }
-
 
 void swap([[maybe_unused]] BinaryUnionStruct& a, [[maybe_unused]] BinaryUnionStruct& b) {
   using ::std::swap;
@@ -1297,12 +1413,40 @@ bool CustomFields::operator==([[maybe_unused]] const CustomFields& rhs) const {
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
+
+::MyType CustomFields::get_bool_field() const {
+  return __fbthrift_field_bool_field;
+}
+
+::MyType& CustomFields::set_bool_field(::MyType bool_field_) {
+  bool_field_ref() = bool_field_;
+  return __fbthrift_field_bool_field;
+}
+
+::MyType CustomFields::get_integer_field() const {
+  return __fbthrift_field_integer_field;
+}
+
+::MyType& CustomFields::set_integer_field(::MyType integer_field_) {
+  integer_field_ref() = integer_field_;
+  return __fbthrift_field_integer_field;
+}
+
+::MyType CustomFields::get_double_field() const {
+  return __fbthrift_field_double_field;
+}
+
+::MyType& CustomFields::set_double_field(::MyType double_field_) {
+  double_field_ref() = double_field_;
+  return __fbthrift_field_double_field;
+}
+
 const ::MyType& CustomFields::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
 ::MyType CustomFields::get_list_field() && {
-  return std::move(__fbthrift_field_list_field);
+  return static_cast<::MyType&&>(__fbthrift_field_list_field);
 }
 
 const ::MyType& CustomFields::get_set_field() const& {
@@ -1310,7 +1454,7 @@ const ::MyType& CustomFields::get_set_field() const& {
 }
 
 ::MyType CustomFields::get_set_field() && {
-  return std::move(__fbthrift_field_set_field);
+  return static_cast<::MyType&&>(__fbthrift_field_set_field);
 }
 
 const ::MyType& CustomFields::get_map_field() const& {
@@ -1318,7 +1462,7 @@ const ::MyType& CustomFields::get_map_field() const& {
 }
 
 ::MyType CustomFields::get_map_field() && {
-  return std::move(__fbthrift_field_map_field);
+  return static_cast<::MyType&&>(__fbthrift_field_map_field);
 }
 
 const ::MyType& CustomFields::get_struct_field() const& {
@@ -1326,9 +1470,8 @@ const ::MyType& CustomFields::get_struct_field() const& {
 }
 
 ::MyType CustomFields::get_struct_field() && {
-  return std::move(__fbthrift_field_struct_field);
+  return static_cast<::MyType&&>(__fbthrift_field_struct_field);
 }
-
 
 void swap([[maybe_unused]] CustomFields& a, [[maybe_unused]] CustomFields& b) {
   using ::std::swap;
@@ -1479,12 +1622,40 @@ bool CustomTypedefFields::operator==([[maybe_unused]] const CustomTypedefFields&
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
+
+::py3::simple::CustomBool CustomTypedefFields::get_bool_field() const {
+  return __fbthrift_field_bool_field;
+}
+
+::py3::simple::CustomBool& CustomTypedefFields::set_bool_field(::py3::simple::CustomBool bool_field_) {
+  bool_field_ref() = bool_field_;
+  return __fbthrift_field_bool_field;
+}
+
+::py3::simple::CustomInteger CustomTypedefFields::get_integer_field() const {
+  return __fbthrift_field_integer_field;
+}
+
+::py3::simple::CustomInteger& CustomTypedefFields::set_integer_field(::py3::simple::CustomInteger integer_field_) {
+  integer_field_ref() = integer_field_;
+  return __fbthrift_field_integer_field;
+}
+
+::py3::simple::CustomDouble CustomTypedefFields::get_double_field() const {
+  return __fbthrift_field_double_field;
+}
+
+::py3::simple::CustomDouble& CustomTypedefFields::set_double_field(::py3::simple::CustomDouble double_field_) {
+  double_field_ref() = double_field_;
+  return __fbthrift_field_double_field;
+}
+
 const ::py3::simple::CustomList& CustomTypedefFields::get_list_field() const& {
   return __fbthrift_field_list_field;
 }
 
 ::py3::simple::CustomList CustomTypedefFields::get_list_field() && {
-  return std::move(__fbthrift_field_list_field);
+  return static_cast<::py3::simple::CustomList&&>(__fbthrift_field_list_field);
 }
 
 const ::py3::simple::CustomSet& CustomTypedefFields::get_set_field() const& {
@@ -1492,7 +1663,7 @@ const ::py3::simple::CustomSet& CustomTypedefFields::get_set_field() const& {
 }
 
 ::py3::simple::CustomSet CustomTypedefFields::get_set_field() && {
-  return std::move(__fbthrift_field_set_field);
+  return static_cast<::py3::simple::CustomSet&&>(__fbthrift_field_set_field);
 }
 
 const ::py3::simple::CustomMap& CustomTypedefFields::get_map_field() const& {
@@ -1500,7 +1671,7 @@ const ::py3::simple::CustomMap& CustomTypedefFields::get_map_field() const& {
 }
 
 ::py3::simple::CustomMap CustomTypedefFields::get_map_field() && {
-  return std::move(__fbthrift_field_map_field);
+  return static_cast<::py3::simple::CustomMap&&>(__fbthrift_field_map_field);
 }
 
 const ::py3::simple::CustomStruct& CustomTypedefFields::get_struct_field() const& {
@@ -1508,9 +1679,8 @@ const ::py3::simple::CustomStruct& CustomTypedefFields::get_struct_field() const
 }
 
 ::py3::simple::CustomStruct CustomTypedefFields::get_struct_field() && {
-  return std::move(__fbthrift_field_struct_field);
+  return static_cast<::py3::simple::CustomStruct&&>(__fbthrift_field_struct_field);
 }
-
 
 void swap([[maybe_unused]] CustomTypedefFields& a, [[maybe_unused]] CustomTypedefFields& b) {
   using ::std::swap;

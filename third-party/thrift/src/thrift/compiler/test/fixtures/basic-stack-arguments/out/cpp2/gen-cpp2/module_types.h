@@ -289,16 +289,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
@@ -309,7 +304,7 @@ class MyStruct final  {
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   ::std::string get_MyStringField() && {
-    return std::move(__fbthrift_field_MyStringField);
+    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
   }
 
   /** Glean { "field": "MyStringField" } */

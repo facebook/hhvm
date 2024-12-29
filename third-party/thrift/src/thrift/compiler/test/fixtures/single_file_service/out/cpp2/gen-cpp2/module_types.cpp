@@ -73,6 +73,19 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
 }
 
 
+const ::std::int32_t* Foo::get_value() const& {
+  return value_ref().has_value() ? std::addressof(__fbthrift_field_value) : nullptr;
+}
+
+::std::int32_t* Foo::get_value() & {
+  return value_ref().has_value() ? std::addressof(__fbthrift_field_value) : nullptr;
+}
+
+::std::int32_t& Foo::set_value(::std::int32_t value_) {
+  value_ref() = value_;
+  return __fbthrift_field_value;
+}
+
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_value, b.__fbthrift_field_value);

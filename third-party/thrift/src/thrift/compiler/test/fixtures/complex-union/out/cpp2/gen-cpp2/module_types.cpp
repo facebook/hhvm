@@ -542,14 +542,23 @@ bool Val::operator<([[maybe_unused]] const Val& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t Val::get_intVal() const {
+  return __fbthrift_field_intVal;
+}
+
+::std::int32_t& Val::set_intVal(::std::int32_t intVal_) {
+  intVal_ref() = intVal_;
+  return __fbthrift_field_intVal;
+}
+
 const ::cpp2::containerTypedef& Val::get_typedefValue() const& {
   return __fbthrift_field_typedefValue;
 }
 
 ::cpp2::containerTypedef Val::get_typedefValue() && {
-  return std::move(__fbthrift_field_typedefValue);
+  return static_cast<::cpp2::containerTypedef&&>(__fbthrift_field_typedefValue);
 }
-
 
 void swap([[maybe_unused]] Val& a, [[maybe_unused]] Val& b) {
   using ::std::swap;
@@ -910,6 +919,15 @@ bool NonCopyableStruct::operator<([[maybe_unused]] const NonCopyableStruct& rhs)
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int64_t NonCopyableStruct::get_num() const {
+  return __fbthrift_field_num;
+}
+
+::std::int64_t& NonCopyableStruct::set_num(::std::int64_t num_) {
+  num_ref() = num_;
+  return __fbthrift_field_num;
+}
 
 void swap([[maybe_unused]] NonCopyableStruct& a, [[maybe_unused]] NonCopyableStruct& b) {
   using ::std::swap;

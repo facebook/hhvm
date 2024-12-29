@@ -98,6 +98,15 @@ bool DoSomethingResult::operator<([[maybe_unused]] const DoSomethingResult& rhs)
 }
 
 
+::std::int32_t DoSomethingResult::get_i_res() const {
+  return __fbthrift_field_i_res;
+}
+
+::std::int32_t& DoSomethingResult::set_i_res(::std::int32_t i_res_) {
+  i_res_ref() = i_res_;
+  return __fbthrift_field_i_res;
+}
+
 void swap([[maybe_unused]] DoSomethingResult& a, [[maybe_unused]] DoSomethingResult& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_s_res, b.__fbthrift_field_s_res);

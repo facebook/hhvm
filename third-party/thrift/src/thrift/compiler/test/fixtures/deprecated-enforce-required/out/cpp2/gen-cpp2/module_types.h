@@ -176,16 +176,11 @@ class Foo final  {
 
   /** Glean { "field": "bar" } */
   [[deprecated("Use `FOO.bar().value();` instead of `FOO.get_bar();`")]]
-  ::std::int32_t get_bar() const {
-    return __fbthrift_field_bar;
-  }
+  ::std::int32_t get_bar() const;
 
   /** Glean { "field": "bar" } */
   [[deprecated("Use `FOO.bar() = BAR;` instead of `FOO.set_bar(BAR);`")]]
-  ::std::int32_t& set_bar(::std::int32_t bar_) {
-    bar_ref() = bar_;
-    return __fbthrift_field_bar;
-  }
+  ::std::int32_t& set_bar(::std::int32_t bar_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

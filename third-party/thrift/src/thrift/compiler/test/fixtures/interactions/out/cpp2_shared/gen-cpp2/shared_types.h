@@ -243,7 +243,7 @@ class DoSomethingResult final  {
   /** Glean { "field": "s_res" } */
   [[deprecated("Use `FOO.s_res().value();` instead of `FOO.get_s_res();`")]]
   ::std::string get_s_res() && {
-    return std::move(__fbthrift_field_s_res);
+    return static_cast<::std::string&&>(__fbthrift_field_s_res);
   }
 
   /** Glean { "field": "s_res" } */
@@ -256,16 +256,11 @@ class DoSomethingResult final  {
 
   /** Glean { "field": "i_res" } */
   [[deprecated("Use `FOO.i_res().value();` instead of `FOO.get_i_res();`")]]
-  ::std::int32_t get_i_res() const {
-    return __fbthrift_field_i_res;
-  }
+  ::std::int32_t get_i_res() const;
 
   /** Glean { "field": "i_res" } */
   [[deprecated("Use `FOO.i_res() = BAR;` instead of `FOO.set_i_res(BAR);`")]]
-  ::std::int32_t& set_i_res(::std::int32_t i_res_) {
-    i_res_ref() = i_res_;
-    return __fbthrift_field_i_res;
-  }
+  ::std::int32_t& set_i_res(::std::int32_t i_res_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

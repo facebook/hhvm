@@ -352,75 +352,47 @@ class BasicTypes final  {
 
   /** Glean { "field": "first" } */
   [[deprecated("Use `FOO.first().value();` instead of `FOO.get_first();`")]]
-  ::std::int32_t get_first() const {
-    return __fbthrift_field_first;
-  }
+  ::std::int32_t get_first() const;
 
   /** Glean { "field": "first" } */
   [[deprecated("Use `FOO.first() = BAR;` instead of `FOO.set_first(BAR);`")]]
-  ::std::int32_t& set_first(::std::int32_t first_) {
-    first_ref() = first_;
-    return __fbthrift_field_first;
-  }
+  ::std::int32_t& set_first(::std::int32_t first_);
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
-  const ::std::int32_t* get_second() const& {
-    return second_ref().has_value() ? std::addressof(__fbthrift_field_second) : nullptr;
-  }
+  const ::std::int32_t* get_second() const&;
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
-  ::std::int32_t* get_second() & {
-    return second_ref().has_value() ? std::addressof(__fbthrift_field_second) : nullptr;
-  }
+  ::std::int32_t* get_second() &;
 
-  /** Glean { "field": "second" } */
-  [[deprecated("Use `FOO.second().value();` instead of `FOO.get_second();`")]]
   ::std::int32_t* get_second() && = delete;
 
   /** Glean { "field": "second" } */
   [[deprecated("Use `FOO.second() = BAR;` instead of `FOO.set_second(BAR);`")]]
-  ::std::int32_t& set_second(::std::int32_t second_) {
-    second_ref() = second_;
-    return __fbthrift_field_second;
-  }
+  ::std::int32_t& set_second(::std::int32_t second_);
 
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
-  const ::std::int64_t* get_third() const& {
-    return third_ref().has_value() ? std::addressof(__fbthrift_field_third) : nullptr;
-  }
+  const ::std::int64_t* get_third() const&;
 
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
-  ::std::int64_t* get_third() & {
-    return third_ref().has_value() ? std::addressof(__fbthrift_field_third) : nullptr;
-  }
+  ::std::int64_t* get_third() &;
 
-  /** Glean { "field": "third" } */
-  [[deprecated("Use `FOO.third().value();` instead of `FOO.get_third();`")]]
   ::std::int64_t* get_third() && = delete;
 
   /** Glean { "field": "third" } */
   [[deprecated("Use `FOO.third() = BAR;` instead of `FOO.set_third(BAR);`")]]
-  ::std::int64_t& set_third(::std::int64_t third_) {
-    third_ref() = third_;
-    return __fbthrift_field_third;
-  }
+  ::std::int64_t& set_third(::std::int64_t third_);
 
   /** Glean { "field": "isTrue" } */
   [[deprecated("Use `FOO.isTrue().value();` instead of `FOO.get_isTrue();`")]]
-  bool get_isTrue() const {
-    return __fbthrift_field_isTrue;
-  }
+  bool get_isTrue() const;
 
   /** Glean { "field": "isTrue" } */
   [[deprecated("Use `FOO.isTrue() = BAR;` instead of `FOO.set_isTrue(BAR);`")]]
-  bool& set_isTrue(bool isTrue_) {
-    isTrue_ref() = isTrue_;
-    return __fbthrift_field_isTrue;
-  }
+  bool& set_isTrue(bool isTrue_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

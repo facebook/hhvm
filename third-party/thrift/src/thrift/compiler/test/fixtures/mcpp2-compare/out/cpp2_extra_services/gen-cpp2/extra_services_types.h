@@ -864,52 +864,33 @@ class containerStruct2 final  {
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
-  bool get_fieldA() const {
-    return __fbthrift_field_fieldA;
-  }
+  bool get_fieldA() const;
 
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA() = BAR;` instead of `FOO.set_fieldA(BAR);`")]]
-  bool& set_fieldA(bool fieldA_) {
-    fieldA_ref() = fieldA_;
-    return __fbthrift_field_fieldA;
-  }
+  bool& set_fieldA(bool fieldA_);
 
   /** Glean { "field": "req_fieldA" } */
   [[deprecated("Use `FOO.req_fieldA().value();` instead of `FOO.get_req_fieldA();`")]]
-  bool get_req_fieldA() const {
-    return __fbthrift_field_req_fieldA;
-  }
+  bool get_req_fieldA() const;
 
   /** Glean { "field": "req_fieldA" } */
   [[deprecated("Use `FOO.req_fieldA() = BAR;` instead of `FOO.set_req_fieldA(BAR);`")]]
-  bool& set_req_fieldA(bool req_fieldA_) {
-    req_fieldA_ref() = req_fieldA_;
-    return __fbthrift_field_req_fieldA;
-  }
+  bool& set_req_fieldA(bool req_fieldA_);
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
-  const bool* get_opt_fieldA() const& {
-    return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
-  }
+  const bool* get_opt_fieldA() const&;
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
-  bool* get_opt_fieldA() & {
-    return opt_fieldA_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldA) : nullptr;
-  }
+  bool* get_opt_fieldA() &;
 
-  /** Glean { "field": "opt_fieldA" } */
-  [[deprecated("Use `FOO.opt_fieldA().value();` instead of `FOO.get_opt_fieldA();`")]]
   bool* get_opt_fieldA() && = delete;
 
   /** Glean { "field": "opt_fieldA" } */
   [[deprecated("Use `FOO.opt_fieldA() = BAR;` instead of `FOO.set_opt_fieldA(BAR);`")]]
-  bool& set_opt_fieldA(bool opt_fieldA_) {
-    opt_fieldA_ref() = opt_fieldA_;
-    return __fbthrift_field_opt_fieldA;
-  }
+  bool& set_opt_fieldA(bool opt_fieldA_);
 
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
@@ -951,8 +932,6 @@ class containerStruct2 final  {
   [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   ::std::map<::std::string, bool>* get_opt_fieldB() &;
 
-  /** Glean { "field": "opt_fieldB" } */
-  [[deprecated("Use `FOO.opt_fieldB().value();` instead of `FOO.get_opt_fieldB();`")]]
   ::std::map<::std::string, bool>* get_opt_fieldB() && = delete;
 
   /** Glean { "field": "opt_fieldB" } */
@@ -1003,8 +982,6 @@ class containerStruct2 final  {
   [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   ::std::set<::std::int32_t>* get_opt_fieldC() &;
 
-  /** Glean { "field": "opt_fieldC" } */
-  [[deprecated("Use `FOO.opt_fieldC().value();` instead of `FOO.get_opt_fieldC();`")]]
   ::std::set<::std::int32_t>* get_opt_fieldC() && = delete;
 
   /** Glean { "field": "opt_fieldC" } */
@@ -1024,7 +1001,7 @@ class containerStruct2 final  {
   /** Glean { "field": "fieldD" } */
   [[deprecated("Use `FOO.fieldD().value();` instead of `FOO.get_fieldD();`")]]
   ::std::string get_fieldD() && {
-    return std::move(__fbthrift_field_fieldD);
+    return static_cast<::std::string&&>(__fbthrift_field_fieldD);
   }
 
   /** Glean { "field": "fieldD" } */
@@ -1044,7 +1021,7 @@ class containerStruct2 final  {
   /** Glean { "field": "fieldE" } */
   [[deprecated("Use `FOO.fieldE().value();` instead of `FOO.get_fieldE();`")]]
   ::std::string get_fieldE() && {
-    return std::move(__fbthrift_field_fieldE);
+    return static_cast<::std::string&&>(__fbthrift_field_fieldE);
   }
 
   /** Glean { "field": "fieldE" } */
@@ -1064,7 +1041,7 @@ class containerStruct2 final  {
   /** Glean { "field": "req_fieldE" } */
   [[deprecated("Use `FOO.req_fieldE().value();` instead of `FOO.get_req_fieldE();`")]]
   ::std::string get_req_fieldE() && {
-    return std::move(__fbthrift_field_req_fieldE);
+    return static_cast<::std::string&&>(__fbthrift_field_req_fieldE);
   }
 
   /** Glean { "field": "req_fieldE" } */
@@ -1077,18 +1054,12 @@ class containerStruct2 final  {
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
-  const ::std::string* get_opt_fieldE() const& {
-    return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
-  }
+  const ::std::string* get_opt_fieldE() const&;
 
   /** Glean { "field": "opt_fieldE" } */
   [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
-  ::std::string* get_opt_fieldE() & {
-    return opt_fieldE_ref().has_value() ? std::addressof(__fbthrift_field_opt_fieldE) : nullptr;
-  }
+  ::std::string* get_opt_fieldE() &;
 
-  /** Glean { "field": "opt_fieldE" } */
-  [[deprecated("Use `FOO.opt_fieldE().value();` instead of `FOO.get_opt_fieldE();`")]]
   ::std::string* get_opt_fieldE() && = delete;
 
   /** Glean { "field": "opt_fieldE" } */

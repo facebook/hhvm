@@ -474,14 +474,32 @@ bool YourStruct::operator<([[maybe_unused]] const YourStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int64_t YourStruct::get_majorVer() const {
+  return __fbthrift_field_majorVer;
+}
+
+::std::int64_t& YourStruct::set_majorVer(::std::int64_t majorVer_) {
+  majorVer_ref() = majorVer_;
+  return __fbthrift_field_majorVer;
+}
+
+::cpp2::YourEnum YourStruct::get_my_enum() const {
+  return __fbthrift_field_my_enum;
+}
+
+::cpp2::YourEnum& YourStruct::set_my_enum(::cpp2::YourEnum my_enum_) {
+  my_enum_ref() = my_enum_;
+  return __fbthrift_field_my_enum;
+}
+
 const ::cpp2::list_string_6884& YourStruct::get_cpp_type_annotation() const& {
   return __fbthrift_field_cpp_type_annotation;
 }
 
 ::cpp2::list_string_6884 YourStruct::get_cpp_type_annotation() && {
-  return std::move(__fbthrift_field_cpp_type_annotation);
+  return static_cast<::cpp2::list_string_6884&&>(__fbthrift_field_cpp_type_annotation);
 }
-
 
 void swap([[maybe_unused]] YourStruct& a, [[maybe_unused]] YourStruct& b) {
   using ::std::swap;
@@ -600,6 +618,15 @@ bool SecretStruct::operator<([[maybe_unused]] const SecretStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int64_t SecretStruct::get_id() const {
+  return __fbthrift_field_id;
+}
+
+::std::int64_t& SecretStruct::set_id(::std::int64_t id_) {
+  id_ref() = id_;
+  return __fbthrift_field_id;
+}
 
 void swap([[maybe_unused]] SecretStruct& a, [[maybe_unused]] SecretStruct& b) {
   using ::std::swap;

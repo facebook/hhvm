@@ -536,8 +536,6 @@ class TemplateLists final  {
   [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
   std::vector<::std::string>* get_std_string() &;
 
-  /** Glean { "field": "std_string" } */
-  [[deprecated("Use `FOO.std_string().value();` instead of `FOO.get_std_string();`")]]
   std::vector<::std::string>* get_std_string() && = delete;
 
   /** Glean { "field": "std_string" } */
@@ -1989,7 +1987,7 @@ class TWrapped final  {
   /** Glean { "field": "fieldA" } */
   [[deprecated("Use `FOO.fieldA().value();` instead of `FOO.get_fieldA();`")]]
   ::std::string get_fieldA() && {
-    return std::move(__fbthrift_field_fieldA);
+    return static_cast<::std::string&&>(__fbthrift_field_fieldA);
   }
 
   /** Glean { "field": "fieldA" } */
@@ -2009,7 +2007,7 @@ class TWrapped final  {
   /** Glean { "field": "fieldB" } */
   [[deprecated("Use `FOO.fieldB().value();` instead of `FOO.get_fieldB();`")]]
   ::std::string get_fieldB() && {
-    return std::move(__fbthrift_field_fieldB);
+    return static_cast<::std::string&&>(__fbthrift_field_fieldB);
   }
 
   /** Glean { "field": "fieldB" } */

@@ -569,16 +569,11 @@ class ModuleA final  {
 
   /** Glean { "field": "i32Field" } */
   [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
-  ::std::int32_t get_i32Field() const {
-    return __fbthrift_field_i32Field;
-  }
+  ::std::int32_t get_i32Field() const;
 
   /** Glean { "field": "i32Field" } */
   [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
-  ::std::int32_t& set_i32Field(::std::int32_t i32Field_) {
-    i32Field_ref() = i32Field_;
-    return __fbthrift_field_i32Field;
-  }
+  ::std::int32_t& set_i32Field(::std::int32_t i32Field_);
 
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
@@ -589,7 +584,7 @@ class ModuleA final  {
   /** Glean { "field": "strField" } */
   [[deprecated("Use `FOO.strField().value();` instead of `FOO.get_strField();`")]]
   ::std::string get_strField() && {
-    return std::move(__fbthrift_field_strField);
+    return static_cast<::std::string&&>(__fbthrift_field_strField);
   }
 
   /** Glean { "field": "strField" } */
@@ -873,29 +868,19 @@ class ModuleB final  {
 
   /** Glean { "field": "i32Field" } */
   [[deprecated("Use `FOO.i32Field().value();` instead of `FOO.get_i32Field();`")]]
-  ::std::int32_t get_i32Field() const {
-    return __fbthrift_field_i32Field;
-  }
+  ::std::int32_t get_i32Field() const;
 
   /** Glean { "field": "i32Field" } */
   [[deprecated("Use `FOO.i32Field() = BAR;` instead of `FOO.set_i32Field(BAR);`")]]
-  ::std::int32_t& set_i32Field(::std::int32_t i32Field_) {
-    i32Field_ref() = i32Field_;
-    return __fbthrift_field_i32Field;
-  }
+  ::std::int32_t& set_i32Field(::std::int32_t i32Field_);
 
   /** Glean { "field": "inclEnumB" } */
   [[deprecated("Use `FOO.inclEnumB().value();` instead of `FOO.get_inclEnumB();`")]]
-  ::some::ns::EnumB get_inclEnumB() const {
-    return __fbthrift_field_inclEnumB;
-  }
+  ::some::ns::EnumB get_inclEnumB() const;
 
   /** Glean { "field": "inclEnumB" } */
   [[deprecated("Use `FOO.inclEnumB() = BAR;` instead of `FOO.set_inclEnumB(BAR);`")]]
-  ::some::ns::EnumB& set_inclEnumB(::some::ns::EnumB inclEnumB_) {
-    inclEnumB_ref() = inclEnumB_;
-    return __fbthrift_field_inclEnumB;
-  }
+  ::some::ns::EnumB& set_inclEnumB(::some::ns::EnumB inclEnumB_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1054,16 +1039,11 @@ class DirectlyAdapted final  {
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field().value();` instead of `FOO.get_field();`")]]
-  ::std::int32_t get_field() const {
-    return __fbthrift_field_field;
-  }
+  ::std::int32_t get_field() const;
 
   /** Glean { "field": "field" } */
   [[deprecated("Use `FOO.field() = BAR;` instead of `FOO.set_field(BAR);`")]]
-  ::std::int32_t& set_field(::std::int32_t field_) {
-    field_ref() = field_;
-    return __fbthrift_field_field;
-  }
+  ::std::int32_t& set_field(::std::int32_t field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

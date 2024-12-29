@@ -192,6 +192,14 @@ bool Serious::operator<([[maybe_unused]] const Serious& rhs) const {
 }
 
 
+const ::std::string* Serious::get_sonnet() const& {
+  return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
+}
+
+::std::string* Serious::get_sonnet() & {
+  return sonnet_ref().has_value() ? std::addressof(__fbthrift_field_sonnet) : nullptr;
+}
+
 void swap([[maybe_unused]] Serious& a, [[maybe_unused]] Serious& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_sonnet, b.__fbthrift_field_sonnet);
@@ -513,6 +521,15 @@ bool ExceptionWithPrimitiveField::operator<([[maybe_unused]] const ExceptionWith
 }
 
 
+::std::int32_t ExceptionWithPrimitiveField::get_error_code() const {
+  return __fbthrift_field_error_code;
+}
+
+::std::int32_t& ExceptionWithPrimitiveField::set_error_code(::std::int32_t error_code_) {
+  error_code_ref() = error_code_;
+  return __fbthrift_field_error_code;
+}
+
 void swap([[maybe_unused]] ExceptionWithPrimitiveField& a, [[maybe_unused]] ExceptionWithPrimitiveField& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_message, b.__fbthrift_field_message);
@@ -620,6 +637,15 @@ bool ExceptionWithStructuredAnnotation::operator<([[maybe_unused]] const Excepti
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t ExceptionWithStructuredAnnotation::get_error_code() const {
+  return __fbthrift_field_error_code;
+}
+
+::std::int32_t& ExceptionWithStructuredAnnotation::set_error_code(::std::int32_t error_code_) {
+  error_code_ref() = error_code_;
+  return __fbthrift_field_error_code;
+}
 
 void swap([[maybe_unused]] ExceptionWithStructuredAnnotation& a, [[maybe_unused]] ExceptionWithStructuredAnnotation& b) {
   using ::std::swap;

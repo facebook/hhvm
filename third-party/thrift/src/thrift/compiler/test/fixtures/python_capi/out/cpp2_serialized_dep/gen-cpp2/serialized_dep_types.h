@@ -433,7 +433,7 @@ class SerializedStruct final  {
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
   ::std::string get_s() && {
-    return std::move(__fbthrift_field_s);
+    return static_cast<::std::string&&>(__fbthrift_field_s);
   }
 
   /** Glean { "field": "s" } */
@@ -446,31 +446,20 @@ class SerializedStruct final  {
 
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i().value();` instead of `FOO.get_i();`")]]
-  ::std::int32_t get_i() const {
-    return __fbthrift_field_i;
-  }
+  ::std::int32_t get_i() const;
 
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i() = BAR;` instead of `FOO.set_i(BAR);`")]]
-  ::std::int32_t& set_i(::std::int32_t i_) {
-    i_ref() = i_;
-    return __fbthrift_field_i;
-  }
+  ::std::int32_t& set_i(::std::int32_t i_);
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  const ::std::string* get_os() const& {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  ::std::string* get_os() & {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  ::std::string* get_os() &;
 
-  /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
@@ -490,7 +479,7 @@ class SerializedStruct final  {
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
   ::std::string get_rs() && {
-    return std::move(__fbthrift_field_rs);
+    return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */
@@ -1070,7 +1059,7 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
   /** Glean { "field": "msg" } */
   [[deprecated("Use `FOO.msg().value();` instead of `FOO.get_msg();`")]]
   ::std::string get_msg() && {
-    return std::move(__fbthrift_field_msg);
+    return static_cast<::std::string&&>(__fbthrift_field_msg);
   }
 
   /** Glean { "field": "msg" } */
@@ -1083,18 +1072,12 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  const ::std::string* get_os() const& {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  ::std::string* get_os() & {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  ::std::string* get_os() &;
 
-  /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
@@ -1114,7 +1097,7 @@ class FOLLY_EXPORT SerializedError : public virtual apache::thrift::TException {
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
   ::std::string get_rs() && {
-    return std::move(__fbthrift_field_rs);
+    return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */
@@ -1450,7 +1433,7 @@ class MarshalStruct final  {
   /** Glean { "field": "s" } */
   [[deprecated("Use `FOO.s().value();` instead of `FOO.get_s();`")]]
   ::std::string get_s() && {
-    return std::move(__fbthrift_field_s);
+    return static_cast<::std::string&&>(__fbthrift_field_s);
   }
 
   /** Glean { "field": "s" } */
@@ -1463,31 +1446,20 @@ class MarshalStruct final  {
 
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i().value();` instead of `FOO.get_i();`")]]
-  ::std::int32_t get_i() const {
-    return __fbthrift_field_i;
-  }
+  ::std::int32_t get_i() const;
 
   /** Glean { "field": "i" } */
   [[deprecated("Use `FOO.i() = BAR;` instead of `FOO.set_i(BAR);`")]]
-  ::std::int32_t& set_i(::std::int32_t i_) {
-    i_ref() = i_;
-    return __fbthrift_field_i;
-  }
+  ::std::int32_t& set_i(::std::int32_t i_);
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  const ::std::string* get_os() const& {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  ::std::string* get_os() & {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  ::std::string* get_os() &;
 
-  /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
@@ -1507,7 +1479,7 @@ class MarshalStruct final  {
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
   ::std::string get_rs() && {
-    return std::move(__fbthrift_field_rs);
+    return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */
@@ -2087,7 +2059,7 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
   /** Glean { "field": "msg" } */
   [[deprecated("Use `FOO.msg().value();` instead of `FOO.get_msg();`")]]
   ::std::string get_msg() && {
-    return std::move(__fbthrift_field_msg);
+    return static_cast<::std::string&&>(__fbthrift_field_msg);
   }
 
   /** Glean { "field": "msg" } */
@@ -2100,18 +2072,12 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  const ::std::string* get_os() const& {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  const ::std::string* get_os() const&;
 
   /** Glean { "field": "os" } */
   [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
-  ::std::string* get_os() & {
-    return os_ref().has_value() ? std::addressof(__fbthrift_field_os) : nullptr;
-  }
+  ::std::string* get_os() &;
 
-  /** Glean { "field": "os" } */
-  [[deprecated("Use `FOO.os().value();` instead of `FOO.get_os();`")]]
   ::std::string* get_os() && = delete;
 
   /** Glean { "field": "os" } */
@@ -2131,7 +2097,7 @@ class FOLLY_EXPORT MarshalError : public virtual apache::thrift::TException {
   /** Glean { "field": "rs" } */
   [[deprecated("Use `FOO.rs().value();` instead of `FOO.get_rs();`")]]
   ::std::string get_rs() && {
-    return std::move(__fbthrift_field_rs);
+    return static_cast<::std::string&&>(__fbthrift_field_rs);
   }
 
   /** Glean { "field": "rs" } */

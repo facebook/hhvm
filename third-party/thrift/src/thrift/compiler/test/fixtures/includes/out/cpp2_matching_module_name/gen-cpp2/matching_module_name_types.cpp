@@ -72,14 +72,14 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::matching_module_name::OtherStruct& MyStruct::get_OtherStructField() const& {
   return __fbthrift_field_OtherStructField;
 }
 
 ::matching_module_name::OtherStruct MyStruct::get_OtherStructField() && {
-  return std::move(__fbthrift_field_OtherStructField);
+  return static_cast<::matching_module_name::OtherStruct&&>(__fbthrift_field_OtherStructField);
 }
-
 
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;

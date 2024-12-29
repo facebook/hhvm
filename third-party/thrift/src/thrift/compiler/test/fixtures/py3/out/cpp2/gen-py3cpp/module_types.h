@@ -1018,94 +1018,59 @@ class SimpleStruct final  {
 
   /** Glean { "field": "is_on" } */
   [[deprecated("Use `FOO.is_on().value();` instead of `FOO.get_is_on();`")]]
-  bool get_is_on() const {
-    return __fbthrift_field_is_on;
-  }
+  bool get_is_on() const;
 
   /** Glean { "field": "is_on" } */
   [[deprecated("Use `FOO.is_on() = BAR;` instead of `FOO.set_is_on(BAR);`")]]
-  bool& set_is_on(bool is_on_) {
-    is_on_ref() = is_on_;
-    return __fbthrift_field_is_on;
-  }
+  bool& set_is_on(bool is_on_);
 
   /** Glean { "field": "tiny_int" } */
   [[deprecated("Use `FOO.tiny_int().value();` instead of `FOO.get_tiny_int();`")]]
-  ::std::int8_t get_tiny_int() const {
-    return __fbthrift_field_tiny_int;
-  }
+  ::std::int8_t get_tiny_int() const;
 
   /** Glean { "field": "tiny_int" } */
   [[deprecated("Use `FOO.tiny_int() = BAR;` instead of `FOO.set_tiny_int(BAR);`")]]
-  ::std::int8_t& set_tiny_int(::std::int8_t tiny_int_) {
-    tiny_int_ref() = tiny_int_;
-    return __fbthrift_field_tiny_int;
-  }
+  ::std::int8_t& set_tiny_int(::std::int8_t tiny_int_);
 
   /** Glean { "field": "small_int" } */
   [[deprecated("Use `FOO.small_int().value();` instead of `FOO.get_small_int();`")]]
-  ::std::int16_t get_small_int() const {
-    return __fbthrift_field_small_int;
-  }
+  ::std::int16_t get_small_int() const;
 
   /** Glean { "field": "small_int" } */
   [[deprecated("Use `FOO.small_int() = BAR;` instead of `FOO.set_small_int(BAR);`")]]
-  ::std::int16_t& set_small_int(::std::int16_t small_int_) {
-    small_int_ref() = small_int_;
-    return __fbthrift_field_small_int;
-  }
+  ::std::int16_t& set_small_int(::std::int16_t small_int_);
 
   /** Glean { "field": "nice_sized_int" } */
   [[deprecated("Use `FOO.nice_sized_int().value();` instead of `FOO.get_nice_sized_int();`")]]
-  ::std::int32_t get_nice_sized_int() const {
-    return __fbthrift_field_nice_sized_int;
-  }
+  ::std::int32_t get_nice_sized_int() const;
 
   /** Glean { "field": "nice_sized_int" } */
   [[deprecated("Use `FOO.nice_sized_int() = BAR;` instead of `FOO.set_nice_sized_int(BAR);`")]]
-  ::std::int32_t& set_nice_sized_int(::std::int32_t nice_sized_int_) {
-    nice_sized_int_ref() = nice_sized_int_;
-    return __fbthrift_field_nice_sized_int;
-  }
+  ::std::int32_t& set_nice_sized_int(::std::int32_t nice_sized_int_);
 
   /** Glean { "field": "big_int" } */
   [[deprecated("Use `FOO.big_int().value();` instead of `FOO.get_big_int();`")]]
-  ::std::int64_t get_big_int() const {
-    return __fbthrift_field_big_int;
-  }
+  ::std::int64_t get_big_int() const;
 
   /** Glean { "field": "big_int" } */
   [[deprecated("Use `FOO.big_int() = BAR;` instead of `FOO.set_big_int(BAR);`")]]
-  ::std::int64_t& set_big_int(::std::int64_t big_int_) {
-    big_int_ref() = big_int_;
-    return __fbthrift_field_big_int;
-  }
+  ::std::int64_t& set_big_int(::std::int64_t big_int_);
 
   /** Glean { "field": "real" } */
   [[deprecated("Use `FOO.real().value();` instead of `FOO.get_real();`")]]
-  double get_real() const {
-    return __fbthrift_field_real;
-  }
+  double get_real() const;
 
   /** Glean { "field": "real" } */
   [[deprecated("Use `FOO.real() = BAR;` instead of `FOO.set_real(BAR);`")]]
-  double& set_real(double real_) {
-    real_ref() = real_;
-    return __fbthrift_field_real;
-  }
+  double& set_real(double real_);
 
   /** Glean { "field": "smaller_real" } */
   [[deprecated("Use `FOO.smaller_real().value();` instead of `FOO.get_smaller_real();`")]]
-  float get_smaller_real() const {
-    return __fbthrift_field_smaller_real;
-  }
+  float get_smaller_real() const;
 
   /** Glean { "field": "smaller_real" } */
   [[deprecated("Use `FOO.smaller_real() = BAR;` instead of `FOO.set_smaller_real(BAR);`")]]
-  float& set_smaller_real(float smaller_real_) {
-    smaller_real_ref() = smaller_real_;
-    return __fbthrift_field_smaller_real;
-  }
+  float& set_smaller_real(float smaller_real_);
 
   /** Glean { "field": "something" } */
   [[deprecated("Use `FOO.something().value();` instead of `FOO.get_something();`")]]
@@ -1125,16 +1090,11 @@ class SimpleStruct final  {
 
   /** Glean { "field": "hidden_field" } */
   [[deprecated("Use `FOO.hidden_field().value();` instead of `FOO.get_hidden_field();`")]]
-  ::std::int16_t get_hidden_field() const {
-    return __fbthrift_field_hidden_field;
-  }
+  ::std::int16_t get_hidden_field() const;
 
   /** Glean { "field": "hidden_field" } */
   [[deprecated("Use `FOO.hidden_field() = BAR;` instead of `FOO.set_hidden_field(BAR);`")]]
-  ::std::int16_t& set_hidden_field(::std::int16_t hidden_field_) {
-    hidden_field_ref() = hidden_field_;
-    return __fbthrift_field_hidden_field;
-  }
+  ::std::int16_t& set_hidden_field(::std::int16_t hidden_field_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1551,16 +1511,11 @@ class FOLLY_EXPORT SimpleException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "err_code" } */
   [[deprecated("Use `FOO.err_code().value();` instead of `FOO.get_err_code();`")]]
-  ::std::int16_t get_err_code() const {
-    return __fbthrift_field_err_code;
-  }
+  ::std::int16_t get_err_code() const;
 
   /** Glean { "field": "err_code" } */
   [[deprecated("Use `FOO.err_code() = BAR;` instead of `FOO.set_err_code(BAR);`")]]
-  ::std::int16_t& set_err_code(::std::int16_t err_code_) {
-    err_code_ref() = err_code_;
-    return __fbthrift_field_err_code;
-  }
+  ::std::int16_t& set_err_code(::std::int16_t err_code_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1722,18 +1677,12 @@ class OptionalRefStruct final  {
 
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value();` instead of `FOO.get_optional_blob();`")]]
-  const ::py3::simple::IOBufPtr* get_optional_blob() const& {
-    return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
-  }
+  const ::py3::simple::IOBufPtr* get_optional_blob() const&;
 
   /** Glean { "field": "optional_blob" } */
   [[deprecated("Use `FOO.optional_blob().value();` instead of `FOO.get_optional_blob();`")]]
-  ::py3::simple::IOBufPtr* get_optional_blob() & {
-    return optional_blob_ref().has_value() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
-  }
+  ::py3::simple::IOBufPtr* get_optional_blob() &;
 
-  /** Glean { "field": "optional_blob" } */
-  [[deprecated("Use `FOO.optional_blob().value();` instead of `FOO.get_optional_blob();`")]]
   ::py3::simple::IOBufPtr* get_optional_blob() && = delete;
 
   /** Glean { "field": "optional_blob" } */
@@ -2197,16 +2146,11 @@ class FOLLY_EXPORT HiddenException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "test" } */
   [[deprecated("Use `FOO.test().value();` instead of `FOO.get_test();`")]]
-  ::std::int16_t get_test() const {
-    return __fbthrift_field_test;
-  }
+  ::std::int16_t get_test() const;
 
   /** Glean { "field": "test" } */
   [[deprecated("Use `FOO.test() = BAR;` instead of `FOO.set_test(BAR);`")]]
-  ::std::int16_t& set_test(::std::int16_t test_) {
-    test_ref() = test_;
-    return __fbthrift_field_test;
-  }
+  ::std::int16_t& set_test(::std::int16_t test_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -2817,16 +2761,11 @@ class ComplexStruct final  {
 
   /** Glean { "field": "an_integer" } */
   [[deprecated("Use `FOO.an_integer().value();` instead of `FOO.get_an_integer();`")]]
-  ::std::int32_t get_an_integer() const {
-    return __fbthrift_field_an_integer;
-  }
+  ::std::int32_t get_an_integer() const;
 
   /** Glean { "field": "an_integer" } */
   [[deprecated("Use `FOO.an_integer() = BAR;` instead of `FOO.set_an_integer(BAR);`")]]
-  ::std::int32_t& set_an_integer(::std::int32_t an_integer_) {
-    an_integer_ref() = an_integer_;
-    return __fbthrift_field_an_integer;
-  }
+  ::std::int32_t& set_an_integer(::std::int32_t an_integer_);
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
@@ -2837,7 +2776,7 @@ class ComplexStruct final  {
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   ::std::string get_name() && {
-    return std::move(__fbthrift_field_name);
+    return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
@@ -2850,16 +2789,11 @@ class ComplexStruct final  {
 
   /** Glean { "field": "an_enum" } */
   [[deprecated("Use `FOO.an_enum().value();` instead of `FOO.get_an_enum();`")]]
-  ::py3::simple::AnEnum get_an_enum() const {
-    return __fbthrift_field_an_enum;
-  }
+  ::py3::simple::AnEnum get_an_enum() const;
 
   /** Glean { "field": "an_enum" } */
   [[deprecated("Use `FOO.an_enum() = BAR;` instead of `FOO.set_an_enum(BAR);`")]]
-  ::py3::simple::AnEnum& set_an_enum(::py3::simple::AnEnum an_enum_) {
-    an_enum_ref() = an_enum_;
-    return __fbthrift_field_an_enum;
-  }
+  ::py3::simple::AnEnum& set_an_enum(::py3::simple::AnEnum an_enum_);
 
   /** Glean { "field": "some_bytes" } */
   [[deprecated("Use `FOO.some_bytes().value();` instead of `FOO.get_some_bytes();`")]]
@@ -2870,7 +2804,7 @@ class ComplexStruct final  {
   /** Glean { "field": "some_bytes" } */
   [[deprecated("Use `FOO.some_bytes().value();` instead of `FOO.get_some_bytes();`")]]
   ::std::string get_some_bytes() && {
-    return std::move(__fbthrift_field_some_bytes);
+    return static_cast<::std::string&&>(__fbthrift_field_some_bytes);
   }
 
   /** Glean { "field": "some_bytes" } */
@@ -2890,7 +2824,7 @@ class ComplexStruct final  {
   /** Glean { "field": "from" } */
   [[deprecated("Use `FOO.from().value();` instead of `FOO.get_from();`")]]
   ::std::string get_from() && {
-    return std::move(__fbthrift_field_from);
+    return static_cast<::std::string&&>(__fbthrift_field_from);
   }
 
   /** Glean { "field": "from" } */
@@ -2910,7 +2844,7 @@ class ComplexStruct final  {
   /** Glean { "field": "cdef" } */
   [[deprecated("Use `FOO.cdef().value();` instead of `FOO.get_cdef();`")]]
   ::std::string get_cdef() && {
-    return std::move(__fbthrift_field_cdef);
+    return static_cast<::std::string&&>(__fbthrift_field_cdef);
   }
 
   /** Glean { "field": "cdef" } */
@@ -2930,7 +2864,7 @@ class ComplexStruct final  {
   /** Glean { "field": "bytes_with_cpp_type" } */
   [[deprecated("Use `FOO.bytes_with_cpp_type().value();` instead of `FOO.get_bytes_with_cpp_type();`")]]
   ::py3::simple::foo_bar get_bytes_with_cpp_type() && {
-    return std::move(__fbthrift_field_bytes_with_cpp_type);
+    return static_cast<::py3::simple::foo_bar&&>(__fbthrift_field_bytes_with_cpp_type);
   }
 
   /** Glean { "field": "bytes_with_cpp_type" } */
@@ -3902,42 +3836,27 @@ class CustomFields final  {
 
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field().value();` instead of `FOO.get_bool_field();`")]]
-  ::MyType get_bool_field() const {
-    return __fbthrift_field_bool_field;
-  }
+  ::MyType get_bool_field() const;
 
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
-  ::MyType& set_bool_field(::MyType bool_field_) {
-    bool_field_ref() = bool_field_;
-    return __fbthrift_field_bool_field;
-  }
+  ::MyType& set_bool_field(::MyType bool_field_);
 
   /** Glean { "field": "integer_field" } */
   [[deprecated("Use `FOO.integer_field().value();` instead of `FOO.get_integer_field();`")]]
-  ::MyType get_integer_field() const {
-    return __fbthrift_field_integer_field;
-  }
+  ::MyType get_integer_field() const;
 
   /** Glean { "field": "integer_field" } */
   [[deprecated("Use `FOO.integer_field() = BAR;` instead of `FOO.set_integer_field(BAR);`")]]
-  ::MyType& set_integer_field(::MyType integer_field_) {
-    integer_field_ref() = integer_field_;
-    return __fbthrift_field_integer_field;
-  }
+  ::MyType& set_integer_field(::MyType integer_field_);
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value();` instead of `FOO.get_double_field();`")]]
-  ::MyType get_double_field() const {
-    return __fbthrift_field_double_field;
-  }
+  ::MyType get_double_field() const;
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
-  ::MyType& set_double_field(::MyType double_field_) {
-    double_field_ref() = double_field_;
-    return __fbthrift_field_double_field;
-  }
+  ::MyType& set_double_field(::MyType double_field_);
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
@@ -3948,7 +3867,7 @@ class CustomFields final  {
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   ::MyType get_string_field() && {
-    return std::move(__fbthrift_field_string_field);
+    return static_cast<::MyType&&>(__fbthrift_field_string_field);
   }
 
   /** Glean { "field": "string_field" } */
@@ -3968,7 +3887,7 @@ class CustomFields final  {
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
   ::MyType get_binary_field() && {
-    return std::move(__fbthrift_field_binary_field);
+    return static_cast<::MyType&&>(__fbthrift_field_binary_field);
   }
 
   /** Glean { "field": "binary_field" } */
@@ -4616,42 +4535,27 @@ class CustomTypedefFields final  {
 
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field().value();` instead of `FOO.get_bool_field();`")]]
-  ::py3::simple::CustomBool get_bool_field() const {
-    return __fbthrift_field_bool_field;
-  }
+  ::py3::simple::CustomBool get_bool_field() const;
 
   /** Glean { "field": "bool_field" } */
   [[deprecated("Use `FOO.bool_field() = BAR;` instead of `FOO.set_bool_field(BAR);`")]]
-  ::py3::simple::CustomBool& set_bool_field(::py3::simple::CustomBool bool_field_) {
-    bool_field_ref() = bool_field_;
-    return __fbthrift_field_bool_field;
-  }
+  ::py3::simple::CustomBool& set_bool_field(::py3::simple::CustomBool bool_field_);
 
   /** Glean { "field": "integer_field" } */
   [[deprecated("Use `FOO.integer_field().value();` instead of `FOO.get_integer_field();`")]]
-  ::py3::simple::CustomInteger get_integer_field() const {
-    return __fbthrift_field_integer_field;
-  }
+  ::py3::simple::CustomInteger get_integer_field() const;
 
   /** Glean { "field": "integer_field" } */
   [[deprecated("Use `FOO.integer_field() = BAR;` instead of `FOO.set_integer_field(BAR);`")]]
-  ::py3::simple::CustomInteger& set_integer_field(::py3::simple::CustomInteger integer_field_) {
-    integer_field_ref() = integer_field_;
-    return __fbthrift_field_integer_field;
-  }
+  ::py3::simple::CustomInteger& set_integer_field(::py3::simple::CustomInteger integer_field_);
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field().value();` instead of `FOO.get_double_field();`")]]
-  ::py3::simple::CustomDouble get_double_field() const {
-    return __fbthrift_field_double_field;
-  }
+  ::py3::simple::CustomDouble get_double_field() const;
 
   /** Glean { "field": "double_field" } */
   [[deprecated("Use `FOO.double_field() = BAR;` instead of `FOO.set_double_field(BAR);`")]]
-  ::py3::simple::CustomDouble& set_double_field(::py3::simple::CustomDouble double_field_) {
-    double_field_ref() = double_field_;
-    return __fbthrift_field_double_field;
-  }
+  ::py3::simple::CustomDouble& set_double_field(::py3::simple::CustomDouble double_field_);
 
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
@@ -4662,7 +4566,7 @@ class CustomTypedefFields final  {
   /** Glean { "field": "string_field" } */
   [[deprecated("Use `FOO.string_field().value();` instead of `FOO.get_string_field();`")]]
   ::py3::simple::CustomString get_string_field() && {
-    return std::move(__fbthrift_field_string_field);
+    return static_cast<::py3::simple::CustomString&&>(__fbthrift_field_string_field);
   }
 
   /** Glean { "field": "string_field" } */
@@ -4682,7 +4586,7 @@ class CustomTypedefFields final  {
   /** Glean { "field": "binary_field" } */
   [[deprecated("Use `FOO.binary_field().value();` instead of `FOO.get_binary_field();`")]]
   ::py3::simple::CustomBinary get_binary_field() && {
-    return std::move(__fbthrift_field_binary_field);
+    return static_cast<::py3::simple::CustomBinary&&>(__fbthrift_field_binary_field);
   }
 
   /** Glean { "field": "binary_field" } */

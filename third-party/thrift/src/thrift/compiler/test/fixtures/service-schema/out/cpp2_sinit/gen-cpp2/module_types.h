@@ -304,7 +304,7 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   ::std::string get_name() && {
-    return std::move(__fbthrift_field_name);
+    return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
@@ -317,16 +317,11 @@ class FOLLY_EXPORT CustomException : public virtual apache::thrift::TException {
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result().value();` instead of `FOO.get_result();`")]]
-  ::cpp2::Result get_result() const {
-    return __fbthrift_field_result;
-  }
+  ::cpp2::Result get_result() const;
 
   /** Glean { "field": "result" } */
   [[deprecated("Use `FOO.result() = BAR;` instead of `FOO.set_result(BAR);`")]]
-  ::cpp2::Result& set_result(::cpp2::Result result_) {
-    result_ref() = result_;
-    return __fbthrift_field_result;
-  }
+  ::cpp2::Result& set_result(::cpp2::Result result_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

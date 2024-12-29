@@ -927,6 +927,15 @@ bool SinkException2::operator<([[maybe_unused]] const SinkException2& rhs) const
 }
 
 
+::std::int64_t SinkException2::get_reason() const {
+  return __fbthrift_field_reason;
+}
+
+::std::int64_t& SinkException2::set_reason(::std::int64_t reason_) {
+  reason_ref() = reason_;
+  return __fbthrift_field_reason;
+}
+
 void swap([[maybe_unused]] SinkException2& a, [[maybe_unused]] SinkException2& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_reason, b.__fbthrift_field_reason);

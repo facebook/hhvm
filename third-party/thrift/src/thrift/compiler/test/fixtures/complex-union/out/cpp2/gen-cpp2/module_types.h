@@ -1652,7 +1652,7 @@ class Val final  {
   /** Glean { "field": "strVal" } */
   [[deprecated("Use `FOO.strVal().value();` instead of `FOO.get_strVal();`")]]
   ::std::string get_strVal() && {
-    return std::move(__fbthrift_field_strVal);
+    return static_cast<::std::string&&>(__fbthrift_field_strVal);
   }
 
   /** Glean { "field": "strVal" } */
@@ -1665,16 +1665,11 @@ class Val final  {
 
   /** Glean { "field": "intVal" } */
   [[deprecated("Use `FOO.intVal().value();` instead of `FOO.get_intVal();`")]]
-  ::std::int32_t get_intVal() const {
-    return __fbthrift_field_intVal;
-  }
+  ::std::int32_t get_intVal() const;
 
   /** Glean { "field": "intVal" } */
   [[deprecated("Use `FOO.intVal() = BAR;` instead of `FOO.set_intVal(BAR);`")]]
-  ::std::int32_t& set_intVal(::std::int32_t intVal_) {
-    intVal_ref() = intVal_;
-    return __fbthrift_field_intVal;
-  }
+  ::std::int32_t& set_intVal(::std::int32_t intVal_);
 
   /** Glean { "field": "typedefValue" } */
   [[deprecated("Use `FOO.typedefValue().value();` instead of `FOO.get_typedefValue();`")]]
@@ -2466,16 +2461,11 @@ class NonCopyableStruct final  {
 
   /** Glean { "field": "num" } */
   [[deprecated("Use `FOO.num().value();` instead of `FOO.get_num();`")]]
-  ::std::int64_t get_num() const {
-    return __fbthrift_field_num;
-  }
+  ::std::int64_t get_num() const;
 
   /** Glean { "field": "num" } */
   [[deprecated("Use `FOO.num() = BAR;` instead of `FOO.set_num(BAR);`")]]
-  ::std::int64_t& set_num(::std::int64_t num_) {
-    num_ref() = num_;
-    return __fbthrift_field_num;
-  }
+  ::std::int64_t& set_num(::std::int64_t num_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

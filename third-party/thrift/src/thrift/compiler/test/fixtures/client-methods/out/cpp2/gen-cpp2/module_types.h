@@ -192,7 +192,7 @@ class EchoRequest final  {
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
   ::std::string get_text() && {
-    return std::move(__fbthrift_field_text);
+    return static_cast<::std::string&&>(__fbthrift_field_text);
   }
 
   /** Glean { "field": "text" } */
@@ -367,7 +367,7 @@ class EchoResponse final  {
   /** Glean { "field": "text" } */
   [[deprecated("Use `FOO.text().value();` instead of `FOO.get_text();`")]]
   ::std::string get_text() && {
-    return std::move(__fbthrift_field_text);
+    return static_cast<::std::string&&>(__fbthrift_field_text);
   }
 
   /** Glean { "field": "text" } */

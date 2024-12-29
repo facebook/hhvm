@@ -187,6 +187,52 @@ bool TrivialTypesStruct::operator<([[maybe_unused]] const TrivialTypesStruct& rh
 }
 
 
+const ::std::int32_t* TrivialTypesStruct::get_fieldA() const& {
+  return fieldA_ref().has_value() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
+}
+
+::std::int32_t* TrivialTypesStruct::get_fieldA() & {
+  return fieldA_ref().has_value() ? std::addressof(__fbthrift_field_fieldA) : nullptr;
+}
+
+::std::int32_t& TrivialTypesStruct::set_fieldA(::std::int32_t fieldA_) {
+  fieldA_ref() = fieldA_;
+  return __fbthrift_field_fieldA;
+}
+
+const ::std::string* TrivialTypesStruct::get_fieldB() const& {
+  return fieldB_ref().has_value() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
+}
+
+::std::string* TrivialTypesStruct::get_fieldB() & {
+  return fieldB_ref().has_value() ? std::addressof(__fbthrift_field_fieldB) : nullptr;
+}
+
+const ::std::string* TrivialTypesStruct::get_fieldC() const& {
+  return fieldC_ref().has_value() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
+}
+
+::std::string* TrivialTypesStruct::get_fieldC() & {
+  return fieldC_ref().has_value() ? std::addressof(__fbthrift_field_fieldC) : nullptr;
+}
+
+const ::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() const& {
+  return fieldD_ref().has_value() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
+}
+
+::test::fixtures::tablebased::IOBufPtr* TrivialTypesStruct::get_fieldD() & {
+  return fieldD_ref().has_value() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
+}
+
+::test::fixtures::tablebased::ExampleEnum TrivialTypesStruct::get_fieldE() const {
+  return __fbthrift_field_fieldE;
+}
+
+::test::fixtures::tablebased::ExampleEnum& TrivialTypesStruct::set_fieldE(::test::fixtures::tablebased::ExampleEnum fieldE_) {
+  fieldE_ref() = fieldE_;
+  return __fbthrift_field_fieldE;
+}
+
 void swap([[maybe_unused]] TrivialTypesStruct& a, [[maybe_unused]] TrivialTypesStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
@@ -351,12 +397,13 @@ bool ContainerStruct::operator==([[maybe_unused]] const ContainerStruct& rhs) co
   return ::apache::thrift::op::detail::StructEquality{}(*this, rhs);
 }
 
+
 const ::std::vector<::std::int32_t>& ContainerStruct::get_fieldA() const& {
   return __fbthrift_field_fieldA;
 }
 
 ::std::vector<::std::int32_t> ContainerStruct::get_fieldA() && {
-  return std::move(__fbthrift_field_fieldA);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_fieldA);
 }
 
 const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& {
@@ -364,7 +411,7 @@ const std::list<::std::int32_t>& ContainerStruct::get_fieldB() const& {
 }
 
 std::list<::std::int32_t> ContainerStruct::get_fieldB() && {
-  return std::move(__fbthrift_field_fieldB);
+  return static_cast<std::list<::std::int32_t>&&>(__fbthrift_field_fieldB);
 }
 
 const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& {
@@ -372,7 +419,7 @@ const std::deque<::std::int32_t>& ContainerStruct::get_fieldC() const& {
 }
 
 std::deque<::std::int32_t> ContainerStruct::get_fieldC() && {
-  return std::move(__fbthrift_field_fieldC);
+  return static_cast<std::deque<::std::int32_t>&&>(__fbthrift_field_fieldC);
 }
 
 const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& {
@@ -380,7 +427,7 @@ const folly::fbvector<::std::int32_t>& ContainerStruct::get_fieldD() const& {
 }
 
 folly::fbvector<::std::int32_t> ContainerStruct::get_fieldD() && {
-  return std::move(__fbthrift_field_fieldD);
+  return static_cast<folly::fbvector<::std::int32_t>&&>(__fbthrift_field_fieldD);
 }
 
 const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& {
@@ -388,7 +435,7 @@ const folly::small_vector<::std::int32_t>& ContainerStruct::get_fieldE() const& 
 }
 
 folly::small_vector<::std::int32_t> ContainerStruct::get_fieldE() && {
-  return std::move(__fbthrift_field_fieldE);
+  return static_cast<folly::small_vector<::std::int32_t>&&>(__fbthrift_field_fieldE);
 }
 
 const folly::sorted_vector_set<::std::int32_t>& ContainerStruct::get_fieldF() const& {
@@ -396,7 +443,7 @@ const folly::sorted_vector_set<::std::int32_t>& ContainerStruct::get_fieldF() co
 }
 
 folly::sorted_vector_set<::std::int32_t> ContainerStruct::get_fieldF() && {
-  return std::move(__fbthrift_field_fieldF);
+  return static_cast<folly::sorted_vector_set<::std::int32_t>&&>(__fbthrift_field_fieldF);
 }
 
 const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::get_fieldG() const& {
@@ -404,7 +451,7 @@ const folly::sorted_vector_map<::std::int32_t, ::std::string>& ContainerStruct::
 }
 
 folly::sorted_vector_map<::std::int32_t, ::std::string> ContainerStruct::get_fieldG() && {
-  return std::move(__fbthrift_field_fieldG);
+  return static_cast<folly::sorted_vector_map<::std::int32_t, ::std::string>&&>(__fbthrift_field_fieldG);
 }
 
 const ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>& ContainerStruct::get_fieldH() const& {
@@ -412,9 +459,8 @@ const ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>& Container
 }
 
 ::std::vector<::test::fixtures::tablebased::TrivialTypesStruct> ContainerStruct::get_fieldH() && {
-  return std::move(__fbthrift_field_fieldH);
+  return static_cast<::std::vector<::test::fixtures::tablebased::TrivialTypesStruct>&&>(__fbthrift_field_fieldH);
 }
-
 
 void swap([[maybe_unused]] ContainerStruct& a, [[maybe_unused]] ContainerStruct& b) {
   using ::std::swap;

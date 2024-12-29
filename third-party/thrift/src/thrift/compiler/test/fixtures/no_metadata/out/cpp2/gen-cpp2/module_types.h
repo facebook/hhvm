@@ -519,16 +519,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
@@ -539,7 +534,7 @@ class MyStruct final  {
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   ::std::string get_MyStringField() && {
-    return std::move(__fbthrift_field_MyStringField);
+    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
   }
 
   /** Glean { "field": "MyStringField" } */
@@ -568,16 +563,11 @@ class MyStruct final  {
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
-  ::cpp2::MyEnum get_myEnum() const {
-    return __fbthrift_field_myEnum;
-  }
+  ::cpp2::MyEnum get_myEnum() const;
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
-  ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_) {
-    myEnum_ref() = myEnum_;
-    return __fbthrift_field_myEnum;
-  }
+  ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

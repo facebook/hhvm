@@ -115,6 +115,15 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
 }
 
 
+::std::int64_t MyStruct::get_MyIntField() const {
+  return __fbthrift_field_MyIntField;
+}
+
+::std::int64_t& MyStruct::set_MyIntField(::std::int64_t MyIntField_) {
+  MyIntField_ref() = MyIntField_;
+  return __fbthrift_field_MyIntField;
+}
+
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_MyIntField, b.__fbthrift_field_MyIntField);

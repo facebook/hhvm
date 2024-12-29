@@ -98,6 +98,15 @@ bool IncludedA::operator<([[maybe_unused]] const IncludedA& rhs) const {
 }
 
 
+::std::int32_t IncludedA::get_i32Field() const {
+  return __fbthrift_field_i32Field;
+}
+
+::std::int32_t& IncludedA::set_i32Field(::std::int32_t i32Field_) {
+  i32Field_ref() = i32Field_;
+  return __fbthrift_field_i32Field;
+}
+
 void swap([[maybe_unused]] IncludedA& a, [[maybe_unused]] IncludedA& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_i32Field, b.__fbthrift_field_i32Field);

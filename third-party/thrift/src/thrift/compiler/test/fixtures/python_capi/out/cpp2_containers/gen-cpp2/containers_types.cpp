@@ -109,6 +109,7 @@ bool TemplateLists::__fbthrift_is_empty() const {
 
 
 
+
 const std::vector<::std::string>* TemplateLists::get_std_string() const& {
   return std_string_ref().has_value() ? std::addressof(__fbthrift_field_std_string) : nullptr;
 }
@@ -122,7 +123,7 @@ const std::deque<::std::string>& TemplateLists::get_deque_string() const& {
 }
 
 std::deque<::std::string> TemplateLists::get_deque_string() && {
-  return std::move(__fbthrift_field_deque_string);
+  return static_cast<std::deque<::std::string>&&>(__fbthrift_field_deque_string);
 }
 
 const ::test::fixtures::python_capi::small_vector_iobuf& TemplateLists::get_small_vector_iobuf() const& {
@@ -130,7 +131,7 @@ const ::test::fixtures::python_capi::small_vector_iobuf& TemplateLists::get_smal
 }
 
 ::test::fixtures::python_capi::small_vector_iobuf TemplateLists::get_small_vector_iobuf() && {
-  return std::move(__fbthrift_field_small_vector_iobuf);
+  return static_cast<::test::fixtures::python_capi::small_vector_iobuf&&>(__fbthrift_field_small_vector_iobuf);
 }
 
 const folly::small_vector<::test::fixtures::python_capi::fbvector_string>& TemplateLists::get_nested_small_vector() const& {
@@ -138,7 +139,7 @@ const folly::small_vector<::test::fixtures::python_capi::fbvector_string>& Templ
 }
 
 folly::small_vector<::test::fixtures::python_capi::fbvector_string> TemplateLists::get_nested_small_vector() && {
-  return std::move(__fbthrift_field_nested_small_vector);
+  return static_cast<folly::small_vector<::test::fixtures::python_capi::fbvector_string>&&>(__fbthrift_field_nested_small_vector);
 }
 
 const folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>& TemplateLists::get_small_vector_tensor() const& {
@@ -146,9 +147,8 @@ const folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>& 
 }
 
 folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string> TemplateLists::get_small_vector_tensor() && {
-  return std::move(__fbthrift_field_small_vector_tensor);
+  return static_cast<folly::fbvector<::test::fixtures::python_capi::fbvector_fbvector_string>&&>(__fbthrift_field_small_vector_tensor);
 }
-
 
 void swap([[maybe_unused]] TemplateLists& a, [[maybe_unused]] TemplateLists& b) {
   using ::std::swap;
@@ -284,12 +284,13 @@ bool TemplateSets::operator<([[maybe_unused]] const TemplateSets& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const std::set<::std::string>& TemplateSets::get_std_set() const& {
   return __fbthrift_field_std_set;
 }
 
 std::set<::std::string> TemplateSets::get_std_set() && {
-  return std::move(__fbthrift_field_std_set);
+  return static_cast<std::set<::std::string>&&>(__fbthrift_field_std_set);
 }
 
 const std::unordered_set<::std::string>& TemplateSets::get_std_unordered() const& {
@@ -297,7 +298,7 @@ const std::unordered_set<::std::string>& TemplateSets::get_std_unordered() const
 }
 
 std::unordered_set<::std::string> TemplateSets::get_std_unordered() && {
-  return std::move(__fbthrift_field_std_unordered);
+  return static_cast<std::unordered_set<::std::string>&&>(__fbthrift_field_std_unordered);
 }
 
 const folly::F14FastSet<::std::string>& TemplateSets::get_folly_fast() const& {
@@ -305,7 +306,7 @@ const folly::F14FastSet<::std::string>& TemplateSets::get_folly_fast() const& {
 }
 
 folly::F14FastSet<::std::string> TemplateSets::get_folly_fast() && {
-  return std::move(__fbthrift_field_folly_fast);
+  return static_cast<folly::F14FastSet<::std::string>&&>(__fbthrift_field_folly_fast);
 }
 
 const folly::F14NodeSet<::std::string>& TemplateSets::get_folly_node() const& {
@@ -313,7 +314,7 @@ const folly::F14NodeSet<::std::string>& TemplateSets::get_folly_node() const& {
 }
 
 folly::F14NodeSet<::std::string> TemplateSets::get_folly_node() && {
-  return std::move(__fbthrift_field_folly_node);
+  return static_cast<folly::F14NodeSet<::std::string>&&>(__fbthrift_field_folly_node);
 }
 
 const folly::F14ValueSet<::std::string>& TemplateSets::get_folly_value() const& {
@@ -321,7 +322,7 @@ const folly::F14ValueSet<::std::string>& TemplateSets::get_folly_value() const& 
 }
 
 folly::F14ValueSet<::std::string> TemplateSets::get_folly_value() && {
-  return std::move(__fbthrift_field_folly_value);
+  return static_cast<folly::F14ValueSet<::std::string>&&>(__fbthrift_field_folly_value);
 }
 
 const folly::F14VectorSet<::std::string>& TemplateSets::get_folly_vector() const& {
@@ -329,7 +330,7 @@ const folly::F14VectorSet<::std::string>& TemplateSets::get_folly_vector() const
 }
 
 folly::F14VectorSet<::std::string> TemplateSets::get_folly_vector() && {
-  return std::move(__fbthrift_field_folly_vector);
+  return static_cast<folly::F14VectorSet<::std::string>&&>(__fbthrift_field_folly_vector);
 }
 
 const folly::sorted_vector_set<::std::string>& TemplateSets::get_folly_sorted_vector() const& {
@@ -337,9 +338,8 @@ const folly::sorted_vector_set<::std::string>& TemplateSets::get_folly_sorted_ve
 }
 
 folly::sorted_vector_set<::std::string> TemplateSets::get_folly_sorted_vector() && {
-  return std::move(__fbthrift_field_folly_sorted_vector);
+  return static_cast<folly::sorted_vector_set<::std::string>&&>(__fbthrift_field_folly_sorted_vector);
 }
-
 
 void swap([[maybe_unused]] TemplateSets& a, [[maybe_unused]] TemplateSets& b) {
   using ::std::swap;
@@ -477,12 +477,13 @@ bool TemplateMaps::operator<([[maybe_unused]] const TemplateMaps& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const std::map<::std::string, ::std::string>& TemplateMaps::get_std_map() const& {
   return __fbthrift_field_std_map;
 }
 
 std::map<::std::string, ::std::string> TemplateMaps::get_std_map() && {
-  return std::move(__fbthrift_field_std_map);
+  return static_cast<std::map<::std::string, ::std::string>&&>(__fbthrift_field_std_map);
 }
 
 const std::unordered_map<::std::string, ::std::string>& TemplateMaps::get_std_unordered() const& {
@@ -490,7 +491,7 @@ const std::unordered_map<::std::string, ::std::string>& TemplateMaps::get_std_un
 }
 
 std::unordered_map<::std::string, ::std::string> TemplateMaps::get_std_unordered() && {
-  return std::move(__fbthrift_field_std_unordered);
+  return static_cast<std::unordered_map<::std::string, ::std::string>&&>(__fbthrift_field_std_unordered);
 }
 
 const folly::F14FastMap<::std::string, ::std::string>& TemplateMaps::get_folly_fast() const& {
@@ -498,7 +499,7 @@ const folly::F14FastMap<::std::string, ::std::string>& TemplateMaps::get_folly_f
 }
 
 folly::F14FastMap<::std::string, ::std::string> TemplateMaps::get_folly_fast() && {
-  return std::move(__fbthrift_field_folly_fast);
+  return static_cast<folly::F14FastMap<::std::string, ::std::string>&&>(__fbthrift_field_folly_fast);
 }
 
 const folly::F14NodeMap<::std::string, ::std::string>& TemplateMaps::get_folly_node() const& {
@@ -506,7 +507,7 @@ const folly::F14NodeMap<::std::string, ::std::string>& TemplateMaps::get_folly_n
 }
 
 folly::F14NodeMap<::std::string, ::std::string> TemplateMaps::get_folly_node() && {
-  return std::move(__fbthrift_field_folly_node);
+  return static_cast<folly::F14NodeMap<::std::string, ::std::string>&&>(__fbthrift_field_folly_node);
 }
 
 const folly::F14ValueMap<::std::string, ::std::string>& TemplateMaps::get_folly_value() const& {
@@ -514,7 +515,7 @@ const folly::F14ValueMap<::std::string, ::std::string>& TemplateMaps::get_folly_
 }
 
 folly::F14ValueMap<::std::string, ::std::string> TemplateMaps::get_folly_value() && {
-  return std::move(__fbthrift_field_folly_value);
+  return static_cast<folly::F14ValueMap<::std::string, ::std::string>&&>(__fbthrift_field_folly_value);
 }
 
 const folly::F14VectorMap<::std::string, ::std::string>& TemplateMaps::get_folly_vector() const& {
@@ -522,7 +523,7 @@ const folly::F14VectorMap<::std::string, ::std::string>& TemplateMaps::get_folly
 }
 
 folly::F14VectorMap<::std::string, ::std::string> TemplateMaps::get_folly_vector() && {
-  return std::move(__fbthrift_field_folly_vector);
+  return static_cast<folly::F14VectorMap<::std::string, ::std::string>&&>(__fbthrift_field_folly_vector);
 }
 
 const folly::sorted_vector_map<::std::string, ::std::string>& TemplateMaps::get_folly_sorted_vector() const& {
@@ -530,9 +531,8 @@ const folly::sorted_vector_map<::std::string, ::std::string>& TemplateMaps::get_
 }
 
 folly::sorted_vector_map<::std::string, ::std::string> TemplateMaps::get_folly_sorted_vector() && {
-  return std::move(__fbthrift_field_folly_sorted_vector);
+  return static_cast<folly::sorted_vector_map<::std::string, ::std::string>&&>(__fbthrift_field_folly_sorted_vector);
 }
-
 
 void swap([[maybe_unused]] TemplateMaps& a, [[maybe_unused]] TemplateMaps& b) {
   using ::std::swap;
@@ -747,14 +747,14 @@ bool IndirectionA::operator<([[maybe_unused]] const IndirectionA& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::test::fixtures::python_capi::ListOfWrapped& IndirectionA::get_lst() const& {
   return __fbthrift_field_lst;
 }
 
 ::test::fixtures::python_capi::ListOfWrapped IndirectionA::get_lst() && {
-  return std::move(__fbthrift_field_lst);
+  return static_cast<::test::fixtures::python_capi::ListOfWrapped&&>(__fbthrift_field_lst);
 }
-
 
 void swap([[maybe_unused]] IndirectionA& a, [[maybe_unused]] IndirectionA& b) {
   using ::std::swap;
@@ -862,14 +862,14 @@ bool IndirectionB::operator<([[maybe_unused]] const IndirectionB& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::test::fixtures::python_capi::VecOfWrapped& IndirectionB::get_lst() const& {
   return __fbthrift_field_lst;
 }
 
 ::test::fixtures::python_capi::VecOfWrapped IndirectionB::get_lst() && {
-  return std::move(__fbthrift_field_lst);
+  return static_cast<::test::fixtures::python_capi::VecOfWrapped&&>(__fbthrift_field_lst);
 }
-
 
 void swap([[maybe_unused]] IndirectionB& a, [[maybe_unused]] IndirectionB& b) {
   using ::std::swap;
@@ -977,14 +977,14 @@ bool IndirectionC::operator<([[maybe_unused]] const IndirectionC& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::test::fixtures::python_capi::ListOfWrappedAlias& IndirectionC::get_lst() const& {
   return __fbthrift_field_lst;
 }
 
 ::test::fixtures::python_capi::ListOfWrappedAlias IndirectionC::get_lst() && {
-  return std::move(__fbthrift_field_lst);
+  return static_cast<::test::fixtures::python_capi::ListOfWrappedAlias&&>(__fbthrift_field_lst);
 }
-
 
 void swap([[maybe_unused]] IndirectionC& a, [[maybe_unused]] IndirectionC& b) {
   using ::std::swap;

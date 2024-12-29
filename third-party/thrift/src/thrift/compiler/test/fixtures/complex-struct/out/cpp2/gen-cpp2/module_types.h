@@ -1056,29 +1056,19 @@ class MyStructFloatFieldThrowExp final  {
 
   /** Glean { "field": "myLongField" } */
   [[deprecated("Use `FOO.myLongField().value();` instead of `FOO.get_myLongField();`")]]
-  ::std::int64_t get_myLongField() const {
-    return __fbthrift_field_myLongField;
-  }
+  ::std::int64_t get_myLongField() const;
 
   /** Glean { "field": "myLongField" } */
   [[deprecated("Use `FOO.myLongField() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
-  ::std::int64_t& set_myLongField(::std::int64_t myLongField_) {
-    myLongField_ref() = myLongField_;
-    return __fbthrift_field_myLongField;
-  }
+  ::std::int64_t& set_myLongField(::std::int64_t myLongField_);
 
   /** Glean { "field": "MyByteField" } */
   [[deprecated("Use `FOO.MyByteField().value();` instead of `FOO.get_MyByteField();`")]]
-  ::std::int8_t get_MyByteField() const {
-    return __fbthrift_field_MyByteField;
-  }
+  ::std::int8_t get_MyByteField() const;
 
   /** Glean { "field": "MyByteField" } */
   [[deprecated("Use `FOO.MyByteField() = BAR;` instead of `FOO.set_MyByteField(BAR);`")]]
-  ::std::int8_t& set_MyByteField(::std::int8_t MyByteField_) {
-    MyByteField_ref() = MyByteField_;
-    return __fbthrift_field_MyByteField;
-  }
+  ::std::int8_t& set_MyByteField(::std::int8_t MyByteField_);
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
@@ -1089,7 +1079,7 @@ class MyStructFloatFieldThrowExp final  {
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
   ::std::string get_myStringField() && {
-    return std::move(__fbthrift_field_myStringField);
+    return static_cast<::std::string&&>(__fbthrift_field_myStringField);
   }
 
   /** Glean { "field": "myStringField" } */
@@ -1102,16 +1092,11 @@ class MyStructFloatFieldThrowExp final  {
 
   /** Glean { "field": "myFloatField" } */
   [[deprecated("Use `FOO.myFloatField().value();` instead of `FOO.get_myFloatField();`")]]
-  float get_myFloatField() const {
-    return __fbthrift_field_myFloatField;
-  }
+  float get_myFloatField() const;
 
   /** Glean { "field": "myFloatField" } */
   [[deprecated("Use `FOO.myFloatField() = BAR;` instead of `FOO.set_myFloatField(BAR);`")]]
-  float& set_myFloatField(float myFloatField_) {
-    myFloatField_ref() = myFloatField_;
-    return __fbthrift_field_myFloatField;
-  }
+  float& set_myFloatField(float myFloatField_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -1322,16 +1307,11 @@ class MyStructMapFloatThrowExp final  {
 
   /** Glean { "field": "myLongField" } */
   [[deprecated("Use `FOO.myLongField().value();` instead of `FOO.get_myLongField();`")]]
-  ::std::int64_t get_myLongField() const {
-    return __fbthrift_field_myLongField;
-  }
+  ::std::int64_t get_myLongField() const;
 
   /** Glean { "field": "myLongField" } */
   [[deprecated("Use `FOO.myLongField() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
-  ::std::int64_t& set_myLongField(::std::int64_t myLongField_) {
-    myLongField_ref() = myLongField_;
-    return __fbthrift_field_myLongField;
-  }
+  ::std::int64_t& set_myLongField(::std::int64_t myLongField_);
 
   /** Glean { "field": "mapListOfFloats" } */
   [[deprecated("Use `FOO.mapListOfFloats().value();` instead of `FOO.get_mapListOfFloats();`")]]
@@ -3009,16 +2989,11 @@ class MyStruct final  {
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField().value();` instead of `FOO.get_MyIntField();`")]]
-  ::std::int64_t get_MyIntField() const {
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t get_MyIntField() const;
 
   /** Glean { "field": "MyIntField" } */
   [[deprecated("Use `FOO.MyIntField() = BAR;` instead of `FOO.set_MyIntField(BAR);`")]]
-  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_) {
-    MyIntField_ref() = MyIntField_;
-    return __fbthrift_field_MyIntField;
-  }
+  ::std::int64_t& set_MyIntField(::std::int64_t MyIntField_);
 
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
@@ -3029,7 +3004,7 @@ class MyStruct final  {
   /** Glean { "field": "MyStringField" } */
   [[deprecated("Use `FOO.MyStringField().value();` instead of `FOO.get_MyStringField();`")]]
   ::std::string get_MyStringField() && {
-    return std::move(__fbthrift_field_MyStringField);
+    return static_cast<::std::string&&>(__fbthrift_field_MyStringField);
   }
 
   /** Glean { "field": "MyStringField" } */
@@ -3058,81 +3033,51 @@ class MyStruct final  {
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
-  ::cpp2::MyEnum get_myEnum() const {
-    return __fbthrift_field_myEnum;
-  }
+  ::cpp2::MyEnum get_myEnum() const;
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
-  ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_) {
-    myEnum_ref() = myEnum_;
-    return __fbthrift_field_myEnum;
-  }
+  ::cpp2::MyEnum& set_myEnum(::cpp2::MyEnum myEnum_);
 
   /** Glean { "field": "MyBoolField" } */
   [[deprecated("Use `FOO.MyBoolField().value();` instead of `FOO.get_MyBoolField();`")]]
-  bool get_MyBoolField() const {
-    return __fbthrift_field_MyBoolField;
-  }
+  bool get_MyBoolField() const;
 
   /** Glean { "field": "MyBoolField" } */
   [[deprecated("Use `FOO.MyBoolField() = BAR;` instead of `FOO.set_MyBoolField(BAR);`")]]
-  bool& set_MyBoolField(bool MyBoolField_) {
-    MyBoolField_ref() = MyBoolField_;
-    return __fbthrift_field_MyBoolField;
-  }
+  bool& set_MyBoolField(bool MyBoolField_);
 
   /** Glean { "field": "MyByteField" } */
   [[deprecated("Use `FOO.MyByteField().value();` instead of `FOO.get_MyByteField();`")]]
-  ::std::int8_t get_MyByteField() const {
-    return __fbthrift_field_MyByteField;
-  }
+  ::std::int8_t get_MyByteField() const;
 
   /** Glean { "field": "MyByteField" } */
   [[deprecated("Use `FOO.MyByteField() = BAR;` instead of `FOO.set_MyByteField(BAR);`")]]
-  ::std::int8_t& set_MyByteField(::std::int8_t MyByteField_) {
-    MyByteField_ref() = MyByteField_;
-    return __fbthrift_field_MyByteField;
-  }
+  ::std::int8_t& set_MyByteField(::std::int8_t MyByteField_);
 
   /** Glean { "field": "MyShortField" } */
   [[deprecated("Use `FOO.MyShortField().value();` instead of `FOO.get_MyShortField();`")]]
-  ::std::int16_t get_MyShortField() const {
-    return __fbthrift_field_MyShortField;
-  }
+  ::std::int16_t get_MyShortField() const;
 
   /** Glean { "field": "MyShortField" } */
   [[deprecated("Use `FOO.MyShortField() = BAR;` instead of `FOO.set_MyShortField(BAR);`")]]
-  ::std::int16_t& set_MyShortField(::std::int16_t MyShortField_) {
-    MyShortField_ref() = MyShortField_;
-    return __fbthrift_field_MyShortField;
-  }
+  ::std::int16_t& set_MyShortField(::std::int16_t MyShortField_);
 
   /** Glean { "field": "MyLongField" } */
   [[deprecated("Use `FOO.MyLongField().value();` instead of `FOO.get_MyLongField();`")]]
-  ::std::int64_t get_MyLongField() const {
-    return __fbthrift_field_MyLongField;
-  }
+  ::std::int64_t get_MyLongField() const;
 
   /** Glean { "field": "MyLongField" } */
   [[deprecated("Use `FOO.MyLongField() = BAR;` instead of `FOO.set_MyLongField(BAR);`")]]
-  ::std::int64_t& set_MyLongField(::std::int64_t MyLongField_) {
-    MyLongField_ref() = MyLongField_;
-    return __fbthrift_field_MyLongField;
-  }
+  ::std::int64_t& set_MyLongField(::std::int64_t MyLongField_);
 
   /** Glean { "field": "MyDoubleField" } */
   [[deprecated("Use `FOO.MyDoubleField().value();` instead of `FOO.get_MyDoubleField();`")]]
-  double get_MyDoubleField() const {
-    return __fbthrift_field_MyDoubleField;
-  }
+  double get_MyDoubleField() const;
 
   /** Glean { "field": "MyDoubleField" } */
   [[deprecated("Use `FOO.MyDoubleField() = BAR;` instead of `FOO.set_MyDoubleField(BAR);`")]]
-  double& set_MyDoubleField(double MyDoubleField_) {
-    MyDoubleField_ref() = MyDoubleField_;
-    return __fbthrift_field_MyDoubleField;
-  }
+  double& set_MyDoubleField(double MyDoubleField_);
 
   /** Glean { "field": "lDouble" } */
   [[deprecated("Use `FOO.lDouble().value();` instead of `FOO.get_lDouble();`")]]
@@ -3647,16 +3592,11 @@ class SimpleStruct final  {
 
   /** Glean { "field": "age" } */
   [[deprecated("Use `FOO.age().value();` instead of `FOO.get_age();`")]]
-  ::std::int64_t get_age() const {
-    return __fbthrift_field_age;
-  }
+  ::std::int64_t get_age() const;
 
   /** Glean { "field": "age" } */
   [[deprecated("Use `FOO.age() = BAR;` instead of `FOO.set_age(BAR);`")]]
-  ::std::int64_t& set_age(::std::int64_t age_) {
-    age_ref() = age_;
-    return __fbthrift_field_age;
-  }
+  ::std::int64_t& set_age(::std::int64_t age_);
 
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
@@ -3667,7 +3607,7 @@ class SimpleStruct final  {
   /** Glean { "field": "name" } */
   [[deprecated("Use `FOO.name().value();` instead of `FOO.get_name();`")]]
   ::std::string get_name() && {
-    return std::move(__fbthrift_field_name);
+    return static_cast<::std::string&&>(__fbthrift_field_name);
   }
 
   /** Glean { "field": "name" } */
@@ -6850,55 +6790,35 @@ class defaultStruct final  {
 
   /** Glean { "field": "myLongDFset" } */
   [[deprecated("Use `FOO.myLongDFset().value();` instead of `FOO.get_myLongDFset();`")]]
-  ::std::int64_t get_myLongDFset() const {
-    return __fbthrift_field_myLongDFset;
-  }
+  ::std::int64_t get_myLongDFset() const;
 
   /** Glean { "field": "myLongDFset" } */
   [[deprecated("Use `FOO.myLongDFset() = BAR;` instead of `FOO.set_myLongDFset(BAR);`")]]
-  ::std::int64_t& set_myLongDFset(::std::int64_t myLongDFset_) {
-    myLongDFset_ref() = myLongDFset_;
-    return __fbthrift_field_myLongDFset;
-  }
+  ::std::int64_t& set_myLongDFset(::std::int64_t myLongDFset_);
 
   /** Glean { "field": "myLongDF" } */
   [[deprecated("Use `FOO.myLongDF().value();` instead of `FOO.get_myLongDF();`")]]
-  ::std::int64_t get_myLongDF() const {
-    return __fbthrift_field_myLongDF;
-  }
+  ::std::int64_t get_myLongDF() const;
 
   /** Glean { "field": "myLongDF" } */
   [[deprecated("Use `FOO.myLongDF() = BAR;` instead of `FOO.set_myLongDF(BAR);`")]]
-  ::std::int64_t& set_myLongDF(::std::int64_t myLongDF_) {
-    myLongDF_ref() = myLongDF_;
-    return __fbthrift_field_myLongDF;
-  }
+  ::std::int64_t& set_myLongDF(::std::int64_t myLongDF_);
 
   /** Glean { "field": "portDFset" } */
   [[deprecated("Use `FOO.portDFset().value();` instead of `FOO.get_portDFset();`")]]
-  ::std::int32_t get_portDFset() const {
-    return __fbthrift_field_portDFset;
-  }
+  ::std::int32_t get_portDFset() const;
 
   /** Glean { "field": "portDFset" } */
   [[deprecated("Use `FOO.portDFset() = BAR;` instead of `FOO.set_portDFset(BAR);`")]]
-  ::std::int32_t& set_portDFset(::std::int32_t portDFset_) {
-    portDFset_ref() = portDFset_;
-    return __fbthrift_field_portDFset;
-  }
+  ::std::int32_t& set_portDFset(::std::int32_t portDFset_);
 
   /** Glean { "field": "portNum" } */
   [[deprecated("Use `FOO.portNum().value();` instead of `FOO.get_portNum();`")]]
-  ::std::int32_t get_portNum() const {
-    return __fbthrift_field_portNum;
-  }
+  ::std::int32_t get_portNum() const;
 
   /** Glean { "field": "portNum" } */
   [[deprecated("Use `FOO.portNum() = BAR;` instead of `FOO.set_portNum(BAR);`")]]
-  ::std::int32_t& set_portNum(::std::int32_t portNum_) {
-    portNum_ref() = portNum_;
-    return __fbthrift_field_portNum;
-  }
+  ::std::int32_t& set_portNum(::std::int32_t portNum_);
 
   /** Glean { "field": "myBinaryDFset" } */
   [[deprecated("Use `FOO.myBinaryDFset().value();` instead of `FOO.get_myBinaryDFset();`")]]
@@ -6909,7 +6829,7 @@ class defaultStruct final  {
   /** Glean { "field": "myBinaryDFset" } */
   [[deprecated("Use `FOO.myBinaryDFset().value();` instead of `FOO.get_myBinaryDFset();`")]]
   ::std::string get_myBinaryDFset() && {
-    return std::move(__fbthrift_field_myBinaryDFset);
+    return static_cast<::std::string&&>(__fbthrift_field_myBinaryDFset);
   }
 
   /** Glean { "field": "myBinaryDFset" } */
@@ -6929,7 +6849,7 @@ class defaultStruct final  {
   /** Glean { "field": "myBinary" } */
   [[deprecated("Use `FOO.myBinary().value();` instead of `FOO.get_myBinary();`")]]
   ::std::string get_myBinary() && {
-    return std::move(__fbthrift_field_myBinary);
+    return static_cast<::std::string&&>(__fbthrift_field_myBinary);
   }
 
   /** Glean { "field": "myBinary" } */
@@ -6942,68 +6862,43 @@ class defaultStruct final  {
 
   /** Glean { "field": "myByteDFSet" } */
   [[deprecated("Use `FOO.myByteDFSet().value();` instead of `FOO.get_myByteDFSet();`")]]
-  ::std::int8_t get_myByteDFSet() const {
-    return __fbthrift_field_myByteDFSet;
-  }
+  ::std::int8_t get_myByteDFSet() const;
 
   /** Glean { "field": "myByteDFSet" } */
   [[deprecated("Use `FOO.myByteDFSet() = BAR;` instead of `FOO.set_myByteDFSet(BAR);`")]]
-  ::std::int8_t& set_myByteDFSet(::std::int8_t myByteDFSet_) {
-    myByteDFSet_ref() = myByteDFSet_;
-    return __fbthrift_field_myByteDFSet;
-  }
+  ::std::int8_t& set_myByteDFSet(::std::int8_t myByteDFSet_);
 
   /** Glean { "field": "myByte" } */
   [[deprecated("Use `FOO.myByte().value();` instead of `FOO.get_myByte();`")]]
-  ::std::int8_t get_myByte() const {
-    return __fbthrift_field_myByte;
-  }
+  ::std::int8_t get_myByte() const;
 
   /** Glean { "field": "myByte" } */
   [[deprecated("Use `FOO.myByte() = BAR;` instead of `FOO.set_myByte(BAR);`")]]
-  ::std::int8_t& set_myByte(::std::int8_t myByte_) {
-    myByte_ref() = myByte_;
-    return __fbthrift_field_myByte;
-  }
+  ::std::int8_t& set_myByte(::std::int8_t myByte_);
 
   /** Glean { "field": "myDoubleDFset" } */
   [[deprecated("Use `FOO.myDoubleDFset().value();` instead of `FOO.get_myDoubleDFset();`")]]
-  double get_myDoubleDFset() const {
-    return __fbthrift_field_myDoubleDFset;
-  }
+  double get_myDoubleDFset() const;
 
   /** Glean { "field": "myDoubleDFset" } */
   [[deprecated("Use `FOO.myDoubleDFset() = BAR;` instead of `FOO.set_myDoubleDFset(BAR);`")]]
-  double& set_myDoubleDFset(double myDoubleDFset_) {
-    myDoubleDFset_ref() = myDoubleDFset_;
-    return __fbthrift_field_myDoubleDFset;
-  }
+  double& set_myDoubleDFset(double myDoubleDFset_);
 
   /** Glean { "field": "myDoubleDFZero" } */
   [[deprecated("Use `FOO.myDoubleDFZero().value();` instead of `FOO.get_myDoubleDFZero();`")]]
-  double get_myDoubleDFZero() const {
-    return __fbthrift_field_myDoubleDFZero;
-  }
+  double get_myDoubleDFZero() const;
 
   /** Glean { "field": "myDoubleDFZero" } */
   [[deprecated("Use `FOO.myDoubleDFZero() = BAR;` instead of `FOO.set_myDoubleDFZero(BAR);`")]]
-  double& set_myDoubleDFZero(double myDoubleDFZero_) {
-    myDoubleDFZero_ref() = myDoubleDFZero_;
-    return __fbthrift_field_myDoubleDFZero;
-  }
+  double& set_myDoubleDFZero(double myDoubleDFZero_);
 
   /** Glean { "field": "myDouble" } */
   [[deprecated("Use `FOO.myDouble().value();` instead of `FOO.get_myDouble();`")]]
-  double get_myDouble() const {
-    return __fbthrift_field_myDouble;
-  }
+  double get_myDouble() const;
 
   /** Glean { "field": "myDouble" } */
   [[deprecated("Use `FOO.myDouble() = BAR;` instead of `FOO.set_myDouble(BAR);`")]]
-  double& set_myDouble(double myDouble_) {
-    myDouble_ref() = myDouble_;
-    return __fbthrift_field_myDouble;
-  }
+  double& set_myDouble(double myDouble_);
 
   /** Glean { "field": "field3" } */
   [[deprecated("Use `FOO.field3().value();` instead of `FOO.get_field3();`")]]
@@ -7754,29 +7649,19 @@ class MyStructTypeDef final  {
 
   /** Glean { "field": "myLongField" } */
   [[deprecated("Use `FOO.myLongField().value();` instead of `FOO.get_myLongField();`")]]
-  ::std::int64_t get_myLongField() const {
-    return __fbthrift_field_myLongField;
-  }
+  ::std::int64_t get_myLongField() const;
 
   /** Glean { "field": "myLongField" } */
   [[deprecated("Use `FOO.myLongField() = BAR;` instead of `FOO.set_myLongField(BAR);`")]]
-  ::std::int64_t& set_myLongField(::std::int64_t myLongField_) {
-    myLongField_ref() = myLongField_;
-    return __fbthrift_field_myLongField;
-  }
+  ::std::int64_t& set_myLongField(::std::int64_t myLongField_);
 
   /** Glean { "field": "myLongTypeDef" } */
   [[deprecated("Use `FOO.myLongTypeDef().value();` instead of `FOO.get_myLongTypeDef();`")]]
-  ::cpp2::longTypeDef get_myLongTypeDef() const {
-    return __fbthrift_field_myLongTypeDef;
-  }
+  ::cpp2::longTypeDef get_myLongTypeDef() const;
 
   /** Glean { "field": "myLongTypeDef" } */
   [[deprecated("Use `FOO.myLongTypeDef() = BAR;` instead of `FOO.set_myLongTypeDef(BAR);`")]]
-  ::cpp2::longTypeDef& set_myLongTypeDef(::cpp2::longTypeDef myLongTypeDef_) {
-    myLongTypeDef_ref() = myLongTypeDef_;
-    return __fbthrift_field_myLongTypeDef;
-  }
+  ::cpp2::longTypeDef& set_myLongTypeDef(::cpp2::longTypeDef myLongTypeDef_);
 
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
@@ -7787,7 +7672,7 @@ class MyStructTypeDef final  {
   /** Glean { "field": "myStringField" } */
   [[deprecated("Use `FOO.myStringField().value();` instead of `FOO.get_myStringField();`")]]
   ::std::string get_myStringField() && {
-    return std::move(__fbthrift_field_myStringField);
+    return static_cast<::std::string&&>(__fbthrift_field_myStringField);
   }
 
   /** Glean { "field": "myStringField" } */
@@ -7807,7 +7692,7 @@ class MyStructTypeDef final  {
   /** Glean { "field": "myStringTypedef" } */
   [[deprecated("Use `FOO.myStringTypedef().value();` instead of `FOO.get_myStringTypedef();`")]]
   ::cpp2::stringTypedef get_myStringTypedef() && {
-    return std::move(__fbthrift_field_myStringTypedef);
+    return static_cast<::cpp2::stringTypedef&&>(__fbthrift_field_myStringTypedef);
   }
 
   /** Glean { "field": "myStringTypedef" } */
@@ -8705,16 +8590,11 @@ class TypeRemapped final  {
 
   /** Glean { "field": "BigInteger" } */
   [[deprecated("Use `FOO.BigInteger().value();` instead of `FOO.get_BigInteger();`")]]
-  ::cpp2::i32_1194 get_BigInteger() const {
-    return __fbthrift_field_BigInteger;
-  }
+  ::cpp2::i32_1194 get_BigInteger() const;
 
   /** Glean { "field": "BigInteger" } */
   [[deprecated("Use `FOO.BigInteger() = BAR;` instead of `FOO.set_BigInteger(BAR);`")]]
-  ::cpp2::i32_1194& set_BigInteger(::cpp2::i32_1194 BigInteger_) {
-    BigInteger_ref() = BigInteger_;
-    return __fbthrift_field_BigInteger;
-  }
+  ::cpp2::i32_1194& set_BigInteger(::cpp2::i32_1194 BigInteger_);
 
   /** Glean { "field": "binaryTestBuffer" } */
   [[deprecated("Use `FOO.binaryTestBuffer().value();` instead of `FOO.get_binaryTestBuffer();`")]]
@@ -8725,7 +8605,7 @@ class TypeRemapped final  {
   /** Glean { "field": "binaryTestBuffer" } */
   [[deprecated("Use `FOO.binaryTestBuffer().value();` instead of `FOO.get_binaryTestBuffer();`")]]
   ::cpp2::binary_4918 get_binaryTestBuffer() && {
-    return std::move(__fbthrift_field_binaryTestBuffer);
+    return static_cast<::cpp2::binary_4918&&>(__fbthrift_field_binaryTestBuffer);
   }
 
   /** Glean { "field": "binaryTestBuffer" } */
@@ -9067,7 +8947,7 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string get_message() && {
-    return std::move(__fbthrift_field_message);
+    return static_cast<::std::string&&>(__fbthrift_field_message);
   }
 
   /** Glean { "field": "message" } */
@@ -9080,16 +8960,11 @@ class FOLLY_EXPORT reqXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]
-  ::std::int32_t get_errorCode() const {
-    return __fbthrift_field_errorCode;
-  }
+  ::std::int32_t get_errorCode() const;
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode() = BAR;` instead of `FOO.set_errorCode(BAR);`")]]
-  ::std::int32_t& set_errorCode(::std::int32_t errorCode_) {
-    errorCode_ref() = errorCode_;
-    return __fbthrift_field_errorCode;
-  }
+  ::std::int32_t& set_errorCode(::std::int32_t errorCode_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -9310,18 +9185,12 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  const ::std::string* get_message() const& {
-    return message_ref().has_value() ? std::addressof(__fbthrift_field_message) : nullptr;
-  }
+  const ::std::string* get_message() const&;
 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
-  ::std::string* get_message() & {
-    return message_ref().has_value() ? std::addressof(__fbthrift_field_message) : nullptr;
-  }
+  ::std::string* get_message() &;
 
-  /** Glean { "field": "message" } */
-  [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string* get_message() && = delete;
 
   /** Glean { "field": "message" } */
@@ -9334,26 +9203,17 @@ class FOLLY_EXPORT optXcep : public virtual apache::thrift::TException {
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]
-  const ::std::int32_t* get_errorCode() const& {
-    return errorCode_ref().has_value() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
-  }
+  const ::std::int32_t* get_errorCode() const&;
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]
-  ::std::int32_t* get_errorCode() & {
-    return errorCode_ref().has_value() ? std::addressof(__fbthrift_field_errorCode) : nullptr;
-  }
+  ::std::int32_t* get_errorCode() &;
 
-  /** Glean { "field": "errorCode" } */
-  [[deprecated("Use `FOO.errorCode().value();` instead of `FOO.get_errorCode();`")]]
   ::std::int32_t* get_errorCode() && = delete;
 
   /** Glean { "field": "errorCode" } */
   [[deprecated("Use `FOO.errorCode() = BAR;` instead of `FOO.set_errorCode(BAR);`")]]
-  ::std::int32_t& set_errorCode(::std::int32_t errorCode_) {
-    errorCode_ref() = errorCode_;
-    return __fbthrift_field_errorCode;
-  }
+  ::std::int32_t& set_errorCode(::std::int32_t errorCode_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);
@@ -9789,7 +9649,7 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
   /** Glean { "field": "message" } */
   [[deprecated("Use `FOO.message().value();` instead of `FOO.get_message();`")]]
   ::std::string get_message() && {
-    return std::move(__fbthrift_field_message);
+    return static_cast<::std::string&&>(__fbthrift_field_message);
   }
 
   /** Glean { "field": "message" } */
@@ -9818,16 +9678,11 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
 
   /** Glean { "field": "errorEnum" } */
   [[deprecated("Use `FOO.errorEnum().value();` instead of `FOO.get_errorEnum();`")]]
-  ::cpp2::MyEnum get_errorEnum() const {
-    return __fbthrift_field_errorEnum;
-  }
+  ::cpp2::MyEnum get_errorEnum() const;
 
   /** Glean { "field": "errorEnum" } */
   [[deprecated("Use `FOO.errorEnum() = BAR;` instead of `FOO.set_errorEnum(BAR);`")]]
-  ::cpp2::MyEnum& set_errorEnum(::cpp2::MyEnum errorEnum_) {
-    errorEnum_ref() = errorEnum_;
-    return __fbthrift_field_errorEnum;
-  }
+  ::cpp2::MyEnum& set_errorEnum(::cpp2::MyEnum errorEnum_);
 
   /** Glean { "field": "unionError" } */
   [[deprecated("Use `FOO.unionError().value();` instead of `FOO.get_unionError();`")]]
@@ -9837,8 +9692,6 @@ class FOLLY_EXPORT complexException : public virtual apache::thrift::TException 
   [[deprecated("Use `FOO.unionError().value();` instead of `FOO.get_unionError();`")]]
   ::cpp2::MyUnion* get_unionError() &;
 
-  /** Glean { "field": "unionError" } */
-  [[deprecated("Use `FOO.unionError().value();` instead of `FOO.get_unionError();`")]]
   ::cpp2::MyUnion* get_unionError() && = delete;
 
   /** Glean { "field": "unionError" } */

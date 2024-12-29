@@ -136,6 +136,15 @@ bool MyAnnotation::operator<([[maybe_unused]] const MyAnnotation& rhs) const {
 }
 
 
+::facebook::thrift::test::Color MyAnnotation::get_color() const {
+  return __fbthrift_field_color;
+}
+
+::facebook::thrift::test::Color& MyAnnotation::set_color(::facebook::thrift::test::Color color_) {
+  color_ref() = color_;
+  return __fbthrift_field_color;
+}
+
 void swap([[maybe_unused]] MyAnnotation& a, [[maybe_unused]] MyAnnotation& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_signature, b.__fbthrift_field_signature);
@@ -381,12 +390,13 @@ bool Foo::operator<([[maybe_unused]] const Foo& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::std::vector<::std::int32_t>& Foo::get_adapted_list() const& {
   return __fbthrift_field_adapted_list;
 }
 
 ::std::vector<::std::int32_t> Foo::get_adapted_list() && {
-  return std::move(__fbthrift_field_adapted_list);
+  return static_cast<::std::vector<::std::int32_t>&&>(__fbthrift_field_adapted_list);
 }
 
 const ::std::set<::std::int32_t>& Foo::get_adapted_set() const& {
@@ -394,7 +404,7 @@ const ::std::set<::std::int32_t>& Foo::get_adapted_set() const& {
 }
 
 ::std::set<::std::int32_t> Foo::get_adapted_set() && {
-  return std::move(__fbthrift_field_adapted_set);
+  return static_cast<::std::set<::std::int32_t>&&>(__fbthrift_field_adapted_set);
 }
 
 const ::std::map<::std::string, ::std::int32_t>& Foo::get_adapted_map() const& {
@@ -402,7 +412,7 @@ const ::std::map<::std::string, ::std::int32_t>& Foo::get_adapted_map() const& {
 }
 
 ::std::map<::std::string, ::std::int32_t> Foo::get_adapted_map() && {
-  return std::move(__fbthrift_field_adapted_map);
+  return static_cast<::std::map<::std::string, ::std::int32_t>&&>(__fbthrift_field_adapted_map);
 }
 
 const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& Foo::get_adapted_list_nested() const& {
@@ -410,9 +420,8 @@ const ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& 
 }
 
 ::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> Foo::get_adapted_list_nested() && {
-  return std::move(__fbthrift_field_adapted_list_nested);
+  return static_cast<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>&&>(__fbthrift_field_adapted_list_nested);
 }
-
 
 void swap([[maybe_unused]] Foo& a, [[maybe_unused]] Foo& b) {
   using ::std::swap;
@@ -759,12 +768,13 @@ bool Bar::operator<([[maybe_unused]] const Bar& rhs) const {
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>& Bar::get_structListField() const& {
   return __fbthrift_field_structListField;
 }
 
 ::std::vector<::facebook::thrift::test::FooWithAdapter_9317> Bar::get_structListField() && {
-  return std::move(__fbthrift_field_structListField);
+  return static_cast<::std::vector<::facebook::thrift::test::FooWithAdapter_9317>&&>(__fbthrift_field_structListField);
 }
 
 const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* Bar::get_optionalStructListField() const& {
@@ -774,7 +784,6 @@ const ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* Bar::get_opt
 ::std::vector<::facebook::thrift::test::FooWithAdapter_9317>* Bar::get_optionalStructListField() & {
   return optionalStructListField_ref().has_value() ? std::addressof(__fbthrift_field_optionalStructListField) : nullptr;
 }
-
 
 void swap([[maybe_unused]] Bar& a, [[maybe_unused]] Bar& b) {
   using ::std::swap;
@@ -895,6 +904,15 @@ bool DirectlyAdapted::operator<([[maybe_unused]] const DirectlyAdapted& rhs) con
 }
 
 
+::std::int32_t DirectlyAdapted::get_field() const {
+  return __fbthrift_field_field;
+}
+
+::std::int32_t& DirectlyAdapted::set_field(::std::int32_t field_) {
+  field_ref() = field_;
+  return __fbthrift_field_field;
+}
+
 void swap([[maybe_unused]] DirectlyAdapted& a, [[maybe_unused]] DirectlyAdapted& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
@@ -978,6 +996,15 @@ bool IndependentDirectlyAdapted::operator<([[maybe_unused]] const IndependentDir
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int32_t IndependentDirectlyAdapted::get_field() const {
+  return __fbthrift_field_field;
+}
+
+::std::int32_t& IndependentDirectlyAdapted::set_field(::std::int32_t field_) {
+  field_ref() = field_;
+  return __fbthrift_field_field;
+}
 
 void swap([[maybe_unused]] IndependentDirectlyAdapted& a, [[maybe_unused]] IndependentDirectlyAdapted& b) {
   using ::std::swap;
@@ -1671,6 +1698,15 @@ bool MyStruct::operator<([[maybe_unused]] const MyStruct& rhs) const {
 }
 
 
+::std::int32_t MyStruct::get_field() const {
+  return __fbthrift_field_field;
+}
+
+::std::int32_t& MyStruct::set_field(::std::int32_t field_) {
+  field_ref() = field_;
+  return __fbthrift_field_field;
+}
+
 void swap([[maybe_unused]] MyStruct& a, [[maybe_unused]] MyStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
@@ -2345,14 +2381,14 @@ bool AdaptTemplatedNestedTestStruct::operator<([[maybe_unused]] const AdaptTempl
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::facebook::thrift::test::AdaptTemplatedTestStruct& AdaptTemplatedNestedTestStruct::get_adaptedStruct() const& {
   return __fbthrift_field_adaptedStruct;
 }
 
 ::facebook::thrift::test::AdaptTemplatedTestStruct AdaptTemplatedNestedTestStruct::get_adaptedStruct() && {
-  return std::move(__fbthrift_field_adaptedStruct);
+  return static_cast<::facebook::thrift::test::AdaptTemplatedTestStruct&&>(__fbthrift_field_adaptedStruct);
 }
-
 
 void swap([[maybe_unused]] AdaptTemplatedNestedTestStruct& a, [[maybe_unused]] AdaptTemplatedNestedTestStruct& b) {
   using ::std::swap;
@@ -2580,6 +2616,15 @@ bool ThriftAdaptedStruct::operator<([[maybe_unused]] const ThriftAdaptedStruct& 
 }
 
 
+::std::int64_t ThriftAdaptedStruct::get_data() const {
+  return __fbthrift_field_data;
+}
+
+::std::int64_t& ThriftAdaptedStruct::set_data(::std::int64_t data_) {
+  data_ref() = data_;
+  return __fbthrift_field_data;
+}
+
 void swap([[maybe_unused]] ThriftAdaptedStruct& a, [[maybe_unused]] ThriftAdaptedStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data, b.__fbthrift_field_data);
@@ -2662,6 +2707,15 @@ bool DirectlyAdaptedStruct::operator<([[maybe_unused]] const DirectlyAdaptedStru
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int64_t DirectlyAdaptedStruct::get_data() const {
+  return __fbthrift_field_data;
+}
+
+::std::int64_t& DirectlyAdaptedStruct::set_data(::std::int64_t data_) {
+  data_ref() = data_;
+  return __fbthrift_field_data;
+}
 
 void swap([[maybe_unused]] DirectlyAdaptedStruct& a, [[maybe_unused]] DirectlyAdaptedStruct& b) {
   using ::std::swap;
@@ -2920,14 +2974,14 @@ bool CircularAdaptee::operator<([[maybe_unused]] const CircularAdaptee& rhs) con
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
 const ::facebook::thrift::test::CircularStruct& CircularAdaptee::get_field() const& {
   return __fbthrift_field_field;
 }
 
 ::facebook::thrift::test::CircularStruct CircularAdaptee::get_field() && {
-  return std::move(__fbthrift_field_field);
+  return static_cast<::facebook::thrift::test::CircularStruct&&>(__fbthrift_field_field);
 }
-
 
 void swap([[maybe_unused]] CircularAdaptee& a, [[maybe_unused]] CircularAdaptee& b) {
   using ::std::swap;
@@ -3325,6 +3379,15 @@ bool UnderlyingRenamedStruct::operator<([[maybe_unused]] const UnderlyingRenamed
 }
 
 
+::std::int64_t UnderlyingRenamedStruct::get_data() const {
+  return __fbthrift_field_data;
+}
+
+::std::int64_t& UnderlyingRenamedStruct::set_data(::std::int64_t data_) {
+  data_ref() = data_;
+  return __fbthrift_field_data;
+}
+
 void swap([[maybe_unused]] UnderlyingRenamedStruct& a, [[maybe_unused]] UnderlyingRenamedStruct& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_data, b.__fbthrift_field_data);
@@ -3406,6 +3469,15 @@ bool UnderlyingSameNamespaceStruct::operator<([[maybe_unused]] const UnderlyingS
   return ::apache::thrift::op::detail::StructLessThan{}(*this, rhs);
 }
 
+
+::std::int64_t UnderlyingSameNamespaceStruct::get_data() const {
+  return __fbthrift_field_data;
+}
+
+::std::int64_t& UnderlyingSameNamespaceStruct::set_data(::std::int64_t data_) {
+  data_ref() = data_;
+  return __fbthrift_field_data;
+}
 
 void swap([[maybe_unused]] UnderlyingSameNamespaceStruct& a, [[maybe_unused]] UnderlyingSameNamespaceStruct& b) {
   using ::std::swap;

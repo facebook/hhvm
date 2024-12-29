@@ -427,29 +427,19 @@ class MyStruct final  {
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum().value();` instead of `FOO.get_myEnum();`")]]
-  ::test::fixtures::enumstrict::MyEnum get_myEnum() const {
-    return __fbthrift_field_myEnum;
-  }
+  ::test::fixtures::enumstrict::MyEnum get_myEnum() const;
 
   /** Glean { "field": "myEnum" } */
   [[deprecated("Use `FOO.myEnum() = BAR;` instead of `FOO.set_myEnum(BAR);`")]]
-  ::test::fixtures::enumstrict::MyEnum& set_myEnum(::test::fixtures::enumstrict::MyEnum myEnum_) {
-    myEnum_ref() = myEnum_;
-    return __fbthrift_field_myEnum;
-  }
+  ::test::fixtures::enumstrict::MyEnum& set_myEnum(::test::fixtures::enumstrict::MyEnum myEnum_);
 
   /** Glean { "field": "myBigEnum" } */
   [[deprecated("Use `FOO.myBigEnum().value();` instead of `FOO.get_myBigEnum();`")]]
-  ::test::fixtures::enumstrict::MyBigEnum get_myBigEnum() const {
-    return __fbthrift_field_myBigEnum;
-  }
+  ::test::fixtures::enumstrict::MyBigEnum get_myBigEnum() const;
 
   /** Glean { "field": "myBigEnum" } */
   [[deprecated("Use `FOO.myBigEnum() = BAR;` instead of `FOO.set_myBigEnum(BAR);`")]]
-  ::test::fixtures::enumstrict::MyBigEnum& set_myBigEnum(::test::fixtures::enumstrict::MyBigEnum myBigEnum_) {
-    myBigEnum_ref() = myBigEnum_;
-    return __fbthrift_field_myBigEnum;
-  }
+  ::test::fixtures::enumstrict::MyBigEnum& set_myBigEnum(::test::fixtures::enumstrict::MyBigEnum myBigEnum_);
 
   template <class Protocol_>
   unsigned long read(Protocol_* iprot);

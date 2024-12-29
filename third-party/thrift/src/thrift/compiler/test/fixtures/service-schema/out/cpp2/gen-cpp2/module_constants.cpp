@@ -21,11 +21,7 @@ namespace module_constants {
 
 
 ::folly::Range<const ::std::string_view*> _fbthrift_schema_b747839c13cb3aa5_includes() {
-  static const ::std::array<::std::string_view, 2> includes = {
-    _fbthrift_schema_b747839c13cb3aa5(),
-    ::apache::thrift::detail::mc::readSchema(::cpp2::include_constants::_fbthrift_schema_8569dfae849b43aa),
-  };
-  return ::folly::range(includes);
+  return {};
 }
 
 } // namespace module_constants

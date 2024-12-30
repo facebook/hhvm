@@ -223,6 +223,7 @@ namespace Trace {
       TM(xenon)         \
       TM(xls)           \
       TM(xls_stats)     \
+      TM(xreqsync)      \
       TM(clisrv)        \
       TM(bccache)       \
       TM(idx)           \

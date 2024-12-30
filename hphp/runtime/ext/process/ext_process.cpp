@@ -45,6 +45,7 @@
 #include "hphp/runtime/ext/std/ext_std_file.h"
 #include "hphp/runtime/ext/std/ext_std_function.h"
 #include "hphp/runtime/ext/string/ext_string.h"
+#include "hphp/runtime/ext/xreqsync/ext_xreqsync.h"
 #include "hphp/runtime/server/cli-server.h"
 #include "hphp/runtime/server/xbox-server.h"
 #include "hphp/runtime/vm/unit-parser.h"
@@ -114,6 +115,9 @@ bool cantPrefork() {
   }
   s_lock.lock();
   XboxServer::Stop();
+  if (XReqCallbackReaper::get().isRunning()) {
+    XReqCallbackReaper::get().shutdownReaperThread();
+  }
   if (AsyncFuncImpl::count()) {
     XboxServer::Restart();
     s_lock.unlock();
@@ -126,6 +130,9 @@ bool cantPrefork() {
 void postfork(pid_t pid) {
   folly::SingletonVault::singleton()->reenableInstances();
   XboxServer::Restart();
+  if (XReqCallbackReaper::get().isRunning()) {
+    XReqCallbackReaper::get().initReaperThread();
+  }
   if (pid == 0) {
     Logger::ResetPid();
     new (&s_lock) SimpleMutex();

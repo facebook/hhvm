@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<674e43047a19afe874c881f81759d24e>>
+// @generated SignedSource<<d166261debd93682ed77ea152fba947d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -751,6 +751,8 @@ pub enum T_ {
     OpaqueTypeFromModule(pos_or_decl::PosOrDecl, String, Box<T_>),
     #[rust_to_ocaml(name = "SDT_call")]
     SDTCall(pos_or_decl::PosOrDecl, Box<T_>),
+    #[rust_to_ocaml(name = "Like_call")]
+    LikeCall(pos_or_decl::PosOrDecl, Box<T_>),
 }
 
 pub type Reason = T_;

@@ -1243,6 +1243,13 @@ and obj_get_inner_union args env on_error id reason tys : internal_result =
             id
             on_error
         in
+        (* Preserve outer reason on dynamic *)
+        let ty =
+          if is_dynamic (fst ty) then
+            (with_reason (fst ty) reason, snd ty)
+          else
+            ty
+        in
         ( env,
           ty_err :: ty_errs,
           ty :: tys,

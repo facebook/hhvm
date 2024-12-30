@@ -74,6 +74,7 @@ val call :
   ?dynamic_func:dyn_func_kind ->
   expr_pos:Pos.t ->
   recv_pos:Pos.t ->
+  id_pos:Pos.t ->
   Typing_env_types.env ->
   Typing_defs.locl_ty ->
   Nast.argument list ->

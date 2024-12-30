@@ -148,6 +148,7 @@ let check_param : env -> Nast.fun_param -> unit =
                  ~expected:None
                  ~expr_pos:pos
                  ~recv_pos:pos
+                 ~id_pos:pos
                  env
                  tfty
                  []

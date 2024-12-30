@@ -2411,8 +2411,13 @@ module rec Expr : sig
     ?nullsafe:pos option ->
     in_await:locl_phase Reason.t_ option ->
     ?dynamic_func:dyn_func_kind ->
+    (* Span of whole call expression e.g. $x->meth($y) *)
     expr_pos:pos ->
+    (* Span of object receiver expression or expression of function type
+       e.g. $x in $x->meth($y) or $f in $f(3) *)
     recv_pos:pos ->
+    (* Span of function/method id e.g. meth in $x->meth($y) or C::f in C::f(5) *)
+    id_pos:pos ->
     env ->
     locl_ty ->
     Nast.argument list ->
@@ -3261,6 +3266,7 @@ end = struct
           ~expected:None
           ~expr_pos:p
           ~recv_pos:p
+          ~id_pos:p
           ~in_await:None
           env
           tfty
@@ -5450,6 +5456,7 @@ end = struct
           ~expected
           ~expr_pos:p
           ~recv_pos:(fst id)
+          ~id_pos:(fst id)
           ~in_await:None
           env
           fty
@@ -5518,6 +5525,7 @@ end = struct
           ~expected
           ~expr_pos:p
           ~recv_pos:fpos
+          ~id_pos:fpos
           ~in_await:None
           env
           fty
@@ -5558,6 +5566,7 @@ end = struct
                 ~expected
                 ~expr_pos:p
                 ~recv_pos:fpos
+                ~id_pos:pos
                 ~in_await:None
                 env
                 fty
@@ -5922,7 +5931,8 @@ end = struct
           ~nullsafe
           ~expected
           ~expr_pos:p
-          ~recv_pos:pos_id
+          ~recv_pos:p1
+          ~id_pos:pos_id
           ~in_await:None
           env
           tfty
@@ -5991,6 +6001,7 @@ end = struct
           ~expected
           ~expr_pos:p
           ~recv_pos:fpos
+          ~id_pos:fpos
           ~in_await:None
           env
           fty
@@ -6149,6 +6160,7 @@ end = struct
           ~expected:None
           ~expr_pos:p
           ~recv_pos:cid_pos
+          ~id_pos:cid_pos
           ~in_await:None
           env
           m
@@ -6182,6 +6194,7 @@ end = struct
       ?(dynamic_func : dyn_func_kind option)
       ~(expr_pos : Pos.t)
       ~(recv_pos : Pos.t)
+      ~(id_pos : Pos.t)
       env
       fty
       (el : Nast.argument list)
@@ -6257,8 +6270,10 @@ end = struct
           ?dynamic_func:(to_like_function dynamic_func)
           ~expr_pos
           ~recv_pos
+          ~id_pos
           env
-          ty
+          (* Preserve the reason off the like type *)
+          (with_reason ty (get_reason efty))
           el
           unpacked_element
       | _ ->
@@ -6389,6 +6404,7 @@ end = struct
             ?dynamic_func
             ~expr_pos
             ~recv_pos
+            ~id_pos
             env
             ty
             el
@@ -6403,6 +6419,7 @@ end = struct
                   ?dynamic_func
                   ~expr_pos
                   ~recv_pos
+                  ~id_pos
                   env
                   ty
                   el
@@ -6431,6 +6448,7 @@ end = struct
                   ?dynamic_func
                   ~expr_pos
                   ~recv_pos
+                  ~id_pos
                   env
                   ty
                   el
@@ -6773,7 +6791,7 @@ end = struct
                   Coeffect
                     (Coeffect.Call_coeffect
                        {
-                         pos = recv_pos;
+                         pos = id_pos;
                          available_incl_unsafe =
                            Typing_coeffects.pretty env env_capability;
                          available_pos = Typing_defs.get_pos env_capability;
@@ -7046,6 +7064,7 @@ end = struct
                 ?dynamic_func
                 ~expr_pos
                 ~recv_pos
+                ~id_pos
                 env
                 ty
                 el
@@ -7059,6 +7078,7 @@ end = struct
                   ?dynamic_func:(Some Supportdyn_function)
                   ~expr_pos
                   ~recv_pos
+                  ~id_pos
                   env
                   ty
                   el
@@ -7066,7 +7086,11 @@ end = struct
               in
               let ret =
                 match dynamic_func with
-                | Some Like_function -> MakeType.locl_like (get_reason ret) ret
+                | Some Like_function ->
+                  MakeType.locl_like
+                    (Reason.like_call
+                       (Pos_or_decl.of_raw_pos recv_pos, get_reason efty))
+                    ret
                 | _ -> ret
               in
               (env, (tel, typed_unpack_element, ret, should_forget_fakes))
@@ -7457,6 +7481,7 @@ end = struct
         ~expected:None
         ~expr_pos:p
         ~recv_pos:cid_pos
+        ~id_pos:(fst method_id)
         ~in_await:None
         env
         fty
@@ -10561,6 +10586,7 @@ end = struct
         ~expected:None
         ~expr_pos:p
         ~recv_pos:obj_pos
+        ~id_pos:p
         ~in_await:None
         env
         tfty
@@ -11788,6 +11814,7 @@ let call
     ?dynamic_func
     ~expr_pos
     ~recv_pos
+    ~id_pos
     env
     fty
     params
@@ -11799,6 +11826,7 @@ let call
     ?dynamic_func
     ~expr_pos
     ~recv_pos
+    ~id_pos
     env
     fty
     params

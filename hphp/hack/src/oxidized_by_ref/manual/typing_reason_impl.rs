@@ -135,6 +135,7 @@ impl<'a> Reason<'a> {
 
             DynamicPartialEnforcement((p, _, _))
             | SDTCall((p, _))
+            | LikeCall((p, _))
             | OpaqueTypeFromModule((p, _, _)) => Some(p),
             LostInfo((_, r, _)) | TypeAccess((r, _)) | InvariantGeneric((r, _)) => r.pos(),
 
@@ -198,6 +199,7 @@ impl<'a> std::fmt::Debug for T_<'a> {
                 .field(t)
                 .finish(),
             SDTCall((p, t)) => f.debug_tuple("RSDTCall").field(p).field(t).finish(),
+            LikeCall((p, t)) => f.debug_tuple("RlikeCall").field(p).field(t).finish(),
             DynamicCoercion(p) => f.debug_tuple("RdynamicCoercion").field(p).finish(),
             Invalid => f.debug_tuple("Rinvalid").finish(),
             LowerBound { .. }

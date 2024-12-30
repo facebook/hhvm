@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<86ecf904ee26c517bdcf2e57f12a995e>>
+// @generated SignedSource<<8ae7adfad9b3b4d8bf43d88ca51e31a4>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -746,6 +746,10 @@ pub enum T_<'a> {
     #[rust_to_ocaml(name = "SDT_call")]
     #[rust_to_ocaml(inline_tuple)]
     SDTCall(&'a (&'a pos_or_decl::PosOrDecl<'a>, T_<'a>)),
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    #[rust_to_ocaml(name = "Like_call")]
+    #[rust_to_ocaml(inline_tuple)]
+    LikeCall(&'a (&'a pos_or_decl::PosOrDecl<'a>, T_<'a>)),
 }
 impl<'a> TrivialDrop for T_<'a> {}
 arena_deserializer::impl_deserialize_in_arena!(T_<'arena>);

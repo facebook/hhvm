@@ -284,6 +284,7 @@ module.exports = {
             items: [
               'fb/languages/python/code-frameworks',
               'fb/languages/python/python-capi',
+              'fb/languages/python/api/exceptions',
             ],
           },
         ]),

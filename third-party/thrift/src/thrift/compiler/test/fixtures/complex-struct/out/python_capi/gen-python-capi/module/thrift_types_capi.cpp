@@ -58,8 +58,8 @@ bool ensure_module_imported() {
   static constexpr std::int16_t _fbthrift__complexException__tuple_pos[6] = {
     1, 2, 3, 4, 5, 6
   };
-  static constexpr std::int16_t _fbthrift__Containers__tuple_pos[18] = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18
+  static constexpr std::int16_t _fbthrift__Containers__tuple_pos[37] = {
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37
   };
 } // namespace
 
@@ -2653,6 +2653,82 @@ Extractor<::apache::thrift::python::capi::ComposedStruct<
       cpp.map_map_2_ref(),
       PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[17]),
       error);
+  Extractor<list<list<int32_t>>>{}.extractInto(
+      cpp.list_list_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[18]),
+      error);
+  Extractor<list<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
+      cpp.list_list_struct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[19]),
+      error);
+  Extractor<list<set<int32_t>>>{}.extractInto(
+      cpp.list_set_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[20]),
+      error);
+  Extractor<list<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
+      cpp.list_set_struct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[21]),
+      error);
+  Extractor<list<map<int32_t, int32_t>>>{}.extractInto(
+      cpp.list_map_i32_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[22]),
+      error);
+  Extractor<list<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
+      cpp.list_map_i32_struct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[23]),
+      error);
+  Extractor<list<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>{}.extractInto(
+      cpp.list_map_struct_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[24]),
+      error);
+  Extractor<set<list<int32_t>>>{}.extractInto(
+      cpp.set_list_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[25]),
+      error);
+  Extractor<set<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
+      cpp.set_list_struct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[26]),
+      error);
+  Extractor<set<set<int32_t>>>{}.extractInto(
+      cpp.set_set_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[27]),
+      error);
+  Extractor<set<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
+      cpp.set_set_struct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[28]),
+      error);
+  Extractor<set<map<int32_t, int32_t>>>{}.extractInto(
+      cpp.set_map_i32_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[29]),
+      error);
+  Extractor<set<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
+      cpp.set_map_i32_struct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[30]),
+      error);
+  Extractor<set<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>{}.extractInto(
+      cpp.set_map_struct_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[31]),
+      error);
+  Extractor<map<int32_t, map<int32_t, int32_t>>>{}.extractInto(
+      cpp.map_i32_map_i32_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[32]),
+      error);
+  Extractor<map<int32_t, map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>{}.extractInto(
+      cpp.map_i32_map_struct_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[33]),
+      error);
+  Extractor<map<int32_t, map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}.extractInto(
+      cpp.map_i32_map_i32_struct_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[34]),
+      error);
+  Extractor<map<int32_t, list<map<int32_t, int32_t>>>>{}.extractInto(
+      cpp.map_i32_map_list_i32_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[35]),
+      error);
+  Extractor<map<int32_t, list<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>>{}.extractInto(
+      cpp.map_i32_map_list_struct_i32_ref(),
+      PyTuple_GET_ITEM(fbThriftData, _fbthrift__Containers__tuple_pos[36]),
+      error);
   if (error) {
     return folly::makeUnexpected(*error);
   }
@@ -2693,7 +2769,7 @@ PyObject* Constructor<::cpp2::Containers>::operator()(
 PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
         ::cpp2::Containers>>::operator()(
     [[maybe_unused]] const ::cpp2::Containers& val) {
-  StrongRef fbthrift_data(createStructTuple(18));
+  StrongRef fbthrift_data(createStructTuple(37));
   StrongRef _fbthrift__struct_list(
     Constructor<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>{}
     .constructFrom(val.struct_list_ref()));
@@ -2872,6 +2948,196 @@ PyObject* Constructor<::apache::thrift::python::capi::ComposedStruct<
           *fbthrift_data,
           _fbthrift__Containers__tuple_pos[17],
           *_fbthrift__map_map_2) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_list_i32(
+    Constructor<list<list<int32_t>>>{}
+    .constructFrom(val.list_list_i32_ref()));
+  if (!_fbthrift__list_list_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[18],
+          *_fbthrift__list_list_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_list_struct(
+    Constructor<list<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
+    .constructFrom(val.list_list_struct_ref()));
+  if (!_fbthrift__list_list_struct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[19],
+          *_fbthrift__list_list_struct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_set_i32(
+    Constructor<list<set<int32_t>>>{}
+    .constructFrom(val.list_set_i32_ref()));
+  if (!_fbthrift__list_set_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[20],
+          *_fbthrift__list_set_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_set_struct(
+    Constructor<list<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
+    .constructFrom(val.list_set_struct_ref()));
+  if (!_fbthrift__list_set_struct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[21],
+          *_fbthrift__list_set_struct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_map_i32_i32(
+    Constructor<list<map<int32_t, int32_t>>>{}
+    .constructFrom(val.list_map_i32_i32_ref()));
+  if (!_fbthrift__list_map_i32_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[22],
+          *_fbthrift__list_map_i32_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_map_i32_struct(
+    Constructor<list<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
+    .constructFrom(val.list_map_i32_struct_ref()));
+  if (!_fbthrift__list_map_i32_struct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[23],
+          *_fbthrift__list_map_i32_struct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__list_map_struct_i32(
+    Constructor<list<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>{}
+    .constructFrom(val.list_map_struct_i32_ref()));
+  if (!_fbthrift__list_map_struct_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[24],
+          *_fbthrift__list_map_struct_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_list_i32(
+    Constructor<set<list<int32_t>>>{}
+    .constructFrom(val.set_list_i32_ref()));
+  if (!_fbthrift__set_list_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[25],
+          *_fbthrift__set_list_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_list_struct(
+    Constructor<set<list<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
+    .constructFrom(val.set_list_struct_ref()));
+  if (!_fbthrift__set_list_struct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[26],
+          *_fbthrift__set_list_struct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_set_i32(
+    Constructor<set<set<int32_t>>>{}
+    .constructFrom(val.set_set_i32_ref()));
+  if (!_fbthrift__set_set_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[27],
+          *_fbthrift__set_set_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_set_struct(
+    Constructor<set<set<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
+    .constructFrom(val.set_set_struct_ref()));
+  if (!_fbthrift__set_set_struct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[28],
+          *_fbthrift__set_set_struct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_map_i32_i32(
+    Constructor<set<map<int32_t, int32_t>>>{}
+    .constructFrom(val.set_map_i32_i32_ref()));
+  if (!_fbthrift__set_map_i32_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[29],
+          *_fbthrift__set_map_i32_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_map_i32_struct(
+    Constructor<set<map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
+    .constructFrom(val.set_map_i32_struct_ref()));
+  if (!_fbthrift__set_map_i32_struct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[30],
+          *_fbthrift__set_map_i32_struct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__set_map_struct_i32(
+    Constructor<set<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>{}
+    .constructFrom(val.set_map_struct_i32_ref()));
+  if (!_fbthrift__set_map_struct_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[31],
+          *_fbthrift__set_map_struct_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__map_i32_map_i32_i32(
+    Constructor<map<int32_t, map<int32_t, int32_t>>>{}
+    .constructFrom(val.map_i32_map_i32_i32_ref()));
+  if (!_fbthrift__map_i32_map_i32_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[32],
+          *_fbthrift__map_i32_map_i32_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__map_i32_map_struct_i32(
+    Constructor<map<int32_t, map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>{}
+    .constructFrom(val.map_i32_map_struct_i32_ref()));
+  if (!_fbthrift__map_i32_map_struct_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[33],
+          *_fbthrift__map_i32_map_struct_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__map_i32_map_i32_struct(
+    Constructor<map<int32_t, map<int32_t, ::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>>>>{}
+    .constructFrom(val.map_i32_map_i32_struct_ref()));
+  if (!_fbthrift__map_i32_map_i32_struct ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[34],
+          *_fbthrift__map_i32_map_i32_struct) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__map_i32_map_list_i32_i32(
+    Constructor<map<int32_t, list<map<int32_t, int32_t>>>>{}
+    .constructFrom(val.map_i32_map_list_i32_i32_ref()));
+  if (!_fbthrift__map_i32_map_list_i32_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[35],
+          *_fbthrift__map_i32_map_list_i32_i32) == -1) {
+    return nullptr;
+  }
+  StrongRef _fbthrift__map_i32_map_list_struct_i32(
+    Constructor<map<int32_t, list<map<::apache::thrift::python::capi::ComposedStruct<::cpp2::MyStruct>, int32_t>>>>{}
+    .constructFrom(val.map_i32_map_list_struct_i32_ref()));
+  if (!_fbthrift__map_i32_map_list_struct_i32 ||
+      setStructField(
+          *fbthrift_data,
+          _fbthrift__Containers__tuple_pos[36],
+          *_fbthrift__map_i32_map_list_struct_i32) == -1) {
     return nullptr;
   }
   return std::move(fbthrift_data).release();

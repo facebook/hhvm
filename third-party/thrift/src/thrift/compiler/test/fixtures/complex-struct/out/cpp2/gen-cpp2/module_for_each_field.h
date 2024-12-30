@@ -249,6 +249,25 @@ struct ForEachField<::cpp2::Containers> {
     f(15, static_cast<T&&>(t).set_map_2_ref()...);
     f(16, static_cast<T&&>(t).map_map_ref()...);
     f(17, static_cast<T&&>(t).map_map_2_ref()...);
+    f(18, static_cast<T&&>(t).list_list_i32_ref()...);
+    f(19, static_cast<T&&>(t).list_list_struct_ref()...);
+    f(20, static_cast<T&&>(t).list_set_i32_ref()...);
+    f(21, static_cast<T&&>(t).list_set_struct_ref()...);
+    f(22, static_cast<T&&>(t).list_map_i32_i32_ref()...);
+    f(23, static_cast<T&&>(t).list_map_i32_struct_ref()...);
+    f(24, static_cast<T&&>(t).list_map_struct_i32_ref()...);
+    f(25, static_cast<T&&>(t).set_list_i32_ref()...);
+    f(26, static_cast<T&&>(t).set_list_struct_ref()...);
+    f(27, static_cast<T&&>(t).set_set_i32_ref()...);
+    f(28, static_cast<T&&>(t).set_set_struct_ref()...);
+    f(29, static_cast<T&&>(t).set_map_i32_i32_ref()...);
+    f(30, static_cast<T&&>(t).set_map_i32_struct_ref()...);
+    f(31, static_cast<T&&>(t).set_map_struct_i32_ref()...);
+    f(32, static_cast<T&&>(t).map_i32_map_i32_i32_ref()...);
+    f(33, static_cast<T&&>(t).map_i32_map_struct_i32_ref()...);
+    f(34, static_cast<T&&>(t).map_i32_map_i32_struct_ref()...);
+    f(35, static_cast<T&&>(t).map_i32_map_list_i32_i32_ref()...);
+    f(36, static_cast<T&&>(t).map_i32_map_list_struct_i32_ref()...);
   }
 };
 } // namespace detail

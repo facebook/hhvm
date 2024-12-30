@@ -437,6 +437,44 @@ struct VisitByFieldId<::cpp2::Containers> {
       return f(16, static_cast<T&&>(t).map_map_ref());
     case 18:
       return f(17, static_cast<T&&>(t).map_map_2_ref());
+    case 19:
+      return f(18, static_cast<T&&>(t).list_list_i32_ref());
+    case 20:
+      return f(19, static_cast<T&&>(t).list_list_struct_ref());
+    case 21:
+      return f(20, static_cast<T&&>(t).list_set_i32_ref());
+    case 22:
+      return f(21, static_cast<T&&>(t).list_set_struct_ref());
+    case 23:
+      return f(22, static_cast<T&&>(t).list_map_i32_i32_ref());
+    case 24:
+      return f(23, static_cast<T&&>(t).list_map_i32_struct_ref());
+    case 25:
+      return f(24, static_cast<T&&>(t).list_map_struct_i32_ref());
+    case 26:
+      return f(25, static_cast<T&&>(t).set_list_i32_ref());
+    case 27:
+      return f(26, static_cast<T&&>(t).set_list_struct_ref());
+    case 28:
+      return f(27, static_cast<T&&>(t).set_set_i32_ref());
+    case 29:
+      return f(28, static_cast<T&&>(t).set_set_struct_ref());
+    case 30:
+      return f(29, static_cast<T&&>(t).set_map_i32_i32_ref());
+    case 31:
+      return f(30, static_cast<T&&>(t).set_map_i32_struct_ref());
+    case 32:
+      return f(31, static_cast<T&&>(t).set_map_struct_i32_ref());
+    case 33:
+      return f(32, static_cast<T&&>(t).map_i32_map_i32_i32_ref());
+    case 34:
+      return f(33, static_cast<T&&>(t).map_i32_map_struct_i32_ref());
+    case 35:
+      return f(34, static_cast<T&&>(t).map_i32_map_i32_struct_ref());
+    case 36:
+      return f(35, static_cast<T&&>(t).map_i32_map_list_i32_i32_ref());
+    case 37:
+      return f(36, static_cast<T&&>(t).map_i32_map_list_struct_i32_ref());
     default:
       throwInvalidThriftId(fieldId, "::cpp2::Containers");
     }

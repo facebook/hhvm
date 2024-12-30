@@ -3075,6 +3075,25 @@ Containers::Containers([[maybe_unused]] Containers&& other) noexcept :
     __fbthrift_field_set_map_2(std::move(other.__fbthrift_field_set_map_2)),
     __fbthrift_field_map_map(std::move(other.__fbthrift_field_map_map)),
     __fbthrift_field_map_map_2(std::move(other.__fbthrift_field_map_map_2)),
+    __fbthrift_field_list_list_i32(std::move(other.__fbthrift_field_list_list_i32)),
+    __fbthrift_field_list_list_struct(std::move(other.__fbthrift_field_list_list_struct)),
+    __fbthrift_field_list_set_i32(std::move(other.__fbthrift_field_list_set_i32)),
+    __fbthrift_field_list_set_struct(std::move(other.__fbthrift_field_list_set_struct)),
+    __fbthrift_field_list_map_i32_i32(std::move(other.__fbthrift_field_list_map_i32_i32)),
+    __fbthrift_field_list_map_i32_struct(std::move(other.__fbthrift_field_list_map_i32_struct)),
+    __fbthrift_field_list_map_struct_i32(std::move(other.__fbthrift_field_list_map_struct_i32)),
+    __fbthrift_field_set_list_i32(std::move(other.__fbthrift_field_set_list_i32)),
+    __fbthrift_field_set_list_struct(std::move(other.__fbthrift_field_set_list_struct)),
+    __fbthrift_field_set_set_i32(std::move(other.__fbthrift_field_set_set_i32)),
+    __fbthrift_field_set_set_struct(std::move(other.__fbthrift_field_set_set_struct)),
+    __fbthrift_field_set_map_i32_i32(std::move(other.__fbthrift_field_set_map_i32_i32)),
+    __fbthrift_field_set_map_i32_struct(std::move(other.__fbthrift_field_set_map_i32_struct)),
+    __fbthrift_field_set_map_struct_i32(std::move(other.__fbthrift_field_set_map_struct_i32)),
+    __fbthrift_field_map_i32_map_i32_i32(std::move(other.__fbthrift_field_map_i32_map_i32_i32)),
+    __fbthrift_field_map_i32_map_struct_i32(std::move(other.__fbthrift_field_map_i32_map_struct_i32)),
+    __fbthrift_field_map_i32_map_i32_struct(std::move(other.__fbthrift_field_map_i32_map_i32_struct)),
+    __fbthrift_field_map_i32_map_list_i32_i32(std::move(other.__fbthrift_field_map_i32_map_list_i32_i32)),
+    __fbthrift_field_map_i32_map_list_struct_i32(std::move(other.__fbthrift_field_map_i32_map_list_struct_i32)),
     __isset(other.__isset) {
 }
 
@@ -3097,12 +3116,31 @@ Containers& Containers::operator=([[maybe_unused]] Containers&& other) noexcept 
     this->__fbthrift_field_set_map_2 = std::move(other.__fbthrift_field_set_map_2);
     this->__fbthrift_field_map_map = std::move(other.__fbthrift_field_map_map);
     this->__fbthrift_field_map_map_2 = std::move(other.__fbthrift_field_map_map_2);
+    this->__fbthrift_field_list_list_i32 = std::move(other.__fbthrift_field_list_list_i32);
+    this->__fbthrift_field_list_list_struct = std::move(other.__fbthrift_field_list_list_struct);
+    this->__fbthrift_field_list_set_i32 = std::move(other.__fbthrift_field_list_set_i32);
+    this->__fbthrift_field_list_set_struct = std::move(other.__fbthrift_field_list_set_struct);
+    this->__fbthrift_field_list_map_i32_i32 = std::move(other.__fbthrift_field_list_map_i32_i32);
+    this->__fbthrift_field_list_map_i32_struct = std::move(other.__fbthrift_field_list_map_i32_struct);
+    this->__fbthrift_field_list_map_struct_i32 = std::move(other.__fbthrift_field_list_map_struct_i32);
+    this->__fbthrift_field_set_list_i32 = std::move(other.__fbthrift_field_set_list_i32);
+    this->__fbthrift_field_set_list_struct = std::move(other.__fbthrift_field_set_list_struct);
+    this->__fbthrift_field_set_set_i32 = std::move(other.__fbthrift_field_set_set_i32);
+    this->__fbthrift_field_set_set_struct = std::move(other.__fbthrift_field_set_set_struct);
+    this->__fbthrift_field_set_map_i32_i32 = std::move(other.__fbthrift_field_set_map_i32_i32);
+    this->__fbthrift_field_set_map_i32_struct = std::move(other.__fbthrift_field_set_map_i32_struct);
+    this->__fbthrift_field_set_map_struct_i32 = std::move(other.__fbthrift_field_set_map_struct_i32);
+    this->__fbthrift_field_map_i32_map_i32_i32 = std::move(other.__fbthrift_field_map_i32_map_i32_i32);
+    this->__fbthrift_field_map_i32_map_struct_i32 = std::move(other.__fbthrift_field_map_i32_map_struct_i32);
+    this->__fbthrift_field_map_i32_map_i32_struct = std::move(other.__fbthrift_field_map_i32_map_i32_struct);
+    this->__fbthrift_field_map_i32_map_list_i32_i32 = std::move(other.__fbthrift_field_map_i32_map_list_i32_i32);
+    this->__fbthrift_field_map_i32_map_list_struct_i32 = std::move(other.__fbthrift_field_map_i32_map_list_struct_i32);
     __isset = other.__isset;
     return *this;
 }
 
 
-Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::cpp2::MyStruct> struct_list__arg, ::std::vector<::cpp2::MyUnion> union_list__arg, ::std::vector<::cpp2::MyEnum> enum_list__arg, ::std::set<::cpp2::MyStruct> struct_set__arg, ::std::set<::cpp2::MyUnion> union_set__arg, ::std::set<::cpp2::MyEnum> enum_set__arg, ::std::map<::cpp2::MyStruct, ::std::int64_t> struct_map__arg, ::std::map<::cpp2::MyUnion, ::std::int64_t> union_map__arg, ::std::map<::cpp2::MyEnum, ::std::int64_t> enum_map__arg, ::std::map<::std::int32_t, ::cpp2::MyStruct> struct_map_2__arg, ::std::map<::std::int32_t, ::cpp2::MyUnion> union_map_2__arg, ::std::map<::std::int32_t, ::cpp2::MyEnum> enum_map_2__arg, ::std::map<::std::vector<::std::int32_t>, ::std::int32_t> list_map__arg, ::std::map<::std::int32_t, ::std::vector<::std::int32_t>> list_map_2__arg, ::std::map<::std::set<::std::int32_t>, ::std::int32_t> set_map__arg, ::std::map<::std::int32_t, ::std::set<::std::int32_t>> set_map_2__arg, ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t> map_map__arg, ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>> map_map_2__arg) :
+Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::cpp2::MyStruct> struct_list__arg, ::std::vector<::cpp2::MyUnion> union_list__arg, ::std::vector<::cpp2::MyEnum> enum_list__arg, ::std::set<::cpp2::MyStruct> struct_set__arg, ::std::set<::cpp2::MyUnion> union_set__arg, ::std::set<::cpp2::MyEnum> enum_set__arg, ::std::map<::cpp2::MyStruct, ::std::int64_t> struct_map__arg, ::std::map<::cpp2::MyUnion, ::std::int64_t> union_map__arg, ::std::map<::cpp2::MyEnum, ::std::int64_t> enum_map__arg, ::std::map<::std::int32_t, ::cpp2::MyStruct> struct_map_2__arg, ::std::map<::std::int32_t, ::cpp2::MyUnion> union_map_2__arg, ::std::map<::std::int32_t, ::cpp2::MyEnum> enum_map_2__arg, ::std::map<::std::vector<::std::int32_t>, ::std::int32_t> list_map__arg, ::std::map<::std::int32_t, ::std::vector<::std::int32_t>> list_map_2__arg, ::std::map<::std::set<::std::int32_t>, ::std::int32_t> set_map__arg, ::std::map<::std::int32_t, ::std::set<::std::int32_t>> set_map_2__arg, ::std::map<::std::map<::std::int32_t, ::std::int32_t>, ::std::int32_t> map_map__arg, ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>> map_map_2__arg, ::std::vector<::std::vector<::std::int32_t>> list_list_i32__arg, ::std::vector<::std::vector<::cpp2::MyStruct>> list_list_struct__arg, ::std::vector<::std::set<::std::int32_t>> list_set_i32__arg, ::std::vector<::std::set<::cpp2::MyStruct>> list_set_struct__arg, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>> list_map_i32_i32__arg, ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>> list_map_i32_struct__arg, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>> list_map_struct_i32__arg, ::std::set<::std::vector<::std::int32_t>> set_list_i32__arg, ::std::set<::std::vector<::cpp2::MyStruct>> set_list_struct__arg, ::std::set<::std::set<::std::int32_t>> set_set_i32__arg, ::std::set<::std::set<::cpp2::MyStruct>> set_set_struct__arg, ::std::set<::std::map<::std::int32_t, ::std::int32_t>> set_map_i32_i32__arg, ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>> set_map_i32_struct__arg, ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>> set_map_struct_i32__arg, ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>> map_i32_map_i32_i32__arg, ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>> map_i32_map_struct_i32__arg, ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>> map_i32_map_i32_struct__arg, ::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> map_i32_map_list_i32_i32__arg, ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>> map_i32_map_list_struct_i32__arg) :
     __fbthrift_field_struct_list(std::move(struct_list__arg)),
     __fbthrift_field_union_list(std::move(union_list__arg)),
     __fbthrift_field_enum_list(std::move(enum_list__arg)),
@@ -3120,7 +3158,26 @@ Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::cpp2:
     __fbthrift_field_set_map(std::move(set_map__arg)),
     __fbthrift_field_set_map_2(std::move(set_map_2__arg)),
     __fbthrift_field_map_map(std::move(map_map__arg)),
-    __fbthrift_field_map_map_2(std::move(map_map_2__arg)) { 
+    __fbthrift_field_map_map_2(std::move(map_map_2__arg)),
+    __fbthrift_field_list_list_i32(std::move(list_list_i32__arg)),
+    __fbthrift_field_list_list_struct(std::move(list_list_struct__arg)),
+    __fbthrift_field_list_set_i32(std::move(list_set_i32__arg)),
+    __fbthrift_field_list_set_struct(std::move(list_set_struct__arg)),
+    __fbthrift_field_list_map_i32_i32(std::move(list_map_i32_i32__arg)),
+    __fbthrift_field_list_map_i32_struct(std::move(list_map_i32_struct__arg)),
+    __fbthrift_field_list_map_struct_i32(std::move(list_map_struct_i32__arg)),
+    __fbthrift_field_set_list_i32(std::move(set_list_i32__arg)),
+    __fbthrift_field_set_list_struct(std::move(set_list_struct__arg)),
+    __fbthrift_field_set_set_i32(std::move(set_set_i32__arg)),
+    __fbthrift_field_set_set_struct(std::move(set_set_struct__arg)),
+    __fbthrift_field_set_map_i32_i32(std::move(set_map_i32_i32__arg)),
+    __fbthrift_field_set_map_i32_struct(std::move(set_map_i32_struct__arg)),
+    __fbthrift_field_set_map_struct_i32(std::move(set_map_struct_i32__arg)),
+    __fbthrift_field_map_i32_map_i32_i32(std::move(map_i32_map_i32_i32__arg)),
+    __fbthrift_field_map_i32_map_struct_i32(std::move(map_i32_map_struct_i32__arg)),
+    __fbthrift_field_map_i32_map_i32_struct(std::move(map_i32_map_i32_struct__arg)),
+    __fbthrift_field_map_i32_map_list_i32_i32(std::move(map_i32_map_list_i32_i32__arg)),
+    __fbthrift_field_map_i32_map_list_struct_i32(std::move(map_i32_map_list_struct_i32__arg)) { 
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -3139,6 +3196,25 @@ Containers::Containers(apache::thrift::FragileConstructor, ::std::vector<::cpp2:
   __isset.set(folly::index_constant<15>(), true);
   __isset.set(folly::index_constant<16>(), true);
   __isset.set(folly::index_constant<17>(), true);
+  __isset.set(folly::index_constant<18>(), true);
+  __isset.set(folly::index_constant<19>(), true);
+  __isset.set(folly::index_constant<20>(), true);
+  __isset.set(folly::index_constant<21>(), true);
+  __isset.set(folly::index_constant<22>(), true);
+  __isset.set(folly::index_constant<23>(), true);
+  __isset.set(folly::index_constant<24>(), true);
+  __isset.set(folly::index_constant<25>(), true);
+  __isset.set(folly::index_constant<26>(), true);
+  __isset.set(folly::index_constant<27>(), true);
+  __isset.set(folly::index_constant<28>(), true);
+  __isset.set(folly::index_constant<29>(), true);
+  __isset.set(folly::index_constant<30>(), true);
+  __isset.set(folly::index_constant<31>(), true);
+  __isset.set(folly::index_constant<32>(), true);
+  __isset.set(folly::index_constant<33>(), true);
+  __isset.set(folly::index_constant<34>(), true);
+  __isset.set(folly::index_constant<35>(), true);
+  __isset.set(folly::index_constant<36>(), true);
 }
 
 
@@ -3162,6 +3238,25 @@ void Containers::__fbthrift_clear() {
   this->__fbthrift_field_set_map_2.clear();
   this->__fbthrift_field_map_map.clear();
   this->__fbthrift_field_map_map_2.clear();
+  this->__fbthrift_field_list_list_i32.clear();
+  this->__fbthrift_field_list_list_struct.clear();
+  this->__fbthrift_field_list_set_i32.clear();
+  this->__fbthrift_field_list_set_struct.clear();
+  this->__fbthrift_field_list_map_i32_i32.clear();
+  this->__fbthrift_field_list_map_i32_struct.clear();
+  this->__fbthrift_field_list_map_struct_i32.clear();
+  this->__fbthrift_field_set_list_i32.clear();
+  this->__fbthrift_field_set_list_struct.clear();
+  this->__fbthrift_field_set_set_i32.clear();
+  this->__fbthrift_field_set_set_struct.clear();
+  this->__fbthrift_field_set_map_i32_i32.clear();
+  this->__fbthrift_field_set_map_i32_struct.clear();
+  this->__fbthrift_field_set_map_struct_i32.clear();
+  this->__fbthrift_field_map_i32_map_i32_i32.clear();
+  this->__fbthrift_field_map_i32_map_struct_i32.clear();
+  this->__fbthrift_field_map_i32_map_i32_struct.clear();
+  this->__fbthrift_field_map_i32_map_list_i32_i32.clear();
+  this->__fbthrift_field_map_i32_map_list_struct_i32.clear();
   __isset = {};
 }
 
@@ -3325,6 +3420,158 @@ const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Co
   return static_cast<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_map_map_2);
 }
 
+const ::std::vector<::std::vector<::std::int32_t>>& Containers::get_list_list_i32() const& {
+  return __fbthrift_field_list_list_i32;
+}
+
+::std::vector<::std::vector<::std::int32_t>> Containers::get_list_list_i32() && {
+  return static_cast<::std::vector<::std::vector<::std::int32_t>>&&>(__fbthrift_field_list_list_i32);
+}
+
+const ::std::vector<::std::vector<::cpp2::MyStruct>>& Containers::get_list_list_struct() const& {
+  return __fbthrift_field_list_list_struct;
+}
+
+::std::vector<::std::vector<::cpp2::MyStruct>> Containers::get_list_list_struct() && {
+  return static_cast<::std::vector<::std::vector<::cpp2::MyStruct>>&&>(__fbthrift_field_list_list_struct);
+}
+
+const ::std::vector<::std::set<::std::int32_t>>& Containers::get_list_set_i32() const& {
+  return __fbthrift_field_list_set_i32;
+}
+
+::std::vector<::std::set<::std::int32_t>> Containers::get_list_set_i32() && {
+  return static_cast<::std::vector<::std::set<::std::int32_t>>&&>(__fbthrift_field_list_set_i32);
+}
+
+const ::std::vector<::std::set<::cpp2::MyStruct>>& Containers::get_list_set_struct() const& {
+  return __fbthrift_field_list_set_struct;
+}
+
+::std::vector<::std::set<::cpp2::MyStruct>> Containers::get_list_set_struct() && {
+  return static_cast<::std::vector<::std::set<::cpp2::MyStruct>>&&>(__fbthrift_field_list_set_struct);
+}
+
+const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_list_map_i32_i32() const& {
+  return __fbthrift_field_list_map_i32_i32;
+}
+
+::std::vector<::std::map<::std::int32_t, ::std::int32_t>> Containers::get_list_map_i32_i32() && {
+  return static_cast<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_list_map_i32_i32);
+}
+
+const ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_list_map_i32_struct() const& {
+  return __fbthrift_field_list_map_i32_struct;
+}
+
+::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>> Containers::get_list_map_i32_struct() && {
+  return static_cast<::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>&&>(__fbthrift_field_list_map_i32_struct);
+}
+
+const ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_list_map_struct_i32() const& {
+  return __fbthrift_field_list_map_struct_i32;
+}
+
+::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>> Containers::get_list_map_struct_i32() && {
+  return static_cast<::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>&&>(__fbthrift_field_list_map_struct_i32);
+}
+
+const ::std::set<::std::vector<::std::int32_t>>& Containers::get_set_list_i32() const& {
+  return __fbthrift_field_set_list_i32;
+}
+
+::std::set<::std::vector<::std::int32_t>> Containers::get_set_list_i32() && {
+  return static_cast<::std::set<::std::vector<::std::int32_t>>&&>(__fbthrift_field_set_list_i32);
+}
+
+const ::std::set<::std::vector<::cpp2::MyStruct>>& Containers::get_set_list_struct() const& {
+  return __fbthrift_field_set_list_struct;
+}
+
+::std::set<::std::vector<::cpp2::MyStruct>> Containers::get_set_list_struct() && {
+  return static_cast<::std::set<::std::vector<::cpp2::MyStruct>>&&>(__fbthrift_field_set_list_struct);
+}
+
+const ::std::set<::std::set<::std::int32_t>>& Containers::get_set_set_i32() const& {
+  return __fbthrift_field_set_set_i32;
+}
+
+::std::set<::std::set<::std::int32_t>> Containers::get_set_set_i32() && {
+  return static_cast<::std::set<::std::set<::std::int32_t>>&&>(__fbthrift_field_set_set_i32);
+}
+
+const ::std::set<::std::set<::cpp2::MyStruct>>& Containers::get_set_set_struct() const& {
+  return __fbthrift_field_set_set_struct;
+}
+
+::std::set<::std::set<::cpp2::MyStruct>> Containers::get_set_set_struct() && {
+  return static_cast<::std::set<::std::set<::cpp2::MyStruct>>&&>(__fbthrift_field_set_set_struct);
+}
+
+const ::std::set<::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_set_map_i32_i32() const& {
+  return __fbthrift_field_set_map_i32_i32;
+}
+
+::std::set<::std::map<::std::int32_t, ::std::int32_t>> Containers::get_set_map_i32_i32() && {
+  return static_cast<::std::set<::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_set_map_i32_i32);
+}
+
+const ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_set_map_i32_struct() const& {
+  return __fbthrift_field_set_map_i32_struct;
+}
+
+::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>> Containers::get_set_map_i32_struct() && {
+  return static_cast<::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>&&>(__fbthrift_field_set_map_i32_struct);
+}
+
+const ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_set_map_struct_i32() const& {
+  return __fbthrift_field_set_map_struct_i32;
+}
+
+::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>> Containers::get_set_map_struct_i32() && {
+  return static_cast<::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>&&>(__fbthrift_field_set_map_struct_i32);
+}
+
+const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>& Containers::get_map_i32_map_i32_i32() const& {
+  return __fbthrift_field_map_i32_map_i32_i32;
+}
+
+::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>> Containers::get_map_i32_map_i32_i32() && {
+  return static_cast<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::int32_t>>&&>(__fbthrift_field_map_i32_map_i32_i32);
+}
+
+const ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>& Containers::get_map_i32_map_struct_i32() const& {
+  return __fbthrift_field_map_i32_map_struct_i32;
+}
+
+::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>> Containers::get_map_i32_map_struct_i32() && {
+  return static_cast<::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>&&>(__fbthrift_field_map_i32_map_struct_i32);
+}
+
+const ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>& Containers::get_map_i32_map_i32_struct() const& {
+  return __fbthrift_field_map_i32_map_i32_struct;
+}
+
+::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>> Containers::get_map_i32_map_i32_struct() && {
+  return static_cast<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>&&>(__fbthrift_field_map_i32_map_i32_struct);
+}
+
+const ::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>& Containers::get_map_i32_map_list_i32_i32() const& {
+  return __fbthrift_field_map_i32_map_list_i32_i32;
+}
+
+::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> Containers::get_map_i32_map_list_i32_i32() && {
+  return static_cast<::std::map<::std::int32_t, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>>&&>(__fbthrift_field_map_i32_map_list_i32_i32);
+}
+
+const ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>& Containers::get_map_i32_map_list_struct_i32() const& {
+  return __fbthrift_field_map_i32_map_list_struct_i32;
+}
+
+::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>> Containers::get_map_i32_map_list_struct_i32() && {
+  return static_cast<::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>&&>(__fbthrift_field_map_i32_map_list_struct_i32);
+}
+
 void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_struct_list, b.__fbthrift_field_struct_list);
@@ -3345,6 +3592,25 @@ void swap([[maybe_unused]] Containers& a, [[maybe_unused]] Containers& b) {
   swap(a.__fbthrift_field_set_map_2, b.__fbthrift_field_set_map_2);
   swap(a.__fbthrift_field_map_map, b.__fbthrift_field_map_map);
   swap(a.__fbthrift_field_map_map_2, b.__fbthrift_field_map_map_2);
+  swap(a.__fbthrift_field_list_list_i32, b.__fbthrift_field_list_list_i32);
+  swap(a.__fbthrift_field_list_list_struct, b.__fbthrift_field_list_list_struct);
+  swap(a.__fbthrift_field_list_set_i32, b.__fbthrift_field_list_set_i32);
+  swap(a.__fbthrift_field_list_set_struct, b.__fbthrift_field_list_set_struct);
+  swap(a.__fbthrift_field_list_map_i32_i32, b.__fbthrift_field_list_map_i32_i32);
+  swap(a.__fbthrift_field_list_map_i32_struct, b.__fbthrift_field_list_map_i32_struct);
+  swap(a.__fbthrift_field_list_map_struct_i32, b.__fbthrift_field_list_map_struct_i32);
+  swap(a.__fbthrift_field_set_list_i32, b.__fbthrift_field_set_list_i32);
+  swap(a.__fbthrift_field_set_list_struct, b.__fbthrift_field_set_list_struct);
+  swap(a.__fbthrift_field_set_set_i32, b.__fbthrift_field_set_set_i32);
+  swap(a.__fbthrift_field_set_set_struct, b.__fbthrift_field_set_set_struct);
+  swap(a.__fbthrift_field_set_map_i32_i32, b.__fbthrift_field_set_map_i32_i32);
+  swap(a.__fbthrift_field_set_map_i32_struct, b.__fbthrift_field_set_map_i32_struct);
+  swap(a.__fbthrift_field_set_map_struct_i32, b.__fbthrift_field_set_map_struct_i32);
+  swap(a.__fbthrift_field_map_i32_map_i32_i32, b.__fbthrift_field_map_i32_map_i32_i32);
+  swap(a.__fbthrift_field_map_i32_map_struct_i32, b.__fbthrift_field_map_i32_map_struct_i32);
+  swap(a.__fbthrift_field_map_i32_map_i32_struct, b.__fbthrift_field_map_i32_map_i32_struct);
+  swap(a.__fbthrift_field_map_i32_map_list_i32_i32, b.__fbthrift_field_map_i32_map_list_i32_i32);
+  swap(a.__fbthrift_field_map_i32_map_list_struct_i32, b.__fbthrift_field_map_i32_map_list_struct_i32);
   swap(a.__isset, b.__isset);
 }
 
@@ -3404,6 +3670,72 @@ static_assert(
         Containers,
         ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::variant>,
         ::std::map<::std::int32_t, ::cpp2::MyUnion>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>,
+        ::std::vector<::std::vector<::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>>,
+        ::std::vector<::std::set<::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>,
+        ::std::vector<::std::map<::std::int32_t, ::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>,
+        ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::set<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>,
+        ::std::set<::std::vector<::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::set<::apache::thrift::type_class::set<::apache::thrift::type_class::structure>>,
+        ::std::set<::std::set<::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::set<::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>,
+        ::std::set<::std::map<::std::int32_t, ::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::set<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>,
+        ::std::set<::std::map<::cpp2::MyStruct, ::std::int32_t>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>,
+        ::std::map<::std::int32_t, ::std::map<::cpp2::MyStruct, ::std::int32_t>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>>,
+        ::std::map<::std::int32_t, ::std::map<::std::int32_t, ::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Containers,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>>>,
+        ::std::map<::std::int32_t, ::std::vector<::std::map<::cpp2::MyStruct, ::std::int32_t>>>>,
     "inconsistent use of json option");
 
 } // namespace cpp2

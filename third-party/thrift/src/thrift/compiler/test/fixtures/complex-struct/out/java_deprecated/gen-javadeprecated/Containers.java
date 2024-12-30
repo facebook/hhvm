@@ -42,6 +42,25 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
   private static final TField SET_MAP_2_FIELD_DESC = new TField("set_map_2", TType.MAP, (short)16);
   private static final TField MAP_MAP_FIELD_DESC = new TField("map_map", TType.MAP, (short)17);
   private static final TField MAP_MAP_2_FIELD_DESC = new TField("map_map_2", TType.MAP, (short)18);
+  private static final TField LIST_LIST_I32_FIELD_DESC = new TField("list_list_i32", TType.LIST, (short)19);
+  private static final TField LIST_LIST_STRUCT_FIELD_DESC = new TField("list_list_struct", TType.LIST, (short)20);
+  private static final TField LIST_SET_I32_FIELD_DESC = new TField("list_set_i32", TType.LIST, (short)21);
+  private static final TField LIST_SET_STRUCT_FIELD_DESC = new TField("list_set_struct", TType.LIST, (short)22);
+  private static final TField LIST_MAP_I32_I32_FIELD_DESC = new TField("list_map_i32_i32", TType.LIST, (short)23);
+  private static final TField LIST_MAP_I32_STRUCT_FIELD_DESC = new TField("list_map_i32_struct", TType.LIST, (short)24);
+  private static final TField LIST_MAP_STRUCT_I32_FIELD_DESC = new TField("list_map_struct_i32", TType.LIST, (short)25);
+  private static final TField SET_LIST_I32_FIELD_DESC = new TField("set_list_i32", TType.SET, (short)26);
+  private static final TField SET_LIST_STRUCT_FIELD_DESC = new TField("set_list_struct", TType.SET, (short)27);
+  private static final TField SET_SET_I32_FIELD_DESC = new TField("set_set_i32", TType.SET, (short)28);
+  private static final TField SET_SET_STRUCT_FIELD_DESC = new TField("set_set_struct", TType.SET, (short)29);
+  private static final TField SET_MAP_I32_I32_FIELD_DESC = new TField("set_map_i32_i32", TType.SET, (short)30);
+  private static final TField SET_MAP_I32_STRUCT_FIELD_DESC = new TField("set_map_i32_struct", TType.SET, (short)31);
+  private static final TField SET_MAP_STRUCT_I32_FIELD_DESC = new TField("set_map_struct_i32", TType.SET, (short)32);
+  private static final TField MAP_I32_MAP_I32_I32_FIELD_DESC = new TField("map_i32_map_i32_i32", TType.MAP, (short)33);
+  private static final TField MAP_I32_MAP_STRUCT_I32_FIELD_DESC = new TField("map_i32_map_struct_i32", TType.MAP, (short)34);
+  private static final TField MAP_I32_MAP_I32_STRUCT_FIELD_DESC = new TField("map_i32_map_i32_struct", TType.MAP, (short)35);
+  private static final TField MAP_I32_MAP_LIST_I32_I32_FIELD_DESC = new TField("map_i32_map_list_i32_i32", TType.MAP, (short)36);
+  private static final TField MAP_I32_MAP_LIST_STRUCT_I32_FIELD_DESC = new TField("map_i32_map_list_struct_i32", TType.MAP, (short)37);
 
   public List<MyStruct> struct_list;
   public List<MyUnion> union_list;
@@ -61,6 +80,25 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
   public Map<Integer,Set<Integer>> set_map_2;
   public Map<Map<Integer,Integer>,Integer> map_map;
   public Map<Integer,Map<Integer,Integer>> map_map_2;
+  public List<List<Integer>> list_list_i32;
+  public List<List<MyStruct>> list_list_struct;
+  public List<Set<Integer>> list_set_i32;
+  public List<Set<MyStruct>> list_set_struct;
+  public List<Map<Integer,Integer>> list_map_i32_i32;
+  public List<Map<Integer,MyStruct>> list_map_i32_struct;
+  public List<Map<MyStruct,Integer>> list_map_struct_i32;
+  public Set<List<Integer>> set_list_i32;
+  public Set<List<MyStruct>> set_list_struct;
+  public Set<Set<Integer>> set_set_i32;
+  public Set<Set<MyStruct>> set_set_struct;
+  public Set<Map<Integer,Integer>> set_map_i32_i32;
+  public Set<Map<Integer,MyStruct>> set_map_i32_struct;
+  public Set<Map<MyStruct,Integer>> set_map_struct_i32;
+  public Map<Integer,Map<Integer,Integer>> map_i32_map_i32_i32;
+  public Map<Integer,Map<MyStruct,Integer>> map_i32_map_struct_i32;
+  public Map<Integer,Map<Integer,MyStruct>> map_i32_map_i32_struct;
+  public Map<Integer,List<Map<Integer,Integer>>> map_i32_map_list_i32_i32;
+  public Map<Integer,List<Map<MyStruct,Integer>>> map_i32_map_list_struct_i32;
   public static final int STRUCT_LIST = 1;
   public static final int UNION_LIST = 2;
   public static final int ENUM_LIST = 3;
@@ -79,6 +117,25 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
   public static final int SET_MAP_2 = 16;
   public static final int MAP_MAP = 17;
   public static final int MAP_MAP_2 = 18;
+  public static final int LIST_LIST_I32 = 19;
+  public static final int LIST_LIST_STRUCT = 20;
+  public static final int LIST_SET_I32 = 21;
+  public static final int LIST_SET_STRUCT = 22;
+  public static final int LIST_MAP_I32_I32 = 23;
+  public static final int LIST_MAP_I32_STRUCT = 24;
+  public static final int LIST_MAP_STRUCT_I32 = 25;
+  public static final int SET_LIST_I32 = 26;
+  public static final int SET_LIST_STRUCT = 27;
+  public static final int SET_SET_I32 = 28;
+  public static final int SET_SET_STRUCT = 29;
+  public static final int SET_MAP_I32_I32 = 30;
+  public static final int SET_MAP_I32_STRUCT = 31;
+  public static final int SET_MAP_STRUCT_I32 = 32;
+  public static final int MAP_I32_MAP_I32_I32 = 33;
+  public static final int MAP_I32_MAP_STRUCT_I32 = 34;
+  public static final int MAP_I32_MAP_I32_STRUCT = 35;
+  public static final int MAP_I32_MAP_LIST_I32_I32 = 36;
+  public static final int MAP_I32_MAP_LIST_STRUCT_I32 = 37;
 
   // isset id assignments
 
@@ -160,6 +217,100 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
             new MapMetaData(TType.MAP, 
                 new FieldValueMetaData(TType.I32), 
                 new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(LIST_LIST_I32, new FieldMetaData("list_list_i32", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new ListMetaData(TType.LIST, 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(LIST_LIST_STRUCT, new FieldMetaData("list_list_struct", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new ListMetaData(TType.LIST, 
+                new StructMetaData(TType.STRUCT, MyStruct.class)))));
+    tmpMetaDataMap.put(LIST_SET_I32, new FieldMetaData("list_set_i32", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new SetMetaData(TType.SET, 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(LIST_SET_STRUCT, new FieldMetaData("list_set_struct", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new SetMetaData(TType.SET, 
+                new StructMetaData(TType.STRUCT, MyStruct.class)))));
+    tmpMetaDataMap.put(LIST_MAP_I32_I32, new FieldMetaData("list_map_i32_i32", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new MapMetaData(TType.MAP, 
+                new FieldValueMetaData(TType.I32), 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(LIST_MAP_I32_STRUCT, new FieldMetaData("list_map_i32_struct", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new MapMetaData(TType.MAP, 
+                new FieldValueMetaData(TType.I32), 
+                new StructMetaData(TType.STRUCT, MyStruct.class)))));
+    tmpMetaDataMap.put(LIST_MAP_STRUCT_I32, new FieldMetaData("list_map_struct_i32", TFieldRequirementType.DEFAULT, 
+        new ListMetaData(TType.LIST, 
+            new MapMetaData(TType.MAP, 
+                new StructMetaData(TType.STRUCT, MyStruct.class), 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(SET_LIST_I32, new FieldMetaData("set_list_i32", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new ListMetaData(TType.LIST, 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(SET_LIST_STRUCT, new FieldMetaData("set_list_struct", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new ListMetaData(TType.LIST, 
+                new StructMetaData(TType.STRUCT, MyStruct.class)))));
+    tmpMetaDataMap.put(SET_SET_I32, new FieldMetaData("set_set_i32", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new SetMetaData(TType.SET, 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(SET_SET_STRUCT, new FieldMetaData("set_set_struct", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new SetMetaData(TType.SET, 
+                new StructMetaData(TType.STRUCT, MyStruct.class)))));
+    tmpMetaDataMap.put(SET_MAP_I32_I32, new FieldMetaData("set_map_i32_i32", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new MapMetaData(TType.MAP, 
+                new FieldValueMetaData(TType.I32), 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(SET_MAP_I32_STRUCT, new FieldMetaData("set_map_i32_struct", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new MapMetaData(TType.MAP, 
+                new FieldValueMetaData(TType.I32), 
+                new StructMetaData(TType.STRUCT, MyStruct.class)))));
+    tmpMetaDataMap.put(SET_MAP_STRUCT_I32, new FieldMetaData("set_map_struct_i32", TFieldRequirementType.DEFAULT, 
+        new SetMetaData(TType.SET, 
+            new MapMetaData(TType.MAP, 
+                new StructMetaData(TType.STRUCT, MyStruct.class), 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(MAP_I32_MAP_I32_I32, new FieldMetaData("map_i32_map_i32_i32", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.I32), 
+            new MapMetaData(TType.MAP, 
+                new FieldValueMetaData(TType.I32), 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(MAP_I32_MAP_STRUCT_I32, new FieldMetaData("map_i32_map_struct_i32", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.I32), 
+            new MapMetaData(TType.MAP, 
+                new StructMetaData(TType.STRUCT, MyStruct.class), 
+                new FieldValueMetaData(TType.I32)))));
+    tmpMetaDataMap.put(MAP_I32_MAP_I32_STRUCT, new FieldMetaData("map_i32_map_i32_struct", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.I32), 
+            new MapMetaData(TType.MAP, 
+                new FieldValueMetaData(TType.I32), 
+                new StructMetaData(TType.STRUCT, MyStruct.class)))));
+    tmpMetaDataMap.put(MAP_I32_MAP_LIST_I32_I32, new FieldMetaData("map_i32_map_list_i32_i32", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.I32), 
+            new ListMetaData(TType.LIST, 
+                new MapMetaData(TType.MAP, 
+                    new FieldValueMetaData(TType.I32), 
+                    new FieldValueMetaData(TType.I32))))));
+    tmpMetaDataMap.put(MAP_I32_MAP_LIST_STRUCT_I32, new FieldMetaData("map_i32_map_list_struct_i32", TFieldRequirementType.DEFAULT, 
+        new MapMetaData(TType.MAP, 
+            new FieldValueMetaData(TType.I32), 
+            new ListMetaData(TType.LIST, 
+                new MapMetaData(TType.MAP, 
+                    new StructMetaData(TType.STRUCT, MyStruct.class), 
+                    new FieldValueMetaData(TType.I32))))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -188,7 +339,26 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       Map<Set<Integer>,Integer> set_map,
       Map<Integer,Set<Integer>> set_map_2,
       Map<Map<Integer,Integer>,Integer> map_map,
-      Map<Integer,Map<Integer,Integer>> map_map_2) {
+      Map<Integer,Map<Integer,Integer>> map_map_2,
+      List<List<Integer>> list_list_i32,
+      List<List<MyStruct>> list_list_struct,
+      List<Set<Integer>> list_set_i32,
+      List<Set<MyStruct>> list_set_struct,
+      List<Map<Integer,Integer>> list_map_i32_i32,
+      List<Map<Integer,MyStruct>> list_map_i32_struct,
+      List<Map<MyStruct,Integer>> list_map_struct_i32,
+      Set<List<Integer>> set_list_i32,
+      Set<List<MyStruct>> set_list_struct,
+      Set<Set<Integer>> set_set_i32,
+      Set<Set<MyStruct>> set_set_struct,
+      Set<Map<Integer,Integer>> set_map_i32_i32,
+      Set<Map<Integer,MyStruct>> set_map_i32_struct,
+      Set<Map<MyStruct,Integer>> set_map_struct_i32,
+      Map<Integer,Map<Integer,Integer>> map_i32_map_i32_i32,
+      Map<Integer,Map<MyStruct,Integer>> map_i32_map_struct_i32,
+      Map<Integer,Map<Integer,MyStruct>> map_i32_map_i32_struct,
+      Map<Integer,List<Map<Integer,Integer>>> map_i32_map_list_i32_i32,
+      Map<Integer,List<Map<MyStruct,Integer>>> map_i32_map_list_struct_i32) {
     this();
     this.struct_list = struct_list;
     this.union_list = union_list;
@@ -208,6 +378,25 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
     this.set_map_2 = set_map_2;
     this.map_map = map_map;
     this.map_map_2 = map_map_2;
+    this.list_list_i32 = list_list_i32;
+    this.list_list_struct = list_list_struct;
+    this.list_set_i32 = list_set_i32;
+    this.list_set_struct = list_set_struct;
+    this.list_map_i32_i32 = list_map_i32_i32;
+    this.list_map_i32_struct = list_map_i32_struct;
+    this.list_map_struct_i32 = list_map_struct_i32;
+    this.set_list_i32 = set_list_i32;
+    this.set_list_struct = set_list_struct;
+    this.set_set_i32 = set_set_i32;
+    this.set_set_struct = set_set_struct;
+    this.set_map_i32_i32 = set_map_i32_i32;
+    this.set_map_i32_struct = set_map_i32_struct;
+    this.set_map_struct_i32 = set_map_struct_i32;
+    this.map_i32_map_i32_i32 = map_i32_map_i32_i32;
+    this.map_i32_map_struct_i32 = map_i32_map_struct_i32;
+    this.map_i32_map_i32_struct = map_i32_map_i32_struct;
+    this.map_i32_map_list_i32_i32 = map_i32_map_list_i32_i32;
+    this.map_i32_map_list_struct_i32 = map_i32_map_list_struct_i32;
   }
 
   public static class Builder {
@@ -229,6 +418,25 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
     private Map<Integer,Set<Integer>> set_map_2;
     private Map<Map<Integer,Integer>,Integer> map_map;
     private Map<Integer,Map<Integer,Integer>> map_map_2;
+    private List<List<Integer>> list_list_i32;
+    private List<List<MyStruct>> list_list_struct;
+    private List<Set<Integer>> list_set_i32;
+    private List<Set<MyStruct>> list_set_struct;
+    private List<Map<Integer,Integer>> list_map_i32_i32;
+    private List<Map<Integer,MyStruct>> list_map_i32_struct;
+    private List<Map<MyStruct,Integer>> list_map_struct_i32;
+    private Set<List<Integer>> set_list_i32;
+    private Set<List<MyStruct>> set_list_struct;
+    private Set<Set<Integer>> set_set_i32;
+    private Set<Set<MyStruct>> set_set_struct;
+    private Set<Map<Integer,Integer>> set_map_i32_i32;
+    private Set<Map<Integer,MyStruct>> set_map_i32_struct;
+    private Set<Map<MyStruct,Integer>> set_map_struct_i32;
+    private Map<Integer,Map<Integer,Integer>> map_i32_map_i32_i32;
+    private Map<Integer,Map<MyStruct,Integer>> map_i32_map_struct_i32;
+    private Map<Integer,Map<Integer,MyStruct>> map_i32_map_i32_struct;
+    private Map<Integer,List<Map<Integer,Integer>>> map_i32_map_list_i32_i32;
+    private Map<Integer,List<Map<MyStruct,Integer>>> map_i32_map_list_struct_i32;
 
     public Builder() {
     }
@@ -323,6 +531,101 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       return this;
     }
 
+    public Builder setList_list_i32(final List<List<Integer>> list_list_i32) {
+      this.list_list_i32 = list_list_i32;
+      return this;
+    }
+
+    public Builder setList_list_struct(final List<List<MyStruct>> list_list_struct) {
+      this.list_list_struct = list_list_struct;
+      return this;
+    }
+
+    public Builder setList_set_i32(final List<Set<Integer>> list_set_i32) {
+      this.list_set_i32 = list_set_i32;
+      return this;
+    }
+
+    public Builder setList_set_struct(final List<Set<MyStruct>> list_set_struct) {
+      this.list_set_struct = list_set_struct;
+      return this;
+    }
+
+    public Builder setList_map_i32_i32(final List<Map<Integer,Integer>> list_map_i32_i32) {
+      this.list_map_i32_i32 = list_map_i32_i32;
+      return this;
+    }
+
+    public Builder setList_map_i32_struct(final List<Map<Integer,MyStruct>> list_map_i32_struct) {
+      this.list_map_i32_struct = list_map_i32_struct;
+      return this;
+    }
+
+    public Builder setList_map_struct_i32(final List<Map<MyStruct,Integer>> list_map_struct_i32) {
+      this.list_map_struct_i32 = list_map_struct_i32;
+      return this;
+    }
+
+    public Builder setSet_list_i32(final Set<List<Integer>> set_list_i32) {
+      this.set_list_i32 = set_list_i32;
+      return this;
+    }
+
+    public Builder setSet_list_struct(final Set<List<MyStruct>> set_list_struct) {
+      this.set_list_struct = set_list_struct;
+      return this;
+    }
+
+    public Builder setSet_set_i32(final Set<Set<Integer>> set_set_i32) {
+      this.set_set_i32 = set_set_i32;
+      return this;
+    }
+
+    public Builder setSet_set_struct(final Set<Set<MyStruct>> set_set_struct) {
+      this.set_set_struct = set_set_struct;
+      return this;
+    }
+
+    public Builder setSet_map_i32_i32(final Set<Map<Integer,Integer>> set_map_i32_i32) {
+      this.set_map_i32_i32 = set_map_i32_i32;
+      return this;
+    }
+
+    public Builder setSet_map_i32_struct(final Set<Map<Integer,MyStruct>> set_map_i32_struct) {
+      this.set_map_i32_struct = set_map_i32_struct;
+      return this;
+    }
+
+    public Builder setSet_map_struct_i32(final Set<Map<MyStruct,Integer>> set_map_struct_i32) {
+      this.set_map_struct_i32 = set_map_struct_i32;
+      return this;
+    }
+
+    public Builder setMap_i32_map_i32_i32(final Map<Integer,Map<Integer,Integer>> map_i32_map_i32_i32) {
+      this.map_i32_map_i32_i32 = map_i32_map_i32_i32;
+      return this;
+    }
+
+    public Builder setMap_i32_map_struct_i32(final Map<Integer,Map<MyStruct,Integer>> map_i32_map_struct_i32) {
+      this.map_i32_map_struct_i32 = map_i32_map_struct_i32;
+      return this;
+    }
+
+    public Builder setMap_i32_map_i32_struct(final Map<Integer,Map<Integer,MyStruct>> map_i32_map_i32_struct) {
+      this.map_i32_map_i32_struct = map_i32_map_i32_struct;
+      return this;
+    }
+
+    public Builder setMap_i32_map_list_i32_i32(final Map<Integer,List<Map<Integer,Integer>>> map_i32_map_list_i32_i32) {
+      this.map_i32_map_list_i32_i32 = map_i32_map_list_i32_i32;
+      return this;
+    }
+
+    public Builder setMap_i32_map_list_struct_i32(final Map<Integer,List<Map<MyStruct,Integer>>> map_i32_map_list_struct_i32) {
+      this.map_i32_map_list_struct_i32 = map_i32_map_list_struct_i32;
+      return this;
+    }
+
     public Containers build() {
       Containers result = new Containers();
       result.setStruct_list(this.struct_list);
@@ -343,6 +646,25 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       result.setSet_map_2(this.set_map_2);
       result.setMap_map(this.map_map);
       result.setMap_map_2(this.map_map_2);
+      result.setList_list_i32(this.list_list_i32);
+      result.setList_list_struct(this.list_list_struct);
+      result.setList_set_i32(this.list_set_i32);
+      result.setList_set_struct(this.list_set_struct);
+      result.setList_map_i32_i32(this.list_map_i32_i32);
+      result.setList_map_i32_struct(this.list_map_i32_struct);
+      result.setList_map_struct_i32(this.list_map_struct_i32);
+      result.setSet_list_i32(this.set_list_i32);
+      result.setSet_list_struct(this.set_list_struct);
+      result.setSet_set_i32(this.set_set_i32);
+      result.setSet_set_struct(this.set_set_struct);
+      result.setSet_map_i32_i32(this.set_map_i32_i32);
+      result.setSet_map_i32_struct(this.set_map_i32_struct);
+      result.setSet_map_struct_i32(this.set_map_struct_i32);
+      result.setMap_i32_map_i32_i32(this.map_i32_map_i32_i32);
+      result.setMap_i32_map_struct_i32(this.map_i32_map_struct_i32);
+      result.setMap_i32_map_i32_struct(this.map_i32_map_i32_struct);
+      result.setMap_i32_map_list_i32_i32(this.map_i32_map_list_i32_i32);
+      result.setMap_i32_map_list_struct_i32(this.map_i32_map_list_struct_i32);
       return result;
     }
   }
@@ -408,6 +730,63 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
     }
     if (other.isSetMap_map_2()) {
       this.map_map_2 = TBaseHelper.deepCopy(other.map_map_2);
+    }
+    if (other.isSetList_list_i32()) {
+      this.list_list_i32 = TBaseHelper.deepCopy(other.list_list_i32);
+    }
+    if (other.isSetList_list_struct()) {
+      this.list_list_struct = TBaseHelper.deepCopy(other.list_list_struct);
+    }
+    if (other.isSetList_set_i32()) {
+      this.list_set_i32 = TBaseHelper.deepCopy(other.list_set_i32);
+    }
+    if (other.isSetList_set_struct()) {
+      this.list_set_struct = TBaseHelper.deepCopy(other.list_set_struct);
+    }
+    if (other.isSetList_map_i32_i32()) {
+      this.list_map_i32_i32 = TBaseHelper.deepCopy(other.list_map_i32_i32);
+    }
+    if (other.isSetList_map_i32_struct()) {
+      this.list_map_i32_struct = TBaseHelper.deepCopy(other.list_map_i32_struct);
+    }
+    if (other.isSetList_map_struct_i32()) {
+      this.list_map_struct_i32 = TBaseHelper.deepCopy(other.list_map_struct_i32);
+    }
+    if (other.isSetSet_list_i32()) {
+      this.set_list_i32 = TBaseHelper.deepCopy(other.set_list_i32);
+    }
+    if (other.isSetSet_list_struct()) {
+      this.set_list_struct = TBaseHelper.deepCopy(other.set_list_struct);
+    }
+    if (other.isSetSet_set_i32()) {
+      this.set_set_i32 = TBaseHelper.deepCopy(other.set_set_i32);
+    }
+    if (other.isSetSet_set_struct()) {
+      this.set_set_struct = TBaseHelper.deepCopy(other.set_set_struct);
+    }
+    if (other.isSetSet_map_i32_i32()) {
+      this.set_map_i32_i32 = TBaseHelper.deepCopy(other.set_map_i32_i32);
+    }
+    if (other.isSetSet_map_i32_struct()) {
+      this.set_map_i32_struct = TBaseHelper.deepCopy(other.set_map_i32_struct);
+    }
+    if (other.isSetSet_map_struct_i32()) {
+      this.set_map_struct_i32 = TBaseHelper.deepCopy(other.set_map_struct_i32);
+    }
+    if (other.isSetMap_i32_map_i32_i32()) {
+      this.map_i32_map_i32_i32 = TBaseHelper.deepCopy(other.map_i32_map_i32_i32);
+    }
+    if (other.isSetMap_i32_map_struct_i32()) {
+      this.map_i32_map_struct_i32 = TBaseHelper.deepCopy(other.map_i32_map_struct_i32);
+    }
+    if (other.isSetMap_i32_map_i32_struct()) {
+      this.map_i32_map_i32_struct = TBaseHelper.deepCopy(other.map_i32_map_i32_struct);
+    }
+    if (other.isSetMap_i32_map_list_i32_i32()) {
+      this.map_i32_map_list_i32_i32 = TBaseHelper.deepCopy(other.map_i32_map_list_i32_i32);
+    }
+    if (other.isSetMap_i32_map_list_struct_i32()) {
+      this.map_i32_map_list_struct_i32 = TBaseHelper.deepCopy(other.map_i32_map_list_struct_i32);
     }
   }
 
@@ -847,6 +1226,462 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
     }
   }
 
+  public List<List<Integer>> getList_list_i32() {
+    return this.list_list_i32;
+  }
+
+  public Containers setList_list_i32(List<List<Integer>> list_list_i32) {
+    this.list_list_i32 = list_list_i32;
+    return this;
+  }
+
+  public void unsetList_list_i32() {
+    this.list_list_i32 = null;
+  }
+
+  // Returns true if field list_list_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetList_list_i32() {
+    return this.list_list_i32 != null;
+  }
+
+  public void setList_list_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.list_list_i32 = null;
+    }
+  }
+
+  public List<List<MyStruct>> getList_list_struct() {
+    return this.list_list_struct;
+  }
+
+  public Containers setList_list_struct(List<List<MyStruct>> list_list_struct) {
+    this.list_list_struct = list_list_struct;
+    return this;
+  }
+
+  public void unsetList_list_struct() {
+    this.list_list_struct = null;
+  }
+
+  // Returns true if field list_list_struct is set (has been assigned a value) and false otherwise
+  public boolean isSetList_list_struct() {
+    return this.list_list_struct != null;
+  }
+
+  public void setList_list_structIsSet(boolean __value) {
+    if (!__value) {
+      this.list_list_struct = null;
+    }
+  }
+
+  public List<Set<Integer>> getList_set_i32() {
+    return this.list_set_i32;
+  }
+
+  public Containers setList_set_i32(List<Set<Integer>> list_set_i32) {
+    this.list_set_i32 = list_set_i32;
+    return this;
+  }
+
+  public void unsetList_set_i32() {
+    this.list_set_i32 = null;
+  }
+
+  // Returns true if field list_set_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetList_set_i32() {
+    return this.list_set_i32 != null;
+  }
+
+  public void setList_set_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.list_set_i32 = null;
+    }
+  }
+
+  public List<Set<MyStruct>> getList_set_struct() {
+    return this.list_set_struct;
+  }
+
+  public Containers setList_set_struct(List<Set<MyStruct>> list_set_struct) {
+    this.list_set_struct = list_set_struct;
+    return this;
+  }
+
+  public void unsetList_set_struct() {
+    this.list_set_struct = null;
+  }
+
+  // Returns true if field list_set_struct is set (has been assigned a value) and false otherwise
+  public boolean isSetList_set_struct() {
+    return this.list_set_struct != null;
+  }
+
+  public void setList_set_structIsSet(boolean __value) {
+    if (!__value) {
+      this.list_set_struct = null;
+    }
+  }
+
+  public List<Map<Integer,Integer>> getList_map_i32_i32() {
+    return this.list_map_i32_i32;
+  }
+
+  public Containers setList_map_i32_i32(List<Map<Integer,Integer>> list_map_i32_i32) {
+    this.list_map_i32_i32 = list_map_i32_i32;
+    return this;
+  }
+
+  public void unsetList_map_i32_i32() {
+    this.list_map_i32_i32 = null;
+  }
+
+  // Returns true if field list_map_i32_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetList_map_i32_i32() {
+    return this.list_map_i32_i32 != null;
+  }
+
+  public void setList_map_i32_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.list_map_i32_i32 = null;
+    }
+  }
+
+  public List<Map<Integer,MyStruct>> getList_map_i32_struct() {
+    return this.list_map_i32_struct;
+  }
+
+  public Containers setList_map_i32_struct(List<Map<Integer,MyStruct>> list_map_i32_struct) {
+    this.list_map_i32_struct = list_map_i32_struct;
+    return this;
+  }
+
+  public void unsetList_map_i32_struct() {
+    this.list_map_i32_struct = null;
+  }
+
+  // Returns true if field list_map_i32_struct is set (has been assigned a value) and false otherwise
+  public boolean isSetList_map_i32_struct() {
+    return this.list_map_i32_struct != null;
+  }
+
+  public void setList_map_i32_structIsSet(boolean __value) {
+    if (!__value) {
+      this.list_map_i32_struct = null;
+    }
+  }
+
+  public List<Map<MyStruct,Integer>> getList_map_struct_i32() {
+    return this.list_map_struct_i32;
+  }
+
+  public Containers setList_map_struct_i32(List<Map<MyStruct,Integer>> list_map_struct_i32) {
+    this.list_map_struct_i32 = list_map_struct_i32;
+    return this;
+  }
+
+  public void unsetList_map_struct_i32() {
+    this.list_map_struct_i32 = null;
+  }
+
+  // Returns true if field list_map_struct_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetList_map_struct_i32() {
+    return this.list_map_struct_i32 != null;
+  }
+
+  public void setList_map_struct_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.list_map_struct_i32 = null;
+    }
+  }
+
+  public Set<List<Integer>> getSet_list_i32() {
+    return this.set_list_i32;
+  }
+
+  public Containers setSet_list_i32(Set<List<Integer>> set_list_i32) {
+    this.set_list_i32 = set_list_i32;
+    return this;
+  }
+
+  public void unsetSet_list_i32() {
+    this.set_list_i32 = null;
+  }
+
+  // Returns true if field set_list_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetSet_list_i32() {
+    return this.set_list_i32 != null;
+  }
+
+  public void setSet_list_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.set_list_i32 = null;
+    }
+  }
+
+  public Set<List<MyStruct>> getSet_list_struct() {
+    return this.set_list_struct;
+  }
+
+  public Containers setSet_list_struct(Set<List<MyStruct>> set_list_struct) {
+    this.set_list_struct = set_list_struct;
+    return this;
+  }
+
+  public void unsetSet_list_struct() {
+    this.set_list_struct = null;
+  }
+
+  // Returns true if field set_list_struct is set (has been assigned a value) and false otherwise
+  public boolean isSetSet_list_struct() {
+    return this.set_list_struct != null;
+  }
+
+  public void setSet_list_structIsSet(boolean __value) {
+    if (!__value) {
+      this.set_list_struct = null;
+    }
+  }
+
+  public Set<Set<Integer>> getSet_set_i32() {
+    return this.set_set_i32;
+  }
+
+  public Containers setSet_set_i32(Set<Set<Integer>> set_set_i32) {
+    this.set_set_i32 = set_set_i32;
+    return this;
+  }
+
+  public void unsetSet_set_i32() {
+    this.set_set_i32 = null;
+  }
+
+  // Returns true if field set_set_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetSet_set_i32() {
+    return this.set_set_i32 != null;
+  }
+
+  public void setSet_set_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.set_set_i32 = null;
+    }
+  }
+
+  public Set<Set<MyStruct>> getSet_set_struct() {
+    return this.set_set_struct;
+  }
+
+  public Containers setSet_set_struct(Set<Set<MyStruct>> set_set_struct) {
+    this.set_set_struct = set_set_struct;
+    return this;
+  }
+
+  public void unsetSet_set_struct() {
+    this.set_set_struct = null;
+  }
+
+  // Returns true if field set_set_struct is set (has been assigned a value) and false otherwise
+  public boolean isSetSet_set_struct() {
+    return this.set_set_struct != null;
+  }
+
+  public void setSet_set_structIsSet(boolean __value) {
+    if (!__value) {
+      this.set_set_struct = null;
+    }
+  }
+
+  public Set<Map<Integer,Integer>> getSet_map_i32_i32() {
+    return this.set_map_i32_i32;
+  }
+
+  public Containers setSet_map_i32_i32(Set<Map<Integer,Integer>> set_map_i32_i32) {
+    this.set_map_i32_i32 = set_map_i32_i32;
+    return this;
+  }
+
+  public void unsetSet_map_i32_i32() {
+    this.set_map_i32_i32 = null;
+  }
+
+  // Returns true if field set_map_i32_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetSet_map_i32_i32() {
+    return this.set_map_i32_i32 != null;
+  }
+
+  public void setSet_map_i32_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.set_map_i32_i32 = null;
+    }
+  }
+
+  public Set<Map<Integer,MyStruct>> getSet_map_i32_struct() {
+    return this.set_map_i32_struct;
+  }
+
+  public Containers setSet_map_i32_struct(Set<Map<Integer,MyStruct>> set_map_i32_struct) {
+    this.set_map_i32_struct = set_map_i32_struct;
+    return this;
+  }
+
+  public void unsetSet_map_i32_struct() {
+    this.set_map_i32_struct = null;
+  }
+
+  // Returns true if field set_map_i32_struct is set (has been assigned a value) and false otherwise
+  public boolean isSetSet_map_i32_struct() {
+    return this.set_map_i32_struct != null;
+  }
+
+  public void setSet_map_i32_structIsSet(boolean __value) {
+    if (!__value) {
+      this.set_map_i32_struct = null;
+    }
+  }
+
+  public Set<Map<MyStruct,Integer>> getSet_map_struct_i32() {
+    return this.set_map_struct_i32;
+  }
+
+  public Containers setSet_map_struct_i32(Set<Map<MyStruct,Integer>> set_map_struct_i32) {
+    this.set_map_struct_i32 = set_map_struct_i32;
+    return this;
+  }
+
+  public void unsetSet_map_struct_i32() {
+    this.set_map_struct_i32 = null;
+  }
+
+  // Returns true if field set_map_struct_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetSet_map_struct_i32() {
+    return this.set_map_struct_i32 != null;
+  }
+
+  public void setSet_map_struct_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.set_map_struct_i32 = null;
+    }
+  }
+
+  public Map<Integer,Map<Integer,Integer>> getMap_i32_map_i32_i32() {
+    return this.map_i32_map_i32_i32;
+  }
+
+  public Containers setMap_i32_map_i32_i32(Map<Integer,Map<Integer,Integer>> map_i32_map_i32_i32) {
+    this.map_i32_map_i32_i32 = map_i32_map_i32_i32;
+    return this;
+  }
+
+  public void unsetMap_i32_map_i32_i32() {
+    this.map_i32_map_i32_i32 = null;
+  }
+
+  // Returns true if field map_i32_map_i32_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetMap_i32_map_i32_i32() {
+    return this.map_i32_map_i32_i32 != null;
+  }
+
+  public void setMap_i32_map_i32_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.map_i32_map_i32_i32 = null;
+    }
+  }
+
+  public Map<Integer,Map<MyStruct,Integer>> getMap_i32_map_struct_i32() {
+    return this.map_i32_map_struct_i32;
+  }
+
+  public Containers setMap_i32_map_struct_i32(Map<Integer,Map<MyStruct,Integer>> map_i32_map_struct_i32) {
+    this.map_i32_map_struct_i32 = map_i32_map_struct_i32;
+    return this;
+  }
+
+  public void unsetMap_i32_map_struct_i32() {
+    this.map_i32_map_struct_i32 = null;
+  }
+
+  // Returns true if field map_i32_map_struct_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetMap_i32_map_struct_i32() {
+    return this.map_i32_map_struct_i32 != null;
+  }
+
+  public void setMap_i32_map_struct_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.map_i32_map_struct_i32 = null;
+    }
+  }
+
+  public Map<Integer,Map<Integer,MyStruct>> getMap_i32_map_i32_struct() {
+    return this.map_i32_map_i32_struct;
+  }
+
+  public Containers setMap_i32_map_i32_struct(Map<Integer,Map<Integer,MyStruct>> map_i32_map_i32_struct) {
+    this.map_i32_map_i32_struct = map_i32_map_i32_struct;
+    return this;
+  }
+
+  public void unsetMap_i32_map_i32_struct() {
+    this.map_i32_map_i32_struct = null;
+  }
+
+  // Returns true if field map_i32_map_i32_struct is set (has been assigned a value) and false otherwise
+  public boolean isSetMap_i32_map_i32_struct() {
+    return this.map_i32_map_i32_struct != null;
+  }
+
+  public void setMap_i32_map_i32_structIsSet(boolean __value) {
+    if (!__value) {
+      this.map_i32_map_i32_struct = null;
+    }
+  }
+
+  public Map<Integer,List<Map<Integer,Integer>>> getMap_i32_map_list_i32_i32() {
+    return this.map_i32_map_list_i32_i32;
+  }
+
+  public Containers setMap_i32_map_list_i32_i32(Map<Integer,List<Map<Integer,Integer>>> map_i32_map_list_i32_i32) {
+    this.map_i32_map_list_i32_i32 = map_i32_map_list_i32_i32;
+    return this;
+  }
+
+  public void unsetMap_i32_map_list_i32_i32() {
+    this.map_i32_map_list_i32_i32 = null;
+  }
+
+  // Returns true if field map_i32_map_list_i32_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetMap_i32_map_list_i32_i32() {
+    return this.map_i32_map_list_i32_i32 != null;
+  }
+
+  public void setMap_i32_map_list_i32_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.map_i32_map_list_i32_i32 = null;
+    }
+  }
+
+  public Map<Integer,List<Map<MyStruct,Integer>>> getMap_i32_map_list_struct_i32() {
+    return this.map_i32_map_list_struct_i32;
+  }
+
+  public Containers setMap_i32_map_list_struct_i32(Map<Integer,List<Map<MyStruct,Integer>>> map_i32_map_list_struct_i32) {
+    this.map_i32_map_list_struct_i32 = map_i32_map_list_struct_i32;
+    return this;
+  }
+
+  public void unsetMap_i32_map_list_struct_i32() {
+    this.map_i32_map_list_struct_i32 = null;
+  }
+
+  // Returns true if field map_i32_map_list_struct_i32 is set (has been assigned a value) and false otherwise
+  public boolean isSetMap_i32_map_list_struct_i32() {
+    return this.map_i32_map_list_struct_i32 != null;
+  }
+
+  public void setMap_i32_map_list_struct_i32IsSet(boolean __value) {
+    if (!__value) {
+      this.map_i32_map_list_struct_i32 = null;
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
@@ -994,6 +1829,158 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       }
       break;
 
+    case LIST_LIST_I32:
+      if (__value == null) {
+        unsetList_list_i32();
+      } else {
+        setList_list_i32((List<List<Integer>>)__value);
+      }
+      break;
+
+    case LIST_LIST_STRUCT:
+      if (__value == null) {
+        unsetList_list_struct();
+      } else {
+        setList_list_struct((List<List<MyStruct>>)__value);
+      }
+      break;
+
+    case LIST_SET_I32:
+      if (__value == null) {
+        unsetList_set_i32();
+      } else {
+        setList_set_i32((List<Set<Integer>>)__value);
+      }
+      break;
+
+    case LIST_SET_STRUCT:
+      if (__value == null) {
+        unsetList_set_struct();
+      } else {
+        setList_set_struct((List<Set<MyStruct>>)__value);
+      }
+      break;
+
+    case LIST_MAP_I32_I32:
+      if (__value == null) {
+        unsetList_map_i32_i32();
+      } else {
+        setList_map_i32_i32((List<Map<Integer,Integer>>)__value);
+      }
+      break;
+
+    case LIST_MAP_I32_STRUCT:
+      if (__value == null) {
+        unsetList_map_i32_struct();
+      } else {
+        setList_map_i32_struct((List<Map<Integer,MyStruct>>)__value);
+      }
+      break;
+
+    case LIST_MAP_STRUCT_I32:
+      if (__value == null) {
+        unsetList_map_struct_i32();
+      } else {
+        setList_map_struct_i32((List<Map<MyStruct,Integer>>)__value);
+      }
+      break;
+
+    case SET_LIST_I32:
+      if (__value == null) {
+        unsetSet_list_i32();
+      } else {
+        setSet_list_i32((Set<List<Integer>>)__value);
+      }
+      break;
+
+    case SET_LIST_STRUCT:
+      if (__value == null) {
+        unsetSet_list_struct();
+      } else {
+        setSet_list_struct((Set<List<MyStruct>>)__value);
+      }
+      break;
+
+    case SET_SET_I32:
+      if (__value == null) {
+        unsetSet_set_i32();
+      } else {
+        setSet_set_i32((Set<Set<Integer>>)__value);
+      }
+      break;
+
+    case SET_SET_STRUCT:
+      if (__value == null) {
+        unsetSet_set_struct();
+      } else {
+        setSet_set_struct((Set<Set<MyStruct>>)__value);
+      }
+      break;
+
+    case SET_MAP_I32_I32:
+      if (__value == null) {
+        unsetSet_map_i32_i32();
+      } else {
+        setSet_map_i32_i32((Set<Map<Integer,Integer>>)__value);
+      }
+      break;
+
+    case SET_MAP_I32_STRUCT:
+      if (__value == null) {
+        unsetSet_map_i32_struct();
+      } else {
+        setSet_map_i32_struct((Set<Map<Integer,MyStruct>>)__value);
+      }
+      break;
+
+    case SET_MAP_STRUCT_I32:
+      if (__value == null) {
+        unsetSet_map_struct_i32();
+      } else {
+        setSet_map_struct_i32((Set<Map<MyStruct,Integer>>)__value);
+      }
+      break;
+
+    case MAP_I32_MAP_I32_I32:
+      if (__value == null) {
+        unsetMap_i32_map_i32_i32();
+      } else {
+        setMap_i32_map_i32_i32((Map<Integer,Map<Integer,Integer>>)__value);
+      }
+      break;
+
+    case MAP_I32_MAP_STRUCT_I32:
+      if (__value == null) {
+        unsetMap_i32_map_struct_i32();
+      } else {
+        setMap_i32_map_struct_i32((Map<Integer,Map<MyStruct,Integer>>)__value);
+      }
+      break;
+
+    case MAP_I32_MAP_I32_STRUCT:
+      if (__value == null) {
+        unsetMap_i32_map_i32_struct();
+      } else {
+        setMap_i32_map_i32_struct((Map<Integer,Map<Integer,MyStruct>>)__value);
+      }
+      break;
+
+    case MAP_I32_MAP_LIST_I32_I32:
+      if (__value == null) {
+        unsetMap_i32_map_list_i32_i32();
+      } else {
+        setMap_i32_map_list_i32_i32((Map<Integer,List<Map<Integer,Integer>>>)__value);
+      }
+      break;
+
+    case MAP_I32_MAP_LIST_STRUCT_I32:
+      if (__value == null) {
+        unsetMap_i32_map_list_struct_i32();
+      } else {
+        setMap_i32_map_list_struct_i32((Map<Integer,List<Map<MyStruct,Integer>>>)__value);
+      }
+      break;
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -1055,6 +2042,63 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
     case MAP_MAP_2:
       return getMap_map_2();
 
+    case LIST_LIST_I32:
+      return getList_list_i32();
+
+    case LIST_LIST_STRUCT:
+      return getList_list_struct();
+
+    case LIST_SET_I32:
+      return getList_set_i32();
+
+    case LIST_SET_STRUCT:
+      return getList_set_struct();
+
+    case LIST_MAP_I32_I32:
+      return getList_map_i32_i32();
+
+    case LIST_MAP_I32_STRUCT:
+      return getList_map_i32_struct();
+
+    case LIST_MAP_STRUCT_I32:
+      return getList_map_struct_i32();
+
+    case SET_LIST_I32:
+      return getSet_list_i32();
+
+    case SET_LIST_STRUCT:
+      return getSet_list_struct();
+
+    case SET_SET_I32:
+      return getSet_set_i32();
+
+    case SET_SET_STRUCT:
+      return getSet_set_struct();
+
+    case SET_MAP_I32_I32:
+      return getSet_map_i32_i32();
+
+    case SET_MAP_I32_STRUCT:
+      return getSet_map_i32_struct();
+
+    case SET_MAP_STRUCT_I32:
+      return getSet_map_struct_i32();
+
+    case MAP_I32_MAP_I32_I32:
+      return getMap_i32_map_i32_i32();
+
+    case MAP_I32_MAP_STRUCT_I32:
+      return getMap_i32_map_struct_i32();
+
+    case MAP_I32_MAP_I32_STRUCT:
+      return getMap_i32_map_i32_struct();
+
+    case MAP_I32_MAP_LIST_I32_I32:
+      return getMap_i32_map_list_i32_i32();
+
+    case MAP_I32_MAP_LIST_STRUCT_I32:
+      return getMap_i32_map_list_struct_i32();
+
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
     }
@@ -1106,12 +2150,50 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetMap_map_2(), that.isSetMap_map_2(), this.map_map_2, that.map_map_2)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetList_list_i32(), that.isSetList_list_i32(), this.list_list_i32, that.list_list_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetList_list_struct(), that.isSetList_list_struct(), this.list_list_struct, that.list_list_struct)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetList_set_i32(), that.isSetList_set_i32(), this.list_set_i32, that.list_set_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetList_set_struct(), that.isSetList_set_struct(), this.list_set_struct, that.list_set_struct)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetList_map_i32_i32(), that.isSetList_map_i32_i32(), this.list_map_i32_i32, that.list_map_i32_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetList_map_i32_struct(), that.isSetList_map_i32_struct(), this.list_map_i32_struct, that.list_map_i32_struct)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetList_map_struct_i32(), that.isSetList_map_struct_i32(), this.list_map_struct_i32, that.list_map_struct_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetSet_list_i32(), that.isSetSet_list_i32(), this.set_list_i32, that.set_list_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetSet_list_struct(), that.isSetSet_list_struct(), this.set_list_struct, that.set_list_struct)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetSet_set_i32(), that.isSetSet_set_i32(), this.set_set_i32, that.set_set_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetSet_set_struct(), that.isSetSet_set_struct(), this.set_set_struct, that.set_set_struct)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetSet_map_i32_i32(), that.isSetSet_map_i32_i32(), this.set_map_i32_i32, that.set_map_i32_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetSet_map_i32_struct(), that.isSetSet_map_i32_struct(), this.set_map_i32_struct, that.set_map_i32_struct)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetSet_map_struct_i32(), that.isSetSet_map_struct_i32(), this.set_map_struct_i32, that.set_map_struct_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetMap_i32_map_i32_i32(), that.isSetMap_i32_map_i32_i32(), this.map_i32_map_i32_i32, that.map_i32_map_i32_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetMap_i32_map_struct_i32(), that.isSetMap_i32_map_struct_i32(), this.map_i32_map_struct_i32, that.map_i32_map_struct_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetMap_i32_map_i32_struct(), that.isSetMap_i32_map_i32_struct(), this.map_i32_map_i32_struct, that.map_i32_map_i32_struct)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetMap_i32_map_list_i32_i32(), that.isSetMap_i32_map_list_i32_i32(), this.map_i32_map_list_i32_i32, that.map_i32_map_list_i32_i32)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetMap_i32_map_list_struct_i32(), that.isSetMap_i32_map_list_struct_i32(), this.map_i32_map_list_struct_i32, that.map_i32_map_list_struct_i32)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {struct_list, union_list, enum_list, struct_set, union_set, enum_set, struct_map, union_map, enum_map, struct_map_2, union_map_2, enum_map_2, list_map, list_map_2, set_map, set_map_2, map_map, map_map_2});
+    return Arrays.deepHashCode(new Object[] {struct_list, union_list, enum_list, struct_set, union_set, enum_set, struct_map, union_map, enum_map, struct_map_2, union_map_2, enum_map_2, list_map, list_map_2, set_map, set_map_2, map_map, map_map_2, list_list_i32, list_list_struct, list_set_i32, list_set_struct, list_map_i32_i32, list_map_i32_struct, list_map_struct_i32, set_list_i32, set_list_struct, set_set_i32, set_set_struct, set_map_i32_i32, set_map_i32_struct, set_map_struct_i32, map_i32_map_i32_i32, map_i32_map_struct_i32, map_i32_map_i32_struct, map_i32_map_list_i32_i32, map_i32_map_list_struct_i32});
   }
 
   public void read(TProtocol iprot) throws TException {
@@ -1575,6 +2657,662 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case LIST_LIST_I32:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list539 = iprot.readListBegin();
+              this.list_list_i32 = new ArrayList<List<Integer>>(Math.max(0, _list539.size));
+              for (int _i540 = 0; 
+                   (_list539.size < 0) ? iprot.peekList() : (_i540 < _list539.size); 
+                   ++_i540)
+              {
+                List<Integer> _elem541;
+                {
+                  TList _list542 = iprot.readListBegin();
+                  _elem541 = new ArrayList<Integer>(Math.max(0, _list542.size));
+                  for (int _i543 = 0; 
+                       (_list542.size < 0) ? iprot.peekList() : (_i543 < _list542.size); 
+                       ++_i543)
+                  {
+                    int _elem544;
+                    _elem544 = iprot.readI32();
+                    _elem541.add(_elem544);
+                  }
+                  iprot.readListEnd();
+                }
+                this.list_list_i32.add(_elem541);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case LIST_LIST_STRUCT:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list545 = iprot.readListBegin();
+              this.list_list_struct = new ArrayList<List<MyStruct>>(Math.max(0, _list545.size));
+              for (int _i546 = 0; 
+                   (_list545.size < 0) ? iprot.peekList() : (_i546 < _list545.size); 
+                   ++_i546)
+              {
+                List<MyStruct> _elem547;
+                {
+                  TList _list548 = iprot.readListBegin();
+                  _elem547 = new ArrayList<MyStruct>(Math.max(0, _list548.size));
+                  for (int _i549 = 0; 
+                       (_list548.size < 0) ? iprot.peekList() : (_i549 < _list548.size); 
+                       ++_i549)
+                  {
+                    MyStruct _elem550;
+                    _elem550 = new MyStruct();
+                    _elem550.read(iprot);
+                    _elem547.add(_elem550);
+                  }
+                  iprot.readListEnd();
+                }
+                this.list_list_struct.add(_elem547);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case LIST_SET_I32:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list551 = iprot.readListBegin();
+              this.list_set_i32 = new ArrayList<Set<Integer>>(Math.max(0, _list551.size));
+              for (int _i552 = 0; 
+                   (_list551.size < 0) ? iprot.peekList() : (_i552 < _list551.size); 
+                   ++_i552)
+              {
+                Set<Integer> _elem553;
+                {
+                  TSet _set554 = iprot.readSetBegin();
+                  _elem553 = new HashSet<Integer>(Math.max(0, 2*_set554.size));
+                  for (int _i555 = 0; 
+                       (_set554.size < 0) ? iprot.peekSet() : (_i555 < _set554.size); 
+                       ++_i555)
+                  {
+                    int _elem556;
+                    _elem556 = iprot.readI32();
+                    _elem553.add(_elem556);
+                  }
+                  iprot.readSetEnd();
+                }
+                this.list_set_i32.add(_elem553);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case LIST_SET_STRUCT:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list557 = iprot.readListBegin();
+              this.list_set_struct = new ArrayList<Set<MyStruct>>(Math.max(0, _list557.size));
+              for (int _i558 = 0; 
+                   (_list557.size < 0) ? iprot.peekList() : (_i558 < _list557.size); 
+                   ++_i558)
+              {
+                Set<MyStruct> _elem559;
+                {
+                  TSet _set560 = iprot.readSetBegin();
+                  _elem559 = new HashSet<MyStruct>(Math.max(0, 2*_set560.size));
+                  for (int _i561 = 0; 
+                       (_set560.size < 0) ? iprot.peekSet() : (_i561 < _set560.size); 
+                       ++_i561)
+                  {
+                    MyStruct _elem562;
+                    _elem562 = new MyStruct();
+                    _elem562.read(iprot);
+                    _elem559.add(_elem562);
+                  }
+                  iprot.readSetEnd();
+                }
+                this.list_set_struct.add(_elem559);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case LIST_MAP_I32_I32:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list563 = iprot.readListBegin();
+              this.list_map_i32_i32 = new ArrayList<Map<Integer,Integer>>(Math.max(0, _list563.size));
+              for (int _i564 = 0; 
+                   (_list563.size < 0) ? iprot.peekList() : (_i564 < _list563.size); 
+                   ++_i564)
+              {
+                Map<Integer,Integer> _elem565;
+                {
+                  TMap _map566 = iprot.readMapBegin();
+                  _elem565 = new HashMap<Integer,Integer>(Math.max(0, 2*_map566.size));
+                  for (int _i567 = 0; 
+                       (_map566.size < 0) ? iprot.peekMap() : (_i567 < _map566.size); 
+                       ++_i567)
+                  {
+                    int _key568;
+                    int _val569;
+                    _key568 = iprot.readI32();
+                    _val569 = iprot.readI32();
+                    _elem565.put(_key568, _val569);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.list_map_i32_i32.add(_elem565);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case LIST_MAP_I32_STRUCT:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list570 = iprot.readListBegin();
+              this.list_map_i32_struct = new ArrayList<Map<Integer,MyStruct>>(Math.max(0, _list570.size));
+              for (int _i571 = 0; 
+                   (_list570.size < 0) ? iprot.peekList() : (_i571 < _list570.size); 
+                   ++_i571)
+              {
+                Map<Integer,MyStruct> _elem572;
+                {
+                  TMap _map573 = iprot.readMapBegin();
+                  _elem572 = new HashMap<Integer,MyStruct>(Math.max(0, 2*_map573.size));
+                  for (int _i574 = 0; 
+                       (_map573.size < 0) ? iprot.peekMap() : (_i574 < _map573.size); 
+                       ++_i574)
+                  {
+                    int _key575;
+                    MyStruct _val576;
+                    _key575 = iprot.readI32();
+                    _val576 = new MyStruct();
+                    _val576.read(iprot);
+                    _elem572.put(_key575, _val576);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.list_map_i32_struct.add(_elem572);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case LIST_MAP_STRUCT_I32:
+          if (__field.type == TType.LIST) {
+            {
+              TList _list577 = iprot.readListBegin();
+              this.list_map_struct_i32 = new ArrayList<Map<MyStruct,Integer>>(Math.max(0, _list577.size));
+              for (int _i578 = 0; 
+                   (_list577.size < 0) ? iprot.peekList() : (_i578 < _list577.size); 
+                   ++_i578)
+              {
+                Map<MyStruct,Integer> _elem579;
+                {
+                  TMap _map580 = iprot.readMapBegin();
+                  _elem579 = new HashMap<MyStruct,Integer>(Math.max(0, 2*_map580.size));
+                  for (int _i581 = 0; 
+                       (_map580.size < 0) ? iprot.peekMap() : (_i581 < _map580.size); 
+                       ++_i581)
+                  {
+                    MyStruct _key582;
+                    int _val583;
+                    _key582 = new MyStruct();
+                    _key582.read(iprot);
+                    _val583 = iprot.readI32();
+                    _elem579.put(_key582, _val583);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.list_map_struct_i32.add(_elem579);
+              }
+              iprot.readListEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case SET_LIST_I32:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set584 = iprot.readSetBegin();
+              this.set_list_i32 = new HashSet<List<Integer>>(Math.max(0, 2*_set584.size));
+              for (int _i585 = 0; 
+                   (_set584.size < 0) ? iprot.peekSet() : (_i585 < _set584.size); 
+                   ++_i585)
+              {
+                List<Integer> _elem586;
+                {
+                  TList _list587 = iprot.readListBegin();
+                  _elem586 = new ArrayList<Integer>(Math.max(0, _list587.size));
+                  for (int _i588 = 0; 
+                       (_list587.size < 0) ? iprot.peekList() : (_i588 < _list587.size); 
+                       ++_i588)
+                  {
+                    int _elem589;
+                    _elem589 = iprot.readI32();
+                    _elem586.add(_elem589);
+                  }
+                  iprot.readListEnd();
+                }
+                this.set_list_i32.add(_elem586);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case SET_LIST_STRUCT:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set590 = iprot.readSetBegin();
+              this.set_list_struct = new HashSet<List<MyStruct>>(Math.max(0, 2*_set590.size));
+              for (int _i591 = 0; 
+                   (_set590.size < 0) ? iprot.peekSet() : (_i591 < _set590.size); 
+                   ++_i591)
+              {
+                List<MyStruct> _elem592;
+                {
+                  TList _list593 = iprot.readListBegin();
+                  _elem592 = new ArrayList<MyStruct>(Math.max(0, _list593.size));
+                  for (int _i594 = 0; 
+                       (_list593.size < 0) ? iprot.peekList() : (_i594 < _list593.size); 
+                       ++_i594)
+                  {
+                    MyStruct _elem595;
+                    _elem595 = new MyStruct();
+                    _elem595.read(iprot);
+                    _elem592.add(_elem595);
+                  }
+                  iprot.readListEnd();
+                }
+                this.set_list_struct.add(_elem592);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case SET_SET_I32:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set596 = iprot.readSetBegin();
+              this.set_set_i32 = new HashSet<Set<Integer>>(Math.max(0, 2*_set596.size));
+              for (int _i597 = 0; 
+                   (_set596.size < 0) ? iprot.peekSet() : (_i597 < _set596.size); 
+                   ++_i597)
+              {
+                Set<Integer> _elem598;
+                {
+                  TSet _set599 = iprot.readSetBegin();
+                  _elem598 = new HashSet<Integer>(Math.max(0, 2*_set599.size));
+                  for (int _i600 = 0; 
+                       (_set599.size < 0) ? iprot.peekSet() : (_i600 < _set599.size); 
+                       ++_i600)
+                  {
+                    int _elem601;
+                    _elem601 = iprot.readI32();
+                    _elem598.add(_elem601);
+                  }
+                  iprot.readSetEnd();
+                }
+                this.set_set_i32.add(_elem598);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case SET_SET_STRUCT:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set602 = iprot.readSetBegin();
+              this.set_set_struct = new HashSet<Set<MyStruct>>(Math.max(0, 2*_set602.size));
+              for (int _i603 = 0; 
+                   (_set602.size < 0) ? iprot.peekSet() : (_i603 < _set602.size); 
+                   ++_i603)
+              {
+                Set<MyStruct> _elem604;
+                {
+                  TSet _set605 = iprot.readSetBegin();
+                  _elem604 = new HashSet<MyStruct>(Math.max(0, 2*_set605.size));
+                  for (int _i606 = 0; 
+                       (_set605.size < 0) ? iprot.peekSet() : (_i606 < _set605.size); 
+                       ++_i606)
+                  {
+                    MyStruct _elem607;
+                    _elem607 = new MyStruct();
+                    _elem607.read(iprot);
+                    _elem604.add(_elem607);
+                  }
+                  iprot.readSetEnd();
+                }
+                this.set_set_struct.add(_elem604);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case SET_MAP_I32_I32:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set608 = iprot.readSetBegin();
+              this.set_map_i32_i32 = new HashSet<Map<Integer,Integer>>(Math.max(0, 2*_set608.size));
+              for (int _i609 = 0; 
+                   (_set608.size < 0) ? iprot.peekSet() : (_i609 < _set608.size); 
+                   ++_i609)
+              {
+                Map<Integer,Integer> _elem610;
+                {
+                  TMap _map611 = iprot.readMapBegin();
+                  _elem610 = new HashMap<Integer,Integer>(Math.max(0, 2*_map611.size));
+                  for (int _i612 = 0; 
+                       (_map611.size < 0) ? iprot.peekMap() : (_i612 < _map611.size); 
+                       ++_i612)
+                  {
+                    int _key613;
+                    int _val614;
+                    _key613 = iprot.readI32();
+                    _val614 = iprot.readI32();
+                    _elem610.put(_key613, _val614);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.set_map_i32_i32.add(_elem610);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case SET_MAP_I32_STRUCT:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set615 = iprot.readSetBegin();
+              this.set_map_i32_struct = new HashSet<Map<Integer,MyStruct>>(Math.max(0, 2*_set615.size));
+              for (int _i616 = 0; 
+                   (_set615.size < 0) ? iprot.peekSet() : (_i616 < _set615.size); 
+                   ++_i616)
+              {
+                Map<Integer,MyStruct> _elem617;
+                {
+                  TMap _map618 = iprot.readMapBegin();
+                  _elem617 = new HashMap<Integer,MyStruct>(Math.max(0, 2*_map618.size));
+                  for (int _i619 = 0; 
+                       (_map618.size < 0) ? iprot.peekMap() : (_i619 < _map618.size); 
+                       ++_i619)
+                  {
+                    int _key620;
+                    MyStruct _val621;
+                    _key620 = iprot.readI32();
+                    _val621 = new MyStruct();
+                    _val621.read(iprot);
+                    _elem617.put(_key620, _val621);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.set_map_i32_struct.add(_elem617);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case SET_MAP_STRUCT_I32:
+          if (__field.type == TType.SET) {
+            {
+              TSet _set622 = iprot.readSetBegin();
+              this.set_map_struct_i32 = new HashSet<Map<MyStruct,Integer>>(Math.max(0, 2*_set622.size));
+              for (int _i623 = 0; 
+                   (_set622.size < 0) ? iprot.peekSet() : (_i623 < _set622.size); 
+                   ++_i623)
+              {
+                Map<MyStruct,Integer> _elem624;
+                {
+                  TMap _map625 = iprot.readMapBegin();
+                  _elem624 = new HashMap<MyStruct,Integer>(Math.max(0, 2*_map625.size));
+                  for (int _i626 = 0; 
+                       (_map625.size < 0) ? iprot.peekMap() : (_i626 < _map625.size); 
+                       ++_i626)
+                  {
+                    MyStruct _key627;
+                    int _val628;
+                    _key627 = new MyStruct();
+                    _key627.read(iprot);
+                    _val628 = iprot.readI32();
+                    _elem624.put(_key627, _val628);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.set_map_struct_i32.add(_elem624);
+              }
+              iprot.readSetEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case MAP_I32_MAP_I32_I32:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map629 = iprot.readMapBegin();
+              this.map_i32_map_i32_i32 = new HashMap<Integer,Map<Integer,Integer>>(Math.max(0, 2*_map629.size));
+              for (int _i630 = 0; 
+                   (_map629.size < 0) ? iprot.peekMap() : (_i630 < _map629.size); 
+                   ++_i630)
+              {
+                int _key631;
+                Map<Integer,Integer> _val632;
+                _key631 = iprot.readI32();
+                {
+                  TMap _map633 = iprot.readMapBegin();
+                  _val632 = new HashMap<Integer,Integer>(Math.max(0, 2*_map633.size));
+                  for (int _i634 = 0; 
+                       (_map633.size < 0) ? iprot.peekMap() : (_i634 < _map633.size); 
+                       ++_i634)
+                  {
+                    int _key635;
+                    int _val636;
+                    _key635 = iprot.readI32();
+                    _val636 = iprot.readI32();
+                    _val632.put(_key635, _val636);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.map_i32_map_i32_i32.put(_key631, _val632);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case MAP_I32_MAP_STRUCT_I32:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map637 = iprot.readMapBegin();
+              this.map_i32_map_struct_i32 = new HashMap<Integer,Map<MyStruct,Integer>>(Math.max(0, 2*_map637.size));
+              for (int _i638 = 0; 
+                   (_map637.size < 0) ? iprot.peekMap() : (_i638 < _map637.size); 
+                   ++_i638)
+              {
+                int _key639;
+                Map<MyStruct,Integer> _val640;
+                _key639 = iprot.readI32();
+                {
+                  TMap _map641 = iprot.readMapBegin();
+                  _val640 = new HashMap<MyStruct,Integer>(Math.max(0, 2*_map641.size));
+                  for (int _i642 = 0; 
+                       (_map641.size < 0) ? iprot.peekMap() : (_i642 < _map641.size); 
+                       ++_i642)
+                  {
+                    MyStruct _key643;
+                    int _val644;
+                    _key643 = new MyStruct();
+                    _key643.read(iprot);
+                    _val644 = iprot.readI32();
+                    _val640.put(_key643, _val644);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.map_i32_map_struct_i32.put(_key639, _val640);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case MAP_I32_MAP_I32_STRUCT:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map645 = iprot.readMapBegin();
+              this.map_i32_map_i32_struct = new HashMap<Integer,Map<Integer,MyStruct>>(Math.max(0, 2*_map645.size));
+              for (int _i646 = 0; 
+                   (_map645.size < 0) ? iprot.peekMap() : (_i646 < _map645.size); 
+                   ++_i646)
+              {
+                int _key647;
+                Map<Integer,MyStruct> _val648;
+                _key647 = iprot.readI32();
+                {
+                  TMap _map649 = iprot.readMapBegin();
+                  _val648 = new HashMap<Integer,MyStruct>(Math.max(0, 2*_map649.size));
+                  for (int _i650 = 0; 
+                       (_map649.size < 0) ? iprot.peekMap() : (_i650 < _map649.size); 
+                       ++_i650)
+                  {
+                    int _key651;
+                    MyStruct _val652;
+                    _key651 = iprot.readI32();
+                    _val652 = new MyStruct();
+                    _val652.read(iprot);
+                    _val648.put(_key651, _val652);
+                  }
+                  iprot.readMapEnd();
+                }
+                this.map_i32_map_i32_struct.put(_key647, _val648);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case MAP_I32_MAP_LIST_I32_I32:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map653 = iprot.readMapBegin();
+              this.map_i32_map_list_i32_i32 = new HashMap<Integer,List<Map<Integer,Integer>>>(Math.max(0, 2*_map653.size));
+              for (int _i654 = 0; 
+                   (_map653.size < 0) ? iprot.peekMap() : (_i654 < _map653.size); 
+                   ++_i654)
+              {
+                int _key655;
+                List<Map<Integer,Integer>> _val656;
+                _key655 = iprot.readI32();
+                {
+                  TList _list657 = iprot.readListBegin();
+                  _val656 = new ArrayList<Map<Integer,Integer>>(Math.max(0, _list657.size));
+                  for (int _i658 = 0; 
+                       (_list657.size < 0) ? iprot.peekList() : (_i658 < _list657.size); 
+                       ++_i658)
+                  {
+                    Map<Integer,Integer> _elem659;
+                    {
+                      TMap _map660 = iprot.readMapBegin();
+                      _elem659 = new HashMap<Integer,Integer>(Math.max(0, 2*_map660.size));
+                      for (int _i661 = 0; 
+                           (_map660.size < 0) ? iprot.peekMap() : (_i661 < _map660.size); 
+                           ++_i661)
+                      {
+                        int _key662;
+                        int _val663;
+                        _key662 = iprot.readI32();
+                        _val663 = iprot.readI32();
+                        _elem659.put(_key662, _val663);
+                      }
+                      iprot.readMapEnd();
+                    }
+                    _val656.add(_elem659);
+                  }
+                  iprot.readListEnd();
+                }
+                this.map_i32_map_list_i32_i32.put(_key655, _val656);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case MAP_I32_MAP_LIST_STRUCT_I32:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map664 = iprot.readMapBegin();
+              this.map_i32_map_list_struct_i32 = new HashMap<Integer,List<Map<MyStruct,Integer>>>(Math.max(0, 2*_map664.size));
+              for (int _i665 = 0; 
+                   (_map664.size < 0) ? iprot.peekMap() : (_i665 < _map664.size); 
+                   ++_i665)
+              {
+                int _key666;
+                List<Map<MyStruct,Integer>> _val667;
+                _key666 = iprot.readI32();
+                {
+                  TList _list668 = iprot.readListBegin();
+                  _val667 = new ArrayList<Map<MyStruct,Integer>>(Math.max(0, _list668.size));
+                  for (int _i669 = 0; 
+                       (_list668.size < 0) ? iprot.peekList() : (_i669 < _list668.size); 
+                       ++_i669)
+                  {
+                    Map<MyStruct,Integer> _elem670;
+                    {
+                      TMap _map671 = iprot.readMapBegin();
+                      _elem670 = new HashMap<MyStruct,Integer>(Math.max(0, 2*_map671.size));
+                      for (int _i672 = 0; 
+                           (_map671.size < 0) ? iprot.peekMap() : (_i672 < _map671.size); 
+                           ++_i672)
+                      {
+                        MyStruct _key673;
+                        int _val674;
+                        _key673 = new MyStruct();
+                        _key673.read(iprot);
+                        _val674 = iprot.readI32();
+                        _elem670.put(_key673, _val674);
+                      }
+                      iprot.readMapEnd();
+                    }
+                    _val667.add(_elem670);
+                  }
+                  iprot.readListEnd();
+                }
+                this.map_i32_map_list_struct_i32.put(_key666, _val667);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -1596,8 +3334,8 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(STRUCT_LIST_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.struct_list.size()));
-        for (MyStruct _iter539 : this.struct_list)        {
-          _iter539.write(oprot);
+        for (MyStruct _iter675 : this.struct_list)        {
+          _iter675.write(oprot);
         }
         oprot.writeListEnd();
       }
@@ -1607,8 +3345,8 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(UNION_LIST_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.union_list.size()));
-        for (MyUnion _iter540 : this.union_list)        {
-          _iter540.write(oprot);
+        for (MyUnion _iter676 : this.union_list)        {
+          _iter676.write(oprot);
         }
         oprot.writeListEnd();
       }
@@ -1618,8 +3356,8 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(ENUM_LIST_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I32, this.enum_list.size()));
-        for (MyEnum _iter541 : this.enum_list)        {
-          oprot.writeI32(_iter541 == null ? 0 : _iter541.getValue());
+        for (MyEnum _iter677 : this.enum_list)        {
+          oprot.writeI32(_iter677 == null ? 0 : _iter677.getValue());
         }
         oprot.writeListEnd();
       }
@@ -1629,8 +3367,8 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(STRUCT_SET_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRUCT, this.struct_set.size()));
-        for (MyStruct _iter542 : this.struct_set)        {
-          _iter542.write(oprot);
+        for (MyStruct _iter678 : this.struct_set)        {
+          _iter678.write(oprot);
         }
         oprot.writeSetEnd();
       }
@@ -1640,8 +3378,8 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(UNION_SET_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.STRUCT, this.union_set.size()));
-        for (MyUnion _iter543 : this.union_set)        {
-          _iter543.write(oprot);
+        for (MyUnion _iter679 : this.union_set)        {
+          _iter679.write(oprot);
         }
         oprot.writeSetEnd();
       }
@@ -1651,8 +3389,8 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(ENUM_SET_FIELD_DESC);
       {
         oprot.writeSetBegin(new TSet(TType.I32, this.enum_set.size()));
-        for (MyEnum _iter544 : this.enum_set)        {
-          oprot.writeI32(_iter544 == null ? 0 : _iter544.getValue());
+        for (MyEnum _iter680 : this.enum_set)        {
+          oprot.writeI32(_iter680 == null ? 0 : _iter680.getValue());
         }
         oprot.writeSetEnd();
       }
@@ -1662,9 +3400,9 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(STRUCT_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I64, this.struct_map.size()));
-        for (Map.Entry<MyStruct, Long> _iter545 : this.struct_map.entrySet())        {
-          _iter545.getKey().write(oprot);
-          oprot.writeI64(_iter545.getValue());
+        for (Map.Entry<MyStruct, Long> _iter681 : this.struct_map.entrySet())        {
+          _iter681.getKey().write(oprot);
+          oprot.writeI64(_iter681.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1674,9 +3412,9 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(UNION_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I64, this.union_map.size()));
-        for (Map.Entry<MyUnion, Long> _iter546 : this.union_map.entrySet())        {
-          _iter546.getKey().write(oprot);
-          oprot.writeI64(_iter546.getValue());
+        for (Map.Entry<MyUnion, Long> _iter682 : this.union_map.entrySet())        {
+          _iter682.getKey().write(oprot);
+          oprot.writeI64(_iter682.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1686,9 +3424,9 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(ENUM_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.I64, this.enum_map.size()));
-        for (Map.Entry<MyEnum, Long> _iter547 : this.enum_map.entrySet())        {
-          oprot.writeI32(_iter547.getKey() == null ? 0 : _iter547.getKey().getValue());
-          oprot.writeI64(_iter547.getValue());
+        for (Map.Entry<MyEnum, Long> _iter683 : this.enum_map.entrySet())        {
+          oprot.writeI32(_iter683.getKey() == null ? 0 : _iter683.getKey().getValue());
+          oprot.writeI64(_iter683.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1698,9 +3436,9 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(STRUCT_MAP_2_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, this.struct_map_2.size()));
-        for (Map.Entry<Integer, MyStruct> _iter548 : this.struct_map_2.entrySet())        {
-          oprot.writeI32(_iter548.getKey());
-          _iter548.getValue().write(oprot);
+        for (Map.Entry<Integer, MyStruct> _iter684 : this.struct_map_2.entrySet())        {
+          oprot.writeI32(_iter684.getKey());
+          _iter684.getValue().write(oprot);
         }
         oprot.writeMapEnd();
       }
@@ -1710,9 +3448,9 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(UNION_MAP_2_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, this.union_map_2.size()));
-        for (Map.Entry<Integer, MyUnion> _iter549 : this.union_map_2.entrySet())        {
-          oprot.writeI32(_iter549.getKey());
-          _iter549.getValue().write(oprot);
+        for (Map.Entry<Integer, MyUnion> _iter685 : this.union_map_2.entrySet())        {
+          oprot.writeI32(_iter685.getKey());
+          _iter685.getValue().write(oprot);
         }
         oprot.writeMapEnd();
       }
@@ -1722,9 +3460,9 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(ENUM_MAP_2_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.I32, this.enum_map_2.size()));
-        for (Map.Entry<Integer, MyEnum> _iter550 : this.enum_map_2.entrySet())        {
-          oprot.writeI32(_iter550.getKey());
-          oprot.writeI32(_iter550.getValue() == null ? 0 : _iter550.getValue().getValue());
+        for (Map.Entry<Integer, MyEnum> _iter686 : this.enum_map_2.entrySet())        {
+          oprot.writeI32(_iter686.getKey());
+          oprot.writeI32(_iter686.getValue() == null ? 0 : _iter686.getValue().getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1734,15 +3472,15 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(LIST_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.LIST, TType.I32, this.list_map.size()));
-        for (Map.Entry<List<Integer>, Integer> _iter551 : this.list_map.entrySet())        {
+        for (Map.Entry<List<Integer>, Integer> _iter687 : this.list_map.entrySet())        {
           {
-            oprot.writeListBegin(new TList(TType.I32, _iter551.getKey().size()));
-            for (int _iter552 : _iter551.getKey())            {
-              oprot.writeI32(_iter552);
+            oprot.writeListBegin(new TList(TType.I32, _iter687.getKey().size()));
+            for (int _iter688 : _iter687.getKey())            {
+              oprot.writeI32(_iter688);
             }
             oprot.writeListEnd();
           }
-          oprot.writeI32(_iter551.getValue());
+          oprot.writeI32(_iter687.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1752,12 +3490,12 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(LIST_MAP_2_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, this.list_map_2.size()));
-        for (Map.Entry<Integer, List<Integer>> _iter553 : this.list_map_2.entrySet())        {
-          oprot.writeI32(_iter553.getKey());
+        for (Map.Entry<Integer, List<Integer>> _iter689 : this.list_map_2.entrySet())        {
+          oprot.writeI32(_iter689.getKey());
           {
-            oprot.writeListBegin(new TList(TType.I32, _iter553.getValue().size()));
-            for (int _iter554 : _iter553.getValue())            {
-              oprot.writeI32(_iter554);
+            oprot.writeListBegin(new TList(TType.I32, _iter689.getValue().size()));
+            for (int _iter690 : _iter689.getValue())            {
+              oprot.writeI32(_iter690);
             }
             oprot.writeListEnd();
           }
@@ -1770,15 +3508,15 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(SET_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.SET, TType.I32, this.set_map.size()));
-        for (Map.Entry<Set<Integer>, Integer> _iter555 : this.set_map.entrySet())        {
+        for (Map.Entry<Set<Integer>, Integer> _iter691 : this.set_map.entrySet())        {
           {
-            oprot.writeSetBegin(new TSet(TType.I32, _iter555.getKey().size()));
-            for (int _iter556 : _iter555.getKey())            {
-              oprot.writeI32(_iter556);
+            oprot.writeSetBegin(new TSet(TType.I32, _iter691.getKey().size()));
+            for (int _iter692 : _iter691.getKey())            {
+              oprot.writeI32(_iter692);
             }
             oprot.writeSetEnd();
           }
-          oprot.writeI32(_iter555.getValue());
+          oprot.writeI32(_iter691.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1788,12 +3526,12 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(SET_MAP_2_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.SET, this.set_map_2.size()));
-        for (Map.Entry<Integer, Set<Integer>> _iter557 : this.set_map_2.entrySet())        {
-          oprot.writeI32(_iter557.getKey());
+        for (Map.Entry<Integer, Set<Integer>> _iter693 : this.set_map_2.entrySet())        {
+          oprot.writeI32(_iter693.getKey());
           {
-            oprot.writeSetBegin(new TSet(TType.I32, _iter557.getValue().size()));
-            for (int _iter558 : _iter557.getValue())            {
-              oprot.writeI32(_iter558);
+            oprot.writeSetBegin(new TSet(TType.I32, _iter693.getValue().size()));
+            for (int _iter694 : _iter693.getValue())            {
+              oprot.writeI32(_iter694);
             }
             oprot.writeSetEnd();
           }
@@ -1806,16 +3544,16 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(MAP_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.MAP, TType.I32, this.map_map.size()));
-        for (Map.Entry<Map<Integer,Integer>, Integer> _iter559 : this.map_map.entrySet())        {
+        for (Map.Entry<Map<Integer,Integer>, Integer> _iter695 : this.map_map.entrySet())        {
           {
-            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter559.getKey().size()));
-            for (Map.Entry<Integer, Integer> _iter560 : _iter559.getKey().entrySet())            {
-              oprot.writeI32(_iter560.getKey());
-              oprot.writeI32(_iter560.getValue());
+            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter695.getKey().size()));
+            for (Map.Entry<Integer, Integer> _iter696 : _iter695.getKey().entrySet())            {
+              oprot.writeI32(_iter696.getKey());
+              oprot.writeI32(_iter696.getValue());
             }
             oprot.writeMapEnd();
           }
-          oprot.writeI32(_iter559.getValue());
+          oprot.writeI32(_iter695.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -1825,15 +3563,366 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(MAP_MAP_2_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, this.map_map_2.size()));
-        for (Map.Entry<Integer, Map<Integer,Integer>> _iter561 : this.map_map_2.entrySet())        {
-          oprot.writeI32(_iter561.getKey());
+        for (Map.Entry<Integer, Map<Integer,Integer>> _iter697 : this.map_map_2.entrySet())        {
+          oprot.writeI32(_iter697.getKey());
           {
-            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter561.getValue().size()));
-            for (Map.Entry<Integer, Integer> _iter562 : _iter561.getValue().entrySet())            {
-              oprot.writeI32(_iter562.getKey());
-              oprot.writeI32(_iter562.getValue());
+            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter697.getValue().size()));
+            for (Map.Entry<Integer, Integer> _iter698 : _iter697.getValue().entrySet())            {
+              oprot.writeI32(_iter698.getKey());
+              oprot.writeI32(_iter698.getValue());
             }
             oprot.writeMapEnd();
+          }
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.list_list_i32 != null) {
+      oprot.writeFieldBegin(LIST_LIST_I32_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.LIST, this.list_list_i32.size()));
+        for (List<Integer> _iter699 : this.list_list_i32)        {
+          {
+            oprot.writeListBegin(new TList(TType.I32, _iter699.size()));
+            for (int _iter700 : _iter699)            {
+              oprot.writeI32(_iter700);
+            }
+            oprot.writeListEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.list_list_struct != null) {
+      oprot.writeFieldBegin(LIST_LIST_STRUCT_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.LIST, this.list_list_struct.size()));
+        for (List<MyStruct> _iter701 : this.list_list_struct)        {
+          {
+            oprot.writeListBegin(new TList(TType.STRUCT, _iter701.size()));
+            for (MyStruct _iter702 : _iter701)            {
+              _iter702.write(oprot);
+            }
+            oprot.writeListEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.list_set_i32 != null) {
+      oprot.writeFieldBegin(LIST_SET_I32_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.SET, this.list_set_i32.size()));
+        for (Set<Integer> _iter703 : this.list_set_i32)        {
+          {
+            oprot.writeSetBegin(new TSet(TType.I32, _iter703.size()));
+            for (int _iter704 : _iter703)            {
+              oprot.writeI32(_iter704);
+            }
+            oprot.writeSetEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.list_set_struct != null) {
+      oprot.writeFieldBegin(LIST_SET_STRUCT_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.SET, this.list_set_struct.size()));
+        for (Set<MyStruct> _iter705 : this.list_set_struct)        {
+          {
+            oprot.writeSetBegin(new TSet(TType.STRUCT, _iter705.size()));
+            for (MyStruct _iter706 : _iter705)            {
+              _iter706.write(oprot);
+            }
+            oprot.writeSetEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.list_map_i32_i32 != null) {
+      oprot.writeFieldBegin(LIST_MAP_I32_I32_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.MAP, this.list_map_i32_i32.size()));
+        for (Map<Integer,Integer> _iter707 : this.list_map_i32_i32)        {
+          {
+            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter707.size()));
+            for (Map.Entry<Integer, Integer> _iter708 : _iter707.entrySet())            {
+              oprot.writeI32(_iter708.getKey());
+              oprot.writeI32(_iter708.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.list_map_i32_struct != null) {
+      oprot.writeFieldBegin(LIST_MAP_I32_STRUCT_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.MAP, this.list_map_i32_struct.size()));
+        for (Map<Integer,MyStruct> _iter709 : this.list_map_i32_struct)        {
+          {
+            oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter709.size()));
+            for (Map.Entry<Integer, MyStruct> _iter710 : _iter709.entrySet())            {
+              oprot.writeI32(_iter710.getKey());
+              _iter710.getValue().write(oprot);
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.list_map_struct_i32 != null) {
+      oprot.writeFieldBegin(LIST_MAP_STRUCT_I32_FIELD_DESC);
+      {
+        oprot.writeListBegin(new TList(TType.MAP, this.list_map_struct_i32.size()));
+        for (Map<MyStruct,Integer> _iter711 : this.list_map_struct_i32)        {
+          {
+            oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter711.size()));
+            for (Map.Entry<MyStruct, Integer> _iter712 : _iter711.entrySet())            {
+              _iter712.getKey().write(oprot);
+              oprot.writeI32(_iter712.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeListEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.set_list_i32 != null) {
+      oprot.writeFieldBegin(SET_LIST_I32_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.LIST, this.set_list_i32.size()));
+        for (List<Integer> _iter713 : this.set_list_i32)        {
+          {
+            oprot.writeListBegin(new TList(TType.I32, _iter713.size()));
+            for (int _iter714 : _iter713)            {
+              oprot.writeI32(_iter714);
+            }
+            oprot.writeListEnd();
+          }
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.set_list_struct != null) {
+      oprot.writeFieldBegin(SET_LIST_STRUCT_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.LIST, this.set_list_struct.size()));
+        for (List<MyStruct> _iter715 : this.set_list_struct)        {
+          {
+            oprot.writeListBegin(new TList(TType.STRUCT, _iter715.size()));
+            for (MyStruct _iter716 : _iter715)            {
+              _iter716.write(oprot);
+            }
+            oprot.writeListEnd();
+          }
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.set_set_i32 != null) {
+      oprot.writeFieldBegin(SET_SET_I32_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.SET, this.set_set_i32.size()));
+        for (Set<Integer> _iter717 : this.set_set_i32)        {
+          {
+            oprot.writeSetBegin(new TSet(TType.I32, _iter717.size()));
+            for (int _iter718 : _iter717)            {
+              oprot.writeI32(_iter718);
+            }
+            oprot.writeSetEnd();
+          }
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.set_set_struct != null) {
+      oprot.writeFieldBegin(SET_SET_STRUCT_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.SET, this.set_set_struct.size()));
+        for (Set<MyStruct> _iter719 : this.set_set_struct)        {
+          {
+            oprot.writeSetBegin(new TSet(TType.STRUCT, _iter719.size()));
+            for (MyStruct _iter720 : _iter719)            {
+              _iter720.write(oprot);
+            }
+            oprot.writeSetEnd();
+          }
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.set_map_i32_i32 != null) {
+      oprot.writeFieldBegin(SET_MAP_I32_I32_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.MAP, this.set_map_i32_i32.size()));
+        for (Map<Integer,Integer> _iter721 : this.set_map_i32_i32)        {
+          {
+            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter721.size()));
+            for (Map.Entry<Integer, Integer> _iter722 : _iter721.entrySet())            {
+              oprot.writeI32(_iter722.getKey());
+              oprot.writeI32(_iter722.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.set_map_i32_struct != null) {
+      oprot.writeFieldBegin(SET_MAP_I32_STRUCT_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.MAP, this.set_map_i32_struct.size()));
+        for (Map<Integer,MyStruct> _iter723 : this.set_map_i32_struct)        {
+          {
+            oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter723.size()));
+            for (Map.Entry<Integer, MyStruct> _iter724 : _iter723.entrySet())            {
+              oprot.writeI32(_iter724.getKey());
+              _iter724.getValue().write(oprot);
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.set_map_struct_i32 != null) {
+      oprot.writeFieldBegin(SET_MAP_STRUCT_I32_FIELD_DESC);
+      {
+        oprot.writeSetBegin(new TSet(TType.MAP, this.set_map_struct_i32.size()));
+        for (Map<MyStruct,Integer> _iter725 : this.set_map_struct_i32)        {
+          {
+            oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter725.size()));
+            for (Map.Entry<MyStruct, Integer> _iter726 : _iter725.entrySet())            {
+              _iter726.getKey().write(oprot);
+              oprot.writeI32(_iter726.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeSetEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.map_i32_map_i32_i32 != null) {
+      oprot.writeFieldBegin(MAP_I32_MAP_I32_I32_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, this.map_i32_map_i32_i32.size()));
+        for (Map.Entry<Integer, Map<Integer,Integer>> _iter727 : this.map_i32_map_i32_i32.entrySet())        {
+          oprot.writeI32(_iter727.getKey());
+          {
+            oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter727.getValue().size()));
+            for (Map.Entry<Integer, Integer> _iter728 : _iter727.getValue().entrySet())            {
+              oprot.writeI32(_iter728.getKey());
+              oprot.writeI32(_iter728.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.map_i32_map_struct_i32 != null) {
+      oprot.writeFieldBegin(MAP_I32_MAP_STRUCT_I32_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, this.map_i32_map_struct_i32.size()));
+        for (Map.Entry<Integer, Map<MyStruct,Integer>> _iter729 : this.map_i32_map_struct_i32.entrySet())        {
+          oprot.writeI32(_iter729.getKey());
+          {
+            oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter729.getValue().size()));
+            for (Map.Entry<MyStruct, Integer> _iter730 : _iter729.getValue().entrySet())            {
+              _iter730.getKey().write(oprot);
+              oprot.writeI32(_iter730.getValue());
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.map_i32_map_i32_struct != null) {
+      oprot.writeFieldBegin(MAP_I32_MAP_I32_STRUCT_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, this.map_i32_map_i32_struct.size()));
+        for (Map.Entry<Integer, Map<Integer,MyStruct>> _iter731 : this.map_i32_map_i32_struct.entrySet())        {
+          oprot.writeI32(_iter731.getKey());
+          {
+            oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter731.getValue().size()));
+            for (Map.Entry<Integer, MyStruct> _iter732 : _iter731.getValue().entrySet())            {
+              oprot.writeI32(_iter732.getKey());
+              _iter732.getValue().write(oprot);
+            }
+            oprot.writeMapEnd();
+          }
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.map_i32_map_list_i32_i32 != null) {
+      oprot.writeFieldBegin(MAP_I32_MAP_LIST_I32_I32_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, this.map_i32_map_list_i32_i32.size()));
+        for (Map.Entry<Integer, List<Map<Integer,Integer>>> _iter733 : this.map_i32_map_list_i32_i32.entrySet())        {
+          oprot.writeI32(_iter733.getKey());
+          {
+            oprot.writeListBegin(new TList(TType.MAP, _iter733.getValue().size()));
+            for (Map<Integer,Integer> _iter734 : _iter733.getValue())            {
+              {
+                oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter734.size()));
+                for (Map.Entry<Integer, Integer> _iter735 : _iter734.entrySet())                {
+                  oprot.writeI32(_iter735.getKey());
+                  oprot.writeI32(_iter735.getValue());
+                }
+                oprot.writeMapEnd();
+              }
+            }
+            oprot.writeListEnd();
+          }
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
+    if (this.map_i32_map_list_struct_i32 != null) {
+      oprot.writeFieldBegin(MAP_I32_MAP_LIST_STRUCT_I32_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, this.map_i32_map_list_struct_i32.size()));
+        for (Map.Entry<Integer, List<Map<MyStruct,Integer>>> _iter736 : this.map_i32_map_list_struct_i32.entrySet())        {
+          oprot.writeI32(_iter736.getKey());
+          {
+            oprot.writeListBegin(new TList(TType.MAP, _iter736.getValue().size()));
+            for (Map<MyStruct,Integer> _iter737 : _iter736.getValue())            {
+              {
+                oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter737.size()));
+                for (Map.Entry<MyStruct, Integer> _iter738 : _iter737.entrySet())                {
+                  _iter738.getKey().write(oprot);
+                  oprot.writeI32(_iter738.getValue());
+                }
+                oprot.writeMapEnd();
+              }
+            }
+            oprot.writeListEnd();
           }
         }
         oprot.writeMapEnd();
@@ -2055,6 +4144,215 @@ public class Containers implements TBase, java.io.Serializable, Cloneable {
       sb.append("null");
     } else {
       sb.append(TBaseHelper.toString(this.getMap_map_2(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("list_list_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getList_list_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getList_list_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("list_list_struct");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getList_list_struct() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getList_list_struct(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("list_set_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getList_set_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getList_set_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("list_set_struct");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getList_set_struct() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getList_set_struct(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("list_map_i32_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getList_map_i32_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getList_map_i32_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("list_map_i32_struct");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getList_map_i32_struct() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getList_map_i32_struct(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("list_map_struct_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getList_map_struct_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getList_map_struct_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("set_list_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getSet_list_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getSet_list_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("set_list_struct");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getSet_list_struct() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getSet_list_struct(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("set_set_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getSet_set_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getSet_set_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("set_set_struct");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getSet_set_struct() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getSet_set_struct(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("set_map_i32_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getSet_map_i32_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getSet_map_i32_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("set_map_i32_struct");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getSet_map_i32_struct() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getSet_map_i32_struct(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("set_map_struct_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getSet_map_struct_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getSet_map_struct_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("map_i32_map_i32_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getMap_i32_map_i32_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getMap_i32_map_i32_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("map_i32_map_struct_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getMap_i32_map_struct_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getMap_i32_map_struct_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("map_i32_map_i32_struct");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getMap_i32_map_i32_struct() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getMap_i32_map_i32_struct(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("map_i32_map_list_i32_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getMap_i32_map_list_i32_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getMap_i32_map_list_i32_i32(), indent + 1, prettyPrint));
+    }
+    first = false;
+    if (!first) sb.append("," + newLine);
+    sb.append(indentStr);
+    sb.append("map_i32_map_list_struct_i32");
+    sb.append(space);
+    sb.append(":").append(space);
+    if (this.getMap_i32_map_list_struct_i32() == null) {
+      sb.append("null");
+    } else {
+      sb.append(TBaseHelper.toString(this.getMap_i32_map_list_struct_i32(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

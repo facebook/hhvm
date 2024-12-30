@@ -41,7 +41,26 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         @com.facebook.swift.codec.ThriftField(value=15, name="set_map", requiredness=Requiredness.NONE) final Map<Set<Integer>, Integer> setMap,
         @com.facebook.swift.codec.ThriftField(value=16, name="set_map_2", requiredness=Requiredness.NONE) final Map<Integer, Set<Integer>> setMap2,
         @com.facebook.swift.codec.ThriftField(value=17, name="map_map", requiredness=Requiredness.NONE) final Map<Map<Integer, Integer>, Integer> mapMap,
-        @com.facebook.swift.codec.ThriftField(value=18, name="map_map_2", requiredness=Requiredness.NONE) final Map<Integer, Map<Integer, Integer>> mapMap2
+        @com.facebook.swift.codec.ThriftField(value=18, name="map_map_2", requiredness=Requiredness.NONE) final Map<Integer, Map<Integer, Integer>> mapMap2,
+        @com.facebook.swift.codec.ThriftField(value=19, name="list_list_i32", requiredness=Requiredness.NONE) final List<List<Integer>> listListI32,
+        @com.facebook.swift.codec.ThriftField(value=20, name="list_list_struct", requiredness=Requiredness.NONE) final List<List<test.fixtures.complex_struct.MyStruct>> listListStruct,
+        @com.facebook.swift.codec.ThriftField(value=21, name="list_set_i32", requiredness=Requiredness.NONE) final List<Set<Integer>> listSetI32,
+        @com.facebook.swift.codec.ThriftField(value=22, name="list_set_struct", requiredness=Requiredness.NONE) final List<Set<test.fixtures.complex_struct.MyStruct>> listSetStruct,
+        @com.facebook.swift.codec.ThriftField(value=23, name="list_map_i32_i32", requiredness=Requiredness.NONE) final List<Map<Integer, Integer>> listMapI32I32,
+        @com.facebook.swift.codec.ThriftField(value=24, name="list_map_i32_struct", requiredness=Requiredness.NONE) final List<Map<Integer, test.fixtures.complex_struct.MyStruct>> listMapI32Struct,
+        @com.facebook.swift.codec.ThriftField(value=25, name="list_map_struct_i32", requiredness=Requiredness.NONE) final List<Map<test.fixtures.complex_struct.MyStruct, Integer>> listMapStructI32,
+        @com.facebook.swift.codec.ThriftField(value=26, name="set_list_i32", requiredness=Requiredness.NONE) final Set<List<Integer>> setListI32,
+        @com.facebook.swift.codec.ThriftField(value=27, name="set_list_struct", requiredness=Requiredness.NONE) final Set<List<test.fixtures.complex_struct.MyStruct>> setListStruct,
+        @com.facebook.swift.codec.ThriftField(value=28, name="set_set_i32", requiredness=Requiredness.NONE) final Set<Set<Integer>> setSetI32,
+        @com.facebook.swift.codec.ThriftField(value=29, name="set_set_struct", requiredness=Requiredness.NONE) final Set<Set<test.fixtures.complex_struct.MyStruct>> setSetStruct,
+        @com.facebook.swift.codec.ThriftField(value=30, name="set_map_i32_i32", requiredness=Requiredness.NONE) final Set<Map<Integer, Integer>> setMapI32I32,
+        @com.facebook.swift.codec.ThriftField(value=31, name="set_map_i32_struct", requiredness=Requiredness.NONE) final Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> setMapI32Struct,
+        @com.facebook.swift.codec.ThriftField(value=32, name="set_map_struct_i32", requiredness=Requiredness.NONE) final Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> setMapStructI32,
+        @com.facebook.swift.codec.ThriftField(value=33, name="map_i32_map_i32_i32", requiredness=Requiredness.NONE) final Map<Integer, Map<Integer, Integer>> mapI32MapI32I32,
+        @com.facebook.swift.codec.ThriftField(value=34, name="map_i32_map_struct_i32", requiredness=Requiredness.NONE) final Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> mapI32MapStructI32,
+        @com.facebook.swift.codec.ThriftField(value=35, name="map_i32_map_i32_struct", requiredness=Requiredness.NONE) final Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> mapI32MapI32Struct,
+        @com.facebook.swift.codec.ThriftField(value=36, name="map_i32_map_list_i32_i32", requiredness=Requiredness.NONE) final Map<Integer, List<Map<Integer, Integer>>> mapI32MapListI32I32,
+        @com.facebook.swift.codec.ThriftField(value=37, name="map_i32_map_list_struct_i32", requiredness=Requiredness.NONE) final Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> mapI32MapListStructI32
     ) {
         this.structList = structList;
         this.unionList = unionList;
@@ -61,6 +80,25 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         this.setMap2 = setMap2;
         this.mapMap = mapMap;
         this.mapMap2 = mapMap2;
+        this.listListI32 = listListI32;
+        this.listListStruct = listListStruct;
+        this.listSetI32 = listSetI32;
+        this.listSetStruct = listSetStruct;
+        this.listMapI32I32 = listMapI32I32;
+        this.listMapI32Struct = listMapI32Struct;
+        this.listMapStructI32 = listMapStructI32;
+        this.setListI32 = setListI32;
+        this.setListStruct = setListStruct;
+        this.setSetI32 = setSetI32;
+        this.setSetStruct = setSetStruct;
+        this.setMapI32I32 = setMapI32I32;
+        this.setMapI32Struct = setMapI32Struct;
+        this.setMapStructI32 = setMapStructI32;
+        this.mapI32MapI32I32 = mapI32MapI32I32;
+        this.mapI32MapStructI32 = mapI32MapStructI32;
+        this.mapI32MapI32Struct = mapI32MapI32Struct;
+        this.mapI32MapListI32I32 = mapI32MapListI32I32;
+        this.mapI32MapListStructI32 = mapI32MapListStructI32;
     }
     
     @ThriftConstructor
@@ -83,6 +121,25 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
       this.setMap2 = null;
       this.mapMap = null;
       this.mapMap2 = null;
+      this.listListI32 = null;
+      this.listListStruct = null;
+      this.listSetI32 = null;
+      this.listSetStruct = null;
+      this.listMapI32I32 = null;
+      this.listMapI32Struct = null;
+      this.listMapStructI32 = null;
+      this.setListI32 = null;
+      this.setListStruct = null;
+      this.setSetI32 = null;
+      this.setSetStruct = null;
+      this.setMapI32I32 = null;
+      this.setMapI32Struct = null;
+      this.setMapStructI32 = null;
+      this.mapI32MapI32I32 = null;
+      this.mapI32MapStructI32 = null;
+      this.mapI32MapI32Struct = null;
+      this.mapI32MapListI32I32 = null;
+      this.mapI32MapListStructI32 = null;
     }
     
     public static Builder builder() {
@@ -112,6 +169,25 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         private Map<Integer, Set<Integer>> setMap2 = null;
         private Map<Map<Integer, Integer>, Integer> mapMap = null;
         private Map<Integer, Map<Integer, Integer>> mapMap2 = null;
+        private List<List<Integer>> listListI32 = null;
+        private List<List<test.fixtures.complex_struct.MyStruct>> listListStruct = null;
+        private List<Set<Integer>> listSetI32 = null;
+        private List<Set<test.fixtures.complex_struct.MyStruct>> listSetStruct = null;
+        private List<Map<Integer, Integer>> listMapI32I32 = null;
+        private List<Map<Integer, test.fixtures.complex_struct.MyStruct>> listMapI32Struct = null;
+        private List<Map<test.fixtures.complex_struct.MyStruct, Integer>> listMapStructI32 = null;
+        private Set<List<Integer>> setListI32 = null;
+        private Set<List<test.fixtures.complex_struct.MyStruct>> setListStruct = null;
+        private Set<Set<Integer>> setSetI32 = null;
+        private Set<Set<test.fixtures.complex_struct.MyStruct>> setSetStruct = null;
+        private Set<Map<Integer, Integer>> setMapI32I32 = null;
+        private Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> setMapI32Struct = null;
+        private Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> setMapStructI32 = null;
+        private Map<Integer, Map<Integer, Integer>> mapI32MapI32I32 = null;
+        private Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> mapI32MapStructI32 = null;
+        private Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> mapI32MapI32Struct = null;
+        private Map<Integer, List<Map<Integer, Integer>>> mapI32MapListI32I32 = null;
+        private Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> mapI32MapListStructI32 = null;
     
         @com.facebook.swift.codec.ThriftField(value=1, name="struct_list", requiredness=Requiredness.NONE)
         public Builder setStructList(List<test.fixtures.complex_struct.MyStruct> structList) {
@@ -257,6 +333,158 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
     
         public Map<Integer, Map<Integer, Integer>> getMapMap2() { return mapMap2; }
     
+            @com.facebook.swift.codec.ThriftField(value=19, name="list_list_i32", requiredness=Requiredness.NONE)
+        public Builder setListListI32(List<List<Integer>> listListI32) {
+            this.listListI32 = listListI32;
+            return this;
+        }
+    
+        public List<List<Integer>> getListListI32() { return listListI32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=20, name="list_list_struct", requiredness=Requiredness.NONE)
+        public Builder setListListStruct(List<List<test.fixtures.complex_struct.MyStruct>> listListStruct) {
+            this.listListStruct = listListStruct;
+            return this;
+        }
+    
+        public List<List<test.fixtures.complex_struct.MyStruct>> getListListStruct() { return listListStruct; }
+    
+            @com.facebook.swift.codec.ThriftField(value=21, name="list_set_i32", requiredness=Requiredness.NONE)
+        public Builder setListSetI32(List<Set<Integer>> listSetI32) {
+            this.listSetI32 = listSetI32;
+            return this;
+        }
+    
+        public List<Set<Integer>> getListSetI32() { return listSetI32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=22, name="list_set_struct", requiredness=Requiredness.NONE)
+        public Builder setListSetStruct(List<Set<test.fixtures.complex_struct.MyStruct>> listSetStruct) {
+            this.listSetStruct = listSetStruct;
+            return this;
+        }
+    
+        public List<Set<test.fixtures.complex_struct.MyStruct>> getListSetStruct() { return listSetStruct; }
+    
+            @com.facebook.swift.codec.ThriftField(value=23, name="list_map_i32_i32", requiredness=Requiredness.NONE)
+        public Builder setListMapI32I32(List<Map<Integer, Integer>> listMapI32I32) {
+            this.listMapI32I32 = listMapI32I32;
+            return this;
+        }
+    
+        public List<Map<Integer, Integer>> getListMapI32I32() { return listMapI32I32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=24, name="list_map_i32_struct", requiredness=Requiredness.NONE)
+        public Builder setListMapI32Struct(List<Map<Integer, test.fixtures.complex_struct.MyStruct>> listMapI32Struct) {
+            this.listMapI32Struct = listMapI32Struct;
+            return this;
+        }
+    
+        public List<Map<Integer, test.fixtures.complex_struct.MyStruct>> getListMapI32Struct() { return listMapI32Struct; }
+    
+            @com.facebook.swift.codec.ThriftField(value=25, name="list_map_struct_i32", requiredness=Requiredness.NONE)
+        public Builder setListMapStructI32(List<Map<test.fixtures.complex_struct.MyStruct, Integer>> listMapStructI32) {
+            this.listMapStructI32 = listMapStructI32;
+            return this;
+        }
+    
+        public List<Map<test.fixtures.complex_struct.MyStruct, Integer>> getListMapStructI32() { return listMapStructI32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=26, name="set_list_i32", requiredness=Requiredness.NONE)
+        public Builder setSetListI32(Set<List<Integer>> setListI32) {
+            this.setListI32 = setListI32;
+            return this;
+        }
+    
+        public Set<List<Integer>> getSetListI32() { return setListI32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=27, name="set_list_struct", requiredness=Requiredness.NONE)
+        public Builder setSetListStruct(Set<List<test.fixtures.complex_struct.MyStruct>> setListStruct) {
+            this.setListStruct = setListStruct;
+            return this;
+        }
+    
+        public Set<List<test.fixtures.complex_struct.MyStruct>> getSetListStruct() { return setListStruct; }
+    
+            @com.facebook.swift.codec.ThriftField(value=28, name="set_set_i32", requiredness=Requiredness.NONE)
+        public Builder setSetSetI32(Set<Set<Integer>> setSetI32) {
+            this.setSetI32 = setSetI32;
+            return this;
+        }
+    
+        public Set<Set<Integer>> getSetSetI32() { return setSetI32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=29, name="set_set_struct", requiredness=Requiredness.NONE)
+        public Builder setSetSetStruct(Set<Set<test.fixtures.complex_struct.MyStruct>> setSetStruct) {
+            this.setSetStruct = setSetStruct;
+            return this;
+        }
+    
+        public Set<Set<test.fixtures.complex_struct.MyStruct>> getSetSetStruct() { return setSetStruct; }
+    
+            @com.facebook.swift.codec.ThriftField(value=30, name="set_map_i32_i32", requiredness=Requiredness.NONE)
+        public Builder setSetMapI32I32(Set<Map<Integer, Integer>> setMapI32I32) {
+            this.setMapI32I32 = setMapI32I32;
+            return this;
+        }
+    
+        public Set<Map<Integer, Integer>> getSetMapI32I32() { return setMapI32I32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=31, name="set_map_i32_struct", requiredness=Requiredness.NONE)
+        public Builder setSetMapI32Struct(Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> setMapI32Struct) {
+            this.setMapI32Struct = setMapI32Struct;
+            return this;
+        }
+    
+        public Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> getSetMapI32Struct() { return setMapI32Struct; }
+    
+            @com.facebook.swift.codec.ThriftField(value=32, name="set_map_struct_i32", requiredness=Requiredness.NONE)
+        public Builder setSetMapStructI32(Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> setMapStructI32) {
+            this.setMapStructI32 = setMapStructI32;
+            return this;
+        }
+    
+        public Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> getSetMapStructI32() { return setMapStructI32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=33, name="map_i32_map_i32_i32", requiredness=Requiredness.NONE)
+        public Builder setMapI32MapI32I32(Map<Integer, Map<Integer, Integer>> mapI32MapI32I32) {
+            this.mapI32MapI32I32 = mapI32MapI32I32;
+            return this;
+        }
+    
+        public Map<Integer, Map<Integer, Integer>> getMapI32MapI32I32() { return mapI32MapI32I32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=34, name="map_i32_map_struct_i32", requiredness=Requiredness.NONE)
+        public Builder setMapI32MapStructI32(Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> mapI32MapStructI32) {
+            this.mapI32MapStructI32 = mapI32MapStructI32;
+            return this;
+        }
+    
+        public Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> getMapI32MapStructI32() { return mapI32MapStructI32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=35, name="map_i32_map_i32_struct", requiredness=Requiredness.NONE)
+        public Builder setMapI32MapI32Struct(Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> mapI32MapI32Struct) {
+            this.mapI32MapI32Struct = mapI32MapI32Struct;
+            return this;
+        }
+    
+        public Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> getMapI32MapI32Struct() { return mapI32MapI32Struct; }
+    
+            @com.facebook.swift.codec.ThriftField(value=36, name="map_i32_map_list_i32_i32", requiredness=Requiredness.NONE)
+        public Builder setMapI32MapListI32I32(Map<Integer, List<Map<Integer, Integer>>> mapI32MapListI32I32) {
+            this.mapI32MapListI32I32 = mapI32MapListI32I32;
+            return this;
+        }
+    
+        public Map<Integer, List<Map<Integer, Integer>>> getMapI32MapListI32I32() { return mapI32MapListI32I32; }
+    
+            @com.facebook.swift.codec.ThriftField(value=37, name="map_i32_map_list_struct_i32", requiredness=Requiredness.NONE)
+        public Builder setMapI32MapListStructI32(Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> mapI32MapListStructI32) {
+            this.mapI32MapListStructI32 = mapI32MapListStructI32;
+            return this;
+        }
+    
+        public Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> getMapI32MapListStructI32() { return mapI32MapListStructI32; }
+    
         public Builder() { }
         public Builder(Containers other) {
             this.structList = other.structList;
@@ -277,6 +505,25 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
             this.setMap2 = other.setMap2;
             this.mapMap = other.mapMap;
             this.mapMap2 = other.mapMap2;
+            this.listListI32 = other.listListI32;
+            this.listListStruct = other.listListStruct;
+            this.listSetI32 = other.listSetI32;
+            this.listSetStruct = other.listSetStruct;
+            this.listMapI32I32 = other.listMapI32I32;
+            this.listMapI32Struct = other.listMapI32Struct;
+            this.listMapStructI32 = other.listMapStructI32;
+            this.setListI32 = other.setListI32;
+            this.setListStruct = other.setListStruct;
+            this.setSetI32 = other.setSetI32;
+            this.setSetStruct = other.setSetStruct;
+            this.setMapI32I32 = other.setMapI32I32;
+            this.setMapI32Struct = other.setMapI32Struct;
+            this.setMapStructI32 = other.setMapStructI32;
+            this.mapI32MapI32I32 = other.mapI32MapI32I32;
+            this.mapI32MapStructI32 = other.mapI32MapStructI32;
+            this.mapI32MapI32Struct = other.mapI32MapI32Struct;
+            this.mapI32MapListI32I32 = other.mapI32MapListI32I32;
+            this.mapI32MapListStructI32 = other.mapI32MapListStructI32;
         }
     
         @ThriftConstructor
@@ -299,7 +546,26 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
                 this.setMap,
                 this.setMap2,
                 this.mapMap,
-                this.mapMap2
+                this.mapMap2,
+                this.listListI32,
+                this.listListStruct,
+                this.listSetI32,
+                this.listSetStruct,
+                this.listMapI32I32,
+                this.listMapI32Struct,
+                this.listMapStructI32,
+                this.setListI32,
+                this.setListStruct,
+                this.setSetI32,
+                this.setSetStruct,
+                this.setMapI32I32,
+                this.setMapI32Struct,
+                this.setMapStructI32,
+                this.mapI32MapI32I32,
+                this.mapI32MapStructI32,
+                this.mapI32MapI32Struct,
+                this.mapI32MapListI32I32,
+                this.mapI32MapListStructI32
             );
             return result;
         }
@@ -363,6 +629,63 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         private final Map<Integer, Map<Integer, Integer>> mapMap2;
     public static final int _MAP_MAP_2 = 18;
     private static final TField MAP_MAP_2_FIELD_DESC = new TField("map_map_2", TType.MAP, (short)18);
+        private final List<List<Integer>> listListI32;
+    public static final int _LIST_LIST_I32 = 19;
+    private static final TField LIST_LIST_I32_FIELD_DESC = new TField("list_list_i32", TType.LIST, (short)19);
+        private final List<List<test.fixtures.complex_struct.MyStruct>> listListStruct;
+    public static final int _LIST_LIST_STRUCT = 20;
+    private static final TField LIST_LIST_STRUCT_FIELD_DESC = new TField("list_list_struct", TType.LIST, (short)20);
+        private final List<Set<Integer>> listSetI32;
+    public static final int _LIST_SET_I32 = 21;
+    private static final TField LIST_SET_I32_FIELD_DESC = new TField("list_set_i32", TType.LIST, (short)21);
+        private final List<Set<test.fixtures.complex_struct.MyStruct>> listSetStruct;
+    public static final int _LIST_SET_STRUCT = 22;
+    private static final TField LIST_SET_STRUCT_FIELD_DESC = new TField("list_set_struct", TType.LIST, (short)22);
+        private final List<Map<Integer, Integer>> listMapI32I32;
+    public static final int _LIST_MAP_I32_I32 = 23;
+    private static final TField LIST_MAP_I32_I32_FIELD_DESC = new TField("list_map_i32_i32", TType.LIST, (short)23);
+        private final List<Map<Integer, test.fixtures.complex_struct.MyStruct>> listMapI32Struct;
+    public static final int _LIST_MAP_I32_STRUCT = 24;
+    private static final TField LIST_MAP_I32_STRUCT_FIELD_DESC = new TField("list_map_i32_struct", TType.LIST, (short)24);
+        private final List<Map<test.fixtures.complex_struct.MyStruct, Integer>> listMapStructI32;
+    public static final int _LIST_MAP_STRUCT_I32 = 25;
+    private static final TField LIST_MAP_STRUCT_I32_FIELD_DESC = new TField("list_map_struct_i32", TType.LIST, (short)25);
+        private final Set<List<Integer>> setListI32;
+    public static final int _SET_LIST_I32 = 26;
+    private static final TField SET_LIST_I32_FIELD_DESC = new TField("set_list_i32", TType.SET, (short)26);
+        private final Set<List<test.fixtures.complex_struct.MyStruct>> setListStruct;
+    public static final int _SET_LIST_STRUCT = 27;
+    private static final TField SET_LIST_STRUCT_FIELD_DESC = new TField("set_list_struct", TType.SET, (short)27);
+        private final Set<Set<Integer>> setSetI32;
+    public static final int _SET_SET_I32 = 28;
+    private static final TField SET_SET_I32_FIELD_DESC = new TField("set_set_i32", TType.SET, (short)28);
+        private final Set<Set<test.fixtures.complex_struct.MyStruct>> setSetStruct;
+    public static final int _SET_SET_STRUCT = 29;
+    private static final TField SET_SET_STRUCT_FIELD_DESC = new TField("set_set_struct", TType.SET, (short)29);
+        private final Set<Map<Integer, Integer>> setMapI32I32;
+    public static final int _SET_MAP_I32_I32 = 30;
+    private static final TField SET_MAP_I32_I32_FIELD_DESC = new TField("set_map_i32_i32", TType.SET, (short)30);
+        private final Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> setMapI32Struct;
+    public static final int _SET_MAP_I32_STRUCT = 31;
+    private static final TField SET_MAP_I32_STRUCT_FIELD_DESC = new TField("set_map_i32_struct", TType.SET, (short)31);
+        private final Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> setMapStructI32;
+    public static final int _SET_MAP_STRUCT_I32 = 32;
+    private static final TField SET_MAP_STRUCT_I32_FIELD_DESC = new TField("set_map_struct_i32", TType.SET, (short)32);
+        private final Map<Integer, Map<Integer, Integer>> mapI32MapI32I32;
+    public static final int _MAP_I32_MAP_I32_I32 = 33;
+    private static final TField MAP_I32_MAP_I32_I32_FIELD_DESC = new TField("map_i32_map_i32_i32", TType.MAP, (short)33);
+        private final Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> mapI32MapStructI32;
+    public static final int _MAP_I32_MAP_STRUCT_I32 = 34;
+    private static final TField MAP_I32_MAP_STRUCT_I32_FIELD_DESC = new TField("map_i32_map_struct_i32", TType.MAP, (short)34);
+        private final Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> mapI32MapI32Struct;
+    public static final int _MAP_I32_MAP_I32_STRUCT = 35;
+    private static final TField MAP_I32_MAP_I32_STRUCT_FIELD_DESC = new TField("map_i32_map_i32_struct", TType.MAP, (short)35);
+        private final Map<Integer, List<Map<Integer, Integer>>> mapI32MapListI32I32;
+    public static final int _MAP_I32_MAP_LIST_I32_I32 = 36;
+    private static final TField MAP_I32_MAP_LIST_I32_I32_FIELD_DESC = new TField("map_i32_map_list_i32_i32", TType.MAP, (short)36);
+        private final Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> mapI32MapListStructI32;
+    public static final int _MAP_I32_MAP_LIST_STRUCT_I32 = 37;
+    private static final TField MAP_I32_MAP_LIST_STRUCT_I32_FIELD_DESC = new TField("map_i32_map_list_struct_i32", TType.MAP, (short)37);
     static {
       NAMES_TO_IDS.put("structList", 1);
       THRIFT_NAMES_TO_IDS.put("struct_list", 1);
@@ -418,6 +741,63 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
       NAMES_TO_IDS.put("mapMap2", 18);
       THRIFT_NAMES_TO_IDS.put("map_map_2", 18);
       FIELD_METADATA.put(18, MAP_MAP_2_FIELD_DESC);
+      NAMES_TO_IDS.put("listListI32", 19);
+      THRIFT_NAMES_TO_IDS.put("list_list_i32", 19);
+      FIELD_METADATA.put(19, LIST_LIST_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("listListStruct", 20);
+      THRIFT_NAMES_TO_IDS.put("list_list_struct", 20);
+      FIELD_METADATA.put(20, LIST_LIST_STRUCT_FIELD_DESC);
+      NAMES_TO_IDS.put("listSetI32", 21);
+      THRIFT_NAMES_TO_IDS.put("list_set_i32", 21);
+      FIELD_METADATA.put(21, LIST_SET_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("listSetStruct", 22);
+      THRIFT_NAMES_TO_IDS.put("list_set_struct", 22);
+      FIELD_METADATA.put(22, LIST_SET_STRUCT_FIELD_DESC);
+      NAMES_TO_IDS.put("listMapI32I32", 23);
+      THRIFT_NAMES_TO_IDS.put("list_map_i32_i32", 23);
+      FIELD_METADATA.put(23, LIST_MAP_I32_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("listMapI32Struct", 24);
+      THRIFT_NAMES_TO_IDS.put("list_map_i32_struct", 24);
+      FIELD_METADATA.put(24, LIST_MAP_I32_STRUCT_FIELD_DESC);
+      NAMES_TO_IDS.put("listMapStructI32", 25);
+      THRIFT_NAMES_TO_IDS.put("list_map_struct_i32", 25);
+      FIELD_METADATA.put(25, LIST_MAP_STRUCT_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("setListI32", 26);
+      THRIFT_NAMES_TO_IDS.put("set_list_i32", 26);
+      FIELD_METADATA.put(26, SET_LIST_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("setListStruct", 27);
+      THRIFT_NAMES_TO_IDS.put("set_list_struct", 27);
+      FIELD_METADATA.put(27, SET_LIST_STRUCT_FIELD_DESC);
+      NAMES_TO_IDS.put("setSetI32", 28);
+      THRIFT_NAMES_TO_IDS.put("set_set_i32", 28);
+      FIELD_METADATA.put(28, SET_SET_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("setSetStruct", 29);
+      THRIFT_NAMES_TO_IDS.put("set_set_struct", 29);
+      FIELD_METADATA.put(29, SET_SET_STRUCT_FIELD_DESC);
+      NAMES_TO_IDS.put("setMapI32I32", 30);
+      THRIFT_NAMES_TO_IDS.put("set_map_i32_i32", 30);
+      FIELD_METADATA.put(30, SET_MAP_I32_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("setMapI32Struct", 31);
+      THRIFT_NAMES_TO_IDS.put("set_map_i32_struct", 31);
+      FIELD_METADATA.put(31, SET_MAP_I32_STRUCT_FIELD_DESC);
+      NAMES_TO_IDS.put("setMapStructI32", 32);
+      THRIFT_NAMES_TO_IDS.put("set_map_struct_i32", 32);
+      FIELD_METADATA.put(32, SET_MAP_STRUCT_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("mapI32MapI32I32", 33);
+      THRIFT_NAMES_TO_IDS.put("map_i32_map_i32_i32", 33);
+      FIELD_METADATA.put(33, MAP_I32_MAP_I32_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("mapI32MapStructI32", 34);
+      THRIFT_NAMES_TO_IDS.put("map_i32_map_struct_i32", 34);
+      FIELD_METADATA.put(34, MAP_I32_MAP_STRUCT_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("mapI32MapI32Struct", 35);
+      THRIFT_NAMES_TO_IDS.put("map_i32_map_i32_struct", 35);
+      FIELD_METADATA.put(35, MAP_I32_MAP_I32_STRUCT_FIELD_DESC);
+      NAMES_TO_IDS.put("mapI32MapListI32I32", 36);
+      THRIFT_NAMES_TO_IDS.put("map_i32_map_list_i32_i32", 36);
+      FIELD_METADATA.put(36, MAP_I32_MAP_LIST_I32_I32_FIELD_DESC);
+      NAMES_TO_IDS.put("mapI32MapListStructI32", 37);
+      THRIFT_NAMES_TO_IDS.put("map_i32_map_list_struct_i32", 37);
+      FIELD_METADATA.put(37, MAP_I32_MAP_LIST_STRUCT_I32_FIELD_DESC);
     }
     
     @Nullable
@@ -509,6 +889,101 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
     @com.facebook.swift.codec.ThriftField(value=18, name="map_map_2", requiredness=Requiredness.NONE)
     public Map<Integer, Map<Integer, Integer>> getMapMap2() { return mapMap2; }
     
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=19, name="list_list_i32", requiredness=Requiredness.NONE)
+    public List<List<Integer>> getListListI32() { return listListI32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=20, name="list_list_struct", requiredness=Requiredness.NONE)
+    public List<List<test.fixtures.complex_struct.MyStruct>> getListListStruct() { return listListStruct; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=21, name="list_set_i32", requiredness=Requiredness.NONE)
+    public List<Set<Integer>> getListSetI32() { return listSetI32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=22, name="list_set_struct", requiredness=Requiredness.NONE)
+    public List<Set<test.fixtures.complex_struct.MyStruct>> getListSetStruct() { return listSetStruct; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=23, name="list_map_i32_i32", requiredness=Requiredness.NONE)
+    public List<Map<Integer, Integer>> getListMapI32I32() { return listMapI32I32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=24, name="list_map_i32_struct", requiredness=Requiredness.NONE)
+    public List<Map<Integer, test.fixtures.complex_struct.MyStruct>> getListMapI32Struct() { return listMapI32Struct; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=25, name="list_map_struct_i32", requiredness=Requiredness.NONE)
+    public List<Map<test.fixtures.complex_struct.MyStruct, Integer>> getListMapStructI32() { return listMapStructI32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=26, name="set_list_i32", requiredness=Requiredness.NONE)
+    public Set<List<Integer>> getSetListI32() { return setListI32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=27, name="set_list_struct", requiredness=Requiredness.NONE)
+    public Set<List<test.fixtures.complex_struct.MyStruct>> getSetListStruct() { return setListStruct; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=28, name="set_set_i32", requiredness=Requiredness.NONE)
+    public Set<Set<Integer>> getSetSetI32() { return setSetI32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=29, name="set_set_struct", requiredness=Requiredness.NONE)
+    public Set<Set<test.fixtures.complex_struct.MyStruct>> getSetSetStruct() { return setSetStruct; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=30, name="set_map_i32_i32", requiredness=Requiredness.NONE)
+    public Set<Map<Integer, Integer>> getSetMapI32I32() { return setMapI32I32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=31, name="set_map_i32_struct", requiredness=Requiredness.NONE)
+    public Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> getSetMapI32Struct() { return setMapI32Struct; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=32, name="set_map_struct_i32", requiredness=Requiredness.NONE)
+    public Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> getSetMapStructI32() { return setMapStructI32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=33, name="map_i32_map_i32_i32", requiredness=Requiredness.NONE)
+    public Map<Integer, Map<Integer, Integer>> getMapI32MapI32I32() { return mapI32MapI32I32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=34, name="map_i32_map_struct_i32", requiredness=Requiredness.NONE)
+    public Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> getMapI32MapStructI32() { return mapI32MapStructI32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=35, name="map_i32_map_i32_struct", requiredness=Requiredness.NONE)
+    public Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> getMapI32MapI32Struct() { return mapI32MapI32Struct; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=36, name="map_i32_map_list_i32_i32", requiredness=Requiredness.NONE)
+    public Map<Integer, List<Map<Integer, Integer>>> getMapI32MapListI32I32() { return mapI32MapListI32I32; }
+    
+    
+    @Nullable
+    @com.facebook.swift.codec.ThriftField(value=37, name="map_i32_map_list_struct_i32", requiredness=Requiredness.NONE)
+    public Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> getMapI32MapListStructI32() { return mapI32MapListStructI32; }
+    
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -530,6 +1005,25 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         helper.add("setMap2", setMap2);
         helper.add("mapMap", mapMap);
         helper.add("mapMap2", mapMap2);
+        helper.add("listListI32", listListI32);
+        helper.add("listListStruct", listListStruct);
+        helper.add("listSetI32", listSetI32);
+        helper.add("listSetStruct", listSetStruct);
+        helper.add("listMapI32I32", listMapI32I32);
+        helper.add("listMapI32Struct", listMapI32Struct);
+        helper.add("listMapStructI32", listMapStructI32);
+        helper.add("setListI32", setListI32);
+        helper.add("setListStruct", setListStruct);
+        helper.add("setSetI32", setSetI32);
+        helper.add("setSetStruct", setSetStruct);
+        helper.add("setMapI32I32", setMapI32I32);
+        helper.add("setMapI32Struct", setMapI32Struct);
+        helper.add("setMapStructI32", setMapStructI32);
+        helper.add("mapI32MapI32I32", mapI32MapI32I32);
+        helper.add("mapI32MapStructI32", mapI32MapStructI32);
+        helper.add("mapI32MapI32Struct", mapI32MapI32Struct);
+        helper.add("mapI32MapListI32I32", mapI32MapListI32I32);
+        helper.add("mapI32MapListStructI32", mapI32MapListStructI32);
         return helper.toString();
     }
     
@@ -563,6 +1057,25 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
             Objects.equals(setMap2, other.setMap2) &&
             Objects.equals(mapMap, other.mapMap) &&
             Objects.equals(mapMap2, other.mapMap2) &&
+            Objects.equals(listListI32, other.listListI32) &&
+            Objects.equals(listListStruct, other.listListStruct) &&
+            Objects.equals(listSetI32, other.listSetI32) &&
+            Objects.equals(listSetStruct, other.listSetStruct) &&
+            Objects.equals(listMapI32I32, other.listMapI32I32) &&
+            Objects.equals(listMapI32Struct, other.listMapI32Struct) &&
+            Objects.equals(listMapStructI32, other.listMapStructI32) &&
+            Objects.equals(setListI32, other.setListI32) &&
+            Objects.equals(setListStruct, other.setListStruct) &&
+            Objects.equals(setSetI32, other.setSetI32) &&
+            Objects.equals(setSetStruct, other.setSetStruct) &&
+            Objects.equals(setMapI32I32, other.setMapI32I32) &&
+            Objects.equals(setMapI32Struct, other.setMapI32Struct) &&
+            Objects.equals(setMapStructI32, other.setMapStructI32) &&
+            Objects.equals(mapI32MapI32I32, other.mapI32MapI32I32) &&
+            Objects.equals(mapI32MapStructI32, other.mapI32MapStructI32) &&
+            Objects.equals(mapI32MapI32Struct, other.mapI32MapI32Struct) &&
+            Objects.equals(mapI32MapListI32I32, other.mapI32MapListI32I32) &&
+            Objects.equals(mapI32MapListStructI32, other.mapI32MapListStructI32) &&
             true;
     }
     
@@ -586,7 +1099,26 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
             setMap,
             setMap2,
             mapMap,
-            mapMap2
+            mapMap2,
+            listListI32,
+            listListStruct,
+            listSetI32,
+            listSetStruct,
+            listMapI32I32,
+            listMapI32Struct,
+            listMapStructI32,
+            setListI32,
+            setListStruct,
+            setSetI32,
+            setSetStruct,
+            setMapI32I32,
+            setMapI32Struct,
+            setMapStructI32,
+            mapI32MapI32I32,
+            mapI32MapStructI32,
+            mapI32MapI32Struct,
+            mapI32MapListI32I32,
+            mapI32MapListStructI32
         });
     }
     
@@ -1017,6 +1549,689 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
             TProtocolUtil.skip(oprot, __field.type);
           }
           break;
+        case _LIST_LIST_I32:
+          if (__field.type == TType.LIST) {
+            List<List<Integer>> listListI32;
+            {
+            TList _list = oprot.readListBegin();
+            listListI32 = new ArrayList<List<Integer>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                List<Integer> _value1;
+                            {
+                            TList _list1 = oprot.readListBegin();
+                            _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readListEnd();
+                            }
+                listListI32.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListListI32(listListI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _LIST_LIST_STRUCT:
+          if (__field.type == TType.LIST) {
+            List<List<test.fixtures.complex_struct.MyStruct>> listListStruct;
+            {
+            TList _list = oprot.readListBegin();
+            listListStruct = new ArrayList<List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                List<test.fixtures.complex_struct.MyStruct> _value1;
+                            {
+                            TList _list1 = oprot.readListBegin();
+                            _value1 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list1.size));
+                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                
+                                
+                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readListEnd();
+                            }
+                listListStruct.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListListStruct(listListStruct);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _LIST_SET_I32:
+          if (__field.type == TType.LIST) {
+            List<Set<Integer>> listSetI32;
+            {
+            TList _list = oprot.readListBegin();
+            listSetI32 = new ArrayList<Set<Integer>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                Set<Integer> _value1;
+                            {
+                            TSet _set1 = oprot.readSetBegin();
+                            _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readSetEnd();
+                            }
+                listSetI32.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListSetI32(listSetI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _LIST_SET_STRUCT:
+          if (__field.type == TType.LIST) {
+            List<Set<test.fixtures.complex_struct.MyStruct>> listSetStruct;
+            {
+            TList _list = oprot.readListBegin();
+            listSetStruct = new ArrayList<Set<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                Set<test.fixtures.complex_struct.MyStruct> _value1;
+                            {
+                            TSet _set1 = oprot.readSetBegin();
+                            _value1 = new HashSet<test.fixtures.complex_struct.MyStruct>(Math.max(0, _set1.size));
+                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                
+                                
+                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readSetEnd();
+                            }
+                listSetStruct.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListSetStruct(listSetStruct);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _LIST_MAP_I32_I32:
+          if (__field.type == TType.LIST) {
+            List<Map<Integer, Integer>> listMapI32I32;
+            {
+            TList _list = oprot.readListBegin();
+            listMapI32I32 = new ArrayList<Map<Integer, Integer>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                Map<Integer, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<Integer, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                int _key2 = oprot.readI32();
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                listMapI32I32.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListMapI32I32(listMapI32I32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _LIST_MAP_I32_STRUCT:
+          if (__field.type == TType.LIST) {
+            List<Map<Integer, test.fixtures.complex_struct.MyStruct>> listMapI32Struct;
+            {
+            TList _list = oprot.readListBegin();
+            listMapI32Struct = new ArrayList<Map<Integer, test.fixtures.complex_struct.MyStruct>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                Map<Integer, test.fixtures.complex_struct.MyStruct> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<Integer, test.fixtures.complex_struct.MyStruct>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                int _key2 = oprot.readI32();
+                                
+                
+                                
+                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                listMapI32Struct.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListMapI32Struct(listMapI32Struct);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _LIST_MAP_STRUCT_I32:
+          if (__field.type == TType.LIST) {
+            List<Map<test.fixtures.complex_struct.MyStruct, Integer>> listMapStructI32;
+            {
+            TList _list = oprot.readListBegin();
+            listMapStructI32 = new ArrayList<Map<test.fixtures.complex_struct.MyStruct, Integer>>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                Map<test.fixtures.complex_struct.MyStruct, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<test.fixtures.complex_struct.MyStruct, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                test.fixtures.complex_struct.MyStruct _key2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                listMapStructI32.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setListMapStructI32(listMapStructI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _SET_LIST_I32:
+          if (__field.type == TType.SET) {
+            Set<List<Integer>> setListI32;
+            {
+            TSet _set = oprot.readSetBegin();
+            setListI32 = new HashSet<List<Integer>>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                List<Integer> _value1;
+                            {
+                            TList _list1 = oprot.readListBegin();
+                            _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readListEnd();
+                            }
+                setListI32.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setSetListI32(setListI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _SET_LIST_STRUCT:
+          if (__field.type == TType.SET) {
+            Set<List<test.fixtures.complex_struct.MyStruct>> setListStruct;
+            {
+            TSet _set = oprot.readSetBegin();
+            setListStruct = new HashSet<List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                List<test.fixtures.complex_struct.MyStruct> _value1;
+                            {
+                            TList _list1 = oprot.readListBegin();
+                            _value1 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list1.size));
+                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                
+                                
+                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readListEnd();
+                            }
+                setListStruct.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setSetListStruct(setListStruct);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _SET_SET_I32:
+          if (__field.type == TType.SET) {
+            Set<Set<Integer>> setSetI32;
+            {
+            TSet _set = oprot.readSetBegin();
+            setSetI32 = new HashSet<Set<Integer>>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                Set<Integer> _value1;
+                            {
+                            TSet _set1 = oprot.readSetBegin();
+                            _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readSetEnd();
+                            }
+                setSetI32.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setSetSetI32(setSetI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _SET_SET_STRUCT:
+          if (__field.type == TType.SET) {
+            Set<Set<test.fixtures.complex_struct.MyStruct>> setSetStruct;
+            {
+            TSet _set = oprot.readSetBegin();
+            setSetStruct = new HashSet<Set<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                Set<test.fixtures.complex_struct.MyStruct> _value1;
+                            {
+                            TSet _set1 = oprot.readSetBegin();
+                            _value1 = new HashSet<test.fixtures.complex_struct.MyStruct>(Math.max(0, _set1.size));
+                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                
+                                
+                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readSetEnd();
+                            }
+                setSetStruct.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setSetSetStruct(setSetStruct);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _SET_MAP_I32_I32:
+          if (__field.type == TType.SET) {
+            Set<Map<Integer, Integer>> setMapI32I32;
+            {
+            TSet _set = oprot.readSetBegin();
+            setMapI32I32 = new HashSet<Map<Integer, Integer>>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                Map<Integer, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<Integer, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                int _key2 = oprot.readI32();
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                setMapI32I32.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setSetMapI32I32(setMapI32I32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _SET_MAP_I32_STRUCT:
+          if (__field.type == TType.SET) {
+            Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> setMapI32Struct;
+            {
+            TSet _set = oprot.readSetBegin();
+            setMapI32Struct = new HashSet<Map<Integer, test.fixtures.complex_struct.MyStruct>>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                Map<Integer, test.fixtures.complex_struct.MyStruct> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<Integer, test.fixtures.complex_struct.MyStruct>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                int _key2 = oprot.readI32();
+                                
+                
+                                
+                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                setMapI32Struct.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setSetMapI32Struct(setMapI32Struct);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _SET_MAP_STRUCT_I32:
+          if (__field.type == TType.SET) {
+            Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> setMapStructI32;
+            {
+            TSet _set = oprot.readSetBegin();
+            setMapStructI32 = new HashSet<Map<test.fixtures.complex_struct.MyStruct, Integer>>(Math.max(0, _set.size));
+            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                
+                Map<test.fixtures.complex_struct.MyStruct, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<test.fixtures.complex_struct.MyStruct, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                test.fixtures.complex_struct.MyStruct _key2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                setMapStructI32.add(_value1);
+            }
+            oprot.readSetEnd();
+            }
+            builder.setSetMapStructI32(setMapStructI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _MAP_I32_MAP_I32_I32:
+          if (__field.type == TType.MAP) {
+            Map<Integer, Map<Integer, Integer>> mapI32MapI32I32;
+            {
+            TMap _map = oprot.readMapBegin();
+            mapI32MapI32I32 = new HashMap<Integer, Map<Integer, Integer>>(Math.max(0, _map.size));
+            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                
+                int _key1 = oprot.readI32();
+                Map<Integer, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<Integer, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                int _key2 = oprot.readI32();
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                                mapI32MapI32I32.put(_key1, _value1);
+            }
+            }
+            oprot.readMapEnd();
+            builder.setMapI32MapI32I32(mapI32MapI32I32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _MAP_I32_MAP_STRUCT_I32:
+          if (__field.type == TType.MAP) {
+            Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> mapI32MapStructI32;
+            {
+            TMap _map = oprot.readMapBegin();
+            mapI32MapStructI32 = new HashMap<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>>(Math.max(0, _map.size));
+            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                
+                int _key1 = oprot.readI32();
+                Map<test.fixtures.complex_struct.MyStruct, Integer> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<test.fixtures.complex_struct.MyStruct, Integer>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                test.fixtures.complex_struct.MyStruct _key2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                
+                                
+                                int _value2 = oprot.readI32();
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                                mapI32MapStructI32.put(_key1, _value1);
+            }
+            }
+            oprot.readMapEnd();
+            builder.setMapI32MapStructI32(mapI32MapStructI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _MAP_I32_MAP_I32_STRUCT:
+          if (__field.type == TType.MAP) {
+            Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> mapI32MapI32Struct;
+            {
+            TMap _map = oprot.readMapBegin();
+            mapI32MapI32Struct = new HashMap<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>>(Math.max(0, _map.size));
+            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                
+                int _key1 = oprot.readI32();
+                Map<Integer, test.fixtures.complex_struct.MyStruct> _value1;
+                            {
+                            TMap _map1 = oprot.readMapBegin();
+                            _value1 = new HashMap<Integer, test.fixtures.complex_struct.MyStruct>(Math.max(0, _map1.size));
+                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                
+                                
+                                int _key2 = oprot.readI32();
+                                
+                
+                                
+                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                
+                                
+                                _value1.put(_key2, _value2);
+                                
+                            }
+                            }
+                            oprot.readMapEnd();
+                                mapI32MapI32Struct.put(_key1, _value1);
+            }
+            }
+            oprot.readMapEnd();
+            builder.setMapI32MapI32Struct(mapI32MapI32Struct);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _MAP_I32_MAP_LIST_I32_I32:
+          if (__field.type == TType.MAP) {
+            Map<Integer, List<Map<Integer, Integer>>> mapI32MapListI32I32;
+            {
+            TMap _map = oprot.readMapBegin();
+            mapI32MapListI32I32 = new HashMap<Integer, List<Map<Integer, Integer>>>(Math.max(0, _map.size));
+            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                
+                int _key1 = oprot.readI32();
+                List<Map<Integer, Integer>> _value1;
+                            {
+                            TList _list1 = oprot.readListBegin();
+                            _value1 = new ArrayList<Map<Integer, Integer>>(Math.max(0, _list1.size));
+                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                
+                                Map<Integer, Integer> _value2;
+            {
+            TMap _map2 = oprot.readMapBegin();
+            _value2 = new HashMap<Integer, Integer>(Math.max(0, _map2.size));
+            for (int _i2 = 0; (_map2.size < 0) ? oprot.peekMap() : (_i2 < _map2.size); _i2++) {
+                
+                
+                int _key3 = oprot.readI32();
+                
+
+                
+                int _value3 = oprot.readI32();
+                
+                
+                _value2.put(_key3, _value3);
+                
+            }
+            }
+            oprot.readMapEnd();
+
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readListEnd();
+                            }
+                                mapI32MapListI32I32.put(_key1, _value1);
+            }
+            }
+            oprot.readMapEnd();
+            builder.setMapI32MapListI32I32(mapI32MapListI32I32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _MAP_I32_MAP_LIST_STRUCT_I32:
+          if (__field.type == TType.MAP) {
+            Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> mapI32MapListStructI32;
+            {
+            TMap _map = oprot.readMapBegin();
+            mapI32MapListStructI32 = new HashMap<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>>(Math.max(0, _map.size));
+            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                
+                int _key1 = oprot.readI32();
+                List<Map<test.fixtures.complex_struct.MyStruct, Integer>> _value1;
+                            {
+                            TList _list1 = oprot.readListBegin();
+                            _value1 = new ArrayList<Map<test.fixtures.complex_struct.MyStruct, Integer>>(Math.max(0, _list1.size));
+                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                
+                                Map<test.fixtures.complex_struct.MyStruct, Integer> _value2;
+            {
+            TMap _map2 = oprot.readMapBegin();
+            _value2 = new HashMap<test.fixtures.complex_struct.MyStruct, Integer>(Math.max(0, _map2.size));
+            for (int _i2 = 0; (_map2.size < 0) ? oprot.peekMap() : (_i2 < _map2.size); _i2++) {
+                
+                
+                test.fixtures.complex_struct.MyStruct _key3 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                
+
+                
+                int _value3 = oprot.readI32();
+                
+                
+                _value2.put(_key3, _value3);
+                
+            }
+            }
+            oprot.readMapEnd();
+
+                                
+                                _value1.add(_value2);
+                                
+                            }
+                            oprot.readListEnd();
+                            }
+                                mapI32MapListStructI32.put(_key1, _value1);
+            }
+            }
+            oprot.readMapEnd();
+            builder.setMapI32MapListStructI32(mapI32MapListStructI32);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(oprot, __field.type);
           break;
@@ -1243,6 +2458,296 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
           oprot.writeI32(_iter2.getValue());
         }
         oprot.writeMapEnd();
+        }
+        oprot.writeMapEnd();
+        oprot.writeFieldEnd();
+      }
+      if (listListI32 != null) {
+        oprot.writeFieldBegin(LIST_LIST_I32_FIELD_DESC);
+        List<List<Integer>> _iter0 = listListI32;
+        oprot.writeListBegin(new TList(TType.LIST, _iter0.size()));
+        for (List<Integer> _iter1 : _iter0) {
+          oprot.writeListBegin(new TList(TType.I32, _iter1.size()));
+        for (int _iter2 : _iter1) {
+          oprot.writeI32(_iter2);
+        }
+        oprot.writeListEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      if (listListStruct != null) {
+        oprot.writeFieldBegin(LIST_LIST_STRUCT_FIELD_DESC);
+        List<List<test.fixtures.complex_struct.MyStruct>> _iter0 = listListStruct;
+        oprot.writeListBegin(new TList(TType.LIST, _iter0.size()));
+        for (List<test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
+          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.size()));
+        for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1) {
+          _iter2.write0(oprot);
+        }
+        oprot.writeListEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      if (listSetI32 != null) {
+        oprot.writeFieldBegin(LIST_SET_I32_FIELD_DESC);
+        List<Set<Integer>> _iter0 = listSetI32;
+        oprot.writeListBegin(new TList(TType.SET, _iter0.size()));
+        for (Set<Integer> _iter1 : _iter0) {
+          oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
+        for (int _iter2 : _iter1) {
+          oprot.writeI32(_iter2);
+        }
+        oprot.writeSetEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      if (listSetStruct != null) {
+        oprot.writeFieldBegin(LIST_SET_STRUCT_FIELD_DESC);
+        List<Set<test.fixtures.complex_struct.MyStruct>> _iter0 = listSetStruct;
+        oprot.writeListBegin(new TList(TType.SET, _iter0.size()));
+        for (Set<test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
+          oprot.writeSetBegin(new TSet(TType.STRUCT, _iter1.size()));
+        for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1) {
+          _iter2.write0(oprot);
+        }
+        oprot.writeSetEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      if (listMapI32I32 != null) {
+        oprot.writeFieldBegin(LIST_MAP_I32_I32_FIELD_DESC);
+        List<Map<Integer, Integer>> _iter0 = listMapI32I32;
+        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
+        for (Map<Integer, Integer> _iter1 : _iter0) {
+          oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.size()));
+        for (Map.Entry<Integer, Integer> _iter2 : _iter1.entrySet()) {
+          oprot.writeI32(_iter2.getKey());
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      if (listMapI32Struct != null) {
+        oprot.writeFieldBegin(LIST_MAP_I32_STRUCT_FIELD_DESC);
+        List<Map<Integer, test.fixtures.complex_struct.MyStruct>> _iter0 = listMapI32Struct;
+        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
+        for (Map<Integer, test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
+          oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter1.size()));
+        for (Map.Entry<Integer, test.fixtures.complex_struct.MyStruct> _iter2 : _iter1.entrySet()) {
+          oprot.writeI32(_iter2.getKey());
+          _iter2.getValue().write0(oprot);
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      if (listMapStructI32 != null) {
+        oprot.writeFieldBegin(LIST_MAP_STRUCT_I32_FIELD_DESC);
+        List<Map<test.fixtures.complex_struct.MyStruct, Integer>> _iter0 = listMapStructI32;
+        oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
+        for (Map<test.fixtures.complex_struct.MyStruct, Integer> _iter1 : _iter0) {
+          oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter1.size()));
+        for (Map.Entry<test.fixtures.complex_struct.MyStruct, Integer> _iter2 : _iter1.entrySet()) {
+          _iter2.getKey().write0(oprot);
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
+      if (setListI32 != null) {
+        oprot.writeFieldBegin(SET_LIST_I32_FIELD_DESC);
+        Set<List<Integer>> _iter0 = setListI32;
+        oprot.writeSetBegin(new TSet(TType.LIST, _iter0.size()));
+        for (List<Integer> _iter1 : _iter0) {
+          oprot.writeListBegin(new TList(TType.I32, _iter1.size()));
+        for (int _iter2 : _iter1) {
+          oprot.writeI32(_iter2);
+        }
+        oprot.writeListEnd();
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
+      if (setListStruct != null) {
+        oprot.writeFieldBegin(SET_LIST_STRUCT_FIELD_DESC);
+        Set<List<test.fixtures.complex_struct.MyStruct>> _iter0 = setListStruct;
+        oprot.writeSetBegin(new TSet(TType.LIST, _iter0.size()));
+        for (List<test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
+          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.size()));
+        for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1) {
+          _iter2.write0(oprot);
+        }
+        oprot.writeListEnd();
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
+      if (setSetI32 != null) {
+        oprot.writeFieldBegin(SET_SET_I32_FIELD_DESC);
+        Set<Set<Integer>> _iter0 = setSetI32;
+        oprot.writeSetBegin(new TSet(TType.SET, _iter0.size()));
+        for (Set<Integer> _iter1 : _iter0) {
+          oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
+        for (int _iter2 : _iter1) {
+          oprot.writeI32(_iter2);
+        }
+        oprot.writeSetEnd();
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
+      if (setSetStruct != null) {
+        oprot.writeFieldBegin(SET_SET_STRUCT_FIELD_DESC);
+        Set<Set<test.fixtures.complex_struct.MyStruct>> _iter0 = setSetStruct;
+        oprot.writeSetBegin(new TSet(TType.SET, _iter0.size()));
+        for (Set<test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
+          oprot.writeSetBegin(new TSet(TType.STRUCT, _iter1.size()));
+        for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1) {
+          _iter2.write0(oprot);
+        }
+        oprot.writeSetEnd();
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
+      if (setMapI32I32 != null) {
+        oprot.writeFieldBegin(SET_MAP_I32_I32_FIELD_DESC);
+        Set<Map<Integer, Integer>> _iter0 = setMapI32I32;
+        oprot.writeSetBegin(new TSet(TType.MAP, _iter0.size()));
+        for (Map<Integer, Integer> _iter1 : _iter0) {
+          oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.size()));
+        for (Map.Entry<Integer, Integer> _iter2 : _iter1.entrySet()) {
+          oprot.writeI32(_iter2.getKey());
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
+      if (setMapI32Struct != null) {
+        oprot.writeFieldBegin(SET_MAP_I32_STRUCT_FIELD_DESC);
+        Set<Map<Integer, test.fixtures.complex_struct.MyStruct>> _iter0 = setMapI32Struct;
+        oprot.writeSetBegin(new TSet(TType.MAP, _iter0.size()));
+        for (Map<Integer, test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
+          oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter1.size()));
+        for (Map.Entry<Integer, test.fixtures.complex_struct.MyStruct> _iter2 : _iter1.entrySet()) {
+          oprot.writeI32(_iter2.getKey());
+          _iter2.getValue().write0(oprot);
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
+      if (setMapStructI32 != null) {
+        oprot.writeFieldBegin(SET_MAP_STRUCT_I32_FIELD_DESC);
+        Set<Map<test.fixtures.complex_struct.MyStruct, Integer>> _iter0 = setMapStructI32;
+        oprot.writeSetBegin(new TSet(TType.MAP, _iter0.size()));
+        for (Map<test.fixtures.complex_struct.MyStruct, Integer> _iter1 : _iter0) {
+          oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter1.size()));
+        for (Map.Entry<test.fixtures.complex_struct.MyStruct, Integer> _iter2 : _iter1.entrySet()) {
+          _iter2.getKey().write0(oprot);
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeSetEnd();
+        oprot.writeFieldEnd();
+      }
+      if (mapI32MapI32I32 != null) {
+        oprot.writeFieldBegin(MAP_I32_MAP_I32_I32_FIELD_DESC);
+        Map<Integer, Map<Integer, Integer>> _iter0 = mapI32MapI32I32;
+        oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
+        for (Map.Entry<Integer, Map<Integer, Integer>> _iter1 : _iter0.entrySet()) {
+          oprot.writeI32(_iter1.getKey());
+          oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.getValue().size()));
+        for (Map.Entry<Integer, Integer> _iter2 : _iter1.getValue().entrySet()) {
+          oprot.writeI32(_iter2.getKey());
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeMapEnd();
+        oprot.writeFieldEnd();
+      }
+      if (mapI32MapStructI32 != null) {
+        oprot.writeFieldBegin(MAP_I32_MAP_STRUCT_I32_FIELD_DESC);
+        Map<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> _iter0 = mapI32MapStructI32;
+        oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
+        for (Map.Entry<Integer, Map<test.fixtures.complex_struct.MyStruct, Integer>> _iter1 : _iter0.entrySet()) {
+          oprot.writeI32(_iter1.getKey());
+          oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter1.getValue().size()));
+        for (Map.Entry<test.fixtures.complex_struct.MyStruct, Integer> _iter2 : _iter1.getValue().entrySet()) {
+          _iter2.getKey().write0(oprot);
+          oprot.writeI32(_iter2.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeMapEnd();
+        oprot.writeFieldEnd();
+      }
+      if (mapI32MapI32Struct != null) {
+        oprot.writeFieldBegin(MAP_I32_MAP_I32_STRUCT_FIELD_DESC);
+        Map<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> _iter0 = mapI32MapI32Struct;
+        oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
+        for (Map.Entry<Integer, Map<Integer, test.fixtures.complex_struct.MyStruct>> _iter1 : _iter0.entrySet()) {
+          oprot.writeI32(_iter1.getKey());
+          oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, _iter1.getValue().size()));
+        for (Map.Entry<Integer, test.fixtures.complex_struct.MyStruct> _iter2 : _iter1.getValue().entrySet()) {
+          oprot.writeI32(_iter2.getKey());
+          _iter2.getValue().write0(oprot);
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeMapEnd();
+        oprot.writeFieldEnd();
+      }
+      if (mapI32MapListI32I32 != null) {
+        oprot.writeFieldBegin(MAP_I32_MAP_LIST_I32_I32_FIELD_DESC);
+        Map<Integer, List<Map<Integer, Integer>>> _iter0 = mapI32MapListI32I32;
+        oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
+        for (Map.Entry<Integer, List<Map<Integer, Integer>>> _iter1 : _iter0.entrySet()) {
+          oprot.writeI32(_iter1.getKey());
+          oprot.writeListBegin(new TList(TType.MAP, _iter1.getValue().size()));
+        for (Map<Integer, Integer> _iter2 : _iter1.getValue()) {
+          oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter2.size()));
+        for (Map.Entry<Integer, Integer> _iter3 : _iter2.entrySet()) {
+          oprot.writeI32(_iter3.getKey());
+          oprot.writeI32(_iter3.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeListEnd();
+        }
+        oprot.writeMapEnd();
+        oprot.writeFieldEnd();
+      }
+      if (mapI32MapListStructI32 != null) {
+        oprot.writeFieldBegin(MAP_I32_MAP_LIST_STRUCT_I32_FIELD_DESC);
+        Map<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> _iter0 = mapI32MapListStructI32;
+        oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
+        for (Map.Entry<Integer, List<Map<test.fixtures.complex_struct.MyStruct, Integer>>> _iter1 : _iter0.entrySet()) {
+          oprot.writeI32(_iter1.getKey());
+          oprot.writeListBegin(new TList(TType.MAP, _iter1.getValue().size()));
+        for (Map<test.fixtures.complex_struct.MyStruct, Integer> _iter2 : _iter1.getValue()) {
+          oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter2.size()));
+        for (Map.Entry<test.fixtures.complex_struct.MyStruct, Integer> _iter3 : _iter2.entrySet()) {
+          _iter3.getKey().write0(oprot);
+          oprot.writeI32(_iter3.getValue());
+        }
+        oprot.writeMapEnd();
+        }
+        oprot.writeListEnd();
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();

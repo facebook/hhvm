@@ -2109,6 +2109,215 @@ class Containers(metaclass=_fbthrift_python_mutable_types.MutableStructMeta):
             False, # field type is primitive
             16, # IDL type (see BaseTypeEnum)
         ),
+        _fbthrift_python_types.FieldInfo(
+            19,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_list_i32",  # name
+            "list_list_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            20,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_list_struct",  # name
+            "list_list_struct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            21,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_set_i32",  # name
+            "list_set_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            22,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_set_struct",  # name
+            "list_set_struct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            23,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_map_i32_i32",  # name
+            "list_map_i32_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            24,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_map_i32_struct",  # name
+            "list_map_i32_struct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            25,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "list_map_struct_i32",  # name
+            "list_map_struct_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct), _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            14, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            26,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_list_i32",  # name
+            "set_list_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            27,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_list_struct",  # name
+            "set_list_struct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            28,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_set_i32",  # name
+            "set_set_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            29,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_set_struct",  # name
+            "set_set_struct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            30,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_map_i32_i32",  # name
+            "set_map_i32_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            31,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_map_i32_struct",  # name
+            "set_map_i32_struct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            32,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "set_map_struct_i32",  # name
+            "set_map_struct_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableSetTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct), _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            15, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            33,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_i32_map_i32_i32",  # name
+            "map_i32_map_i32_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            34,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_i32_map_struct_i32",  # name
+            "map_i32_map_struct_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct), _fbthrift_python_types.typeinfo_i32)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            35,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_i32_map_i32_struct",  # name
+            "map_i32_map_i32_struct",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            36,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_i32_map_list_i32_i32",  # name
+            "map_i32_map_list_i32_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.typeinfo_i32))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
+        _fbthrift_python_types.FieldInfo(
+            37,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "map_i32_map_list_struct_i32",  # name
+            "map_i32_map_list_struct_i32",  # python name (from @python.Name annotation)
+            lambda: _fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_mutable_typeinfos.MutableListTypeInfo(_fbthrift_python_mutable_typeinfos.MutableMapTypeInfo(_fbthrift_python_mutable_typeinfos.MutableStructTypeInfo(MyStruct), _fbthrift_python_types.typeinfo_i32))),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+            False, # field type is primitive
+            16, # IDL type (see BaseTypeEnum)
+        ),
     )
 
     @staticmethod

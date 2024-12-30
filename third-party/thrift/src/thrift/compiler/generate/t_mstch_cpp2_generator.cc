@@ -774,18 +774,7 @@ class cpp_mstch_program : public mstch_program {
           // If you don't have a schema const you don't need schema includes.
           ::apache::thrift::compiler::has_schema(sm_, *program_) &&
           // Opting out of schema const should disable all of its failure modes.
-          !program->find_structured_annotation_or_null(
-              kDisableSchemaConstUri) &&
-          // File-relative includes break schema const naming,
-          // so exclude programs with includes that don't contain a path
-          // separator.
-          std::all_of(
-              program->includes().begin(),
-              program->includes().end(),
-              [](const t_include* inc) {
-                auto path = inc->raw_path();
-                return std::find(path.begin(), path.end(), '/') != path.end();
-              });
+          !program->find_structured_annotation_or_null(kDisableSchemaConstUri);
       return std::make_unique<strong_bool>(static_cast<strong_bool>(ret));
     });
     return static_cast<bool>(supports);

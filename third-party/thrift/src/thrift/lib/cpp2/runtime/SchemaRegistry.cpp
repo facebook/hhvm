@@ -19,22 +19,26 @@
 #include <folly/Indestructible.h>
 #include <folly/compression/Compression.h>
 #include <thrift/lib/cpp2/protocol/Serializer.h>
-#include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 
 namespace apache::thrift {
 
+SchemaRegistry& SchemaRegistry::get() {
+  static folly::Indestructible<SchemaRegistry> self(BaseSchemaRegistry::get());
+  return *self;
+}
+
 const type::Schema& SchemaRegistry::getMergedSchema() {
-  static const folly::Indestructible<type::Schema> merged = [&] {
-    BaseSchemaRegistry::accessed() = true;
+  folly::call_once(mergedFlag_, [this]() {
+    base_.accessed_ = true;
     std::vector<std::string_view> schemas;
-    schemas.reserve(BaseSchemaRegistry::getRawSchemas().size());
-    for (auto& [name, data] : BaseSchemaRegistry::getRawSchemas()) {
+    schemas.reserve(base_.rawSchemas_.size());
+    for (auto& [name, data] : base_.rawSchemas_) {
       schemas.push_back(data.data);
     }
-    return mergeSchemas(folly::range(schemas));
-  }();
+    merged_ = mergeSchemas(folly::range(schemas));
+  });
 
-  return *merged;
+  return merged_;
 }
 
 namespace {

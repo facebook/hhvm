@@ -22,10 +22,10 @@ namespace apache::thrift {
 
 void BaseSchemaRegistry::registerSchema(
     std::string_view name, std::string_view data, std::string_view path) {
-  if (accessed()) {
+  if (accessed_) {
     throw std::runtime_error("Schemas accessed before registration complete.");
   }
-  if (auto it = getRawSchemas().find(name); it != getRawSchemas().end()) {
+  if (auto it = rawSchemas_.find(name); it != rawSchemas_.end()) {
     if (it->second.path != path) { // Needed to support dynamic linking
       throw std::runtime_error(fmt::format(
           "Checksum collision between {} and {}. Make any change to either file's content (e.g.. whitespace/comment) to fix it.",
@@ -34,20 +34,12 @@ void BaseSchemaRegistry::registerSchema(
     }
     return;
   }
-  getRawSchemas()[name] = {data, path};
+  rawSchemas_[name] = {data, path};
 }
 
-folly::F14FastMap<std::string_view, BaseSchemaRegistry::RawSchema>&
-BaseSchemaRegistry::getRawSchemas() {
-  static folly::Indestructible<
-      folly::F14FastMap<std::string_view, BaseSchemaRegistry::RawSchema>>
-      schemas;
-  return *schemas;
-}
-
-bool& BaseSchemaRegistry::accessed() {
-  static folly::Indestructible<bool> accessed = false;
-  return *accessed;
+BaseSchemaRegistry& BaseSchemaRegistry::get() {
+  static folly::Indestructible<BaseSchemaRegistry> self;
+  return *self;
 }
 
 } // namespace apache::thrift

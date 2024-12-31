@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <string>
 #include <vector>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
@@ -31,7 +29,7 @@
 using namespace apache::thrift;
 
 TEST(SchemaTest, not_linked) {
-  const auto& schema = SchemaRegistry::getMergedSchema();
+  const auto& schema = SchemaRegistry::get().getMergedSchema();
   for (const auto& program : *schema.programs()) {
     EXPECT_NE(
         program.path(), "thrift/test/TopologicallySortObjectsTest.thrift");
@@ -42,7 +40,7 @@ TEST(SchemaTest, not_linked) {
 }
 
 TEST(SchemaTest, not_linked_but_included) {
-  const auto& schema = SchemaRegistry::getMergedSchema();
+  const auto& schema = SchemaRegistry::get().getMergedSchema();
   for (const auto& program : *schema.programs()) {
     if (program.path() != "thrift/annotation/thrift.thrift") {
       continue;
@@ -58,7 +56,7 @@ TEST(SchemaTest, not_linked_but_included) {
 
 TEST(SchemaTest, linked) {
   bool found = false;
-  const auto& schema = SchemaRegistry::getMergedSchema();
+  const auto& schema = SchemaRegistry::get().getMergedSchema();
   for (const auto& program : *schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
       found = true;
@@ -99,7 +97,7 @@ TEST(SchemaTest, static_schema) {
   }
   ASSERT_TRUE(static_program);
 
-  const auto& dynamic_schema = SchemaRegistry::getMergedSchema();
+  const auto& dynamic_schema = SchemaRegistry::get().getMergedSchema();
   const type::Program* dynamic_program = nullptr;
   for (const auto& program : *dynamic_schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {

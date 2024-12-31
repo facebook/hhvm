@@ -24,7 +24,10 @@ namespace apache::thrift {
 
 class BaseSchemaRegistry {
  public:
-  static void registerSchema(
+  // Access the global registry.
+  static BaseSchemaRegistry& get();
+
+  void registerSchema(
       std::string_view name, std::string_view data, std::string_view path);
 
  private:
@@ -32,8 +35,8 @@ class BaseSchemaRegistry {
     std::string_view data;
     std::string_view path;
   };
-  static folly::F14FastMap<std::string_view, RawSchema>& getRawSchemas();
-  static bool& accessed();
+  folly::F14FastMap<std::string_view, RawSchema> rawSchemas_;
+  bool accessed_;
 
   friend class SchemaRegistry;
 };

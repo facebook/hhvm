@@ -16,16 +16,31 @@
 
 #pragma once
 
+#include <folly/synchronization/CallOnce.h>
+#include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 
 namespace apache::thrift {
 
 class SchemaRegistry {
  public:
-  static const type::Schema& getMergedSchema();
+  // Access the global registry.
+  static SchemaRegistry& get();
+
+  // Access all data registered
+  const type::Schema& getMergedSchema();
+
+  // Helpers for working with schemas.
   static type::Schema mergeSchemas(
       folly::Range<const std::string_view*> schemas);
   static type::Schema mergeSchemas(std::vector<type::Schema>&& schemas);
+
+  explicit SchemaRegistry(BaseSchemaRegistry& base) : base_(base) {}
+
+ private:
+  BaseSchemaRegistry& base_;
+  type::Schema merged_;
+  folly::once_flag mergedFlag_;
 };
 
 } // namespace apache::thrift

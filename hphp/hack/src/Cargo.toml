@@ -42,6 +42,7 @@ members = [
     "hh_fanout/cargo/hh_fanout_dep_graph_is_subgraph_rust",
     "hh_fanout/cargo/hh_fanout_dep_graph_stats_rust",
     "hh_naming_table_builder/cargo/naming_table_builder_ffi",
+    "hhvm_ffi",
     "naming",
     "naming/cargo/elaborate_namespaces",
     "naming/cargo/naming_attributes",

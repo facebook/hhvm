@@ -28,9 +28,9 @@ jobs:
   build_ubuntu_focal_nightly:
     runs-on: ubuntu-24.04
     container:
-      image: ubuntu:focal
+      image: ubuntu:jammy
       env:
-        DISTRO: ubuntu-20.04-focal
+        DISTRO: ubuntu-22.04-jammy
         IS_NIGHTLY: 1
         CLANG_VERSION: 17
     steps:

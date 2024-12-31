@@ -1,6 +1,10 @@
 #!/usr/bin/make -f
 include /usr/share/dpkg/pkg-info.mk
 
+export DPKG_EXPORT_BUILDFLAGS=1
+export DEB_BUILD_MAINT_OPTIONS=optimize=-lto
+include /usr/share/dpkg/buildflags.mk
+
 %:
 	dh $@ --buildsystem=cmake --parallel
 

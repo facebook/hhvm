@@ -45,7 +45,7 @@
 #include "hphp/util/hash-map.h"
 #include "hphp/util/sha1.h"
 
-#include "hphp/hack/src/parser/ffi_bridge/parser_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/parser_ffi.rs.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

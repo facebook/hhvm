@@ -9,7 +9,7 @@ license = "MIT"
 
 [lib]
 path = "lib.rs"
-crate-type = ["lib", "staticlib"]
+crate-type = ["rlib"]
 
 [dependencies]
 cxx = "1.0.119"

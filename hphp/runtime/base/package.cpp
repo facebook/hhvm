@@ -27,7 +27,7 @@
 #include <re2/re2.h>
 #include "hphp/util/rds-local.h"
 
-#include "hphp/hack/src/package/ffi_bridge/package_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/package_ffi.rs.h"
 
 #include <folly/json/dynamic.h>
 #include <folly/json/json.h>

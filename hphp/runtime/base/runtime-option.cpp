@@ -17,7 +17,7 @@
 #include "hphp/runtime/base/runtime-option.h"
 
 #include "hphp/hack/src/hackc/compile/options_gen.h"
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/compiler_ffi.rs.h"
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/builtin-functions.h"

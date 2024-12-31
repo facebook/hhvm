@@ -19,7 +19,7 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 
-#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+#include "hphp/hack/src/hhvm_ffi/compiler_ffi.rs.h"
 
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"

@@ -408,11 +408,7 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} fizz)
   target_link_libraries(${target} ${VISIBILITY} brotli)
   target_link_libraries(${target} ${VISIBILITY} hhbc_ast_header)
-  target_link_libraries(${target} ${VISIBILITY} compiler_ffi)
-  target_link_libraries(${target} ${VISIBILITY} package_ffi)
-  target_link_libraries(${target} ${VISIBILITY} parser_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hhvm_types_ffi)
-  target_link_libraries(${target} ${VISIBILITY} hhvm_hhbc_defs_ffi)
+  target_link_libraries(${target} ${VISIBILITY} hack_rust_ffi_bridge)
 
   target_link_libraries(${target} ${VISIBILITY} tbb)
 

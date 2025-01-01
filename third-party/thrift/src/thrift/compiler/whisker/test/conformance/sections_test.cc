@@ -48,7 +48,7 @@ TEST_F(SectionsTest, Falsey) {
 // Null is falsey.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L53-L57
 TEST_F(SectionsTest, NullIsFalsey) {
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"\"",
       *render(
@@ -87,7 +87,7 @@ TEST_F(SectionsTest, ParentContexts) {
 // content conditionally if a variable exists.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L71-L78
 TEST_F(SectionsTest, VariableTest) {
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"bar is bar\"",
       *render(
@@ -120,7 +120,7 @@ TEST_F(SectionsTest, ListContexts) {
 // All elements on the context stack should be accessible.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L95-L134
 TEST_F(SectionsTest, DeeplyNestedContexts) {
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
   const object context = w::map(
       {{"a", w::map({{"one", w::i64(1)}})},
        {"b", w::map({{"two", w::i64(2)}})},
@@ -231,8 +231,8 @@ TEST_F(SectionsTest, NestedFalsey) {
 // Failed context lookups should be considered falsey.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L176-L180
 TEST_F(SectionsTest, ContextMisses) {
-  strict_boolean_conditional = diagnostic_level::debug;
-  strict_undefined_variables = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
+  strict_undefined_variables(diagnostic_level::debug);
   EXPECT_EQ(
       "[]",
       *render("[{{#missing}}Found key 'missing'!{{/missing}}]", w::map({})));
@@ -258,7 +258,7 @@ TEST_F(SectionsTest, ImplicitIteratorString) {
 // Implicit iterators should cast integers to strings and interpolate.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L191-L196
 TEST_F(SectionsTest, ImplicitIteratorInteger) {
-  strict_printable_types = diagnostic_level::debug;
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "\"(1)(2)(3)(4)(5)\"",
       *render(
@@ -276,7 +276,7 @@ TEST_F(SectionsTest, ImplicitIteratorInteger) {
 // Implicit iterators should cast decimals to strings and interpolate.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L198-L203
 TEST_F(SectionsTest, ImplicitIteratorDecimal) {
-  strict_printable_types = diagnostic_level::debug;
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "\"(1.1)(2.2)(3.3)(4.4)(5.5)\"",
       *render(
@@ -373,9 +373,9 @@ TEST_F(SectionsTest, DottedNamesFalsey) {
 // Dotted names that cannot be resolved should be considered falsey.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L253-L257
 TEST_F(SectionsTest, DottedNamesBrokenChains) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_printable_types = diagnostic_level::debug;
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_printable_types(diagnostic_level::debug);
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"\" == \"\"",
       render(

@@ -29,7 +29,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -82,12 +81,50 @@ class RenderTest : public testing::Test {
     source_manager& src_manager_;
   };
 
+  // Render options are "sticky" for each test case, across multiple render(...)
+  // calls render within.
+  struct render_test_options {
+    std::optional<diagnostic_level> strict_boolean_conditional;
+    std::optional<diagnostic_level> strict_printable_types;
+    std::optional<diagnostic_level> strict_undefined_variables;
+    // Backtraces are disabled by default since they add generally add noise.
+    bool show_source_backtrace_on_failure = false;
+
+    void apply_to(render_options& options) const {
+      if (strict_boolean_conditional.has_value()) {
+        options.strict_boolean_conditional = *strict_boolean_conditional;
+      }
+      if (strict_printable_types.has_value()) {
+        options.strict_printable_types = *strict_printable_types;
+      }
+      if (strict_undefined_variables.has_value()) {
+        options.strict_undefined_variables = *strict_undefined_variables;
+      }
+      options.show_source_backtrace_on_failure =
+          show_source_backtrace_on_failure ? diagnostic_level::error
+                                           : diagnostic_level::info;
+    }
+  };
+  render_test_options render_test_options_;
+
+  void SetUp() override {
+    last_render_ = std::nullopt;
+    render_test_options_ = {};
+  }
+
  public:
-  std::optional<diagnostic_level> strict_boolean_conditional;
-  std::optional<diagnostic_level> strict_printable_types;
-  std::optional<diagnostic_level> strict_undefined_variables;
-  std::optional<diagnostic_level> show_source_backtrace_on_failure =
-      diagnostic_level::debug;
+  void strict_boolean_conditional(diagnostic_level level) {
+    render_test_options_.strict_boolean_conditional = level;
+  }
+  void strict_printable_types(diagnostic_level level) {
+    render_test_options_.strict_printable_types = level;
+  }
+  void strict_undefined_variables(diagnostic_level level) {
+    render_test_options_.strict_undefined_variables = level;
+  }
+  void show_source_backtrace_on_failure(bool enabled) {
+    render_test_options_.show_source_backtrace_on_failure = enabled;
+  }
 
   struct partials_by_path {
     /**
@@ -128,19 +165,7 @@ class RenderTest : public testing::Test {
     }
 
     render_options options;
-    if (strict_boolean_conditional.has_value()) {
-      options.strict_boolean_conditional = *strict_boolean_conditional;
-    }
-    if (strict_printable_types.has_value()) {
-      options.strict_printable_types = *strict_printable_types;
-    }
-    if (strict_undefined_variables.has_value()) {
-      options.strict_undefined_variables = *strict_undefined_variables;
-    }
-    if (show_source_backtrace_on_failure.has_value()) {
-      options.show_source_backtrace_on_failure =
-          *show_source_backtrace_on_failure;
-    }
+    render_test_options_.apply_to(options);
     if (!partials.value.empty()) {
       auto partial_resolver =
           std::make_unique<in_memory_template_resolver>(current.src_manager);

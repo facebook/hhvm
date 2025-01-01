@@ -162,10 +162,10 @@ TEST_F(MstchCompatTest, array_iteration) {
     EXPECT_FALSE(is_mstch_object(*ctx.lookup_object({"key"})));
   }
   {
-    strict_printable_types = diagnostic_level::debug;
+    strict_printable_types(diagnostic_level::debug);
     auto result = render("{{#key}} {{.}} {{/key}}", converted);
     EXPECT_EQ(*result, " nested  1  true    2 ");
-    strict_printable_types = std::nullopt;
+    strict_printable_types(diagnostic_level::error);
   }
   {
     auto result =

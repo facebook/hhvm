@@ -160,7 +160,7 @@ TEST_F(RenderTest, section_block_array_with_nested_objects) {
 }
 
 TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
-  show_source_backtrace_on_failure = diagnostic_level::error;
+  show_source_backtrace_on_failure(true);
   auto result = render(
       "The factorial function looks like:\n"
       "{{#factorials}}\n"
@@ -239,7 +239,7 @@ TEST_F(RenderTest, section_block_array_iterable_native_object) {
         "120");
   }
   {
-    strict_boolean_conditional = diagnostic_level::info;
+    strict_boolean_conditional(diagnostic_level::info);
     auto result = render(
         "The factorial function looks like:\n"
         "{{^factorials}}\n"
@@ -273,7 +273,7 @@ TEST_F(RenderTest, section_block_map) {
         "6\n");
   }
   {
-    strict_boolean_conditional = diagnostic_level::info;
+    strict_boolean_conditional(diagnostic_level::info);
     auto result = render(
         "The factorial function looks like:{{^factorials}}\n"
         "{{first}}\n"
@@ -330,7 +330,7 @@ TEST_F(RenderTest, section_block_map_like_native_object) {
         "6\n");
   }
   {
-    strict_boolean_conditional = diagnostic_level::info;
+    strict_boolean_conditional(diagnostic_level::info);
     auto result = render(
         "The factorial function looks like:\n"
         "{{^factorials}}\n"
@@ -347,7 +347,7 @@ TEST_F(RenderTest, section_block_pointless_native_object) {
   auto context =
       w::map({{"pointless", w::make_native_object<empty_native_object>()}});
   {
-    strict_boolean_conditional = diagnostic_level::info;
+    strict_boolean_conditional(diagnostic_level::info);
     auto result = render(
         "{{#pointless}}\n"
         "Should not be rendered\n"
@@ -356,7 +356,7 @@ TEST_F(RenderTest, section_block_pointless_native_object) {
     EXPECT_EQ(*result, "");
   }
   {
-    strict_boolean_conditional = diagnostic_level::error;
+    strict_boolean_conditional(diagnostic_level::error);
     auto result = render(
         "{{#pointless}}\n"
         "Should not be rendered\n"
@@ -401,7 +401,7 @@ TEST_F(RenderTest, section_block_boolean_condition) {
 }
 
 TEST_F(RenderTest, section_block_non_boolean_condition_failure) {
-  show_source_backtrace_on_failure = diagnostic_level::error;
+  show_source_backtrace_on_failure(true);
   auto result = render(
       "{{#news.has-update?}}Stuff is {{foo}} happening!{{/news.has-update?}}",
       w::map(
@@ -421,7 +421,7 @@ TEST_F(RenderTest, section_block_non_boolean_condition_failure) {
 }
 
 TEST_F(RenderTest, section_block_non_boolean_condition_warning) {
-  strict_boolean_conditional = diagnostic_level::warning;
+  strict_boolean_conditional(diagnostic_level::warning);
 
   auto result = render(
       "{{#news.has-update?}}Stuff is {{foo}} happening!{{/news.has-update?}}",
@@ -440,7 +440,7 @@ TEST_F(RenderTest, section_block_non_boolean_condition_warning) {
 }
 
 TEST_F(RenderTest, section_block_non_boolean_condition_allowed) {
-  strict_boolean_conditional = diagnostic_level::info;
+  strict_boolean_conditional(diagnostic_level::info);
 
   auto result = render(
       "{{#news.has-update?}}Stuff is {{foo}} happening!{{/news.has-update?}}",
@@ -469,7 +469,7 @@ TEST_F(RenderTest, section_block_inversion_boolean_condition) {
 }
 
 TEST_F(RenderTest, section_block_inversion_array) {
-  strict_boolean_conditional = diagnostic_level::info;
+  strict_boolean_conditional(diagnostic_level::info);
   auto result = render(
       "The factorial function looks like:\n"
       "{{^factorials}}\n"
@@ -499,7 +499,7 @@ TEST_F(RenderTest, section_block_inversion_non_boolean_condition_failure) {
 }
 
 TEST_F(RenderTest, section_block_inversion_non_boolean_condition_warning) {
-  strict_boolean_conditional = diagnostic_level::warning;
+  strict_boolean_conditional(diagnostic_level::warning);
 
   auto result = render(
       "{{^news.has-update?}}Stuff is {{foo}} happening!{{/news.has-update?}}",
@@ -788,7 +788,7 @@ TEST_F(RenderTest, user_defined_function) {
 }
 
 TEST_F(RenderTest, user_defined_function_type_error) {
-  show_source_backtrace_on_failure = diagnostic_level::error;
+  show_source_backtrace_on_failure(true);
   auto result = render(
       "{{ (add 1 true) }}\n",
       w::map({
@@ -808,7 +808,7 @@ TEST_F(RenderTest, user_defined_function_type_error) {
 }
 
 TEST_F(RenderTest, user_defined_function_named_argument_type_error) {
-  show_source_backtrace_on_failure = diagnostic_level::error;
+  show_source_backtrace_on_failure(true);
   auto result = render(
       "{{ (add 1 2 negate=1) }}\n",
       w::map({
@@ -991,7 +991,7 @@ TEST_F(RenderTest, with_map_like_native_object) {
 }
 
 TEST_F(RenderTest, with_not_map_like_native_object) {
-  show_source_backtrace_on_failure = diagnostic_level::error;
+  show_source_backtrace_on_failure(true);
   auto result = render(
       "{{#with empty}}\n"
       "{{/with}}\n",
@@ -1091,7 +1091,7 @@ TEST_F(RenderTest, printable_types_strict_failure) {
 }
 
 TEST_F(RenderTest, printable_types_warning) {
-  strict_printable_types = diagnostic_level::warning;
+  strict_printable_types(diagnostic_level::warning);
 
   {
     auto result = render(R"({{-42}} {{"hello"}})", w::map({}));
@@ -1176,7 +1176,7 @@ TEST_F(RenderTest, printable_types_warning) {
 }
 
 TEST_F(RenderTest, printable_types_allowed) {
-  strict_printable_types = diagnostic_level::info;
+  strict_printable_types(diagnostic_level::info);
 
   {
     auto result = render(
@@ -1242,8 +1242,8 @@ TEST_F(RenderTest, printable_types_allowed) {
 }
 
 TEST_F(RenderTest, undefined_variables_allowed) {
-  strict_undefined_variables = diagnostic_level::info;
-  strict_printable_types = diagnostic_level::info;
+  strict_undefined_variables(diagnostic_level::info);
+  strict_printable_types(diagnostic_level::info);
 
   auto result = render(
       "{{foo}}\n"
@@ -1396,7 +1396,7 @@ TEST_F(RenderTest, partial_apply_preserves_whitespace_offset) {
 }
 
 TEST_F(RenderTest, partial_nested_undefined_variable_trace) {
-  show_source_backtrace_on_failure = diagnostic_level::error;
+  show_source_backtrace_on_failure(true);
   auto result = render(
       "\n"
       "{{> partial-1}}\n",

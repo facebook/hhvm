@@ -48,7 +48,7 @@ TEST_F(InvertedTest, Truthy) {
 // Null is falsey.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/inverted.yml#L49-L53
 TEST_F(InvertedTest, NullIsFalsey) {
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"This should be rendered.\"",
       *render(
@@ -59,7 +59,7 @@ TEST_F(InvertedTest, NullIsFalsey) {
 // Objects and hashes should behave like truthy values.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/inverted.yml#L55-L59
 TEST_F(InvertedTest, Context) {
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"\"",
       *render(
@@ -70,7 +70,7 @@ TEST_F(InvertedTest, Context) {
 // Lists should behave like truthy values.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/inverted.yml#L61-L65
 TEST_F(InvertedTest, List) {
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"\"",
       *render(
@@ -87,7 +87,7 @@ TEST_F(InvertedTest, List) {
 // Empty lists should behave like falsey values.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/inverted.yml#L67-L71
 TEST_F(InvertedTest, EmptyList) {
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"Yay lists!\"",
       *render(
@@ -136,8 +136,8 @@ TEST_F(InvertedTest, NestedTruthy) {
 // Failed context lookups should be considered falsey.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/inverted.yml#L101-L105
 TEST_F(InvertedTest, ContextMisses) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "[Cannot find key 'missing'!]",
       *render(
@@ -168,8 +168,8 @@ TEST_F(InvertedTest, DottedNamesFalsey) {
 // Dotted names that cannot be resolved should be considered falsey.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/inverted.yml#L121-L125
 TEST_F(InvertedTest, DottedNamesBrokenChains) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_boolean_conditional = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_boolean_conditional(diagnostic_level::debug);
   EXPECT_EQ(
       "\"Not Here\" == \"Not Here\"",
       *render(

@@ -73,7 +73,7 @@ TEST_F(InterpolationTest, BasicIntegerInterpolation) {
 // Decimals should interpolate seamlessly with proper significance.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L92-L96
 TEST_F(InterpolationTest, BasicDecimalInterpolation) {
-  strict_printable_types = diagnostic_level::debug;
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "\"1.21 jiggawatts!\"",
       *render("\"{{power}} jiggawatts!\"", w::map({{"power", w::f64(1.21)}})));
@@ -82,7 +82,7 @@ TEST_F(InterpolationTest, BasicDecimalInterpolation) {
 // Nulls should interpolate as the empty string.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L110-L114
 TEST_F(InterpolationTest, BasicNullInterpolation) {
-  strict_printable_types = diagnostic_level::debug;
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "I () be seen!",
       *render("I ({{cannot}}) be seen!", w::map({{"cannot", w::null}})));
@@ -91,8 +91,8 @@ TEST_F(InterpolationTest, BasicNullInterpolation) {
 // Failed context lookups should default to empty strings.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L130-L134
 TEST_F(InterpolationTest, BasicContextMissInterpolation) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_printable_types = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ("I () be seen!", *render("I ({{cannot}}) be seen!", w::map({})));
 }
 
@@ -132,8 +132,8 @@ TEST_F(InterpolationTest, DottedNamesArbitraryDepth) {
 // Any falsey value prior to the last part of the name should yield ''.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L175-L180
 TEST_F(InterpolationTest, DottedNamesBrokenChains) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_printable_types = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "\"\" == \"\"",
       *render("\"{{a.b.c}}\" == \"\"", w::map({{"a", w::map({})}})));
@@ -142,8 +142,8 @@ TEST_F(InterpolationTest, DottedNamesBrokenChains) {
 // Each part of a dotted name should resolve only against its parent.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L182-L188
 TEST_F(InterpolationTest, DottedNamesBrokenChainResolution) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_printable_types = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "\"\" == \"\"",
       *render(
@@ -188,8 +188,8 @@ TEST_F(InterpolationTest, DottedNamesInitialResolution) {
 // Dotted names should be resolved against former resolutions.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L198-L204
 TEST_F(InterpolationTest, DottedNameContextPrecedence) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_printable_types = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "",
       *render(
@@ -202,16 +202,16 @@ TEST_F(InterpolationTest, DottedNameContextPrecedence) {
 // Dotted names shall not be parsed as single, atomic keys.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L206-L211
 TEST_F(InterpolationTest, DottedNamesAreNeverSingleKeys) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_printable_types = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ("", *render("{{a.b}}", w::map({{"a.b", w::string("c")}})));
 }
 
 // Dotted Names in a given context are unvavailable due to dot splitting.
 //   https://github.com/mustache/spec/blob/v1.4.2/specs/interpolation.yml#L213-L219
 TEST_F(InterpolationTest, DottedNamesNoMasking) {
-  strict_undefined_variables = diagnostic_level::debug;
-  strict_printable_types = diagnostic_level::debug;
+  strict_undefined_variables(diagnostic_level::debug);
+  strict_printable_types(diagnostic_level::debug);
   EXPECT_EQ(
       "d",
       *render(

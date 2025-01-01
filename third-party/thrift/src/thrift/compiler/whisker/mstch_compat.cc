@@ -62,6 +62,8 @@ class mstch_array_proxy final
 
   void print_to(tree_printer::scope scope, const object_print_options& options)
       const override {
+    assert(scope.semantic_depth() <= options.max_depth);
+
     const auto size = proxied_.size();
     scope.println("mstch::array (size={})", size);
     for (std::size_t i = 0; i < size; ++i) {
@@ -127,13 +129,14 @@ class mstch_map_proxy final
 
   void print_to(tree_printer::scope scope, const object_print_options& options)
       const override {
+    assert(scope.semantic_depth() <= options.max_depth);
     const auto size = proxied_.size();
     scope.println("mstch::map (size={})", size);
 
     for (const auto& [key, _] : proxied_) {
       auto cached = lookup_property(key);
       assert(cached != nullptr);
-      auto element_scope = scope.open_property();
+      auto element_scope = scope.open_transparent_property();
       element_scope.println("'{}'", key);
       whisker::print_to(*cached, element_scope.open_node(), options);
     }
@@ -193,7 +196,9 @@ class mstch_object_proxy
   }
 
   void print_to(
-      tree_printer::scope scope, const object_print_options&) const override {
+      tree_printer::scope scope,
+      [[maybe_unused]] const object_print_options& options) const override {
+    assert(scope.semantic_depth() <= options.max_depth);
     scope.println("mstch::object");
 
     for (const auto& key : proxied_->property_names()) {

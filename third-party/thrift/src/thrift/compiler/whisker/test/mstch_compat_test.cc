@@ -132,6 +132,30 @@ TEST_F(MstchCompatTest, array_iteration) {
       "  |   |   |   |-i64(3)\n");
 
   {
+    object_print_options print_opts;
+    print_opts.max_depth = 2;
+    EXPECT_EQ(
+        to_string(converted, print_opts),
+        "mstch::map (size=2)\n"
+        "`-'key'\n"
+        "  |-mstch::array (size=5)\n"
+        "  | `-[0]\n"
+        "  |   |-'nested'\n"
+        "  | `-[1]\n"
+        "  |   |-i64(1)\n"
+        "  | `-[2]\n"
+        "  |   |-true\n"
+        "  | `-[3]\n"
+        "  |   |-null\n"
+        "  | `-[4]\n"
+        "  |   |-f64(2)\n"
+        "`-'outer'\n"
+        "  |-mstch::array (size=1)\n"
+        "  | `-[0]\n"
+        "  |   |-...\n");
+  }
+
+  {
     auto ctx = eval_context::with_root_scope(converted);
     EXPECT_TRUE(is_mstch_array(*ctx.lookup_object({"key"})));
     EXPECT_FALSE(is_mstch_map(*ctx.lookup_object({"key"})));

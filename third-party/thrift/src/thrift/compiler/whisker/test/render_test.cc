@@ -55,9 +55,6 @@ class double_property_name
   mutable std::map<std::string, object, std::less<>> cached_;
 };
 
-const auto T = w::boolean(true);
-const auto F = w::boolean(false);
-
 } // namespace
 
 TEST_F(RenderTest, basic) {
@@ -391,14 +388,14 @@ TEST_F(RenderTest, section_block_boolean_condition) {
     auto result = render(
         "{{#news.has-update?}}Stuff is {{foo}} happening!{{/news.has-update?}}",
         w::map(
-            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+            {{"news", w::map({{"has-update?", w::true_}})},
              {"foo", w::string("now")}}));
     EXPECT_EQ(*result, "Stuff is now happening!");
   }
   {
     auto result = render(
         "{{#news.has-update?}}Stuff is {{foo}} happening!{{/news.has-update?}}",
-        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+        w::map({{"news", w::map({{"has-update?", w::false_}})}}));
     EXPECT_EQ(*result, "");
   }
 }
@@ -459,14 +456,14 @@ TEST_F(RenderTest, section_block_inversion_boolean_condition) {
     auto result = render(
         "{{^news.has-no-update?}}Stuff is {{foo}} happening!{{/news.has-no-update?}}",
         w::map(
-            {{"news", w::map({{"has-no-update?", w::boolean(false)}})},
+            {{"news", w::map({{"has-no-update?", w::false_}})},
              {"foo", w::string("now")}}));
     EXPECT_EQ(*result, "Stuff is now happening!");
   }
   {
     auto result = render(
         "{{^news.has-no-update?}}Stuff is {{foo}} happening!{{/news.has-no-update?}}",
-        w::map({{"news", w::map({{"has-no-update?", w::boolean(true)}})}}));
+        w::map({{"news", w::map({{"has-no-update?", w::true_}})}}));
     EXPECT_EQ(*result, "");
   }
 }
@@ -527,14 +524,14 @@ TEST_F(RenderTest, if_block) {
         "Stuff is {{foo}} happening!\n"
         "{{/if news.has-update?}}\n",
         w::map(
-            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+            {{"news", w::map({{"has-update?", w::true_}})},
              {"foo", w::string("now")}}));
     EXPECT_EQ(*result, "Stuff is now happening!\n");
   }
   {
     auto result = render(
         "{{#if news.has-update?}}Stuff is {{foo}} happening!{{/if news.has-update?}}",
-        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+        w::map({{"news", w::map({{"has-update?", w::false_}})}}));
     EXPECT_EQ(*result, "");
   }
 }
@@ -546,14 +543,14 @@ TEST_F(RenderTest, unless_block) {
         "Stuff is {{foo}} happening!\n"
         "{{/if (not news.has-update?)}}\n",
         w::map(
-            {{"news", w::map({{"has-update?", w::boolean(false)}})},
+            {{"news", w::map({{"has-update?", w::false_}})},
              {"foo", w::string("now")}}));
     EXPECT_EQ(*result, "Stuff is now happening!\n");
   }
   {
     auto result = render(
         "{{#if (not news.has-update?)}}Stuff is {{foo}} happening!{{/if (not news.has-update?)}}",
-        w::map({{"news", w::map({{"has-update?", w::boolean(true)}})}}));
+        w::map({{"news", w::map({{"has-update?", w::true_}})}}));
     EXPECT_EQ(*result, "");
   }
 }
@@ -567,7 +564,7 @@ TEST_F(RenderTest, if_else_block) {
         "Nothing is happening!\n"
         "{{/if news.has-update?}}\n",
         w::map(
-            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+            {{"news", w::map({{"has-update?", w::true_}})},
              {"foo", w::string("now")}}));
     EXPECT_EQ(*result, "Stuff is now happening!\n");
   }
@@ -578,7 +575,7 @@ TEST_F(RenderTest, if_else_block) {
         "{{#else}}\n"
         "Nothing is happening!\n"
         "{{/if news.has-update?}}\n",
-        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+        w::map({{"news", w::map({{"has-update?", w::false_}})}}));
     EXPECT_EQ(*result, "Nothing is happening!\n");
   }
 }
@@ -596,19 +593,24 @@ TEST_F(RenderTest, else_if_blocks) {
       "{{/if a}}\n";
 
   {
-    auto result = render(template_text, w::map({{"a", T}}));
+    auto result = render(template_text, w::map({{"a", w::true_}}));
     EXPECT_EQ(*result, "a\n");
   }
   {
-    auto result = render(template_text, w::map({{"a", F}, {"b", T}}));
+    auto result =
+        render(template_text, w::map({{"a", w::false_}, {"b", w::true_}}));
     EXPECT_EQ(*result, "b\n");
   }
   {
-    auto result = render(template_text, w::map({{"a", F}, {"b", F}, {"c", T}}));
+    auto result = render(
+        template_text,
+        w::map({{"a", w::false_}, {"b", w::false_}, {"c", w::true_}}));
     EXPECT_EQ(*result, "c\n");
   }
   {
-    auto result = render(template_text, w::map({{"a", F}, {"b", F}, {"c", F}}));
+    auto result = render(
+        template_text,
+        w::map({{"a", w::false_}, {"b", w::false_}, {"c", w::false_}}));
     EXPECT_EQ(*result, "d\n");
   }
 }
@@ -621,7 +623,7 @@ TEST_F(RenderTest, unless_else_block) {
         "{{#else}}\n"
         "Stuff is {{foo}} happening!\n"
         "{{/if (not news.has-update?)}}\n",
-        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+        w::map({{"news", w::map({{"has-update?", w::false_}})}}));
     EXPECT_EQ(*result, "Nothing is happening!\n");
   }
   {
@@ -632,7 +634,7 @@ TEST_F(RenderTest, unless_else_block) {
         "Stuff is {{foo}} happening!\n"
         "{{/if (not news.has-update?)}}\n",
         w::map(
-            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+            {{"news", w::map({{"has-update?", w::true_}})},
              {"foo", w::string("now")}}));
     EXPECT_EQ(*result, "Stuff is now happening!\n");
   }
@@ -646,7 +648,7 @@ TEST_F(RenderTest, if_not_else_block) {
         "{{#else}}\n"
         "Stuff is {{foo}} happening!\n"
         "{{/if (not news.has-update?)}}\n",
-        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+        w::map({{"news", w::map({{"has-update?", w::false_}})}}));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "Nothing is happening!\n");
   }
@@ -658,7 +660,7 @@ TEST_F(RenderTest, if_not_else_block) {
         "Stuff is {{foo}} happening!\n"
         "{{/if (not news.has-update?)}}\n",
         w::map(
-            {{"news", w::map({{"has-update?", w::boolean(true)}})},
+            {{"news", w::map({{"has-update?", w::true_}})},
              {"foo", w::string("now")}}));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "Stuff is now happening!\n");
@@ -671,7 +673,7 @@ TEST_F(RenderTest, and_or) {
         "{{#if (and (or no yes) yes)}}\n"
         "Yes!\n"
         "{{/if (and (or no yes) yes)}}\n",
-        w::map({{"yes", w::boolean(true)}, {"no", w::boolean(false)}}));
+        w::map({{"yes", w::true_}, {"no", w::false_}}));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "Yes!\n");
   }
@@ -686,7 +688,7 @@ TEST_F(RenderTest, and_or_short_circuit) {
         "{{#if (or (not news.has-update?) intentionally_undefined)}}\n"
         "Nothing is happening!\n"
         "{{/if (or (not news.has-update?) intentionally_undefined)}}\n",
-        w::map({{"news", w::map({{"has-update?", w::boolean(false)}})}}));
+        w::map({{"news", w::map({{"has-update?", w::false_}})}}));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "Nothing is happening!\n");
   }
@@ -949,9 +951,7 @@ TEST_F(RenderTest, with_block) {
       "{{/with}}\n",
       w::map(
           {{"news",
-            w::map(
-                {{"has-update?", w::boolean(true)},
-                 {"foo", w::string("now")}})}}));
+            w::map({{"has-update?", w::true_}, {"foo", w::string("now")}})}}));
   EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(*result, "    Stuff is now happening!\n");
 }
@@ -1190,7 +1190,7 @@ TEST_F(RenderTest, printable_types_allowed) {
     EXPECT_EQ(*result, "3.1415926");
   }
   {
-    auto result = render("{{bool}}", w::map({{"bool", w::boolean(true)}}));
+    auto result = render("{{bool}}", w::map({{"bool", w::true_}}));
     EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "true");
   }
@@ -1432,7 +1432,7 @@ TEST_F(RenderTest, strip_standalone_lines) {
       "|\n"
       "{{/boolean}}\n"
       "| A Line\n",
-      w::map({{"boolean", w::boolean(true)}}));
+      w::map({{"boolean", w::true_}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
@@ -1447,7 +1447,7 @@ TEST_F(RenderTest, strip_standalone_lines_indented) {
       "|\n"
       "  {{/boolean}}\n"
       "| A Line\n",
-      w::map({{"boolean", w::boolean(true)}}));
+      w::map({{"boolean", w::true_}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
@@ -1463,7 +1463,7 @@ TEST_F(RenderTest, strip_standalone_lines_multiple) {
       "  {{/boolean}}\n"
       "  {{/boolean}}\n"
       "| A Line\n",
-      w::map({{"boolean", w::boolean(true)}}));
+      w::map({{"boolean", w::true_}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
@@ -1479,7 +1479,7 @@ TEST_F(RenderTest, strip_standalone_lines_multiline) {
       "|\n"
       "  {{/boolean.condition}}\n"
       "| A Line\n",
-      w::map({{"boolean", w::map({{"condition", w::boolean(true)}})}}));
+      w::map({{"boolean", w::map({{"condition", w::true_}})}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
@@ -1495,7 +1495,7 @@ TEST_F(RenderTest, strip_standalone_lines_multiline_comment) {
       "|\n"
       "  {{/boolean.condition}}\n"
       "| A Line\n",
-      w::map({{"boolean", w::map({{"condition", w::boolean(false)}})}}));
+      w::map({{"boolean", w::map({{"condition", w::false_}})}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
@@ -1513,7 +1513,7 @@ TEST_F(RenderTest, strip_standalone_lines_multiline_ineligible) {
       "| A Line\n",
       w::map(
           {{"ineligible", w::string("")},
-           {"boolean", w::map({{"condition", w::boolean(true)}})}}));
+           {"boolean", w::map({{"condition", w::true_}})}}));
   EXPECT_EQ(
       *result,
       "| This Is\n"
@@ -1534,7 +1534,7 @@ TEST_F(
       "| A Line\n",
       w::map(
           {{"value", w::i64(5)},
-           {"boolean", w::map({{"condition", w::boolean(true)}})}}),
+           {"boolean", w::map({{"condition", w::true_}})}}),
       partials({{"ineligible", "{{value}} (from partial)\n"}}));
   EXPECT_EQ(
       *result,

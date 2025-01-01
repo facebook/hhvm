@@ -1280,10 +1280,10 @@ class parser {
     scan.advance();
 
     ast::pragma_statement::pragmas pragma;
-    if (id.string_value() == "single-line") {
-      pragma = ast::pragma_statement::pragmas::single_line;
+    if (id.string_value() == "ignore-newlines") {
+      pragma = ast::pragma_statement::pragmas::ignore_newlines;
     } else {
-      report_error(scan, "unknown pragma `{}`", id.string_value());
+      report_error(scan, "unknown pragma '{}'", id.string_value());
     }
 
     if (!try_consume_token(&scan, tok::close)) {

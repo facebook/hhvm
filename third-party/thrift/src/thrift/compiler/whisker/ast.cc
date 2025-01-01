@@ -103,8 +103,8 @@ std::string expression::function_call::name() const {
 
 std::string_view pragma_statement::to_string() const {
   switch (pragma) {
-    case pragma_statement::pragmas::single_line:
-      return "single-line";
+    case pragma_statement::pragmas::ignore_newlines:
+      return "ignore-newlines";
   }
 }
 

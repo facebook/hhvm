@@ -591,7 +591,7 @@ class render_engine {
   void visit(const ast::pragma_statement& pragma_statement) {
     using pragma = ast::pragma_statement::pragmas;
     switch (pragma_statement.pragma) {
-      case pragma::single_line:
+      case pragma::ignore_newlines:
         source_stack_.top()->ignore_newlines = true;
         break;
     }

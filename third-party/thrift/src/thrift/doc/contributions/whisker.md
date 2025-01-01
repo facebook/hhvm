@@ -251,6 +251,7 @@ keyword → {
   "import"  |
   "export"  |
   "from"    |
+  "pragma"  |
 }
 id_prefix → { alpha |        | '_' | '$' }
 id_suffix → { alpha | digits | '_' | '$' | '-' | '+' | ':' | '?' | '/' }
@@ -601,12 +602,12 @@ let-statement → { "{{" ~ "#" ~ "let" ~ identifier ~ "=" ~ expression ~ "}}" }
 
 Whisker `{{#pragma}}` statements allow modifying rendering behavior for the current template or partial.
 
-Currently the only pragma supported is `single-line`, which suppresses all newlines in the current partial.
+Currently the only pragma supported is `ignore-newlines`, which suppresses all newlines in the current source file.
 
 <Example>
 
 ```handlebars
-{{#pragma single-line}}
+{{#pragma ignore-newlines}}
 This
  is
  all

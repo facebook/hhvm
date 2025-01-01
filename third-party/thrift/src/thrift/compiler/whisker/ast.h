@@ -366,7 +366,7 @@ struct let_statement {
  */
 struct pragma_statement {
   enum class pragmas {
-    single_line,
+    ignore_newlines,
   };
   source_range loc;
 

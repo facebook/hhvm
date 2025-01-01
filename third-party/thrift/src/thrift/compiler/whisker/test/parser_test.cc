@@ -880,13 +880,13 @@ TEST_F(ParserTest, let_statement_keyword) {
           1)));
 }
 
-TEST_F(ParserTest, pragma_single_line) {
-  auto ast = parse_ast("{{#pragma single-line}}\n");
+TEST_F(ParserTest, pragma_ignore_newlines) {
+  auto ast = parse_ast("{{#pragma ignore-newlines}}\n");
   EXPECT_THAT(diagnostics, testing::IsEmpty());
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- pragma-statement `single-line` <line:1:1, col:24>\n");
+      "|- pragma-statement 'ignore-newlines' <line:1:1, col:28>\n");
 }
 
 TEST_F(ParserTest, pragma_unrecognized) {
@@ -895,7 +895,7 @@ TEST_F(ParserTest, pragma_unrecognized) {
       diagnostics,
       testing::ElementsAre(diagnostic(
           diagnostic_level::error,
-          "unknown pragma `unrecognized`",
+          "unknown pragma 'unrecognized'",
           path_to_file(1),
           1)));
 }

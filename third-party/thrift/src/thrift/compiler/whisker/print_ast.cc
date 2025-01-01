@@ -144,7 +144,7 @@ struct ast_visitor {
       const ast::pragma_statement& pragma_statement,
       tree_printer::scope scope) const {
     scope.println(
-        " pragma-statement `{}` {}",
+        " pragma-statement '{}' {}",
         pragma_statement.to_string(),
         location(pragma_statement.loc));
   }

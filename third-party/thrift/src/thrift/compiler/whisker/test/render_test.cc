@@ -1562,9 +1562,9 @@ TEST_F(RenderTest, globals_shadowing) {
   EXPECT_EQ(*result, "good\n");
 }
 
-TEST_F(RenderTest, pragma_single_line) {
+TEST_F(RenderTest, pragma_ignore_newlines) {
   auto result = render(
-      "{{#pragma single-line}}\n"
+      "{{#pragma ignore-newlines}}\n"
       "This\n"
       " is\n"
       "{{! comment}}\n"
@@ -1577,7 +1577,7 @@ TEST_F(RenderTest, pragma_single_line) {
 
   // Test that the pragma is scoped to the active partial/template.
   result = render(
-      "{{#pragma single-line}}\n"
+      "{{#pragma ignore-newlines}}\n"
       "This\n"
       " is\n"
       "{{> partial }}\n"

@@ -136,6 +136,14 @@ struct render_options {
   diagnostic_level strict_undefined_variables = diagnostic_level::error;
 
   /**
+   * The diagnostic level at which the trace of source locations of partial
+   * applications will be printed in case there is an error during rendering.
+   *
+   * This is useful for debugging and is set to the highest level by default.
+   */
+  diagnostic_level show_source_backtrace_on_failure = diagnostic_level::error;
+
+  /**
    * An object that can be used to resolve partial application within
    * Whisker templates: "{{> path/to/partial }}".
    *

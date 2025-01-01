@@ -76,10 +76,7 @@ TEST_F(RenderTest, variable_missing_in_scope) {
           "Name 'foo' was not found in the current scope. Tried to search through the following scopes:\n"
           "#0 map (size=0)\n"
           "\n"
-          "#1 <global scope> (size=0)\n"
-          "\n"
-          "The source backtrace is:\n"
-          "#0 path/to/test.whisker <line:1, col:13>\n",
+          "#1 <global scope> (size=0)\n",
           path_to_file,
           1)));
 }
@@ -166,6 +163,7 @@ TEST_F(RenderTest, section_block_array_with_nested_objects) {
 }
 
 TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
+  show_source_backtrace_on_failure = diagnostic_level::error;
   auto result = render(
       "The factorial function looks like:\n"
       "{{#factorials}}\n"
@@ -175,30 +173,29 @@ TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
           {{"factorials",
             w::array(
                 {w::map({{"value", w::i64(1)}}),
-                 w::map({{"oops", w::null}}), // missing value, scoped should
+                 w::map({{"oops", w::null}}), // missing value, scope should
                                               // have been cleared
                  w::map({{"value", w::i64(6)}}),
                  w::map({{"value", w::i64(24)}}),
                  w::map({{"value", w::i64(120)}})})}}));
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Name 'value' was not found in the current scope. Tried to search through the following scopes:\n"
-          "#0 map (size=1)\n"
-          "`-'oops'\n"
-          "  |-null\n"
-          "\n"
-          "#1 map (size=1)\n"
-          "`-'factorials'\n"
-          "  |-...\n"
-          "\n"
-          "#2 <global scope> (size=0)\n"
-          "\n"
-          "The source backtrace is:\n"
-          "#0 path/to/test.whisker <line:3, col:5>\n",
-          path_to_file,
-          3)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Name 'value' was not found in the current scope. Tried to search through the following scopes:\n"
+              "#0 map (size=1)\n"
+              "`-'oops'\n"
+              "  |-null\n"
+              "\n"
+              "#1 map (size=1)\n"
+              "`-'factorials'\n"
+              "  |-...\n"
+              "\n"
+              "#2 <global scope> (size=0)\n",
+              path_to_file,
+              3),
+          error_backtrace("#0 path/to/test.whisker <line:3, col:5>\n")));
 }
 
 TEST_F(RenderTest, section_block_array_iterable_native_object) {
@@ -407,6 +404,7 @@ TEST_F(RenderTest, section_block_boolean_condition) {
 }
 
 TEST_F(RenderTest, section_block_non_boolean_condition_failure) {
+  show_source_backtrace_on_failure = diagnostic_level::error;
   auto result = render(
       "{{#news.has-update?}}Stuff is {{foo}} happening!{{/news.has-update?}}",
       w::map(
@@ -415,12 +413,14 @@ TEST_F(RenderTest, section_block_non_boolean_condition_failure) {
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Condition 'news.has-update?' is not a boolean. The encountered value is:\n"
-          "i64(1)\n",
-          path_to_file,
-          1)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Condition 'news.has-update?' is not a boolean. The encountered value is:\n"
+              "i64(1)\n",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:4>\n")));
 }
 
 TEST_F(RenderTest, section_block_non_boolean_condition_warning) {
@@ -451,7 +451,7 @@ TEST_F(RenderTest, section_block_non_boolean_condition_allowed) {
           {{"news", w::map({{"has-update?", w::i64(1)}})},
            {"foo", w::string("now")}}));
   EXPECT_EQ(*result, "Stuff is now happening!");
-  EXPECT_THAT(diagnostics(), testing::ElementsAre(/* empty */));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
 }
 
 TEST_F(RenderTest, section_block_inversion_boolean_condition) {
@@ -786,6 +786,7 @@ TEST_F(RenderTest, user_defined_function) {
 }
 
 TEST_F(RenderTest, user_defined_function_type_error) {
+  show_source_backtrace_on_failure = diagnostic_level::error;
   auto result = render(
       "{{ (add 1 true) }}\n",
       w::map({
@@ -794,15 +795,18 @@ TEST_F(RenderTest, user_defined_function_type_error) {
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Function 'add' threw an error:\n"
-          "Argument at index 1 is of an unexpected type.",
-          path_to_file,
-          1)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Function 'add' threw an error:\n"
+              "Argument at index 1 is of an unexpected type.",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:5>\n")));
 }
 
 TEST_F(RenderTest, user_defined_function_named_argument_type_error) {
+  show_source_backtrace_on_failure = diagnostic_level::error;
   auto result = render(
       "{{ (add 1 2 negate=1) }}\n",
       w::map({
@@ -811,12 +815,14 @@ TEST_F(RenderTest, user_defined_function_named_argument_type_error) {
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Function 'add' threw an error:\n"
-          "Named argument 'negate' is of an unexpected type.",
-          path_to_file,
-          1)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Function 'add' threw an error:\n"
+              "Named argument 'negate' is of an unexpected type.",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:5>\n")));
 }
 
 TEST_F(RenderTest, user_defined_function_arity_error) {
@@ -985,6 +991,7 @@ TEST_F(RenderTest, with_map_like_native_object) {
 }
 
 TEST_F(RenderTest, with_not_map_like_native_object) {
+  show_source_backtrace_on_failure = diagnostic_level::error;
   auto result = render(
       "{{#with empty}}\n"
       "{{/with}}\n",
@@ -992,12 +999,14 @@ TEST_F(RenderTest, with_not_map_like_native_object) {
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Expression 'empty' is a native_object which is not map-like. The encountered value is:\n"
-          "<native_object>\n",
-          path_to_file,
-          1)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Expression 'empty' is a native_object which is not map-like. The encountered value is:\n"
+              "<native_object>\n",
+              path_to_file,
+              1),
+          error_backtrace("#0 path/to/test.whisker <line:1, col:9>\n")));
 }
 
 TEST_F(RenderTest, printable_types_strict_failure) {
@@ -1177,17 +1186,17 @@ TEST_F(RenderTest, printable_types_allowed) {
   }
   {
     auto result = render("{{f64}}", w::map({{"f64", w::f64(3.1415926)}}));
-    EXPECT_THAT(diagnostics(), testing::ElementsAre(/* empty */));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "3.1415926");
   }
   {
     auto result = render("{{bool}}", w::map({{"bool", w::boolean(true)}}));
-    EXPECT_THAT(diagnostics(), testing::ElementsAre(/* empty */));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "true");
   }
   {
     auto result = render("{{null_}}", w::map({{"null_", w::null}}));
-    EXPECT_THAT(diagnostics(), testing::ElementsAre(/* empty */));
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
     EXPECT_EQ(*result, "");
   }
 
@@ -1242,7 +1251,7 @@ TEST_F(RenderTest, undefined_variables_allowed) {
       "{{abc}}\n"
       "{{abc.xyz}}\n",
       w::map({{"abc", w::string("xyz")}}));
-  EXPECT_THAT(diagnostics(), testing::ElementsAre(/* empty */));
+  EXPECT_THAT(diagnostics(), testing::IsEmpty());
   EXPECT_EQ(
       *result,
       "\n"
@@ -1387,6 +1396,7 @@ TEST_F(RenderTest, partial_apply_preserves_whitespace_offset) {
 }
 
 TEST_F(RenderTest, partial_nested_undefined_variable_trace) {
+  show_source_backtrace_on_failure = diagnostic_level::error;
   auto result = render(
       "\n"
       "{{> partial-1}}\n",
@@ -1400,20 +1410,19 @@ TEST_F(RenderTest, partial_nested_undefined_variable_trace) {
   EXPECT_FALSE(result.has_value());
   EXPECT_THAT(
       diagnostics(),
-      testing::ElementsAre(diagnostic(
-          diagnostic_level::error,
-          "Name 'undefined' was not found in the current scope. Tried to search through the following scopes:\n"
-          "#0 map (size=0)\n"
-          "\n"
-          "#1 <global scope> (size=0)\n"
-          "\n"
-          "The source backtrace is:\n"
-          "#0 partial-3 <line:1, col:3>\n"
-          "#1 partial-2 <line:1, col:5>\n"
-          "#2 partial-1 <line:2, col:3>\n"
-          "#3 path/to/test.whisker <line:2, col:1>\n",
-          "partial-3", // file name
-          1)));
+      testing::ElementsAre(
+          diagnostic(
+              diagnostic_level::error,
+              "Name 'undefined' was not found in the current scope. Tried to search through the following scopes:\n"
+              "#0 map (size=0)\n"
+              "\n"
+              "#1 <global scope> (size=0)\n",
+              "partial-3", // file name
+              1),
+          error_backtrace("#0 partial-3 <line:1, col:3>\n"
+                          "#1 partial-2 <line:1, col:5>\n"
+                          "#2 partial-1 <line:2, col:3>\n"
+                          "#3 path/to/test.whisker <line:2, col:1>\n")));
 }
 
 TEST_F(RenderTest, strip_standalone_lines) {

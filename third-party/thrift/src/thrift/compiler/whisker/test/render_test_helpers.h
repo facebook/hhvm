@@ -86,6 +86,8 @@ class RenderTest : public testing::Test {
   std::optional<diagnostic_level> strict_boolean_conditional;
   std::optional<diagnostic_level> strict_printable_types;
   std::optional<diagnostic_level> strict_undefined_variables;
+  std::optional<diagnostic_level> show_source_backtrace_on_failure =
+      diagnostic_level::debug;
 
   struct partials_by_path {
     /**
@@ -135,6 +137,10 @@ class RenderTest : public testing::Test {
     if (strict_undefined_variables.has_value()) {
       options.strict_undefined_variables = *strict_undefined_variables;
     }
+    if (show_source_backtrace_on_failure.has_value()) {
+      options.show_source_backtrace_on_failure =
+          *show_source_backtrace_on_failure;
+    }
     if (!partials.value.empty()) {
       auto partial_resolver =
           std::make_unique<in_memory_template_resolver>(current.src_manager);
@@ -158,6 +164,13 @@ class RenderTest : public testing::Test {
       return last_render_.value().diagnostics;
     }
     throw std::logic_error("Unreachable");
+  }
+
+  diagnostic error_backtrace(std::string message) {
+    return diagnostic(
+        diagnostic_level::error,
+        fmt::format("The source backtrace is:\n{}", std::move(message)),
+        "" /* file */);
   }
 };
 

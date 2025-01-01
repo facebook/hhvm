@@ -231,6 +231,7 @@ class source_stack {
     return frame_guard{*this, std::move(apply_location)};
   }
 
+  using backtrace = std::vector<resolved_location>;
   /**
    * Creates a back trace for debugging that contains the chain of partial
    * applications within the source.
@@ -238,8 +239,7 @@ class source_stack {
    * The source_location from the current stack frame must be provided by the
    * caller.
    */
-  std::vector<resolved_location> make_backtrace_at(
-      const source_location& current) const {
+  backtrace make_backtrace_at(const source_location& current) const {
     assert(!frames_.empty());
     assert(current != source_location());
 
@@ -303,7 +303,16 @@ bool coerce_to_boolean(const map&) {
  * This is only used within the render_engine implementation to abruptly
  * terminate rendering.
  */
-struct abort_rendering : std::exception {};
+struct render_error : std::exception {
+  explicit render_error(source_stack::backtrace backtrace)
+      : backtrace_(std::move(backtrace)) {
+    assert(!backtrace_.empty());
+  }
+  const source_stack::backtrace& backtrace() const { return backtrace_; }
+
+ private:
+  source_stack::backtrace backtrace_;
+};
 
 class render_engine {
  public:
@@ -326,8 +335,33 @@ class render_engine {
           source_stack_.make_frame_guard(source_location());
       visit(root.body_elements);
       return true;
-    } catch (const abort_rendering&) {
-      // errors should have been reported through diagnostics_engine
+    } catch (const render_error& err) {
+      if (!diags_.params().should_report(
+              opts_.show_source_backtrace_on_failure)) {
+        return false;
+      }
+      const source_stack::backtrace& backtrace = err.backtrace();
+      assert(!backtrace.empty());
+
+      auto source_trace = [&]() -> std::string {
+        std::string result;
+        for (std::size_t i = 0; i < backtrace.size(); ++i) {
+          const auto& frame = backtrace[i];
+          fmt::format_to(
+              std::back_inserter(result),
+              "#{} {} <line:{}, col:{}>\n",
+              i,
+              frame.file_name(),
+              frame.line(),
+              frame.column());
+        }
+        return result;
+      }();
+
+      diags_.error(
+          source_location(),
+          "The source backtrace is:\n{}",
+          std::move(source_trace));
       return false;
     }
   }
@@ -346,12 +380,22 @@ class render_engine {
         loc.begin, level, "{}", std::invoke(std::forward<ReportFunc>(report)));
   }
 
+  [[noreturn]] void abort_rendering(const source_location& loc) {
+    throw render_error(source_stack_.make_backtrace_at(loc));
+  }
+
+  template <typename... T>
+  [[noreturn]] void report_fatal_error(
+      source_location loc, fmt::format_string<T...> msg, T&&... args) {
+    diags_.error(loc, msg, std::forward<T>(args)...);
+    abort_rendering(loc);
+  }
+
   void visit(const ast::bodies& bodies) {
     for (const auto& body : bodies) {
       visit(body);
     }
   }
-
   // Prevent implicit conversion to ast::body. Otherwise, we can silently
   // compile an infinitely recursive visit() chain if there is a missing
   // overload for one of the alternatives in the variant.
@@ -414,33 +458,15 @@ class render_engine {
             return result;
           }();
 
-          auto source_trace = [&]() -> std::string {
-            std::vector<resolved_location> backtrace =
-                source_stack_.make_backtrace_at(variable_lookup.loc.begin);
-            std::string result = "\nThe source backtrace is:\n";
-            for (std::size_t i = 0; i < backtrace.size(); ++i) {
-              const auto& frame = backtrace[i];
-              fmt::format_to(
-                  std::back_inserter(result),
-                  "#{} {} <line:{}, col:{}>\n",
-                  i,
-                  frame.file_name(),
-                  frame.line(),
-                  frame.column());
-            }
-            return result;
-          }();
-
           maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
             return fmt::format(
-                "Name '{}' was not found in the current scope. {}{}",
+                "Name '{}' was not found in the current scope. {}",
                 err.property_name(),
-                scope_trace,
-                source_trace);
+                scope_trace);
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
-            throw abort_rendering();
+            abort_rendering(variable_lookup.loc.begin);
           }
           return whisker::make::null;
         },
@@ -465,7 +491,7 @@ class render_engine {
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
-            throw abort_rendering();
+            abort_rendering(variable_lookup.loc.begin);
           }
           return whisker::make::null;
         });
@@ -530,12 +556,11 @@ class render_engine {
                 const ast::variable_lookup& name = user_defined.name;
                 const object& lookup_result = lookup_variable(name);
                 if (!lookup_result.is_native_function()) {
-                  diags_.error(
+                  report_fatal_error(
                       name.loc.begin,
                       "Object '{}' is not a function. The encountered value is:\n{}",
                       name.chain_string(),
                       to_string(lookup_result));
-                  throw abort_rendering();
                 }
                 const native_function::ptr& f =
                     lookup_result.as_native_function();
@@ -561,12 +586,11 @@ class render_engine {
                 try {
                   return f->invoke(std::move(ctx));
                 } catch (const native_function::fatal_error& err) {
-                  diags_.error(
+                  report_fatal_error(
                       name.loc.begin,
                       "Function '{}' threw an error:\n{}",
                       name.chain_string(),
                       err.what());
-                  throw abort_rendering();
                 }
               });
         });
@@ -580,11 +604,10 @@ class render_engine {
           // The binding was successful
         },
         [&](const eval_name_already_bound_error& err) {
-          diags_.error(
+          report_fatal_error(
               let_statement.loc.begin,
               "Name '{}' is already bound in the current scope.",
               err.name());
-          throw abort_rendering();
         });
   }
 
@@ -614,7 +637,7 @@ class render_engine {
       report_unprintable_message_only(level);
       if (level == diagnostic_level::error) {
         // Fail rendering in strict mode
-        throw abort_rendering();
+        abort_rendering(interpolation.loc.begin);
       }
     };
 
@@ -637,7 +660,7 @@ class render_engine {
         [&](auto&&) -> std::string {
           // Other types are never printable
           report_unprintable_message_only(diagnostic_level::error);
-          throw abort_rendering();
+          abort_rendering(interpolation.loc.begin);
         });
     out_.write(std::move(output));
   }
@@ -657,7 +680,7 @@ class render_engine {
     });
     if (diag_level == diagnostic_level::error) {
       // Fail rendering in strict mode
-      throw abort_rendering();
+      abort_rendering(expr.loc.begin);
     }
   }
   bool evaluate_as_bool(const ast::expression& expr) {
@@ -800,21 +823,19 @@ class render_engine {
         [&](const native_object::ptr& o) {
           // map-like native objects can be de-structured.
           if (o->as_map_like() == nullptr) {
-            diags_.error(
+            report_fatal_error(
                 expr.loc.begin,
                 "Expression '{}' is a native_object which is not map-like. The encountered value is:\n{}",
                 expr.to_string(),
                 to_string(*result));
-            throw abort_rendering();
           }
         },
         [&](auto&&) {
-          diags_.error(
+          report_fatal_error(
               expr.loc.begin,
               "Expression '{}' does not evaluate to a map. The encountered value is:\n{}",
               expr.to_string(),
               to_string(*result));
-          throw abort_rendering();
         });
     eval_context_.push_scope(*result);
     visit(with_block.body_elements);
@@ -830,21 +851,19 @@ class render_engine {
 
     auto* partial_resolver = opts_.partial_resolver.get();
     if (partial_resolver == nullptr) {
-      diags_.error(
+      report_fatal_error(
           partial_apply.loc.begin,
           "No partial resolver was provided. Cannot resolve partial with path '{}'",
           partial_apply.path_string());
-      throw abort_rendering();
     }
 
     auto resolved_partial =
         partial_resolver->resolve(path, partial_apply.loc.begin, diags_);
     if (!resolved_partial.has_value()) {
-      diags_.error(
+      report_fatal_error(
           partial_apply.loc.begin,
           "Partial with path '{}' was not found",
           partial_apply.path_string());
-      throw abort_rendering();
     }
 
     // Partial applications stored in a stack for pragmas and debugging reasons.

@@ -76,7 +76,10 @@ TEST_F(RenderTest, variable_missing_in_scope) {
           "Name 'foo' was not found in the current scope. Tried to search through the following scopes:\n"
           "#0 map (size=0)\n"
           "\n"
-          "#1 <global scope> (size=0)\n",
+          "#1 <global scope> (size=0)\n"
+          "\n"
+          "The source backtrace is:\n"
+          "#0 path/to/test.whisker <line:1, col:13>\n",
           path_to_file,
           1)));
 }
@@ -190,7 +193,10 @@ TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
           "`-'factorials'\n"
           "  |-...\n"
           "\n"
-          "#2 <global scope> (size=0)\n",
+          "#2 <global scope> (size=0)\n"
+          "\n"
+          "The source backtrace is:\n"
+          "#0 path/to/test.whisker <line:3, col:5>\n",
           path_to_file,
           3)));
 }
@@ -1378,6 +1384,36 @@ TEST_F(RenderTest, partial_apply_preserves_whitespace_offset) {
       " \t \t 1\n"
       " \t  \t \t 2\n"
       " \t  \t  \t \t42! \n");
+}
+
+TEST_F(RenderTest, partial_nested_undefined_variable_trace) {
+  auto result = render(
+      "\n"
+      "{{> partial-1}}\n",
+      w::map({}),
+      partials(
+          {{"partial-1",
+            "\n"
+            "\t {{>partial-2}}\n"},
+           {"partial-2", "foo {{>partial-3}}\n"},
+           {"partial-3", "{{undefined}}"}}));
+  EXPECT_FALSE(result.has_value());
+  EXPECT_THAT(
+      diagnostics(),
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "Name 'undefined' was not found in the current scope. Tried to search through the following scopes:\n"
+          "#0 map (size=0)\n"
+          "\n"
+          "#1 <global scope> (size=0)\n"
+          "\n"
+          "The source backtrace is:\n"
+          "#0 partial-3 <line:1, col:3>\n"
+          "#1 partial-2 <line:1, col:5>\n"
+          "#2 partial-1 <line:2, col:3>\n"
+          "#3 path/to/test.whisker <line:2, col:1>\n",
+          "partial-3", // file name
+          1)));
 }
 
 TEST_F(RenderTest, strip_standalone_lines) {

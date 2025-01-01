@@ -22,8 +22,8 @@
 #include <cmath>
 #include <exception>
 #include <functional>
+#include <iterator>
 #include <ostream>
-#include <stack>
 #include <string>
 #include <vector>
 
@@ -162,6 +162,106 @@ class outputter {
   std::vector<std::string> next_indent_;
 };
 
+/**
+ * A class that keeps track of the stack of partial applications, including the
+ * locations in the source file where partials have been applied.
+ *
+ * This is useful for pragmas and debugging.
+ */
+class source_stack {
+ public:
+  /**
+   * State that is kept for each "source" file. This includes the root node and
+   * each partial application's source location.
+   */
+  struct frame {
+    /**
+     * For all elements except the top of the stack, this is the location of the
+     * partial application within that source that led to the current stack.
+     *
+     * For the top of the source, this is an empty source_location.
+     *
+     * When a partial application occurs, the top of the stack has the location
+     * saved before the new source is pushed to the stack. After the partial
+     * application completes, the saved location is dropped.
+     */
+    source_location apply_location;
+    bool ignore_newlines = false;
+  };
+
+  /**
+   * Returns the current source stack frame, or nullptr if the stack is empty.
+   */
+  frame* top() {
+    if (frames_.empty()) {
+      return nullptr;
+    }
+    return &frames_.back();
+  }
+
+  /**
+   * An RAII guard that pushes and pops sources from the stack of partial
+   * applications.
+   */
+  auto make_frame_guard(source_location apply_location) {
+    class frame_guard {
+     public:
+      explicit frame_guard(source_stack& stack, source_location apply_location)
+          : stack_(stack) {
+        if (auto* frame = stack_.top()) {
+          frame->apply_location = std::move(apply_location);
+        }
+        stack.frames_.emplace_back();
+      }
+      ~frame_guard() noexcept {
+        assert(!stack_.frames_.empty());
+        stack_.frames_.pop_back();
+        if (auto* source = stack_.top()) {
+          source->apply_location = source_location();
+        }
+      }
+      frame_guard(frame_guard&& other) = delete;
+      frame_guard& operator=(frame_guard&& other) = delete;
+      frame_guard(const frame_guard& other) = delete;
+      frame_guard& operator=(const frame_guard& other) = delete;
+
+     private:
+      source_stack& stack_;
+    };
+    return frame_guard{*this, std::move(apply_location)};
+  }
+
+  /**
+   * Creates a back trace for debugging that contains the chain of partial
+   * applications within the source.
+   *
+   * The source_location from the current stack frame must be provided by the
+   * caller.
+   */
+  std::vector<resolved_location> make_backtrace_at(
+      const source_location& current) const {
+    assert(!frames_.empty());
+    assert(current != source_location());
+
+    std::vector<resolved_location> result;
+    result.emplace_back(resolved_location(current, diags_.source_mgr()));
+    for (auto frame = std::next(frames_.rbegin()); frame != frames_.rend();
+         ++frame) {
+      assert(frame->apply_location != source_location());
+      result.emplace_back(
+          resolved_location(frame->apply_location, diags_.source_mgr()));
+    }
+    return result;
+  }
+
+  explicit source_stack(diagnostics_engine& diags) : diags_(diags) {}
+
+ private:
+  // Using std::vector as a stack so we can iterate over it
+  std::vector<frame> frames_;
+  diagnostics_engine& diags_;
+};
+
 // The following coercion functions follow the rules described in
 // render_options::strict_boolean_conditional.
 
@@ -216,11 +316,14 @@ class render_engine {
         eval_context_(eval_context::with_root_scope(
             root_context, std::exchange(opts.globals, {}))),
         diags_(diags),
+        source_stack_(diags_),
         opts_(std::move(opts)) {}
 
   bool visit(const ast::root& root) {
     try {
       auto flush_guard = out_.make_flush_guard();
+      auto source_frame_guard =
+          source_stack_.make_frame_guard(source_location());
       visit(root.body_elements);
       return true;
     } catch (const abort_rendering&) {
@@ -261,7 +364,7 @@ class render_engine {
 
   void visit(const ast::text& text) { out_.write(text); }
   void visit(const ast::newline& newline) {
-    if (!skip_newlines_.top()) {
+    if (!source_stack_.top()->ignore_newlines) {
       out_.write(newline);
     }
   }
@@ -294,22 +397,46 @@ class render_engine {
         eval_context_.lookup_object(path),
         [](const object& value) -> const object& { return value; },
         [&](const eval_scope_lookup_error& err) -> const object& {
-          std::vector<std::string> scope_trace;
-          scope_trace.reserve(err.searched_scopes().size());
-          for (std::size_t i = 0; i < err.searched_scopes().size(); ++i) {
-            object_print_options print_opts;
-            print_opts.max_depth = 1;
-            scope_trace.push_back(fmt::format(
-                "#{} {}",
-                i,
-                to_string(err.searched_scopes()[i], std::move(print_opts))));
-          }
+          auto scope_trace = [&]() -> std::string {
+            std::string result =
+                "Tried to search through the following scopes:\n";
+            for (std::size_t i = 0; i < err.searched_scopes().size(); ++i) {
+              const std::string_view maybe_newline = i == 0 ? "" : "\n";
+              object_print_options print_opts;
+              print_opts.max_depth = 1;
+              fmt::format_to(
+                  std::back_inserter(result),
+                  "{}#{} {}",
+                  maybe_newline,
+                  i,
+                  to_string(err.searched_scopes()[i], std::move(print_opts)));
+            }
+            return result;
+          }();
+
+          auto source_trace = [&]() -> std::string {
+            std::vector<resolved_location> backtrace =
+                source_stack_.make_backtrace_at(variable_lookup.loc.begin);
+            std::string result = "\nThe source backtrace is:\n";
+            for (std::size_t i = 0; i < backtrace.size(); ++i) {
+              const auto& frame = backtrace[i];
+              fmt::format_to(
+                  std::back_inserter(result),
+                  "#{} {} <line:{}, col:{}>\n",
+                  i,
+                  frame.file_name(),
+                  frame.line(),
+                  frame.column());
+            }
+            return result;
+          }();
 
           maybe_report(variable_lookup.loc, undefined_diag_level, [&] {
             return fmt::format(
-                "Name '{}' was not found in the current scope. Tried to search through the following scopes:\n{}",
+                "Name '{}' was not found in the current scope. {}{}",
                 err.property_name(),
-                fmt::join(scope_trace, "\n"));
+                scope_trace,
+                source_trace);
           });
           if (undefined_diag_level == diagnostic_level::error) {
             // Fail rendering in strict mode
@@ -465,7 +592,7 @@ class render_engine {
     using pragma = ast::pragma_statement::pragmas;
     switch (pragma_statement.pragma) {
       case pragma::single_line:
-        skip_newlines_.top() = true;
+        source_stack_.top()->ignore_newlines = true;
         break;
     }
   }
@@ -663,29 +790,6 @@ class render_engine {
     }
   }
 
-  /**
-   * An RAII guard that disables printing newlines. This supports the
-   * single-line pragma for partials.
-   */
-  auto make_single_line_guard(bool enabled) {
-    class single_line_guard {
-     public:
-      explicit single_line_guard(render_engine& engine, bool skip)
-          : engine_(engine) {
-        engine_.skip_newlines_.push(skip);
-      }
-      ~single_line_guard() { engine_.skip_newlines_.pop(); }
-      single_line_guard(single_line_guard&& other) = delete;
-      single_line_guard& operator=(single_line_guard&& other) = delete;
-      single_line_guard(const single_line_guard& other) = delete;
-      single_line_guard& operator=(const single_line_guard& other) = delete;
-
-     private:
-      render_engine& engine_;
-    };
-    return single_line_guard{*this, enabled};
-  }
-
   void visit(const ast::with_block& with_block) {
     const ast::expression& expr = with_block.value;
     object::ptr result = evaluate(expr);
@@ -743,19 +847,21 @@ class render_engine {
       throw abort_rendering();
     }
 
+    // Partial applications stored in a stack for pragmas and debugging reasons.
+    auto source_frame_guard =
+        source_stack_.make_frame_guard(partial_apply.loc.begin);
     // Partials are "inlined" into their invocation site. In other words, they
     // execute within the scope where they are invoked.
     auto indent_guard =
         out_.make_indent_guard(partial_apply.standalone_offset_within_line);
-    auto single_line_guard = make_single_line_guard(false);
     visit(resolved_partial->body_elements);
   }
 
   outputter out_;
   eval_context eval_context_;
   diagnostics_engine& diags_;
+  source_stack source_stack_;
   render_options opts_;
-  std::stack<bool> skip_newlines_{{false}};
 };
 
 } // namespace

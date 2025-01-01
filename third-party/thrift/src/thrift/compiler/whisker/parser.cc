@@ -187,6 +187,17 @@ bool try_consume_token(parser_scan_window* scan, tok kind) {
   return false;
 }
 
+bool try_consume_tokens(
+    parser_scan_window* scan, std::initializer_list<tok> kinds) {
+  assert(scan);
+  for (tok t : kinds) {
+    if (!try_consume_token(scan, t)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * The Mustache spec contains this concept called "standalone lines".
  *   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L279-L305
@@ -605,14 +616,8 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!(try_consume_token(&scan, tok::open) &&
-          try_consume_token(&scan, tok::pound))) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::kw_else)) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::kw_if)) {
+    if (!try_consume_tokens(
+            &scan, {tok::open, tok::pound, tok::kw_else, tok::kw_if})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -641,10 +646,8 @@ class parser {
   //
   // else-clause → { "{{" ~ "#" ~ "else" ~ "}}" }
   parse_result<std::monostate> parse_else_clause(parser_scan_window scan) {
-    if (!(try_consume_token(&scan, tok::open) &&
-          try_consume_token(&scan, tok::pound) &&
-          try_consume_token(&scan, tok::kw_else) &&
-          try_consume_token(&scan, tok::close))) {
+    if (!try_consume_tokens(
+            &scan, {tok::open, tok::pound, tok::kw_else, tok::close})) {
       return no_parse_result();
     }
     return {{}, scan};
@@ -655,9 +658,7 @@ class parser {
   //
   // { "{{" ~ "#" ~ "else" }
   bool peek_else_clause(parser_scan_window scan) {
-    return try_consume_token(&scan, tok::open) &&
-        try_consume_token(&scan, tok::pound) &&
-        try_consume_token(&scan, tok::kw_else);
+    return try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_else});
   }
 
   // Returns an empty parse result if no body was found.
@@ -1218,13 +1219,7 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_token(&scan, tok::open)) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::pound)) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::kw_let)) {
+    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_let})) {
       return no_parse_result();
     }
 
@@ -1263,13 +1258,7 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_token(&scan, tok::open)) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::pound)) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::kw_pragma)) {
+    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_pragma})) {
       return no_parse_result();
     }
 
@@ -1312,11 +1301,7 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!(try_consume_token(&scan, tok::open) &&
-          try_consume_token(&scan, tok::pound))) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::kw_if)) {
+    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_if})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -1400,9 +1385,7 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!(try_consume_token(&scan, tok::open) &&
-          try_consume_token(&scan, tok::pound) &&
-          try_consume_token(&scan, tok::kw_with))) {
+    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_with})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();
@@ -1446,10 +1429,7 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    if (!try_consume_token(&scan, tok::open)) {
-      return no_parse_result();
-    }
-    if (!try_consume_token(&scan, tok::gt)) {
+    if (!try_consume_tokens(&scan, {tok::open, tok::gt})) {
       return no_parse_result();
     }
     scan = scan.make_fresh();

@@ -537,7 +537,7 @@ class parser {
   }
 
   template <typename... T>
-  [[noreturn]] void report_expected(
+  [[noreturn]] void report_fatal_expected(
       const parser_scan_window& scan,
       fmt::format_string<T...> msg,
       T&&... args) {
@@ -584,7 +584,7 @@ class parser {
               "expected {} but found dangling else-clause",
               expected_types);
         } else {
-          report_expected(scan, expected_types);
+          report_fatal_expected(scan, expected_types);
         }
       }
       return ast::root{original_scan.start_location(), std::move(bodies)};
@@ -619,11 +619,11 @@ class parser {
 
     parse_result condition = parse_expression(scan);
     if (!condition.has_value()) {
-      report_expected(scan, "expression in else-if clause");
+      report_fatal_expected(scan, "expression in else-if clause");
     }
     ast::expression cond = std::move(condition).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, "`}}` in else-if clause");
+      report_fatal_expected(scan, "{} in else-if clause", tok::close);
     }
     scan = scan.make_fresh();
 
@@ -797,10 +797,10 @@ class parser {
         scan.advance();
         return {ast::comment{scan.range(), ""}, scan};
       default:
-        report_expected(scan, "comment text");
+        report_fatal_expected(scan, "comment text");
     }
     if (scan.peek().kind != tok::close) {
-      report_expected(scan, "{} to close comment", tok::close);
+      report_fatal_expected(scan, "{} to close comment", tok::close);
     }
     scan.advance();
 
@@ -854,7 +854,7 @@ class parser {
       templ = std::move(partial_apply).consume_and_advance(&scan);
     }
     if (!templ.has_value()) {
-      report_expected(
+      report_fatal_expected(
           scan,
           "interpolation, block, statement, or partial-apply in template");
     }
@@ -892,11 +892,11 @@ class parser {
 
     parse_result expression = parse_expression(scan);
     if (!expression.has_value()) {
-      report_expected(scan, "expression in interpolation");
+      report_fatal_expected(scan, "expression in interpolation");
     }
     ast::expression lookup = std::move(expression).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, "{} to close interpolation", tok::close);
+      report_fatal_expected(scan, "{} to close interpolation", tok::close);
     }
     return {
         ast::interpolation{
@@ -929,7 +929,7 @@ class parser {
     while (try_consume_token(&scan, tok::dot)) {
       const token& id_part = scan.peek();
       if (id_part.kind != tok::identifier) {
-        report_expected(scan, "identifier in variable-lookup");
+        report_fatal_expected(scan, "identifier in variable-lookup");
       }
       scan.advance();
       path.emplace_back(
@@ -962,26 +962,26 @@ class parser {
 
     parse_result lookup_at_open = parse_variable_lookup(scan.make_fresh());
     if (!lookup_at_open.has_value()) {
-      report_expected(scan, "variable-lookup to open section-block");
+      report_fatal_expected(scan, "variable-lookup to open section-block");
     }
     ast::variable_lookup open =
         std::move(lookup_at_open).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, "{} to open section-block", tok::close);
+      report_fatal_expected(scan, "{} to open section-block", tok::close);
     }
     scan = scan.make_fresh();
 
     ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
 
     if (!try_consume_token(&scan, tok::open)) {
-      report_expected(
+      report_fatal_expected(
           scan,
           "{} to close section-block '{}'",
           tok::open,
           open.chain_string());
     }
     if (!try_consume_token(&scan, tok::slash)) {
-      report_expected(
+      report_fatal_expected(
           scan,
           "{} to close section-block '{}'",
           tok::slash,
@@ -990,7 +990,7 @@ class parser {
 
     parse_result lookup_at_close = parse_variable_lookup(scan.make_fresh());
     if (!lookup_at_close.has_value()) {
-      report_expected(
+      report_fatal_expected(
           scan,
           "variable-lookup to close section-block '{}'",
           open.chain_string());
@@ -1089,7 +1089,7 @@ class parser {
       func.which = function_call::user_defined{
           std::move(lookup).consume_and_advance(&scan)};
     } else {
-      report_expected(scan, "function-lookup in function-call");
+      report_fatal_expected(scan, "function-lookup in function-call");
     }
 
     using named_argument_entry =
@@ -1113,7 +1113,7 @@ class parser {
                           std::move(expr).consume_and_advance(&scan))}},
               scan};
         }
-        report_expected(scan, "expression in named argument");
+        report_fatal_expected(scan, "expression in named argument");
       }
 
       assert(scan.empty());
@@ -1202,7 +1202,7 @@ class parser {
         });
 
     if (!try_consume_token(&scan, tok::r_paren)) {
-      report_expected(
+      report_fatal_expected(
           scan, "{} to close function '{}'", tok::r_paren, func.name());
     }
 
@@ -1230,23 +1230,23 @@ class parser {
 
     const token& id = scan.peek();
     if (id.kind != tok::identifier) {
-      report_expected(scan, "identifier in let-statement");
+      report_fatal_expected(scan, "identifier in let-statement");
     }
     scan.advance();
 
     if (!try_consume_token(&scan, tok::eq)) {
-      report_expected(scan, "{} in let-statement", tok::eq);
+      report_fatal_expected(scan, "{} in let-statement", tok::eq);
     }
 
     scan = scan.make_fresh();
     parse_result expression = parse_expression(scan);
     if (!expression.has_value()) {
-      report_expected(scan, "expression in let-statement");
+      report_fatal_expected(scan, "expression in let-statement");
     }
     ast::expression value = std::move(expression).consume_and_advance(&scan);
 
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, "{} to close let-statement", tok::close);
+      report_fatal_expected(scan, "{} to close let-statement", tok::close);
     }
 
     return {
@@ -1275,7 +1275,7 @@ class parser {
 
     const token& id = scan.peek();
     if (id.kind != tok::identifier) {
-      report_expected(scan, "identifier in pragma-statement");
+      report_fatal_expected(scan, "identifier in pragma-statement");
     }
     scan.advance();
 
@@ -1287,7 +1287,7 @@ class parser {
     }
 
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, "{} to close pragma-statement", tok::close);
+      report_fatal_expected(scan, "{} to close pragma-statement", tok::close);
     }
 
     return {
@@ -1323,11 +1323,11 @@ class parser {
 
     parse_result condition = parse_expression(scan);
     if (!condition.has_value()) {
-      report_expected(scan, "expression to open if-block");
+      report_fatal_expected(scan, "expression to open if-block");
     }
     ast::expression open = std::move(condition).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, "{} to open if-block", tok::close);
+      report_fatal_expected(scan, "{} to open if-block", tok::close);
     }
     scan = scan.make_fresh();
 
@@ -1358,7 +1358,7 @@ class parser {
 
     const auto expect_on_close = [&](tok kind) {
       if (!try_consume_token(&scan, kind)) {
-        report_expected(
+        report_fatal_expected(
             scan, "{} to close if-block '{}'", kind, open.to_string());
       }
     };
@@ -1368,7 +1368,7 @@ class parser {
     expect_on_close(tok::kw_if);
     condition = parse_expression(scan.make_fresh());
     if (!condition.has_value()) {
-      report_expected(
+      report_fatal_expected(
           scan, "expression to close if-block '{}'", open.to_string());
     }
     ast::expression close = {std::move(condition).consume_and_advance(&scan)};
@@ -1409,11 +1409,11 @@ class parser {
 
     parse_result value = parse_expression(scan);
     if (!value.has_value()) {
-      report_expected(scan, "expression to open with-block");
+      report_fatal_expected(scan, "expression to open with-block");
     }
     ast::expression expr = std::move(value).consume_and_advance(&scan);
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(scan, "{} to open with-block", tok::close);
+      report_fatal_expected(scan, "{} to open with-block", tok::close);
     }
     scan = scan.make_fresh();
 
@@ -1421,7 +1421,7 @@ class parser {
 
     const auto expect_on_close = [&](tok kind) {
       if (!try_consume_token(&scan, kind)) {
-        report_expected(
+        report_fatal_expected(
             scan, "{} to close with-block '{}'", kind, expr.to_string());
       }
     };
@@ -1456,13 +1456,13 @@ class parser {
 
     parse_result partial_lookup = parse_partial_lookup(scan.make_fresh());
     if (!partial_lookup.has_value()) {
-      report_expected(scan, "partial-lookup in partial-apply");
+      report_fatal_expected(scan, "partial-lookup in partial-apply");
     }
     ast::partial_lookup lookup =
         std::move(partial_lookup).consume_and_advance(&scan);
 
     if (!try_consume_token(&scan, tok::close)) {
-      report_expected(
+      report_fatal_expected(
           scan,
           "{} to close partial-apply '{}'",
           tok::close,
@@ -1494,7 +1494,7 @@ class parser {
     while (try_consume_token(&scan, tok::slash)) {
       const token& component_part = scan.peek();
       if (component_part.kind != tok::path_component) {
-        report_expected(scan, "path-component in partial-lookup");
+        report_fatal_expected(scan, "path-component in partial-lookup");
       }
       scan.advance();
       path.emplace_back(ast::path_component{

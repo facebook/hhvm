@@ -103,7 +103,6 @@ struct RequiresBackwardCompatibility {
 @scope.Struct
 @scope.Exception
 @scope.Field
-@Experimental
 struct TerseWrite {}
 
 /** Indicates that an optional field's value should never be stored on the stack,

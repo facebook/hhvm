@@ -570,10 +570,6 @@ class TerseWrite implements \IThriftSyncStruct, \IThriftStructMetadata, \IThrift
           shape(
           )
         ),
-        '\facebook\thrift\annotation\Experimental' => \facebook\thrift\annotation\Experimental::fromShape(
-          shape(
-          )
-        ),
       ],
       'fields' => dict[
       ],

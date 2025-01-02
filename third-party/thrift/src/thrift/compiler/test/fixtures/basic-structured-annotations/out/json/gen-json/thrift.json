@@ -8,7 +8,7 @@
   },
   "enumerations" : {
     "RpcPriority" : {
-      "lineno" : 222,
+      "lineno" : 221,
       "constants" : {
         "HIGH_IMPORTANT" : 0,
         "HIGH" : 1,
@@ -18,11 +18,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 222,
+          "line" : 221,
           "column" : 1
         },
         "end" : {
-          "line" : 228,
+          "line" : 227,
           "column" : 2
         }
       }
@@ -147,8 +147,7 @@
         "scope.Program" : {  },
         "scope.Struct" : {  },
         "scope.Exception" : {  },
-        "scope.Field" : {  },
-        "Experimental" : {  }
+        "scope.Field" : {  }
       },
       "fields" : {
 
@@ -159,13 +158,13 @@
           "column" : 1
         },
         "end" : {
-          "line" : 107,
+          "line" : 106,
           "column" : 21
         }
       }
     },
     "Box" : {
-      "lineno" : 139,
+      "lineno" : 138,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -176,17 +175,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 139,
+          "line" : 138,
           "column" : 1
         },
         "end" : {
-          "line" : 140,
+          "line" : 139,
           "column" : 14
         }
       }
     },
     "Mixin" : {
-      "lineno" : 146,
+      "lineno" : 145,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -197,17 +196,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 146,
+          "line" : 145,
           "column" : 1
         },
         "end" : {
-          "line" : 147,
+          "line" : 146,
           "column" : 16
         }
       }
     },
     "SerializeInFieldIdOrder" : {
-      "lineno" : 157,
+      "lineno" : 156,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -219,17 +218,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 157,
+          "line" : 156,
           "column" : 1
         },
         "end" : {
-          "line" : 159,
+          "line" : 158,
           "column" : 34
         }
       }
     },
     "BitmaskEnum" : {
-      "lineno" : 165,
+      "lineno" : 164,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -240,17 +239,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 165,
+          "line" : 164,
           "column" : 1
         },
         "end" : {
-          "line" : 166,
+          "line" : 165,
           "column" : 22
         }
       }
     },
     "ExceptionMessage" : {
-      "lineno" : 190,
+      "lineno" : 189,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -261,17 +260,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 190,
+          "line" : 189,
           "column" : 1
         },
         "end" : {
-          "line" : 191,
+          "line" : 190,
           "column" : 27
         }
       }
     },
     "InternBox" : {
-      "lineno" : 197,
+      "lineno" : 196,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -283,17 +282,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 197,
+          "line" : 196,
           "column" : 1
         },
         "end" : {
-          "line" : 199,
+          "line" : 198,
           "column" : 20
         }
       }
     },
     "Serial" : {
-      "lineno" : 204,
+      "lineno" : 203,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -304,17 +303,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 204,
+          "line" : 203,
           "column" : 1
         },
         "end" : {
-          "line" : 205,
+          "line" : 204,
           "column" : 17
         }
       }
     },
     "Uri" : {
-      "lineno" : 210,
+      "lineno" : 209,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -327,11 +326,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 212,
+              "line" : 211,
               "column" : 3
             },
             "end" : {
-              "line" : 212,
+              "line" : 211,
               "column" : 19
             }
           }
@@ -339,17 +338,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 210,
+          "line" : 209,
           "column" : 1
         },
         "end" : {
-          "line" : 213,
+          "line" : 212,
           "column" : 2
         }
       }
     },
     "Priority" : {
-      "lineno" : 218,
+      "lineno" : 217,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -362,11 +361,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 220,
+              "line" : 219,
               "column" : 3
             },
             "end" : {
-              "line" : 220,
+              "line" : 219,
               "column" : 24
             }
           }
@@ -374,17 +373,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 218,
+          "line" : 217,
           "column" : 1
         },
         "end" : {
-          "line" : 221,
+          "line" : 220,
           "column" : 2
         }
       }
     },
     "DeprecatedUnvalidatedAnnotations" : {
-      "lineno" : 233,
+      "lineno" : 232,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -397,11 +396,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 235,
+              "line" : 234,
               "column" : 3
             },
             "end" : {
-              "line" : 235,
+              "line" : 234,
               "column" : 32
             }
           }
@@ -409,17 +408,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 233,
+          "line" : 232,
           "column" : 1
         },
         "end" : {
-          "line" : 236,
+          "line" : 235,
           "column" : 2
         }
       }
     },
     "AllowReservedIdentifier" : {
-      "lineno" : 248,
+      "lineno" : 247,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -430,17 +429,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 248,
+          "line" : 247,
           "column" : 1
         },
         "end" : {
-          "line" : 249,
+          "line" : 248,
           "column" : 34
         }
       }
     },
     "AllowReservedFilename" : {
-      "lineno" : 251,
+      "lineno" : 250,
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
@@ -451,11 +450,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 251,
+          "line" : 250,
           "column" : 1
         },
         "end" : {
-          "line" : 252,
+          "line" : 251,
           "column" : 32
         }
       }

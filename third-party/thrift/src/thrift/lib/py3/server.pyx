@@ -119,10 +119,10 @@ cdef class AsyncProcessorFactory:
         to remove this method.
         """
         # Tests for some implementations that use py3 servers fail
-        # if this function returns True. 
+        # if this function returns True.
         # Some py3 tests implementation do not create metadata, which is a
         # prerequisite to call requireResourcePools() on the ThriftServer.
-        # This function can return False with no adverse effects 
+        # This function can return False with no adverse effects
         # in production. The effect is that py3 tests will not run with
         # resource pools enabled.
         # This function is still relevant because derived implementations
@@ -341,9 +341,16 @@ cdef class ThriftServer:
 
     def disable_info_logging(self):
         self.server.get().disableInfoLogging()
-        
+
     def is_resource_pool_enabled(self) -> bool:
         return self.server.get().resourcePoolEnabled()
+
+    def set_task_expire_time(self, seconds):
+        self.server.get().setTaskExpireTime(milliseconds(<int64_t>(seconds * 1000)))
+
+    def set_use_client_timeout(self, cbool use_client_timeout):
+        self.server.get().setUseClientTimeout(use_client_timeout)
+
 
 
 cdef class ClientMetadata:

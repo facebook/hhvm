@@ -141,6 +141,8 @@ cdef extern from "thrift/lib/cpp2/server/ThriftServer.h" \
         void disableInfoLogging()
         cbool resourcePoolEnabled() nogil noexcept
         void requireResourcePools() nogil noexcept
+        void setTaskExpireTime(milliseconds timeout)
+        void setUseClientTimeout(cbool useClientTimeout)
 
 cdef extern from "folly/ssl/OpenSSLCertUtils.h" \
         namespace "folly::ssl":

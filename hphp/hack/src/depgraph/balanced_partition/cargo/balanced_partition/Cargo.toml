@@ -12,6 +12,6 @@ path = "../../lib.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-itertools = "0.13.0"
+itertools = "0.14.0"
 log = { version = "0.4.22", features = ["kv_unstable"] }
 rayon = "1.9.0"

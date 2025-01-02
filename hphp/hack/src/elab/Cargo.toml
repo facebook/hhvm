@@ -15,7 +15,7 @@ bitflags = { version = "2.6", features = ["serde"] }
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 elaborate_namespaces_visitor = { version = "0.0.0", path = "../naming/cargo/elaborate_namespaces" }
 hack_macros = { version = "0.0.0", path = "../utils/hack_macros/cargo/hack_macros" }
-itertools = "0.13.0"
+itertools = "0.14.0"
 naming_special_names_rust = { version = "0.0.0", path = "../naming" }
 oxidized = { version = "0.0.0", path = "../oxidized" }
 relative_path = { version = "0.0.0", path = "../utils/rust/relative_path" }

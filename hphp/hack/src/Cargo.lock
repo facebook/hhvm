@@ -90,7 +90,7 @@ name = "analysis"
 version = "0.0.0"
 dependencies = [
  "ir_core",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "newtype",
  "print",
 ]
@@ -276,7 +276,7 @@ dependencies = [
  "anyhow",
  "hash",
  "ir_core",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "log",
  "naming_special_names_rust",
  "parse_macro_ir",
@@ -287,7 +287,7 @@ name = "assemble_opcode_macro"
 version = "0.0.0"
 dependencies = [
  "hhbc-gen",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "proc-macro2",
  "quote",
  "syn 1.0.109",
@@ -380,7 +380,7 @@ dependencies = [
 name = "balanced_partition"
 version = "0.0.0"
 dependencies = [
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "log",
  "rayon",
 ]
@@ -517,7 +517,7 @@ dependencies = [
  "hhbc_string_utils",
  "hhvm_hhbc_defs_ffi",
  "hhvm_types_ffi",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "print_opcode",
  "relative_path",
  "thiserror 2.0.7",
@@ -786,7 +786,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc_string_utils",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "naming_special_names_rust",
  "oxidized",
  "stack_limit",
@@ -937,7 +937,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "indexmap 2.2.6",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "naming_special_names_rust",
  "oxidized",
  "stack_limit",
@@ -1401,7 +1401,7 @@ dependencies = [
  "dep_graph_delta",
  "depgraph_reader",
  "hash",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "ocamlrep",
  "ocamlrep_custom",
  "parking_lot",
@@ -1558,7 +1558,7 @@ dependencies = [
  "bstr",
  "elaborate_namespaces_visitor",
  "hack_macros",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "naming_special_names_rust",
  "oxidized",
  "relative_path",
@@ -1645,7 +1645,7 @@ dependencies = [
  "hhvm_types_ffi",
  "indexmap 2.2.6",
  "instruction_sequence",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "label_rewriter",
  "lazy_static",
  "naming_special_names_rust",
@@ -1960,7 +1960,7 @@ dependencies = [
  "eq_modulo_pos",
  "hash",
  "indexmap 2.2.6",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "oxidized",
  "pos",
  "shallow_decl_provider",
@@ -2164,7 +2164,7 @@ dependencies = [
  "hhvm_options",
  "ir",
  "ir_to_bc",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "jwalk",
  "log",
  "multifile_rust",
@@ -2747,7 +2747,7 @@ dependencies = [
  "hhbc",
  "instruction_sequence",
  "ir",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "log",
  "smallvec",
  "stack_depth",
@@ -2775,9 +2775,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.13.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
 dependencies = [
  "either",
 ]
@@ -2941,7 +2941,7 @@ dependencies = [
  "hash",
  "hhbc_string_utils",
  "html_entities",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "lazy_static",
  "lint_rust",
  "naming_special_names_rust",
@@ -3556,7 +3556,7 @@ dependencies = [
  "hh24_types",
  "hh_autoimport_rust",
  "hh_hash",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
@@ -3714,7 +3714,7 @@ version = "0.0.0"
 dependencies = [
  "bitflags 2.6.0",
  "bumpalo",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "line_break_map",
  "ocaml_helper",
  "ocamlrep",
@@ -3742,7 +3742,7 @@ dependencies = [
  "analysis",
  "hash",
  "ir_core",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "log",
  "newtype",
  "print",
@@ -4328,7 +4328,7 @@ dependencies = [
  "escaper",
  "hash",
  "hh_autoimport_rust",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "naming_special_names_rust",
  "oxidized",
  "parser_core_types",
@@ -4477,7 +4477,7 @@ dependencies = [
  "hash",
  "hhbc",
  "hhbc-gen",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "log",
  "newtype",
 ]
@@ -4590,7 +4590,7 @@ dependencies = [
  "anyhow",
  "datastore",
  "decl_parser",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "naming_provider",
  "oxidized",
  "pos",
@@ -5026,7 +5026,7 @@ dependencies = [
  "hhbc",
  "hhbc_string_utils",
  "ir",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "log",
  "naming_special_names_rust",
  "newtype",
@@ -5039,7 +5039,7 @@ dependencies = [
 name = "textual_macros"
 version = "0.0.0"
 dependencies = [
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "proc-macro-error",
  "proc-macro2",
  "quote",
@@ -5384,7 +5384,7 @@ version = "0.0.0"
 dependencies = [
  "analysis",
  "ir_core",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "print",
 ]
 

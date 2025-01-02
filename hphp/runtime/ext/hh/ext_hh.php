@@ -36,6 +36,13 @@ interface UNSAFESingletonMemoizeParam extends IMemoizeParam {
 <<__Native>>
 function autoload_is_native(): bool;
 
+/*
+ * Returns true if the current request is proxying filesystem access and other
+ * system calls to an external client process via the CLI server protocol.
+ */
+<<__Native>>
+function is_cli_server_mode(): bool;
+
 /**
  * Get the path which uniquely defines the given symbol.
  *

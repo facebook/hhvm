@@ -270,3 +270,7 @@ exception TestExceptionCopy {
   9: map<string, i32> unqualified_map_string_i32;
   10: optional TestExceptionCopy recursive_exception;
 }
+
+struct TestStructWithMapOfList {
+  1: map<string, list<TestStruct>> str_to_test_structs;
+}

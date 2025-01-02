@@ -76,6 +76,7 @@ from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestStructNested_1 as TestStructNested_1_Mutable,
     TestStructNested_2 as TestStructNested_2_Mutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesMutable,
+    TestStructWithMapOfList as TestStructWithMapOfListMutable,
     TestStructWithTypedefField as TestStructWithTypedefFieldMutable,
 )
 
@@ -86,6 +87,7 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructAllThriftPrimitiveTypes as TestStructAllThriftPrimitiveTypesImmutable,
     TestStructAllThriftPrimitiveTypesWithDefaultValues as TestStructAllThriftPrimitiveTypesWithDefaultValuesImmutable,
     TestStructWithDefaultValues as TestStructWithDefaultValuesImmutable,
+    TestStructWithMapOfList as TestStructWithMapOfListImmutable,
 )
 
 max_byte: int = 2**7 - 1
@@ -519,6 +521,21 @@ class ThriftPython_ImmutableStruct_Test(unittest.TestCase):
                 self.assertEqual(x, datetime.fromtimestamp(1733556290))
             case _:
                 self.fail("Expected match, got none.")
+
+    def test_conversion_map_of_list(self) -> None:
+        s = TestStructWithMapOfListImmutable(
+            str_to_test_structs={"foo": [TestStructImmutable(unqualified_string="bar")]}
+        )
+
+        # DO_BEFORE(aristidis,20250115): Fix conversion bug, code below should not throw
+        with self.assertRaisesRegex(
+            TypeError,
+            (
+                "error setting Thrift struct field 'str_to_test_structs': object of "
+                "type 'thrift.python.mutable_types._ThriftListWrapper' has no len()"
+            ),
+        ):
+            s._to_mutable_python()
 
 
 class ThriftPython_MutableStruct_Test(unittest.TestCase):

@@ -24,7 +24,8 @@ void MyServiceWrapper::async_tm_ping(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_ping(
             this->if_object,
@@ -42,7 +43,8 @@ void MyServiceWrapper::async_tm_getRandomData(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_MyService_getRandomData(
             this->if_object,
@@ -63,7 +65,8 @@ void MyServiceWrapper::async_tm_hasDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_MyService_hasDataById(
             this->if_object,
@@ -85,7 +88,8 @@ void MyServiceWrapper::async_tm_getDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_MyService_getDataById(
             this->if_object,
@@ -108,8 +112,9 @@ void MyServiceWrapper::async_tm_putDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-data = std::move(data)    ]() mutable {
+     id,
+     data = std::move(data)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_putDataById(
             this->if_object,
@@ -133,8 +138,9 @@ void MyServiceWrapper::async_tm_lobDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-dataStr = std::move(dataStr)    ]() mutable {
+     id,
+     dataStr = std::move(dataStr)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_lobDataById(
             this->if_object,
@@ -154,7 +160,8 @@ void MyServiceWrapper::async_tm_cppDoNothing(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_doNothing(
             this->if_object,
@@ -200,7 +207,8 @@ void MyServicePrioParentWrapper::async_tm_ping(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyServicePrioParent_ping(
             this->if_object,
@@ -218,7 +226,8 @@ void MyServicePrioParentWrapper::async_tm_pong(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyServicePrioParent_pong(
             this->if_object,
@@ -263,7 +272,8 @@ void MyServicePrioChildWrapper::async_tm_pang(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyServicePrioChild_pang(
             this->if_object,
@@ -309,7 +319,8 @@ void BadServiceWrapper::async_tm_bar(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_BadService_bar(
             this->if_object,
@@ -358,7 +369,8 @@ void FooBarBazServiceWrapper::async_tm_foo(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_FooBarBazService_foo(
             this->if_object,
@@ -376,7 +388,8 @@ void FooBarBazServiceWrapper::async_tm_bar(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_FooBarBazService_bar(
             this->if_object,
@@ -394,7 +407,8 @@ void FooBarBazServiceWrapper::async_tm_baz(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_FooBarBazService_baz(
             this->if_object,

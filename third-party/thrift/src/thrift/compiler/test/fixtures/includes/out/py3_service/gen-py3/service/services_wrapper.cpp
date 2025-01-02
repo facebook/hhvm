@@ -28,8 +28,9 @@ void MyServiceWrapper::async_tm_query(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-s = std::move(s),
-i = std::move(i)    ]() mutable {
+     s = std::move(s),
+     i = std::move(i)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_query(
             this->if_object,
@@ -53,8 +54,9 @@ void MyServiceWrapper::async_tm_has_arg_docs(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-s = std::move(s),
-i = std::move(i)    ]() mutable {
+     s = std::move(s),
+     i = std::move(i)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_has_arg_docs(
             this->if_object,

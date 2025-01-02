@@ -28,8 +28,9 @@ void PubSubStreamingServiceWrapper::async_tm_returnstream(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-i32_from,
-i32_to    ]() mutable {
+     i32_from,
+     i32_to
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ServerStream<int32_t>>();
         call_cy_PubSubStreamingService_returnstream(
             this->if_object,
@@ -52,7 +53,8 @@ void PubSubStreamingServiceWrapper::async_tm_streamthrows(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo    ]() mutable {
+     foo
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ServerStream<int32_t>>();
         call_cy_PubSubStreamingService_streamthrows(
             this->if_object,
@@ -74,7 +76,8 @@ void PubSubStreamingServiceWrapper::async_tm_servicethrows(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo    ]() mutable {
+     foo
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ServerStream<int32_t>>();
         call_cy_PubSubStreamingService_servicethrows(
             this->if_object,
@@ -96,7 +99,8 @@ void PubSubStreamingServiceWrapper::async_tm_servicethrows2(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo    ]() mutable {
+     foo
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ServerStream<int32_t>>();
         call_cy_PubSubStreamingService_servicethrows2(
             this->if_object,
@@ -118,7 +122,8 @@ void PubSubStreamingServiceWrapper::async_tm_boththrows(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo    ]() mutable {
+     foo
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ServerStream<int32_t>>();
         call_cy_PubSubStreamingService_boththrows(
             this->if_object,
@@ -140,7 +145,8 @@ void PubSubStreamingServiceWrapper::async_tm_responseandstreamstreamthrows(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo    ]() mutable {
+     foo
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>();
         call_cy_PubSubStreamingService_responseandstreamstreamthrows(
             this->if_object,
@@ -162,7 +168,8 @@ void PubSubStreamingServiceWrapper::async_tm_responseandstreamservicethrows(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo    ]() mutable {
+     foo
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>();
         call_cy_PubSubStreamingService_responseandstreamservicethrows(
             this->if_object,
@@ -184,7 +191,8 @@ void PubSubStreamingServiceWrapper::async_tm_responseandstreamboththrows(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo    ]() mutable {
+     foo
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>();
         call_cy_PubSubStreamingService_responseandstreamboththrows(
             this->if_object,
@@ -207,8 +215,9 @@ void PubSubStreamingServiceWrapper::async_eb_returnstreamFast(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-i32_from,
-i32_to    ]() mutable {
+     i32_from,
+     i32_to
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ServerStream<int32_t>>();
         call_cy_PubSubStreamingService_returnstreamFast(
             this->if_object,

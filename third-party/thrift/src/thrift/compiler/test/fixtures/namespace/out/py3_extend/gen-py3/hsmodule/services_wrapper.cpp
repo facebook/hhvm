@@ -27,7 +27,8 @@ void HsTestServiceWrapper::async_tm_init(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-int1    ]() mutable {
+     int1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int64_t>();
         call_cy_HsTestService_init(
             this->if_object,

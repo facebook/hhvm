@@ -26,7 +26,8 @@ void ExtendTestServiceWrapper::async_tm_check(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-struct1 = std::move(struct1)    ]() mutable {
+     struct1 = std::move(struct1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_ExtendTestService_check(
             this->if_object,

@@ -25,7 +25,8 @@ void SimpleServiceWrapper::async_tm_get_five(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_get_five(
             this->if_object,
@@ -46,7 +47,8 @@ void SimpleServiceWrapper::async_tm_add_five(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-num    ]() mutable {
+     num
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_add_five(
             this->if_object,
@@ -65,7 +67,8 @@ void SimpleServiceWrapper::async_tm_do_nothing(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_SimpleService_do_nothing(
             this->if_object,
@@ -87,8 +90,9 @@ void SimpleServiceWrapper::async_tm_concat(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-first = std::move(first),
-second = std::move(second)    ]() mutable {
+     first = std::move(first),
+     second = std::move(second)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_SimpleService_concat(
             this->if_object,
@@ -111,7 +115,8 @@ void SimpleServiceWrapper::async_tm_get_value(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-simple_struct = std::move(simple_struct)    ]() mutable {
+     simple_struct = std::move(simple_struct)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_get_value(
             this->if_object,
@@ -133,7 +138,8 @@ void SimpleServiceWrapper::async_tm_negate(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-input    ]() mutable {
+     input
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_SimpleService_negate(
             this->if_object,
@@ -155,7 +161,8 @@ void SimpleServiceWrapper::async_tm_tiny(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-input    ]() mutable {
+     input
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int8_t>();
         call_cy_SimpleService_tiny(
             this->if_object,
@@ -177,7 +184,8 @@ void SimpleServiceWrapper::async_tm_small(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-input    ]() mutable {
+     input
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int16_t>();
         call_cy_SimpleService_small(
             this->if_object,
@@ -199,7 +207,8 @@ void SimpleServiceWrapper::async_tm_big(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-input    ]() mutable {
+     input
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int64_t>();
         call_cy_SimpleService_big(
             this->if_object,
@@ -221,7 +230,8 @@ void SimpleServiceWrapper::async_tm_two(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-input    ]() mutable {
+     input
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<double>();
         call_cy_SimpleService_two(
             this->if_object,
@@ -240,7 +250,8 @@ void SimpleServiceWrapper::async_tm_expected_exception(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_SimpleService_expected_exception(
             this->if_object,
@@ -258,7 +269,8 @@ void SimpleServiceWrapper::async_tm_unexpected_exception(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_unexpected_exception(
             this->if_object,
@@ -279,7 +291,8 @@ void SimpleServiceWrapper::async_tm_sum_i16_list(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-numbers = std::move(numbers)    ]() mutable {
+     numbers = std::move(numbers)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_sum_i16_list(
             this->if_object,
@@ -301,7 +314,8 @@ void SimpleServiceWrapper::async_tm_sum_i32_list(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-numbers = std::move(numbers)    ]() mutable {
+     numbers = std::move(numbers)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_sum_i32_list(
             this->if_object,
@@ -323,7 +337,8 @@ void SimpleServiceWrapper::async_tm_sum_i64_list(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-numbers = std::move(numbers)    ]() mutable {
+     numbers = std::move(numbers)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_sum_i64_list(
             this->if_object,
@@ -345,7 +360,8 @@ void SimpleServiceWrapper::async_tm_concat_many(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-words = std::move(words)    ]() mutable {
+     words = std::move(words)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_SimpleService_concat_many(
             this->if_object,
@@ -367,7 +383,8 @@ void SimpleServiceWrapper::async_tm_count_structs(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-items = std::move(items)    ]() mutable {
+     items = std::move(items)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_count_structs(
             this->if_object,
@@ -389,7 +406,8 @@ void SimpleServiceWrapper::async_tm_sum_set(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-numbers = std::move(numbers)    ]() mutable {
+     numbers = std::move(numbers)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_sum_set(
             this->if_object,
@@ -412,8 +430,9 @@ void SimpleServiceWrapper::async_tm_contains_word(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-words = std::move(words),
-word = std::move(word)    ]() mutable {
+     words = std::move(words),
+     word = std::move(word)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_SimpleService_contains_word(
             this->if_object,
@@ -437,8 +456,9 @@ void SimpleServiceWrapper::async_tm_get_map_value(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-words = std::move(words),
-key = std::move(key)    ]() mutable {
+     words = std::move(words),
+     key = std::move(key)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_SimpleService_get_map_value(
             this->if_object,
@@ -461,7 +481,8 @@ void SimpleServiceWrapper::async_tm_map_length(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-items = std::move(items)    ]() mutable {
+     items = std::move(items)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int16_t>();
         call_cy_SimpleService_map_length(
             this->if_object,
@@ -483,7 +504,8 @@ void SimpleServiceWrapper::async_tm_sum_map_values(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-items = std::move(items)    ]() mutable {
+     items = std::move(items)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int16_t>();
         call_cy_SimpleService_sum_map_values(
             this->if_object,
@@ -505,7 +527,8 @@ void SimpleServiceWrapper::async_tm_complex_sum_i32(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-counter = std::move(counter)    ]() mutable {
+     counter = std::move(counter)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_complex_sum_i32(
             this->if_object,
@@ -527,7 +550,8 @@ void SimpleServiceWrapper::async_tm_repeat_name(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-counter = std::move(counter)    ]() mutable {
+     counter = std::move(counter)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_SimpleService_repeat_name(
             this->if_object,
@@ -546,7 +570,8 @@ void SimpleServiceWrapper::async_tm_get_struct(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::py3::simple::SimpleStruct>>();
         call_cy_SimpleService_get_struct(
             this->if_object,
@@ -567,7 +592,8 @@ void SimpleServiceWrapper::async_tm_fib(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-n    ]() mutable {
+     n
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<int32_t>>>();
         call_cy_SimpleService_fib(
             this->if_object,
@@ -589,7 +615,8 @@ void SimpleServiceWrapper::async_tm_unique_words(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-words = std::move(words)    ]() mutable {
+     words = std::move(words)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::set<std::string>>>();
         call_cy_SimpleService_unique_words(
             this->if_object,
@@ -611,7 +638,8 @@ void SimpleServiceWrapper::async_tm_words_count(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-words = std::move(words)    ]() mutable {
+     words = std::move(words)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::map<std::string,int16_t>>>();
         call_cy_SimpleService_words_count(
             this->if_object,
@@ -633,7 +661,8 @@ void SimpleServiceWrapper::async_tm_set_enum(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-in_enum    ]() mutable {
+     in_enum
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<::py3::simple::AnEnum>();
         call_cy_SimpleService_set_enum(
             this->if_object,
@@ -656,8 +685,9 @@ void SimpleServiceWrapper::async_tm_list_of_lists(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-num_lists,
-num_items    ]() mutable {
+     num_lists,
+     num_items
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<std::vector<int32_t>>>>();
         call_cy_SimpleService_list_of_lists(
             this->if_object,
@@ -680,7 +710,8 @@ void SimpleServiceWrapper::async_tm_word_character_frequency(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-sentence = std::move(sentence)    ]() mutable {
+     sentence = std::move(sentence)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::map<std::string,std::map<std::string,int32_t>>>>();
         call_cy_SimpleService_word_character_frequency(
             this->if_object,
@@ -702,7 +733,8 @@ void SimpleServiceWrapper::async_tm_list_of_sets(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-some_words = std::move(some_words)    ]() mutable {
+     some_words = std::move(some_words)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<std::set<std::string>>>>();
         call_cy_SimpleService_list_of_sets(
             this->if_object,
@@ -724,7 +756,8 @@ void SimpleServiceWrapper::async_tm_nested_map_argument(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-struct_map = std::move(struct_map)    ]() mutable {
+     struct_map = std::move(struct_map)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_SimpleService_nested_map_argument(
             this->if_object,
@@ -746,7 +779,8 @@ void SimpleServiceWrapper::async_tm_make_sentence(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-word_chars = std::move(word_chars)    ]() mutable {
+     word_chars = std::move(word_chars)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_SimpleService_make_sentence(
             this->if_object,
@@ -768,7 +802,8 @@ void SimpleServiceWrapper::async_tm_get_union(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-sets = std::move(sets)    ]() mutable {
+     sets = std::move(sets)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::set<int32_t>>>();
         call_cy_SimpleService_get_union(
             this->if_object,
@@ -790,7 +825,8 @@ void SimpleServiceWrapper::async_tm_get_keys(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-string_map = std::move(string_map)    ]() mutable {
+     string_map = std::move(string_map)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::set<std::string>>>();
         call_cy_SimpleService_get_keys(
             this->if_object,
@@ -812,7 +848,8 @@ void SimpleServiceWrapper::async_tm_lookup_double(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-key    ]() mutable {
+     key
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<double>();
         call_cy_SimpleService_lookup_double(
             this->if_object,
@@ -834,7 +871,8 @@ void SimpleServiceWrapper::async_tm_retrieve_binary(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-something = std::move(something)    ]() mutable {
+     something = std::move(something)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_SimpleService_retrieve_binary(
             this->if_object,
@@ -856,7 +894,8 @@ void SimpleServiceWrapper::async_tm_contain_binary(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-binaries = std::move(binaries)    ]() mutable {
+     binaries = std::move(binaries)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::set<std::string>>>();
         call_cy_SimpleService_contain_binary(
             this->if_object,
@@ -878,7 +917,8 @@ void SimpleServiceWrapper::async_tm_contain_enum(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-the_enum = std::move(the_enum)    ]() mutable {
+     the_enum = std::move(the_enum)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<::py3::simple::AnEnum>>>();
         call_cy_SimpleService_contain_enum(
             this->if_object,
@@ -900,7 +940,8 @@ void SimpleServiceWrapper::async_tm_get_binary_union_struct(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-u = std::move(u)    ]() mutable {
+     u = std::move(u)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::py3::simple::BinaryUnionStruct>>();
         call_cy_SimpleService_get_binary_union_struct(
             this->if_object,
@@ -946,7 +987,8 @@ void DerivedServiceWrapper::async_tm_get_six(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_DerivedService_get_six(
             this->if_object,
@@ -991,7 +1033,8 @@ void RederivedServiceWrapper::async_tm_get_seven(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_RederivedService_get_seven(
             this->if_object,

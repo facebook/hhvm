@@ -27,7 +27,8 @@ void NestedContainersWrapper::async_tm_mapList(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo = std::move(foo)    ]() mutable {
+     foo = std::move(foo)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_NestedContainers_mapList(
             this->if_object,
@@ -49,7 +50,8 @@ void NestedContainersWrapper::async_tm_mapSet(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo = std::move(foo)    ]() mutable {
+     foo = std::move(foo)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_NestedContainers_mapSet(
             this->if_object,
@@ -71,7 +73,8 @@ void NestedContainersWrapper::async_tm_listMap(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo = std::move(foo)    ]() mutable {
+     foo = std::move(foo)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_NestedContainers_listMap(
             this->if_object,
@@ -93,7 +96,8 @@ void NestedContainersWrapper::async_tm_listSet(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo = std::move(foo)    ]() mutable {
+     foo = std::move(foo)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_NestedContainers_listSet(
             this->if_object,
@@ -115,7 +119,8 @@ void NestedContainersWrapper::async_tm_turtles(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo = std::move(foo)    ]() mutable {
+     foo = std::move(foo)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_NestedContainers_turtles(
             this->if_object,

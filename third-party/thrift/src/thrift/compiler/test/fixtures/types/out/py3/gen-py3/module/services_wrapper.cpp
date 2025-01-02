@@ -30,7 +30,8 @@ void SomeServiceWrapper::async_tm_bounce_map(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-m = std::move(m)    ]() mutable {
+     m = std::move(m)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::unordered_map<int32_t,std::string>>>();
         call_cy_SomeService_bounce_map(
             this->if_object,
@@ -52,7 +53,8 @@ void SomeServiceWrapper::async_tm_binary_keyed_map(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-r = std::move(r)    ]() mutable {
+     r = std::move(r)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::map<std::string,int64_t>>>();
         call_cy_SomeService_binary_keyed_map(
             this->if_object,

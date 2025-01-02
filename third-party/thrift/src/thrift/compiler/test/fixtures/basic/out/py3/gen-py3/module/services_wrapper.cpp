@@ -26,7 +26,8 @@ void FooServiceWrapper::async_tm_simple_rpc(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_FooService_simple_rpc(
             this->if_object,
@@ -75,7 +76,8 @@ void FB303ServiceWrapper::async_tm_simple_rpc(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-int_parameter    ]() mutable {
+     int_parameter
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>>();
         call_cy_FB303Service_simple_rpc(
             this->if_object,
@@ -122,7 +124,8 @@ void MyServiceWrapper::async_tm_ping(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_ping(
             this->if_object,
@@ -140,7 +143,8 @@ void MyServiceWrapper::async_tm_getRandomData(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_MyService_getRandomData(
             this->if_object,
@@ -161,7 +165,8 @@ void MyServiceWrapper::async_tm_sink(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-sink    ]() mutable {
+     sink
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_sink(
             this->if_object,
@@ -184,8 +189,9 @@ void MyServiceWrapper::async_tm_putDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-data = std::move(data)    ]() mutable {
+     id,
+     data = std::move(data)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_putDataById(
             this->if_object,
@@ -208,7 +214,8 @@ void MyServiceWrapper::async_tm_hasDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_MyService_hasDataById(
             this->if_object,
@@ -230,7 +237,8 @@ void MyServiceWrapper::async_tm_getDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_MyService_getDataById(
             this->if_object,
@@ -252,7 +260,8 @@ void MyServiceWrapper::async_tm_deleteDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_deleteDataById(
             this->if_object,
@@ -275,8 +284,9 @@ void MyServiceWrapper::async_tm_lobDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-data = std::move(data)    ]() mutable {
+     id,
+     data = std::move(data)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_lobDataById(
             this->if_object,
@@ -296,7 +306,8 @@ void MyServiceWrapper::async_tm_invalid_return_for_hack(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::set<float>>>();
         call_cy_MyService_invalid_return_for_hack(
             this->if_object,
@@ -314,7 +325,8 @@ void MyServiceWrapper::async_tm_rpc_skipped_codegen(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_rpc_skipped_codegen(
             this->if_object,
@@ -363,7 +375,8 @@ void DbMixedStackArgumentsWrapper::async_tm_getDataByKey0(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-key = std::move(key)    ]() mutable {
+     key = std::move(key)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_DbMixedStackArguments_getDataByKey0(
             this->if_object,
@@ -385,7 +398,8 @@ void DbMixedStackArgumentsWrapper::async_tm_getDataByKey1(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-key = std::move(key)    ]() mutable {
+     key = std::move(key)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_DbMixedStackArguments_getDataByKey1(
             this->if_object,

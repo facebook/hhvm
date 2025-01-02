@@ -24,7 +24,8 @@ void AWrapper::async_tm_foo(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::cpp2::Foo>>();
         call_cy_A_foo(
             this->if_object,
@@ -75,7 +76,8 @@ void BWrapper::async_tm_bar(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-foo = std::move(foo)    ]() mutable {
+     foo = std::move(foo)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_B_bar(
             this->if_object,
@@ -94,7 +96,8 @@ void BWrapper::async_tm_stream_stuff(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ServerStream<int32_t>>();
         call_cy_B_stream_stuff(
             this->if_object,

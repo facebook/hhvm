@@ -27,7 +27,8 @@ void MyServiceWrapper::async_tm_hasDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_MyService_hasDataById(
             this->if_object,
@@ -49,7 +50,8 @@ void MyServiceWrapper::async_tm_getDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::string>();
         call_cy_MyService_getDataById(
             this->if_object,
@@ -72,8 +74,9 @@ void MyServiceWrapper::async_tm_putDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-data = std::move(data)    ]() mutable {
+     id,
+     data = std::move(data)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_putDataById(
             this->if_object,
@@ -97,8 +100,9 @@ void MyServiceWrapper::async_tm_lobDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-data = std::move(data)    ]() mutable {
+     id,
+     data = std::move(data)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_lobDataById(
             this->if_object,
@@ -149,7 +153,8 @@ void MyServiceFastWrapper::async_eb_hasDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_MyServiceFast_hasDataById(
             this->if_object,
@@ -171,7 +176,8 @@ void MyServiceFastWrapper::async_eb_getDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id    ]() mutable {
+     id
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::string>();
         call_cy_MyServiceFast_getDataById(
             this->if_object,
@@ -194,8 +200,9 @@ void MyServiceFastWrapper::async_eb_putDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-data = std::move(data)    ]() mutable {
+     id,
+     data = std::move(data)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyServiceFast_putDataById(
             this->if_object,
@@ -219,8 +226,9 @@ void MyServiceFastWrapper::async_eb_lobDataById(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-id,
-data = std::move(data)    ]() mutable {
+     id,
+     data = std::move(data)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyServiceFast_lobDataById(
             this->if_object,
@@ -271,7 +279,8 @@ void DbMixedStackArgumentsWrapper::async_tm_getDataByKey0(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-key = std::move(key)    ]() mutable {
+     key = std::move(key)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_DbMixedStackArguments_getDataByKey0(
             this->if_object,
@@ -293,7 +302,8 @@ void DbMixedStackArgumentsWrapper::async_tm_getDataByKey1(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-key = std::move(key)    ]() mutable {
+     key = std::move(key)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::string>();
         call_cy_DbMixedStackArguments_getDataByKey1(
             this->if_object,

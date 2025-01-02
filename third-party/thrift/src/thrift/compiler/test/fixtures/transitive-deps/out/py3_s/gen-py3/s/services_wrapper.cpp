@@ -24,7 +24,8 @@ void TestServiceWrapper::async_tm_test(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_TestService_test(
             this->if_object,

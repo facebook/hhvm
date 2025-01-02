@@ -24,7 +24,8 @@ void MyServiceWrapper::async_tm_foo(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_foo(
             this->if_object,
@@ -45,7 +46,8 @@ void MyServiceWrapper::async_tm_interact(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-arg    ]() mutable {
+     arg
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyService_interact(
             this->if_object,
@@ -64,7 +66,8 @@ void MyServiceWrapper::async_tm_interactFast(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_MyService_interactFast(
             this->if_object,
@@ -82,7 +85,8 @@ void MyServiceWrapper::async_tm_serialize(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>();
         call_cy_MyService_serialize(
             this->if_object,
@@ -137,7 +141,8 @@ void FactoriesWrapper::async_tm_foo(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_Factories_foo(
             this->if_object,
@@ -158,7 +163,8 @@ void FactoriesWrapper::async_tm_interact(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-arg    ]() mutable {
+     arg
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_Factories_interact(
             this->if_object,
@@ -177,7 +183,8 @@ void FactoriesWrapper::async_tm_interactFast(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_Factories_interactFast(
             this->if_object,
@@ -195,7 +202,8 @@ void FactoriesWrapper::async_tm_serialize(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<apache::thrift::ResponseAndServerStream<int32_t,int32_t>>();
         call_cy_Factories_serialize(
             this->if_object,
@@ -241,7 +249,8 @@ void PerformWrapper::async_tm_foo(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_Perform_foo(
             this->if_object,
@@ -296,7 +305,8 @@ void InteractWithSharedWrapper::async_tm_do_some_similar_things(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::thrift::shared_interactions::DoSomethingResult>>();
         call_cy_InteractWithShared_do_some_similar_things(
             this->if_object,
@@ -351,7 +361,8 @@ void BoxServiceWrapper::async_tm_getABoxSession(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-req = std::move(req)    ]() mutable {
+     req = std::move(req)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::cpp2::ShouldBeBoxed>>();
         call_cy_BoxService_getABoxSession(
             this->if_object,

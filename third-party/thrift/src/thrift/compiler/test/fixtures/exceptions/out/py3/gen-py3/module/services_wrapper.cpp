@@ -24,7 +24,8 @@ void RaiserWrapper::async_tm_doBland(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_Raiser_doBland(
             this->if_object,
@@ -42,7 +43,8 @@ void RaiserWrapper::async_tm_doRaise(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_Raiser_doRaise(
             this->if_object,
@@ -60,7 +62,8 @@ void RaiserWrapper::async_tm_get200(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_Raiser_get200(
             this->if_object,
@@ -78,7 +81,8 @@ void RaiserWrapper::async_tm_get500(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_Raiser_get500(
             this->if_object,

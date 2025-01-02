@@ -54,7 +54,8 @@ void ReturnServiceWrapper::async_eb_noReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ReturnService_noReturn(
             this->if_object,
@@ -72,7 +73,8 @@ void ReturnServiceWrapper::async_tm_boolReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_ReturnService_boolReturn(
             this->if_object,
@@ -90,7 +92,8 @@ void ReturnServiceWrapper::async_tm_i16Return(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int16_t>();
         call_cy_ReturnService_i16Return(
             this->if_object,
@@ -108,7 +111,8 @@ void ReturnServiceWrapper::async_tm_i32Return(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_ReturnService_i32Return(
             this->if_object,
@@ -126,7 +130,8 @@ void ReturnServiceWrapper::async_tm_i64Return(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int64_t>();
         call_cy_ReturnService_i64Return(
             this->if_object,
@@ -144,7 +149,8 @@ void ReturnServiceWrapper::async_tm_floatReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<float>();
         call_cy_ReturnService_floatReturn(
             this->if_object,
@@ -162,7 +168,8 @@ void ReturnServiceWrapper::async_tm_doubleReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<double>();
         call_cy_ReturnService_doubleReturn(
             this->if_object,
@@ -180,7 +187,8 @@ void ReturnServiceWrapper::async_eb_stringReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_ReturnService_stringReturn(
             this->if_object,
@@ -198,7 +206,8 @@ void ReturnServiceWrapper::async_tm_binaryReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_ReturnService_binaryReturn(
             this->if_object,
@@ -216,7 +225,8 @@ void ReturnServiceWrapper::async_tm_mapReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::map<std::string,int64_t>>>();
         call_cy_ReturnService_mapReturn(
             this->if_object,
@@ -234,7 +244,8 @@ void ReturnServiceWrapper::async_tm_simpleTypedefReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_ReturnService_simpleTypedefReturn(
             this->if_object,
@@ -252,7 +263,8 @@ void ReturnServiceWrapper::async_tm_complexTypedefReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>();
         call_cy_ReturnService_complexTypedefReturn(
             this->if_object,
@@ -270,7 +282,8 @@ void ReturnServiceWrapper::async_tm_list_mostComplexTypedefReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<std::vector<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>>>();
         call_cy_ReturnService_list_mostComplexTypedefReturn(
             this->if_object,
@@ -288,7 +301,8 @@ void ReturnServiceWrapper::async_eb_enumReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<::some::valid::ns::MyEnumA>();
         call_cy_ReturnService_enumReturn(
             this->if_object,
@@ -306,7 +320,8 @@ void ReturnServiceWrapper::async_eb_list_EnumReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<::some::valid::ns::MyEnumA>>>();
         call_cy_ReturnService_list_EnumReturn(
             this->if_object,
@@ -324,7 +339,8 @@ void ReturnServiceWrapper::async_tm_structReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::some::valid::ns::MyStruct>>();
         call_cy_ReturnService_structReturn(
             this->if_object,
@@ -342,7 +358,8 @@ void ReturnServiceWrapper::async_tm_set_StructReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::set<::some::valid::ns::MyStruct>>>();
         call_cy_ReturnService_set_StructReturn(
             this->if_object,
@@ -360,7 +377,8 @@ void ReturnServiceWrapper::async_eb_unionReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::some::valid::ns::ComplexUnion>>();
         call_cy_ReturnService_unionReturn(
             this->if_object,
@@ -378,7 +396,8 @@ void ReturnServiceWrapper::async_tm_list_UnionReturn(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<::some::valid::ns::ComplexUnion>>>();
         call_cy_ReturnService_list_UnionReturn(
             this->if_object,
@@ -399,7 +418,8 @@ void ReturnServiceWrapper::async_eb_readDataEb(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-size    ]() mutable {
+     size
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<folly::IOBuf>>();
         call_cy_ReturnService_readDataEb(
             this->if_object,
@@ -421,7 +441,8 @@ void ReturnServiceWrapper::async_tm_readData(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-size    ]() mutable {
+     size
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::unique_ptr<folly::IOBuf>>>();
         call_cy_ReturnService_readData(
             this->if_object,
@@ -471,7 +492,8 @@ void ParamServiceWrapper::async_eb_void_ret_i16_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1    ]() mutable {
+     param1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_i16_param(
             this->if_object,
@@ -494,8 +516,9 @@ void ParamServiceWrapper::async_tm_void_ret_byte_i16_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1,
-param2    ]() mutable {
+     param1,
+     param2
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_byte_i16_param(
             this->if_object,
@@ -518,7 +541,8 @@ void ParamServiceWrapper::async_tm_void_ret_map_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_map_param(
             this->if_object,
@@ -541,8 +565,9 @@ void ParamServiceWrapper::async_tm_void_ret_map_setlist_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1),
-param2 = std::move(param2)    ]() mutable {
+     param1 = std::move(param1),
+     param2 = std::move(param2)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_map_setlist_param(
             this->if_object,
@@ -565,7 +590,8 @@ void ParamServiceWrapper::async_tm_void_ret_map_typedef_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1    ]() mutable {
+     param1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_map_typedef_param(
             this->if_object,
@@ -587,7 +613,8 @@ void ParamServiceWrapper::async_tm_void_ret_enum_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1    ]() mutable {
+     param1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_enum_param(
             this->if_object,
@@ -609,7 +636,8 @@ void ParamServiceWrapper::async_tm_void_ret_struct_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_struct_param(
             this->if_object,
@@ -631,7 +659,8 @@ void ParamServiceWrapper::async_tm_void_ret_listunion_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_ParamService_void_ret_listunion_param(
             this->if_object,
@@ -654,8 +683,9 @@ void ParamServiceWrapper::async_tm_bool_ret_i32_i64_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1,
-param2    ]() mutable {
+     param1,
+     param2
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_ParamService_bool_ret_i32_i64_param(
             this->if_object,
@@ -678,7 +708,8 @@ void ParamServiceWrapper::async_tm_bool_ret_map_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_ParamService_bool_ret_map_param(
             this->if_object,
@@ -700,7 +731,8 @@ void ParamServiceWrapper::async_tm_bool_ret_union_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<bool>();
         call_cy_ParamService_bool_ret_union_param(
             this->if_object,
@@ -723,8 +755,9 @@ void ParamServiceWrapper::async_tm_i64_ret_float_double_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1,
-param2    ]() mutable {
+     param1,
+     param2
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int64_t>();
         call_cy_ParamService_i64_ret_float_double_param(
             this->if_object,
@@ -748,8 +781,9 @@ void ParamServiceWrapper::async_tm_i64_ret_string_typedef_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1),
-param2 = std::move(param2)    ]() mutable {
+     param1 = std::move(param1),
+     param2 = std::move(param2)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int64_t>();
         call_cy_ParamService_i64_ret_string_typedef_param(
             this->if_object,
@@ -776,11 +810,12 @@ void ParamServiceWrapper::async_eb_i64_ret_i32_i32_i32_i32_i32_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1,
-param2,
-param3,
-param4,
-param5    ]() mutable {
+     param1,
+     param2,
+     param3,
+     param4,
+     param5
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int64_t>();
         call_cy_ParamService_i64_ret_i32_i32_i32_i32_i32_param(
             this->if_object,
@@ -806,7 +841,8 @@ void ParamServiceWrapper::async_tm_double_ret_setstruct_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<double>();
         call_cy_ParamService_double_ret_setstruct_param(
             this->if_object,
@@ -828,7 +864,8 @@ void ParamServiceWrapper::async_tm_string_ret_string_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_ParamService_string_ret_string_param(
             this->if_object,
@@ -850,7 +887,8 @@ void ParamServiceWrapper::async_tm_binary_ret_binary_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::string>>();
         call_cy_ParamService_binary_ret_binary_param(
             this->if_object,
@@ -872,7 +910,8 @@ void ParamServiceWrapper::async_tm_map_ret_bool_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1    ]() mutable {
+     param1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::map<std::string,int64_t>>>();
         call_cy_ParamService_map_ret_bool_param(
             this->if_object,
@@ -895,8 +934,9 @@ void ParamServiceWrapper::async_tm_list_ret_map_setlist_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1),
-param2 = std::move(param2)    ]() mutable {
+     param1 = std::move(param1),
+     param2 = std::move(param2)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<bool>>>();
         call_cy_ParamService_list_ret_map_setlist_param(
             this->if_object,
@@ -919,7 +959,8 @@ void ParamServiceWrapper::async_tm_mapsetlistmapliststring_ret_listlistlist_para
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::map<std::set<std::vector<int32_t>>,std::map<std::vector<std::set<std::string>>,std::string>>>>();
         call_cy_ParamService_mapsetlistmapliststring_ret_listlistlist_param(
             this->if_object,
@@ -941,7 +982,8 @@ void ParamServiceWrapper::async_tm_typedef_ret_i32_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1    ]() mutable {
+     param1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_ParamService_typedef_ret_i32_param(
             this->if_object,
@@ -963,7 +1005,8 @@ void ParamServiceWrapper::async_eb_listtypedef_ret_typedef_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<int32_t>>>();
         call_cy_ParamService_listtypedef_ret_typedef_param(
             this->if_object,
@@ -985,7 +1028,8 @@ void ParamServiceWrapper::async_tm_enum_ret_double_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1    ]() mutable {
+     param1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<::some::valid::ns::MyEnumA>();
         call_cy_ParamService_enum_ret_double_param(
             this->if_object,
@@ -1008,8 +1052,9 @@ void ParamServiceWrapper::async_tm_enum_ret_double_enum_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1,
-param2    ]() mutable {
+     param1,
+     param2
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<::some::valid::ns::MyEnumA>();
         call_cy_ParamService_enum_ret_double_enum_param(
             this->if_object,
@@ -1032,7 +1077,8 @@ void ParamServiceWrapper::async_tm_listenum_ret_map_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<::some::valid::ns::MyEnumA>>>();
         call_cy_ParamService_listenum_ret_map_param(
             this->if_object,
@@ -1054,7 +1100,8 @@ void ParamServiceWrapper::async_eb_struct_ret_i16_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1    ]() mutable {
+     param1
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::some::valid::ns::MyStruct>>();
         call_cy_ParamService_struct_ret_i16_param(
             this->if_object,
@@ -1076,7 +1123,8 @@ void ParamServiceWrapper::async_tm_setstruct_ret_set_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::set<::some::valid::ns::MyStruct>>>();
         call_cy_ParamService_setstruct_ret_set_param(
             this->if_object,
@@ -1099,8 +1147,9 @@ void ParamServiceWrapper::async_tm_union_ret_i32_i32_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1,
-param2    ]() mutable {
+     param1,
+     param2
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::some::valid::ns::ComplexUnion>>();
         call_cy_ParamService_union_ret_i32_i32_param(
             this->if_object,
@@ -1123,7 +1172,8 @@ void ParamServiceWrapper::async_tm_listunion_string_param(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-param1 = std::move(param1)    ]() mutable {
+     param1 = std::move(param1)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<std::vector<::some::valid::ns::ComplexUnion>>>();
         call_cy_ParamService_listunion_string_param(
             this->if_object,

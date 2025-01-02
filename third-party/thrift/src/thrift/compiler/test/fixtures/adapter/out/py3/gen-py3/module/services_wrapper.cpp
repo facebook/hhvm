@@ -31,9 +31,10 @@ void ServiceWrapper::async_tm_func(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-arg1 = std::move(arg1),
-arg2 = std::move(arg2),
-arg3 = std::move(arg3)    ]() mutable {
+     arg1 = std::move(arg1),
+     arg2 = std::move(arg2),
+     arg3 = std::move(arg3)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<int32_t>();
         call_cy_Service_func(
             this->if_object,
@@ -82,7 +83,8 @@ void AdapterServiceWrapper::async_tm_count(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::CountingStruct>>();
         call_cy_AdapterService_count(
             this->if_object,
@@ -103,7 +105,8 @@ void AdapterServiceWrapper::async_tm_adaptedTypes(
     this->executor,
     [this, ctx,
      callback = std::move(callback),
-arg = std::move(arg)    ]() mutable {
+     arg = std::move(arg)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>();
         call_cy_AdapterService_adaptedTypes(
             this->if_object,

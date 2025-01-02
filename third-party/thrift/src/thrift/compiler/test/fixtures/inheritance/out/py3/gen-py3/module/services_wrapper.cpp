@@ -24,7 +24,8 @@ void MyRootWrapper::async_tm_do_root(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyRoot_do_root(
             this->if_object,
@@ -69,7 +70,8 @@ void MyNodeWrapper::async_tm_do_mid(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyNode_do_mid(
             this->if_object,
@@ -114,7 +116,8 @@ void MyLeafWrapper::async_tm_do_leaf(
   folly::via(
     this->executor,
     [this, ctx,
-     callback = std::move(callback)    ]() mutable {
+     callback = std::move(callback)
+    ]() mutable {
         auto [promise, future] = folly::makePromiseContract<folly::Unit>();
         call_cy_MyLeaf_do_leaf(
             this->if_object,

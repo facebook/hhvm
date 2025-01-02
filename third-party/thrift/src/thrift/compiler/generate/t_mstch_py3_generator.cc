@@ -1379,6 +1379,13 @@ class t_mstch_py3_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
+  std::optional<whisker_options> use_whisker() const override {
+    whisker_options opts;
+    opts.allowed_undefined_variables = {
+        "service:autogen_path", "function:stream?"};
+    return opts;
+  }
+
   std::string template_prefix() const override { return "py3"; }
 
   void generate_program() override {

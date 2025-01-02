@@ -1941,6 +1941,14 @@ struct ChangesSinceV2Result {
  * excludedRoots - optional ist of roots to exclude from results. If not
  *   provided or an empty list, no roots will be excluded from results.
  *   Applied after roots are included - see includedRoots.
+ *
+ * includedSuffixes - optional list of suffixes to include in results. If not
+ *   provided or an empty list, all suffixes will be included in results.
+ *   Applied before suffixes are excluded - see excludedSuffixes.
+ *
+ * excludedSuffixes - optional ist of suffixes to exclude from results. If not
+ *   provided or an empty list, no suffixes will be excluded from results.
+ *   Applied after suffixes are included - see includedSuffixes.
  */
 struct ChangesSinceV2Params {
   1: PathString mountPoint;
@@ -1948,6 +1956,8 @@ struct ChangesSinceV2Params {
   3: optional bool includeVCSRoots;
   4: optional list<PathString> includedRoots;
   5: optional list<PathString> excludedRoots;
+  6: optional list<string> includedSuffixes;
+  7: optional list<string> excludedSuffixes;
 }
 
 service EdenService extends fb303_core.BaseService {

@@ -75,11 +75,15 @@ pub(crate) use {{program:crate}} as types;
     }}{{/struct:has_adapter?}}{{!
 }}{{/program:structs}}{{!
 
-}}{{#program:enums}}{{> lib/enum}}{{/program:enums}}{{!
+}}
+{{#program:enums}}
+{{> lib/enum}}
+{{/program:enums}}
 
-}}{{#program:typedefs}}{{> lib/typedefimpl}}{{/program:typedefs}}{{!
-
-}}{{#program:structs}}{{^struct:has_adapter?}}{{> lib/structimpl}}{{> lib/unionimpl}}{{/struct:has_adapter?}}{{/program:structs}}{{!
+{{#program:typedefs}}
+{{> lib/typedefimpl}}
+{{/program:typedefs}}
+{{#program:structs}}{{^struct:has_adapter?}}{{> lib/structimpl}}{{> lib/unionimpl}}{{/struct:has_adapter?}}{{/program:structs}}{{!
 
 }}{{#program:has_adapted_structs?}}{{!
     }}{{> lib/mod.unadapted}}{{!

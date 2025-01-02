@@ -348,7 +348,6 @@ pub mod my_interaction {
         }
     }
 }
-
 /// Service definitions for `MyInteractionFast`.
 pub mod my_interaction_fast {
     #[derive(Clone, Debug)]
@@ -694,7 +693,6 @@ pub mod my_interaction_fast {
         }
     }
 }
-
 /// Service definitions for `SerialInteraction`.
 pub mod serial_interaction {
     #[derive(Clone, Debug)]
@@ -787,7 +785,6 @@ pub mod serial_interaction {
         }
     }
 }
-
 /// Service definitions for `BoxedInteraction`.
 pub mod boxed_interaction {
     #[derive(Clone, Debug)]
@@ -880,7 +877,6 @@ pub mod boxed_interaction {
         }
     }
 }
-
 /// Service definitions for `MyService`.
 pub mod my_service {
     #[derive(Clone, Debug)]
@@ -1317,7 +1313,6 @@ pub mod my_service {
         }
     }
 }
-
 /// Service definitions for `Factories`.
 pub mod factories {
     #[derive(Clone, Debug)]
@@ -1754,7 +1749,6 @@ pub mod factories {
         }
     }
 }
-
 /// Service definitions for `Perform`.
 pub mod perform {
     #[derive(Clone, Debug)]
@@ -1847,7 +1841,6 @@ pub mod perform {
         }
     }
 }
-
 /// Service definitions for `InteractWithShared`.
 pub mod interact_with_shared {
     #[derive(Clone, Debug)]
@@ -1940,7 +1933,6 @@ pub mod interact_with_shared {
         }
     }
 }
-
 /// Service definitions for `BoxService`.
 pub mod box_service {
     #[derive(Clone, Debug)]

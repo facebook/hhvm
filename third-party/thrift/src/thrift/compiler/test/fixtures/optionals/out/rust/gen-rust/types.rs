@@ -59,6 +59,7 @@ pub struct Person {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Animal(pub ::std::primitive::i32);
 
@@ -689,6 +690,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Person {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -725,3 +727,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

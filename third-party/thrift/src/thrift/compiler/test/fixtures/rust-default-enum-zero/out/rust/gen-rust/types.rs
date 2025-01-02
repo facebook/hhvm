@@ -8,6 +8,7 @@
 #[allow(unused_imports)]
 pub(crate) use crate as types;
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum(pub ::std::primitive::i32);
 
@@ -156,3 +157,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

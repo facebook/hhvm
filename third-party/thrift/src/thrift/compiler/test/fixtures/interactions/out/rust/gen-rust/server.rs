@@ -954,9 +954,9 @@ pub mod my_service {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -965,7 +965,7 @@ pub mod my_service {
         }
     }
     
-        
+    
     
     
     /// Processor for MyInteractionFast's methods.
@@ -1372,9 +1372,9 @@ pub mod my_service {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteractionFast:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -1383,7 +1383,7 @@ pub mod my_service {
         }
     }
     
-        
+    
     
     
     /// Processor for SerialInteraction's methods.
@@ -1625,9 +1625,9 @@ pub mod my_service {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.SerialInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -1636,7 +1636,7 @@ pub mod my_service {
         }
     }
     
-    
+
 }
 
 #[::async_trait::async_trait]
@@ -2965,9 +2965,9 @@ pub mod factories {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -2976,7 +2976,7 @@ pub mod factories {
         }
     }
     
-        
+    
     
     
     /// Processor for MyInteractionFast's methods.
@@ -3383,9 +3383,9 @@ pub mod factories {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteractionFast:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -3394,7 +3394,7 @@ pub mod factories {
         }
     }
     
-        
+    
     
     
     /// Processor for SerialInteraction's methods.
@@ -3636,9 +3636,9 @@ pub mod factories {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.SerialInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -3647,7 +3647,7 @@ pub mod factories {
         }
     }
     
-    
+
 }
 
 #[::async_trait::async_trait]
@@ -4895,9 +4895,9 @@ pub mod perform {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -4906,7 +4906,7 @@ pub mod perform {
         }
     }
     
-        
+    
     
     
     /// Processor for MyInteractionFast's methods.
@@ -5313,9 +5313,9 @@ pub mod perform {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteractionFast:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -5324,7 +5324,7 @@ pub mod perform {
         }
     }
     
-        
+    
     
     
     /// Processor for SerialInteraction's methods.
@@ -5566,9 +5566,9 @@ pub mod perform {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.SerialInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -5577,7 +5577,7 @@ pub mod perform {
         }
     }
     
-    
+
 }
 
 #[::async_trait::async_trait]
@@ -6482,9 +6482,9 @@ pub mod interact_with_shared {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.MyInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -6493,7 +6493,7 @@ pub mod interact_with_shared {
         }
     }
     
-        
+    
     
     
     /// Processor for SharedInteraction's methods.
@@ -6865,9 +6865,9 @@ pub mod interact_with_shared {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From shared.SharedInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -6876,7 +6876,7 @@ pub mod interact_with_shared {
         }
     }
     
-    
+
 }
 
 #[::async_trait::async_trait]
@@ -7575,9 +7575,9 @@ pub mod box_service {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.BoxedInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -7586,7 +7586,7 @@ pub mod box_service {
         }
     }
     
-    
+
 }
 
 #[::async_trait::async_trait]
@@ -7957,3 +7957,4 @@ where
         }
     }
 }
+

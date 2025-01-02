@@ -447,6 +447,7 @@ pub struct StructWithDoubleUnderscores {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct has_bitwise_ops(pub ::std::primitive::i32);
 
@@ -585,7 +586,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct is_unscoped(pub ::std::primitive::i32);
 
@@ -706,7 +706,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyForwardRefEnum(pub ::std::primitive::i32);
 
@@ -5339,6 +5338,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for StructWithDoubleUnderscores {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -5482,3 +5482,4 @@ pub(crate) mod r#impl {
         }
     }
 }
+

@@ -36,6 +36,7 @@ pub struct MyStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Metasyntactic(pub ::std::primitive::i32);
 
@@ -168,7 +169,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum1(pub ::std::primitive::i32);
 
@@ -313,7 +313,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum2(pub ::std::primitive::i32);
 
@@ -440,7 +439,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum3(pub ::std::primitive::i32);
 
@@ -585,7 +583,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum4(pub ::std::primitive::i32);
 
@@ -718,7 +715,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyBitmaskEnum1(pub ::std::primitive::i32);
 
@@ -845,7 +841,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyBitmaskEnum2(pub ::std::primitive::i32);
 
@@ -1257,6 +1252,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -1293,3 +1289,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

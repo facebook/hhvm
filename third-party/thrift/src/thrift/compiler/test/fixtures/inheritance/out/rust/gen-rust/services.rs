@@ -96,7 +96,6 @@ pub mod my_root {
         }
     }
 }
-
 /// Service definitions for `MyNode`.
 pub mod my_node {
     #[derive(Clone, Debug)]
@@ -189,7 +188,6 @@ pub mod my_node {
         }
     }
 }
-
 /// Service definitions for `MyLeaf`.
 pub mod my_leaf {
     #[derive(Clone, Debug)]

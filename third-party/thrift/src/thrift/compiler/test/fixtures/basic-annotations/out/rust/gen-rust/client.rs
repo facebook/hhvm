@@ -223,6 +223,7 @@ pub type BadInteractionClient = ::std::sync::Arc<BadInteractionDynClient>;
 
 
 
+
 pub trait MyService: ::std::marker::Send {
     fn ping(
         &self,

@@ -96,7 +96,6 @@ pub mod service {
         }
     }
 }
-
 /// Service definitions for `AdapterService`.
 pub mod adapter_service {
     #[derive(Clone, Debug)]

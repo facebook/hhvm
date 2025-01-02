@@ -515,6 +515,7 @@ pub struct RenamedStructWithStructAdapterAndFieldAdapter {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Color(pub ::std::primitive::i32);
 
@@ -647,7 +648,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ThriftAdaptedEnum(pub ::std::primitive::i32);
 

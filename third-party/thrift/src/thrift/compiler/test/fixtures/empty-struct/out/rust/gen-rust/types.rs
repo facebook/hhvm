@@ -23,6 +23,8 @@ pub enum Nada {
     UnknownField(::std::primitive::i32),
 }
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Empty {
     fn default() -> Self {
@@ -208,6 +210,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Nada {
     }
 }
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -244,3 +247,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

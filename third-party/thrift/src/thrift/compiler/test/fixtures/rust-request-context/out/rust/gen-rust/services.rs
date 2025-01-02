@@ -96,7 +96,6 @@ pub mod my_interaction {
         }
     }
 }
-
 /// Service definitions for `MyService`.
 pub mod my_service {
     #[derive(Clone, Debug)]

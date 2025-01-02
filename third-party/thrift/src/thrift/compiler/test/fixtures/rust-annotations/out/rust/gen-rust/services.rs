@@ -96,7 +96,6 @@ pub mod service1 {
         }
     }
 }
-
 /// Service definitions for `S2`.
 pub mod s2_proxy {
     #[derive(Clone, Debug)]
@@ -189,7 +188,6 @@ pub mod s2_proxy {
         }
     }
 }
-
 /// Service definitions for `AllMethods`.
 pub mod all_methods {
     #[derive(Clone, Debug)]
@@ -393,7 +391,6 @@ pub mod all_methods {
         }
     }
 }
-
 /// Service definitions for `OneMethod`.
 pub mod one_method {
     #[derive(Clone, Debug)]
@@ -586,7 +583,6 @@ pub mod one_method {
         }
     }
 }
-
 /// Service definitions for `OneMethodOptOut`.
 pub mod one_method_opt_out {
     #[derive(Clone, Debug)]

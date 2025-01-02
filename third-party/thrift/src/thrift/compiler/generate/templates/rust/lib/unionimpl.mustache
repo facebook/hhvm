@@ -26,7 +26,6 @@ impl ::std::default::Default for {{struct:rust_name}} {
 impl ::fbthrift::GetTType for {{struct:rust_name}} {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
-{{!newline}}
 {{#struct:thrift_uri}}
 
 impl ::fbthrift::GetUri for self::{{struct:rust_name}} {
@@ -129,4 +128,3 @@ impl {{struct:rust_name}} {
 {{> lib/metadata/struct}}
 {{/program:rust_gen_native_metadata?}}
 {{/struct:union?}}
-{{!newline}}

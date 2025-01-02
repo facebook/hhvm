@@ -22,6 +22,8 @@ pub struct Foo {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Foo {
     fn default() -> Self {
@@ -160,6 +162,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Foo {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -196,3 +199,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

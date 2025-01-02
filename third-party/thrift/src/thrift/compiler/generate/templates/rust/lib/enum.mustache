@@ -131,7 +131,6 @@ impl ::std::str::FromStr for {{enum:rust_name}} {
 impl ::fbthrift::GetTType for {{enum:rust_name}} {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
 }
-{{!newline}}
 {{#enum:thrift_uri}}
 
 impl ::fbthrift::GetUri for self::{{enum:rust_name}} {
@@ -160,4 +159,3 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-{{!newline}}

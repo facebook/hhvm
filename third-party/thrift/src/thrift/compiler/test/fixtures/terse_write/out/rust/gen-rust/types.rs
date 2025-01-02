@@ -191,6 +191,7 @@ impl ::std::fmt::Display for TerseException {
     }
 }
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum(pub ::std::primitive::i32);
 
@@ -2369,6 +2370,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for TerseException {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -2405,3 +2407,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

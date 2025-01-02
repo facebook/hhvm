@@ -80,6 +80,8 @@ pub enum NonCopyableUnion {
 }
 
 
+
+
 impl ::std::default::Default for ComplexUnion {
     fn default() -> Self {
         Self::UnknownField(-1)
@@ -1058,6 +1060,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for NonCopyableUnion {
     }
 }
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -1094,3 +1097,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

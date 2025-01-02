@@ -34,6 +34,8 @@ pub struct Serde {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::NoSerde {
     fn default() -> Self {
@@ -240,6 +242,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Serde {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -276,3 +279,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

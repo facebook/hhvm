@@ -96,7 +96,6 @@ pub mod foo_service {
         }
     }
 }
-
 /// Service definitions for `FB303Service`.
 pub mod f_b303_service {
     #[derive(Clone, Debug)]
@@ -189,7 +188,6 @@ pub mod f_b303_service {
         }
     }
 }
-
 /// Service definitions for `MyService`.
 pub mod my_service {
     #[derive(Clone, Debug)]
@@ -1092,7 +1090,6 @@ pub mod my_service {
         }
     }
 }
-
 /// Service definitions for `DbMixedStackArguments`.
 pub mod db_mixed_stack_arguments {
     #[derive(Clone, Debug)]

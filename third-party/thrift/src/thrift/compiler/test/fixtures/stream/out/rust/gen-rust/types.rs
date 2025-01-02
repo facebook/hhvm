@@ -91,6 +91,8 @@ impl ::std::fmt::Display for FooEx2 {
     }
 }
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::FooStreamEx {
     fn default() -> Self {
@@ -373,6 +375,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for FooEx2 {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -409,3 +412,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

@@ -439,6 +439,7 @@ pub type MyInteractionDynClient = dyn MyInteraction + ::std::marker::Send + ::st
 pub type MyInteractionClient = ::std::sync::Arc<MyInteractionDynClient>;
 
 
+
 pub trait MyInteractionFast: ::std::marker::Send {
     fn frobnicate(
         &self,
@@ -863,6 +864,7 @@ pub type MyInteractionFastDynClient = dyn MyInteractionFast + ::std::marker::Sen
 pub type MyInteractionFastClient = ::std::sync::Arc<MyInteractionFastDynClient>;
 
 
+
 pub trait SerialInteraction: ::std::marker::Send {
     fn frobnicate(
         &self,
@@ -1070,6 +1072,7 @@ pub type SerialInteractionDynClient = dyn SerialInteraction + ::std::marker::Sen
 pub type SerialInteractionClient = ::std::sync::Arc<SerialInteractionDynClient>;
 
 
+
 pub trait BoxedInteraction: ::std::marker::Send {
     fn getABox(
         &self,
@@ -1275,6 +1278,7 @@ where
 
 pub type BoxedInteractionDynClient = dyn BoxedInteraction + ::std::marker::Send + ::std::marker::Sync + 'static;
 pub type BoxedInteractionClient = ::std::sync::Arc<BoxedInteractionDynClient>;
+
 
 
 

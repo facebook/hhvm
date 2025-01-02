@@ -619,6 +619,15 @@ class t_mstch_rust_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
+  std::optional<whisker_options> use_whisker() const override {
+    whisker_options opts;
+    opts.allowed_undefined_variables = {
+        "typedef:newtype?",
+        "function:name",
+    };
+    return opts;
+  }
+
   std::string template_prefix() const override { return "rust"; }
 
   void generate_program() override;

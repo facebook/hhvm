@@ -209,6 +209,8 @@ impl ::std::fmt::Display for Banal {
     }
 }
 
+
+
 #[allow(clippy::derivable_impls)]
 impl ::std::default::Default for self::Fiery {
     fn default() -> Self {
@@ -1036,6 +1038,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Banal {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -1072,3 +1075,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

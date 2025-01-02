@@ -2340,9 +2340,9 @@ pub mod bad_service {
         fn get_method_metadata(&self) -> &'static [::fbthrift::processor::MethodMetadata] {
             &[
                 // From module.BadInteraction:
-            // Interaction's method names are never queried directly.
-            // They are always queried from the "main" processor.
-        ]
+                // Interaction's method names are never queried directly.
+                // They are always queried from the "main" processor.
+            ]
         }
     
         async fn on_termination(&self) {
@@ -2351,7 +2351,7 @@ pub mod bad_service {
         }
     }
     
-    
+
 }
 
 #[::async_trait::async_trait]
@@ -3322,3 +3322,4 @@ where
         }
     }
 }
+

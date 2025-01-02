@@ -41,6 +41,8 @@ pub struct MyStruct {
     #[doc(hidden)]
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
+
+
 impl ::fbthrift::GetTType for MapType {
     const TTYPE: ::fbthrift::TType = <::std::collections::BTreeMap<::std::primitive::i32, ::std::primitive::i32> as ::fbthrift::GetTType>::TTYPE;
 }
@@ -281,6 +283,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -437,3 +440,4 @@ pub(crate) mod r#impl {
         }
     }
 }
+

@@ -23,6 +23,7 @@ pub struct MyStruct {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct EmptyEnum(pub ::std::primitive::i32);
 
@@ -125,7 +126,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyEnum(pub ::std::primitive::i32);
 
@@ -240,7 +240,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyUseIntrinsicDefaultEnum(pub ::std::primitive::i32);
 
@@ -361,7 +360,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct MyBigEnum(pub ::std::primitive::i32);
 
@@ -699,6 +697,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for MyStruct {
 }
 
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -735,3 +734,4 @@ pub(crate) mod r#impl {
         ::std::result::Result::Ok(value.0)
     }
 }
+

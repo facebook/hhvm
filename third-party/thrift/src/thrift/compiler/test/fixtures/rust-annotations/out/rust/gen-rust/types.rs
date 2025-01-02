@@ -228,6 +228,7 @@ pub enum Bar {
     UnknownField(::std::primitive::i32),
 }
 
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct E1(pub ::std::primitive::i32);
 
@@ -342,7 +343,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct F2(pub ::std::primitive::i32);
 
@@ -445,7 +445,6 @@ where
         ::std::result::Result::Ok(Self::from(::anyhow::Context::context(p.read_i32(), "Expected a number indicating enum variant")?))
     }
 }
-
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Foo)]
 pub struct EnumWithDerives(pub ::std::primitive::i32);
 
@@ -2669,6 +2668,7 @@ impl ::fbthrift::metadata::ThriftAnnotations for Bar {
     }
 }
 
+
 mod dot_dot {
     #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
     pub struct OtherFields(pub(crate) ());
@@ -2793,3 +2793,4 @@ pub(crate) mod r#impl {
         }
     }
 }
+

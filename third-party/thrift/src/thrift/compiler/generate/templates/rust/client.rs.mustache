@@ -45,8 +45,9 @@ pub(crate) use {{program:types}}::services;
 {{#program:interactions}}{{> lib/client}}
 {{/program:interactions}}
 
-{{#program:services}}{{> lib/client}}{{!
-}}{{/program:services}}
+{{#program:services}}
+{{> lib/client}}
+{{/program:services}}
 {{/program:services?}}
 {{^program:services?}}
 #![doc(hidden)]

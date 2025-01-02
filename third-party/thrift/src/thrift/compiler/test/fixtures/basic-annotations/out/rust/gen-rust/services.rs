@@ -96,7 +96,6 @@ pub mod bad_interaction {
         }
     }
 }
-
 /// Service definitions for `MyService`.
 pub mod my_service {
     #[derive(Clone, Debug)]
@@ -728,7 +727,6 @@ pub mod my_service {
         }
     }
 }
-
 /// Service definitions for `MyServicePrioParent`.
 pub mod my_service_prio_parent {
     #[derive(Clone, Debug)]
@@ -911,7 +909,6 @@ pub mod my_service_prio_parent {
         }
     }
 }
-
 /// Service definitions for `MyServicePrioChild`.
 pub mod my_service_prio_child {
     #[derive(Clone, Debug)]
@@ -1004,7 +1001,6 @@ pub mod my_service_prio_child {
         }
     }
 }
-
 /// Service definitions for `BadService`.
 pub mod bad_service {
     #[derive(Clone, Debug)]
@@ -1097,7 +1093,6 @@ pub mod bad_service {
         }
     }
 }
-
 /// Service definitions for `FooBarBazService`.
 pub mod foo_bar_baz_service {
     #[derive(Clone, Debug)]

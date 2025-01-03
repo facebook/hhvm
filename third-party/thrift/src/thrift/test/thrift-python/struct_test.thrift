@@ -271,6 +271,12 @@ exception TestExceptionCopy {
   10: optional TestExceptionCopy recursive_exception;
 }
 
+struct TestStructWithInvariantField {
+  1: i32 unqualified_i32;
+  2: string unqualified_string;
+  3: map<TestStruct, i32> unqualified_map_struct_i32;
+}
+
 struct TestStructWithMapOfList {
   1: map<string, list<TestStruct>> str_to_test_structs;
 }

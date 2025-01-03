@@ -63,6 +63,12 @@ class {{> structs/unadapted_name}}({{!
     def {{field:py_name}}(self) -> {{> fields/field_type_pyi}}: ...
     {{/field:is_invariant_container_type?}}
     {{/struct:fields_ordered_by_id}}
+    {{^struct:union?}}
+    {{^struct:has_invariant_field?}}
+{{> fields/maybe_abstract_method_annotation}}
+    def __iter__(self) -> {{> types/iter_return_type}}: ...
+    {{/struct:has_invariant_field?}}
+    {{/struct:union?}}
     {{#struct:legacy_api?}}
 {{> fields/maybe_abstract_method_annotation}}
     def _to_mutable_python(self) -> "{{program:module_path}}.thrift_mutable_types.{{> structs/unadapted_name}}": ...  # type: ignore

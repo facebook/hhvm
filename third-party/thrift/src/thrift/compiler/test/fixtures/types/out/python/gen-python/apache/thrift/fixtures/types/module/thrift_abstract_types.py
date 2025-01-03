@@ -33,6 +33,8 @@ from apache.thrift.fixtures.types.module.thrift_enums import (
 
 class empty_struct(_abc.ABC):
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.empty_struct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.empty_struct": ...  # type: ignore
@@ -45,6 +47,8 @@ class decorated_struct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> str: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.decorated_struct": ...  # type: ignore
     @_abc.abstractmethod
@@ -80,6 +84,8 @@ class ContainerStruct(_abc.ABC):
     @_abc.abstractmethod
     def fieldA(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[int], _typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, str], _typing.Mapping[int, str], _typing.Sequence[int]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.ContainerStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ContainerStruct": ...  # type: ignore
@@ -93,6 +99,8 @@ class CppTypeStruct(_abc.ABC):
     @_abc.abstractmethod
     def fieldA(self) -> _typing.Sequence[int]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.CppTypeStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.CppTypeStruct": ...  # type: ignore
@@ -105,6 +113,8 @@ class VirtualStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def MyIntField(self) -> int: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.VirtualStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -122,6 +132,8 @@ class MyStructWithForwardRefEnum(_abc.ABC):
     @_abc.abstractmethod
     def b(self) -> _fbthrift_MyForwardRefEnum: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_MyForwardRefEnum, _fbthrift_MyForwardRefEnum]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.MyStructWithForwardRefEnum": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.MyStructWithForwardRefEnum": ...  # type: ignore
@@ -137,6 +149,8 @@ class TrivialNumeric(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def b(self) -> bool: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, bool]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.TrivialNumeric": ...  # type: ignore
     @_abc.abstractmethod
@@ -154,6 +168,8 @@ class TrivialNestedWithDefault(_abc.ABC):
     @_abc.abstractmethod
     def n(self) -> _fbthrift_TrivialNumeric: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, _fbthrift_TrivialNumeric]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.TrivialNestedWithDefault": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.TrivialNestedWithDefault": ...  # type: ignore
@@ -170,6 +186,8 @@ class ComplexString(_abc.ABC):
     @_abc.abstractmethod
     def b(self) -> _typing.Mapping[str, int]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _typing.Mapping[str, int]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.ComplexString": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ComplexString": ...  # type: ignore
@@ -185,6 +203,8 @@ class ComplexNestedWithDefault(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def n(self) -> _fbthrift_ComplexString: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[str, _fbthrift_ComplexString]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.ComplexNestedWithDefault": ...  # type: ignore
     @_abc.abstractmethod
@@ -211,6 +231,8 @@ class MinPadding(_abc.ABC):
     @_abc.abstractmethod
     def tiny(self) -> int: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int, int, int]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.MinPadding": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.MinPadding": ...  # type: ignore
@@ -236,6 +258,8 @@ class MinPaddingWithCustomType(_abc.ABC):
     @_abc.abstractmethod
     def tiny(self) -> int: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int, int, int]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.MinPaddingWithCustomType": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.MinPaddingWithCustomType": ...  # type: ignore
@@ -258,6 +282,8 @@ class MyStruct(_abc.ABC):
     @_abc.abstractmethod
     def data(self) -> _fbthrift_MyDataItem: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, str, int, _fbthrift_MyDataItem]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.MyStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.MyStruct": ...  # type: ignore
@@ -267,6 +293,8 @@ class MyStruct(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...  # type: ignore
 _fbthrift_MyStruct = MyStruct
 class MyDataItem(_abc.ABC):
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.MyDataItem": ...  # type: ignore
     @_abc.abstractmethod
@@ -280,6 +308,8 @@ class Renaming(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def foo(self) -> int: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.Renaming": ...  # type: ignore
     @_abc.abstractmethod
@@ -297,6 +327,8 @@ class AnnotatedTypes(_abc.ABC):
     @_abc.abstractmethod
     def list_field(self) -> _typing.Sequence[_typing.Mapping[int, str]]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[bytes, _typing.Sequence[_typing.Mapping[int, str]]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.AnnotatedTypes": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.AnnotatedTypes": ...  # type: ignore
@@ -313,6 +345,8 @@ class ForwardUsageRoot(_abc.ABC):
     @_abc.abstractmethod
     def ForwardUsageByRef(self) -> _typing.Optional[_fbthrift_ForwardUsageByRef]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_ForwardUsageStruct, _fbthrift_ForwardUsageByRef]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.ForwardUsageRoot": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ForwardUsageRoot": ...  # type: ignore
@@ -325,6 +359,8 @@ class ForwardUsageStruct(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def foo(self) -> _typing.Optional[_fbthrift_ForwardUsageRoot]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_ForwardUsageRoot]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.ForwardUsageStruct": ...  # type: ignore
     @_abc.abstractmethod
@@ -339,6 +375,8 @@ class ForwardUsageByRef(_abc.ABC):
     @_abc.abstractmethod
     def foo(self) -> _typing.Optional[_fbthrift_ForwardUsageRoot]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_ForwardUsageRoot]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.ForwardUsageByRef": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.ForwardUsageByRef": ...  # type: ignore
@@ -352,6 +390,8 @@ class IncompleteMap(_abc.ABC):
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Mapping[int, _fbthrift_IncompleteMapDep]]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[int, _fbthrift_IncompleteMapDep]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.IncompleteMap": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.IncompleteMap": ...  # type: ignore
@@ -361,6 +401,8 @@ class IncompleteMap(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteMap": ...  # type: ignore
 _fbthrift_IncompleteMap = IncompleteMap
 class IncompleteMapDep(_abc.ABC):
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.IncompleteMapDep": ...  # type: ignore
     @_abc.abstractmethod
@@ -375,6 +417,8 @@ class CompleteMap(_abc.ABC):
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Mapping[int, _fbthrift_CompleteMapDep]]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Mapping[int, _fbthrift_CompleteMapDep]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.CompleteMap": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.CompleteMap": ...  # type: ignore
@@ -384,6 +428,8 @@ class CompleteMap(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteMap": ...  # type: ignore
 _fbthrift_CompleteMap = CompleteMap
 class CompleteMapDep(_abc.ABC):
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.CompleteMapDep": ...  # type: ignore
     @_abc.abstractmethod
@@ -398,6 +444,8 @@ class IncompleteList(_abc.ABC):
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[_fbthrift_IncompleteListDep]]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[_fbthrift_IncompleteListDep]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.IncompleteList": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.IncompleteList": ...  # type: ignore
@@ -407,6 +455,8 @@ class IncompleteList(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.IncompleteList": ...  # type: ignore
 _fbthrift_IncompleteList = IncompleteList
 class IncompleteListDep(_abc.ABC):
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.IncompleteListDep": ...  # type: ignore
     @_abc.abstractmethod
@@ -421,6 +471,8 @@ class CompleteList(_abc.ABC):
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[_fbthrift_CompleteListDep]]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[_fbthrift_CompleteListDep]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.CompleteList": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.CompleteList": ...  # type: ignore
@@ -430,6 +482,8 @@ class CompleteList(_abc.ABC):
     def _to_py_deprecated(self) -> "module.ttypes.CompleteList": ...  # type: ignore
 _fbthrift_CompleteList = CompleteList
 class CompleteListDep(_abc.ABC):
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.CompleteListDep": ...  # type: ignore
     @_abc.abstractmethod
@@ -444,6 +498,8 @@ class AdaptedList(_abc.ABC):
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[_fbthrift_AdaptedListDep]]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[_fbthrift_AdaptedListDep]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.AdaptedList": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.AdaptedList": ...  # type: ignore
@@ -456,6 +512,8 @@ class AdaptedListDep(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _fbthrift_AdaptedList: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_fbthrift_AdaptedList]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.AdaptedListDep": ...  # type: ignore
     @_abc.abstractmethod
@@ -470,6 +528,8 @@ class DependentAdaptedList(_abc.ABC):
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[_typing.Sequence[_fbthrift_DependentAdaptedListDep]]: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[_fbthrift_DependentAdaptedListDep]]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.DependentAdaptedList": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.DependentAdaptedList": ...  # type: ignore
@@ -482,6 +542,8 @@ class DependentAdaptedListDep(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def field(self) -> _typing.Optional[int]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.DependentAdaptedListDep": ...  # type: ignore
     @_abc.abstractmethod
@@ -514,6 +576,8 @@ class AllocatorAware(_abc.ABC):
     @_abc.abstractmethod
     def aa_shared(self) -> int: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[_typing.Sequence[int], _typing.AbstractSet[int], _typing.Mapping[int, int], str, int, int, int]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.AllocatorAware": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.AllocatorAware": ...  # type: ignore
@@ -529,6 +593,8 @@ class AllocatorAware2(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def box_field(self) -> _typing.Optional[int]: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.AllocatorAware2": ...  # type: ignore
     @_abc.abstractmethod
@@ -549,6 +615,8 @@ class TypedefStruct(_abc.ABC):
     @_abc.abstractmethod
     def UintTypedef_field(self) -> int: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int, int, int]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.TypedefStruct": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "apache.thrift.fixtures.types.module.thrift_types.TypedefStruct": ...  # type: ignore
@@ -561,6 +629,8 @@ class StructWithDoubleUnderscores(_abc.ABC):
     @_fbthrift_property
     @_abc.abstractmethod
     def _StructWithDoubleUnderscores__field(self) -> int: ...
+    @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
     @_abc.abstractmethod
     def _to_mutable_python(self) -> "apache.thrift.fixtures.types.module.thrift_mutable_types.StructWithDoubleUnderscores": ...  # type: ignore
     @_abc.abstractmethod

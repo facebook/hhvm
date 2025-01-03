@@ -120,6 +120,31 @@ mstch::node adapter_node(
   return node;
 }
 
+bool is_invariant_container_type(const t_type* type) {
+  // Mapping is invariant in its key type
+  // For example, if `Derived` extends `Base`,
+  // then Mapping[Derived, Any] is not compatible with Mapping[Base, Any].
+  // We first check if the map has an `Base` key type (for abstract types).
+  // Then, we recursively verify whether the map's value type, or the element
+  // type of a list or set, contains any such mapping incompatibility.
+  const t_type* true_type = type->get_true_type();
+  if (true_type->is_map()) {
+    const t_map* map_type = dynamic_cast<const t_map*>(true_type);
+    const t_type* key_type = map_type->get_key_type()->get_true_type();
+    return key_type->is_struct() || key_type->is_union() ||
+        key_type->is_exception() || key_type->is_container() ||
+        is_invariant_container_type(map_type->get_val_type());
+  } else if (true_type->is_list()) {
+    return is_invariant_container_type(
+        dynamic_cast<const t_list*>(true_type)->get_elem_type());
+  } else if (true_type->is_set()) {
+    return is_invariant_container_type(
+        dynamic_cast<const t_set*>(true_type)->get_elem_type());
+  }
+
+  return false;
+}
+
 class python_mstch_program : public mstch_program {
  public:
   python_mstch_program(
@@ -814,6 +839,8 @@ class python_mstch_struct : public mstch_struct {
             {"struct:exception_message",
              &python_mstch_struct::exception_message},
             {"struct:has_adapter?", &python_mstch_struct::adapter},
+            {"struct:has_invariant_field?",
+             &python_mstch_struct::has_invariant_field},
             {"struct:legacy_api?", &python_mstch_struct::legacy_api},
             {"struct:fields_size", &python_mstch_struct::fields_size},
         });
@@ -827,6 +854,15 @@ class python_mstch_struct : public mstch_struct {
       return m->id() < n->id();
     });
     return make_mstch_fields(fields);
+  }
+
+  mstch::node has_invariant_field() {
+    return std::any_of(
+        struct_->fields().begin(),
+        struct_->fields().end(),
+        [](const auto& field) {
+          return is_invariant_container_type(field.get_type());
+        });
   }
 
   mstch::node has_exception_message() {
@@ -936,38 +972,14 @@ class python_mstch_field : public mstch_field {
   }
 
   mstch::node is_invariant_container_type() {
-    return is_invariant_container_type(field_->get_type());
+    return ::apache::thrift::compiler::is_invariant_container_type(
+        field_->get_type());
   }
 
  private:
   const std::string py_name_;
   const t_const* adapter_annotation_;
   const t_const* transitive_adapter_annotation_;
-
-  static bool is_invariant_container_type(const t_type* type) {
-    // Mapping is invariant in its key type
-    // For example, if `Derived` extends `Base`,
-    // then Mapping[Derived, Any] is not compatible with Mapping[Base, Any].
-    // We first check if the map has an `Base` key type (for abstract types).
-    // Then, we recursively verify whether the map's value type, or the element
-    // type of a list or set, contains any such mapping incompatibility.
-    const t_type* true_type = type->get_true_type();
-    if (true_type->is_map()) {
-      const t_map* map_type = dynamic_cast<const t_map*>(true_type);
-      const t_type* key_type = map_type->get_key_type()->get_true_type();
-      return key_type->is_struct() || key_type->is_union() ||
-          key_type->is_exception() || key_type->is_container() ||
-          is_invariant_container_type(map_type->get_val_type());
-    } else if (true_type->is_list()) {
-      return is_invariant_container_type(
-          dynamic_cast<const t_list*>(true_type)->get_elem_type());
-    } else if (true_type->is_set()) {
-      return is_invariant_container_type(
-          dynamic_cast<const t_set*>(true_type)->get_elem_type());
-    }
-
-    return false;
-  }
 };
 
 class python_mstch_enum : public mstch_enum {

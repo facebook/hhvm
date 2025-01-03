@@ -23,6 +23,8 @@ class C(_abc.ABC):
     @_abc.abstractmethod
     def i(self) -> int: ...
     @_abc.abstractmethod
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[int]]]: ...
+    @_abc.abstractmethod
     def _to_mutable_python(self) -> "c.thrift_mutable_types.C": ...  # type: ignore
     @_abc.abstractmethod
     def _to_python(self) -> "c.thrift_types.C": ...  # type: ignore
@@ -32,6 +34,7 @@ class C(_abc.ABC):
     def _to_py_deprecated(self) -> "c.ttypes.C": ...  # type: ignore
 _fbthrift_C = C
 class E(_fbthrift_python_abstract_types.AbstractGeneratedError):
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Union[None]]]: ...
     def _to_mutable_python(self) -> "c.thrift_mutable_types.E": ...  # type: ignore
     def _to_python(self) -> "c.thrift_types.E": ...  # type: ignore
     def _to_py3(self) -> "c.types.E": ...  # type: ignore

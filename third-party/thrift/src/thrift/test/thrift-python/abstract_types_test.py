@@ -48,6 +48,7 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
     TestStructNested_2 as TestStructNested_2Abstract,
     TestStructWithDefaultValues as TestStructWithDefaultValuesAbstract,
     TestStructWithExceptionField as TestStructWithExceptionFieldAbstract,
+    TestStructWithInvariantField as TestStructWithInvariantFieldAbstract,
     TestStructWithTypedefField as TestStructWithTypedefFieldAbstract,
     TestStructWithUnionField as TestStructWithUnionFieldAbstract,
 )
@@ -55,11 +56,13 @@ from thrift.test.thrift_python.struct_test.thrift_abstract_types import (  # @ma
 from thrift.test.thrift_python.struct_test.thrift_mutable_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesMutable,
     TestStruct as TestStructMutable,
+    TestStructWithInvariantField as TestStructWithInvariantFieldMutable,
 )
 
 from thrift.test.thrift_python.struct_test.thrift_types import (
     TestExceptionAllThriftPrimitiveTypes as TestExceptionAllThriftPrimitiveTypesImmutable,
     TestStruct as TestStructImmutable,
+    TestStructWithInvariantField as TestStructWithInvariantFieldImmutable,
 )
 
 from thrift.test.thrift_python.union_test.thrift_abstract_types import (  # @manual=//thrift/test/thrift-python:union_test_thrift-python-types
@@ -736,15 +739,38 @@ class ThriftPythonAbstractTypesTest(unittest.TestCase):
             # Incompatible parameter type [6]: In call `set.__init__`,
             # for 1st positional argument, expected `Iterable[Variable[_T]]`
             # but got `TestStructAbstract`
-            # DO_BEFORE(satishvk, 20250630): Add __iter__ to abstract types.
-            # Removed because of type-check failures in the presence of
-            # __iter__ for mutable types when there are invariant types used as
-            # keys in the map.
-            #
-            # pyre-fixme[6]: For 1st argument expected `Iterable[_T]` but got
-            #  `TestStructAbstract`.
             set(ts),
             {("unqualified_string", "hello"), ("optional_string", None)},
+        )
+
+    @parameterized.expand(
+        [
+            (
+                # provide a test name for clarity, especially with failures.
+                "immutable_struct",
+                TestStructWithInvariantFieldImmutable(unqualified_string="hello"),
+            ),
+            (
+                "mutable_struct",
+                TestStructWithInvariantFieldMutable(unqualified_string="hello"),
+            ),
+        ],
+    )
+    def test_iteration_with_invariant_field(
+        self, test_name: str, ts: TestStructWithInvariantFieldAbstract
+    ) -> None:
+        self.assertEqual(
+            # If the struct has an invariant field, `__iter__` is not generated.
+            # TestStructWithInvariantFieldAbstract does not have an `__iter__`
+            # method, so the line below will fail and needs a pyre-fixme.
+            # pyre-fixme[6]: For 1st argument expected `Iterable[_T]` but got
+            #  `TestStructWithInvariantFieldAbstract`.
+            sorted(ts),
+            [
+                ("unqualified_i32", 0),
+                ("unqualified_map_struct_i32", {}),
+                ("unqualified_string", "hello"),
+            ],
         )
 
     # Construct immutable and mutable structs to ensure that

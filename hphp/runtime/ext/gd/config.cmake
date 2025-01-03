@@ -57,6 +57,7 @@ HHVM_DEFINE_EXTENSION("gd"
   DEPENDS
     libFreetype OPTIONAL
     libJpeg OPTIONAL
+    libHeif
     libIConv
     libPng OPTIONAL
     libVpx OPTIONAL

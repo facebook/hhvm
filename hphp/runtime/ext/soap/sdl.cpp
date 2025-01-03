@@ -178,7 +178,7 @@ static void load_wsdl_ex(char *struri, sdlCtx *ctx, bool include,
     wsdl = soap_xmlParseFile(struri);
   }
   if (!wsdl) {
-    xmlErrorPtr xmlErrorPtr = xmlGetLastError();
+    auto xmlErrorPtr = xmlGetLastError();
     if (xmlErrorPtr) {
       throw SoapException("Parsing WSDL: Couldn't load from '%s' : %s",
                           struri, xmlErrorPtr->message);

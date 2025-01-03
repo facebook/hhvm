@@ -36,6 +36,7 @@
 #include <libxml/uri.h>
 #include <libxml/xmlerror.h>
 #include <libxml/xmlsave.h>
+#include <libxml/xmlversion.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
@@ -624,7 +625,11 @@ String libxml_get_valid_file_path(const String& source) {
   return file_dest;
 }
 
+#if LIBXML_VERSION >= 21200
+static void libxml_error_handler(void* /*userData*/, const xmlError* error) {
+#else
 static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
+#endif
   if (rl_libxml_request_data->m_suppress_error) {
     return;
   }
@@ -642,7 +647,7 @@ static void libxml_error_handler(void* /*userData*/, xmlErrorPtr error) {
   }
 }
 
-static Object create_libxmlerror(xmlError &error) {
+static Object create_libxmlerror(const xmlError &error) {
   Object ret{ LibXMLError::classof() };
   // Setting only public properties
   ret->setProp(nullctx, s_level.get(), make_tv<KindOfInt64>(error.level));
@@ -678,7 +683,7 @@ Array HHVM_FUNCTION(libxml_get_errors) {
 }
 
 Variant HHVM_FUNCTION(libxml_get_last_error) {
-  xmlErrorPtr error = xmlGetLastError();
+  auto error = xmlGetLastError();
   if (error) {
     return create_libxmlerror(*error);
   }

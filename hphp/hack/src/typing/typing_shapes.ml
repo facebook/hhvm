@@ -49,52 +49,48 @@ let widen_for_refine_shape ~expr_pos field_name env ty =
   end
   | _ -> ((env, None), None)
 
-let shape_field_name_with_ty_err env (_, p, field) =
+let tshape_field_name_with_ty_err env (_, pos, field) =
   let resolve_self env =
     let this =
       match Env.get_self_ty env with
       | None -> None
       | Some c_ty ->
         (match get_node c_ty with
-        | Tclass (sid, _, _) -> Some (Positioned.unsafe_to_raw_positioned sid)
+        | Tclass (sid, _, _) -> Some sid
         | _ -> None)
     in
     match this with
     | Some sid -> Ok sid
     | None ->
       Error
-        Typing_error.(
-          primary @@ Primary.Expected_class { pos = p; suffix = None })
+        Typing_error.(primary @@ Primary.Expected_class { pos; suffix = None })
   in
+  let p = Pos_or_decl.of_raw_pos pos in
+  let map_pos = Tuple.T2.map_fst ~f:Pos_or_decl.of_raw_pos in
   match field with
-  | Aast.Int name -> Ok (Ast_defs.SFregex_group (p, name))
-  | Aast.String name -> Ok (Ast_defs.SFlit_str (p, name))
+  | Aast.Int name -> Ok (TSFregex_group (p, name))
+  | Aast.String name -> Ok (TSFlit_str (p, name))
   | Aast.Class_const ((_, _, ((Aast.CI _ | Aast.CIself) as cid)), (_, "class"))
     ->
     Error
       Typing_error.(
         primary
         @@ Primary.Class_const_to_string
-             {
-               pos = p;
-               cls_name = Typing_class_pointers.string_of_class_id_ cid;
-             })
+             { pos; cls_name = Typing_class_pointers.string_of_class_id_ cid })
   | Aast.Class_const ((_, _, Aast.CI x), y) ->
-    Ok (Ast_defs.SFclass_const (x, y))
+    Ok (TSFclass_const (map_pos x, map_pos y))
   | Aast.Nameof (_, _, Aast.CI x) ->
-    Ok (Ast_defs.SFclass_const (x, (p, "class")))
+    Ok (TSFclass_const (map_pos x, (p, "class")))
   | Aast.Class_const ((_, _, Aast.CIself), y) ->
     let self_id = resolve_self env in
-    Result.map ~f:(fun sid -> Ast_defs.SFclass_const (sid, y)) self_id
+    Result.map ~f:(fun sid -> TSFclass_const (sid, map_pos y)) self_id
   | Aast.Nameof (_, _, Aast.CIself) ->
     let self_id = resolve_self env in
-    Result.map
-      ~f:(fun sid -> Ast_defs.SFclass_const (sid, (p, "class")))
-      self_id
+    Result.map ~f:(fun sid -> TSFclass_const (sid, (p, "class"))) self_id
   | _ ->
     let err =
       Typing_error.Primary.Shape.(
-        Invalid_shape_field_name { pos = p; is_empty = false })
+        Invalid_shape_field_name { pos; is_empty = false })
     in
     Error (Typing_error.shape err)
 
@@ -104,13 +100,11 @@ let do_with_field_expr
     (field : ('a, 'b) Aast.expr)
     ~(with_error : res)
     (do_f : tshape_field_name -> res) : res =
-  match shape_field_name_with_ty_err env field with
+  match tshape_field_name_with_ty_err env field with
   | Error ty_err ->
     Typing_error_utils.add_typing_error ~env ty_err;
     with_error
-  | Ok field_name ->
-    let field_name = TShapeField.of_ast Pos_or_decl.of_raw_pos field_name in
-    do_f field_name
+  | Ok field_name -> do_f field_name
 
 let mixed_for_refinement env r ty =
   let mixed = MakeType.mixed r in

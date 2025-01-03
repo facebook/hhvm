@@ -61,7 +61,7 @@ class DefaultPayloadSerializerStrategy final
       folly::AsyncTransport* transport);
 
   template <typename T>
-  std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
+  std::unique_ptr<folly::IOBuf> packCompact(const T& data) {
     CompactProtocolWriter writer;
     folly::IOBufQueue queue;
     writer.setOutput(&queue);

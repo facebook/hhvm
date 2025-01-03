@@ -208,7 +208,7 @@ bool RocketStreamClientCallback::onStreamHeaders(HeadersPayload&& payload) {
   serverMeta.streamHeadersPush_ref()->headersPayloadContent_ref() =
       std::move(payload.payload);
   connection_.sendMetadataPush(
-      PayloadSerializer::getInstance()->packCompact(std::move(serverMeta)));
+      PayloadSerializer::getInstance()->packCompact(serverMeta));
   return true;
 }
 

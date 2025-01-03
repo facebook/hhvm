@@ -141,10 +141,9 @@ class PayloadSerializer : public folly::hazptr_obj_base<PayloadSerializer> {
   }
 
   template <typename T>
-  std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
-    return visit([&](auto& strategy) {
-      return strategy.template packCompact<T>(std::forward<T>(data));
-    });
+  std::unique_ptr<folly::IOBuf> packCompact(const T& data) {
+    return visit(
+        [&](auto& strategy) { return strategy.template packCompact<T>(data); });
   }
 
   template <typename T>

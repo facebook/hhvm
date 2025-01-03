@@ -1129,8 +1129,7 @@ bool RocketClient::sendHeadersPush(
       std::move(payload.payload);
   return sendFrame(
       MetadataPushFrame::makeFromMetadata(
-          rocket::PayloadSerializer::getInstance()->packCompact(
-              std::move(clientMeta))),
+          rocket::PayloadSerializer::getInstance()->packCompact(clientMeta)),
       std::move(onError));
 }
 
@@ -1517,8 +1516,7 @@ void RocketClient::terminateInteraction(int64_t id) {
   clientMeta.interactionTerminate_ref().ensure().interactionId_ref() = id;
   std::ignore = sendFrame(
       MetadataPushFrame::makeFromMetadata(
-          rocket::PayloadSerializer::getInstance()->packCompact(
-              std::move(clientMeta))),
+          rocket::PayloadSerializer::getInstance()->packCompact(clientMeta)),
       std::move(onError));
 }
 
@@ -1560,8 +1558,7 @@ void RocketClient::sendTransportMetadataPush() {
     clientMeta.transportMetadataPush_ref() = std::move(*transportMetadataPush);
     std::ignore = sendFrame(
         MetadataPushFrame::makeFromMetadata(
-            rocket::PayloadSerializer::getInstance()->packCompact(
-                std::move(clientMeta))),
+            rocket::PayloadSerializer::getInstance()->packCompact(clientMeta)),
         std::move(onError));
   }
 }

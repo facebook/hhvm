@@ -45,8 +45,8 @@ class PayloadSerializerStrategy {
   }
 
   template <typename T>
-  FOLLY_ALWAYS_INLINE std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
-    return child_.packCompact(std::forward<T>(data));
+  FOLLY_ALWAYS_INLINE std::unique_ptr<folly::IOBuf> packCompact(const T& data) {
+    return child_.packCompact(data);
   }
 
   template <typename Metadata>

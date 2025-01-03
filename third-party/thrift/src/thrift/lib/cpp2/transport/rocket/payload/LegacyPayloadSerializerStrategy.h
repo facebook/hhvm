@@ -44,8 +44,8 @@ class LegacyPayloadSerializerStrategy final
   }
 
   template <typename T>
-  FOLLY_ERASE std::unique_ptr<folly::IOBuf> packCompact(T&& data) {
-    return ::apache::thrift::rocket::packCompact<T>(std::forward<T>(data));
+  FOLLY_ERASE std::unique_ptr<folly::IOBuf> packCompact(const T& data) {
+    return ::apache::thrift::rocket::packCompact<T>(data);
   }
 
   template <typename T>

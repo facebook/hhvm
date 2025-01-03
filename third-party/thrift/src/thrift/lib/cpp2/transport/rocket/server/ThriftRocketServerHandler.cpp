@@ -283,7 +283,7 @@ void ThriftRocketServerHandler::handleSetupFrame(
     serverMeta.setupResponse_ref()->version_ref() = version_;
     serverMeta.setupResponse_ref()->zstdSupported_ref() = true;
     connection.sendMetadataPush(
-        PayloadSerializer::getInstance()->packCompact(std::move(serverMeta)));
+        PayloadSerializer::getInstance()->packCompact(serverMeta));
   } catch (const std::exception& e) {
     return connection.close(folly::make_exception_wrapper<RocketException>(
         ErrorCode::INVALID_SETUP,

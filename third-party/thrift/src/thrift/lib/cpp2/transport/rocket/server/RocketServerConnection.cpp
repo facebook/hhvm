@@ -308,7 +308,7 @@ void RocketServerConnection::closeIfNeeded() {
           .drainCompleteCode_ref()
           .from_optional(drainCompleteCode_);
       sendMetadataPush(
-          PayloadSerializer::getInstance()->packCompact(std::move(serverMeta)));
+          PayloadSerializer::getInstance()->packCompact(serverMeta));
       // Send CONNECTION_ERROR error in case client doesn't support
       // DrainCompletePush
       sendError(StreamId{0}, RocketException(ErrorCode::CONNECTION_ERROR));

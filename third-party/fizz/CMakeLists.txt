@@ -93,4 +93,9 @@ target_link_libraries(
   fizz_deps
 )
 
+find_package(liboqs CONFIG)
+if (liboqs_FOUND)
+  target_link_libraries(fizz INTERFACE OQS::oqs)
+endif()
+
 set(FIZZ_INSTALL_DIR "${INSTALL_DIR}" PARENT_SCOPE)

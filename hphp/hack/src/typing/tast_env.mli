@@ -266,6 +266,9 @@ val simplify_unions : env -> Tast.ty -> env * Tast.ty
 (** Simplify intersections in a type. *)
 val simplify_intersections : env -> Tast.ty -> env * Tast.ty
 
+val as_bounds_to_non_intersection_type :
+  env -> Tast.decl_ty list -> Tast.ty option
+
 (** Union a list of types. *)
 val union_list : env -> Typing_reason.t -> Tast.ty list -> env * Tast.ty
 

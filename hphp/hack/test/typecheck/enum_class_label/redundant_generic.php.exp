@@ -4,5 +4,3 @@ ERROR: File "redundant_generic.php", line 9, characters 25-25:
 This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
 ERROR: File "redundant_generic.php", line 14, characters 34-34:
 This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `arraykey` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])
-ERROR: File "redundant_generic.php", line 19, characters 39-39:
-This generic parameter is redundant because it only appears in a contravariant (input) position. Consider replacing uses of generic parameter with `mixed` or specifying `<<__Explicit>>` on the generic parameter (Typing[4366])

@@ -120,62 +120,22 @@ let ft_redundant_generics env tparams ty =
             else
               " with useless `super` bound"
           in
-          (* If there is more than one `as` bound, we can't replace,
-           * because we don't support explicit intersection types
-           *)
-          begin
-            match as_bounds with
-            | [(_, t)] ->
-              Typing_error_utils.add_typing_error
-                ~env:(Tast_env.tast_env_as_typing_env env)
-                Typing_error.(
-                  primary
-                  @@ Primary.Redundant_generic
-                       {
-                         pos = Pos_or_decl.unsafe_to_raw_pos pos;
-                         variance = `Contra;
-                         msg = bounds_message;
-                         suggest = Tast_env.print_decl_ty env t;
-                       })
-            | _ ->
-              let ts = List.map as_bounds ~f:snd in
-              let t = mk (Reason.none, Tintersection ts) in
-              (* Need to localize in order to simplify *)
-              let (_, locl_ty) =
-                Tast_env.localize_no_subst ~ignore_errors:true env t
-              in
-              (* Multiple bounds can be expressed as an intersection,
-               * but it might be possible to simplify this *)
-              let (_, locl_ty) = Tast_env.simplify_intersections env locl_ty in
-              begin
-                match get_node locl_ty with
-                (* We can't denote this in source code so just suggest mixed *)
-                | Tintersection _ ->
-                  Typing_error_utils.add_typing_error
-                    ~env:(Tast_env.tast_env_as_typing_env env)
-                    Typing_error.(
-                      primary
-                      @@ Primary.Redundant_generic
-                           {
-                             pos = Pos_or_decl.unsafe_to_raw_pos pos;
-                             variance = `Contra;
-                             msg = bounds_message;
-                             suggest = "mixed";
-                           })
-                | _ ->
-                  Typing_error_utils.add_typing_error
-                    ~env:(Tast_env.tast_env_as_typing_env env)
-                    Typing_error.(
-                      primary
-                      @@ Primary.Redundant_generic
-                           {
-                             pos = Pos_or_decl.unsafe_to_raw_pos pos;
-                             variance = `Contra;
-                             msg = bounds_message;
-                             suggest = Tast_env.print_ty env locl_ty;
-                           })
-              end
-          end
+          let ts = List.map as_bounds ~f:snd in
+          (match Tast_env.as_bounds_to_non_intersection_type env ts with
+          (* We can't denote this in source code so let it be *)
+          | None -> ()
+          | Some locl_ty ->
+            Typing_error_utils.add_typing_error
+              ~env:(Tast_env.tast_env_as_typing_env env)
+              Typing_error.(
+                primary
+                @@ Primary.Redundant_generic
+                     {
+                       pos = Pos_or_decl.unsafe_to_raw_pos pos;
+                       variance = `Contra;
+                       msg = bounds_message;
+                       suggest = Tast_env.print_ty env locl_ty;
+                     }))
         | (None, Some _positions) -> ()
         | (None, None) -> ())
 

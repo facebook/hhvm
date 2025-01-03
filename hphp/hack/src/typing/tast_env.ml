@@ -252,6 +252,20 @@ let is_fresh_generic_parameter = Typing_env.is_fresh_generic_parameter
 
 let simplify_unions env ty = Typing_union.simplify_unions env ty
 
+let as_bounds_to_non_intersection_type env tys =
+  let t = Typing_defs.(mk (Reason.none, Tintersection tys)) in
+  (* Need to localize in order to simplify *)
+  let (_, locl_ty) = localize_no_subst ~ignore_errors:true env t in
+  (* Multiple bounds can be expressed as an intersection,
+   * but it might be possible to simplify this *)
+  let (_, locl_ty) = Typing_intersection.simplify_intersections env locl_ty in
+  let (_, locl_ty) = strip_supportdyn env locl_ty in
+  begin
+    match Typing_defs.get_node locl_ty with
+    | Typing_defs.Tintersection (_ :: _) -> None
+    | _ -> Some locl_ty
+  end
+
 let simplify_intersections env ty =
   Typing_intersection.simplify_intersections env ty
 

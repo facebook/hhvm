@@ -277,6 +277,21 @@ struct TestStructWithInvariantField {
   3: map<TestStruct, i32> unqualified_map_struct_i32;
 }
 
-struct TestStructWithMapOfList {
-  1: map<string, list<TestStruct>> str_to_test_structs;
+struct TestStructWithNestedContainers {
+  1: list<list<i32>> list_list_i32;
+  2: list<set<i32>> list_set_i32;
+  3: list<map<string, i32>> list_map_string_i32;
+  4: list<map<string, list<i32>>> list_map_string_list_i32;
+  5: list<map<string, set<i32>>> list_map_string_set_i32;
+  6: set<list<i32>> set_list_i32;
+  7: set<set<i32>> set_set_i32;
+  8: set<map<string, i32>> set_map_string_i32;
+  9: set<map<string, list<i32>>> set_map_string_list_i32;
+  10: set<map<string, set<i32>>> set_map_string_set_i32;
+  11: map<i32, list<i32>> map_i32_list_i32;
+  12: map<i32, set<i32>> map_i32_set_i32;
+  13: map<i32, map<string, i32>> map_i32_map_string_i32;
+  14: map<i32, map<string, list<i32>>> map_i32_map_string_list_i32;
+  15: map<i32, map<string, set<i32>>> map_i32_map_string_set_i32;
+  16: list<list<map<i32, list<map<string, list<set<i32>>>>>>> many_nested;
 }

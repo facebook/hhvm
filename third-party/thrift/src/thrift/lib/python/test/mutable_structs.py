@@ -53,6 +53,7 @@ from thrift.test.thrift_python.struct_test.thrift_types import (
     TestStructNested_0 as TestStructNested_0_Immutable,
     TestStructNested_1 as TestStructNested_1_Immutable,
     TestStructNested_2 as TestStructNested_2_Immutable,
+    TestStructWithNestedContainers as TestStructWithNestedContainersImmutable,
 )
 
 max_byte: int = 2**7 - 1
@@ -528,3 +529,21 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
         self.assertEqual(42, s_mutable.i32_field)
         self.assertEqual(41, s_mutable.nested_1.i32_field)
         self.assertEqual(40, s_mutable.nested_1.nested_2.i32_field)
+
+    def test_conversion_nested_containers(self) -> None:
+        s = TestStructWithNestedContainersImmutable(
+            list_list_i32=[[1]],
+            list_set_i32=[{2}],
+            list_map_string_i32=[{"a": 1}],
+            list_map_string_list_i32=[{"b": [2]}],
+            list_map_string_set_i32=[{"c": {3}}],
+            map_i32_list_i32={1: [1]},
+            map_i32_set_i32={2: {2}},
+            map_i32_map_string_i32={3: {"a": 1}},
+            map_i32_map_string_list_i32={4: {"b": [2]}},
+            map_i32_map_string_set_i32={5: {"c": {3}}},
+            many_nested=[[{1: [{"a": [{2}]}]}]],
+        )
+
+        mutable_struct = s._to_mutable_python()
+        self.assertEqual(s, mutable_struct._to_python())

@@ -85,7 +85,8 @@ cdef object _to_mutable_python_struct_or_union(
             **{
                 field.py_name: _to_mutable_python_field_value(
                     _get_src_struct_field_value(src_struct_or_union, field),
-                    field.type_info
+                    field.type_info,
+                    is_nested_container=False,
                 )
                 for field in mutable_struct_info.fields
             }
@@ -98,7 +99,7 @@ cdef object _to_mutable_python_struct_or_union(
             try:
                 src_union_value = _get_src_union_field_value(src_struct_or_union, field)
                 mutable_python_value = _to_mutable_python_field_value(
-                    src_union_value, field.type_info
+                    src_union_value, field.type_info, is_nested_container=False,
                 )
                 return mutable_thrift_python_cls(
                     **{field.py_name: mutable_python_value}
@@ -168,7 +169,7 @@ cdef object _get_src_union_field_value(object src_union, FieldInfo field):
     )
 
 cdef object _to_mutable_python_field_value(
-    object src_value, object mutable_type_info
+    object src_value, object mutable_type_info, bint is_nested_container
 ):
     """
     Converts `src_value` (from the src object) to a value suitable for a thrift-python
@@ -176,6 +177,22 @@ cdef object _to_mutable_python_field_value(
 
     Effectively, the returned value should correspond to the value that a client would
     provide at initialization time, if directly creating a thrift-python instance.
+
+    Args:
+        src_value: The source value to be converted.
+        mutable_type_info: An object providing type information for the field.
+        is_nested_container: A boolean indicating whether the current container is nested
+            within another container. Only applicable if `mutable_type_info` is a container
+            type info (MutableListTypeInfo, MutableSetTypeInfo, or MutableMapTypeInfo).
+
+    Note:
+        - Mutable thrift-python fields should be assigned with to_thrift_list(),
+        to_thrift_set(), or to_thrift_map(). These functions use the corresponding
+        _Thrift{List,Set,Map}Wrapper structs.
+        - For nested containers, only the top container should be wrapped, not
+        the nested containers. For example, for list<set<i32>>, assignment should
+        be to_thrift_list([{1, 2}, {3, 4}]), wrapping the internal container will
+        result in an error (to_thrift_list([to_thrift_set({1, 2})])).
     """
     if src_value is None:
         return None
@@ -188,26 +205,35 @@ cdef object _to_mutable_python_field_value(
             (<MutableStructTypeInfo>mutable_type_info)._mutable_struct_class, src_value
         )
     elif isinstance(mutable_type_info, MutableListTypeInfo):
-        return _ThriftListWrapper([
+        list_value = [
             _to_mutable_python_field_value(
-                elem, (<MutableListTypeInfo>mutable_type_info).val_info
+                elem,
+                (<MutableListTypeInfo>mutable_type_info).val_info,
+                is_nested_container=True,
             )
             for elem in src_value
-        ])
+        ]
+        return list_value if is_nested_container else _ThriftListWrapper(list_value)
     elif isinstance(mutable_type_info, MutableSetTypeInfo):
-        return _ThriftSetWrapper({
+        set_value = {
             _to_mutable_python_field_value(
-                elem, (<MutableSetTypeInfo>mutable_type_info).val_info
+                elem,
+                (<MutableSetTypeInfo>mutable_type_info).val_info,
+                is_nested_container=True
             )
             for elem in src_value
-        })
+        }
+        return set_value if is_nested_container else _ThriftSetWrapper(set_value)
     elif isinstance(mutable_type_info, MutableMapTypeInfo):
         mutable_map_type_info = <MutableMapTypeInfo>mutable_type_info
-        return _ThriftMapWrapper({
-            _to_mutable_python_field_value(k, mutable_map_type_info.key_info):
-            _to_mutable_python_field_value(v, mutable_map_type_info.val_info)
+        map_value = {
+            _to_mutable_python_field_value(
+                k, mutable_map_type_info.key_info, is_nested_container=True):
+            _to_mutable_python_field_value(
+                v, mutable_map_type_info.val_info, is_nested_container=True)
             for k, v in src_value.items()
-        })
+        }
+        return map_value if is_nested_container else _ThriftMapWrapper(map_value)
     elif isinstance(mutable_type_info, EnumTypeInfo):
         try:
             return (<EnumTypeInfo>mutable_type_info)._class(int(src_value))

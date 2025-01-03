@@ -28,7 +28,9 @@
 #include <folly/String.h>
 #include <folly/portability/Sockets.h>
 
+#ifndef HPHP_OSS
 #include "common/serialize/FBSerialize.h"
+#endif
 
 #include "hphp/util/configs/eval.h"
 #include "hphp/util/htonll.h"
@@ -116,6 +118,7 @@ enum TType {
 const StaticString s_invalidMethCallerSerde("Cannot serialize meth_caller");
 
 Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
+#ifndef HPHP_OSS
   try {
     if (options & k_FB_SERIALIZE_POST_HACK_ARRAY_MIGRATION) {
       size_t len = HPHP::serialize
@@ -183,12 +186,16 @@ Variant HHVM_FUNCTION(fb_serialize, const Variant& thing, int64_t options) {
   } catch (const HPHP::serialize::SerializeError&) {
     return init_null();
   }
+#else
+    return init_null();
+#endif
 }
 
 Variant HHVM_FUNCTION(fb_unserialize,
                       const Variant& thing,
                       bool& success,
                       int64_t options) {
+#ifndef HPHP_OSS
   if (thing.isString()) {
     String sthing = thing.toString();
 
@@ -200,11 +207,13 @@ Variant HHVM_FUNCTION(fb_unserialize,
       return fb_unserialize(sthing.data(), sthing.size(), success, options);
     }
   }
+#endif
 
   success = false;
   return false;
 }
 
+#ifndef HPHP_OSS
 Variant fb_unserialize(const char* str,
                        int len,
                        bool& success,
@@ -657,10 +666,18 @@ String fb_compact_serialize(const Variant& thing, int64_t options) {
   return sb.detach();
 }
 
+#endif // HPHP_OSS
+
 Variant HHVM_FUNCTION(
     fb_compact_serialize, const Variant& thing, int64_t options) {
+#ifndef HPHP_OSS
   return fb_compact_serialize(thing, options);
+#else
+  return String();
+#endif
 }
+
+#ifndef HPHP_OSS
 
 /* Check if there are enough bytes left in the buffer */
 #define CHECK_ENOUGH(bytes, pos, num) do {                                \
@@ -904,9 +921,12 @@ Variant fb_compact_unserialize(const char* str, int len,
   return ret;
 }
 
+#endif // HPHP_OSS
+
 Variant HHVM_FUNCTION(fb_compact_unserialize,
                       const Variant& thing, bool& success,
                       Variant& errcode) {
+#ifndef HPHP_OSS
   if (!thing.isString()) {
     success = false;
     errcode = FB_UNSERIALIZE_NONSTRING_VALUE;
@@ -915,6 +935,11 @@ Variant HHVM_FUNCTION(fb_compact_unserialize,
 
   String s = thing.toString();
   return fb_compact_unserialize(s.data(), s.size(), success, errcode);
+#else
+    success = false;
+    errcode = 0;
+    return false;
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

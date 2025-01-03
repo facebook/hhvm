@@ -35,6 +35,7 @@
 #include <thrift/compiler/ast/t_structured.h>
 #include <thrift/compiler/ast/t_typedef.h>
 #include <thrift/compiler/ast/t_union.h>
+#include <thrift/compiler/ast/type_visitor.h>
 
 namespace apache::thrift::compiler::detail {
 namespace {
@@ -764,24 +765,25 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
     return as_value_type();
   }
 
-  const auto* ttype = ty_->get_true_type();
-  assert(ttype != nullptr && (ttype->is_struct() || ttype->is_map()));
-
-  if (ttype->is_map()) {
-    // Maps are not restricted to string-based field keys, so we should extend
-    // the look-up to any sealed key type.
-    const auto* map_ty = dynamic_cast<const t_map*>(ttype);
-    const auto* val_ty = map_ty->get_val_type()->get_true_type();
-    return protocol_value_builder{*val_ty};
-  }
-
-  assert(
-      key.kind() == t_const_value::CV_STRING &&
-      "A struct only has named fields");
-  const auto* struct_ty = dynamic_cast<const t_struct*>(ttype);
-  const auto* field = struct_ty->get_field_by_name(key.get_string());
-  const auto* field_ty = field->get_type()->get_true_type();
-  return protocol_value_builder{*field_ty};
+  return ty_->visit(
+      [&](const t_map& map) {
+        // Maps are not restricted to string-based field keys, so we should
+        // extend the look-up to any sealed key type.
+        return protocol_value_builder{*map.get_val_type()};
+      },
+      [&](const t_struct& strct) {
+        assert(
+            key.kind() == t_const_value::CV_STRING &&
+            "A struct only has named fields");
+        const auto* field = strct.get_field_by_name(key.get_string());
+        return protocol_value_builder{*field->get_type()};
+      },
+      [&](auto&&) -> protocol_value_builder {
+        throw std::logic_error(fmt::format(
+            "Invalid name={} type={} for property look-up",
+            ty_->get_full_name(),
+            t_type::type_name(ty_->get_type_value())));
+      });
 }
 
 [[nodiscard]] protocol_value_builder protocol_value_builder::key(
@@ -790,18 +792,22 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
     return as_value_type();
   }
 
-  if (ty_->is_struct()) {
-    assert(
-        key.kind() == t_const_value::CV_STRING &&
-        "A struct only has named fields");
-    return as_value_type();
-  }
-
-  assert(ty_->is_map() && "The type must be a map");
-  const auto* map_ty = dynamic_cast<const t_map*>(ty_);
-  const auto* key_ty = map_ty->get_key_type()->get_true_type();
-  assert(key_ty != nullptr);
-  return protocol_value_builder{*key_ty};
+  return ty_->visit(
+      [&](const t_struct&) {
+        assert(
+            key.kind() == t_const_value::CV_STRING &&
+            "A struct only has named fields");
+        return as_value_type();
+      },
+      [&](const t_map& map) {
+        return protocol_value_builder{*map.get_key_type()};
+      },
+      [&](auto&&) -> protocol_value_builder {
+        throw std::logic_error(fmt::format(
+            "Invalid name={} type={} for key look-up",
+            ty_->get_full_name(),
+            t_type::type_name(ty_->get_type_value())));
+      });
 }
 
 [[nodiscard]] protocol_value_builder protocol_value_builder::container_element(
@@ -812,25 +818,23 @@ protocol_value_builder::protocol_value_builder() : ty_{nullptr} {}
     return as_value_type();
   }
 
-  assert(
-      ty_->is_container() &&
-      "Resolving to a container element requires the current field to be a container");
-  const auto* container_ty = dynamic_cast<const t_container*>(ty_);
-  const t_type* element_ty = nullptr;
-  switch (container_ty->container_type()) {
-    case t_container::type::t_list:
-      element_ty = static_cast<const t_list*>(container_ty)
-                       ->elem_type()
-                       ->get_true_type();
-      break;
-    case t_container::type::t_set:
-      element_ty =
-          static_cast<const t_set*>(container_ty)->elem_type()->get_true_type();
-      break;
-    case t_container::type::t_map:
-      assert(false && "Maps should not deduce a single container element");
-  }
-  return protocol_value_builder{*element_ty};
+  return ty_->visit(
+      [&](const t_list& list) {
+        return protocol_value_builder{*list.elem_type()};
+      },
+      [&](const t_set& set) {
+        return protocol_value_builder{*set.elem_type()};
+      },
+      [&](const t_map&) -> protocol_value_builder {
+        throw std::logic_error(
+            "Maps should not deduce a single container element");
+      },
+      [&](auto&&) -> protocol_value_builder {
+        throw std::logic_error(fmt::format(
+            "Invalid name={} type={} for container element look-up",
+            ty_->get_full_name(),
+            t_type::type_name(ty_->get_type_value())));
+      });
 }
 
 std::pair<std::unique_ptr<t_const_value>, std::unique_ptr<t_const_value>>

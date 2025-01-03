@@ -28,14 +28,22 @@ namespace apache::thrift::compiler {
 
 class t_program;
 class t_placeholder_typedef;
+class t_type;
+
+namespace detail {
+
+template <typename... Visitors>
+extern decltype(auto) visit_type(const t_type& ty, Visitors&&... visitors);
+
+}
 
 /**
  * Generic representation of a thrift type.
  *
- * These objects are used by the parser module to build up a tree of object that
- * are all explicitly typed. The generic t_type class exports a variety of
- * useful methods that are used by the code generator to branch based upon
- * different handling for the various types.
+ * These objects are used by the parser module to build up a tree of object
+ * that are all explicitly typed. The generic t_type class exports a variety
+ * of useful methods that are used by the code generator to branch based
+ * upon different handling for the various types.
  */
 class t_type : public t_named {
  public:
@@ -191,6 +199,14 @@ class t_type : public t_named {
   }
 
   const t_program* get_program() const { return program(); }
+
+  // Visitor API
+  // Note: this requires including the `type_visitor.h` header to prevent a
+  // circular dependency.
+  template <typename... Visitors>
+  decltype(auto) visit(Visitors&&... visitors) const {
+    return detail::visit_type(*this, std::forward<Visitors>(visitors)...);
+  }
 };
 
 /**

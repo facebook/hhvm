@@ -16,6 +16,7 @@
 
 #include <vector>
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 #include <thrift/lib/cpp2/runtime/SchemaRegistry.h>
 
 // These deps pull in the corresponding schemas when enabled.
@@ -29,7 +30,8 @@
 using namespace apache::thrift;
 
 TEST(SchemaTest, not_linked) {
-  const auto& schema = SchemaRegistry::get().getMergedSchema();
+  auto schemaPtr = SchemaRegistry::get().getMergedSchema();
+  const auto& schema = *schemaPtr;
   for (const auto& program : *schema.programs()) {
     EXPECT_NE(
         program.path(), "thrift/test/TopologicallySortObjectsTest.thrift");
@@ -40,7 +42,8 @@ TEST(SchemaTest, not_linked) {
 }
 
 TEST(SchemaTest, not_linked_but_included) {
-  const auto& schema = SchemaRegistry::get().getMergedSchema();
+  auto schemaPtr = SchemaRegistry::get().getMergedSchema();
+  const auto& schema = *schemaPtr;
   for (const auto& program : *schema.programs()) {
     if (program.path() != "thrift/annotation/thrift.thrift") {
       continue;
@@ -56,7 +59,8 @@ TEST(SchemaTest, not_linked_but_included) {
 
 TEST(SchemaTest, linked) {
   bool found = false;
-  const auto& schema = SchemaRegistry::get().getMergedSchema();
+  auto schemaPtr = SchemaRegistry::get().getMergedSchema();
+  const auto& schema = *schemaPtr;
   for (const auto& program : *schema.programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
       found = true;
@@ -97,9 +101,9 @@ TEST(SchemaTest, static_schema) {
   }
   ASSERT_TRUE(static_program);
 
-  const auto& dynamic_schema = SchemaRegistry::get().getMergedSchema();
+  auto dynamic_schema_ptr = SchemaRegistry::get().getMergedSchema();
   const type::Program* dynamic_program = nullptr;
-  for (const auto& program : *dynamic_schema.programs()) {
+  for (const auto& program : *dynamic_schema_ptr->programs()) {
     if (program.path() == "thrift/test/schema.thrift") {
       dynamic_program = &program;
     }
@@ -107,6 +111,20 @@ TEST(SchemaTest, static_schema) {
   ASSERT_TRUE(dynamic_program);
 
   EXPECT_EQ(*static_program, *dynamic_program);
+}
+
+TEST(SchemaTest, merged_schema_add_after_access) {
+  auto data = facebook::thrift::test::schema::schema_constants::
+      _fbthrift_schema_fba4d3dcfb7c979a();
+
+  BaseSchemaRegistry base;
+  SchemaRegistry registry(base);
+  auto schemaPtr = registry.getMergedSchema();
+  base.registerSchema("schema", data, "schema.thrift");
+  auto newSchemaPtr = registry.getMergedSchema();
+  // Data is not reused after access.
+  EXPECT_EQ(schemaPtr->programs()->size(), 0);
+  EXPECT_GT(newSchemaPtr->programs()->size(), 0);
 }
 
 TEST(SchemaTest, service_schema) {

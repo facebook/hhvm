@@ -27,25 +27,11 @@ SchemaRegistry& SchemaRegistry::get() {
   return *self;
 }
 
-const type::Schema& SchemaRegistry::getMergedSchema() {
-  folly::call_once(mergedFlag_, [this]() {
-    base_.accessed_ = true;
-    std::vector<std::string_view> schemas;
-    schemas.reserve(base_.rawSchemas_.size());
-    for (auto& [name, data] : base_.rawSchemas_) {
-      schemas.push_back(data.data);
-    }
-    merged_ = mergeSchemas(folly::range(schemas));
-  });
-
-  return merged_;
-}
-
 namespace {
 void mergeInto(
     type::Schema& dst,
     type::Schema&& src,
-    std::unordered_set<type::ProgramId> includedPrograms) {
+    std::unordered_set<type::ProgramId>& includedPrograms) {
   for (auto& program : *src.programs()) {
     auto id = *program.id();
     if (!includedPrograms.insert(id).second) {
@@ -69,7 +55,56 @@ void mergeInto(
     throw std::runtime_error("DefinitionKey collision");
   }
 }
+
+std::optional<type::Schema> readSchema(std::string_view data) {
+  if (data.empty()) {
+    // This program's schema wasn't found under the expected path, e.g. due to
+    // use of relative includes.
+    return std::nullopt;
+  }
+  auto decompressed = folly::io::getCodec(folly::compression::CodecType::ZSTD)
+                          ->uncompress(data);
+  return CompactSerializer::deserialize<type::Schema>(decompressed);
+}
 } // namespace
+
+SchemaRegistry::Ptr SchemaRegistry::getMergedSchema() {
+  std::shared_lock rlock(base_.mutex_);
+  if (mergedSchema_) {
+    mergedSchemaAccessed_ = true;
+    return mergedSchema_;
+  }
+  rlock.unlock();
+
+  std::unique_lock wlock(base_.mutex_);
+  if (mergedSchema_) {
+    mergedSchemaAccessed_ = true;
+    return mergedSchema_;
+  }
+
+  mergedSchema_ = std::make_shared<type::Schema>();
+  for (auto& [name, data] : base_.rawSchemas_) {
+    if (auto schema = readSchema(data.data)) {
+      mergeInto(*mergedSchema_, std::move(*schema), includedPrograms_);
+    }
+  }
+
+  base_.insertCallback_ = [this](std::string_view data) {
+    // The caller is holding a write lock.
+
+    // If no one else has a reference yet we can reuse the storage.
+    if (mergedSchemaAccessed_.exchange(false)) {
+      mergedSchema_ = std::make_shared<type::Schema>(*mergedSchema_);
+    }
+
+    if (auto schema = readSchema(data)) {
+      mergeInto(*mergedSchema_, std::move(*schema), includedPrograms_);
+    }
+  };
+
+  mergedSchemaAccessed_ = true;
+  return mergedSchema_;
+}
 
 type::Schema SchemaRegistry::mergeSchemas(
     folly::Range<const std::string_view*> schemas) {
@@ -77,15 +112,9 @@ type::Schema SchemaRegistry::mergeSchemas(
   std::unordered_set<type::ProgramId> includedPrograms;
 
   for (const auto& data : schemas) {
-    if (data.empty()) {
-      // This program's schema wasn't found under the expected path, e.g. due to
-      // use of relative includes.
-      continue;
+    if (auto schema = readSchema(data)) {
+      mergeInto(mergedSchema, std::move(*schema), includedPrograms);
     }
-    auto decompressed = folly::io::getCodec(folly::compression::CodecType::ZSTD)
-                            ->uncompress(data);
-    auto schema = CompactSerializer::deserialize<type::Schema>(decompressed);
-    mergeInto(mergedSchema, std::move(schema), includedPrograms);
   }
 
   return mergedSchema;

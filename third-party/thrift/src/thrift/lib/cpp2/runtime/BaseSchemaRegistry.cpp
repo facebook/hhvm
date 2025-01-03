@@ -16,15 +16,14 @@
 
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 
+#include <mutex>
 #include <folly/Indestructible.h>
 
 namespace apache::thrift {
 
 void BaseSchemaRegistry::registerSchema(
     std::string_view name, std::string_view data, std::string_view path) {
-  if (accessed_) {
-    throw std::runtime_error("Schemas accessed before registration complete.");
-  }
+  std::lock_guard lock(mutex_);
   if (auto it = rawSchemas_.find(name); it != rawSchemas_.end()) {
     if (it->second.path != path) { // Needed to support dynamic linking
       throw std::runtime_error(fmt::format(
@@ -35,6 +34,9 @@ void BaseSchemaRegistry::registerSchema(
     return;
   }
   rawSchemas_[name] = {data, path};
+  if (insertCallback_) {
+    insertCallback_(data);
+  }
 }
 
 BaseSchemaRegistry& BaseSchemaRegistry::get() {

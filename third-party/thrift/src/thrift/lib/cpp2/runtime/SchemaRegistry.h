@@ -16,7 +16,8 @@
 
 #pragma once
 
-#include <folly/synchronization/CallOnce.h>
+#include <unordered_set>
+#include <folly/synchronization/RelaxedAtomic.h>
 #include <thrift/lib/cpp2/runtime/BaseSchemaRegistry.h>
 #include <thrift/lib/thrift/gen-cpp2/schema_types.h>
 
@@ -27,8 +28,10 @@ class SchemaRegistry {
   // Access the global registry.
   static SchemaRegistry& get();
 
+  using Ptr = std::shared_ptr<type::Schema>;
+
   // Access all data registered
-  const type::Schema& getMergedSchema();
+  Ptr getMergedSchema();
 
   // Helpers for working with schemas.
   static type::Schema mergeSchemas(
@@ -39,8 +42,9 @@ class SchemaRegistry {
 
  private:
   BaseSchemaRegistry& base_;
-  type::Schema merged_;
-  folly::once_flag mergedFlag_;
+  Ptr mergedSchema_;
+  folly::relaxed_atomic<bool> mergedSchemaAccessed_{false};
+  std::unordered_set<type::ProgramId> includedPrograms_;
 };
 
 } // namespace apache::thrift

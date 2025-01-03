@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../assemble/lib.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 assemble_opcode_macro = { version = "0.0.0", path = "../assemble_opcode_macro" }
 escaper = { version = "0.0.0", path = "../../../utils/escaper" }
 ffi = { version = "0.0.0", path = "../../ffi/ffi" }

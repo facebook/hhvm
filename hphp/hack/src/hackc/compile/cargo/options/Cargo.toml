@@ -11,7 +11,7 @@ license = "MIT"
 path = "../../options.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 cxx = "1.0.119"
 hhvm_options = { version = "0.0.0", path = "../../../../utils/hhvm_options" }

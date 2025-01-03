@@ -11,7 +11,7 @@ license = "MIT"
 path = "hhvm_options.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 clap = { version = "4.5.20", features = ["derive", "env", "string", "unicode", "wrap_help"] }
 hdf = { version = "0.0.0", path = "../hdf" }
 hhvm_runtime_options = { version = "0.0.0", path = "hhvm_runtime_options" }

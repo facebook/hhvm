@@ -11,7 +11,7 @@ license = "MIT"
 path = "hh24_types.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 derive_more = { version = "1.0.0", features = ["full"] }
 file_info = { version = "0.0.0", path = "../../deps/rust/file_info" }
 hh_hash = { version = "0.0.0", path = "../hh_hash" }

@@ -11,7 +11,7 @@ license = "MIT"
 path = "lmdb.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 libc = "0.2.139"
 
 [dev-dependencies]

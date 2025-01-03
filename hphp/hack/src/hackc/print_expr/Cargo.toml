@@ -11,7 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 ast_scope = { version = "0.0.0", path = "../emitter/cargo/ast_scope" }
 bstr = { version = "1.10.0", features = ["serde", "std", "unicode"] }
 core_utils_rust = { version = "0.0.0", path = "../../utils/core" }

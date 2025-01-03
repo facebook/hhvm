@@ -11,7 +11,7 @@ license = "MIT"
 path = "../relative_path_utils.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 relative_path = { version = "0.0.0", path = "../relative_path" }
 
 [dev-dependencies]

@@ -11,7 +11,7 @@ license = "MIT"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 hash = { version = "0.0.0", path = "../../../utils/hash" }
 ir_core = { version = "0.0.0", path = "../ir_core" }
 itertools = "0.14.0"

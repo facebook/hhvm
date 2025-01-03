@@ -11,6 +11,6 @@ license = "MIT"
 path = "../../hhvm_config.rs"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.95"
 hhvm_options = { version = "0.0.0", path = "../../../../utils/hhvm_options" }
 options = { version = "0.0.0", path = "../../../compile/cargo/options" }

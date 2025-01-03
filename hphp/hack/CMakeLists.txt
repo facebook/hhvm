@@ -180,7 +180,7 @@ add_custom_command(
     ${INVOKE_CARGO} dump-opcodes dump-opcodes --bin dump_opcodes
       -o "${RUST_OPCODES}"
   COMMENT "Generating Rust opcode struct for cbindgen to use to generate hhbc-unit.h"
-  DEPENDS "${OPCODE_DATA}"
+  DEPENDS opam_setup "${OPCODE_DATA}"
 )
 
 set(HHBC_AST_HEADER "${RUST_FFI_BUILD_ROOT}/hphp/hack/src/hackc/hhbc-unit.h")
@@ -209,7 +209,7 @@ add_custom_command(
       --header "${HHBC_AST_HEADER}" --namespaces "HPHP,hackc,hhbc"
       --includes "${FFI_HEADER},${NAMING_SPECIAL_NAMES_HEADER},${TYPE_CONSTRAINT_HEADER},${ATTR_HEADER},${FCALL_HEADER},${ITER_ARGS_HEADER},${HHBC_HEADER}"
       ${HHBC_AST_SRCS}
-  DEPENDS rustc cargo "${RUST_OPCODES}"
+  DEPENDS opam_setup rustc cargo "${RUST_OPCODES}"
   COMMENT "Generating hhbc-unit.h"
 )
 
@@ -259,7 +259,7 @@ add_custom_command(
     . "${CMAKE_CURRENT_BINARY_DIR}/dev_env_rust_only.sh" &&
     ${CMAKE_COMMAND} -E env CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} ${INVOKE_CARGO} hhvm_ffi hhvm_ffi --target-dir "${FFI_BRIDGE_BIN}"
     WORKING_DIRECTORY ${FFI_BRIDGE_SRC}
-    DEPENDS rustc cargo hackc_options "${OPCODE_DATA}"
+    DEPENDS opam_setup rustc cargo hackc_options "${OPCODE_DATA}"
 )
 
 add_custom_target(

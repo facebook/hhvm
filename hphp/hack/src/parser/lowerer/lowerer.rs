@@ -2448,6 +2448,7 @@ fn p_et_splice_expr<'a>(expr: S<'a>, env: &mut Env<'a>, location: ExprLocation) 
         spliced_expr,
         contains_await,
         extract_client_type: true,
+        macro_variables: None,
     })))
 }
 

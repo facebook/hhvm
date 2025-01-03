@@ -639,8 +639,13 @@ and expr_ env acc p e =
   | Import _ -> acc
   | Collection _ -> acc
   | FunctionPointer _ -> acc
-  | ET_Splice { spliced_expr = e; extract_client_type = _; contains_await = _ }
-    ->
+  | ET_Splice
+      {
+        spliced_expr = e;
+        extract_client_type = _;
+        contains_await = _;
+        macro_variables = _;
+      } ->
     expr acc e
   | ReadonlyExpr e -> expr acc e
   | Hole (e, _, _, _) -> expr acc e

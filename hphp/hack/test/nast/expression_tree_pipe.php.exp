@@ -44,7 +44,8 @@
                                                 ((), [4:22-36],
                                                  (ET_Splice
                                                     { extract_client_type = false; 
-                                                      contains_await = false;
+                                                      contains_await = false; 
+                                                      macro_variables = None;
                                                       spliced_expr =
                                                       ((), [4:22-36],
                                                        (Pipe (([4:22-36], $$),
@@ -122,8 +123,11 @@
                                                                     (Some (
                                                                     (), [4:19-38],
                                                                     (
-                                                                    ET_Splice { extract_client_type = true; contains_await = false; spliced_expr = ((), [4:22-36], (Lvar ([4:22-36], $0splice0))) })))))
-                                                                    ] }; 
+                                                                    ET_Splice
+                                                                    { extract_client_type = true; 
+                                                                    contains_await = false; 
+                                                                    macro_variables = None; 
+                                                                    spliced_expr = ((), [4:22-36], (Lvar ([4:22-36], $0splice0))) })))))] }; 
                                                                     f_fun_kind = FSync; 
                                                                     f_user_attributes = []; 
                                                                     f_external = false; 

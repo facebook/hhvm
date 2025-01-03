@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<29487812aacba9fb55b877a1ed5ba971>>
+// @generated SignedSource<<bb97aa8ba626827e7c22f56f78e10b10>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -888,6 +888,12 @@ pub struct EtSplice<'a, Ex, En> {
     pub extract_client_type: bool,
     /// Does the spliced_expr contain an await expression
     pub contains_await: bool,
+    /// Should the splice be interpreted as a "macro". That is, if spliced_expr has type
+    /// Spliceable<t1, t2, t3>, in an enviroment with the macro variables bound to types
+    /// Spliceable<t1, t2, u1>,..,Spliceable<t1, t2, un> then the splice should have
+    /// type Spliceable<t1, t2, (function (u1, .., un): t3)>
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub macro_variables: Option<&'a [&'a Lid<'a>]>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub spliced_expr: &'a Expr<'a, Ex, En>,
 }

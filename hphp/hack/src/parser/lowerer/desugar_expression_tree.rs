@@ -1368,6 +1368,7 @@ impl RewriteState {
                 spliced_expr,
                 extract_client_type,
                 contains_await,
+                macro_variables,
             }) => {
                 let len = self.splices.len();
                 let expr_pos = spliced_expr.1.clone();
@@ -1378,6 +1379,7 @@ impl RewriteState {
                         spliced_expr,
                         extract_client_type: false,
                         contains_await,
+                        macro_variables: macro_variables.clone(),
                     }),
                 ));
                 let temp_variable = temp_splice_lvar(&expr_pos, len);
@@ -1394,6 +1396,7 @@ impl RewriteState {
                         spliced_expr: temp_variable,
                         extract_client_type,
                         contains_await,
+                        macro_variables,
                     }),
                 );
                 self.contains_spliced_await |= contains_await;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<37ff048d2395050fe48baee6b338d2f2>>
+// @generated SignedSource<<79a21171eb755935da6fae4bd5b1706f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -631,7 +631,8 @@ impl Transform for EtSplice {
             EtSplice {
                 extract_client_type: ref mut __binding_0,
                 contains_await: ref mut __binding_1,
-                spliced_expr: ref mut __binding_2,
+                macro_variables: ref mut __binding_2,
+                spliced_expr: ref mut __binding_3,
             } => {
                 {
                     __binding_0.transform(env, &mut pass.clone())
@@ -639,7 +640,10 @@ impl Transform for EtSplice {
                 {
                     __binding_1.transform(env, &mut pass.clone())
                 }
-                { __binding_2.transform(env, &mut pass.clone()) }
+                {
+                    __binding_2.transform(env, &mut pass.clone())
+                }
+                { __binding_3.transform(env, &mut pass.clone()) }
             }
         }
     }

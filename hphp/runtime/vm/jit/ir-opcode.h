@@ -19,6 +19,7 @@
 #include <type_traits>
 #include <vector>
 
+#include <fmt/format.h>
 #include <folly/Range.h>
 
 #include "hphp/runtime/vm/jit/types.h"

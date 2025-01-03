@@ -231,6 +231,26 @@ class t_const_value {
     return *program_;
   }
 
+  static std::string_view kind_to_string(t_const_value_kind kind) {
+    switch (kind) {
+      case CV_BOOL:
+        return "bool";
+      case CV_INTEGER:
+        return "integer";
+      case CV_DOUBLE:
+        return "double";
+      case CV_STRING:
+        return "string";
+      case CV_MAP:
+        return "map({})";
+      case CV_LIST:
+        return "list([])";
+      case CV_IDENTIFIER:
+        return "identifier";
+    }
+    abort();
+  }
+
  private:
   t_const_value_kind kind_ = CV_BOOL;
 
@@ -304,26 +324,6 @@ class t_const_value {
   //   const MyStruct s = MyStruct{a = 1, b = 2};
   bool is_struct_literal_ = false;
 
-  static std::string_view kind_to_string(t_const_value_kind kind) {
-    switch (kind) {
-      case CV_BOOL:
-        return "bool";
-      case CV_INTEGER:
-        return "integer";
-      case CV_DOUBLE:
-        return "double";
-      case CV_STRING:
-        return "string";
-      case CV_MAP:
-        return "map({})";
-      case CV_LIST:
-        return "list([])";
-      case CV_IDENTIFIER:
-        return "identifier";
-    }
-    abort();
-  }
-
   void check_kind(t_const_value_kind expected) const {
     if (kind_ != expected) {
       throw std::runtime_error(fmt::format(
@@ -338,6 +338,10 @@ class t_const_value {
   // backwards compatibility.
   const t_type* get_ttype() const { return ttype_.get_type(); }
 };
+
+// Returns the ProtocolObject ValueType of a t_const_value
+t_type::value_type from_const_value_type(
+    t_const_value::t_const_value_kind kind);
 
 } // namespace apache::thrift::compiler
 

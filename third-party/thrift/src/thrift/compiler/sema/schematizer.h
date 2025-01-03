@@ -36,6 +36,8 @@ class t_typedef;
 
 namespace detail {
 
+class protocol_value_builder;
+
 class schematizer {
  public:
   enum class value_id : int64_t {};
@@ -126,12 +128,6 @@ class schematizer {
   std::string_view program_checksum(const t_program& program);
 };
 
-// Turns a t_const_value holding some value into a t_const_value holding a
-// protocol.Value representing this value. Currently only supports bool, i64,
-// double, string, list and map.
-std::unique_ptr<t_const_value> wrap_with_protocol_value(
-    const t_const_value& value, t_type_ref ttype);
-
 // Tag for obtaining a compact-encoded schema for the root program via a
 // pluggable function.
 struct get_schema_tag {
@@ -141,6 +137,44 @@ struct get_schema_tag {
       const t_program& /* root_program */) {
     return {};
   }
+};
+
+class protocol_value_builder {
+ public:
+  // Start resolving from a struct definition with the given type
+  explicit protocol_value_builder(const t_type& struct_ty);
+
+  // Directly resolves to the type of the underlying ProtocolObject value
+  // without external type info.
+  [[nodiscard]] static protocol_value_builder as_value_type();
+
+  // Resolves to the inner property of a given type.
+  // - For `t_struct` this finds a field with a matching name
+  // - For `t_map` this resolves to type of the value
+  [[nodiscard]] protocol_value_builder property(const t_const_value& key) const;
+
+  std::unique_ptr<t_const_value> wrap(
+      const t_const_value& val, t_type_ref ttype) const;
+
+ private:
+  explicit protocol_value_builder();
+
+  // Resolves to the key-type of a map or struct.
+  [[nodiscard]] protocol_value_builder key(const t_const_value& key) const;
+
+  // Resolves to the type of the elements in a container.
+  // Note: This excludes `map`, which is handled separately for key & value.
+  [[nodiscard]] protocol_value_builder container_element(
+      const t_const_value& val) const;
+
+  // Generates a self-describing value pair for a given `t_const_value`, e.g.
+  // String("i64Value") => I64(42)
+  // String("stringValue") => String("hello")
+  std::pair<std::unique_ptr<t_const_value>, std::unique_ptr<t_const_value>>
+  to_labeled_value(const t_const_value& value) const;
+
+ private:
+  const t_type* ty_;
 };
 
 } // namespace detail

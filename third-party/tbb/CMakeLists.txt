@@ -20,6 +20,7 @@ ExternalProject_Add(
       tbb_root=${TBB_ROOT}
       CC=${CMAKE_C_COMPILER}
       CXX=${CMAKE_CXX_COMPILER}
+      CXXFLAGS=${CMAKE_CXX_FLAGS}
       # TODO: We should pass CFLAGS/CXXFLAGS.
       tbb
   INSTALL_COMMAND ""

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<35efe35b930e7969a6eb39b236c85625>>
+// @generated SignedSource<<51dd33892d0007914f4f12040c0135a7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -71,11 +71,6 @@ pub type PositionedByteString = (Pos, bstr::BString);
 #[rust_to_ocaml(attr = "transform.opaque")]
 #[repr(C, u8)]
 pub enum ShapeFieldName {
-    /// TODO(T199271494) Eliminate this group node and its supporting code. It
-    /// is conjured by typing for inference of Shapes::idx for regex results,
-    /// but is otherwise never emitted.
-    #[rust_to_ocaml(name = "SFregex_group")]
-    SFregexGroup(Pstring),
     #[rust_to_ocaml(name = "SFlit_str")]
     SFlitStr(PositionedByteString),
     SFclassname(Id),

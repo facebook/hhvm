@@ -79,7 +79,6 @@ let pos_of_expr = Tuple3.get2
 let pos_of_shape_field_name =
   Ast_defs.(
     function
-    | SFregex_group (pos, _) -> pos
     | SFlit_str (pos, _) -> pos
     | SFclassname (pos, _) -> pos
     | SFclass_const (_, (pos, _)) -> pos)

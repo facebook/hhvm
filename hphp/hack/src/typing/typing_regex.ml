@@ -47,7 +47,7 @@ let rec keys_aux p top names_numbers acc =
 
 (*
  *  Any shape keys for our match type except 0. For re"Hel(\D)(?'o'\D)", this is
- * [ SFregex_group (p, "1"); SFregex_group (p, 'o') ].
+ * [ TSFregex_group (p, "1"); TSFlit_str (p, 'o') ].
  *
  *)
 let keys p s ~flags =

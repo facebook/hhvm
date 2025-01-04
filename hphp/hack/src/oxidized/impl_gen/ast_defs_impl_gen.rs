@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<48697de1f55638c3e384724c5a9e0f1a>>
+// @generated SignedSource<<a001e45ffcee1e6281490628ff723cf6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,9 +11,6 @@
 #![allow(clippy::all)]
 use crate::ast_defs::*;
 impl ShapeFieldName {
-    pub fn mk_sfregex_group(p0: Pstring) -> Self {
-        ShapeFieldName::SFregexGroup(p0)
-    }
     pub fn mk_sflit_str(p0: PositionedByteString) -> Self {
         ShapeFieldName::SFlitStr(p0)
     }
@@ -22,12 +19,6 @@ impl ShapeFieldName {
     }
     pub fn mk_sfclass_const(p0: Id, p1: Pstring) -> Self {
         ShapeFieldName::SFclassConst(p0, p1)
-    }
-    pub fn is_sfregex_group(&self) -> bool {
-        match self {
-            ShapeFieldName::SFregexGroup(..) => true,
-            _ => false,
-        }
     }
     pub fn is_sflit_str(&self) -> bool {
         match self {
@@ -45,12 +36,6 @@ impl ShapeFieldName {
         match self {
             ShapeFieldName::SFclassConst(..) => true,
             _ => false,
-        }
-    }
-    pub fn as_sfregex_group(&self) -> Option<&Pstring> {
-        match self {
-            ShapeFieldName::SFregexGroup(p0) => Some(p0),
-            _ => None,
         }
     }
     pub fn as_sflit_str(&self) -> Option<&PositionedByteString> {
@@ -71,12 +56,6 @@ impl ShapeFieldName {
             _ => None,
         }
     }
-    pub fn as_sfregex_group_mut(&mut self) -> Option<&mut Pstring> {
-        match self {
-            ShapeFieldName::SFregexGroup(p0) => Some(p0),
-            _ => None,
-        }
-    }
     pub fn as_sflit_str_mut(&mut self) -> Option<&mut PositionedByteString> {
         match self {
             ShapeFieldName::SFlitStr(p0) => Some(p0),
@@ -92,12 +71,6 @@ impl ShapeFieldName {
     pub fn as_sfclass_const_mut(&mut self) -> Option<(&mut Id, &mut Pstring)> {
         match self {
             ShapeFieldName::SFclassConst(p0, p1) => Some((p0, p1)),
-            _ => None,
-        }
-    }
-    pub fn as_sfregex_group_into(self) -> Option<Pstring> {
-        match self {
-            ShapeFieldName::SFregexGroup(p0) => Some(p0),
             _ => None,
         }
     }

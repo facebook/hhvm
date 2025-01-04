@@ -2254,9 +2254,6 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
 
     fn make_t_shape_field_name(&self, ShapeField(field): &ShapeField<'a>) -> TShapeField<'a> {
         TShapeField(match field {
-            ShapeFieldName::SFregexGroup(&(pos, x)) => {
-                TshapeFieldName::TSFregexGroup(self.alloc(PosString(pos, x)))
-            }
             ShapeFieldName::SFlitStr(&(pos, x)) => {
                 TshapeFieldName::TSFlitStr(self.alloc(PosByteString(pos, x)))
             }

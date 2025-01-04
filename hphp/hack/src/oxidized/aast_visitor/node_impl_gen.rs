@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<32fd0eaf8929514a05b82b7f61385838>>
+// @generated SignedSource<<be5239b7154f181abb07f72d9a81c79e>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1974,7 +1974,6 @@ impl<P: Params> Node<P> for ShapeFieldName {
         v: &mut dyn Visitor<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            ShapeFieldName::SFregexGroup(a0) => a0.accept(c, v),
             ShapeFieldName::SFlitStr(a0) => a0.accept(c, v),
             ShapeFieldName::SFclassname(a0) => a0.accept(c, v),
             ShapeFieldName::SFclassConst(a0, a1) => {

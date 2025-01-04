@@ -128,7 +128,6 @@ pub fn fmt_hint(tparams: &[&str], strip_tparams: bool, hint: &Hint) -> Result<St
         //  TODO: Check whether shape fields need to retain order *)
         Hshape(NastShapeInfo { field_map, .. }) => {
             let fmt_field_name = |name: &ShapeFieldName| match name {
-                ShapeFieldName::SFregexGroup((_, s)) => s.to_owned(),
                 ShapeFieldName::SFlitStr((_, s)) => format!("'{}'", s),
                 ShapeFieldName::SFclassname(Id(_, cid)) => {
                     format!("'{}'", fmt_name_or_prim(tparams, cid))

@@ -251,9 +251,7 @@ fn expr_requires_deep_init(ast::Expr(_, _, expr): &ast::Expr, force_class_init: 
 
 fn shape_field_requires_deep_init((name, expr): &(ast_defs::ShapeFieldName, ast::Expr)) -> bool {
     match name {
-        ast_defs::ShapeFieldName::SFregexGroup(_) | ast_defs::ShapeFieldName::SFlitStr(_) => {
-            expr_requires_deep_init_(expr)
-        }
+        ast_defs::ShapeFieldName::SFlitStr(_) => expr_requires_deep_init_(expr),
         ast_defs::ShapeFieldName::SFclassname(_) => false, // dynamic names are banned
         ast_defs::ShapeFieldName::SFclassConst(ast_defs::Id(_, s), (_, p)) => {
             class_const_requires_deep_init(s, p)

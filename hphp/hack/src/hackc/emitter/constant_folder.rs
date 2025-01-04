@@ -220,18 +220,6 @@ fn shape_to_typed_value(
         .iter()
         .map(|(sf, expr)| {
             let key = match sf {
-                ast_defs::ShapeFieldName::SFregexGroup((_, s)) => {
-                    let tv = int_expr_to_typed_value(s)?;
-                    match tv {
-                        TypedValue::Int(_) => tv,
-                        _ => {
-                            return Err(Error::unrecoverable(format!(
-                                "{} is not a valid integer index",
-                                s
-                            )));
-                        }
-                    }
-                }
                 ast_defs::ShapeFieldName::SFlitStr(id) => TypedValue::intern_string(&id.1),
                 ast_defs::ShapeFieldName::SFclassname(class_id) => nameof_to_typed_value(
                     emitter,

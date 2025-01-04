@@ -529,7 +529,6 @@ let to_dict env pos shape_ty res =
       (env, MakeType.dict r key value))
 
 let shape_field_pos = function
-  | Ast_defs.SFregex_group (p, _)
   | Ast_defs.SFlit_str (p, _)
   | Ast_defs.SFclassname (p, _) ->
     p
@@ -543,7 +542,6 @@ let check_shape_keys_validity env keys =
     (* Empty strings or literals that start with numbers are not
          permitted as shape field names. *)
     match key with
-    | Ast_defs.SFregex_group _ -> (env, key_pos, None)
     | Ast_defs.SFlit_str (_, key_name) ->
       (if Int.equal 0 (String.length key_name) then
         Typing_error_utils.add_typing_error ~env

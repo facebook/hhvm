@@ -185,7 +185,6 @@ let hint_to_string_and_symbols ~is_ctx (hint : Aast.hint) =
     append " => ";
     parse ~is_ctx:false sfi_hint
   and parse_shape_field_name = function
-    | Ast_defs.SFregex_group (_, s) -> append s
     | Ast_defs.SFlit_str (_, s) -> append ("'" ^ s ^ "'")
     | Ast_defs.SFclassname (_, c) -> append ("nameof " ^ Typing_print.strip_ns c)
     | Ast_defs.SFclass_const ((pos, c), (_, s)) ->
@@ -294,7 +293,6 @@ let rec hint_to_angle h =
   | Hoption h -> Hint.(Key (Option (hint_to_angle h)))
   | Hshape { nsi_allows_unknown_fields; nsi_field_map } ->
     let shape_field_name_to_hint = function
-      | Ast_defs.SFregex_group (_, s) -> ShapeKV.Sf_regex_group s
       | Ast_defs.SFlit_str (_, s) -> ShapeKV.Sf_lit_string s
       | Ast_defs.SFclassname (_, c) ->
         ShapeKV.Sf_class_const

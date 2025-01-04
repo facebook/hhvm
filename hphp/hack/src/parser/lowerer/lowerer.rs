@@ -960,9 +960,7 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 // TODO(T199272576) just combine with the Shape_name_check in OCaml
                 let (field_pos, field_name): (&Pos, &BStr) = match &f.name {
                     SFclassname(Id(p, _name)) => (p, "class".into()), // TODO(T199272576) sketchy check, needs to be post-namespacing and model runtime names
-                    SFregexGroup((p, name)) | SFclassConst(_, (p, name)) => {
-                        (p, name.as_bytes().into())
-                    }
+                    SFclassConst(_, (p, name)) => (p, name.as_bytes().into()),
                     SFlitStr((p, name)) => (p, name.as_ref()),
                 };
 

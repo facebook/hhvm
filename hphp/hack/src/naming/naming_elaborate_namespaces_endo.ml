@@ -446,9 +446,7 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
 
     method! on_shape_field_name env sfn =
       match sfn with
-      | SFregex_group _
-      | SFlit_str _ ->
-        sfn
+      | SFlit_str _ -> sfn
       | SFclassname x -> SFclassname (elaborate_type_name env x)
       | SFclass_const (x, (pos, y)) ->
         let x = elaborate_type_name env x in

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<ff990ef043e3d5f310bac240791bed0b>>
+// @generated SignedSource<<a6fd611464aef830cc5be61bac77fae2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1974,7 +1974,6 @@ impl<P: Params> NodeMut<P> for ShapeFieldName {
         v: &mut dyn VisitorMut<'node, Params = P>,
     ) -> Result<(), P::Error> {
         match self {
-            ShapeFieldName::SFregexGroup(a0) => a0.accept(c, v),
             ShapeFieldName::SFlitStr(a0) => a0.accept(c, v),
             ShapeFieldName::SFclassname(a0) => a0.accept(c, v),
             ShapeFieldName::SFclassConst(a0, a1) => {

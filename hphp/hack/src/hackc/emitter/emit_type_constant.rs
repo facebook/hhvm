@@ -105,7 +105,6 @@ fn is_prim_or_resolved_classname(kind: TypeStructureKind) -> bool {
 fn shape_field_name(sf: &ShapeFieldName) -> (String, bool) {
     use oxidized::ast_defs::Id;
     match sf {
-        ShapeFieldName::SFregexGroup((_, s)) => (s.to_string(), false),
         ShapeFieldName::SFlitStr((_, s)) => {
             (
                 // FIXME: This is not safe--string literals are binary strings.

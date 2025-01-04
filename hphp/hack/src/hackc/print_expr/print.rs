@@ -293,7 +293,6 @@ fn print_expr(
     ) -> Result<()> {
         use ast::ShapeFieldName as S;
         match field {
-            S::SFregexGroup((_, s)) => print_expr_int(w, s.as_ref()),
             S::SFlitStr((_, s)) => print_expr_string(w, s),
             S::SFclassname(id) => write::wrap_by(w, "\"", |w| print_expr_id(w, env, id.1.as_ref())),
             // TODO(T204024412) This is broken, it loses info about the class

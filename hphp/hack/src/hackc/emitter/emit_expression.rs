@@ -1106,7 +1106,6 @@ fn extract_shape_field_name_pstring<'a>(
 ) -> Result<ast::Expr_> {
     use ast_defs::ShapeFieldName as SF;
     Ok(match field {
-        SF::SFregexGroup(s) => ast::Expr_::mk_int(s.1.clone()),
         SF::SFlitStr(s) => ast::Expr_::mk_string(s.1.clone()),
         SF::SFclassname(id) => {
             ast::Expr_::mk_nameof(ast::ClassId((), pos.clone(), ast::ClassId_::CI(id.clone())))

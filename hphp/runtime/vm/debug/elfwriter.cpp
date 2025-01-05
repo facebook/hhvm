@@ -16,6 +16,10 @@
 #include "hphp/runtime/vm/debug/elfwriter.h"
 #include "hphp/runtime/vm/debug/gdb-jit.h"
 #include <elf.h>
+#include <libdwarf.h>
+#ifdef LIBDWARF_USE_NEW_PRODUCER_API
+#include <libdwarfp.h>
+#endif
 #include <string>
 #include <vector>
 #include <iostream>
@@ -37,6 +41,10 @@ namespace Debug {
 
 TRACE_SET_MOD(debuginfo)
 static const uint8_t CFA_OFFSET = 16;
+
+#ifdef LIBDWARF_USE_NEW_PRODUCER_API
+#define DW_DLV_NOCOUNT ((Dwarf_Signed) -1)
+#endif
 
 void ElfWriter::logError(const std::string& msg) {
   perror("");
@@ -118,7 +126,7 @@ bool ElfWriter::initDwarfProducer() {
 bool ElfWriter::initDwarfProducer() {
   Dwarf_Error error = 0;
   auto ret = dwarf_producer_init(
-    DW_DLC_WRITE | DW_DLC_SIZE_64 | DW_DLC_SYMBOLIC_RELOCATIONS,
+    DW_DLC_SIZE_64 | DW_DLC_SYMBOLIC_RELOCATIONS,
     g_dwarfCallback,
     nullptr,
     nullptr,
@@ -136,13 +144,334 @@ bool ElfWriter::initDwarfProducer() {
 }
 #endif
 
+Dwarf_Unsigned dwarf_add_expr_gen_compat(
+  Dwarf_P_Expr expr,
+  Dwarf_Small opcode,
+  Dwarf_Unsigned val1,
+  Dwarf_Unsigned val2,
+  Dwarf_Error* error
+) {
+  Dwarf_Unsigned len = 0;
+  int res = dwarf_add_expr_gen_a(expr, opcode, val1, val2, &len, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+
+  return len;
+}
+
+Dwarf_P_Die dwarf_new_die_compat(
+  Dwarf_P_Debug producer,
+  Dwarf_Tag tag,
+  Dwarf_P_Die parent,
+  Dwarf_P_Die child,
+  Dwarf_P_Die left,
+  Dwarf_P_Die right,
+  Dwarf_Error* error
+) {
+  Dwarf_P_Die die = nullptr;
+  int res = dwarf_new_die_a(producer, tag, parent, child, left, right, &die, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return die;
+}
+
+Dwarf_P_Attribute dwarf_add_AT_name_compat(Dwarf_P_Die die, char* name, Dwarf_Error* error) {
+  Dwarf_P_Attribute attribute = nullptr;
+  int res = dwarf_add_AT_name_a(die, name, &attribute, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return attribute;
+}
+
+Dwarf_P_Attribute dwarf_add_AT_targ_address_compat(
+  Dwarf_P_Debug producer,
+  Dwarf_P_Die ownerDie,
+  Dwarf_Half attr,
+  Dwarf_Unsigned value,
+  Dwarf_Unsigned symbolIndex,
+  Dwarf_Error* error
+) {
+  Dwarf_P_Attribute attribute = nullptr;
+  int res = dwarf_add_AT_targ_address_c(producer, ownerDie, attr, value, symbolIndex, &attribute, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return attribute;
+}
+
+
+Dwarf_P_Attribute dwarf_add_AT_location_expr_compat(
+  Dwarf_P_Debug producer,
+  Dwarf_P_Die ownerDie,
+  Dwarf_Half attr,
+  Dwarf_P_Expr locExpr,
+  Dwarf_Error* error
+) {
+  Dwarf_P_Attribute attribute = nullptr;
+  int res = dwarf_add_AT_location_expr_a(producer, ownerDie, attr, locExpr, &attribute, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return attribute;
+}
+
+Dwarf_P_Attribute dwarf_add_AT_reference_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_P_Die ownerDie,
+  Dwarf_Half attr,
+  Dwarf_P_Die otherDie,
+  Dwarf_Error* error
+) {
+  Dwarf_P_Attribute attribute = nullptr;
+  int res = dwarf_add_AT_reference_c(dbg, ownerDie, attr, otherDie, &attribute, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return attribute;
+}
+
+Dwarf_P_Die dwarf_die_link_compat(
+  Dwarf_P_Die newDie,
+  Dwarf_P_Die parent,
+  Dwarf_P_Die child,
+  Dwarf_P_Die left,
+  Dwarf_P_Die right,
+  Dwarf_Error* error
+) {
+  int res = dwarf_die_link_a(newDie, parent, child, left, right, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return newDie;
+}
+
+Dwarf_P_Attribute dwarf_add_AT_flag_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_P_Die ownerDie,
+  Dwarf_Half attr,
+  Dwarf_Small flag,
+  Dwarf_Error* error
+) {
+  Dwarf_P_Attribute attribute = nullptr;
+  int res = dwarf_add_AT_flag_a(dbg, ownerDie, attr, flag, &attribute, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return attribute;
+}
+
+Dwarf_P_Attribute dwarf_add_AT_unsigned_const_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_P_Die ownerDie,
+  Dwarf_Half attr,
+  Dwarf_Unsigned value,
+  Dwarf_Error* error
+) {
+  Dwarf_P_Attribute attribute = nullptr;
+  int res = dwarf_add_AT_unsigned_const_a(dbg, ownerDie, attr, value, &attribute, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return attribute;
+}
+
+Dwarf_P_Fde dwarf_new_fde_compat(
+  Dwarf_P_Debug producer,
+  Dwarf_Error* error
+) {
+  Dwarf_P_Fde fde = nullptr;
+  int res = dwarf_new_fde_a(producer, &fde, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+  return fde;
+}
+
+Dwarf_Unsigned dwarf_add_frame_fde_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_P_Fde fde,
+  Dwarf_P_Die die,
+  Dwarf_Unsigned cie,
+  Dwarf_Unsigned virtAddr,
+  Dwarf_Unsigned codeLen,
+  Dwarf_Unsigned symbolIndex,
+  Dwarf_Error* error
+) {
+  Dwarf_Unsigned index = 0;
+  int res = dwarf_add_frame_fde_c(dbg, fde, die, cie, virtAddr, codeLen, symbolIndex, 0, 0, &index, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+  return index;
+}
+
+Dwarf_Unsigned dwarf_add_file_decl_compat(
+  Dwarf_P_Debug dbg,
+  char* name,
+  Dwarf_Unsigned dirIndex,
+  Dwarf_Unsigned lastMod,
+  Dwarf_Unsigned length,
+  Dwarf_Error* error
+) {
+  Dwarf_Unsigned index = 0;
+  int res = dwarf_add_file_decl_a(dbg, name, dirIndex, lastMod, length, &index, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+  return index;
+}
+
+Dwarf_Unsigned dwarf_lne_set_address_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_Addr addr,
+  Dwarf_Unsigned fileIndex,
+  Dwarf_Error* error
+) {
+  int res = dwarf_lne_set_address_a(dbg, addr, fileIndex, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+  return 0;
+}
+
+Dwarf_Unsigned dwarf_add_line_entry_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_Unsigned fileIndex,
+  Dwarf_Addr codeAddress,
+  Dwarf_Unsigned lineNo,
+  Dwarf_Signed colNo,
+  Dwarf_Bool isStmtBegin,
+  Dwarf_Bool isBBBegin,
+  Dwarf_Error* error
+) {
+  int res = dwarf_add_line_entry_c(dbg, fileIndex, codeAddress, lineNo, colNo, isStmtBegin, isBBBegin, 0, 0, 0, 0, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+  return 0;
+}
+
+Dwarf_Unsigned dwarf_lne_end_sequence_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_Addr endAddress,
+  Dwarf_Error* error
+) {
+  int res = dwarf_lne_end_sequence_a(dbg, endAddress, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+  return 0;
+}
+
+Dwarf_P_Expr dwarf_new_expr_compat(Dwarf_P_Debug producer, Dwarf_Error* error) {
+  Dwarf_P_Expr expr = nullptr;
+  int res = dwarf_new_expr_a(producer, &expr, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+  return expr;
+}
+
+Dwarf_Unsigned dwarf_add_die_to_debug_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_P_Die die,
+  Dwarf_Error* error
+) {
+  int res = dwarf_add_die_to_debug_a(dbg, die, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+  return 0;
+}
+
+Dwarf_Unsigned dwarf_add_frame_cie_compat(
+  Dwarf_P_Debug dbg,
+  char* augmenter,
+  Dwarf_Small codeAlign,
+  Dwarf_Small dataAlign,
+  Dwarf_Small returnReg,
+  Dwarf_Ptr initBytes,
+  Dwarf_Unsigned initNBytes,
+  Dwarf_Error* error
+) {
+  Dwarf_Unsigned index = 0;
+  int res = dwarf_add_frame_cie_a(dbg, augmenter, codeAlign, dataAlign, returnReg, initBytes, initNBytes, &index, error);
+  if (res != DW_DLV_OK) {
+    return DW_DLV_NOCOUNT;
+  }
+  return index;
+}
+
+Dwarf_Unsigned dwarf_transform_to_disk_form_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_Error* error
+) {
+#ifdef LIBDWARF_USE_NEW_PRODUCER_API
+  Dwarf_Unsigned count = 0;
+#else
+  Dwarf_Signed count = 0;
+#endif
+
+  int res = dwarf_transform_to_disk_form_a(dbg, &count, error);
+  if (res == DW_DLV_ERROR) {
+    return DW_DLV_NOCOUNT;
+  }
+
+#ifdef LIBDWARF_USE_NEW_PRODUCER_API
+  return count;
+#else
+  return static_cast<Dwarf_Unsigned>(count);
+#endif
+}
+
+Dwarf_Ptr dwarf_get_section_bytes_compat(
+  Dwarf_P_Debug dbg,
+  Dwarf_Unsigned* sectionIndex,
+  Dwarf_Unsigned* length,
+  Dwarf_Error* error
+) {
+  Dwarf_Signed unused;
+  Dwarf_Ptr bytes = nullptr;
+
+#ifdef LIBDWARF_USE_NEW_PRODUCER_API
+  Dwarf_Unsigned bcSectionIndex;
+#else
+  Dwarf_Signed bcSectionIndex;
+#endif
+
+  int res = dwarf_get_section_bytes_a(dbg, unused, &bcSectionIndex, length, &bytes, error);
+  if (res != DW_DLV_OK) {
+    return nullptr;
+  }
+
+#ifdef LIBDWARF_USE_NEW_PRODUCER_API
+  *sectionIndex = bcSectionIndex;
+#else
+  *sectionIndex = static_cast<Dwarf_Unsigned>(bcSectionIndex);
+#endif
+
+  return bytes;
+}
+
 Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   Dwarf_Error error = 0;
 
   /* top level DIE for each function */
-  Dwarf_P_Die func = dwarf_new_die(m_dwarfProducer,
+  Dwarf_P_Die func = dwarf_new_die_compat(m_dwarfProducer,
     DW_TAG_subprogram, nullptr, nullptr, nullptr, nullptr, &error);
-  if (reinterpret_cast<Dwarf_Addr>(func) == DW_DLV_BADADDR) {
+  if (func == nullptr) {
     logError("unable to create child DIE");
     return nullptr;
   }
@@ -152,7 +481,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   /* if this function is from an unseen file, register file name
    * and get index to file name */
   if (it == m_fileDB.end()) {
-    file = dwarf_add_file_decl(m_dwarfProducer,
+    file = dwarf_add_file_decl_compat(m_dwarfProducer,
       (char *)f->file, 0, 0, 1000, &error);
     if (file == DW_DLV_NOCOUNT) {
       logError("unable to add file declaration");
@@ -165,24 +494,24 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
 
   /* add function name attribute to function DIE */
   Dwarf_P_Attribute at;
-  at = dwarf_add_AT_name(func, (char *)f->name.c_str(), &error);
-  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+  at = dwarf_add_AT_name_compat(func, (char *)f->name.c_str(), &error);
+  if (at == nullptr) {
     logError("unable to add name attribute to function");
     return nullptr;
   }
 
   /* Add lower PC bound to function DIE */
-  at = dwarf_add_AT_targ_address(m_dwarfProducer, func, DW_AT_low_pc,
+  at = dwarf_add_AT_targ_address_compat(m_dwarfProducer, func, DW_AT_low_pc,
     reinterpret_cast<Dwarf_Unsigned>(f->range.begin()), 0, &error);
-  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+  if (at == nullptr) {
     logError("unable to add low_pc attribute to function");
     return nullptr;
   }
 
   /* add upper PC bound to function DIE */
-  at = dwarf_add_AT_targ_address(m_dwarfProducer, func, DW_AT_high_pc,
+  at = dwarf_add_AT_targ_address_compat(m_dwarfProducer, func, DW_AT_high_pc,
     reinterpret_cast<Dwarf_Unsigned>(f->range.end()), 0, &error);
-  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+  if (at == nullptr) {
     logError("unable to add high_pc attribute to function");
     return nullptr;
   }
@@ -190,7 +519,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   /* register line number information for function:
    * 1. register start address */
   Dwarf_Unsigned u;
-  u = dwarf_lne_set_address(m_dwarfProducer,
+  u = dwarf_lne_set_address_compat(m_dwarfProducer,
     reinterpret_cast<Dwarf_Addr>(f->range.begin()), 0, &error);
   if (u != 0) {
     logError("unable to set line start address");
@@ -200,7 +529,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   /* 2. register line number info for each tracelet in function */
   std::vector<LineEntry>::iterator it2;
   for (it2 = f->m_lineTable.begin(); it2 != f->m_lineTable.end(); it2++) {
-    u = dwarf_add_line_entry(m_dwarfProducer,
+    u = dwarf_add_line_entry_compat(m_dwarfProducer,
       file, reinterpret_cast<Dwarf_Addr>(it2->range.begin()), it2->lineNumber,
       0, 1, 0, &error);
     if (u != 0) {
@@ -212,7 +541,7 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   }
 
   /* 3. register end address of function */
-  u = dwarf_lne_end_sequence(m_dwarfProducer,
+  u = dwarf_lne_end_sequence_compat(m_dwarfProducer,
     reinterpret_cast<Dwarf_Addr>(f->range.end()), &error);
   if (u != 0) {
     logError("unable to set line end address");
@@ -221,33 +550,33 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
 
   {
     /* 4. register frame base of function */
-    Dwarf_P_Expr locExpr = dwarf_new_expr(m_dwarfProducer, &error);
+    Dwarf_P_Expr locExpr = dwarf_new_expr_compat(m_dwarfProducer, &error);
     if (locExpr == nullptr) {
       logError("unable to create new location expression");
       return nullptr;
     }
 
-    u = dwarf_add_expr_gen(locExpr, DW_OP_call_frame_cfa, 0, 0, &error);
+    u = dwarf_add_expr_gen_compat(locExpr, DW_OP_call_frame_cfa, 0, 0, &error);
     if (u == DW_DLV_NOCOUNT) {
       logError("unable to add subexpression to location expression");
       return nullptr;
     }
 
-    u = dwarf_add_expr_gen(locExpr, DW_OP_const1u, CFA_OFFSET, 0, &error);
+    u = dwarf_add_expr_gen_compat(locExpr, DW_OP_const1u, CFA_OFFSET, 0, &error);
     if (u == DW_DLV_NOCOUNT) {
       logError("unable to add subexpression to location expression");
       return nullptr;
     }
 
-    u = dwarf_add_expr_gen(locExpr, DW_OP_minus, 0, 0, &error);
+    u = dwarf_add_expr_gen_compat(locExpr, DW_OP_minus, 0, 0, &error);
     if (u == DW_DLV_NOCOUNT) {
       logError("unable to add subexpression to location expression");
       return nullptr;
     }
 
-    Dwarf_P_Attribute frameBaseAttr = dwarf_add_AT_location_expr(
+    Dwarf_P_Attribute frameBaseAttr = dwarf_add_AT_location_expr_compat(
       m_dwarfProducer, func, DW_AT_frame_base, locExpr, &error);
-    if (reinterpret_cast<Dwarf_Addr>(frameBaseAttr) == DW_DLV_BADADDR) {
+    if (frameBaseAttr == nullptr) {
       logError("unable to add frame_base attribute");
       return nullptr;
     }
@@ -258,21 +587,21 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
   int i = 1;
   for (std::vector<std::string>::iterator it = f->m_namedLocals.begin();
        it != f->m_namedLocals.end(); it++) {
-    Dwarf_P_Die localVar = dwarf_new_die(m_dwarfProducer,
+    Dwarf_P_Die localVar = dwarf_new_die_compat(m_dwarfProducer,
       DW_TAG_variable, nullptr, nullptr, nullptr, nullptr, &error);
-    if (reinterpret_cast<Dwarf_Addr>(localVar) == DW_DLV_BADADDR) {
+    if (localVar == nullptr) {
       logError("unable to create new DIE for local variable");
       return nullptr;
     }
 
     /* Create location expression defined w.r.t DW_AT_frame_base */
-    Dwarf_P_Expr locExpr = dwarf_new_expr(m_dwarfProducer, &error);
+    Dwarf_P_Expr locExpr = dwarf_new_expr_compat(m_dwarfProducer, &error);
     if (locExpr == nullptr) {
       logError("unable to create new location expression");
       return nullptr;
     }
 
-    u = dwarf_add_expr_gen(locExpr, DW_OP_fbreg,
+    u = dwarf_add_expr_gen_compat(locExpr, DW_OP_fbreg,
       -(i * sizeof(TypedValue)), 0, &error);
     ++i;
     if (u == DW_DLV_NOCOUNT) {
@@ -280,33 +609,33 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
       return nullptr;
     }
 
-    Dwarf_P_Attribute locAttr = dwarf_add_AT_location_expr(m_dwarfProducer,
+    Dwarf_P_Attribute locAttr = dwarf_add_AT_location_expr_compat(m_dwarfProducer,
       localVar, DW_AT_location, locExpr, &error);
-    if (reinterpret_cast<Dwarf_Addr>(locAttr) == DW_DLV_BADADDR) {
+    if (locAttr == nullptr) {
       logError("unable to add location attribute to local variable");
       return nullptr;
     }
 
-    Dwarf_P_Attribute nameAttr = dwarf_add_AT_name(localVar, const_cast<char *>(it->data()), &error);
-    if (reinterpret_cast<Dwarf_Addr>(nameAttr) == DW_DLV_BADADDR) {
+    Dwarf_P_Attribute nameAttr = dwarf_add_AT_name_compat(localVar, const_cast<char *>(it->data()), &error);
+    if (nameAttr == nullptr) {
       logError("unable to add name attribute to local variable");
       return nullptr;
     }
 
-    Dwarf_P_Attribute varTypeAttr = dwarf_add_AT_reference(m_dwarfProducer,
+    Dwarf_P_Attribute varTypeAttr = dwarf_add_AT_reference_compat(m_dwarfProducer,
       localVar, DW_AT_type, type, &error);
-    if (reinterpret_cast<Dwarf_Addr>(varTypeAttr) == DW_DLV_BADADDR) {
+    if (varTypeAttr == nullptr) {
       logError("unable to add type attribute to local variable DIE");
       return nullptr;
     }
 
     Dwarf_P_Die res = 0;
     if (lastLocal != nullptr) {
-      res = dwarf_die_link(localVar, nullptr, nullptr, lastLocal, nullptr, &error);
+      res = dwarf_die_link_compat(localVar, nullptr, nullptr, lastLocal, nullptr, &error);
     } else {
-      res = dwarf_die_link(localVar, func, nullptr, nullptr, nullptr, &error);
+      res = dwarf_die_link_compat(localVar, func, nullptr, nullptr, nullptr, &error);
     }
-    if (reinterpret_cast<Dwarf_Addr>(res) == DW_DLV_BADADDR) {
+    if (res == nullptr) {
       logError("unable to link die");
       return nullptr;
     }
@@ -318,31 +647,31 @@ Dwarf_P_Die ElfWriter::addFunctionInfo(FunctionInfo* f, Dwarf_P_Die type) {
 
 Dwarf_P_Die ElfWriter::makeLocalTypeDie() {
   Dwarf_Error error = 0;
-  Dwarf_P_Die typedValueType = dwarf_new_die(m_dwarfProducer,
+  Dwarf_P_Die typedValueType = dwarf_new_die_compat(m_dwarfProducer,
     DW_TAG_structure_type, nullptr, nullptr, nullptr, nullptr, &error);
-  if (reinterpret_cast<Dwarf_Addr>(typedValueType) == DW_DLV_BADADDR) {
+  if (typedValueType == nullptr) {
     logError("unable to create new DIE for TypedValue type");
     return nullptr;
   }
 
   /* hard coding the name of 'HPHP::TypedValue' */
   Dwarf_P_Attribute at;
-  at = dwarf_add_AT_name(typedValueType, "HPHP::TypedValue", &error);
-  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+  at = dwarf_add_AT_name_compat(typedValueType, "HPHP::TypedValue", &error);
+  if (at == nullptr) {
     logError("unable to add name attribute to TypedValue type DIE");
     return nullptr;
   }
 
-  at = dwarf_add_AT_flag(m_dwarfProducer,
+  at = dwarf_add_AT_flag_compat(m_dwarfProducer,
     typedValueType, DW_AT_declaration, 1, &error);
-  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+  if (at == nullptr) {
     logError("unable to add declaration attribute to TypedValue type DIE");
     return nullptr;
   }
 
-  at = dwarf_add_AT_unsigned_const(m_dwarfProducer,
+  at = dwarf_add_AT_unsigned_const_compat(m_dwarfProducer,
     typedValueType, DW_AT_byte_size, sizeof(TypedValue), &error);
-  if (reinterpret_cast<Dwarf_Addr>(at) == DW_DLV_BADADDR) {
+  if (at == nullptr) {
     logError("unable to add byte_size attribute to TypedValue type DIE");
     return nullptr;
   }
@@ -355,9 +684,9 @@ bool ElfWriter::addSymbolInfo(DwarfChunk* d) {
   /* create a top level DIE (debug information entry)
    * all subsequent DIEs' will be children of this DIE
    */
-  Dwarf_P_Die codeUnit = dwarf_new_die(m_dwarfProducer,
+  Dwarf_P_Die codeUnit = dwarf_new_die_compat(m_dwarfProducer,
     DW_TAG_compile_unit, nullptr, nullptr, nullptr, nullptr, &error);
-  if (reinterpret_cast<Dwarf_Addr>(codeUnit) == DW_DLV_BADADDR) {
+  if (codeUnit == nullptr) {
     logError("unable to create code unit DIE");
     return false;
   }
@@ -370,8 +699,8 @@ bool ElfWriter::addSymbolInfo(DwarfChunk* d) {
     return false;
   }
   Dwarf_P_Die linkRes;
-  linkRes = dwarf_die_link(type, codeUnit, nullptr, nullptr, nullptr, &error);
-  if (reinterpret_cast<Dwarf_Addr>(linkRes) == DW_DLV_BADADDR) {
+  linkRes = dwarf_die_link_compat(type, codeUnit, nullptr, nullptr, nullptr, &error);
+  if (linkRes == nullptr) {
     logError("unable to link die");
     return false;
   }
@@ -386,11 +715,11 @@ bool ElfWriter::addSymbolInfo(DwarfChunk* d) {
     }
 
     if (lastChild) {
-      linkRes = dwarf_die_link(func, nullptr, nullptr, lastChild, nullptr, &error);
+      linkRes = dwarf_die_link_compat(func, nullptr, nullptr, lastChild, nullptr, &error);
     } else {
-      linkRes = dwarf_die_link(func, codeUnit, nullptr, nullptr, nullptr, &error);
+      linkRes = dwarf_die_link_compat(func, codeUnit, nullptr, nullptr, nullptr, &error);
     }
-    if (reinterpret_cast<Dwarf_Addr>(linkRes) == DW_DLV_BADADDR) {
+    if (linkRes == nullptr) {
       logError("unable to link die");
       return false;
     }
@@ -398,7 +727,7 @@ bool ElfWriter::addSymbolInfo(DwarfChunk* d) {
   }
 
   /* register top level DIE */
-  Dwarf_Unsigned res = dwarf_add_die_to_debug(m_dwarfProducer,
+  Dwarf_Unsigned res = dwarf_add_die_to_debug_compat(m_dwarfProducer,
     codeUnit, &error);
   if (res != DW_DLV_OK) {
     logError("unable to add DIE to DWARF");
@@ -432,7 +761,7 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
   b.dwarf_cfa_same_value(RSP);
 
   /* register above rules in a CIE (common information entry) */
-  Dwarf_Signed cie_index = dwarf_add_frame_cie(
+  Dwarf_Signed cie_index = dwarf_add_frame_cie_compat(
     m_dwarfProducer,
     "",
     DWARF_CODE_ALIGN,
@@ -451,8 +780,8 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
    * an FDE (Frame Description entry) */
   FuncPtrDB::iterator it;
   for (it = d->m_functions.begin(); it != d->m_functions.end(); it++) {
-    Dwarf_P_Fde fde = dwarf_new_fde(m_dwarfProducer, &error);
-    if (reinterpret_cast<Dwarf_Addr>(fde) == DW_DLV_BADADDR) {
+    Dwarf_P_Fde fde = dwarf_new_fde_compat(m_dwarfProducer, &error);
+    if (fde == nullptr) {
       logError("Unable to create FDE");
       return false;
     }
@@ -463,12 +792,12 @@ bool ElfWriter::addFrameInfo(DwarfChunk* d) {
       logError("Unable to add instructions to fde");
       return false;
     }
-    Dwarf_Unsigned fde_index = dwarf_add_frame_fde(
+    Dwarf_Unsigned fde_index = dwarf_add_frame_fde_compat(
       m_dwarfProducer, fde, 0, cie_index,
       (Dwarf_Unsigned)((*it)->range.begin()),
       (*it)->range.size(),
       0, &error);
-    if (fde_index == DW_DLV_BADADDR) {
+    if (fde_index == DW_DLV_NOCOUNT) {
       logError("Unable to add FDE");
       return false;
     }
@@ -525,15 +854,20 @@ bool ElfWriter::addSectionData(int section_index, void *data, uint64_t size) {
 }
 
 bool ElfWriter::writeDwarfInfo() {
-  Dwarf_Signed sections = dwarf_transform_to_disk_form (m_dwarfProducer, 0);
+  Dwarf_Unsigned sections = dwarf_transform_to_disk_form_compat(m_dwarfProducer, 0);
 
   Dwarf_Signed i = 0;
-  Dwarf_Signed elf_section_index = 0;
+  Dwarf_Unsigned elf_section_index = 0;
   Dwarf_Unsigned length = 0;
 
   for (i = 0; i < sections; i++) {
-    Dwarf_Ptr bytes = dwarf_get_section_bytes(
-      m_dwarfProducer, 0, &elf_section_index, &length, 0);
+    Dwarf_Ptr bytes = dwarf_get_section_bytes_compat(
+      m_dwarfProducer, &elf_section_index, &length, 0);
+
+    if (bytes == nullptr) {
+      logError("Unable to create section");
+      return false;
+    }
 
     if (!addSectionData(elf_section_index, bytes, length)) {
       logError("Unable to create section");
@@ -634,7 +968,7 @@ ElfWriter::~ElfWriter() {
     unlink(m_filename.c_str());
   }
   if (m_dwarfProducer != nullptr)
-    dwarf_producer_finish(m_dwarfProducer, 0);
+    dwarf_producer_finish_a(m_dwarfProducer, 0);
 }
 
 }

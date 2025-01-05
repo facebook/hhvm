@@ -238,6 +238,10 @@ if (NOT WINDOWS)
     add_definitions("-DLIBDWARF_USE_INIT_C")
   endif()
 
+  if (LIBDWARF_USE_NEW_PRODUCER_API)
+    add_definitions("-DLIBDWARF_USE_NEW_PRODUCER_API")
+  endif()
+
   find_package(LibElf REQUIRED)
   include_directories(${LIBELF_INCLUDE_DIRS})
   if (ELF_GETSHDRSTRNDX)
@@ -272,6 +276,10 @@ endif()
 
 if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
+
+if (LINUX)
+  find_package(LibUnwind REQUIRED)
 endif()
 
 # This is required by Homebrew's libc. See
@@ -334,6 +342,10 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${LIBEVENT_LIB})
   target_link_libraries(${target} ${VISIBILITY} ${CURL_LIBRARIES})
   target_link_libraries(${target} ${VISIBILITY} glog)
+
+  if (LINUX)
+    target_link_libraries(${target} ${VISIBILITY} ${LIBUNWIND_LIBRARIES})
+  endif()
 
   if (LIBINOTIFY_LIBRARY)
     target_link_libraries(${target} ${VISIBILITY} ${LIBINOTIFY_LIBRARY})

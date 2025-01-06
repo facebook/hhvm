@@ -16,7 +16,7 @@ aast_parser = { version = "0.0.0", path = "../aast_parser" }
 ast_and_decl_parser = { version = "0.0.0", path = "../ast_and_decl_parser" }
 bumpalo = { version = "3.14.0", features = ["allocator_api", "collections"] }
 clap = { version = "4.5.20", features = ["derive", "env", "string", "unicode", "wrap_help"] }
-criterion = { version = "0.5.1", features = ["csv_output"] }
+criterion = { version = "0.5.1", features = ["async_tokio", "csv_output"] }
 cst_and_decl_parser = { version = "0.0.0", path = "../../api/cargo/cst_and_decl_parser" }
 direct_decl_parser = { version = "0.0.0", path = "../../api/cargo/direct_decl_parser" }
 parser_core_types = { version = "0.0.0", path = "../core_types" }

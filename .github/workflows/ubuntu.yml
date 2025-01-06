@@ -26,7 +26,7 @@ env:
 
 jobs:
   build_ubuntu_focal_nightly:
-    runs-on: ubuntu-24.04
+    runs-on: 8-core-ubuntu
     container:
       image: ubuntu:noble
       env:

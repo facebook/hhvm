@@ -85,10 +85,17 @@ struct parser_scan_window {
     return *head++;
   }
   /**
-   * Creates a copy of this parser_scan_window and advances the head n times.
+   * Creates a copy of this parser_scan_window with its head advanced n times
+   * (or retreated if n is negative).
+   *
+   * The head is never moved past the end of the input or before the start of
+   * the scan window.
    */
-  [[nodiscard]] parser_scan_window next(std::size_t n = 1) {
-    return with_head(std::min(std::prev(end), std::next(head, n)));
+  [[nodiscard]] parser_scan_window next(cursor::difference_type n = 1) {
+    return with_head(std::clamp(std::next(head, n), start, std::prev(end)));
+  }
+  [[nodiscard]] parser_scan_window prev(cursor::difference_type n = 1) {
+    return next(-n);
   }
 
   /**
@@ -178,20 +185,34 @@ struct [[nodiscard]] parse_result
   using base::operator->;
 };
 
-bool try_consume_token(parser_scan_window* scan, tok kind) {
+/**
+ * Advances the provided scan window iff the next token matches the provided
+ * kind. If the next token is not a match, then the scan window is unchanged.
+ *
+ * This function returns the observed token if matched, otherwise nullptr.
+ */
+const token* try_consume_token(parser_scan_window* scan, tok kind) {
   assert(scan);
   if (scan->peek().kind == kind) {
-    scan->advance();
-    return true;
+    return &scan->advance();
   }
-  return false;
+  return nullptr;
 }
 
+/**
+ * Advances the provided scan window iff the next series of token matches the
+ * a sequence of token kinds in the provided order. If there is no exact match,
+ * then the scan window is unchanged.
+ *
+ * This function returns true iff the scan window was advanced, otherwise false.
+ */
 bool try_consume_tokens(
     parser_scan_window* scan, std::initializer_list<tok> kinds) {
   assert(scan);
+  auto original = *scan;
   for (tok t : kinds) {
     if (!try_consume_token(scan, t)) {
+      *scan = original;
       return false;
     }
   }
@@ -384,11 +405,9 @@ class standalone_lines_scanner {
     };
 
     while (scan.can_advance()) {
-      if (scan.peek().kind == tok::newline) {
-        scan.advance();
+      if (try_consume_token(&scan, tok::newline)) {
         commit_current_line_markings();
       }
-
       if (try_consume_token(&scan, tok::whitespace)) {
         scan = scan.make_fresh();
         continue;
@@ -748,7 +767,8 @@ class parser {
       // the scan window.
       return {std::nullopt, scan};
     }
-    return parse_result{std::optional{ast::text{scan.range(), result}}, scan};
+    return parse_result{
+        std::optional{ast::text{scan.range(), std::move(result)}}, scan};
   }
 
   // Returns an empty parse result if no newline was found.
@@ -782,30 +802,23 @@ class parser {
   // with by the lexer already.
   parse_result<ast::comment> parse_comment(parser_scan_window scan) {
     assert(scan.empty());
-    if (scan.advance().kind != tok::open) {
+    if (!try_consume_tokens(&scan, {tok::open, tok::bang})) {
       return no_parse_result();
     }
-    if (scan.advance().kind != tok::bang) {
-      return no_parse_result();
+    if (try_consume_token(&scan, tok::close)) {
+      // empty comment
+      return {ast::comment{scan.range(), ""}, scan};
     }
-    const auto& text = scan.peek();
-    switch (text.kind) {
-      case tok::text:
-        scan.advance();
-        break;
-      case tok::close:
-        // empty comment
-        scan.advance();
-        return {ast::comment{scan.range(), ""}, scan};
-      default:
-        report_fatal_expected(scan, "comment text");
-    }
-    if (scan.peek().kind != tok::close) {
-      report_fatal_expected(scan, "{} to close comment", tok::close);
-    }
-    scan.advance();
 
-    return {ast::comment{scan.range(), std::string(text.string_value())}, scan};
+    if (const token* text = try_consume_token(&scan, tok::text)) {
+      if (!try_consume_token(&scan, tok::close)) {
+        report_fatal_expected(scan, "{} to close comment", tok::close);
+      }
+      return {
+          ast::comment{scan.range(), std::string(text->string_value())}, scan};
+    } else {
+      report_fatal_expected(scan, "comment text");
+    }
   }
 
   using template_body = std::variant<
@@ -877,10 +890,10 @@ class parser {
         [[fallthrough]];
       case tok::pound:
       case tok::caret:
-        // this is a section-block-open
+        // this is a block opening
         [[fallthrough]];
       case tok::slash:
-        // this is a section-block-close
+        // this is a block closing
         return no_parse_result();
       case tok::gt:
         // this is a partial-apply
@@ -928,13 +941,12 @@ class parser {
         ast::identifier{first_id.range, std::string(first_id.string_value())});
 
     while (try_consume_token(&scan, tok::dot)) {
-      const token& id_part = scan.peek();
-      if (id_part.kind != tok::identifier) {
+      if (const token* id_part = try_consume_token(&scan, tok::identifier)) {
+        path.emplace_back(ast::identifier{
+            id_part->range, std::string(id_part->string_value())});
+      } else {
         report_fatal_expected(scan, "identifier in variable-lookup");
       }
-      scan.advance();
-      path.emplace_back(
-          ast::identifier{id_part.range, std::string(id_part.string_value())});
     }
 
     auto range = scan.with_start(scan_start).range();
@@ -1039,32 +1051,31 @@ class parser {
     using function_call = expression::function_call;
 
     // Parse literals
-    {
-      const token& t = scan.advance();
-      switch (t.kind) {
-        case tok::string_literal:
-          return {
-              expression{
-                  scan.range(),
-                  expression::string_literal{std::string(t.string_value())}},
-              scan};
-        case tok::i64_literal:
-          return {
-              expression{scan.range(), expression::i64_literal{t.i64_value()}},
-              scan};
-        case tok::kw_null:
-          return {expression{scan.range(), expression::null_literal{}}, scan};
-        case tok::kw_true:
-          return {expression{scan.range(), expression::true_literal{}}, scan};
-        case tok::kw_false:
-          return {expression{scan.range(), expression::false_literal{}}, scan};
-        default:
-          // Other tokens are not literals, so reset the scan.
-          scan = scan.with_head(scan_start);
-          break;
-      }
-      assert(scan.empty());
+    if (const token* string_literal =
+            try_consume_token(&scan, tok::string_literal)) {
+      return {
+          expression{
+              scan.range(),
+              expression::string_literal{
+                  std::string(string_literal->string_value())}},
+          scan};
     }
+    if (const token* i64_literal = try_consume_token(&scan, tok::i64_literal)) {
+      return {
+          expression{
+              scan.range(), expression::i64_literal{i64_literal->i64_value()}},
+          scan};
+    }
+    if (try_consume_token(&scan, tok::kw_null)) {
+      return {expression{scan.range(), expression::null_literal{}}, scan};
+    }
+    if (try_consume_token(&scan, tok::kw_true)) {
+      return {expression{scan.range(), expression::true_literal{}}, scan};
+    }
+    if (try_consume_token(&scan, tok::kw_false)) {
+      return {expression{scan.range(), expression::false_literal{}}, scan};
+    }
+    assert(scan.empty());
 
     if (parse_result lookup = parse_variable_lookup(scan)) {
       auto expr = std::move(lookup).consume_and_advance(&scan);
@@ -1101,10 +1112,11 @@ class parser {
     const auto parse_argument = [this, &func](parser_scan_window scan)
         -> parse_result<std::variant<expression, named_argument_entry>> {
       assert(scan.empty());
-      const token& id = scan.peek();
-      if (id.kind == tok::identifier && scan.next().peek().kind == tok::eq) {
-        scan = scan.next(2).make_fresh();
-        if (parse_result expr = parse_expression(scan)) {
+
+      if (try_consume_tokens(&scan, {tok::identifier, tok::eq})) {
+        const token& id = scan.prev(2).peek();
+        assert(id.kind == tok::identifier);
+        if (parse_result expr = parse_expression(scan.make_fresh())) {
           return {
               named_argument_entry{
                   id.string_value(),
@@ -1208,8 +1220,7 @@ class parser {
     }
 
     return {
-        ast::expression{scan.with_start(scan_start).range(), std::move(func)},
-        scan};
+        expression{scan.with_start(scan_start).range(), std::move(func)}, scan};
   }
 
   // let-statement →
@@ -1223,11 +1234,10 @@ class parser {
       return no_parse_result();
     }
 
-    const token& id = scan.peek();
-    if (id.kind != tok::identifier) {
+    const token* id = try_consume_token(&scan, tok::identifier);
+    if (id == nullptr) {
       report_fatal_expected(scan, "identifier in let-statement");
     }
-    scan.advance();
 
     if (!try_consume_token(&scan, tok::eq)) {
       report_fatal_expected(scan, "{} in let-statement", tok::eq);
@@ -1247,7 +1257,7 @@ class parser {
     return {
         ast::let_statement{
             scan.with_start(scan_start).range(),
-            ast::identifier{id.range, std::string(id.string_value())},
+            ast::identifier{id->range, std::string(id->string_value())},
             std::move(value)},
         scan};
   }
@@ -1262,17 +1272,16 @@ class parser {
       return no_parse_result();
     }
 
-    const token& id = scan.peek();
-    if (id.kind != tok::identifier) {
+    const token* id = try_consume_token(&scan, tok::identifier);
+    if (id == nullptr) {
       report_fatal_expected(scan, "identifier in pragma-statement");
     }
-    scan.advance();
 
     ast::pragma_statement::pragmas pragma;
-    if (id.string_value() == "ignore-newlines") {
+    if (id->string_value() == "ignore-newlines") {
       pragma = ast::pragma_statement::pragmas::ignore_newlines;
     } else {
-      report_error(scan, "unknown pragma '{}'", id.string_value());
+      report_error(scan, "unknown pragma '{}'", id->string_value());
     }
 
     if (!try_consume_token(&scan, tok::close)) {
@@ -1463,22 +1472,23 @@ class parser {
     assert(scan.empty());
     const auto scan_start = scan.start;
 
-    const token& first_component = scan.advance();
-    if (first_component.kind != tok::path_component) {
+    const token* first_component =
+        try_consume_token(&scan, tok::path_component);
+    if (first_component == nullptr) {
       return no_parse_result();
     }
     std::vector<ast::path_component> path;
     path.emplace_back(ast::path_component{
-        first_component.range, std::string(first_component.string_value())});
+        first_component->range, std::string(first_component->string_value())});
 
     while (try_consume_token(&scan, tok::slash)) {
-      const token& component_part = scan.peek();
-      if (component_part.kind != tok::path_component) {
+      const token* component_part =
+          try_consume_token(&scan, tok::path_component);
+      if (component_part == nullptr) {
         report_fatal_expected(scan, "path-component in partial-lookup");
       }
-      scan.advance();
       path.emplace_back(ast::path_component{
-          component_part.range, std::string(component_part.string_value())});
+          component_part->range, std::string(component_part->string_value())});
     }
     return {
         ast::partial_lookup{

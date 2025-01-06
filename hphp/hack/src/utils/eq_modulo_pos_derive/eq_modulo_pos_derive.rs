@@ -10,6 +10,15 @@ use synstructure::Structure;
 
 decl_derive!([EqModuloPos] => derive_eq_modulo_pos);
 
+fn workaround_non_local_def(impl_block: TokenStream) -> TokenStream {
+    // We need to upgrade synstructure to remove this warning, but doing so will also require upgrading
+    // to syn2 and rewriting to handle the API changes.
+    quote! {
+        #[allow(non_local_definitions)]
+        #impl_block
+    }
+}
+
 fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
     // By default, if you are deriving an impl of trait Foo for generic type
     // X<T>, synstructure will add Foo as a bound not only for the type
@@ -20,7 +29,7 @@ fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
 
     let eq_modulo_pos = derive_eq_modulo_pos_body(&s);
     let eq_modulo_pos_and_reason = derive_eq_modulo_pos_and_reason_body(&s);
-    s.gen_impl(quote! {
+    workaround_non_local_def(s.gen_impl(quote! {
         gen impl EqModuloPos for @Self {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
                 match self { #eq_modulo_pos }
@@ -29,7 +38,7 @@ fn derive_eq_modulo_pos(mut s: Structure<'_>) -> TokenStream {
                 match self { #eq_modulo_pos_and_reason }
             }
         }
-    })
+    }))
 }
 
 fn derive_eq_modulo_pos_body(s: &Structure<'_>) -> TokenStream {

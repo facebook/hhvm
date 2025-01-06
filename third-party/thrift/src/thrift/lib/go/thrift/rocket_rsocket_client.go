@@ -116,7 +116,8 @@ func (r *rsocketClient) RequestResponse(ctx context.Context, messageName string,
 	if err != nil {
 		return nil, nil, err
 	}
-	val, err := rsocketBlock(ctx, r.client, request)
+	mono := r.client.RequestResponse(request)
+	val, err := mono.Block(ctx)
 	if err != nil {
 		return nil, nil, err
 	}

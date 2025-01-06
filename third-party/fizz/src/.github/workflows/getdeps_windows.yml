@@ -55,6 +55,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py fetch --no-tests zlib
     - name: Fetch zstd
       run: python build/fbcode_builder/getdeps.py fetch --no-tests zstd
+    - name: Fetch jom
+      run: python build/fbcode_builder/getdeps.py fetch --no-tests jom
     - name: Fetch perl
       run: python build/fbcode_builder/getdeps.py fetch --no-tests perl
     - name: Fetch openssl
@@ -95,6 +97,8 @@ jobs:
       run: python build/fbcode_builder/getdeps.py build --no-tests zlib
     - name: Build zstd
       run: python build/fbcode_builder/getdeps.py build --no-tests zstd
+    - name: Build jom
+      run: python build/fbcode_builder/getdeps.py build --no-tests jom
     - name: Build perl
       run: python build/fbcode_builder/getdeps.py build --no-tests perl
     - name: Build openssl

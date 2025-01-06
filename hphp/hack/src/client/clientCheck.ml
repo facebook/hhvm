@@ -241,37 +241,6 @@ let filter_real_paths ~allow_directories paths =
         Utils.prerr_endlinef "Could not find file '%s'" fn;
         None)
 
-let validate_streamed_errors error_list streamed_errors =
-  let module Set = Errors.FinalizedErrorSet in
-  let limit = 10 in
-  let print_errors errors =
-    Set.to_seq errors
-    |> Seq.take 10
-    |> Seq.map Errors.to_string
-    |> Stdlib.List.of_seq
-    |> String.concat ~sep:"\n"
-  in
-  let expected = Set.of_list error_list in
-  let unexpected_errors = Set.diff streamed_errors expected in
-  let missing_errors = Set.diff expected streamed_errors in
-  if
-    (not @@ Set.is_empty unexpected_errors)
-    || (not @@ Set.is_empty missing_errors)
-  then (
-    let msg =
-      Printf.sprintf
-        "ERROR STREAMING: errors are wrong.\n\n%d unexpected errors (first %d only): %s\n\n%d missing  (first %d only) errors: %s"
-        (Set.cardinal unexpected_errors)
-        limit
-        (print_errors unexpected_errors)
-        (Set.cardinal missing_errors)
-        limit
-        (print_errors missing_errors)
-    in
-    Hh_logger.log "%s" msg;
-    HackEventLogger.invariant_violation_bug msg
-  )
-
 let main_internal
     (args : ClientEnv.client_check_env)
     (config : ServerConfig.t)
@@ -308,46 +277,11 @@ let main_internal
       && not (Sandcastle.is_sandcastle ())
     in
     if use_streaming then
-      let%lwt (exit_status, streamed_errors, watchman_clock_streaming, telemetry)
-          =
-        ClientCheckStatus.go_streaming
-          args
-          error_filter
-          ~partial_telemetry_ref
-          ~connect_then_close:(fun () -> connect_then_close args)
-      in
-      (* TODO @catg The following is only temporary to validate correctness of error streaming.
-         To delete when correctness is validated, or to put behind a flag. *)
-      let%lwt () =
-        if Option.is_none args.ClientEnv.max_errors then (
-          let%lwt res =
-            Lwt_utils.with_timeout ~timeout_sec:2. (fun () ->
-                rpc
-                  args
-                  (ServerCommandTypes.STATUS
-                     { max_errors = args.ClientEnv.max_errors; error_filter }))
-          in
-          (match res with
-          | `Timeout -> ()
-          | `Done
-              ( {
-                  ServerCommandTypes.Server_status.error_list;
-                  watchman_clock;
-                  _;
-                },
-                _telemetry ) ->
-            if
-              Option.equal
-                Watchman.equal_clock
-                watchman_clock
-                watchman_clock_streaming
-            then
-              validate_streamed_errors error_list streamed_errors);
-          Lwt.return_unit
-        ) else
-          Lwt.return_unit
-      in
-      Lwt.return (exit_status, telemetry)
+      ClientCheckStatus.go_streaming
+        args
+        error_filter
+        ~partial_telemetry_ref
+        ~connect_then_close:(fun () -> connect_then_close args)
     else
       let%lwt (status, telemetry) =
         rpc

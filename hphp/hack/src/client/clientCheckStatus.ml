@@ -101,51 +101,15 @@ let end_sentinel_short_string = function
   | Completed c -> Server_progress.show_completion_reason c
 
 module ErrorsInfo = struct
-  type t = {
-    errors: Errors.FinalizedErrorSet.t;
-    errors_count: int * int;
-    files_with_errors: Relative_path.Set.t;
-    files_reported_twice: Relative_path.t list;
-  }
+  type t = { errors_count: int * int }
 
-  let empty =
-    {
-      errors = Errors.FinalizedErrorSet.empty;
-      errors_count = (0, 0);
-      files_with_errors = Relative_path.Set.empty;
-      files_reported_twice = [];
-    }
+  let empty = { errors_count = (0, 0) }
 
   let add_tuples (i, j) (k, l) = (i + k, j + l)
 
   let accumulate
-      {
-        errors = errors_acc;
-        errors_count;
-        files_with_errors;
-        files_reported_twice;
-      }
+      { errors_count }
       (errors : Errors.finalized_error list Relative_path.Map.t) =
-    let errors_acc =
-      Relative_path.Map.fold errors ~init:errors_acc ~f:(fun _path errors acc ->
-          Errors.FinalizedErrorSet.add_seq (errors |> Stdlib.List.to_seq) acc)
-    in
-    let files_reported_twice =
-      Relative_path.Map.fold
-        errors
-        ~init:files_reported_twice
-        ~f:(fun path _ acc ->
-          if Relative_path.Set.mem files_with_errors path then
-            path :: acc
-          else
-            acc)
-    in
-    let files_with_errors =
-      Relative_path.Map.fold
-        errors
-        ~init:files_with_errors
-        ~f:(fun path _ acc -> Relative_path.Set.add acc path)
-    in
     let errors_count =
       Relative_path.Map.fold
         errors
@@ -153,27 +117,10 @@ module ErrorsInfo = struct
         ~f:(fun _ errors error_counts ->
           Errors.count_errors_and_warnings errors |> add_tuples error_counts)
     in
-    {
-      errors = errors_acc;
-      errors_count;
-      files_with_errors;
-      files_reported_twice;
-    }
+    { errors_count }
 
   let total_count { errors_count = (e, w); _ } = e + w
 end
-
-let validate_files_reported_twice files =
-  (* TODO @catg when we're happy with this validation, delete this or put behind a flag *)
-  if not @@ List.is_empty files then (
-    let msg =
-      Printf.sprintf
-        "ERROR STREAMING: The following files had errors reported multiple times:\n%s"
-      @@ (List.map files ~f:Relative_path.to_absolute |> String.concat ~sep:"\n")
-    in
-    Hh_logger.log "%s" msg;
-    HackEventLogger.invariant_violation_bug msg
-  )
 
 module ErrorPrinter : sig
   type t
@@ -271,7 +218,7 @@ let go_streaming_on_fd
     (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(progress_callback : string option -> unit) :
-    (Exit_status.t * Errors.FinalizedErrorSet.t * Telemetry.t) Lwt.t =
+    (Exit_status.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ max_errors; error_format; _ } = args in
   let errors_stream = Server_progress_lwt.watch_errors_file ~pid fd in
   let start_time = Unix.gettimeofday () in
@@ -379,12 +326,7 @@ let go_streaming_on_fd
 
   (* We will show progress indefinitely until "consume" finishes,
      at which Lwt.pick will cancel show_progress. *)
-  let%lwt ( {
-              ErrorsInfo.errors;
-              errors_count = (error_count, warning_count);
-              files_with_errors = _;
-              files_reported_twice;
-            },
+  let%lwt ( { ErrorsInfo.errors_count = (error_count, warning_count) },
             end_sentinel,
             printer ) =
     Lwt.pick
@@ -395,7 +337,6 @@ let go_streaming_on_fd
   in
   (* Clear the spinner *)
   progress_callback None;
-  validate_files_reported_twice files_reported_twice;
 
   let (exit_status, telemetry) =
     match end_sentinel with
@@ -445,7 +386,7 @@ let go_streaming_on_fd
       raise Exit_status.(Exit_with Exit_status.Typecheck_abandoned)
   in
 
-  Lwt.return (exit_status, errors, telemetry)
+  Lwt.return (exit_status, telemetry)
 
 (** Gets all files-changed since [clock] which match the standard hack
   predicate [FilesToIgnore.watchman_server_expression_terms].
@@ -642,7 +583,7 @@ let rec keep_trying_to_open
     ~(already_checked_file : FileId.t option)
     ~(progress_callback : string option -> unit)
     ~(deadline : float option)
-    ~(root : Path.t) : (int * Unix.file_descr * Watchman.clock option) Lwt.t =
+    ~(root : Path.t) : (int * Unix.file_descr) Lwt.t =
   Option.iter deadline ~f:(fun deadline ->
       if Float.(Unix.gettimeofday () > deadline) then begin
         progress_callback None;
@@ -748,7 +689,7 @@ let rec keep_trying_to_open
         Hh_logger.log
           "Errors-file: %s is present, without watchman, so just going with it."
           (Sys_utils.show_inode fd);
-        Lwt.return (pid, fd, None)
+        Lwt.return (pid, fd)
       | Ok { Server_progress.ErrorsRead.pid; clock = Some clock; _ } -> begin
         Hh_logger.log
           "Errors-file: %s is present, was started at clock %s, so querying watchman..."
@@ -772,7 +713,7 @@ let rec keep_trying_to_open
              If there has, hh_server will ultimately tell us with a restart sentinel, and we'll
              ask the user to re-run hh. This is sub-optimal UX, but still better UX than
              loudly failing now. *)
-          Lwt.return (pid, fd, Some clock)
+          Lwt.return (pid, fd)
         | Ok relative_raw_updates ->
           let raw_updates =
             relative_raw_updates
@@ -792,7 +733,7 @@ let rec keep_trying_to_open
               "Errors-file: %s is present, was started at clock %s and watchman reports no updates since then, so using it!"
               (Sys_utils.show_inode fd)
               clock;
-            Lwt.return (pid, fd, Some clock)
+            Lwt.return (pid, fd)
           end else begin
             (* But if files have changed since the errors.bin, then we will keep spinning
                under trust that hh_server will eventually recognize those changes and create
@@ -825,11 +766,7 @@ let go_streaming
     (error_filter : Filter_errors.Filter.t)
     ~(partial_telemetry_ref : Telemetry.t option ref)
     ~(connect_then_close : unit -> unit Lwt.t) :
-    (Exit_status.t
-    * Errors.FinalizedErrorSet.t
-    * Watchman.clock option
-    * Telemetry.t)
-    Lwt.t =
+    (Exit_status.t * Telemetry.t) Lwt.t =
   let ClientEnv.{ root; show_spinner; deadline; _ } = args in
   let progress_callback : string option -> unit =
     ClientSpinner.report ~to_stderr:show_spinner ~angery_reaccs_only:false
@@ -839,7 +776,7 @@ let go_streaming
     progress_callback None;
     connect_then_close ()
   in
-  let%lwt (pid, fd, clock) =
+  let%lwt (pid, fd) =
     keep_trying_to_open
       ~has_already_attempted_connect:false
       ~already_checked_file:None
@@ -848,13 +785,10 @@ let go_streaming
       ~deadline
       ~root
   in
-  let%lwt (exit_status, errors, telemetry) =
-    go_streaming_on_fd
-      ~pid
-      fd
-      args
-      error_filter
-      ~partial_telemetry_ref
-      ~progress_callback
-  in
-  Lwt.return (exit_status, errors, clock, telemetry)
+  go_streaming_on_fd
+    ~pid
+    fd
+    args
+    error_filter
+    ~partial_telemetry_ref
+    ~progress_callback

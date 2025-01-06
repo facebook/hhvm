@@ -601,7 +601,7 @@ let test_check_success () : bool Lwt.t =
         (* Now we'll complete the errors file. This should make our check complete. *)
         Server_progress.ErrorsWrite.complete
           (Telemetry.create () |> Telemetry.string_ ~key:"hot" ~value:"potato");
-        let%lwt (exit_status, _errors, _clock, telemetry) = check_future in
+        let%lwt (exit_status, telemetry) = check_future in
         let exit_status = Exit_status.show exit_status in
         let telemetry = Telemetry.to_string telemetry in
         Printf.eprintf "%s\n%s\n%!" exit_status telemetry;
@@ -634,7 +634,7 @@ let test_check_errors () : bool Lwt.t =
           ~cancel_reason;
         Server_progress.ErrorsWrite.report (make_errors [(101, "c", "oops")]);
         Server_progress.ErrorsWrite.complete telemetry;
-        let%lwt (exit_status, _errors, _clock, _telemetry) = check_future in
+        let%lwt (exit_status, _telemetry) = check_future in
         let exit_status = Exit_status.show exit_status in
         String_asserter.assert_equals "Exit_status.Type_error" exit_status "x";
         Lwt.return_unit)

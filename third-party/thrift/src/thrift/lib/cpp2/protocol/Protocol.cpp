@@ -20,7 +20,7 @@
 
 FOLLY_GFLAGS_DEFINE_int32(
     thrift_protocol_max_depth,
-    12500,
+    12000,
     "How many nested struct/list/set/map are allowed");
 
 namespace apache::thrift::detail {

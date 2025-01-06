@@ -9,6 +9,8 @@ cmake_policy(SET CMP0046 NEW)
 # projects are created.
 INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/CMake/VisualStudioToolset.cmake")
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # includes
 SET(
   CMAKE_MODULE_PATH

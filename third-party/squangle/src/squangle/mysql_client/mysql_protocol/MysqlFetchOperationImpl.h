@@ -34,7 +34,7 @@ class MysqlFetchOperationImpl : public MysqlOperationImpl,
   void specializedTimeoutTriggered() override;
   void specializedCompleteOperation() override;
 
-  void cancel() {
+  void cancelOp() {
     cancel_ = true;
     setFetchAction(FetchAction::CompleteQuery);
   }

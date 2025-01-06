@@ -168,7 +168,7 @@ void MysqlFetchOperationImpl::actionable() {
       if (current_row_stream_->getCurrentRow().has_value()) {
         // This should help
         LOG(ERROR) << "Rows not consumed. Perhaps missing `pause`?";
-        cancel();
+        cancelOp();
         continue;
       }
 

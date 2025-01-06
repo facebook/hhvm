@@ -126,6 +126,12 @@ class FetchOperationImpl : virtual public OperationBase {
     use_checksum_ = useChecksum;
   }
 
+  void cancel() override {
+    // Free any allocated results before the connection is closed
+    current_row_stream_ = folly::none;
+    OperationBase::cancel();
+  }
+
   uint64_t currentLastInsertId() const;
   uint64_t currentAffectedRows() const;
   const std::string& currentRecvGtid() const;

@@ -153,7 +153,7 @@ class OperationBase {
   // Try to cancel a pending operation.  This is inherently racey with
   // callbacks; it is possible the callback is being invoked *during*
   // the cancel attempt, so a cancelled operation may still succeed.
-  void cancel();
+  virtual void cancel();
 
   // Did the operation succeed?
   bool ok() const {

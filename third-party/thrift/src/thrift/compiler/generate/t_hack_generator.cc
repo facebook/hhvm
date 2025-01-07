@@ -157,6 +157,9 @@ class t_hack_generator : public t_concat_generator {
     } else if (no_use_hack_collections_ && arrays_) {
       throw std::runtime_error(
           "Don't use no_use_hack_collections with arrays. Just use arrays");
+    } else if (arraysets_ && !(legacy_arrays_ || hack_collections_)) {
+      throw std::runtime_error(
+          "Don't use arraysets without either legacy_arrays or hack_collections");
     } else if (mangled_services_ && has_hack_namespace) {
       throw std::runtime_error(
           "Don't use mangledsvcs with hack namespaces or package.");
@@ -1386,7 +1389,7 @@ void t_hack_generator::generate_json_container(
       indent(out) << container << " = vec[];\n";
     }
   } else if (ttype->is_set()) {
-    if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
+    if (arraysets_) {
       indent(out) << container << " = dict[];\n";
     } else if (hack_collections_) {
       indent(out) << container << " = Set {};\n";
@@ -1435,7 +1438,7 @@ void t_hack_generator::generate_json_set_element(
   t_field felem(tset->get_elem_type(), elem);
   indent(out) << declare_field(&felem, true, true, true).substr(1) << "\n";
   generate_json_field(out, namer, &felem, "", "", value);
-  if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
+  if (arraysets_) {
     indent(out) << prefix_thrift << "[" << elem << "] = true;\n";
   } else if (hack_collections_) {
     indent(out) << prefix_thrift << "->add(" << elem << ");\n";
@@ -2304,7 +2307,7 @@ std::string t_hack_generator::render_default_value(const t_type* type) {
       dval = "vec[]";
     }
   } else if (type->is_set()) {
-    if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
+    if (arraysets_) {
       dval = "dict[]";
     } else if (hack_collections_) {
       dval = "Set {}";
@@ -3034,7 +3037,7 @@ void t_hack_generator::generate_php_type_spec(
     }
     indent(out) << "'etype' => " << type_to_enum(etype) << ",\n";
     generate_php_type_spec_shape_elt_helper(out, "elem", etype, depth);
-    if (arraysets_ && (hack_collections_ || legacy_arrays_)) {
+    if (arraysets_) {
       indent(out) << "'format' => 'array',\n";
     } else if (hack_collections_) {
       indent(out) << "'format' => 'collection',\n";
@@ -6684,14 +6687,7 @@ std::string t_hack_generator::type_to_typehint(
   } else if (const auto* tset = dynamic_cast<const t_set*>(ttype)) {
     std::string prefix;
     std::string suffix = ">";
-    // The order of the ifs matters in the code below.
-    // Even though there is a small amount of duplicated code below,
-    // any alternative approaches to achieve the same outcome seem
-    // make it harder to see the order clearly.
-    if (arraysets_) {
-      prefix = "dict";
-      suffix = ", bool>";
-    } else if (!legacy_arrays_ && !hack_collections_) {
+    if (!legacy_arrays_ && !hack_collections_) {
       prefix = "keyset";
     } else if (arraysets_ || variations[TypeToTypehintVariations::IS_SHAPE]) {
       prefix = "dict";
@@ -7440,7 +7436,7 @@ std::string t_hack_generator::declare_field(
         result += " = vec[]";
       }
     } else if (type->is_set()) {
-      if (arraysets_ && (legacy_arrays_ || hack_collections_)) {
+      if (arraysets_) {
         result += " = dict[]";
       } else if (hack_collections_) {
         result += " = Set {}";

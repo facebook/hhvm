@@ -18,12 +18,12 @@ package thrift
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"runtime"
 	"runtime/debug"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -110,7 +110,11 @@ func (s *server) ServeContext(ctx context.Context) error {
 		}
 	}
 
-	return s.acceptLoop(ctx)
+	err := s.acceptLoop(ctx)
+	if ctx.Err() != nil {
+		return ctx.Err()
+	}
+	return err
 }
 
 func (s *server) acceptLoop(ctx context.Context) error {
@@ -118,11 +122,11 @@ func (s *server) acceptLoop(ctx context.Context) error {
 		conn, err := s.listener.Accept()
 		if err != nil {
 			// graceful shutdown (accept conn closed) is not an error
-			if !strings.Contains(err.Error(), "use of closed network connection") {
-				s.log("during accept: %s", err)
-				return err
+			if errors.Is(err, net.ErrClosed) {
+				return nil
 			}
-			return nil
+			s.log("during accept: %s", err)
+			return err
 		}
 		// add connection info to ctx.
 		connCtx := s.connContext(ctx, conn)

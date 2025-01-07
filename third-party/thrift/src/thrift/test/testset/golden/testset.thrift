@@ -124,266 +124,332 @@ struct struct_map_i64_set_i64 {
 }
 struct struct_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 struct struct_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 struct struct_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 struct struct_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 struct struct_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 struct struct_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 struct struct_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 struct struct_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 struct struct_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 struct struct_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 struct struct_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 struct struct_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 struct struct_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 struct struct_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 struct struct_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 struct struct_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 struct struct_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 struct struct_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 struct struct_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 struct struct_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 struct struct_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 struct struct_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 struct struct_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 struct struct_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 struct struct_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 struct struct_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 struct struct_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 struct struct_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 struct struct_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 struct struct_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 struct struct_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 struct struct_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 struct struct_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 struct struct_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 struct struct_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 struct struct_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 struct struct_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 struct struct_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 struct struct_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 struct struct_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 struct struct_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 struct struct_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 struct struct_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 struct struct_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 struct struct_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 struct struct_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 struct struct_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 struct struct_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 struct struct_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 struct struct_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 struct struct_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 struct struct_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 struct struct_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 struct struct_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 struct struct_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 struct struct_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 struct struct_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 struct struct_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 struct struct_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 struct struct_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 struct struct_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 struct struct_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 struct struct_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 struct struct_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 struct struct_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 struct struct_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 struct struct_bool {
@@ -568,266 +634,332 @@ struct struct_optional_map_i64_set_i64 {
 }
 struct struct_optional_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 struct struct_optional_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 struct struct_optional_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 struct struct_optional_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 struct struct_optional_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 struct struct_optional_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 struct struct_optional_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 struct struct_optional_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 struct struct_optional_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 struct struct_optional_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 struct struct_optional_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 struct struct_optional_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 struct struct_optional_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 struct struct_optional_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 struct struct_optional_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 struct struct_optional_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 struct struct_optional_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 struct struct_optional_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 struct struct_optional_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 struct struct_optional_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 struct struct_optional_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 struct struct_optional_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 struct struct_optional_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 struct struct_optional_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 struct struct_optional_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 struct struct_optional_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 struct struct_optional_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 struct struct_optional_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 struct struct_optional_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 struct struct_optional_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 struct struct_optional_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 struct struct_optional_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 struct struct_optional_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 struct struct_optional_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 struct struct_optional_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 struct struct_optional_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 struct struct_optional_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 struct struct_optional_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 struct struct_optional_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 struct struct_optional_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 struct struct_optional_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 struct struct_optional_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 struct struct_optional_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 struct struct_optional_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 struct struct_optional_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 struct struct_optional_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 struct struct_optional_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 struct struct_optional_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 struct struct_optional_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 struct struct_optional_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 struct struct_optional_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 struct struct_optional_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 struct struct_optional_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 struct struct_optional_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 struct struct_optional_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 struct struct_optional_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 struct struct_optional_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 struct struct_optional_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 struct struct_optional_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 struct struct_optional_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 struct struct_optional_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 struct struct_optional_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 struct struct_optional_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 struct struct_optional_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 struct struct_optional_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 struct struct_optional_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 struct struct_optional_bool {
@@ -1012,266 +1144,332 @@ struct struct_required_map_i64_set_i64 {
 }
 struct struct_required_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 struct struct_required_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 struct struct_required_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 struct struct_required_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 struct struct_required_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 struct struct_required_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 struct struct_required_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 struct struct_required_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 struct struct_required_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 struct struct_required_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 struct struct_required_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 struct struct_required_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 struct struct_required_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 struct struct_required_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 struct struct_required_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 struct struct_required_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 struct struct_required_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 struct struct_required_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 struct struct_required_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 struct struct_required_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 struct struct_required_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 struct struct_required_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 struct struct_required_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 struct struct_required_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 struct struct_required_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 struct struct_required_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 struct struct_required_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 struct struct_required_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 struct struct_required_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 struct struct_required_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 struct struct_required_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 struct struct_required_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 struct struct_required_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 struct struct_required_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 struct struct_required_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 struct struct_required_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 struct struct_required_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 struct struct_required_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 struct struct_required_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 struct struct_required_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 struct struct_required_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 struct struct_required_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 struct struct_required_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 struct struct_required_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 struct struct_required_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 struct struct_required_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 struct struct_required_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 struct struct_required_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 struct struct_required_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 struct struct_required_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 struct struct_required_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 struct struct_required_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 struct struct_required_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 struct struct_required_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 struct struct_required_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 struct struct_required_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 struct struct_required_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 struct struct_required_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 struct struct_required_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 struct struct_required_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 struct struct_required_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 struct struct_required_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 struct struct_required_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 struct struct_required_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 struct struct_required_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 struct struct_required_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 struct struct_required_bool {
@@ -1489,331 +1687,397 @@ struct struct_terse_map_i64_set_i64 {
 }
 struct struct_terse_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 struct struct_terse_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 struct struct_terse_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 struct struct_terse_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 struct struct_terse_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 struct struct_terse_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 struct struct_terse_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 struct struct_terse_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 struct struct_terse_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 struct struct_terse_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 struct struct_terse_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 struct struct_terse_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 struct struct_terse_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 struct struct_terse_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 struct struct_terse_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 struct struct_terse_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 struct struct_terse_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 struct struct_terse_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 struct struct_terse_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 struct struct_terse_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 struct struct_terse_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 struct struct_terse_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 struct struct_terse_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 struct struct_terse_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 struct struct_terse_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 struct struct_terse_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 struct struct_terse_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 struct struct_terse_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 struct struct_terse_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 struct struct_terse_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 struct struct_terse_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 struct struct_terse_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 struct struct_terse_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
 struct struct_terse_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 struct struct_terse_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 struct struct_terse_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 struct struct_terse_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 struct struct_terse_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 struct struct_terse_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 struct struct_terse_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 struct struct_terse_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 struct struct_terse_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 struct struct_terse_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 struct struct_terse_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 struct struct_terse_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 struct struct_terse_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 struct struct_terse_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 struct struct_terse_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 struct struct_terse_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 struct struct_terse_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 struct struct_terse_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 struct struct_terse_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 struct struct_terse_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 struct struct_terse_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 struct struct_terse_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 struct struct_terse_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 struct struct_terse_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 struct struct_terse_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 struct struct_terse_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 struct struct_terse_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 struct struct_terse_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 struct struct_terse_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 struct struct_terse_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 struct struct_terse_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 struct struct_terse_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 struct struct_terse_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
@@ -2919,331 +3183,397 @@ struct struct_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 struct struct_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -3489,331 +3819,397 @@ struct struct_optional_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 struct struct_optional_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -4059,331 +4455,397 @@ struct struct_required_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 struct struct_required_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -4662,396 +5124,462 @@ struct struct_terse_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 struct struct_terse_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 struct struct_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
@@ -6300,266 +6828,332 @@ exception exception_map_i64_set_i64 {
 }
 exception exception_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 exception exception_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 exception exception_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 exception exception_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 exception exception_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 exception exception_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 exception exception_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 exception exception_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 exception exception_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 exception exception_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 exception exception_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 exception exception_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 exception exception_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 exception exception_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 exception exception_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 exception exception_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 exception exception_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 exception exception_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 exception exception_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 exception exception_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 exception exception_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 exception exception_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 exception exception_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 exception exception_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 exception exception_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 exception exception_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 exception exception_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 exception exception_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 exception exception_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 exception exception_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 exception exception_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 exception exception_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 exception exception_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 exception exception_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 exception exception_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 exception exception_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 exception exception_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 exception exception_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 exception exception_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 exception exception_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 exception exception_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 exception exception_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 exception exception_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 exception exception_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 exception exception_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 exception exception_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 exception exception_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 exception exception_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 exception exception_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 exception exception_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 exception exception_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 exception exception_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 exception exception_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 exception exception_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 exception exception_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 exception exception_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 exception exception_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 exception exception_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 exception exception_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 exception exception_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 exception exception_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 exception exception_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 exception exception_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 exception exception_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 exception exception_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 exception exception_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 exception exception_bool {
@@ -6744,266 +7338,332 @@ exception exception_optional_map_i64_set_i64 {
 }
 exception exception_optional_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 exception exception_optional_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 exception exception_optional_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 exception exception_optional_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 exception exception_optional_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 exception exception_optional_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 exception exception_optional_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 exception exception_optional_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 exception exception_optional_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 exception exception_optional_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 exception exception_optional_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 exception exception_optional_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 exception exception_optional_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 exception exception_optional_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 exception exception_optional_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 exception exception_optional_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 exception exception_optional_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 exception exception_optional_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 exception exception_optional_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 exception exception_optional_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 exception exception_optional_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 exception exception_optional_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 exception exception_optional_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 exception exception_optional_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 exception exception_optional_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 exception exception_optional_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 exception exception_optional_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 exception exception_optional_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 exception exception_optional_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 exception exception_optional_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 exception exception_optional_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 exception exception_optional_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 exception exception_optional_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 exception exception_optional_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 exception exception_optional_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 exception exception_optional_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 exception exception_optional_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 exception exception_optional_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 exception exception_optional_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 exception exception_optional_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 exception exception_optional_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 exception exception_optional_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 exception exception_optional_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 exception exception_optional_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 exception exception_optional_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 exception exception_optional_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 exception exception_optional_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 exception exception_optional_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 exception exception_optional_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 exception exception_optional_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 exception exception_optional_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 exception exception_optional_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 exception exception_optional_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 exception exception_optional_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 exception exception_optional_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 exception exception_optional_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 exception exception_optional_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 exception exception_optional_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 exception exception_optional_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 exception exception_optional_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 exception exception_optional_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 exception exception_optional_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 exception exception_optional_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 exception exception_optional_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 exception exception_optional_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 exception exception_optional_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 exception exception_optional_bool {
@@ -7188,266 +7848,332 @@ exception exception_required_map_i64_set_i64 {
 }
 exception exception_required_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 exception exception_required_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 exception exception_required_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 exception exception_required_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 exception exception_required_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 exception exception_required_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 exception exception_required_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 exception exception_required_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 exception exception_required_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 exception exception_required_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 exception exception_required_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 exception exception_required_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 exception exception_required_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 exception exception_required_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 exception exception_required_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 exception exception_required_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 exception exception_required_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 exception exception_required_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 exception exception_required_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 exception exception_required_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 exception exception_required_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 exception exception_required_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 exception exception_required_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 exception exception_required_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 exception exception_required_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 exception exception_required_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 exception exception_required_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 exception exception_required_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 exception exception_required_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 exception exception_required_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 exception exception_required_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 exception exception_required_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 exception exception_required_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 exception exception_required_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 exception exception_required_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 exception exception_required_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 exception exception_required_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 exception exception_required_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 exception exception_required_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 exception exception_required_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 exception exception_required_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 exception exception_required_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 exception exception_required_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 exception exception_required_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 exception exception_required_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 exception exception_required_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 exception exception_required_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 exception exception_required_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 exception exception_required_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 exception exception_required_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 exception exception_required_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 exception exception_required_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 exception exception_required_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 exception exception_required_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 exception exception_required_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 exception exception_required_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 exception exception_required_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 exception exception_required_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 exception exception_required_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 exception exception_required_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 exception exception_required_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 exception exception_required_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 exception exception_required_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 exception exception_required_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 exception exception_required_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 exception exception_required_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 exception exception_required_bool {
@@ -7665,331 +8391,397 @@ exception exception_terse_map_i64_set_i64 {
 }
 exception exception_terse_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 exception exception_terse_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 exception exception_terse_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 exception exception_terse_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 exception exception_terse_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 exception exception_terse_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 exception exception_terse_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 exception exception_terse_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 exception exception_terse_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 exception exception_terse_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 exception exception_terse_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 exception exception_terse_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 exception exception_terse_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 exception exception_terse_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 exception exception_terse_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 exception exception_terse_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 exception exception_terse_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 exception exception_terse_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 exception exception_terse_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 exception exception_terse_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 exception exception_terse_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 exception exception_terse_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 exception exception_terse_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 exception exception_terse_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 exception exception_terse_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 exception exception_terse_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 exception exception_terse_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 exception exception_terse_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 exception exception_terse_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 exception exception_terse_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 exception exception_terse_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 exception exception_terse_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 exception exception_terse_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
 exception exception_terse_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 exception exception_terse_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 exception exception_terse_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 exception exception_terse_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 exception exception_terse_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 exception exception_terse_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 exception exception_terse_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 exception exception_terse_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 exception exception_terse_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 exception exception_terse_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 exception exception_terse_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 exception exception_terse_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 exception exception_terse_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 exception exception_terse_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 exception exception_terse_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 exception exception_terse_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 exception exception_terse_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 exception exception_terse_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 exception exception_terse_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 exception exception_terse_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 exception exception_terse_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 exception exception_terse_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 exception exception_terse_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 exception exception_terse_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 exception exception_terse_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 exception exception_terse_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 exception exception_terse_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 exception exception_terse_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 exception exception_terse_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 exception exception_terse_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 exception exception_terse_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 exception exception_terse_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 exception exception_terse_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
@@ -9095,331 +9887,397 @@ exception exception_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 exception exception_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -9665,331 +10523,397 @@ exception exception_optional_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 exception exception_optional_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_optional_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: optional map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -10235,331 +11159,397 @@ exception exception_required_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 exception exception_required_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_required_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: required map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
@@ -10838,396 +11828,462 @@ exception exception_terse_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 exception exception_terse_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: list<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: set<i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, bool> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, byte> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i16> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i32> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, i64> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, float> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, double> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, binary> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, string> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<string, set<i64>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<string>> field_1;
 }
 @cpp.UseOpEncode
 exception exception_terse_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   @thrift.TerseWrite
   1: map<i64, set<i64>> field_1;
 }
@@ -13408,398 +14464,530 @@ union union_map_i64_set_i64 {
 }
 union union_list_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<bool> field_2;
 }
 union union_list_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<byte> field_2;
 }
 union union_list_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i16> field_2;
 }
 union union_list_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i32> field_2;
 }
 union union_list_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i64> field_2;
 }
 union union_list_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<float> field_2;
 }
 union union_list_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<double> field_2;
 }
 union union_list_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<binary> field_2;
 }
 union union_list_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> field_2;
 }
 union union_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<string> field_2;
 }
 union union_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
 }
 union union_map_string_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, bool> field_2;
 }
 union union_map_string_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, byte> field_2;
 }
 union union_map_string_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i16> field_2;
 }
 union union_map_string_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i32> field_2;
 }
 union union_map_string_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i64> field_2;
 }
 union union_map_string_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, float> field_2;
 }
 union union_map_string_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, double> field_2;
 }
 union union_map_string_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, binary> field_2;
 }
 union union_map_string_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, string> field_2;
 }
 union union_map_i64_bool_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, bool> field_2;
 }
 union union_map_i64_byte_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, byte> field_2;
 }
 union union_map_i64_i16_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i16> field_2;
 }
 union union_map_i64_i32_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i32> field_2;
 }
 union union_map_i64_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i64> field_2;
 }
 union union_map_i64_float_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, float> field_2;
 }
 union union_map_i64_double_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, double> field_2;
 }
 union union_map_i64_binary_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, binary> field_2;
 }
 union union_map_i64_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, string> field_2;
 }
 union union_map_string_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<string>> field_2;
 }
 union union_map_string_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<i64>> field_2;
 }
 union union_map_i64_set_string_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<string>> field_2;
 }
 union union_map_i64_set_i64_cpp_ref {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
 }
 union union_list_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<bool> field_2;
 }
 union union_list_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<byte> field_2;
 }
 union union_list_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i16> field_2;
 }
 union union_list_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i32> field_2;
 }
 union union_list_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i64> field_2;
 }
 union union_list_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<float> field_2;
 }
 union union_list_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<double> field_2;
 }
 union union_list_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<binary> field_2;
 }
 union union_list_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> field_2;
 }
 union union_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<string> field_2;
 }
 union union_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
 }
 union union_map_string_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, bool> field_2;
 }
 union union_map_string_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, byte> field_2;
 }
 union union_map_string_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i16> field_2;
 }
 union union_map_string_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i32> field_2;
 }
 union union_map_string_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i64> field_2;
 }
 union union_map_string_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, float> field_2;
 }
 union union_map_string_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, double> field_2;
 }
 union union_map_string_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, binary> field_2;
 }
 union union_map_string_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, string> field_2;
 }
 union union_map_i64_bool_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, bool> field_2;
 }
 union union_map_i64_byte_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, byte> field_2;
 }
 union union_map_i64_i16_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i16> field_2;
 }
 union union_map_i64_i32_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i32> field_2;
 }
 union union_map_i64_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i64> field_2;
 }
 union union_map_i64_float_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, float> field_2;
 }
 union union_map_i64_double_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, double> field_2;
 }
 union union_map_i64_binary_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, binary> field_2;
 }
 union union_map_i64_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, string> field_2;
 }
 union union_map_string_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<string>> field_2;
 }
 union union_map_string_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<i64>> field_2;
 }
 union union_map_i64_set_string_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<string>> field_2;
 }
 union union_map_i64_set_i64_shared_cpp_ref {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
 }
 union union_bool {
@@ -14009,463 +15197,595 @@ union union_map_i64_set_i64_op_encoded {
 @cpp.UseOpEncode
 union union_list_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<bool> field_2;
 }
 @cpp.UseOpEncode
 union union_list_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<byte> field_2;
 }
 @cpp.UseOpEncode
 union union_list_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i16> field_2;
 }
 @cpp.UseOpEncode
 union union_list_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i32> field_2;
 }
 @cpp.UseOpEncode
 union union_list_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i64> field_2;
 }
 @cpp.UseOpEncode
 union union_list_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<float> field_2;
 }
 @cpp.UseOpEncode
 union union_list_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<double> field_2;
 }
 @cpp.UseOpEncode
 union union_list_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<binary> field_2;
 }
 @cpp.UseOpEncode
 union union_list_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> field_2;
 }
 @cpp.UseOpEncode
 union union_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<string> field_2;
 }
 @cpp.UseOpEncode
 union union_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, bool> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, byte> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i16> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i32> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i64> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, float> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, double> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, binary> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, string> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_bool_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, bool> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_byte_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, byte> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_i16_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i16> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_i32_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i32> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i64> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_float_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, float> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_double_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, double> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_binary_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, binary> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, string> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<string>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<i64>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_string_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<string>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_i64_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.Unique}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
 }
 @cpp.UseOpEncode
 union union_list_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<bool> field_2;
 }
 @cpp.UseOpEncode
 union union_list_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<byte> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<byte> field_2;
 }
 @cpp.UseOpEncode
 union union_list_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i16> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i16> field_2;
 }
 @cpp.UseOpEncode
 union union_list_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i32> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i32> field_2;
 }
 @cpp.UseOpEncode
 union union_list_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<i64> field_2;
 }
 @cpp.UseOpEncode
 union union_list_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<float> field_2;
 }
 @cpp.UseOpEncode
 union union_list_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<double> field_2;
 }
 @cpp.UseOpEncode
 union union_list_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<binary> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<binary> field_2;
 }
 @cpp.UseOpEncode
 union union_list_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: list<string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: list<string> field_2;
 }
 @cpp.UseOpEncode
 union union_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<string> field_2;
 }
 @cpp.UseOpEncode
 union union_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: set<i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: set<i64> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, bool> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, byte> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, byte> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i16> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i16> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i32> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i32> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, i64> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, float> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, double> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, binary> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, binary> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, string> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_bool_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, bool> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, bool> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_byte_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, byte> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, byte> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_i16_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i16> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i16> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_i32_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i32> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i32> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, i64> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, i64> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_float_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, float> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, float> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_double_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, double> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, double> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_binary_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, binary> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, binary> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, string> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, string> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<string>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_string_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<string, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<string, set<i64>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_string_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<string>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<string>> field_2;
 }
 @cpp.UseOpEncode
 union union_map_i64_set_i64_shared_cpp_ref_op_encoded {
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   1: map<i64, set<i64>> field_1;
   @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @cpp.AllowLegacyNonOptionalRef
   2: map<i64, set<i64>> field_2;
 }
 @cpp.UseOpEncode

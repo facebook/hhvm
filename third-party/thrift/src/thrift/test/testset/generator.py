@@ -154,10 +154,19 @@ KEY_TYPES = (
 CPP2_TYPE_NS = "type"
 
 HACK_TYPE_ADAPTER = "|@hack.Adapter{{name = 'ConformanceTestAdapter_{}'}}"
-OTHER_TYPE_ADAPTERS = "|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestAdapter'}}|@java.Adapter{{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}"
+OTHER_TYPE_ADAPTERS = (
+    "|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestAdapter'}}"
+    "|@java.Adapter{{adapterClassName = 'com.facebook.thrift.adapter.test.GenericTypeAdapter', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}"
+    "|@python.Adapter{{name = 'thrift.python.test.adapters.noop.Wrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}"
+)
 TYPE_ADAPTERS: str = OTHER_TYPE_ADAPTERS + HACK_TYPE_ADAPTER
 
-FIELD_ADAPTERS = "|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}}|@java.Wrapper{{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}|@python.Adapter{{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}|@hack.Wrapper{{name = '\\ConformanceTestFieldWrapper'}}"
+FIELD_ADAPTERS = (
+    "|@cpp.Adapter{{name = '::apache::thrift::test::TemplatedTestFieldAdapter'}}"
+    "|@java.Wrapper{{wrapperClassName = 'com.facebook.thrift.adapter.test.GenericWrapper', typeClassName = 'com.facebook.thrift.adapter.test.Wrapped'}}"
+    "|@python.Adapter{{name = 'thrift.python.test.adapters.noop.FieldWrapper', typeHint = 'thrift.python.test.adapters.noop.Wrapped[]',}}"
+    "|@hack.Wrapper{{name = '\\ConformanceTestFieldWrapper'}}"
+)
 
 PRIMATIVE_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "{}",
@@ -251,13 +260,13 @@ TERSE_TRANSFORM: Dict[Target, str] = {
 
 CPP_REF_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "{}_cpp_ref",
-    Target.THRIFT: "{}|@cpp.Ref{{type = cpp.RefType.Unique}}",
+    Target.THRIFT: "{}|@cpp.Ref{{type = cpp.RefType.Unique}}|@cpp.AllowLegacyNonOptionalRef",
     Target.CPP2: "{}|FieldModifier::Reference",
 }
 
 SHARED_CPP_REF_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "{}_shared_cpp_ref",
-    Target.THRIFT: "{}|@cpp.Ref{{type = cpp.RefType.SharedMutable}}",
+    Target.THRIFT: "{}|@cpp.Ref{{type = cpp.RefType.SharedMutable}}|@cpp.AllowLegacyNonOptionalRef",
     Target.CPP2: "{}|FieldModifier::SharedReference",
 }
 

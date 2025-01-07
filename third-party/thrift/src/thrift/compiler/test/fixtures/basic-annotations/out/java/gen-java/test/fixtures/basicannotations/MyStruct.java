@@ -57,7 +57,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.cppTypeAnnotation = null;
       this.myUnion = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -77,72 +77,63 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private List<String> cppTypeAnnotation = null;
         private test.fixtures.basicannotations.MyUnion myUnion = null;
     
-        @com.facebook.swift.codec.ThriftField(value=2, name="major", requiredness=Requiredness.NONE)
-        public Builder setMajor(long major) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="major", requiredness=Requiredness.NONE)    public Builder setMajor(long major) {
             this.major = major;
             return this;
         }
     
         public long getMajor() { return major; }
     
-            @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)
-        public Builder setAbstract(String _abstract) {
+            @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)    public Builder setAbstract(String _abstract) {
             this._abstract = _abstract;
             return this;
         }
     
         public String getAbstract() { return _abstract; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE)
-        public Builder setAnnotationWithQuote(String annotationWithQuote) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE)    public Builder setAnnotationWithQuote(String annotationWithQuote) {
             this.annotationWithQuote = annotationWithQuote;
             return this;
         }
     
         public String getAnnotationWithQuote() { return annotationWithQuote; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="class_", requiredness=Requiredness.NONE)
-        public Builder setClass_(String class_) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="class_", requiredness=Requiredness.NONE)    public Builder setClass_(String class_) {
             this.class_ = class_;
             return this;
         }
     
         public String getClass_() { return class_; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="annotation_with_trailing_comma", requiredness=Requiredness.NONE)
-        public Builder setAnnotationWithTrailingComma(String annotationWithTrailingComma) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="annotation_with_trailing_comma", requiredness=Requiredness.NONE)    public Builder setAnnotationWithTrailingComma(String annotationWithTrailingComma) {
             this.annotationWithTrailingComma = annotationWithTrailingComma;
             return this;
         }
     
         public String getAnnotationWithTrailingComma() { return annotationWithTrailingComma; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="empty_annotations", requiredness=Requiredness.NONE)
-        public Builder setEmptyAnnotations(String emptyAnnotations) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="empty_annotations", requiredness=Requiredness.NONE)    public Builder setEmptyAnnotations(String emptyAnnotations) {
             this.emptyAnnotations = emptyAnnotations;
             return this;
         }
     
         public String getEmptyAnnotations() { return emptyAnnotations; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="my_enum", requiredness=Requiredness.NONE)
-        public Builder setMyEnum(test.fixtures.basicannotations.MyEnum myEnum) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="my_enum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.basicannotations.MyEnum myEnum) {
             this.myEnum = myEnum;
             return this;
         }
     
         public test.fixtures.basicannotations.MyEnum getMyEnum() { return myEnum; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="cpp_type_annotation", requiredness=Requiredness.NONE)
-        public Builder setCppTypeAnnotation(List<String> cppTypeAnnotation) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="cpp_type_annotation", requiredness=Requiredness.NONE)    public Builder setCppTypeAnnotation(List<String> cppTypeAnnotation) {
             this.cppTypeAnnotation = cppTypeAnnotation;
             return this;
         }
     
         public List<String> getCppTypeAnnotation() { return cppTypeAnnotation; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="my_union", requiredness=Requiredness.NONE)
-        public Builder setMyUnion(test.fixtures.basicannotations.MyUnion myUnion) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="my_union", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.basicannotations.MyUnion myUnion) {
             this.myUnion = myUnion;
             return this;
         }
@@ -178,7 +169,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -246,47 +237,47 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     @com.facebook.swift.codec.ThriftField(value=2, name="major", requiredness=Requiredness.NONE)
     public long getMajor() { return major; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="abstract", requiredness=Requiredness.NONE)
     public String getAbstract() { return _abstract; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="annotation_with_quote", requiredness=Requiredness.NONE)
     public String getAnnotationWithQuote() { return annotationWithQuote; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="class_", requiredness=Requiredness.NONE)
     public String getClass_() { return class_; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="annotation_with_trailing_comma", requiredness=Requiredness.NONE)
     public String getAnnotationWithTrailingComma() { return annotationWithTrailingComma; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="empty_annotations", requiredness=Requiredness.NONE)
     public String getEmptyAnnotations() { return emptyAnnotations; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="my_enum", requiredness=Requiredness.NONE)
     public test.fixtures.basicannotations.MyEnum getMyEnum() { return myEnum; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="cpp_type_annotation", requiredness=Requiredness.NONE)
     public List<String> getCppTypeAnnotation() { return cppTypeAnnotation; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="my_union", requiredness=Requiredness.NONE)
     public test.fixtures.basicannotations.MyUnion getMyUnion() { return myUnion; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -301,7 +292,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("myUnion", myUnion);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -325,7 +316,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(myUnion, other.myUnion) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -340,7 +331,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             myUnion
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
@@ -413,16 +404,16 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         case _CPP_TYPE_ANNOTATION:
           if (__field.type == TType.LIST) {
             List<String> cppTypeAnnotation;
-            {
-            TList _list = oprot.readListBegin();
-            cppTypeAnnotation = new ArrayList<String>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                cppTypeAnnotation.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                cppTypeAnnotation = new ArrayList<String>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    cppTypeAnnotation.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setCppTypeAnnotation(cppTypeAnnotation);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -445,7 +436,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MAJOR_FIELD_DESC);
@@ -483,10 +474,10 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldBegin(CPP_TYPE_ANNOTATION_FIELD_DESC);
         List<String> _iter0 = cppTypeAnnotation;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeListEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (myUnion != null) {
@@ -497,7 +488,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructLazy {
         private static final MyStruct _DEFAULT = new MyStruct.Builder().build();
     }

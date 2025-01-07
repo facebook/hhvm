@@ -33,7 +33,7 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
     protected StructWithRefAndAnnotCppNoexceptMoveCtor() {
       this.defField = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
     public static class Builder {
         private test.fixtures.refs.Empty defField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)
-        public Builder setDefField(test.fixtures.refs.Empty defField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)    public Builder setDefField(test.fixtures.refs.Empty defField) {
             this.defField = defField;
             return this;
         }
@@ -66,7 +65,7 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)
     public test.fixtures.refs.Empty getDefField() { return defField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("defField", defField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
             Objects.equals(defField, other.defField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             defField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithRefAndAnnotCppNoexceptMoveCtor> asReader() {
       return StructWithRefAndAnnotCppNoexceptMoveCtor::read0;
@@ -144,7 +143,7 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (defField != null) {
@@ -155,7 +154,7 @@ public final class StructWithRefAndAnnotCppNoexceptMoveCtor implements com.faceb
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithRefAndAnnotCppNoexceptMoveCtorLazy {
         private static final StructWithRefAndAnnotCppNoexceptMoveCtor _DEFAULT = new StructWithRefAndAnnotCppNoexceptMoveCtor.Builder().build();
     }

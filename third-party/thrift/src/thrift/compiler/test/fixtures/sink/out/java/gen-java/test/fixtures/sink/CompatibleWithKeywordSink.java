@@ -33,7 +33,7 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
     protected CompatibleWithKeywordSink() {
       this.sink = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
     public static class Builder {
         private String sink = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="sink", requiredness=Requiredness.NONE)
-        public Builder setSink(String sink) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="sink", requiredness=Requiredness.NONE)    public Builder setSink(String sink) {
             this.sink = sink;
             return this;
         }
@@ -66,7 +65,7 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="sink", requiredness=Requiredness.NONE)
     public String getSink() { return sink; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("sink", sink);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
             Objects.equals(sink, other.sink) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             sink
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<CompatibleWithKeywordSink> asReader() {
       return CompatibleWithKeywordSink::read0;
@@ -144,7 +143,7 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (sink != null) {
@@ -155,7 +154,7 @@ public final class CompatibleWithKeywordSink implements com.facebook.thrift.payl
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _CompatibleWithKeywordSinkLazy {
         private static final CompatibleWithKeywordSink _DEFAULT = new CompatibleWithKeywordSink.Builder().build();
     }

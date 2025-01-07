@@ -123,6 +123,7 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
         res.id = 2;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="delay", requiredness=Requiredness.NONE)
@@ -260,7 +261,7 @@ public final class AdaptTestUnion implements com.facebook.thrift.payload.ThriftS
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<AdaptTestUnion> asReader() {
       return AdaptTestUnion::read0;

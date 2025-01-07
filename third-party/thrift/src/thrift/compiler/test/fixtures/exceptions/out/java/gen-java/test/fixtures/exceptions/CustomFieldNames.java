@@ -58,21 +58,19 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
       this.errorMessage = null;
       this.internalGreatMessage = null;
     }
-    
+
     public static class Builder {
         private String errorMessage = null;
         private String internalGreatMessage = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="error_message", requiredness=Requiredness.NONE)
-        public Builder setErrorMessage(String errorMessage) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="error_message", requiredness=Requiredness.NONE)    public Builder setErrorMessage(String errorMessage) {
             this.errorMessage = errorMessage;
             return this;
         }
     
         public String getErrorMessage() { return errorMessage; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="internal_error_message", requiredness=Requiredness.NONE)
-        public Builder setInternalGreatMessage(String internalGreatMessage) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="internal_error_message", requiredness=Requiredness.NONE)    public Builder setInternalGreatMessage(String internalGreatMessage) {
             this.internalGreatMessage = internalGreatMessage;
             return this;
         }
@@ -94,16 +92,16 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="error_message", requiredness=Requiredness.NONE)
     public String getErrorMessage() { return errorMessage; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="internal_error_message", requiredness=Requiredness.NONE)
     public String getInternalGreatMessage() { return internalGreatMessage; }
-        
+    
     @java.lang.Override
     public String getMessage() {
       return internalGreatMessage;
@@ -146,7 +144,7 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (errorMessage != null) {
@@ -162,7 +160,7 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _CustomFieldNamesLazy {
         private static final CustomFieldNames _DEFAULT = new CustomFieldNames.Builder().build();
     }

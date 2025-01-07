@@ -36,7 +36,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
       this.age = 60L;
       this.name = "Batman";
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
         private long age = 60L;
         private String name = "Batman";
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="age", requiredness=Requiredness.NONE)
-        public Builder setAge(long age) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="age", requiredness=Requiredness.NONE)    public Builder setAge(long age) {
             this.age = age;
             return this;
         }
     
         public long getAge() { return age; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)
-        public Builder setName(String name) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
@@ -80,7 +78,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
     
     @com.facebook.swift.codec.ThriftField(value=1, name="age", requiredness=Requiredness.NONE)
     public long getAge() { return age; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
         helper.add("name", name);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
             Objects.equals(name, other.name) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
             name
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<SimpleStruct> asReader() {
       return SimpleStruct::read0;
@@ -180,7 +178,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(AGE_FIELD_DESC);
@@ -194,7 +192,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _SimpleStructLazy {
         private static final SimpleStruct _DEFAULT = new SimpleStruct.Builder().build();
     }

@@ -36,7 +36,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
       this.first = null;
       this.second = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
         private test.fixtures.module0.Struct first = null;
         private test.fixtures.module1.Struct second = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="first", requiredness=Requiredness.NONE)
-        public Builder setFirst(test.fixtures.module0.Struct first) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="first", requiredness=Requiredness.NONE)    public Builder setFirst(test.fixtures.module0.Struct first) {
             this.first = first;
             return this;
         }
     
         public test.fixtures.module0.Struct getFirst() { return first; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="second", requiredness=Requiredness.NONE)
-        public Builder setSecond(test.fixtures.module1.Struct second) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="second", requiredness=Requiredness.NONE)    public Builder setSecond(test.fixtures.module1.Struct second) {
             this.second = second;
             return this;
         }
@@ -80,7 +78,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="first", requiredness=Requiredness.NONE)
     public test.fixtures.module0.Struct getFirst() { return first; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="second", requiredness=Requiredness.NONE)
     public test.fixtures.module1.Struct getSecond() { return second; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
         helper.add("second", second);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
             Objects.equals(second, other.second) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
             second
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Struct> asReader() {
       return Struct::read0;
@@ -180,7 +178,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (first != null) {
@@ -196,7 +194,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructLazy {
         private static final Struct _DEFAULT = new Struct.Builder().build();
     }

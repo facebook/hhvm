@@ -68,17 +68,17 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       this.binaryField = "8".getBytes();
       this.enumField = com.facebook.thrift.test.terse_write.MyEnum.ME1;
       this.listField = ImmutableList.<Short>builder()
-        .add((short)1)
-        .build();
+            .add((short)1)
+            .build();
       this.setField = ImmutableSet.<Short>builder()
-        .add((short)1)
-        .build();
+            .add((short)1)
+            .build();
       this.mapField = ImmutableMap.<Short, Short>builder()
-        .put((short)1, (short)1)
-        .build();
+            .put((short)1, (short)1)
+            .build();
       this.structField = com.facebook.thrift.test.terse_write.MyStructWithCustomDefault.defaultInstance();
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -99,122 +99,108 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         private byte[] binaryField = "8".getBytes();
         private com.facebook.thrift.test.terse_write.MyEnum enumField = com.facebook.thrift.test.terse_write.MyEnum.ME1;
         private List<Short> listField = ImmutableList.<Short>builder()
-        .add((short)1)
-        .build();
+            .add((short)1)
+            .build();
         private Set<Short> setField = ImmutableSet.<Short>builder()
-        .add((short)1)
-        .build();
+            .add((short)1)
+            .build();
         private Map<Short, Short> mapField = ImmutableMap.<Short, Short>builder()
-        .put((short)1, (short)1)
-        .build();
+            .put((short)1, (short)1)
+            .build();
         private com.facebook.thrift.test.terse_write.MyStructWithCustomDefault structField = com.facebook.thrift.test.terse_write.MyStructWithCustomDefault.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="bool_field", requiredness=Requiredness.TERSE)
-        public Builder setBoolField(boolean boolField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="bool_field", requiredness=Requiredness.TERSE)    public Builder setBoolField(boolean boolField) {
             this.boolField = boolField;
             return this;
         }
     
         public boolean isBoolField() { return boolField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="byte_field", requiredness=Requiredness.TERSE)
-        public Builder setByteField(byte byteField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="byte_field", requiredness=Requiredness.TERSE)    public Builder setByteField(byte byteField) {
             this.byteField = byteField;
             return this;
         }
     
         public byte getByteField() { return byteField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="short_field", requiredness=Requiredness.TERSE)
-        public Builder setShortField(short shortField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="short_field", requiredness=Requiredness.TERSE)    public Builder setShortField(short shortField) {
             this.shortField = shortField;
             return this;
         }
     
         public short getShortField() { return shortField; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="int_field", requiredness=Requiredness.TERSE)
-        public Builder setIntField(int intField) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="int_field", requiredness=Requiredness.TERSE)    public Builder setIntField(int intField) {
             this.intField = intField;
             return this;
         }
     
         public int getIntField() { return intField; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="long_field", requiredness=Requiredness.TERSE)
-        public Builder setLongField(long longField) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="long_field", requiredness=Requiredness.TERSE)    public Builder setLongField(long longField) {
             this.longField = longField;
             return this;
         }
     
         public long getLongField() { return longField; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="float_field", requiredness=Requiredness.TERSE)
-        public Builder setFloatField(float floatField) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="float_field", requiredness=Requiredness.TERSE)    public Builder setFloatField(float floatField) {
             this.floatField = floatField;
             return this;
         }
     
         public float getFloatField() { return floatField; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="double_field", requiredness=Requiredness.TERSE)
-        public Builder setDoubleField(double doubleField) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="double_field", requiredness=Requiredness.TERSE)    public Builder setDoubleField(double doubleField) {
             this.doubleField = doubleField;
             return this;
         }
     
         public double getDoubleField() { return doubleField; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="string_field", requiredness=Requiredness.TERSE)
-        public Builder setStringField(String stringField) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="string_field", requiredness=Requiredness.TERSE)    public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
         }
     
         public String getStringField() { return stringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="binary_field", requiredness=Requiredness.TERSE)
-        public Builder setBinaryField(byte[] binaryField) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="binary_field", requiredness=Requiredness.TERSE)    public Builder setBinaryField(byte[] binaryField) {
             this.binaryField = binaryField;
             return this;
         }
     
         public byte[] getBinaryField() { return binaryField; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="enum_field", requiredness=Requiredness.TERSE)
-        public Builder setEnumField(com.facebook.thrift.test.terse_write.MyEnum enumField) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="enum_field", requiredness=Requiredness.TERSE)    public Builder setEnumField(com.facebook.thrift.test.terse_write.MyEnum enumField) {
             this.enumField = enumField;
             return this;
         }
     
         public com.facebook.thrift.test.terse_write.MyEnum getEnumField() { return enumField; }
     
-            @com.facebook.swift.codec.ThriftField(value=11, name="list_field", requiredness=Requiredness.TERSE)
-        public Builder setListField(List<Short> listField) {
+            @com.facebook.swift.codec.ThriftField(value=11, name="list_field", requiredness=Requiredness.TERSE)    public Builder setListField(List<Short> listField) {
             this.listField = listField;
             return this;
         }
     
         public List<Short> getListField() { return listField; }
     
-            @com.facebook.swift.codec.ThriftField(value=12, name="set_field", requiredness=Requiredness.TERSE)
-        public Builder setSetField(Set<Short> setField) {
+            @com.facebook.swift.codec.ThriftField(value=12, name="set_field", requiredness=Requiredness.TERSE)    public Builder setSetField(Set<Short> setField) {
             this.setField = setField;
             return this;
         }
     
         public Set<Short> getSetField() { return setField; }
     
-            @com.facebook.swift.codec.ThriftField(value=13, name="map_field", requiredness=Requiredness.TERSE)
-        public Builder setMapField(Map<Short, Short> mapField) {
+            @com.facebook.swift.codec.ThriftField(value=13, name="map_field", requiredness=Requiredness.TERSE)    public Builder setMapField(Map<Short, Short> mapField) {
             this.mapField = mapField;
             return this;
         }
     
         public Map<Short, Short> getMapField() { return mapField; }
     
-            @com.facebook.swift.codec.ThriftField(value=14, name="struct_field", requiredness=Requiredness.TERSE)
-        public Builder setStructField(com.facebook.thrift.test.terse_write.MyStructWithCustomDefault structField) {
+            @com.facebook.swift.codec.ThriftField(value=14, name="struct_field", requiredness=Requiredness.TERSE)    public Builder setStructField(com.facebook.thrift.test.terse_write.MyStructWithCustomDefault structField) {
             this.structField = structField;
             return this;
         }
@@ -260,7 +246,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -358,72 +344,72 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
     
     @com.facebook.swift.codec.ThriftField(value=1, name="bool_field", requiredness=Requiredness.TERSE)
     public boolean isBoolField() { return boolField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="byte_field", requiredness=Requiredness.TERSE)
     public byte getByteField() { return byteField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="short_field", requiredness=Requiredness.TERSE)
     public short getShortField() { return shortField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=4, name="int_field", requiredness=Requiredness.TERSE)
     public int getIntField() { return intField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=5, name="long_field", requiredness=Requiredness.TERSE)
     public long getLongField() { return longField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=6, name="float_field", requiredness=Requiredness.TERSE)
     public float getFloatField() { return floatField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=7, name="double_field", requiredness=Requiredness.TERSE)
     public double getDoubleField() { return doubleField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="string_field", requiredness=Requiredness.TERSE)
     public String getStringField() { return stringField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="binary_field", requiredness=Requiredness.TERSE)
     public byte[] getBinaryField() { return binaryField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="enum_field", requiredness=Requiredness.TERSE)
     public com.facebook.thrift.test.terse_write.MyEnum getEnumField() { return enumField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=11, name="list_field", requiredness=Requiredness.TERSE)
     public List<Short> getListField() { return listField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=12, name="set_field", requiredness=Requiredness.TERSE)
     public Set<Short> getSetField() { return setField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=13, name="map_field", requiredness=Requiredness.TERSE)
     public Map<Short, Short> getMapField() { return mapField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=14, name="struct_field", requiredness=Requiredness.TERSE)
     public com.facebook.thrift.test.terse_write.MyStructWithCustomDefault getStructField() { return structField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -443,7 +429,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         helper.add("structField", structField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -472,7 +458,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
             Objects.equals(structField, other.structField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -492,7 +478,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
             structField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<TerseStructWithCustomDefault> asReader() {
       return TerseStructWithCustomDefault::read0;
@@ -602,16 +588,16 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         case _LIST_FIELD:
           if (__field.type == TType.LIST) {
             List<Short> listField;
-            {
-            TList _list = oprot.readListBegin();
-            listField = new ArrayList<Short>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                short _value1 = oprot.readI16();
-                listField.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listField = new ArrayList<Short>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    short _value1 = oprot.readI16();
+                    listField.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListField(listField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -620,16 +606,16 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         case _SET_FIELD:
           if (__field.type == TType.SET) {
             Set<Short> setField;
-            {
-            TSet _set = oprot.readSetBegin();
-            setField = new HashSet<Short>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                short _value1 = oprot.readI16();
-                setField.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setField = new HashSet<Short>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    short _value1 = oprot.readI16();
+                    setField.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetField(setField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -638,17 +624,17 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         case _MAP_FIELD:
           if (__field.type == TType.MAP) {
             Map<Short, Short> mapField;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapField = new HashMap<Short, Short>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                short _key1 = oprot.readI16();
-                short _value1 = oprot.readI16();
-                mapField.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapField = new HashMap<Short, Short>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    short _key1 = oprot.readI16();
+                    short _value1 = oprot.readI16();
+                    mapField.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapField(mapField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -671,7 +657,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       int structStart = 0;
@@ -738,10 +724,10 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);
         List<Short> _iter0 = listField;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
-        for (short _iter1 : _iter0) {
-          oprot.writeI16(_iter1);
-        }
-        oprot.writeListEnd();
+            for (short _iter1 : _iter0) {
+              oprot.writeI16(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       java.util.Objects.requireNonNull(setField, "setField must not be null");
@@ -750,10 +736,10 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
         Set<Short> _iter0 = setField;
         oprot.writeSetBegin(new TSet(TType.I16, _iter0.size()));
-        for (short _iter1 : _iter0) {
-          oprot.writeI16(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (short _iter1 : _iter0) {
+              oprot.writeI16(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       java.util.Objects.requireNonNull(mapField, "mapField must not be null");
@@ -762,11 +748,11 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
         oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
         Map<Short, Short> _iter0 = mapField;
         oprot.writeMapBegin(new TMap(TType.I16, TType.I16, _iter0.size()));
-        for (Map.Entry<Short, Short> _iter1 : _iter0.entrySet()) {
-          oprot.writeI16(_iter1.getKey());
-          oprot.writeI16(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Short, Short> _iter1 : _iter0.entrySet()) {
+              oprot.writeI16(_iter1.getKey());
+              oprot.writeI16(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       java.util.Objects.requireNonNull(structField, "structField must not be null");
@@ -782,7 +768,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _TerseStructWithCustomDefaultLazy {
         private static final TerseStructWithCustomDefault _DEFAULT = new TerseStructWithCustomDefault.Builder().build();
     }

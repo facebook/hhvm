@@ -33,7 +33,7 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
     protected CircularStruct() {
       this.field = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
     public static class Builder {
         private test.fixtures.adapter.CircularAdaptee field = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.OPTIONAL)
-        public Builder setField(test.fixtures.adapter.CircularAdaptee field) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.OPTIONAL)    public Builder setField(test.fixtures.adapter.CircularAdaptee field) {
             this.field = field;
             return this;
         }
@@ -66,7 +65,7 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.adapter.CircularAdaptee getField() { return field; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("field", field);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
             Objects.equals(field, other.field) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             field
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<CircularStruct> asReader() {
       return CircularStruct::read0;
@@ -147,7 +146,7 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (field != null) {
@@ -158,7 +157,7 @@ public final class CircularStruct implements com.facebook.thrift.payload.ThriftS
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _CircularStructLazy {
         private static final CircularStruct _DEFAULT = new CircularStruct.Builder().build();
     }

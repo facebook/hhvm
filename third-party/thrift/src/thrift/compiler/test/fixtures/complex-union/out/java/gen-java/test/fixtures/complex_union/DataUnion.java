@@ -126,6 +126,7 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
         res.id = 2;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="binaryData", requiredness=Requiredness.NONE)
@@ -263,7 +264,7 @@ public final class DataUnion implements com.facebook.thrift.payload.ThriftSerial
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<DataUnion> asReader() {
       return DataUnion::read0;

@@ -716,6 +716,7 @@ oprot.writeString(_iter0);
       oprot.writeSetBegin(new TSet(TType.FLOAT, _iter0.size()));
         for (float _iter1 : _iter0) {
           oprot.writeFloat(_iter1);
+
         }
         oprot.writeSetEnd();
         oprot.writeFieldEnd();

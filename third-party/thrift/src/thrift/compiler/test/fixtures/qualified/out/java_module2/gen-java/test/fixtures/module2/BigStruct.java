@@ -36,7 +36,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
       this.s = null;
       this.id = 0;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
         private test.fixtures.module2.Struct s = null;
         private int id = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="s", requiredness=Requiredness.NONE)
-        public Builder setS(test.fixtures.module2.Struct s) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="s", requiredness=Requiredness.NONE)    public Builder setS(test.fixtures.module2.Struct s) {
             this.s = s;
             return this;
         }
     
         public test.fixtures.module2.Struct getS() { return s; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="id", requiredness=Requiredness.NONE)
-        public Builder setId(int id) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="id", requiredness=Requiredness.NONE)    public Builder setId(int id) {
             this.id = id;
             return this;
         }
@@ -80,7 +78,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="s", requiredness=Requiredness.NONE)
     public test.fixtures.module2.Struct getS() { return s; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="id", requiredness=Requiredness.NONE)
     public int getId() { return id; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
         helper.add("id", id);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
             Objects.equals(id, other.id) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
             id
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<BigStruct> asReader() {
       return BigStruct::read0;
@@ -180,7 +178,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (s != null) {
@@ -194,7 +192,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _BigStructLazy {
         private static final BigStruct _DEFAULT = new BigStruct.Builder().build();
     }

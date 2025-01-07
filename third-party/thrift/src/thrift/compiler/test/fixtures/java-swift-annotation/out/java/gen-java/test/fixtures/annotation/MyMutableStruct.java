@@ -27,7 +27,7 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
       this.intField = 0L;
       this.stringField = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -40,16 +40,14 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
         private long intField = 0L;
         private String stringField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
-        public Builder setIntField(long intField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)    public Builder setIntField(long intField) {
             this.intField = intField;
             return this;
         }
     
         public long getIntField() { return intField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)
-        public Builder setStringField(String stringField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)    public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
         }
@@ -65,11 +63,11 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
         @ThriftConstructor
         public MyMutableStruct build() {
             MyMutableStruct result = new MyMutableStruct();
-            result.intField = this.intField;
-            result.stringField = this.stringField;
-        return result;    }
+                result.intField = this.intField;
+                result.stringField = this.stringField;
+            return result;    }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -92,24 +90,24 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
     
     @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
     public long getIntField() { return intField; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyMutableStruct setIntField(long intField) {
         this.intField = intField;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)
     public String getStringField() { return stringField; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyMutableStruct setStringField(String stringField) {
         this.stringField = stringField;
         return this;
     }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -117,7 +115,7 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
         helper.add("stringField", stringField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -134,7 +132,7 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
             Objects.equals(stringField, other.stringField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -142,7 +140,7 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
             stringField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyMutableStruct> asReader() {
       return MyMutableStruct::read0;
@@ -181,7 +179,7 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
@@ -195,6 +193,6 @@ public final class MyMutableStruct implements com.facebook.thrift.payload.Thrift
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
 
 }

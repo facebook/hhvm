@@ -447,6 +447,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         res.id = 14;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="bool_field", requiredness=Requiredness.NONE)
@@ -854,10 +855,10 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         oprot.writeFieldBegin(LIST_FIELD_FIELD_DESC);
         List<Short> _iter0 = (List<Short>)this.value;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
-        for (short _iter1 : _iter0) {
-          oprot.writeI16(_iter1);
-        }
-        oprot.writeListEnd();
+            for (short _iter1 : _iter0) {
+              oprot.writeI16(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -865,10 +866,10 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
         Set<Short> _iter0 = (Set<Short>)this.value;
         oprot.writeSetBegin(new TSet(TType.I16, _iter0.size()));
-        for (short _iter1 : _iter0) {
-          oprot.writeI16(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (short _iter1 : _iter0) {
+              oprot.writeI16(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -876,11 +877,11 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
         Map<Short, Short> _iter0 = (Map<Short, Short>)this.value;
         oprot.writeMapBegin(new TMap(TType.I16, TType.I16, _iter0.size()));
-        for (Map.Entry<Short, Short> _iter1 : _iter0.entrySet()) {
-          oprot.writeI16(_iter1.getKey());
-          oprot.writeI16(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Short, Short> _iter1 : _iter0.entrySet()) {
+              oprot.writeI16(_iter1.getKey());
+              oprot.writeI16(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -897,7 +898,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyUnion> asReader() {
       return MyUnion::read0;
@@ -974,49 +975,49 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
           case _LIST_FIELD:
             if (__field.type == LIST_FIELD_FIELD_DESC.type) {
               List<Short> listField;
-            {
-            TList _list = oprot.readListBegin();
-            listField = new ArrayList<Short>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                short _value1 = oprot.readI16();
-                listField.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listField = new ArrayList<Short>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    short _value1 = oprot.readI16();
+                    listField.add(_value1);
+                }
+                oprot.readListEnd();
+                }
               res.value = listField;
             }
             break;
           case _SET_FIELD:
             if (__field.type == SET_FIELD_FIELD_DESC.type) {
               Set<Short> setField;
-            {
-            TSet _set = oprot.readSetBegin();
-            setField = new HashSet<Short>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                short _value1 = oprot.readI16();
-                setField.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setField = new HashSet<Short>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    short _value1 = oprot.readI16();
+                    setField.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
               res.value = setField;
             }
             break;
           case _MAP_FIELD:
             if (__field.type == MAP_FIELD_FIELD_DESC.type) {
               Map<Short, Short> mapField;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapField = new HashMap<Short, Short>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                short _key1 = oprot.readI16();
-                short _value1 = oprot.readI16();
-                mapField.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapField = new HashMap<Short, Short>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    short _key1 = oprot.readI16();
+                    short _value1 = oprot.readI16();
+                    mapField.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
               res.value = mapField;
             }
             break;

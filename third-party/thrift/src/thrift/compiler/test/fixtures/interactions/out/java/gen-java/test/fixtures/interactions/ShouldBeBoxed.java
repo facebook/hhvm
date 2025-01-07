@@ -33,7 +33,7 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
     protected ShouldBeBoxed() {
       this.sessionId = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
     public static class Builder {
         private String sessionId = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="sessionId", requiredness=Requiredness.NONE)
-        public Builder setSessionId(String sessionId) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="sessionId", requiredness=Requiredness.NONE)    public Builder setSessionId(String sessionId) {
             this.sessionId = sessionId;
             return this;
         }
@@ -66,7 +65,7 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="sessionId", requiredness=Requiredness.NONE)
     public String getSessionId() { return sessionId; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("sessionId", sessionId);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
             Objects.equals(sessionId, other.sessionId) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             sessionId
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ShouldBeBoxed> asReader() {
       return ShouldBeBoxed::read0;
@@ -144,7 +143,7 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (sessionId != null) {
@@ -155,7 +154,7 @@ public final class ShouldBeBoxed implements com.facebook.thrift.payload.ThriftSe
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ShouldBeBoxedLazy {
         private static final ShouldBeBoxed _DEFAULT = new ShouldBeBoxed.Builder().build();
     }

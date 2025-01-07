@@ -42,7 +42,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
       this.bigInteger = 0;
       this.binaryTestBuffer = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
         private java.math.BigInteger bigInteger = 0;
         private java.nio.ByteBuffer binaryTestBuffer = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE)
-        public Builder setLsMap(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE)    public Builder setLsMap(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap) {
             this.lsMap = lsMap;
             return this;
         }
     
         public it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> getLsMap() { return lsMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="ioMap", requiredness=Requiredness.NONE)
-        public Builder setIoMap(it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> ioMap) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="ioMap", requiredness=Requiredness.NONE)    public Builder setIoMap(it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> ioMap) {
             this.ioMap = ioMap;
             return this;
         }
     
         public it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> getIoMap() { return ioMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="BigInteger", requiredness=Requiredness.NONE)
-        public Builder setBigInteger(java.math.BigInteger bigInteger) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="BigInteger", requiredness=Requiredness.NONE)    public Builder setBigInteger(java.math.BigInteger bigInteger) {
             this.bigInteger = bigInteger;
             return this;
         }
     
         public java.math.BigInteger getBigInteger() { return bigInteger; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="binaryTestBuffer", requiredness=Requiredness.NONE)
-        public Builder setBinaryTestBuffer(java.nio.ByteBuffer binaryTestBuffer) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="binaryTestBuffer", requiredness=Requiredness.NONE)    public Builder setBinaryTestBuffer(java.nio.ByteBuffer binaryTestBuffer) {
             this.binaryTestBuffer = binaryTestBuffer;
             return this;
         }
@@ -108,7 +104,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -143,22 +139,22 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE)
     public it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> getLsMap() { return lsMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="ioMap", requiredness=Requiredness.NONE)
     public it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> getIoMap() { return ioMap; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="BigInteger", requiredness=Requiredness.NONE)
     public java.math.BigInteger getBigInteger() { return bigInteger; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="binaryTestBuffer", requiredness=Requiredness.NONE)
     public java.nio.ByteBuffer getBinaryTestBuffer() { return binaryTestBuffer; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -168,7 +164,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
         helper.add("binaryTestBuffer", binaryTestBuffer);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -187,7 +183,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
             Objects.equals(binaryTestBuffer, other.binaryTestBuffer) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -197,7 +193,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
             binaryTestBuffer
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<TypeRemapped> asReader() {
       return TypeRemapped::read0;
@@ -214,17 +210,17 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
         case _LSMAP:
           if (__field.type == TType.MAP) {
             it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            lsMap = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                long _key1 = oprot.readI64();
-                String _value1 = oprot.readString();
-                lsMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                lsMap = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    long _key1 = oprot.readI64();
+                    String _value1 = oprot.readString();
+                    lsMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setLsMap(lsMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -233,35 +229,35 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
         case _IOMAP:
           if (__field.type == TType.MAP) {
             it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> ioMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            ioMap = new it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>();
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                it.unimi.dsi.fastutil.ints.Int2LongArrayMap _value1;
-            {
-            TMap _map1 = oprot.readMapBegin();
-            _value1 = new it.unimi.dsi.fastutil.ints.Int2LongArrayMap();
-            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                
-                
-                int _key2 = oprot.readI32();
-                
-
-                
-                long _value2 = oprot.readI64();
-                
-                
-                _value1.put(_key2, _value2);
-                
-            }
-            }
-            oprot.readMapEnd();
-                ioMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                ioMap = new it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap>();
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    it.unimi.dsi.fastutil.ints.Int2LongArrayMap _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new it.unimi.dsi.fastutil.ints.Int2LongArrayMap();
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    int _key2 = oprot.readI32();
+                                    
+                    
+                                    
+                                    long _value2 = oprot.readI64();
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    ioMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setIoMap(ioMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -292,34 +288,34 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (lsMap != null) {
         oprot.writeFieldBegin(LS_MAP_FIELD_DESC);
         it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = lsMap;
         oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
-        for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI64(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI64(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (ioMap != null) {
         oprot.writeFieldBegin(IO_MAP_FIELD_DESC);
         it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> _iter0 = ioMap;
         oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
-        for (Map.Entry<Integer, it.unimi.dsi.fastutil.ints.Int2LongArrayMap> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter1.getValue().size()));
-        for (Map.Entry<Integer, Long> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeI32(_iter2.getKey());
-          oprot.writeI64(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, it.unimi.dsi.fastutil.ints.Int2LongArrayMap> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter1.getValue().size()));
+            for (Map.Entry<Integer, Long> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeI32(_iter2.getKey());
+              oprot.writeI64(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(BIG_INTEGER_FIELD_DESC);
@@ -333,7 +329,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _TypeRemappedLazy {
         private static final TypeRemapped _DEFAULT = new TypeRemapped.Builder().build();
     }

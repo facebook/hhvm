@@ -27,7 +27,7 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
       this.normal = 0;
       this.bad = 0;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -40,16 +40,14 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
         private int normal = 0;
         private int bad = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="normal", requiredness=Requiredness.NONE)
-        public Builder setNormal(int normal) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="normal", requiredness=Requiredness.NONE)    public Builder setNormal(int normal) {
             this.normal = normal;
             return this;
         }
     
         public int getNormal() { return normal; }
     
-            @com.facebook.swift.codec.ThriftField(value=-1, name="bad", isLegacyId=true, requiredness=Requiredness.NONE)
-        public Builder setBad(int bad) {
+            @com.facebook.swift.codec.ThriftField(value=-1, name="bad", isLegacyId=true, requiredness=Requiredness.NONE)    public Builder setBad(int bad) {
             this.bad = bad;
             return this;
         }
@@ -65,11 +63,11 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
         @ThriftConstructor
         public LegacyStruct build() {
             LegacyStruct result = new LegacyStruct();
-            result.normal = this.normal;
-            result.bad = this.bad;
-        return result;    }
+                result.normal = this.normal;
+                result.bad = this.bad;
+            return result;    }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -92,24 +90,24 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
     
     @com.facebook.swift.codec.ThriftField(value=1, name="normal", requiredness=Requiredness.NONE)
     public int getNormal() { return normal; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public LegacyStruct setNormal(int normal) {
         this.normal = normal;
         return this;
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=-1, name="bad", isLegacyId=true, requiredness=Requiredness.NONE)
     public int getBad() { return bad; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public LegacyStruct setBad(int bad) {
         this.bad = bad;
         return this;
     }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -117,7 +115,7 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
         helper.add("bad", bad);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -134,7 +132,7 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
             Objects.equals(bad, other.bad) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -142,7 +140,7 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
             bad
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<LegacyStruct> asReader() {
       return LegacyStruct::read0;
@@ -181,7 +179,7 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(NORMAL_FIELD_DESC);
@@ -193,6 +191,6 @@ public final class LegacyStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
 
 }

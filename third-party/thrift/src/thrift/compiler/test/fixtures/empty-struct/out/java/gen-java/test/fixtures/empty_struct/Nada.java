@@ -66,6 +66,7 @@ public final class Nada implements com.facebook.thrift.payload.ThriftSerializabl
     @ThriftConstructor
     public Nada() {
     }
+
     
 
     @ThriftUnionId
@@ -153,7 +154,7 @@ public final class Nada implements com.facebook.thrift.payload.ThriftSerializabl
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Nada> asReader() {
       return Nada::read0;

@@ -38,7 +38,7 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
     }
     
     
-    
+
     public static class Builder {
     
     public Builder() { }
@@ -52,7 +52,7 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
             return result;
         }
     }
-    
+
 
     
     public static com.facebook.thrift.payload.Reader<EmptyXcep> asReader() {
@@ -76,13 +76,13 @@ public final class EmptyXcep extends org.apache.thrift.TBaseException implements
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _EmptyXcepLazy {
         private static final EmptyXcep _DEFAULT = new EmptyXcep.Builder().build();
     }

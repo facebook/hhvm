@@ -207,6 +207,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         res.id = 9;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
@@ -389,10 +390,10 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
         Set<String> _iter0 = (Set<String>)this.value;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -400,15 +401,15 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeFieldBegin(MAP_FIELD_FIELD_DESC);
         Map<String, List<String>> _iter0 = (Map<String, List<String>>)this.value;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-        for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
-        for (String _iter2 : _iter1.getValue()) {
-          oprot.writeString(_iter2);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, List<String>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.STRING, _iter1.getValue().size()));
+            for (String _iter2 : _iter1.getValue()) {
+              oprot.writeString(_iter2);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -432,7 +433,7 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Baz> asReader() {
       return Baz::read0;
@@ -455,47 +456,47 @@ public final class Baz implements com.facebook.thrift.payload.ThriftSerializable
           case _SETFIELD:
             if (__field.type == SET_FIELD_FIELD_DESC.type) {
               Set<String> setField;
-            {
-            TSet _set = oprot.readSetBegin();
-            setField = new HashSet<String>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                setField.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setField = new HashSet<String>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    setField.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
               res.value = setField;
             }
             break;
           case _MAPFIELD:
             if (__field.type == MAP_FIELD_FIELD_DESC.type) {
               Map<String, List<String>> mapField;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapField = new HashMap<String, List<String>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                List<String> _value1;
-            {
-            TList _list1 = oprot.readListBegin();
-            _value1 = new ArrayList<String>(Math.max(0, _list1.size));
-            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                
-                
-                String _value2 = oprot.readString();
-                
-                
-                _value1.add(_value2);
-                
-            }
-            oprot.readListEnd();
-            }
-                mapField.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapField = new HashMap<String, List<String>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    List<String> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<String>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    String _value2 = oprot.readString();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapField.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
               res.value = mapField;
             }
             break;

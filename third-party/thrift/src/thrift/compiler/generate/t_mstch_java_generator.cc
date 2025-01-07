@@ -159,6 +159,17 @@ class t_mstch_java_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
+  std::optional<whisker_options> use_whisker() const override {
+    whisker_options opts;
+    opts.allowed_undefined_variables = {
+        "type:typedef_type", // in UnionWrite.mustache
+        "struct:isUnion?", // in WriteResponseType.mustache
+        "struct:asBean?", // in DefaultValue.mustache
+        "field:hasAdapter?", // in BoxedType.mustache
+    };
+    return opts;
+  }
+
   std::string template_prefix() const override { return "java"; }
 
   void generate_program() override;

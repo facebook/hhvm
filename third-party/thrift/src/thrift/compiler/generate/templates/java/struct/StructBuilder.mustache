@@ -27,7 +27,7 @@ public static class Builder {
     {{#field:isSensitive?}}
     @org.apache.thrift.annotations.Sensitive
     {{/field:isSensitive?}}
-    {{> ThriftFieldAnnotation}}{{#field:javaAnnotation?}} @{{field:javaAnnotation}}{{/field:javaAnnotation?}}
+    {{> ThriftFieldAnnotation}}
     {{#field:hasWrapper?}}
     public Builder {{> SetterName}}({{field:wrapperType}} {{field:javaName}}) {
         this.{{field:javaName}} = {{field:javaName}};

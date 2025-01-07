@@ -39,7 +39,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
       this.stringField = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
       this.setField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
         private String stringField = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
         private Set<Integer> setField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE)
-        public Builder setIntField(int intField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE)    public Builder setIntField(int intField) {
             this.intField = intField;
             return this;
         }
     
         public int getIntField() { return intField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)
-        public Builder setStringField(String stringField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)    public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
         }
     
         public String getStringField() { return stringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)
-        public Builder setSetField(Set<Integer> setField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)    public Builder setSetField(Set<Integer> setField) {
             this.setField = setField;
             return this;
         }
@@ -94,7 +91,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -126,17 +123,17 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     
     @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE)
     public int getIntField() { return intField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)
     public String getStringField() { return stringField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)
     public Set<Integer> getSetField() { return setField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -145,7 +142,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
         helper.add("setField", setField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -163,7 +160,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
             Objects.equals(setField, other.setField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -172,7 +169,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
             setField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<TerseAdaptedFields> asReader() {
       return TerseAdaptedFields::read0;
@@ -205,16 +202,16 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
         case _SET_FIELD:
           if (__field.type == TType.SET) {
             Set<Integer> setField;
-            {
-            TSet _set = oprot.readSetBegin();
-            setField = new HashSet<Integer>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                setField.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setField = new HashSet<Integer>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    setField.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetField(setField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -229,7 +226,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       int structStart = 0;
@@ -253,16 +250,16 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
         oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
         Set<Integer> _iter0 = setField;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _TerseAdaptedFieldsLazy {
         private static final TerseAdaptedFields _DEFAULT = new TerseAdaptedFields.Builder().build();
     }

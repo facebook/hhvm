@@ -33,7 +33,7 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
     protected NonCopyableStruct() {
       this.num = 0L;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
     public static class Builder {
         private long num = 0L;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="num", requiredness=Requiredness.NONE)
-        public Builder setNum(long num) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="num", requiredness=Requiredness.NONE)    public Builder setNum(long num) {
             this.num = num;
             return this;
         }
@@ -66,7 +65,7 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
     
     @com.facebook.swift.codec.ThriftField(value=1, name="num", requiredness=Requiredness.NONE)
     public long getNum() { return num; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("num", num);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
             Objects.equals(num, other.num) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             num
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<NonCopyableStruct> asReader() {
       return NonCopyableStruct::read0;
@@ -144,7 +143,7 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(NUM_FIELD_DESC);
@@ -153,7 +152,7 @@ public final class NonCopyableStruct implements com.facebook.thrift.payload.Thri
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _NonCopyableStructLazy {
         private static final NonCopyableStruct _DEFAULT = new NonCopyableStruct.Builder().build();
     }

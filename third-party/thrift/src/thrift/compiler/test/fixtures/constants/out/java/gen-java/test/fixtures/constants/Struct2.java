@@ -42,7 +42,7 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
       this.c = null;
       this.d = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
         private test.fixtures.constants.Struct1 c = null;
         private List<Integer> d = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
-        public Builder setA(int a) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)    public Builder setA(int a) {
             this.a = a;
             return this;
         }
     
         public int getA() { return a; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)
-        public Builder setB(String b) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)    public Builder setB(String b) {
             this.b = b;
             return this;
         }
     
         public String getB() { return b; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)
-        public Builder setC(test.fixtures.constants.Struct1 c) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)    public Builder setC(test.fixtures.constants.Struct1 c) {
             this.c = c;
             return this;
         }
     
         public test.fixtures.constants.Struct1 getC() { return c; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="d", requiredness=Requiredness.NONE)
-        public Builder setD(List<Integer> d) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="d", requiredness=Requiredness.NONE)    public Builder setD(List<Integer> d) {
             this.d = d;
             return this;
         }
@@ -108,7 +104,7 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -143,22 +139,22 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
     
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
     public int getA() { return a; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)
     public String getB() { return b; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)
     public test.fixtures.constants.Struct1 getC() { return c; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="d", requiredness=Requiredness.NONE)
     public List<Integer> getD() { return d; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -168,7 +164,7 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
         helper.add("d", d);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -187,7 +183,7 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
             Objects.equals(d, other.d) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -197,7 +193,7 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
             d
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Struct2> asReader() {
       return Struct2::read0;
@@ -238,16 +234,16 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
         case _D:
           if (__field.type == TType.LIST) {
             List<Integer> d;
-            {
-            TList _list = oprot.readListBegin();
-            d = new ArrayList<Integer>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                d.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                d = new ArrayList<Integer>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    d.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setD(d);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -262,7 +258,7 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(A_FIELD_DESC);
@@ -282,16 +278,16 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
         oprot.writeFieldBegin(D_FIELD_DESC);
         List<Integer> _iter0 = d;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeListEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _Struct2Lazy {
         private static final Struct2 _DEFAULT = new Struct2.Builder().build();
     }

@@ -42,7 +42,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
       this.optSharedField = null;
       this.optBoxedField = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
         private Integer optSharedField = null;
         private Integer optBoxedField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
-        public Builder setField(int field) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)    public Builder setField(int field) {
             this.field = field;
             return this;
         }
     
         public int getField() { return field; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE)
-        public Builder setSharedField(int sharedField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE)    public Builder setSharedField(int sharedField) {
             this.sharedField = sharedField;
             return this;
         }
     
         public int getSharedField() { return sharedField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptSharedField(Integer optSharedField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptSharedField(Integer optSharedField) {
             this.optSharedField = optSharedField;
             return this;
         }
     
         public Integer getOptSharedField() { return optSharedField; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptBoxedField(Integer optBoxedField) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptBoxedField(Integer optBoxedField) {
             this.optBoxedField = optBoxedField;
             return this;
         }
@@ -108,7 +104,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -146,22 +142,22 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     
     @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
     public int getField() { return field; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="shared_field", requiredness=Requiredness.NONE)
     public int getSharedField() { return sharedField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="opt_shared_field", requiredness=Requiredness.OPTIONAL)
     public Integer getOptSharedField() { return optSharedField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="opt_boxed_field", requiredness=Requiredness.OPTIONAL)
     public Integer getOptBoxedField() { return optBoxedField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -171,7 +167,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
         helper.add("optBoxedField", optBoxedField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -190,7 +186,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
             Objects.equals(optBoxedField, other.optBoxedField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -200,7 +196,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
             optBoxedField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithFieldAdapter> asReader() {
       return StructWithFieldAdapter::read0;
@@ -232,7 +228,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
           break;
         case _OPT_SHARED_FIELD:
           if (__field.type == TType.I32) {
-            Integer optSharedField = oprot.readI32();
+            Integer  optSharedField = oprot.readI32();
             builder.setOptSharedField(optSharedField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -240,7 +236,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
           break;
         case _OPT_BOXED_FIELD:
           if (__field.type == TType.I32) {
-            Integer optBoxedField = oprot.readI32();
+            Integer  optBoxedField = oprot.readI32();
             builder.setOptBoxedField(optBoxedField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -255,7 +251,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(FIELD_FIELD_DESC);
@@ -277,7 +273,7 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithFieldAdapterLazy {
         private static final StructWithFieldAdapter _DEFAULT = new StructWithFieldAdapter.Builder().build();
     }

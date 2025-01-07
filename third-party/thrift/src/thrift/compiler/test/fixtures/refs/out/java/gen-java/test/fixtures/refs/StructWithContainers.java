@@ -48,7 +48,7 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
       this.setRefShared = null;
       this.listRefSharedConst = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -65,48 +65,42 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         private Set<Integer> setRefShared = null;
         private List<Integer> listRefSharedConst = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="list_ref", requiredness=Requiredness.NONE)
-        public Builder setListRef(List<Integer> listRef) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="list_ref", requiredness=Requiredness.NONE)    public Builder setListRef(List<Integer> listRef) {
             this.listRef = listRef;
             return this;
         }
     
         public List<Integer> getListRef() { return listRef; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="set_ref", requiredness=Requiredness.NONE)
-        public Builder setSetRef(Set<Integer> setRef) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="set_ref", requiredness=Requiredness.NONE)    public Builder setSetRef(Set<Integer> setRef) {
             this.setRef = setRef;
             return this;
         }
     
         public Set<Integer> getSetRef() { return setRef; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="map_ref", requiredness=Requiredness.NONE)
-        public Builder setMapRef(Map<Integer, Integer> mapRef) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="map_ref", requiredness=Requiredness.NONE)    public Builder setMapRef(Map<Integer, Integer> mapRef) {
             this.mapRef = mapRef;
             return this;
         }
     
         public Map<Integer, Integer> getMapRef() { return mapRef; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="list_ref_unique", requiredness=Requiredness.NONE)
-        public Builder setListRefUnique(List<Integer> listRefUnique) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="list_ref_unique", requiredness=Requiredness.NONE)    public Builder setListRefUnique(List<Integer> listRefUnique) {
             this.listRefUnique = listRefUnique;
             return this;
         }
     
         public List<Integer> getListRefUnique() { return listRefUnique; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="set_ref_shared", requiredness=Requiredness.NONE)
-        public Builder setSetRefShared(Set<Integer> setRefShared) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="set_ref_shared", requiredness=Requiredness.NONE)    public Builder setSetRefShared(Set<Integer> setRefShared) {
             this.setRefShared = setRefShared;
             return this;
         }
     
         public Set<Integer> getSetRefShared() { return setRefShared; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="list_ref_shared_const", requiredness=Requiredness.NONE)
-        public Builder setListRefSharedConst(List<Integer> listRefSharedConst) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="list_ref_shared_const", requiredness=Requiredness.NONE)    public Builder setListRefSharedConst(List<Integer> listRefSharedConst) {
             this.listRefSharedConst = listRefSharedConst;
             return this;
         }
@@ -136,7 +130,7 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -183,32 +177,32 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="list_ref", requiredness=Requiredness.NONE)
     public List<Integer> getListRef() { return listRef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="set_ref", requiredness=Requiredness.NONE)
     public Set<Integer> getSetRef() { return setRef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="map_ref", requiredness=Requiredness.NONE)
     public Map<Integer, Integer> getMapRef() { return mapRef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="list_ref_unique", requiredness=Requiredness.NONE)
     public List<Integer> getListRefUnique() { return listRefUnique; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="set_ref_shared", requiredness=Requiredness.NONE)
     public Set<Integer> getSetRefShared() { return setRefShared; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="list_ref_shared_const", requiredness=Requiredness.NONE)
     public List<Integer> getListRefSharedConst() { return listRefSharedConst; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -220,7 +214,7 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         helper.add("listRefSharedConst", listRefSharedConst);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -241,7 +235,7 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
             Objects.equals(listRefSharedConst, other.listRefSharedConst) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -253,7 +247,7 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
             listRefSharedConst
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithContainers> asReader() {
       return StructWithContainers::read0;
@@ -270,16 +264,16 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         case _LIST_REF:
           if (__field.type == TType.LIST) {
             List<Integer> listRef;
-            {
-            TList _list = oprot.readListBegin();
-            listRef = new ArrayList<Integer>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                listRef.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listRef = new ArrayList<Integer>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    listRef.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListRef(listRef);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -288,16 +282,16 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         case _SET_REF:
           if (__field.type == TType.SET) {
             Set<Integer> setRef;
-            {
-            TSet _set = oprot.readSetBegin();
-            setRef = new HashSet<Integer>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                setRef.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setRef = new HashSet<Integer>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    setRef.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetRef(setRef);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -306,17 +300,17 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         case _MAP_REF:
           if (__field.type == TType.MAP) {
             Map<Integer, Integer> mapRef;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapRef = new HashMap<Integer, Integer>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                int _value1 = oprot.readI32();
-                mapRef.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapRef = new HashMap<Integer, Integer>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    int _value1 = oprot.readI32();
+                    mapRef.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapRef(mapRef);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -325,16 +319,16 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         case _LIST_REF_UNIQUE:
           if (__field.type == TType.LIST) {
             List<Integer> listRefUnique;
-            {
-            TList _list = oprot.readListBegin();
-            listRefUnique = new ArrayList<Integer>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                listRefUnique.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listRefUnique = new ArrayList<Integer>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    listRefUnique.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListRefUnique(listRefUnique);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -343,16 +337,16 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         case _SET_REF_SHARED:
           if (__field.type == TType.SET) {
             Set<Integer> setRefShared;
-            {
-            TSet _set = oprot.readSetBegin();
-            setRefShared = new HashSet<Integer>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                setRefShared.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setRefShared = new HashSet<Integer>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    setRefShared.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetRefShared(setRefShared);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -361,16 +355,16 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         case _LIST_REF_SHARED_CONST:
           if (__field.type == TType.LIST) {
             List<Integer> listRefSharedConst;
-            {
-            TList _list = oprot.readListBegin();
-            listRefSharedConst = new ArrayList<Integer>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                listRefSharedConst.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listRefSharedConst = new ArrayList<Integer>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    listRefSharedConst.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListRefSharedConst(listRefSharedConst);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -385,74 +379,74 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (listRef != null) {
         oprot.writeFieldBegin(LIST_REF_FIELD_DESC);
         List<Integer> _iter0 = listRef;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeListEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (setRef != null) {
         oprot.writeFieldBegin(SET_REF_FIELD_DESC);
         Set<Integer> _iter0 = setRef;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (mapRef != null) {
         oprot.writeFieldBegin(MAP_REF_FIELD_DESC);
         Map<Integer, Integer> _iter0 = mapRef;
         oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter0.size()));
-        for (Map.Entry<Integer, Integer> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeI32(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, Integer> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeI32(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (listRefUnique != null) {
         oprot.writeFieldBegin(LIST_REF_UNIQUE_FIELD_DESC);
         List<Integer> _iter0 = listRefUnique;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeListEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (setRefShared != null) {
         oprot.writeFieldBegin(SET_REF_SHARED_FIELD_DESC);
         Set<Integer> _iter0 = setRefShared;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (listRefSharedConst != null) {
         oprot.writeFieldBegin(LIST_REF_SHARED_CONST_FIELD_DESC);
         List<Integer> _iter0 = listRefSharedConst;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeListEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithContainersLazy {
         private static final StructWithContainers _DEFAULT = new StructWithContainers.Builder().build();
     }

@@ -48,7 +48,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.toto = null;
       this.password = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -65,40 +65,35 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private String toto = null;
         private String password = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
-        public Builder setIntField(long intField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)    public Builder setIntField(long intField) {
             this.intField = intField;
             return this;
         }
     
         public long getIntField() { return intField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)
-        public Builder setStringField(String stringField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)    public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
         }
     
         public String getStringField() { return stringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="detailField", requiredness=Requiredness.NONE)
-        public Builder setDetailField(String detailField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="detailField", requiredness=Requiredness.NONE)    public Builder setDetailField(String detailField) {
             this.detailField = detailField;
             return this;
         }
     
         public String getDetailField() { return detailField; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="detailMap", requiredness=Requiredness.NONE)
-        public Builder setDetailMap(com.foo.FastIntLongMap detailMap) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="detailMap", requiredness=Requiredness.NONE)    public Builder setDetailMap(com.foo.FastIntLongMap detailMap) {
             this.detailMap = detailMap;
             return this;
         }
     
         public com.foo.FastIntLongMap getDetailMap() { return detailMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="titi", requiredness=Requiredness.NONE)
-        public Builder setToto(String toto) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="titi", requiredness=Requiredness.NONE)    public Builder setToto(String toto) {
             this.toto = toto;
             return this;
         }
@@ -106,8 +101,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         public String getToto() { return toto; }
     
             @org.apache.thrift.annotations.Sensitive
-        @com.facebook.swift.codec.ThriftField(value=6, name="password", requiredness=Requiredness.NONE)
-        public Builder setPassword(String password) {
+        @com.facebook.swift.codec.ThriftField(value=6, name="password", requiredness=Requiredness.NONE)    public Builder setPassword(String password) {
             this.password = password;
             return this;
         }
@@ -137,7 +131,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -185,32 +179,32 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     @com.facebook.swift.codec.ThriftField(value=1, name="intField", requiredness=Requiredness.NONE)
     public long getIntField() { return intField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="stringField", requiredness=Requiredness.NONE)
     public String getStringField() { return stringField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="detailField", requiredness=Requiredness.NONE)
     public String getDetailField() { return detailField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="detailMap", requiredness=Requiredness.NONE)
     public com.foo.FastIntLongMap getDetailMap() { return detailMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="titi", requiredness=Requiredness.NONE)
     public String getToto() { return toto; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="password", requiredness=Requiredness.NONE)
     public String getPassword() { return password; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -222,7 +216,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("password", "<SENSITIVE FIELD>");
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -243,7 +237,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(password, other.password) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -255,7 +249,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             password
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
@@ -296,17 +290,17 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         case _DETAILMAP:
           if (__field.type == TType.MAP) {
             com.foo.FastIntLongMap detailMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            detailMap = new com.foo.FastIntLongMap();
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                long _value1 = oprot.readI64();
-                detailMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                detailMap = new com.foo.FastIntLongMap();
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    long _value1 = oprot.readI64();
+                    detailMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setDetailMap(detailMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -337,7 +331,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
@@ -357,11 +351,11 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldBegin(DETAIL_MAP_FIELD_DESC);
         com.foo.FastIntLongMap _iter0 = detailMap;
         oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter0.size()));
-        for (Map.Entry<Integer, Long> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeI64(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, Long> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeI64(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (toto != null) {
@@ -377,7 +371,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructLazy {
         private static final MyStruct _DEFAULT = new MyStruct.Builder().build();
     }

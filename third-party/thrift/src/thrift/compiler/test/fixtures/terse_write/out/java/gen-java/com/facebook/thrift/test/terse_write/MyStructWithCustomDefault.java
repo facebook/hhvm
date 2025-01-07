@@ -33,7 +33,7 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
     protected MyStructWithCustomDefault() {
       this.field1 = 1L;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
     public static class Builder {
         private long field1 = 1L;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
-        public Builder setField1(long field1) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)    public Builder setField1(long field1) {
             this.field1 = field1;
             return this;
         }
@@ -66,7 +65,7 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
     
     @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
     public long getField1() { return field1; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("field1", field1);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
             Objects.equals(field1, other.field1) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             field1
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStructWithCustomDefault> asReader() {
       return MyStructWithCustomDefault::read0;
@@ -147,7 +146,7 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(FIELD1_FIELD_DESC);
@@ -156,7 +155,7 @@ public final class MyStructWithCustomDefault implements com.facebook.thrift.payl
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructWithCustomDefaultLazy {
         private static final MyStructWithCustomDefault _DEFAULT = new MyStructWithCustomDefault.Builder().build();
     }

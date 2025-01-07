@@ -189,6 +189,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         res.id = 4;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="myEnum", requiredness=Requiredness.NONE)
@@ -367,10 +368,10 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         oprot.writeFieldBegin(FLOAT_SET_FIELD_DESC);
         Set<Float> _iter0 = (Set<Float>)this.value;
         oprot.writeSetBegin(new TSet(TType.FLOAT, _iter0.size()));
-        for (float _iter1 : _iter0) {
-          oprot.writeFloat(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (float _iter1 : _iter0) {
+              oprot.writeFloat(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -380,7 +381,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyUnion> asReader() {
       return MyUnion::read0;
@@ -415,16 +416,16 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
           case _FLOATSET:
             if (__field.type == FLOAT_SET_FIELD_DESC.type) {
               Set<Float> floatSet;
-            {
-            TSet _set = oprot.readSetBegin();
-            floatSet = new HashSet<Float>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                float _value1 = oprot.readFloat();
-                floatSet.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                floatSet = new HashSet<Float>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    float _value1 = oprot.readFloat();
+                    floatSet.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
               res.value = floatSet;
             }
             break;

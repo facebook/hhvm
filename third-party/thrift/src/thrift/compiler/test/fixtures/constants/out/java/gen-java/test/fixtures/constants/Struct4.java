@@ -39,7 +39,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
       this.b = null;
       this.c = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
         private Double b = null;
         private Byte c = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
-        public Builder setA(int a) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)    public Builder setA(int a) {
             this.a = a;
             return this;
         }
     
         public int getA() { return a; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)
-        public Builder setB(Double b) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)    public Builder setB(Double b) {
             this.b = b;
             return this;
         }
     
         public Double getB() { return b; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)
-        public Builder setC(Byte c) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)    public Builder setC(Byte c) {
             this.c = c;
             return this;
         }
@@ -94,7 +91,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
     
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
     public int getA() { return a; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)
     public Double getB() { return b; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)
     public Byte getC() { return c; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
         helper.add("c", c);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
             Objects.equals(c, other.c) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
             c
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Struct4> asReader() {
       return Struct4::read0;
@@ -193,7 +190,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
           break;
         case _B:
           if (__field.type == TType.DOUBLE) {
-            Double b = oprot.readDouble();
+            Double  b = oprot.readDouble();
             builder.setB(b);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -201,7 +198,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
           break;
         case _C:
           if (__field.type == TType.BYTE) {
-            Byte c = oprot.readByte();
+            Byte  c = oprot.readByte();
             builder.setC(c);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -216,7 +213,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(A_FIELD_DESC);
@@ -235,7 +232,7 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _Struct4Lazy {
         private static final Struct4 _DEFAULT = new Struct4.Builder().build();
     }

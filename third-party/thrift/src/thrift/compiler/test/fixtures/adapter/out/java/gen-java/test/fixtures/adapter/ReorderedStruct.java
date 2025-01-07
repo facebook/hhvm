@@ -33,7 +33,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
     protected ReorderedStruct() {
       this.reorderedDependentAdapted = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
     public static class Builder {
         private test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="reordered_dependent_adapted", requiredness=Requiredness.NONE)
-        public Builder setReorderedDependentAdapted(test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="reordered_dependent_adapted", requiredness=Requiredness.NONE)    public Builder setReorderedDependentAdapted(test.fixtures.adapter.DeclaredAfterStruct reorderedDependentAdapted) {
             this.reorderedDependentAdapted = reorderedDependentAdapted;
             return this;
         }
@@ -66,7 +65,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="reordered_dependent_adapted", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.DeclaredAfterStruct getReorderedDependentAdapted() { return reorderedDependentAdapted; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("reorderedDependentAdapted", reorderedDependentAdapted);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
             Objects.equals(reorderedDependentAdapted, other.reorderedDependentAdapted) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             reorderedDependentAdapted
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ReorderedStruct> asReader() {
       return ReorderedStruct::read0;
@@ -147,7 +146,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (reorderedDependentAdapted != null) {
@@ -158,7 +157,7 @@ public final class ReorderedStruct implements com.facebook.thrift.payload.Thrift
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ReorderedStructLazy {
         private static final ReorderedStruct _DEFAULT = new ReorderedStruct.Builder().build();
     }

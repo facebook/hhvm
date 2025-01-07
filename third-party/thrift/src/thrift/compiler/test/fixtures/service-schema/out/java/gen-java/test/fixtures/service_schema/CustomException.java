@@ -58,21 +58,19 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
       this.name = null;
       this.result = test.fixtures.service_schema.Result.SO_SO;
     }
-    
+
     public static class Builder {
         private String name = null;
         private test.fixtures.service_schema.Result result = test.fixtures.service_schema.Result.SO_SO;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)
-        public Builder setName(String name) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
     
         public String getName() { return name; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="result", requiredness=Requiredness.NONE)
-        public Builder setResult(test.fixtures.service_schema.Result result) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="result", requiredness=Requiredness.NONE)    public Builder setResult(test.fixtures.service_schema.Result result) {
             this.result = result;
             return this;
         }
@@ -94,16 +92,16 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="result", requiredness=Requiredness.NONE)
     public test.fixtures.service_schema.Result getResult() { return result; }
-    
+
     
     public static com.facebook.thrift.payload.Reader<CustomException> asReader() {
       return CustomException::read0;
@@ -142,7 +140,7 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (name != null) {
@@ -156,7 +154,7 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _CustomExceptionLazy {
         private static final CustomException _DEFAULT = new CustomException.Builder().build();
     }

@@ -49,12 +49,11 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
     protected SinkException2() {
       this.reason = 0L;
     }
-    
+
     public static class Builder {
         private long reason = 0L;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)
-        public Builder setReason(long reason) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)    public Builder setReason(long reason) {
             this.reason = reason;
             return this;
         }
@@ -74,12 +73,12 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
             return result;
         }
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=1, name="reason", requiredness=Requiredness.NONE)
     public long getReason() { return reason; }
-    
+
     
     public static com.facebook.thrift.payload.Reader<SinkException2> asReader() {
       return SinkException2::read0;
@@ -110,7 +109,7 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(REASON_FIELD_DESC);
@@ -119,7 +118,7 @@ public final class SinkException2 extends org.apache.thrift.TBaseException imple
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _SinkException2Lazy {
         private static final SinkException2 _DEFAULT = new SinkException2.Builder().build();
     }

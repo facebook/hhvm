@@ -134,32 +134,32 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       this.enumWithDefaultValue = test.fixtures.shapes.Enum.ENUM;
       this.aWithDefaultValue = new test.fixtures.shapes.A.Builder().setA("bc").build();
       this.setOfI32WithDefaultValue = ImmutableSet.<Integer>builder()
-        .add(3)
-        .add(7)
-        .add(31)
-        .add(127)
-        .build();
+            .add(3)
+            .add(7)
+            .add(31)
+            .add(127)
+            .build();
       this.mapOfI32ToStringWithDefaultValue = ImmutableMap.<Integer, String>builder()
-        .put(1, "fish")
-        .put(2, "fish")
-        .build();
+            .put(1, "fish")
+            .put(2, "fish")
+            .build();
       this.listOfStringWithDefaultValue = ImmutableList.<String>builder()
-        .add("red fish")
-        .add("blue fish")
-        .build();
+            .add("red fish")
+            .add("blue fish")
+            .build();
       this.mapOfStringToListOfI32WithDefaultValue = ImmutableMap.<String, List<Integer>>builder()
-        .put("Jenny", ImmutableList.<Integer>builder()
-        .add(8)
-        .add(6)
-        .add(7)
-        .add(5)
-        .add(3)
-        .add(0)
-        .add(9)
-        .build())
-        .build();
+            .put("Jenny", ImmutableList.<Integer>builder()
+            .add(8)
+            .add(6)
+            .add(7)
+            .add(5)
+            .add(3)
+            .add(0)
+            .add(9)
+            .build())
+            .build();
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -202,313 +202,277 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         private test.fixtures.shapes.Enum enumWithDefaultValue = test.fixtures.shapes.Enum.ENUM;
         private test.fixtures.shapes.A aWithDefaultValue = new test.fixtures.shapes.A.Builder().setA("bc").build();
         private Set<Integer> setOfI32WithDefaultValue = ImmutableSet.<Integer>builder()
-        .add(3)
-        .add(7)
-        .add(31)
-        .add(127)
-        .build();
+            .add(3)
+            .add(7)
+            .add(31)
+            .add(127)
+            .build();
         private Map<Integer, String> mapOfI32ToStringWithDefaultValue = ImmutableMap.<Integer, String>builder()
-        .put(1, "fish")
-        .put(2, "fish")
-        .build();
+            .put(1, "fish")
+            .put(2, "fish")
+            .build();
         private List<String> listOfStringWithDefaultValue = ImmutableList.<String>builder()
-        .add("red fish")
-        .add("blue fish")
-        .build();
+            .add("red fish")
+            .add("blue fish")
+            .build();
         private Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue = ImmutableMap.<String, List<Integer>>builder()
-        .put("Jenny", ImmutableList.<Integer>builder()
-        .add(8)
-        .add(6)
-        .add(7)
-        .add(5)
-        .add(3)
-        .add(0)
-        .add(9)
-        .build())
-        .build();
+            .put("Jenny", ImmutableList.<Integer>builder()
+            .add(8)
+            .add(6)
+            .add(7)
+            .add(5)
+            .add(3)
+            .add(0)
+            .add(9)
+            .build())
+            .build();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="just_an_A", requiredness=Requiredness.NONE)
-        public Builder setJustAnA(test.fixtures.shapes.A justAnA) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="just_an_A", requiredness=Requiredness.NONE)    public Builder setJustAnA(test.fixtures.shapes.A justAnA) {
             this.justAnA = justAnA;
             return this;
         }
     
         public test.fixtures.shapes.A getJustAnA() { return justAnA; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="set_of_i32", requiredness=Requiredness.NONE)
-        public Builder setSetOfI32(Set<Integer> setOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="set_of_i32", requiredness=Requiredness.NONE)    public Builder setSetOfI32(Set<Integer> setOfI32) {
             this.setOfI32 = setOfI32;
             return this;
         }
     
         public Set<Integer> getSetOfI32() { return setOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="list_of_i32", requiredness=Requiredness.NONE)
-        public Builder setListOfI32(List<Integer> listOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="list_of_i32", requiredness=Requiredness.NONE)    public Builder setListOfI32(List<Integer> listOfI32) {
             this.listOfI32 = listOfI32;
             return this;
         }
     
         public List<Integer> getListOfI32() { return listOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="list_of_string", requiredness=Requiredness.NONE)
-        public Builder setListOfString(List<String> listOfString) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="list_of_string", requiredness=Requiredness.NONE)    public Builder setListOfString(List<String> listOfString) {
             this.listOfString = listOfString;
             return this;
         }
     
         public List<String> getListOfString() { return listOfString; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="map_of_string_to_i32", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToI32(Map<String, Integer> mapOfStringToI32) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="map_of_string_to_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToI32(Map<String, Integer> mapOfStringToI32) {
             this.mapOfStringToI32 = mapOfStringToI32;
             return this;
         }
     
         public Map<String, Integer> getMapOfStringToI32() { return mapOfStringToI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="map_of_string_to_A", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToA(Map<String, test.fixtures.shapes.A> mapOfStringToA) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToA(Map<String, test.fixtures.shapes.A> mapOfStringToA) {
             this.mapOfStringToA = mapOfStringToA;
             return this;
         }
     
         public Map<String, test.fixtures.shapes.A> getMapOfStringToA() { return mapOfStringToA; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="map_of_string_to_list_of_i32", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToListOfI32(Map<String, List<Integer>> mapOfStringToListOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="map_of_string_to_list_of_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfI32(Map<String, List<Integer>> mapOfStringToListOfI32) {
             this.mapOfStringToListOfI32 = mapOfStringToListOfI32;
             return this;
         }
     
         public Map<String, List<Integer>> getMapOfStringToListOfI32() { return mapOfStringToListOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="map_of_string_to_list_of_A", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="map_of_string_to_list_of_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA) {
             this.mapOfStringToListOfA = mapOfStringToListOfA;
             return this;
         }
     
         public Map<String, List<test.fixtures.shapes.A>> getMapOfStringToListOfA() { return mapOfStringToListOfA; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="map_of_string_to_set_of_i32", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToSetOfI32(Map<String, Set<Integer>> mapOfStringToSetOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="map_of_string_to_set_of_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToSetOfI32(Map<String, Set<Integer>> mapOfStringToSetOfI32) {
             this.mapOfStringToSetOfI32 = mapOfStringToSetOfI32;
             return this;
         }
     
         public Map<String, Set<Integer>> getMapOfStringToSetOfI32() { return mapOfStringToSetOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="map_of_string_to_map_of_string_to_i32", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToMapOfStringToI32(Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="map_of_string_to_map_of_string_to_i32", requiredness=Requiredness.NONE)    public Builder setMapOfStringToMapOfStringToI32(Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32) {
             this.mapOfStringToMapOfStringToI32 = mapOfStringToMapOfStringToI32;
             return this;
         }
     
         public Map<String, Map<String, Integer>> getMapOfStringToMapOfStringToI32() { return mapOfStringToMapOfStringToI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=11, name="map_of_string_to_map_of_string_to_A", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToMapOfStringToA(Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA) {
+            @com.facebook.swift.codec.ThriftField(value=11, name="map_of_string_to_map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setMapOfStringToMapOfStringToA(Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA) {
             this.mapOfStringToMapOfStringToA = mapOfStringToMapOfStringToA;
             return this;
         }
     
         public Map<String, Map<String, test.fixtures.shapes.A>> getMapOfStringToMapOfStringToA() { return mapOfStringToMapOfStringToA; }
     
-            @com.facebook.swift.codec.ThriftField(value=12, name="list_of_set_of_i32", requiredness=Requiredness.NONE)
-        public Builder setListOfSetOfI32(List<Set<Integer>> listOfSetOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=12, name="list_of_set_of_i32", requiredness=Requiredness.NONE)    public Builder setListOfSetOfI32(List<Set<Integer>> listOfSetOfI32) {
             this.listOfSetOfI32 = listOfSetOfI32;
             return this;
         }
     
         public List<Set<Integer>> getListOfSetOfI32() { return listOfSetOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=13, name="list_of_map_of_string_to_list_of_A", requiredness=Requiredness.NONE)
-        public Builder setListOfMapOfStringToListOfA(List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA) {
+            @com.facebook.swift.codec.ThriftField(value=13, name="list_of_map_of_string_to_list_of_A", requiredness=Requiredness.NONE)    public Builder setListOfMapOfStringToListOfA(List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA) {
             this.listOfMapOfStringToListOfA = listOfMapOfStringToListOfA;
             return this;
         }
     
         public List<Map<String, List<test.fixtures.shapes.A>>> getListOfMapOfStringToListOfA() { return listOfMapOfStringToListOfA; }
     
-            @com.facebook.swift.codec.ThriftField(value=14, name="list_of_map_of_string_to_A", requiredness=Requiredness.NONE)
-        public Builder setListOfMapOfStringToA(List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA) {
+            @com.facebook.swift.codec.ThriftField(value=14, name="list_of_map_of_string_to_A", requiredness=Requiredness.NONE)    public Builder setListOfMapOfStringToA(List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA) {
             this.listOfMapOfStringToA = listOfMapOfStringToA;
             return this;
         }
     
         public List<Map<String, test.fixtures.shapes.A>> getListOfMapOfStringToA() { return listOfMapOfStringToA; }
     
-            @com.facebook.swift.codec.ThriftField(value=17, name="just_an_enum", requiredness=Requiredness.NONE)
-        public Builder setJustAnEnum(test.fixtures.shapes.Enum justAnEnum) {
+            @com.facebook.swift.codec.ThriftField(value=17, name="just_an_enum", requiredness=Requiredness.NONE)    public Builder setJustAnEnum(test.fixtures.shapes.Enum justAnEnum) {
             this.justAnEnum = justAnEnum;
             return this;
         }
     
         public test.fixtures.shapes.Enum getJustAnEnum() { return justAnEnum; }
     
-            @com.facebook.swift.codec.ThriftField(value=18, name="just_a_union", requiredness=Requiredness.NONE)
-        public Builder setJustAUnion(test.fixtures.shapes.Union justAUnion) {
+            @com.facebook.swift.codec.ThriftField(value=18, name="just_a_union", requiredness=Requiredness.NONE)    public Builder setJustAUnion(test.fixtures.shapes.Union justAUnion) {
             this.justAUnion = justAUnion;
             return this;
         }
     
         public test.fixtures.shapes.Union getJustAUnion() { return justAUnion; }
     
-            @com.facebook.swift.codec.ThriftField(value=51, name="optional_just_an_A", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalJustAnA(test.fixtures.shapes.A optionalJustAnA) {
+            @com.facebook.swift.codec.ThriftField(value=51, name="optional_just_an_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalJustAnA(test.fixtures.shapes.A optionalJustAnA) {
             this.optionalJustAnA = optionalJustAnA;
             return this;
         }
     
         public test.fixtures.shapes.A getOptionalJustAnA() { return optionalJustAnA; }
     
-            @com.facebook.swift.codec.ThriftField(value=52, name="optional_set_of_i32", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalSetOfI32(Set<Integer> optionalSetOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=52, name="optional_set_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalSetOfI32(Set<Integer> optionalSetOfI32) {
             this.optionalSetOfI32 = optionalSetOfI32;
             return this;
         }
     
         public Set<Integer> getOptionalSetOfI32() { return optionalSetOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=53, name="optional_list_of_i32", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalListOfI32(List<Integer> optionalListOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=53, name="optional_list_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalListOfI32(List<Integer> optionalListOfI32) {
             this.optionalListOfI32 = optionalListOfI32;
             return this;
         }
     
         public List<Integer> getOptionalListOfI32() { return optionalListOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=54, name="optional_list_of_string", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalListOfString(List<String> optionalListOfString) {
+            @com.facebook.swift.codec.ThriftField(value=54, name="optional_list_of_string", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalListOfString(List<String> optionalListOfString) {
             this.optionalListOfString = optionalListOfString;
             return this;
         }
     
         public List<String> getOptionalListOfString() { return optionalListOfString; }
     
-            @com.facebook.swift.codec.ThriftField(value=55, name="optional_map_of_string_to_i32", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalMapOfStringToI32(Map<String, Integer> optionalMapOfStringToI32) {
+            @com.facebook.swift.codec.ThriftField(value=55, name="optional_map_of_string_to_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToI32(Map<String, Integer> optionalMapOfStringToI32) {
             this.optionalMapOfStringToI32 = optionalMapOfStringToI32;
             return this;
         }
     
         public Map<String, Integer> getOptionalMapOfStringToI32() { return optionalMapOfStringToI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=56, name="optional_map_of_string_to_A", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalMapOfStringToA(Map<String, test.fixtures.shapes.A> optionalMapOfStringToA) {
+            @com.facebook.swift.codec.ThriftField(value=56, name="optional_map_of_string_to_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToA(Map<String, test.fixtures.shapes.A> optionalMapOfStringToA) {
             this.optionalMapOfStringToA = optionalMapOfStringToA;
             return this;
         }
     
         public Map<String, test.fixtures.shapes.A> getOptionalMapOfStringToA() { return optionalMapOfStringToA; }
     
-            @com.facebook.swift.codec.ThriftField(value=57, name="optional_map_of_string_to_list_of_i32", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalMapOfStringToListOfI32(Map<String, List<Integer>> optionalMapOfStringToListOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=57, name="optional_map_of_string_to_list_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToListOfI32(Map<String, List<Integer>> optionalMapOfStringToListOfI32) {
             this.optionalMapOfStringToListOfI32 = optionalMapOfStringToListOfI32;
             return this;
         }
     
         public Map<String, List<Integer>> getOptionalMapOfStringToListOfI32() { return optionalMapOfStringToListOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=58, name="optional_map_of_string_to_list_of_A", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA) {
+            @com.facebook.swift.codec.ThriftField(value=58, name="optional_map_of_string_to_list_of_A", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToListOfA(Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA) {
             this.optionalMapOfStringToListOfA = optionalMapOfStringToListOfA;
             return this;
         }
     
         public Map<String, List<test.fixtures.shapes.A>> getOptionalMapOfStringToListOfA() { return optionalMapOfStringToListOfA; }
     
-            @com.facebook.swift.codec.ThriftField(value=59, name="optional_map_of_string_to_set_of_i32", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalMapOfStringToSetOfI32(Map<String, Set<Integer>> optionalMapOfStringToSetOfI32) {
+            @com.facebook.swift.codec.ThriftField(value=59, name="optional_map_of_string_to_set_of_i32", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalMapOfStringToSetOfI32(Map<String, Set<Integer>> optionalMapOfStringToSetOfI32) {
             this.optionalMapOfStringToSetOfI32 = optionalMapOfStringToSetOfI32;
             return this;
         }
     
         public Map<String, Set<Integer>> getOptionalMapOfStringToSetOfI32() { return optionalMapOfStringToSetOfI32; }
     
-            @com.facebook.swift.codec.ThriftField(value=60, name="optional_enum", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptionalEnum(test.fixtures.shapes.Enum optionalEnum) {
+            @com.facebook.swift.codec.ThriftField(value=60, name="optional_enum", requiredness=Requiredness.OPTIONAL)    public Builder setOptionalEnum(test.fixtures.shapes.Enum optionalEnum) {
             this.optionalEnum = optionalEnum;
             return this;
         }
     
         public test.fixtures.shapes.Enum getOptionalEnum() { return optionalEnum; }
     
-            @com.facebook.swift.codec.ThriftField(value=70, name="required_enum_with_default", requiredness=Requiredness.REQUIRED)
-        public Builder setRequiredEnumWithDefault(test.fixtures.shapes.Enum requiredEnumWithDefault) {
+            @com.facebook.swift.codec.ThriftField(value=70, name="required_enum_with_default", requiredness=Requiredness.REQUIRED)    public Builder setRequiredEnumWithDefault(test.fixtures.shapes.Enum requiredEnumWithDefault) {
             this.requiredEnumWithDefault = requiredEnumWithDefault;
             return this;
         }
     
         public test.fixtures.shapes.Enum getRequiredEnumWithDefault() { return requiredEnumWithDefault; }
     
-            @com.facebook.swift.codec.ThriftField(value=80, name="string_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setStringWithDefaultValue(String stringWithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=80, name="string_with_default_value", requiredness=Requiredness.NONE)    public Builder setStringWithDefaultValue(String stringWithDefaultValue) {
             this.stringWithDefaultValue = stringWithDefaultValue;
             return this;
         }
     
         public String getStringWithDefaultValue() { return stringWithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=81, name="i32_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setI32WithDefaultValue(int i32WithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=81, name="i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setI32WithDefaultValue(int i32WithDefaultValue) {
             this.i32WithDefaultValue = i32WithDefaultValue;
             return this;
         }
     
         public int getI32WithDefaultValue() { return i32WithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=82, name="double_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setDoubleWithDefaultValue(double doubleWithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=82, name="double_with_default_value", requiredness=Requiredness.NONE)    public Builder setDoubleWithDefaultValue(double doubleWithDefaultValue) {
             this.doubleWithDefaultValue = doubleWithDefaultValue;
             return this;
         }
     
         public double getDoubleWithDefaultValue() { return doubleWithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=83, name="enum_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setEnumWithDefaultValue(test.fixtures.shapes.Enum enumWithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=83, name="enum_with_default_value", requiredness=Requiredness.NONE)    public Builder setEnumWithDefaultValue(test.fixtures.shapes.Enum enumWithDefaultValue) {
             this.enumWithDefaultValue = enumWithDefaultValue;
             return this;
         }
     
         public test.fixtures.shapes.Enum getEnumWithDefaultValue() { return enumWithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=84, name="A_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setAWithDefaultValue(test.fixtures.shapes.A aWithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=84, name="A_with_default_value", requiredness=Requiredness.NONE)    public Builder setAWithDefaultValue(test.fixtures.shapes.A aWithDefaultValue) {
             this.aWithDefaultValue = aWithDefaultValue;
             return this;
         }
     
         public test.fixtures.shapes.A getAWithDefaultValue() { return aWithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=85, name="set_of_i32_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setSetOfI32WithDefaultValue(Set<Integer> setOfI32WithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=85, name="set_of_i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setSetOfI32WithDefaultValue(Set<Integer> setOfI32WithDefaultValue) {
             this.setOfI32WithDefaultValue = setOfI32WithDefaultValue;
             return this;
         }
     
         public Set<Integer> getSetOfI32WithDefaultValue() { return setOfI32WithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=86, name="map_of_i32_to_string_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setMapOfI32ToStringWithDefaultValue(Map<Integer, String> mapOfI32ToStringWithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=86, name="map_of_i32_to_string_with_default_value", requiredness=Requiredness.NONE)    public Builder setMapOfI32ToStringWithDefaultValue(Map<Integer, String> mapOfI32ToStringWithDefaultValue) {
             this.mapOfI32ToStringWithDefaultValue = mapOfI32ToStringWithDefaultValue;
             return this;
         }
     
         public Map<Integer, String> getMapOfI32ToStringWithDefaultValue() { return mapOfI32ToStringWithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=87, name="list_of_string_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setListOfStringWithDefaultValue(List<String> listOfStringWithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=87, name="list_of_string_with_default_value", requiredness=Requiredness.NONE)    public Builder setListOfStringWithDefaultValue(List<String> listOfStringWithDefaultValue) {
             this.listOfStringWithDefaultValue = listOfStringWithDefaultValue;
             return this;
         }
     
         public List<String> getListOfStringWithDefaultValue() { return listOfStringWithDefaultValue; }
     
-            @com.facebook.swift.codec.ThriftField(value=88, name="map_of_string_to_list_of_i32_with_default_value", requiredness=Requiredness.NONE)
-        public Builder setMapOfStringToListOfI32WithDefaultValue(Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue) {
+            @com.facebook.swift.codec.ThriftField(value=88, name="map_of_string_to_list_of_i32_with_default_value", requiredness=Requiredness.NONE)    public Builder setMapOfStringToListOfI32WithDefaultValue(Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue) {
             this.mapOfStringToListOfI32WithDefaultValue = mapOfStringToListOfI32WithDefaultValue;
             return this;
         }
@@ -598,7 +562,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -825,182 +789,182 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="just_an_A", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.A getJustAnA() { return justAnA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="set_of_i32", requiredness=Requiredness.NONE)
     public Set<Integer> getSetOfI32() { return setOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="list_of_i32", requiredness=Requiredness.NONE)
     public List<Integer> getListOfI32() { return listOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="list_of_string", requiredness=Requiredness.NONE)
     public List<String> getListOfString() { return listOfString; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="map_of_string_to_i32", requiredness=Requiredness.NONE)
     public Map<String, Integer> getMapOfStringToI32() { return mapOfStringToI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="map_of_string_to_A", requiredness=Requiredness.NONE)
     public Map<String, test.fixtures.shapes.A> getMapOfStringToA() { return mapOfStringToA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="map_of_string_to_list_of_i32", requiredness=Requiredness.NONE)
     public Map<String, List<Integer>> getMapOfStringToListOfI32() { return mapOfStringToListOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="map_of_string_to_list_of_A", requiredness=Requiredness.NONE)
     public Map<String, List<test.fixtures.shapes.A>> getMapOfStringToListOfA() { return mapOfStringToListOfA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="map_of_string_to_set_of_i32", requiredness=Requiredness.NONE)
     public Map<String, Set<Integer>> getMapOfStringToSetOfI32() { return mapOfStringToSetOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="map_of_string_to_map_of_string_to_i32", requiredness=Requiredness.NONE)
     public Map<String, Map<String, Integer>> getMapOfStringToMapOfStringToI32() { return mapOfStringToMapOfStringToI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=11, name="map_of_string_to_map_of_string_to_A", requiredness=Requiredness.NONE)
     public Map<String, Map<String, test.fixtures.shapes.A>> getMapOfStringToMapOfStringToA() { return mapOfStringToMapOfStringToA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=12, name="list_of_set_of_i32", requiredness=Requiredness.NONE)
     public List<Set<Integer>> getListOfSetOfI32() { return listOfSetOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=13, name="list_of_map_of_string_to_list_of_A", requiredness=Requiredness.NONE)
     public List<Map<String, List<test.fixtures.shapes.A>>> getListOfMapOfStringToListOfA() { return listOfMapOfStringToListOfA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=14, name="list_of_map_of_string_to_A", requiredness=Requiredness.NONE)
     public List<Map<String, test.fixtures.shapes.A>> getListOfMapOfStringToA() { return listOfMapOfStringToA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=17, name="just_an_enum", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.Enum getJustAnEnum() { return justAnEnum; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=18, name="just_a_union", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.Union getJustAUnion() { return justAUnion; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=51, name="optional_just_an_A", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.shapes.A getOptionalJustAnA() { return optionalJustAnA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=52, name="optional_set_of_i32", requiredness=Requiredness.OPTIONAL)
     public Set<Integer> getOptionalSetOfI32() { return optionalSetOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=53, name="optional_list_of_i32", requiredness=Requiredness.OPTIONAL)
     public List<Integer> getOptionalListOfI32() { return optionalListOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=54, name="optional_list_of_string", requiredness=Requiredness.OPTIONAL)
     public List<String> getOptionalListOfString() { return optionalListOfString; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=55, name="optional_map_of_string_to_i32", requiredness=Requiredness.OPTIONAL)
     public Map<String, Integer> getOptionalMapOfStringToI32() { return optionalMapOfStringToI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=56, name="optional_map_of_string_to_A", requiredness=Requiredness.OPTIONAL)
     public Map<String, test.fixtures.shapes.A> getOptionalMapOfStringToA() { return optionalMapOfStringToA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=57, name="optional_map_of_string_to_list_of_i32", requiredness=Requiredness.OPTIONAL)
     public Map<String, List<Integer>> getOptionalMapOfStringToListOfI32() { return optionalMapOfStringToListOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=58, name="optional_map_of_string_to_list_of_A", requiredness=Requiredness.OPTIONAL)
     public Map<String, List<test.fixtures.shapes.A>> getOptionalMapOfStringToListOfA() { return optionalMapOfStringToListOfA; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=59, name="optional_map_of_string_to_set_of_i32", requiredness=Requiredness.OPTIONAL)
     public Map<String, Set<Integer>> getOptionalMapOfStringToSetOfI32() { return optionalMapOfStringToSetOfI32; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=60, name="optional_enum", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.shapes.Enum getOptionalEnum() { return optionalEnum; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=70, name="required_enum_with_default", requiredness=Requiredness.REQUIRED)
     public test.fixtures.shapes.Enum getRequiredEnumWithDefault() { return requiredEnumWithDefault; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=80, name="string_with_default_value", requiredness=Requiredness.NONE)
     public String getStringWithDefaultValue() { return stringWithDefaultValue; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=81, name="i32_with_default_value", requiredness=Requiredness.NONE)
     public int getI32WithDefaultValue() { return i32WithDefaultValue; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=82, name="double_with_default_value", requiredness=Requiredness.NONE)
     public double getDoubleWithDefaultValue() { return doubleWithDefaultValue; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=83, name="enum_with_default_value", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.Enum getEnumWithDefaultValue() { return enumWithDefaultValue; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=84, name="A_with_default_value", requiredness=Requiredness.NONE)
     public test.fixtures.shapes.A getAWithDefaultValue() { return aWithDefaultValue; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=85, name="set_of_i32_with_default_value", requiredness=Requiredness.NONE)
     public Set<Integer> getSetOfI32WithDefaultValue() { return setOfI32WithDefaultValue; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=86, name="map_of_i32_to_string_with_default_value", requiredness=Requiredness.NONE)
     public Map<Integer, String> getMapOfI32ToStringWithDefaultValue() { return mapOfI32ToStringWithDefaultValue; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=87, name="list_of_string_with_default_value", requiredness=Requiredness.NONE)
     public List<String> getListOfStringWithDefaultValue() { return listOfStringWithDefaultValue; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=88, name="map_of_string_to_list_of_i32_with_default_value", requiredness=Requiredness.NONE)
     public Map<String, List<Integer>> getMapOfStringToListOfI32WithDefaultValue() { return mapOfStringToListOfI32WithDefaultValue; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -1042,7 +1006,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         helper.add("mapOfStringToListOfI32WithDefaultValue", mapOfStringToListOfI32WithDefaultValue);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -1093,7 +1057,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
             Objects.equals(mapOfStringToListOfI32WithDefaultValue, other.mapOfStringToListOfI32WithDefaultValue) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -1135,7 +1099,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
             mapOfStringToListOfI32WithDefaultValue
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<B> asReader() {
       return B::read0;
@@ -1160,16 +1124,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _SET_OF_I32:
           if (__field.type == TType.SET) {
             Set<Integer> setOfI32;
-            {
-            TSet _set = oprot.readSetBegin();
-            setOfI32 = new HashSet<Integer>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                setOfI32.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setOfI32 = new HashSet<Integer>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    setOfI32.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetOfI32(setOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1178,16 +1142,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _LIST_OF_I32:
           if (__field.type == TType.LIST) {
             List<Integer> listOfI32;
-            {
-            TList _list = oprot.readListBegin();
-            listOfI32 = new ArrayList<Integer>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                listOfI32.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfI32 = new ArrayList<Integer>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    listOfI32.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfI32(listOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1196,16 +1160,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _LIST_OF_STRING:
           if (__field.type == TType.LIST) {
             List<String> listOfString;
-            {
-            TList _list = oprot.readListBegin();
-            listOfString = new ArrayList<String>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                listOfString.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfString = new ArrayList<String>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    listOfString.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfString(listOfString);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1214,17 +1178,17 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_I32:
           if (__field.type == TType.MAP) {
             Map<String, Integer> mapOfStringToI32;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToI32 = new HashMap<String, Integer>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                int _value1 = oprot.readI32();
-                mapOfStringToI32.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToI32 = new HashMap<String, Integer>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    int _value1 = oprot.readI32();
+                    mapOfStringToI32.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToI32(mapOfStringToI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1233,17 +1197,17 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_A:
           if (__field.type == TType.MAP) {
             Map<String, test.fixtures.shapes.A> mapOfStringToA;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToA = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                test.fixtures.shapes.A _value1 = test.fixtures.shapes.A.read0(oprot);
-                mapOfStringToA.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToA = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    test.fixtures.shapes.A _value1 = test.fixtures.shapes.A.read0(oprot);
+                    mapOfStringToA.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToA(mapOfStringToA);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1252,31 +1216,31 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_LIST_OF_I32:
           if (__field.type == TType.MAP) {
             Map<String, List<Integer>> mapOfStringToListOfI32;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToListOfI32 = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                List<Integer> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                mapOfStringToListOfI32.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToListOfI32 = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    List<Integer> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapOfStringToListOfI32.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToListOfI32(mapOfStringToListOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1285,31 +1249,31 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_LIST_OF_A:
           if (__field.type == TType.MAP) {
             Map<String, List<test.fixtures.shapes.A>> mapOfStringToListOfA;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToListOfA = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                List<test.fixtures.shapes.A> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                mapOfStringToListOfA.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToListOfA = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    List<test.fixtures.shapes.A> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapOfStringToListOfA.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToListOfA(mapOfStringToListOfA);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1318,31 +1282,31 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_SET_OF_I32:
           if (__field.type == TType.MAP) {
             Map<String, Set<Integer>> mapOfStringToSetOfI32;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToSetOfI32 = new HashMap<String, Set<Integer>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                Set<Integer> _value1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readSetEnd();
-                            }
-                                mapOfStringToSetOfI32.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToSetOfI32 = new HashMap<String, Set<Integer>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    Set<Integer> _value1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+                    mapOfStringToSetOfI32.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToSetOfI32(mapOfStringToSetOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1351,35 +1315,35 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32:
           if (__field.type == TType.MAP) {
             Map<String, Map<String, Integer>> mapOfStringToMapOfStringToI32;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToMapOfStringToI32 = new HashMap<String, Map<String, Integer>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                Map<String, Integer> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                                mapOfStringToMapOfStringToI32.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToMapOfStringToI32 = new HashMap<String, Map<String, Integer>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    Map<String, Integer> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<String, Integer>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    String _key2 = oprot.readString();
+                                    
+                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    mapOfStringToMapOfStringToI32.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToMapOfStringToI32(mapOfStringToMapOfStringToI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1388,35 +1352,35 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_MAP_OF_STRING_TO_A:
           if (__field.type == TType.MAP) {
             Map<String, Map<String, test.fixtures.shapes.A>> mapOfStringToMapOfStringToA;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToMapOfStringToA = new HashMap<String, Map<String, test.fixtures.shapes.A>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                Map<String, test.fixtures.shapes.A> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                
-                                test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                                mapOfStringToMapOfStringToA.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToMapOfStringToA = new HashMap<String, Map<String, test.fixtures.shapes.A>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    Map<String, test.fixtures.shapes.A> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    String _key2 = oprot.readString();
+                                    
+                    
+                                    
+                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    mapOfStringToMapOfStringToA.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToMapOfStringToA(mapOfStringToMapOfStringToA);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1425,30 +1389,30 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _LIST_OF_SET_OF_I32:
           if (__field.type == TType.LIST) {
             List<Set<Integer>> listOfSetOfI32;
-            {
-            TList _list = oprot.readListBegin();
-            listOfSetOfI32 = new ArrayList<Set<Integer>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                Set<Integer> _value1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readSetEnd();
-                            }
-                listOfSetOfI32.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfSetOfI32 = new ArrayList<Set<Integer>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    Set<Integer> _value1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+    listOfSetOfI32.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfSetOfI32(listOfSetOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1457,47 +1421,47 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _LIST_OF_MAP_OF_STRING_TO_LIST_OF_A:
           if (__field.type == TType.LIST) {
             List<Map<String, List<test.fixtures.shapes.A>>> listOfMapOfStringToListOfA;
-            {
-            TList _list = oprot.readListBegin();
-            listOfMapOfStringToListOfA = new ArrayList<Map<String, List<test.fixtures.shapes.A>>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                Map<String, List<test.fixtures.shapes.A>> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                List<test.fixtures.shapes.A> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                
-                test.fixtures.shapes.A _value3 = test.fixtures.shapes.A.read0(oprot);
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                listOfMapOfStringToListOfA.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfMapOfStringToListOfA = new ArrayList<Map<String, List<test.fixtures.shapes.A>>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    Map<String, List<test.fixtures.shapes.A>> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    String _key2 = oprot.readString();
+                                    
+                    
+                                    List<test.fixtures.shapes.A> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    
+                                    test.fixtures.shapes.A _value3 = test.fixtures.shapes.A.read0(oprot);
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+    listOfMapOfStringToListOfA.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfMapOfStringToListOfA(listOfMapOfStringToListOfA);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1506,34 +1470,34 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _LIST_OF_MAP_OF_STRING_TO_A:
           if (__field.type == TType.LIST) {
             List<Map<String, test.fixtures.shapes.A>> listOfMapOfStringToA;
-            {
-            TList _list = oprot.readListBegin();
-            listOfMapOfStringToA = new ArrayList<Map<String, test.fixtures.shapes.A>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                Map<String, test.fixtures.shapes.A> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                
-                                test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                listOfMapOfStringToA.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfMapOfStringToA = new ArrayList<Map<String, test.fixtures.shapes.A>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    Map<String, test.fixtures.shapes.A> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    String _key2 = oprot.readString();
+                                    
+                    
+                                    
+                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+    listOfMapOfStringToA.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfMapOfStringToA(listOfMapOfStringToA);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1566,16 +1530,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_SET_OF_I32:
           if (__field.type == TType.SET) {
             Set<Integer> optionalSetOfI32;
-            {
-            TSet _set = oprot.readSetBegin();
-            optionalSetOfI32 = new HashSet<Integer>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                optionalSetOfI32.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                optionalSetOfI32 = new HashSet<Integer>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    optionalSetOfI32.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setOptionalSetOfI32(optionalSetOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1584,16 +1548,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_LIST_OF_I32:
           if (__field.type == TType.LIST) {
             List<Integer> optionalListOfI32;
-            {
-            TList _list = oprot.readListBegin();
-            optionalListOfI32 = new ArrayList<Integer>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                optionalListOfI32.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                optionalListOfI32 = new ArrayList<Integer>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    optionalListOfI32.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setOptionalListOfI32(optionalListOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1602,16 +1566,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_LIST_OF_STRING:
           if (__field.type == TType.LIST) {
             List<String> optionalListOfString;
-            {
-            TList _list = oprot.readListBegin();
-            optionalListOfString = new ArrayList<String>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                optionalListOfString.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                optionalListOfString = new ArrayList<String>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    optionalListOfString.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setOptionalListOfString(optionalListOfString);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1620,17 +1584,17 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_MAP_OF_STRING_TO_I32:
           if (__field.type == TType.MAP) {
             Map<String, Integer> optionalMapOfStringToI32;
-            {
-            TMap _map = oprot.readMapBegin();
-            optionalMapOfStringToI32 = new HashMap<String, Integer>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                int _value1 = oprot.readI32();
-                optionalMapOfStringToI32.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                optionalMapOfStringToI32 = new HashMap<String, Integer>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    int _value1 = oprot.readI32();
+                    optionalMapOfStringToI32.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setOptionalMapOfStringToI32(optionalMapOfStringToI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1639,17 +1603,17 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_MAP_OF_STRING_TO_A:
           if (__field.type == TType.MAP) {
             Map<String, test.fixtures.shapes.A> optionalMapOfStringToA;
-            {
-            TMap _map = oprot.readMapBegin();
-            optionalMapOfStringToA = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                test.fixtures.shapes.A _value1 = test.fixtures.shapes.A.read0(oprot);
-                optionalMapOfStringToA.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                optionalMapOfStringToA = new HashMap<String, test.fixtures.shapes.A>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    test.fixtures.shapes.A _value1 = test.fixtures.shapes.A.read0(oprot);
+                    optionalMapOfStringToA.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setOptionalMapOfStringToA(optionalMapOfStringToA);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1658,31 +1622,31 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32:
           if (__field.type == TType.MAP) {
             Map<String, List<Integer>> optionalMapOfStringToListOfI32;
-            {
-            TMap _map = oprot.readMapBegin();
-            optionalMapOfStringToListOfI32 = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                List<Integer> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                optionalMapOfStringToListOfI32.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                optionalMapOfStringToListOfI32 = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    List<Integer> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    optionalMapOfStringToListOfI32.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setOptionalMapOfStringToListOfI32(optionalMapOfStringToListOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1691,31 +1655,31 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_MAP_OF_STRING_TO_LIST_OF_A:
           if (__field.type == TType.MAP) {
             Map<String, List<test.fixtures.shapes.A>> optionalMapOfStringToListOfA;
-            {
-            TMap _map = oprot.readMapBegin();
-            optionalMapOfStringToListOfA = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                List<test.fixtures.shapes.A> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                optionalMapOfStringToListOfA.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                optionalMapOfStringToListOfA = new HashMap<String, List<test.fixtures.shapes.A>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    List<test.fixtures.shapes.A> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<test.fixtures.shapes.A>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    test.fixtures.shapes.A _value2 = test.fixtures.shapes.A.read0(oprot);
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    optionalMapOfStringToListOfA.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setOptionalMapOfStringToListOfA(optionalMapOfStringToListOfA);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1724,31 +1688,31 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32:
           if (__field.type == TType.MAP) {
             Map<String, Set<Integer>> optionalMapOfStringToSetOfI32;
-            {
-            TMap _map = oprot.readMapBegin();
-            optionalMapOfStringToSetOfI32 = new HashMap<String, Set<Integer>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                Set<Integer> _value1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readSetEnd();
-                            }
-                                optionalMapOfStringToSetOfI32.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                optionalMapOfStringToSetOfI32 = new HashMap<String, Set<Integer>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    Set<Integer> _value1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+                    optionalMapOfStringToSetOfI32.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setOptionalMapOfStringToSetOfI32(optionalMapOfStringToSetOfI32);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1756,7 +1720,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
           break;
         case _OPTIONAL_ENUM:
           if (__field.type == TType.I32) {
-            test.fixtures.shapes.Enum optionalEnum = test.fixtures.shapes.Enum.fromInteger(oprot.readI32());
+            test.fixtures.shapes.Enum  optionalEnum = test.fixtures.shapes.Enum .fromInteger(oprot.readI32());
             builder.setOptionalEnum(optionalEnum);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1813,16 +1777,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _SET_OF_I32_WITH_DEFAULT_VALUE:
           if (__field.type == TType.SET) {
             Set<Integer> setOfI32WithDefaultValue;
-            {
-            TSet _set = oprot.readSetBegin();
-            setOfI32WithDefaultValue = new HashSet<Integer>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                setOfI32WithDefaultValue.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setOfI32WithDefaultValue = new HashSet<Integer>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    setOfI32WithDefaultValue.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetOfI32WithDefaultValue(setOfI32WithDefaultValue);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1831,17 +1795,17 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE:
           if (__field.type == TType.MAP) {
             Map<Integer, String> mapOfI32ToStringWithDefaultValue;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfI32ToStringWithDefaultValue = new HashMap<Integer, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                String _value1 = oprot.readString();
-                mapOfI32ToStringWithDefaultValue.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfI32ToStringWithDefaultValue = new HashMap<Integer, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    String _value1 = oprot.readString();
+                    mapOfI32ToStringWithDefaultValue.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfI32ToStringWithDefaultValue(mapOfI32ToStringWithDefaultValue);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1850,16 +1814,16 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _LIST_OF_STRING_WITH_DEFAULT_VALUE:
           if (__field.type == TType.LIST) {
             List<String> listOfStringWithDefaultValue;
-            {
-            TList _list = oprot.readListBegin();
-            listOfStringWithDefaultValue = new ArrayList<String>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                listOfStringWithDefaultValue.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfStringWithDefaultValue = new ArrayList<String>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    listOfStringWithDefaultValue.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfStringWithDefaultValue(listOfStringWithDefaultValue);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1868,31 +1832,31 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         case _MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE:
           if (__field.type == TType.MAP) {
             Map<String, List<Integer>> mapOfStringToListOfI32WithDefaultValue;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapOfStringToListOfI32WithDefaultValue = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                List<Integer> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                mapOfStringToListOfI32WithDefaultValue.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapOfStringToListOfI32WithDefaultValue = new HashMap<String, List<Integer>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    List<Integer> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapOfStringToListOfI32WithDefaultValue.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapOfStringToListOfI32WithDefaultValue(mapOfStringToListOfI32WithDefaultValue);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1907,7 +1871,7 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (justAnA != null) {
@@ -1919,177 +1883,177 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldBegin(SET_OF_I32_FIELD_DESC);
         Set<Integer> _iter0 = setOfI32;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (listOfI32 != null) {
         oprot.writeFieldBegin(LIST_OF_I32_FIELD_DESC);
         List<Integer> _iter0 = listOfI32;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeListEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (listOfString != null) {
         oprot.writeFieldBegin(LIST_OF_STRING_FIELD_DESC);
         List<String> _iter0 = listOfString;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeListEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToI32 != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO_I32_FIELD_DESC);
         Map<String, Integer> _iter0 = mapOfStringToI32;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter0.size()));
-        for (Map.Entry<String, Integer> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeI32(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Integer> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeI32(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToA != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO__A_FIELD_DESC);
         Map<String, test.fixtures.shapes.A> _iter0 = mapOfStringToA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
-        for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          _iter1.getValue().write0(oprot);
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              _iter1.getValue().write0(oprot);
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToListOfI32 != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
         Map<String, List<Integer>> _iter0 = mapOfStringToListOfI32;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-        for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
-        for (int _iter2 : _iter1.getValue()) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
+            for (int _iter2 : _iter1.getValue()) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToListOfA != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
         Map<String, List<test.fixtures.shapes.A>> _iter0 = mapOfStringToListOfA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-        for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
-        for (test.fixtures.shapes.A _iter2 : _iter1.getValue()) {
-          _iter2.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
+            for (test.fixtures.shapes.A _iter2 : _iter1.getValue()) {
+              _iter2.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToSetOfI32 != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
         Map<String, Set<Integer>> _iter0 = mapOfStringToSetOfI32;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.SET, _iter0.size()));
-        for (Map.Entry<String, Set<Integer>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeSetBegin(new TSet(TType.I32, _iter1.getValue().size()));
-        for (int _iter2 : _iter1.getValue()) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Set<Integer>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeSetBegin(new TSet(TType.I32, _iter1.getValue().size()));
+            for (int _iter2 : _iter1.getValue()) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToMapOfStringToI32 != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO_I32_FIELD_DESC);
         Map<String, Map<String, Integer>> _iter0 = mapOfStringToMapOfStringToI32;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
-        for (Map.Entry<String, Map<String, Integer>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.getValue().size()));
-        for (Map.Entry<String, Integer> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          oprot.writeI32(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Map<String, Integer>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter1.getValue().size()));
+            for (Map.Entry<String, Integer> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeString(_iter2.getKey());
+              oprot.writeI32(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToMapOfStringToA != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO_MAP_OF_STRING_TO__A_FIELD_DESC);
         Map<String, Map<String, test.fixtures.shapes.A>> _iter0 = mapOfStringToMapOfStringToA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
-        for (Map.Entry<String, Map<String, test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter1.getValue().size()));
-        for (Map.Entry<String, test.fixtures.shapes.A> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          _iter2.getValue().write0(oprot);
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Map<String, test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter1.getValue().size()));
+            for (Map.Entry<String, test.fixtures.shapes.A> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeString(_iter2.getKey());
+              _iter2.getValue().write0(oprot);
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (listOfSetOfI32 != null) {
         oprot.writeFieldBegin(LIST_OF_SET_OF_I32_FIELD_DESC);
         List<Set<Integer>> _iter0 = listOfSetOfI32;
         oprot.writeListBegin(new TList(TType.SET, _iter0.size()));
-        for (Set<Integer> _iter1 : _iter0) {
-          oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
-        for (int _iter2 : _iter1) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeListEnd();
+            for (Set<Integer> _iter1 : _iter0) {
+              oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
+            for (int _iter2 : _iter1) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (listOfMapOfStringToListOfA != null) {
         oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
         List<Map<String, List<test.fixtures.shapes.A>>> _iter0 = listOfMapOfStringToListOfA;
         oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<String, List<test.fixtures.shapes.A>> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter1.size()));
-        for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter2 : _iter1.entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter2.getValue().size()));
-        for (test.fixtures.shapes.A _iter3 : _iter2.getValue()) {
-          _iter3.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeListEnd();
+            for (Map<String, List<test.fixtures.shapes.A>> _iter1 : _iter0) {
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter1.size()));
+            for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter2 : _iter1.entrySet()) {
+              oprot.writeString(_iter2.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter2.getValue().size()));
+            for (test.fixtures.shapes.A _iter3 : _iter2.getValue()) {
+              _iter3.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (listOfMapOfStringToA != null) {
         oprot.writeFieldBegin(LIST_OF_MAP_OF_STRING_TO__A_FIELD_DESC);
         List<Map<String, test.fixtures.shapes.A>> _iter0 = listOfMapOfStringToA;
         oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<String, test.fixtures.shapes.A> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter1.size()));
-        for (Map.Entry<String, test.fixtures.shapes.A> _iter2 : _iter1.entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          _iter2.getValue().write0(oprot);
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeListEnd();
+            for (Map<String, test.fixtures.shapes.A> _iter1 : _iter0) {
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter1.size()));
+            for (Map.Entry<String, test.fixtures.shapes.A> _iter2 : _iter1.entrySet()) {
+              oprot.writeString(_iter2.getKey());
+              _iter2.getValue().write0(oprot);
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(JUST_AN_ENUM_FIELD_DESC);
@@ -2107,99 +2071,99 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
       }
       if (optionalSetOfI32 != null) {
         oprot.writeFieldBegin(OPTIONAL_SET_OF_I32_FIELD_DESC);
-        Set<Integer> _iter0 = optionalSetOfI32;
+        Set<Integer>  _iter0 = optionalSetOfI32;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (optionalListOfI32 != null) {
         oprot.writeFieldBegin(OPTIONAL_LIST_OF_I32_FIELD_DESC);
-        List<Integer> _iter0 = optionalListOfI32;
+        List<Integer>  _iter0 = optionalListOfI32;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeListEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (optionalListOfString != null) {
         oprot.writeFieldBegin(OPTIONAL_LIST_OF_STRING_FIELD_DESC);
-        List<String> _iter0 = optionalListOfString;
+        List<String>  _iter0 = optionalListOfString;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeListEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (optionalMapOfStringToI32 != null) {
         oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_I32_FIELD_DESC);
-        Map<String, Integer> _iter0 = optionalMapOfStringToI32;
+        Map<String, Integer>  _iter0 = optionalMapOfStringToI32;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, _iter0.size()));
-        for (Map.Entry<String, Integer> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeI32(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Integer> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeI32(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (optionalMapOfStringToA != null) {
         oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO__A_FIELD_DESC);
-        Map<String, test.fixtures.shapes.A> _iter0 = optionalMapOfStringToA;
+        Map<String, test.fixtures.shapes.A>  _iter0 = optionalMapOfStringToA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
-        for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          _iter1.getValue().write0(oprot);
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, test.fixtures.shapes.A> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              _iter1.getValue().write0(oprot);
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (optionalMapOfStringToListOfI32 != null) {
         oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF_I32_FIELD_DESC);
-        Map<String, List<Integer>> _iter0 = optionalMapOfStringToListOfI32;
+        Map<String, List<Integer>>  _iter0 = optionalMapOfStringToListOfI32;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-        for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
-        for (int _iter2 : _iter1.getValue()) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
+            for (int _iter2 : _iter1.getValue()) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (optionalMapOfStringToListOfA != null) {
         oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_LIST_OF__A_FIELD_DESC);
-        Map<String, List<test.fixtures.shapes.A>> _iter0 = optionalMapOfStringToListOfA;
+        Map<String, List<test.fixtures.shapes.A>>  _iter0 = optionalMapOfStringToListOfA;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-        for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
-        for (test.fixtures.shapes.A _iter2 : _iter1.getValue()) {
-          _iter2.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, List<test.fixtures.shapes.A>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
+            for (test.fixtures.shapes.A _iter2 : _iter1.getValue()) {
+              _iter2.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (optionalMapOfStringToSetOfI32 != null) {
         oprot.writeFieldBegin(OPTIONAL_MAP_OF_STRING_TO_SET_OF_I32_FIELD_DESC);
-        Map<String, Set<Integer>> _iter0 = optionalMapOfStringToSetOfI32;
+        Map<String, Set<Integer>>  _iter0 = optionalMapOfStringToSetOfI32;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.SET, _iter0.size()));
-        for (Map.Entry<String, Set<Integer>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeSetBegin(new TSet(TType.I32, _iter1.getValue().size()));
-        for (int _iter2 : _iter1.getValue()) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Set<Integer>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeSetBegin(new TSet(TType.I32, _iter1.getValue().size()));
+            for (int _iter2 : _iter1.getValue()) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (optionalEnum != null) {
@@ -2233,52 +2197,52 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
         oprot.writeFieldBegin(SET_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
         Set<Integer> _iter0 = setOfI32WithDefaultValue;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfI32ToStringWithDefaultValue != null) {
         oprot.writeFieldBegin(MAP_OF_I32_TO_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
         Map<Integer, String> _iter0 = mapOfI32ToStringWithDefaultValue;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
-        for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (listOfStringWithDefaultValue != null) {
         oprot.writeFieldBegin(LIST_OF_STRING_WITH_DEFAULT_VALUE_FIELD_DESC);
         List<String> _iter0 = listOfStringWithDefaultValue;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeListEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (mapOfStringToListOfI32WithDefaultValue != null) {
         oprot.writeFieldBegin(MAP_OF_STRING_TO_LIST_OF_I32_WITH_DEFAULT_VALUE_FIELD_DESC);
         Map<String, List<Integer>> _iter0 = mapOfStringToListOfI32WithDefaultValue;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
-        for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
-        for (int _iter2 : _iter1.getValue()) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
+            for (int _iter2 : _iter1.getValue()) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _BLazy {
         private static final B _DEFAULT = new B.Builder().build();
     }

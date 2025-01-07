@@ -33,7 +33,7 @@ public final class Fields implements com.facebook.thrift.payload.ThriftSerializa
     protected Fields() {
       this.injectedField = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class Fields implements com.facebook.thrift.payload.ThriftSerializa
     public static class Builder {
         private String injectedField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=100, name="injected_field", requiredness=Requiredness.NONE)
-        public Builder setInjectedField(String injectedField) {
+        @com.facebook.swift.codec.ThriftField(value=100, name="injected_field", requiredness=Requiredness.NONE)    public Builder setInjectedField(String injectedField) {
             this.injectedField = injectedField;
             return this;
         }
@@ -66,7 +65,7 @@ public final class Fields implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class Fields implements com.facebook.thrift.payload.ThriftSerializa
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=100, name="injected_field", requiredness=Requiredness.NONE)
     public String getInjectedField() { return injectedField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("injectedField", injectedField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class Fields implements com.facebook.thrift.payload.ThriftSerializa
             Objects.equals(injectedField, other.injectedField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             injectedField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Fields> asReader() {
       return Fields::read0;
@@ -144,7 +143,7 @@ public final class Fields implements com.facebook.thrift.payload.ThriftSerializa
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (injectedField != null) {
@@ -155,7 +154,7 @@ public final class Fields implements com.facebook.thrift.payload.ThriftSerializa
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _FieldsLazy {
         private static final Fields _DEFAULT = new Fields.Builder().build();
     }

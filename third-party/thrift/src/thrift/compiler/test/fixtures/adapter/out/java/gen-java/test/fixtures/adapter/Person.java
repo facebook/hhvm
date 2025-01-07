@@ -33,7 +33,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
     protected Person() {
       this.name = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
     public static class Builder {
         private String name = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)
-        public Builder setName(String name) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
@@ -66,7 +65,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("name", name);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
             Objects.equals(name, other.name) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             name
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Person> asReader() {
       return Person::read0;
@@ -147,7 +146,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (name != null) {
@@ -158,7 +157,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _PersonLazy {
         private static final Person _DEFAULT = new Person.Builder().build();
     }

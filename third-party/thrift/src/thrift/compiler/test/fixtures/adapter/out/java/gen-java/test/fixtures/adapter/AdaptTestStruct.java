@@ -60,7 +60,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
       this.doubleWrappedInteger = 0;
       this.binaryData = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -81,80 +81,70 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
         private int doubleWrappedInteger = 0;
         private byte[] binaryData = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="delay", requiredness=Requiredness.NONE)
-        public Builder setDelay(long delay) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="delay", requiredness=Requiredness.NONE)    public Builder setDelay(long delay) {
             this.delay = delay;
             return this;
         }
     
         public long getDelay() { return delay; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="custom", requiredness=Requiredness.NONE)
-        public Builder setCustom(byte[] custom) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="custom", requiredness=Requiredness.NONE)    public Builder setCustom(byte[] custom) {
             this.custom = custom;
             return this;
         }
     
         public byte[] getCustom() { return custom; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="timeout", requiredness=Requiredness.NONE)
-        public Builder setTimeout(long timeout) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="timeout", requiredness=Requiredness.NONE)    public Builder setTimeout(long timeout) {
             this.timeout = timeout;
             return this;
         }
     
         public long getTimeout() { return timeout; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="data", requiredness=Requiredness.NONE)
-        public Builder setData(long data) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="data", requiredness=Requiredness.NONE)    public Builder setData(long data) {
             this.data = data;
             return this;
         }
     
         public long getData() { return data; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="meta", requiredness=Requiredness.NONE)
-        public Builder setMeta(String meta) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="meta", requiredness=Requiredness.NONE)    public Builder setMeta(String meta) {
             this.meta = meta;
             return this;
         }
     
         public String getMeta() { return meta; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="indirectionString", requiredness=Requiredness.NONE)
-        public Builder setIndirectionString(String indirectionString) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="indirectionString", requiredness=Requiredness.NONE)    public Builder setIndirectionString(String indirectionString) {
             this.indirectionString = indirectionString;
             return this;
         }
     
         public String getIndirectionString() { return indirectionString; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="string_data", requiredness=Requiredness.NONE)
-        public Builder setStringData(String stringData) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="string_data", requiredness=Requiredness.NONE)    public Builder setStringData(String stringData) {
             this.stringData = stringData;
             return this;
         }
     
         public String getStringData() { return stringData; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="double_wrapped_bool", requiredness=Requiredness.NONE)
-        public Builder setDoubleWrappedBool(boolean doubleWrappedBool) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="double_wrapped_bool", requiredness=Requiredness.NONE)    public Builder setDoubleWrappedBool(boolean doubleWrappedBool) {
             this.doubleWrappedBool = doubleWrappedBool;
             return this;
         }
     
         public boolean isDoubleWrappedBool() { return doubleWrappedBool; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="double_wrapped_integer", requiredness=Requiredness.NONE)
-        public Builder setDoubleWrappedInteger(int doubleWrappedInteger) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="double_wrapped_integer", requiredness=Requiredness.NONE)    public Builder setDoubleWrappedInteger(int doubleWrappedInteger) {
             this.doubleWrappedInteger = doubleWrappedInteger;
             return this;
         }
     
         public int getDoubleWrappedInteger() { return doubleWrappedInteger; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="binary_data", requiredness=Requiredness.NONE)
-        public Builder setBinaryData(byte[] binaryData) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="binary_data", requiredness=Requiredness.NONE)    public Builder setBinaryData(byte[] binaryData) {
             this.binaryData = binaryData;
             return this;
         }
@@ -192,7 +182,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -266,52 +256,52 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
     
     @com.facebook.swift.codec.ThriftField(value=1, name="delay", requiredness=Requiredness.NONE)
     public long getDelay() { return delay; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="custom", requiredness=Requiredness.NONE)
     public byte[] getCustom() { return custom; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="timeout", requiredness=Requiredness.NONE)
     public long getTimeout() { return timeout; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=4, name="data", requiredness=Requiredness.NONE)
     public long getData() { return data; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="meta", requiredness=Requiredness.NONE)
     public String getMeta() { return meta; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="indirectionString", requiredness=Requiredness.NONE)
     public String getIndirectionString() { return indirectionString; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="string_data", requiredness=Requiredness.NONE)
     public String getStringData() { return stringData; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=8, name="double_wrapped_bool", requiredness=Requiredness.NONE)
     public boolean isDoubleWrappedBool() { return doubleWrappedBool; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=9, name="double_wrapped_integer", requiredness=Requiredness.NONE)
     public int getDoubleWrappedInteger() { return doubleWrappedInteger; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="binary_data", requiredness=Requiredness.NONE)
     public byte[] getBinaryData() { return binaryData; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -327,7 +317,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
         helper.add("binaryData", binaryData);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -352,7 +342,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
             Arrays.equals(binaryData, other.binaryData) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -368,7 +358,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
             binaryData
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<AdaptTestStruct> asReader() {
       return AdaptTestStruct::read0;
@@ -471,7 +461,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(DELAY_FIELD_DESC);
@@ -517,7 +507,7 @@ public final class AdaptTestStruct implements com.facebook.thrift.payload.Thrift
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _AdaptTestStructLazy {
         private static final AdaptTestStruct _DEFAULT = new AdaptTestStruct.Builder().build();
     }

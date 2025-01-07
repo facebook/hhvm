@@ -114,6 +114,7 @@ public final class Union1 implements com.facebook.thrift.payload.ThriftSerializa
         res.id = 2;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="i", requiredness=Requiredness.NONE)
@@ -251,7 +252,7 @@ public final class Union1 implements com.facebook.thrift.payload.ThriftSerializa
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Union1> asReader() {
       return Union1::read0;

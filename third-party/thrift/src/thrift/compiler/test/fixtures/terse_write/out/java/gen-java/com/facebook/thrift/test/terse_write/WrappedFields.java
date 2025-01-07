@@ -33,7 +33,7 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
     protected WrappedFields() {
       this.field1 = 7;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
     public static class Builder {
         private int field1 = 7;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
-        public Builder setField1(int field1) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)    public Builder setField1(int field1) {
             this.field1 = field1;
             return this;
         }
@@ -66,7 +65,7 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
     
     @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
     public int getField1() { return field1; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("field1", field1);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
             Objects.equals(field1, other.field1) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             field1
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<WrappedFields> asReader() {
       return WrappedFields::read0;
@@ -148,7 +147,7 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       int structStart = 0;
@@ -162,7 +161,7 @@ public final class WrappedFields implements com.facebook.thrift.payload.ThriftSe
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _WrappedFieldsLazy {
         private static final WrappedFields _DEFAULT = new WrappedFields.Builder().build();
     }

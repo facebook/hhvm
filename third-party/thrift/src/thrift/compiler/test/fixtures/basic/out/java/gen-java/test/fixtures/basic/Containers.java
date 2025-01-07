@@ -39,7 +39,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
       this.stringSet = null;
       this.stringToI64Map = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         private Set<String> stringSet = null;
         private Map<String, Long> stringToI64Map = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="I32List", requiredness=Requiredness.NONE)
-        public Builder setI32List(List<Integer> i32List) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="I32List", requiredness=Requiredness.NONE)    public Builder setI32List(List<Integer> i32List) {
             this.i32List = i32List;
             return this;
         }
     
         public List<Integer> getI32List() { return i32List; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="StringSet", requiredness=Requiredness.NONE)
-        public Builder setStringSet(Set<String> stringSet) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="StringSet", requiredness=Requiredness.NONE)    public Builder setStringSet(Set<String> stringSet) {
             this.stringSet = stringSet;
             return this;
         }
     
         public Set<String> getStringSet() { return stringSet; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="StringToI64Map", requiredness=Requiredness.NONE)
-        public Builder setStringToI64Map(Map<String, Long> stringToI64Map) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="StringToI64Map", requiredness=Requiredness.NONE)    public Builder setStringToI64Map(Map<String, Long> stringToI64Map) {
             this.stringToI64Map = stringToI64Map;
             return this;
         }
@@ -94,7 +91,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -126,17 +123,17 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="I32List", requiredness=Requiredness.NONE)
     public List<Integer> getI32List() { return i32List; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="StringSet", requiredness=Requiredness.NONE)
     public Set<String> getStringSet() { return stringSet; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="StringToI64Map", requiredness=Requiredness.NONE)
     public Map<String, Long> getStringToI64Map() { return stringToI64Map; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -145,7 +142,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         helper.add("stringToI64Map", stringToI64Map);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -163,7 +160,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
             Objects.equals(stringToI64Map, other.stringToI64Map) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -172,7 +169,7 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
             stringToI64Map
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Containers> asReader() {
       return Containers::read0;
@@ -189,16 +186,16 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         case _I32LIST:
           if (__field.type == TType.LIST) {
             List<Integer> i32List;
-            {
-            TList _list = oprot.readListBegin();
-            i32List = new ArrayList<Integer>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                int _value1 = oprot.readI32();
-                i32List.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                i32List = new ArrayList<Integer>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    int _value1 = oprot.readI32();
+                    i32List.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setI32List(i32List);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -207,16 +204,16 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         case _STRINGSET:
           if (__field.type == TType.SET) {
             Set<String> stringSet;
-            {
-            TSet _set = oprot.readSetBegin();
-            stringSet = new HashSet<String>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                stringSet.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                stringSet = new HashSet<String>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    stringSet.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setStringSet(stringSet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -225,17 +222,17 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
         case _STRINGTOI64MAP:
           if (__field.type == TType.MAP) {
             Map<String, Long> stringToI64Map;
-            {
-            TMap _map = oprot.readMapBegin();
-            stringToI64Map = new HashMap<String, Long>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                long _value1 = oprot.readI64();
-                stringToI64Map.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                stringToI64Map = new HashMap<String, Long>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    long _value1 = oprot.readI64();
+                    stringToI64Map.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setStringToI64Map(stringToI64Map);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -250,44 +247,44 @@ public final class Containers implements com.facebook.thrift.payload.ThriftSeria
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (i32List != null) {
         oprot.writeFieldBegin(I32_LIST_FIELD_DESC);
         List<Integer> _iter0 = i32List;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (int _iter1 : _iter0) {
-          oprot.writeI32(_iter1);
-        }
-        oprot.writeListEnd();
+            for (int _iter1 : _iter0) {
+              oprot.writeI32(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (stringSet != null) {
         oprot.writeFieldBegin(STRING_SET_FIELD_DESC);
         Set<String> _iter0 = stringSet;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (stringToI64Map != null) {
         oprot.writeFieldBegin(STRING_TO_I64_MAP_FIELD_DESC);
         Map<String, Long> _iter0 = stringToI64Map;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I64, _iter0.size()));
-        for (Map.Entry<String, Long> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeI64(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Long> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeI64(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ContainersLazy {
         private static final Containers _DEFAULT = new Containers.Builder().build();
     }

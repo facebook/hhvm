@@ -54,7 +54,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
       this.maxByteField = (byte)127;
       this.minByteField = (byte)-128;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -73,64 +73,56 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
         private byte maxByteField = (byte)127;
         private byte minByteField = (byte)-128;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="max_i64_field", requiredness=Requiredness.NONE)
-        public Builder setMaxI64Field(long maxI64Field) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="max_i64_field", requiredness=Requiredness.NONE)    public Builder setMaxI64Field(long maxI64Field) {
             this.maxI64Field = maxI64Field;
             return this;
         }
     
         public long getMaxI64Field() { return maxI64Field; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="min_i64_field", requiredness=Requiredness.NONE)
-        public Builder setMinI64Field(long minI64Field) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="min_i64_field", requiredness=Requiredness.NONE)    public Builder setMinI64Field(long minI64Field) {
             this.minI64Field = minI64Field;
             return this;
         }
     
         public long getMinI64Field() { return minI64Field; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="max_i32_field", requiredness=Requiredness.NONE)
-        public Builder setMaxI32Field(int maxI32Field) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="max_i32_field", requiredness=Requiredness.NONE)    public Builder setMaxI32Field(int maxI32Field) {
             this.maxI32Field = maxI32Field;
             return this;
         }
     
         public int getMaxI32Field() { return maxI32Field; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="min_i32_field", requiredness=Requiredness.NONE)
-        public Builder setMinI32Field(int minI32Field) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="min_i32_field", requiredness=Requiredness.NONE)    public Builder setMinI32Field(int minI32Field) {
             this.minI32Field = minI32Field;
             return this;
         }
     
         public int getMinI32Field() { return minI32Field; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="max_i16_field", requiredness=Requiredness.NONE)
-        public Builder setMaxI16Field(short maxI16Field) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="max_i16_field", requiredness=Requiredness.NONE)    public Builder setMaxI16Field(short maxI16Field) {
             this.maxI16Field = maxI16Field;
             return this;
         }
     
         public short getMaxI16Field() { return maxI16Field; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="min_i16_field", requiredness=Requiredness.NONE)
-        public Builder setMinI16Field(short minI16Field) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="min_i16_field", requiredness=Requiredness.NONE)    public Builder setMinI16Field(short minI16Field) {
             this.minI16Field = minI16Field;
             return this;
         }
     
         public short getMinI16Field() { return minI16Field; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="max_byte_field", requiredness=Requiredness.NONE)
-        public Builder setMaxByteField(byte maxByteField) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="max_byte_field", requiredness=Requiredness.NONE)    public Builder setMaxByteField(byte maxByteField) {
             this.maxByteField = maxByteField;
             return this;
         }
     
         public byte getMaxByteField() { return maxByteField; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="min_byte_field", requiredness=Requiredness.NONE)
-        public Builder setMinByteField(byte minByteField) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="min_byte_field", requiredness=Requiredness.NONE)    public Builder setMinByteField(byte minByteField) {
             this.minByteField = minByteField;
             return this;
         }
@@ -164,7 +156,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -223,42 +215,42 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
     
     @com.facebook.swift.codec.ThriftField(value=1, name="max_i64_field", requiredness=Requiredness.NONE)
     public long getMaxI64Field() { return maxI64Field; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="min_i64_field", requiredness=Requiredness.NONE)
     public long getMinI64Field() { return minI64Field; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="max_i32_field", requiredness=Requiredness.NONE)
     public int getMaxI32Field() { return maxI32Field; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=4, name="min_i32_field", requiredness=Requiredness.NONE)
     public int getMinI32Field() { return minI32Field; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=5, name="max_i16_field", requiredness=Requiredness.NONE)
     public short getMaxI16Field() { return maxI16Field; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=6, name="min_i16_field", requiredness=Requiredness.NONE)
     public short getMinI16Field() { return minI16Field; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=7, name="max_byte_field", requiredness=Requiredness.NONE)
     public byte getMaxByteField() { return maxByteField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=8, name="min_byte_field", requiredness=Requiredness.NONE)
     public byte getMinByteField() { return minByteField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -272,7 +264,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
         helper.add("minByteField", minByteField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -295,7 +287,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
             Objects.equals(minByteField, other.minByteField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -309,7 +301,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
             minByteField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Limits> asReader() {
       return Limits::read0;
@@ -396,7 +388,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MAX_I64_FIELD_FIELD_DESC);
@@ -426,7 +418,7 @@ public final class Limits implements com.facebook.thrift.payload.ThriftSerializa
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _LimitsLazy {
         private static final Limits _DEFAULT = new Limits.Builder().build();
     }

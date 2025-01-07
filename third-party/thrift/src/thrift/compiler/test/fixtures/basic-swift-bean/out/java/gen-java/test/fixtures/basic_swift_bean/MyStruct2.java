@@ -27,7 +27,7 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
       this.myStruct1 = null;
       this.myString = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -40,16 +40,14 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
         private test.fixtures.basic_swift_bean.MyStruct1 myStruct1 = null;
         private String myString = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="myStruct1", requiredness=Requiredness.NONE)
-        public Builder setMyStruct1(test.fixtures.basic_swift_bean.MyStruct1 myStruct1) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="myStruct1", requiredness=Requiredness.NONE)    public Builder setMyStruct1(test.fixtures.basic_swift_bean.MyStruct1 myStruct1) {
             this.myStruct1 = myStruct1;
             return this;
         }
     
         public test.fixtures.basic_swift_bean.MyStruct1 getMyStruct1() { return myStruct1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="myString", requiredness=Requiredness.NONE)
-        public Builder setMyString(String myString) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="myString", requiredness=Requiredness.NONE)    public Builder setMyString(String myString) {
             this.myString = myString;
             return this;
         }
@@ -65,11 +63,11 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
         @ThriftConstructor
         public MyStruct2 build() {
             MyStruct2 result = new MyStruct2();
-            result.myStruct1 = this.myStruct1;
-            result.myString = this.myString;
-        return result;    }
+                result.myStruct1 = this.myStruct1;
+                result.myString = this.myString;
+            return result;    }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -92,24 +90,24 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="myStruct1", requiredness=Requiredness.NONE)
     public test.fixtures.basic_swift_bean.MyStruct1 getMyStruct1() { return myStruct1; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct2 setMyStruct1(test.fixtures.basic_swift_bean.MyStruct1 myStruct1) {
         this.myStruct1 = myStruct1;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="myString", requiredness=Requiredness.NONE)
     public String getMyString() { return myString; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct2 setMyString(String myString) {
         this.myString = myString;
         return this;
     }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -117,7 +115,7 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
         helper.add("myString", myString);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -134,7 +132,7 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
             Objects.equals(myString, other.myString) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -142,7 +140,7 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
             myString
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct2> asReader() {
       return MyStruct2::read0;
@@ -181,7 +179,7 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (myStruct1 != null) {
@@ -197,6 +195,6 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
 
 }

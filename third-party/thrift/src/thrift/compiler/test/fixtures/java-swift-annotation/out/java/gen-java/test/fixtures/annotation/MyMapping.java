@@ -42,7 +42,7 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
       this.binaryMap = null;
       this.regularBinary = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         private Map<String, byte[]> binaryMap = null;
         private Map<String, byte[]> regularBinary = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE)
-        public Builder setLsMap(com.foo.FastLongStringMap lsMap) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE)    public Builder setLsMap(com.foo.FastLongStringMap lsMap) {
             this.lsMap = lsMap;
             return this;
         }
     
         public com.foo.FastLongStringMap getLsMap() { return lsMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="ioMap", requiredness=Requiredness.NONE)
-        public Builder setIoMap(com.foo.FastIntObjectMap<com.foo.FastIntLongMap> ioMap) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="ioMap", requiredness=Requiredness.NONE)    public Builder setIoMap(com.foo.FastIntObjectMap<com.foo.FastIntLongMap> ioMap) {
             this.ioMap = ioMap;
             return this;
         }
     
         public com.foo.FastIntObjectMap<com.foo.FastIntLongMap> getIoMap() { return ioMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)
-        public Builder setBinaryMap(Map<String, byte[]> binaryMap) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)    public Builder setBinaryMap(Map<String, byte[]> binaryMap) {
             this.binaryMap = binaryMap;
             return this;
         }
     
         public Map<String, byte[]> getBinaryMap() { return binaryMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE)
-        public Builder setRegularBinary(Map<String, byte[]> regularBinary) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE)    public Builder setRegularBinary(Map<String, byte[]> regularBinary) {
             this.regularBinary = regularBinary;
             return this;
         }
@@ -108,7 +104,7 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -143,22 +139,22 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="lsMap", requiredness=Requiredness.NONE)
     public com.foo.FastLongStringMap getLsMap() { return lsMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="ioMap", requiredness=Requiredness.NONE)
     public com.foo.FastIntObjectMap<com.foo.FastIntLongMap> getIoMap() { return ioMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)
     public Map<String, byte[]> getBinaryMap() { return binaryMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE)
     public Map<String, byte[]> getRegularBinary() { return regularBinary; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -168,7 +164,7 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         helper.add("regularBinary", regularBinary);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -187,7 +183,7 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
             Objects.equals(regularBinary, other.regularBinary) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -197,7 +193,7 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
             regularBinary
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyMapping> asReader() {
       return MyMapping::read0;
@@ -214,17 +210,17 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         case _LSMAP:
           if (__field.type == TType.MAP) {
             com.foo.FastLongStringMap lsMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            lsMap = new com.foo.FastLongStringMap();
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                long _key1 = oprot.readI64();
-                String _value1 = oprot.readString();
-                lsMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                lsMap = new com.foo.FastLongStringMap();
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    long _key1 = oprot.readI64();
+                    String _value1 = oprot.readString();
+                    lsMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setLsMap(lsMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -233,35 +229,35 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         case _IOMAP:
           if (__field.type == TType.MAP) {
             com.foo.FastIntObjectMap<com.foo.FastIntLongMap> ioMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            ioMap = new com.foo.FastIntObjectMap<com.foo.FastIntLongMap>();
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                com.foo.FastIntLongMap _value1;
-            {
-            TMap _map1 = oprot.readMapBegin();
-            _value1 = new com.foo.FastIntLongMap();
-            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                
-                
-                int _key2 = oprot.readI32();
-                
-
-                
-                long _value2 = oprot.readI64();
-                
-                
-                _value1.put(_key2, _value2);
-                
-            }
-            }
-            oprot.readMapEnd();
-                ioMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                ioMap = new com.foo.FastIntObjectMap<com.foo.FastIntLongMap>();
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    com.foo.FastIntLongMap _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new com.foo.FastIntLongMap();
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    int _key2 = oprot.readI32();
+                                    
+                    
+                                    
+                                    long _value2 = oprot.readI64();
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    ioMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setIoMap(ioMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -270,17 +266,17 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         case _BINARYMAP:
           if (__field.type == TType.MAP) {
             Map<String, byte[]> binaryMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            binaryMap = new HashMap<String, byte[]>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                byte[] _value1 = oprot.readBinary().array();
-                binaryMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                binaryMap = new HashMap<String, byte[]>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    byte[] _value1 = oprot.readBinary().array();
+                    binaryMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setBinaryMap(binaryMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -289,17 +285,17 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         case _REGULARBINARY:
           if (__field.type == TType.MAP) {
             Map<String, byte[]> regularBinary;
-            {
-            TMap _map = oprot.readMapBegin();
-            regularBinary = new HashMap<String, byte[]>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                byte[] _value1 = oprot.readBinary().array();
-                regularBinary.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                regularBinary = new HashMap<String, byte[]>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    byte[] _value1 = oprot.readBinary().array();
+                    regularBinary.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setRegularBinary(regularBinary);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -314,62 +310,62 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (lsMap != null) {
         oprot.writeFieldBegin(LS_MAP_FIELD_DESC);
         com.foo.FastLongStringMap _iter0 = lsMap;
         oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
-        for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI64(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI64(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (ioMap != null) {
         oprot.writeFieldBegin(IO_MAP_FIELD_DESC);
         com.foo.FastIntObjectMap<com.foo.FastIntLongMap> _iter0 = ioMap;
         oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
-        for (Map.Entry<Integer, com.foo.FastIntLongMap> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter1.getValue().size()));
-        for (Map.Entry<Integer, Long> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeI32(_iter2.getKey());
-          oprot.writeI64(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, com.foo.FastIntLongMap> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter1.getValue().size()));
+            for (Map.Entry<Integer, Long> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeI32(_iter2.getKey());
+              oprot.writeI64(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (binaryMap != null) {
         oprot.writeFieldBegin(BINARY_MAP_FIELD_DESC);
         Map<String, byte[]> _iter0 = binaryMap;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
-        for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (regularBinary != null) {
         oprot.writeFieldBegin(REGULAR_BINARY_FIELD_DESC);
         Map<String, byte[]> _iter0 = regularBinary;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
-        for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyMappingLazy {
         private static final MyMapping _DEFAULT = new MyMapping.Builder().build();
     }

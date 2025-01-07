@@ -57,7 +57,7 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
       this.myListTypedef = null;
       this.myMapListOfTypeDef = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -77,72 +77,63 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         private List<Double> myListTypedef = null;
         private Map<Short, List<List<Double>>> myMapListOfTypeDef = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)
-        public Builder setMyLongField(long myLongField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)    public Builder setMyLongField(long myLongField) {
             this.myLongField = myLongField;
             return this;
         }
     
         public long getMyLongField() { return myLongField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="myLongTypeDef", requiredness=Requiredness.NONE)
-        public Builder setMyLongTypeDef(long myLongTypeDef) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="myLongTypeDef", requiredness=Requiredness.NONE)    public Builder setMyLongTypeDef(long myLongTypeDef) {
             this.myLongTypeDef = myLongTypeDef;
             return this;
         }
     
         public long getMyLongTypeDef() { return myLongTypeDef; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="myStringField", requiredness=Requiredness.NONE)
-        public Builder setMyStringField(String myStringField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="myStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
     
         public String getMyStringField() { return myStringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="myStringTypedef", requiredness=Requiredness.NONE)
-        public Builder setMyStringTypedef(String myStringTypedef) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="myStringTypedef", requiredness=Requiredness.NONE)    public Builder setMyStringTypedef(String myStringTypedef) {
             this.myStringTypedef = myStringTypedef;
             return this;
         }
     
         public String getMyStringTypedef() { return myStringTypedef; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="myMapField", requiredness=Requiredness.NONE)
-        public Builder setMyMapField(Map<Short, String> myMapField) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="myMapField", requiredness=Requiredness.NONE)    public Builder setMyMapField(Map<Short, String> myMapField) {
             this.myMapField = myMapField;
             return this;
         }
     
         public Map<Short, String> getMyMapField() { return myMapField; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="myMapTypedef", requiredness=Requiredness.NONE)
-        public Builder setMyMapTypedef(Map<Short, String> myMapTypedef) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="myMapTypedef", requiredness=Requiredness.NONE)    public Builder setMyMapTypedef(Map<Short, String> myMapTypedef) {
             this.myMapTypedef = myMapTypedef;
             return this;
         }
     
         public Map<Short, String> getMyMapTypedef() { return myMapTypedef; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="myListField", requiredness=Requiredness.NONE)
-        public Builder setMyListField(List<Double> myListField) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="myListField", requiredness=Requiredness.NONE)    public Builder setMyListField(List<Double> myListField) {
             this.myListField = myListField;
             return this;
         }
     
         public List<Double> getMyListField() { return myListField; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="myListTypedef", requiredness=Requiredness.NONE)
-        public Builder setMyListTypedef(List<Double> myListTypedef) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="myListTypedef", requiredness=Requiredness.NONE)    public Builder setMyListTypedef(List<Double> myListTypedef) {
             this.myListTypedef = myListTypedef;
             return this;
         }
     
         public List<Double> getMyListTypedef() { return myListTypedef; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="myMapListOfTypeDef", requiredness=Requiredness.NONE)
-        public Builder setMyMapListOfTypeDef(Map<Short, List<List<Double>>> myMapListOfTypeDef) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="myMapListOfTypeDef", requiredness=Requiredness.NONE)    public Builder setMyMapListOfTypeDef(Map<Short, List<List<Double>>> myMapListOfTypeDef) {
             this.myMapListOfTypeDef = myMapListOfTypeDef;
             return this;
         }
@@ -178,7 +169,7 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -243,47 +234,47 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
     
     @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)
     public long getMyLongField() { return myLongField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="myLongTypeDef", requiredness=Requiredness.NONE)
     public long getMyLongTypeDef() { return myLongTypeDef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="myStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="myStringTypedef", requiredness=Requiredness.NONE)
     public String getMyStringTypedef() { return myStringTypedef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="myMapField", requiredness=Requiredness.NONE)
     public Map<Short, String> getMyMapField() { return myMapField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="myMapTypedef", requiredness=Requiredness.NONE)
     public Map<Short, String> getMyMapTypedef() { return myMapTypedef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="myListField", requiredness=Requiredness.NONE)
     public List<Double> getMyListField() { return myListField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="myListTypedef", requiredness=Requiredness.NONE)
     public List<Double> getMyListTypedef() { return myListTypedef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="myMapListOfTypeDef", requiredness=Requiredness.NONE)
     public Map<Short, List<List<Double>>> getMyMapListOfTypeDef() { return myMapListOfTypeDef; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -298,7 +289,7 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         helper.add("myMapListOfTypeDef", myMapListOfTypeDef);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -322,7 +313,7 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
             Objects.equals(myMapListOfTypeDef, other.myMapListOfTypeDef) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -337,7 +328,7 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
             myMapListOfTypeDef
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStructTypeDef> asReader() {
       return MyStructTypeDef::read0;
@@ -386,17 +377,17 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         case _MYMAPFIELD:
           if (__field.type == TType.MAP) {
             Map<Short, String> myMapField;
-            {
-            TMap _map = oprot.readMapBegin();
-            myMapField = new HashMap<Short, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                short _key1 = oprot.readI16();
-                String _value1 = oprot.readString();
-                myMapField.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                myMapField = new HashMap<Short, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    short _key1 = oprot.readI16();
+                    String _value1 = oprot.readString();
+                    myMapField.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMyMapField(myMapField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -405,17 +396,17 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         case _MYMAPTYPEDEF:
           if (__field.type == TType.MAP) {
             Map<Short, String> myMapTypedef;
-            {
-            TMap _map = oprot.readMapBegin();
-            myMapTypedef = new HashMap<Short, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                short _key1 = oprot.readI16();
-                String _value1 = oprot.readString();
-                myMapTypedef.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                myMapTypedef = new HashMap<Short, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    short _key1 = oprot.readI16();
+                    String _value1 = oprot.readString();
+                    myMapTypedef.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMyMapTypedef(myMapTypedef);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -424,16 +415,16 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         case _MYLISTFIELD:
           if (__field.type == TType.LIST) {
             List<Double> myListField;
-            {
-            TList _list = oprot.readListBegin();
-            myListField = new ArrayList<Double>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                double _value1 = oprot.readDouble();
-                myListField.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                myListField = new ArrayList<Double>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    double _value1 = oprot.readDouble();
+                    myListField.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setMyListField(myListField);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -442,16 +433,16 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         case _MYLISTTYPEDEF:
           if (__field.type == TType.LIST) {
             List<Double> myListTypedef;
-            {
-            TList _list = oprot.readListBegin();
-            myListTypedef = new ArrayList<Double>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                double _value1 = oprot.readDouble();
-                myListTypedef.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                myListTypedef = new ArrayList<Double>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    double _value1 = oprot.readDouble();
+                    myListTypedef.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setMyListTypedef(myListTypedef);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -460,44 +451,44 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         case _MYMAPLISTOFTYPEDEF:
           if (__field.type == TType.MAP) {
             Map<Short, List<List<Double>>> myMapListOfTypeDef;
-            {
-            TMap _map = oprot.readMapBegin();
-            myMapListOfTypeDef = new HashMap<Short, List<List<Double>>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                short _key1 = oprot.readI16();
-                List<List<Double>> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<List<Double>>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                List<Double> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<Double>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                
-                double _value3 = oprot.readDouble();
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                myMapListOfTypeDef.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                myMapListOfTypeDef = new HashMap<Short, List<List<Double>>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    short _key1 = oprot.readI16();
+                    List<List<Double>> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<List<Double>>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    List<Double> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<Double>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    
+                                    double _value3 = oprot.readDouble();
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    myMapListOfTypeDef.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMyMapListOfTypeDef(myMapListOfTypeDef);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -512,7 +503,7 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
@@ -535,67 +526,67 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
         oprot.writeFieldBegin(MY_MAP_FIELD_FIELD_DESC);
         Map<Short, String> _iter0 = myMapField;
         oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _iter0.size()));
-        for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI16(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI16(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (myMapTypedef != null) {
         oprot.writeFieldBegin(MY_MAP_TYPEDEF_FIELD_DESC);
         Map<Short, String> _iter0 = myMapTypedef;
         oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _iter0.size()));
-        for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI16(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI16(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (myListField != null) {
         oprot.writeFieldBegin(MY_LIST_FIELD_FIELD_DESC);
         List<Double> _iter0 = myListField;
         oprot.writeListBegin(new TList(TType.DOUBLE, _iter0.size()));
-        for (double _iter1 : _iter0) {
-          oprot.writeDouble(_iter1);
-        }
-        oprot.writeListEnd();
+            for (double _iter1 : _iter0) {
+              oprot.writeDouble(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (myListTypedef != null) {
         oprot.writeFieldBegin(MY_LIST_TYPEDEF_FIELD_DESC);
         List<Double> _iter0 = myListTypedef;
         oprot.writeListBegin(new TList(TType.DOUBLE, _iter0.size()));
-        for (double _iter1 : _iter0) {
-          oprot.writeDouble(_iter1);
-        }
-        oprot.writeListEnd();
+            for (double _iter1 : _iter0) {
+              oprot.writeDouble(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (myMapListOfTypeDef != null) {
         oprot.writeFieldBegin(MY_MAP_LIST_OF_TYPE_DEF_FIELD_DESC);
         Map<Short, List<List<Double>>> _iter0 = myMapListOfTypeDef;
         oprot.writeMapBegin(new TMap(TType.I16, TType.LIST, _iter0.size()));
-        for (Map.Entry<Short, List<List<Double>>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI16(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
-        for (List<Double> _iter2 : _iter1.getValue()) {
-          oprot.writeListBegin(new TList(TType.DOUBLE, _iter2.size()));
-        for (double _iter3 : _iter2) {
-          oprot.writeDouble(_iter3);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Short, List<List<Double>>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI16(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
+            for (List<Double> _iter2 : _iter1.getValue()) {
+              oprot.writeListBegin(new TList(TType.DOUBLE, _iter2.size()));
+            for (double _iter3 : _iter2) {
+              oprot.writeDouble(_iter3);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructTypeDefLazy {
         private static final MyStructTypeDef _DEFAULT = new MyStructTypeDef.Builder().build();
     }

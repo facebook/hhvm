@@ -106,8 +106,8 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
         res.id = 3;
         return res;
     }
-    
-    @com.facebook.swift.codec.ThriftField
+
+        @com.facebook.swift.codec.ThriftField
     @Deprecated
     public void setIntListValue(final List<Long> intListValue) {
         this.value = intListValue;
@@ -119,6 +119,7 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
         this.value = stringListValue;
         this.id = 3;
     }
+
 
     @com.facebook.swift.codec.ThriftField(value=2, name="intListValue", requiredness=Requiredness.NONE)
     public List<Long> getIntListValue() {
@@ -239,10 +240,10 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeFieldBegin(INT_LIST_VALUE_FIELD_DESC);
         List<Long> _iter0 = (List<Long>)this.value;
         oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
-        for (long _iter1 : _iter0) {
-          oprot.writeI64(_iter1);
-        }
-        oprot.writeListEnd();
+            for (long _iter1 : _iter0) {
+              oprot.writeI64(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -250,10 +251,10 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeFieldBegin(STRING_LIST_VALUE_FIELD_DESC);
         List<String> _iter0 = (List<String>)this.value;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeListEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -263,7 +264,7 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ListUnion> asReader() {
       return ListUnion::read0;
@@ -280,32 +281,32 @@ public final class ListUnion implements com.facebook.thrift.payload.ThriftSerial
           case _INTLISTVALUE:
             if (__field.type == INT_LIST_VALUE_FIELD_DESC.type) {
               List<Long> intListValue;
-            {
-            TList _list = oprot.readListBegin();
-            intListValue = new ArrayList<Long>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                long _value1 = oprot.readI64();
-                intListValue.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                intListValue = new ArrayList<Long>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    long _value1 = oprot.readI64();
+                    intListValue.add(_value1);
+                }
+                oprot.readListEnd();
+                }
               res.value = intListValue;
             }
             break;
           case _STRINGLISTVALUE:
             if (__field.type == STRING_LIST_VALUE_FIELD_DESC.type) {
               List<String> stringListValue;
-            {
-            TList _list = oprot.readListBegin();
-            stringListValue = new ArrayList<String>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                stringListValue.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                stringListValue = new ArrayList<String>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    stringListValue.add(_value1);
+                }
+                oprot.readListEnd();
+                }
               res.value = stringListValue;
             }
             break;

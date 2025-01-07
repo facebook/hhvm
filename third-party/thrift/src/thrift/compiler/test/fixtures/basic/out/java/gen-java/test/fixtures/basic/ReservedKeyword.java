@@ -33,7 +33,7 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
     protected ReservedKeyword() {
       this.reservedField = 0;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
     public static class Builder {
         private int reservedField = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="reserved_field", requiredness=Requiredness.NONE)
-        public Builder setReservedField(int reservedField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="reserved_field", requiredness=Requiredness.NONE)    public Builder setReservedField(int reservedField) {
             this.reservedField = reservedField;
             return this;
         }
@@ -66,7 +65,7 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
     
     @com.facebook.swift.codec.ThriftField(value=1, name="reserved_field", requiredness=Requiredness.NONE)
     public int getReservedField() { return reservedField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("reservedField", reservedField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
             Objects.equals(reservedField, other.reservedField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             reservedField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ReservedKeyword> asReader() {
       return ReservedKeyword::read0;
@@ -147,7 +146,7 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(RESERVED_FIELD_FIELD_DESC);
@@ -156,7 +155,7 @@ public final class ReservedKeyword implements com.facebook.thrift.payload.Thrift
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ReservedKeywordLazy {
         private static final ReservedKeyword _DEFAULT = new ReservedKeyword.Builder().build();
     }

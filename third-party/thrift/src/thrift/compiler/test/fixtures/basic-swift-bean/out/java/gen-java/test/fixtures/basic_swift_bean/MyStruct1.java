@@ -42,7 +42,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
       this.myDataField = null;
       this.major = 0L;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
         private test.fixtures.basic_swift_bean.MyDataItem myDataField = null;
         private long major = 0L;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
-        public Builder setMyIntField(long myIntField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)    public Builder setMyIntField(long myIntField) {
             this.myIntField = myIntField;
             return this;
         }
     
         public long getMyIntField() { return myIntField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
-        public Builder setMyStringField(String myStringField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
     
         public String getMyStringField() { return myStringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)
-        public Builder setMyDataField(test.fixtures.basic_swift_bean.MyDataItem myDataField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.basic_swift_bean.MyDataItem myDataField) {
             this.myDataField = myDataField;
             return this;
         }
     
         public test.fixtures.basic_swift_bean.MyDataItem getMyDataField() { return myDataField; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="major", requiredness=Requiredness.NONE)
-        public Builder setMajor(long major) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="major", requiredness=Requiredness.NONE)    public Builder setMajor(long major) {
             this.major = major;
             return this;
         }
@@ -108,7 +104,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -143,22 +139,22 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
     
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)
     public test.fixtures.basic_swift_bean.MyDataItem getMyDataField() { return myDataField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=4, name="major", requiredness=Requiredness.NONE)
     public long getMajor() { return major; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -168,7 +164,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
         helper.add("major", major);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -187,7 +183,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
             Objects.equals(major, other.major) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -197,7 +193,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
             major
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct1> asReader() {
       return MyStruct1::read0;
@@ -252,7 +248,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
@@ -274,7 +270,7 @@ public final class MyStruct1 implements com.facebook.thrift.payload.ThriftSerial
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStruct1Lazy {
         private static final MyStruct1 _DEFAULT = new MyStruct1.Builder().build();
     }

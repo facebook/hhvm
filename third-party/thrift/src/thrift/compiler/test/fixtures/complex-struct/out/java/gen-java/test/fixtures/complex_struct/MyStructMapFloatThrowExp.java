@@ -36,7 +36,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
       this.myLongField = 0L;
       this.mapListOfFloats = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
         private long myLongField = 0L;
         private Map<Integer, List<List<Float>>> mapListOfFloats = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)
-        public Builder setMyLongField(long myLongField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)    public Builder setMyLongField(long myLongField) {
             this.myLongField = myLongField;
             return this;
         }
     
         public long getMyLongField() { return myLongField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="mapListOfFloats", requiredness=Requiredness.NONE)
-        public Builder setMapListOfFloats(Map<Integer, List<List<Float>>> mapListOfFloats) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="mapListOfFloats", requiredness=Requiredness.NONE)    public Builder setMapListOfFloats(Map<Integer, List<List<Float>>> mapListOfFloats) {
             this.mapListOfFloats = mapListOfFloats;
             return this;
         }
@@ -80,7 +78,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
     
     @com.facebook.swift.codec.ThriftField(value=1, name="myLongField", requiredness=Requiredness.NONE)
     public long getMyLongField() { return myLongField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="mapListOfFloats", requiredness=Requiredness.NONE)
     public Map<Integer, List<List<Float>>> getMapListOfFloats() { return mapListOfFloats; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
         helper.add("mapListOfFloats", mapListOfFloats);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
             Objects.equals(mapListOfFloats, other.mapListOfFloats) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
             mapListOfFloats
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStructMapFloatThrowExp> asReader() {
       return MyStructMapFloatThrowExp::read0;
@@ -166,44 +164,44 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
         case _MAPLISTOFFLOATS:
           if (__field.type == TType.MAP) {
             Map<Integer, List<List<Float>>> mapListOfFloats;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapListOfFloats = new HashMap<Integer, List<List<Float>>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                List<List<Float>> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<List<Float>>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                List<Float> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<Float>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                
-                float _value3 = oprot.readFloat();
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                mapListOfFloats.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapListOfFloats = new HashMap<Integer, List<List<Float>>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    List<List<Float>> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<List<Float>>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    List<Float> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<Float>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    
+                                    float _value3 = oprot.readFloat();
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapListOfFloats.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapListOfFloats(mapListOfFloats);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -218,7 +216,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_LONG_FIELD_FIELD_DESC);
@@ -228,25 +226,25 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
         oprot.writeFieldBegin(MAP_LIST_OF_FLOATS_FIELD_DESC);
         Map<Integer, List<List<Float>>> _iter0 = mapListOfFloats;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-        for (Map.Entry<Integer, List<List<Float>>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
-        for (List<Float> _iter2 : _iter1.getValue()) {
-          oprot.writeListBegin(new TList(TType.FLOAT, _iter2.size()));
-        for (float _iter3 : _iter2) {
-          oprot.writeFloat(_iter3);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, List<List<Float>>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
+            for (List<Float> _iter2 : _iter1.getValue()) {
+              oprot.writeListBegin(new TList(TType.FLOAT, _iter2.size()));
+            for (float _iter3 : _iter2) {
+              oprot.writeFloat(_iter3);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructMapFloatThrowExpLazy {
         private static final MyStructMapFloatThrowExp _DEFAULT = new MyStructMapFloatThrowExp.Builder().build();
     }

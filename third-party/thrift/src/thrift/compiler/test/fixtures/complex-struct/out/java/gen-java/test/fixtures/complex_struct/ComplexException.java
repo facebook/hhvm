@@ -94,7 +94,7 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
       this.structError = null;
       this.lsMap = null;
     }
-    
+
     public static class Builder {
         private String message = null;
         private List<String> listStrings = null;
@@ -103,48 +103,42 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
         private test.fixtures.complex_struct.MyStruct structError = null;
         private it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE)
-        public Builder setMessage(String message) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE)    public Builder setMessage(String message) {
             this.message = message;
             return this;
         }
     
         public String getMessage() { return message; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="listStrings", requiredness=Requiredness.NONE)
-        public Builder setListStrings(List<String> listStrings) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="listStrings", requiredness=Requiredness.NONE)    public Builder setListStrings(List<String> listStrings) {
             this.listStrings = listStrings;
             return this;
         }
     
         public List<String> getListStrings() { return listStrings; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="errorEnum", requiredness=Requiredness.NONE)
-        public Builder setErrorEnum(test.fixtures.complex_struct.MyEnum errorEnum) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="errorEnum", requiredness=Requiredness.NONE)    public Builder setErrorEnum(test.fixtures.complex_struct.MyEnum errorEnum) {
             this.errorEnum = errorEnum;
             return this;
         }
     
         public test.fixtures.complex_struct.MyEnum getErrorEnum() { return errorEnum; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="unionError", requiredness=Requiredness.OPTIONAL)
-        public Builder setUnionError(test.fixtures.complex_struct.MyUnion unionError) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="unionError", requiredness=Requiredness.OPTIONAL)    public Builder setUnionError(test.fixtures.complex_struct.MyUnion unionError) {
             this.unionError = unionError;
             return this;
         }
     
         public test.fixtures.complex_struct.MyUnion getUnionError() { return unionError; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="structError", requiredness=Requiredness.NONE)
-        public Builder setStructError(test.fixtures.complex_struct.MyStruct structError) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="structError", requiredness=Requiredness.NONE)    public Builder setStructError(test.fixtures.complex_struct.MyStruct structError) {
             this.structError = structError;
             return this;
         }
     
         public test.fixtures.complex_struct.MyStruct getStructError() { return structError; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="lsMap", requiredness=Requiredness.NONE)
-        public Builder setLsMap(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="lsMap", requiredness=Requiredness.NONE)    public Builder setLsMap(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap) {
             this.lsMap = lsMap;
             return this;
         }
@@ -174,32 +168,32 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE)
     public String getMessage() { return message; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="listStrings", requiredness=Requiredness.NONE)
     public List<String> getListStrings() { return listStrings; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="errorEnum", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.MyEnum getErrorEnum() { return errorEnum; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="unionError", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.complex_struct.MyUnion getUnionError() { return unionError; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="structError", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.MyStruct getStructError() { return structError; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="lsMap", requiredness=Requiredness.NONE)
     public it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> getLsMap() { return lsMap; }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ComplexException> asReader() {
       return ComplexException::read0;
@@ -224,16 +218,16 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
         case _LISTSTRINGS:
           if (__field.type == TType.LIST) {
             List<String> listStrings;
-            {
-            TList _list = oprot.readListBegin();
-            listStrings = new ArrayList<String>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                listStrings.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listStrings = new ArrayList<String>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    listStrings.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListStrings(listStrings);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -266,17 +260,17 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
         case _LSMAP:
           if (__field.type == TType.MAP) {
             it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> lsMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            lsMap = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                long _key1 = oprot.readI64();
-                String _value1 = oprot.readString();
-                lsMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                lsMap = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    long _key1 = oprot.readI64();
+                    String _value1 = oprot.readString();
+                    lsMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setLsMap(lsMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -291,7 +285,7 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (message != null) {
@@ -303,10 +297,10 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
         oprot.writeFieldBegin(LIST_STRINGS_FIELD_DESC);
         List<String> _iter0 = listStrings;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeListEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldBegin(ERROR_ENUM_FIELD_DESC);
@@ -326,17 +320,17 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
         oprot.writeFieldBegin(LS_MAP_FIELD_DESC);
         it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = lsMap;
         oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
-        for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI64(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI64(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ComplexExceptionLazy {
         private static final ComplexException _DEFAULT = new ComplexException.Builder().build();
     }

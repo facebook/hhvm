@@ -60,7 +60,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       this.afraidOfAnimal = null;
       this.vehicles = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -81,80 +81,70 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
         private test.fixtures.optionals.Animal afraidOfAnimal = null;
         private List<test.fixtures.optionals.Vehicle> vehicles = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)
-        public Builder setId(long id) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)    public Builder setId(long id) {
             this.id = id;
             return this;
         }
     
         public long getId() { return id; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)
-        public Builder setName(String name) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
     
         public String getName() { return name; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="age", requiredness=Requiredness.OPTIONAL)
-        public Builder setAge(Short age) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="age", requiredness=Requiredness.OPTIONAL)    public Builder setAge(Short age) {
             this.age = age;
             return this;
         }
     
         public Short getAge() { return age; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="address", requiredness=Requiredness.OPTIONAL)
-        public Builder setAddress(String address) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="address", requiredness=Requiredness.OPTIONAL)    public Builder setAddress(String address) {
             this.address = address;
             return this;
         }
     
         public String getAddress() { return address; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="favoriteColor", requiredness=Requiredness.OPTIONAL)
-        public Builder setFavoriteColor(test.fixtures.optionals.Color favoriteColor) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="favoriteColor", requiredness=Requiredness.OPTIONAL)    public Builder setFavoriteColor(test.fixtures.optionals.Color favoriteColor) {
             this.favoriteColor = favoriteColor;
             return this;
         }
     
         public test.fixtures.optionals.Color getFavoriteColor() { return favoriteColor; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="friends", requiredness=Requiredness.OPTIONAL)
-        public Builder setFriends(Set<Long> friends) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="friends", requiredness=Requiredness.OPTIONAL)    public Builder setFriends(Set<Long> friends) {
             this.friends = friends;
             return this;
         }
     
         public Set<Long> getFriends() { return friends; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="bestFriend", requiredness=Requiredness.OPTIONAL)
-        public Builder setBestFriend(Long bestFriend) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="bestFriend", requiredness=Requiredness.OPTIONAL)    public Builder setBestFriend(Long bestFriend) {
             this.bestFriend = bestFriend;
             return this;
         }
     
         public Long getBestFriend() { return bestFriend; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="petNames", requiredness=Requiredness.OPTIONAL)
-        public Builder setPetNames(Map<test.fixtures.optionals.Animal, String> petNames) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="petNames", requiredness=Requiredness.OPTIONAL)    public Builder setPetNames(Map<test.fixtures.optionals.Animal, String> petNames) {
             this.petNames = petNames;
             return this;
         }
     
         public Map<test.fixtures.optionals.Animal, String> getPetNames() { return petNames; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="afraidOfAnimal", requiredness=Requiredness.OPTIONAL)
-        public Builder setAfraidOfAnimal(test.fixtures.optionals.Animal afraidOfAnimal) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="afraidOfAnimal", requiredness=Requiredness.OPTIONAL)    public Builder setAfraidOfAnimal(test.fixtures.optionals.Animal afraidOfAnimal) {
             this.afraidOfAnimal = afraidOfAnimal;
             return this;
         }
     
         public test.fixtures.optionals.Animal getAfraidOfAnimal() { return afraidOfAnimal; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="vehicles", requiredness=Requiredness.OPTIONAL)
-        public Builder setVehicles(List<test.fixtures.optionals.Vehicle> vehicles) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="vehicles", requiredness=Requiredness.OPTIONAL)    public Builder setVehicles(List<test.fixtures.optionals.Vehicle> vehicles) {
             this.vehicles = vehicles;
             return this;
         }
@@ -192,7 +182,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -263,52 +253,52 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
     
     @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)
     public long getId() { return id; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="name", requiredness=Requiredness.NONE)
     public String getName() { return name; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="age", requiredness=Requiredness.OPTIONAL)
     public Short getAge() { return age; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="address", requiredness=Requiredness.OPTIONAL)
     public String getAddress() { return address; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="favoriteColor", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.optionals.Color getFavoriteColor() { return favoriteColor; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="friends", requiredness=Requiredness.OPTIONAL)
     public Set<Long> getFriends() { return friends; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="bestFriend", requiredness=Requiredness.OPTIONAL)
     public Long getBestFriend() { return bestFriend; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="petNames", requiredness=Requiredness.OPTIONAL)
     public Map<test.fixtures.optionals.Animal, String> getPetNames() { return petNames; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="afraidOfAnimal", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.optionals.Animal getAfraidOfAnimal() { return afraidOfAnimal; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="vehicles", requiredness=Requiredness.OPTIONAL)
     public List<test.fixtures.optionals.Vehicle> getVehicles() { return vehicles; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -324,7 +314,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
         helper.add("vehicles", vehicles);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -349,7 +339,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
             Objects.equals(vehicles, other.vehicles) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -365,7 +355,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
             vehicles
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Person> asReader() {
       return Person::read0;
@@ -397,7 +387,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
           break;
         case _AGE:
           if (__field.type == TType.I16) {
-            Short age = oprot.readI16();
+            Short  age = oprot.readI16();
             builder.setAge(age);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -405,7 +395,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
           break;
         case _ADDRESS:
           if (__field.type == TType.STRING) {
-            String address = oprot.readString();
+            String  address = oprot.readString();
             builder.setAddress(address);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -422,16 +412,16 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
         case _FRIENDS:
           if (__field.type == TType.SET) {
             Set<Long> friends;
-            {
-            TSet _set = oprot.readSetBegin();
-            friends = new HashSet<Long>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                long _value1 = oprot.readI64();
-                friends.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                friends = new HashSet<Long>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    long _value1 = oprot.readI64();
+                    friends.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setFriends(friends);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -439,7 +429,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
           break;
         case _BESTFRIEND:
           if (__field.type == TType.I64) {
-            Long bestFriend = oprot.readI64();
+            Long  bestFriend = oprot.readI64();
             builder.setBestFriend(bestFriend);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -448,17 +438,17 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
         case _PETNAMES:
           if (__field.type == TType.MAP) {
             Map<test.fixtures.optionals.Animal, String> petNames;
-            {
-            TMap _map = oprot.readMapBegin();
-            petNames = new HashMap<test.fixtures.optionals.Animal, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                test.fixtures.optionals.Animal _key1 = test.fixtures.optionals.Animal.fromInteger(oprot.readI32());
-                String _value1 = oprot.readString();
-                petNames.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                petNames = new HashMap<test.fixtures.optionals.Animal, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    test.fixtures.optionals.Animal _key1 = test.fixtures.optionals.Animal.fromInteger(oprot.readI32());
+                    String _value1 = oprot.readString();
+                    petNames.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setPetNames(petNames);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -466,7 +456,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
           break;
         case _AFRAIDOFANIMAL:
           if (__field.type == TType.I32) {
-            test.fixtures.optionals.Animal afraidOfAnimal = test.fixtures.optionals.Animal.fromInteger(oprot.readI32());
+            test.fixtures.optionals.Animal  afraidOfAnimal = test.fixtures.optionals.Animal .fromInteger(oprot.readI32());
             builder.setAfraidOfAnimal(afraidOfAnimal);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -475,16 +465,16 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
         case _VEHICLES:
           if (__field.type == TType.LIST) {
             List<test.fixtures.optionals.Vehicle> vehicles;
-            {
-            TList _list = oprot.readListBegin();
-            vehicles = new ArrayList<test.fixtures.optionals.Vehicle>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                test.fixtures.optionals.Vehicle _value1 = test.fixtures.optionals.Vehicle.read0(oprot);
-                vehicles.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                vehicles = new ArrayList<test.fixtures.optionals.Vehicle>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    test.fixtures.optionals.Vehicle _value1 = test.fixtures.optionals.Vehicle.read0(oprot);
+                    vehicles.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setVehicles(vehicles);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -499,7 +489,7 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(ID_FIELD_DESC);
@@ -527,12 +517,12 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       }
       if (friends != null) {
         oprot.writeFieldBegin(FRIENDS_FIELD_DESC);
-        Set<Long> _iter0 = friends;
+        Set<Long>  _iter0 = friends;
         oprot.writeSetBegin(new TSet(TType.I64, _iter0.size()));
-        for (long _iter1 : _iter0) {
-          oprot.writeI64(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (long _iter1 : _iter0) {
+              oprot.writeI64(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (bestFriend != null) {
@@ -542,13 +532,13 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       }
       if (petNames != null) {
         oprot.writeFieldBegin(PET_NAMES_FIELD_DESC);
-        Map<test.fixtures.optionals.Animal, String> _iter0 = petNames;
+        Map<test.fixtures.optionals.Animal, String>  _iter0 = petNames;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
-        for (Map.Entry<test.fixtures.optionals.Animal, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getKey()));
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<test.fixtures.optionals.Animal, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getKey()));
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (afraidOfAnimal != null) {
@@ -558,18 +548,18 @@ public final class Person implements com.facebook.thrift.payload.ThriftSerializa
       }
       if (vehicles != null) {
         oprot.writeFieldBegin(VEHICLES_FIELD_DESC);
-        List<test.fixtures.optionals.Vehicle> _iter0 = vehicles;
+        List<test.fixtures.optionals.Vehicle>  _iter0 = vehicles;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-        for (test.fixtures.optionals.Vehicle _iter1 : _iter0) {
-          _iter1.write0(oprot);
-        }
-        oprot.writeListEnd();
+            for (test.fixtures.optionals.Vehicle _iter1 : _iter0) {
+              _iter1.write0(oprot);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _PersonLazy {
         private static final Person _DEFAULT = new Person.Builder().build();
     }

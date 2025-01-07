@@ -39,7 +39,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
       this.optField = null;
       this.reqField = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
         private test.fixtures.refs.Empty optField = null;
         private test.fixtures.refs.Empty reqField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)
-        public Builder setDefField(test.fixtures.refs.Empty defField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)    public Builder setDefField(test.fixtures.refs.Empty defField) {
             this.defField = defField;
             return this;
         }
     
         public test.fixtures.refs.Empty getDefField() { return defField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="opt_field", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptField(test.fixtures.refs.Empty optField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="opt_field", requiredness=Requiredness.OPTIONAL)    public Builder setOptField(test.fixtures.refs.Empty optField) {
             this.optField = optField;
             return this;
         }
     
         public test.fixtures.refs.Empty getOptField() { return optField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="req_field", requiredness=Requiredness.REQUIRED)
-        public Builder setReqField(test.fixtures.refs.Empty reqField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="req_field", requiredness=Requiredness.REQUIRED)    public Builder setReqField(test.fixtures.refs.Empty reqField) {
             this.reqField = reqField;
             return this;
         }
@@ -94,7 +91,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="def_field", requiredness=Requiredness.NONE)
     public test.fixtures.refs.Empty getDefField() { return defField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="opt_field", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.refs.Empty getOptField() { return optField; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="req_field", requiredness=Requiredness.REQUIRED)
     public test.fixtures.refs.Empty getReqField() { return reqField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
         helper.add("reqField", reqField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
             Objects.equals(reqField, other.reqField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
             reqField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithRefTypeUnique> asReader() {
       return StructWithRefTypeUnique::read0;
@@ -216,7 +213,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (defField != null) {
@@ -237,7 +234,7 @@ public final class StructWithRefTypeUnique implements com.facebook.thrift.payloa
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithRefTypeUniqueLazy {
         private static final StructWithRefTypeUnique _DEFAULT = new StructWithRefTypeUnique.Builder().build();
     }

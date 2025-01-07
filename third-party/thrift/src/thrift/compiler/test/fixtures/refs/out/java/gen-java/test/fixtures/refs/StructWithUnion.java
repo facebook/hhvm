@@ -39,7 +39,7 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
       this.aDouble = 0.;
       this.f = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
         private double aDouble = 0.;
         private test.fixtures.refs.MyField f = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="u", requiredness=Requiredness.NONE)
-        public Builder setU(test.fixtures.refs.MyUnion u) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="u", requiredness=Requiredness.NONE)    public Builder setU(test.fixtures.refs.MyUnion u) {
             this.u = u;
             return this;
         }
     
         public test.fixtures.refs.MyUnion getU() { return u; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="aDouble", requiredness=Requiredness.NONE)
-        public Builder setADouble(double aDouble) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="aDouble", requiredness=Requiredness.NONE)    public Builder setADouble(double aDouble) {
             this.aDouble = aDouble;
             return this;
         }
     
         public double getADouble() { return aDouble; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="f", requiredness=Requiredness.NONE)
-        public Builder setF(test.fixtures.refs.MyField f) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="f", requiredness=Requiredness.NONE)    public Builder setF(test.fixtures.refs.MyField f) {
             this.f = f;
             return this;
         }
@@ -94,7 +91,7 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="u", requiredness=Requiredness.NONE)
     public test.fixtures.refs.MyUnion getU() { return u; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="aDouble", requiredness=Requiredness.NONE)
     public double getADouble() { return aDouble; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="f", requiredness=Requiredness.NONE)
     public test.fixtures.refs.MyField getF() { return f; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
         helper.add("f", f);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
             Objects.equals(f, other.f) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
             f
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithUnion> asReader() {
       return StructWithUnion::read0;
@@ -216,7 +213,7 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (u != null) {
@@ -235,7 +232,7 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithUnionLazy {
         private static final StructWithUnion _DEFAULT = new StructWithUnion.Builder().build();
     }

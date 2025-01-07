@@ -71,13 +71,16 @@ public class LegacyServiceRpcServerHandler
 oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter0.size()));
         for (Map.Entry<String, List<Integer>> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
+
           
           
 oprot.writeListBegin(new TList(TType.I32, _iter1.getValue().size()));
         for (int _iter2 : _iter1.getValue()) {
           oprot.writeI32(_iter2);
+
         }
         oprot.writeListEnd();
+          
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();

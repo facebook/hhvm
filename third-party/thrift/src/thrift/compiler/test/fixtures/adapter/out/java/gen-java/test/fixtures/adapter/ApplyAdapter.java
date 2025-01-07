@@ -28,7 +28,7 @@ public final class ApplyAdapter implements com.facebook.thrift.payload.ThriftSer
     }
     
     
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -50,7 +50,7 @@ public final class ApplyAdapter implements com.facebook.thrift.payload.ThriftSer
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -65,7 +65,7 @@ static {
         ToStringHelper helper = toStringHelper(this);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -80,13 +80,13 @@ static {
         return
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ApplyAdapter> asReader() {
       return ApplyAdapter::read0;
@@ -109,13 +109,13 @@ static {
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ApplyAdapterLazy {
         private static final ApplyAdapter _DEFAULT = new ApplyAdapter.Builder().build();
     }

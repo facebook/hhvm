@@ -36,7 +36,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
       this.signature = null;
       this.color = test.fixtures.adapter.Color.RED;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
         private String signature = null;
         private test.fixtures.adapter.Color color = test.fixtures.adapter.Color.RED;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE)
-        public Builder setSignature(String signature) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE)    public Builder setSignature(String signature) {
             this.signature = signature;
             return this;
         }
     
         public String getSignature() { return signature; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="color", requiredness=Requiredness.NONE)
-        public Builder setColor(test.fixtures.adapter.Color color) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="color", requiredness=Requiredness.NONE)    public Builder setColor(test.fixtures.adapter.Color color) {
             this.color = color;
             return this;
         }
@@ -80,7 +78,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -106,12 +104,12 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="signature", requiredness=Requiredness.NONE)
     public String getSignature() { return signature; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="color", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.Color getColor() { return color; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -119,7 +117,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
         helper.add("color", color);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -136,7 +134,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
             Objects.equals(color, other.color) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -144,7 +142,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
             color
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyAnnotation> asReader() {
       return MyAnnotation::read0;
@@ -183,7 +181,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (signature != null) {
@@ -197,7 +195,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyAnnotationLazy {
         private static final MyAnnotation _DEFAULT = new MyAnnotation.Builder().build();
     }

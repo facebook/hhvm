@@ -33,7 +33,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     protected Foo() {
       this.a = 2L;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     public static class Builder {
         private long a = 2L;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
-        public Builder setA(long a) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)    public Builder setA(long a) {
             this.a = a;
             return this;
         }
@@ -66,7 +65,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
     public long getA() { return a; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("a", a);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
             Objects.equals(a, other.a) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             a
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Foo> asReader() {
       return Foo::read0;
@@ -144,7 +143,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(A_FIELD_DESC);
@@ -153,7 +152,7 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _FooLazy {
         private static final Foo _DEFAULT = new Foo.Builder().build();
     }

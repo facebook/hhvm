@@ -39,7 +39,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
       this.b = null;
       this.c = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
         private List<Long> b = null;
         private test.fixtures.refs.StructWithRef c = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.OPTIONAL)
-        public Builder setA(String a) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.OPTIONAL)    public Builder setA(String a) {
             this.a = a;
             return this;
         }
     
         public String getA() { return a; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)
-        public Builder setB(List<Long> b) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)    public Builder setB(List<Long> b) {
             this.b = b;
             return this;
         }
     
         public List<Long> getB() { return b; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)
-        public Builder setC(test.fixtures.refs.StructWithRef c) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)    public Builder setC(test.fixtures.refs.StructWithRef c) {
             this.c = c;
             return this;
         }
@@ -94,7 +91,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.OPTIONAL)
     public String getA() { return a; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.OPTIONAL)
     public List<Long> getB() { return b; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.refs.StructWithRef getC() { return c; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
         helper.add("c", c);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
             Objects.equals(c, other.c) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
             c
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithBox> asReader() {
       return StructWithBox::read0;
@@ -185,7 +182,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
         switch (__field.id) {
         case _A:
           if (__field.type == TType.STRING) {
-            String a = oprot.readString();
+            String  a = oprot.readString();
             builder.setA(a);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -194,16 +191,16 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
         case _B:
           if (__field.type == TType.LIST) {
             List<Long> b;
-            {
-            TList _list = oprot.readListBegin();
-            b = new ArrayList<Long>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                long _value1 = oprot.readI64();
-                b.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                b = new ArrayList<Long>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    long _value1 = oprot.readI64();
+                    b.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setB(b);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -226,7 +223,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (a != null) {
@@ -236,12 +233,12 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
       }
       if (b != null) {
         oprot.writeFieldBegin(B_FIELD_DESC);
-        List<Long> _iter0 = b;
+        List<Long>  _iter0 = b;
         oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
-        for (long _iter1 : _iter0) {
-          oprot.writeI64(_iter1);
-        }
-        oprot.writeListEnd();
+            for (long _iter1 : _iter0) {
+              oprot.writeI64(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (c != null) {
@@ -252,7 +249,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithBoxLazy {
         private static final StructWithBox _DEFAULT = new StructWithBox.Builder().build();
     }

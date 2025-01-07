@@ -28,7 +28,7 @@ public final class Empty implements com.facebook.thrift.payload.ThriftSerializab
     }
     
     
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -50,7 +50,7 @@ public final class Empty implements com.facebook.thrift.payload.ThriftSerializab
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -62,7 +62,7 @@ static {
         ToStringHelper helper = toStringHelper(this);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -77,13 +77,13 @@ static {
         return
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Empty> asReader() {
       return Empty::read0;
@@ -106,13 +106,13 @@ static {
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _EmptyLazy {
         private static final Empty _DEFAULT = new Empty.Builder().build();
     }

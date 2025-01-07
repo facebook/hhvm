@@ -33,7 +33,7 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
     protected MoveOnly() {
       this.ptr = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
     public static class Builder {
         private test.fixtures.adapter.HeapAllocated ptr = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE)
-        public Builder setPtr(test.fixtures.adapter.HeapAllocated ptr) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE)    public Builder setPtr(test.fixtures.adapter.HeapAllocated ptr) {
             this.ptr = ptr;
             return this;
         }
@@ -66,7 +65,7 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.HeapAllocated getPtr() { return ptr; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("ptr", ptr);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(ptr, other.ptr) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             ptr
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MoveOnly> asReader() {
       return MoveOnly::read0;
@@ -147,7 +146,7 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (ptr != null) {
@@ -158,7 +157,7 @@ public final class MoveOnly implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MoveOnlyLazy {
         private static final MoveOnly _DEFAULT = new MoveOnly.Builder().build();
     }

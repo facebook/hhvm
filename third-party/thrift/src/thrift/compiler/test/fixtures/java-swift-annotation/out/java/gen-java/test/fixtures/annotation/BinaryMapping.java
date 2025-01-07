@@ -36,7 +36,7 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
       this.binaryMap = null;
       this.regularBinary = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
         private Map<String, String> binaryMap = null;
         private Map<String, byte[]> regularBinary = null;
     
-        @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)
-        public Builder setBinaryMap(Map<String, String> binaryMap) {
+        @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)    public Builder setBinaryMap(Map<String, String> binaryMap) {
             this.binaryMap = binaryMap;
             return this;
         }
     
         public Map<String, String> getBinaryMap() { return binaryMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE)
-        public Builder setRegularBinary(Map<String, byte[]> regularBinary) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE)    public Builder setRegularBinary(Map<String, byte[]> regularBinary) {
             this.regularBinary = regularBinary;
             return this;
         }
@@ -80,7 +78,7 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="binaryMap", requiredness=Requiredness.NONE)
     public Map<String, String> getBinaryMap() { return binaryMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="regularBinary", requiredness=Requiredness.NONE)
     public Map<String, byte[]> getRegularBinary() { return regularBinary; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
         helper.add("regularBinary", regularBinary);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
             Objects.equals(regularBinary, other.regularBinary) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
             regularBinary
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<BinaryMapping> asReader() {
       return BinaryMapping::read0;
@@ -158,17 +156,17 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
         case _BINARYMAP:
           if (__field.type == TType.MAP) {
             Map<String, String> binaryMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            binaryMap = new HashMap<String, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                String _value1 = oprot.readString();
-                binaryMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                binaryMap = new HashMap<String, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    String _value1 = oprot.readString();
+                    binaryMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setBinaryMap(binaryMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -177,17 +175,17 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
         case _REGULARBINARY:
           if (__field.type == TType.MAP) {
             Map<String, byte[]> regularBinary;
-            {
-            TMap _map = oprot.readMapBegin();
-            regularBinary = new HashMap<String, byte[]>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                byte[] _value1 = oprot.readBinary().array();
-                regularBinary.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                regularBinary = new HashMap<String, byte[]>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    byte[] _value1 = oprot.readBinary().array();
+                    regularBinary.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setRegularBinary(regularBinary);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -202,35 +200,35 @@ public final class BinaryMapping implements com.facebook.thrift.payload.ThriftSe
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (binaryMap != null) {
         oprot.writeFieldBegin(BINARY_MAP_FIELD_DESC);
         Map<String, String> _iter0 = binaryMap;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
-        for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (regularBinary != null) {
         oprot.writeFieldBegin(REGULAR_BINARY_FIELD_DESC);
         Map<String, byte[]> _iter0 = regularBinary;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
-        for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _BinaryMappingLazy {
         private static final BinaryMapping _DEFAULT = new BinaryMapping.Builder().build();
     }

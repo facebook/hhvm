@@ -33,7 +33,7 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
     protected AdaptTemplatedNestedTestStruct() {
       this.adaptedStruct = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
     public static class Builder {
         private test.fixtures.adapter.AdaptTemplatedTestStruct adaptedStruct = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE)
-        public Builder setAdaptedStruct(test.fixtures.adapter.AdaptTemplatedTestStruct adaptedStruct) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE)    public Builder setAdaptedStruct(test.fixtures.adapter.AdaptTemplatedTestStruct adaptedStruct) {
             this.adaptedStruct = adaptedStruct;
             return this;
         }
@@ -66,7 +65,7 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.AdaptTemplatedTestStruct getAdaptedStruct() { return adaptedStruct; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("adaptedStruct", adaptedStruct);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
             Objects.equals(adaptedStruct, other.adaptedStruct) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             adaptedStruct
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<AdaptTemplatedNestedTestStruct> asReader() {
       return AdaptTemplatedNestedTestStruct::read0;
@@ -147,7 +146,7 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (adaptedStruct != null) {
@@ -158,7 +157,7 @@ public final class AdaptTemplatedNestedTestStruct implements com.facebook.thrift
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _AdaptTemplatedNestedTestStructLazy {
         private static final AdaptTemplatedNestedTestStruct _DEFAULT = new AdaptTemplatedNestedTestStruct.Builder().build();
     }

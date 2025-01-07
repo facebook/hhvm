@@ -33,7 +33,7 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
     protected AlsoMoveOnly() {
       this.ptr = 0L;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
     public static class Builder {
         private long ptr = 0L;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE)
-        public Builder setPtr(long ptr) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE)    public Builder setPtr(long ptr) {
             this.ptr = ptr;
             return this;
         }
@@ -66,7 +65,7 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
     
     @com.facebook.swift.codec.ThriftField(value=1, name="ptr", requiredness=Requiredness.NONE)
     public long getPtr() { return ptr; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("ptr", ptr);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
             Objects.equals(ptr, other.ptr) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             ptr
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<AlsoMoveOnly> asReader() {
       return AlsoMoveOnly::read0;
@@ -147,7 +146,7 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(PTR_FIELD_DESC);
@@ -156,7 +155,7 @@ public final class AlsoMoveOnly implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _AlsoMoveOnlyLazy {
         private static final AlsoMoveOnly _DEFAULT = new AlsoMoveOnly.Builder().build();
     }

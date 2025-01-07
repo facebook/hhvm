@@ -38,7 +38,7 @@ public final class Banal extends org.apache.thrift.TBaseException implements com
     }
     
     
-    
+
     public static class Builder {
     
     public Builder() { }
@@ -52,7 +52,7 @@ public final class Banal extends org.apache.thrift.TBaseException implements com
             return result;
         }
     }
-    
+
 
     
     public static com.facebook.thrift.payload.Reader<Banal> asReader() {
@@ -76,13 +76,13 @@ public final class Banal extends org.apache.thrift.TBaseException implements com
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _BanalLazy {
         private static final Banal _DEFAULT = new Banal.Builder().build();
     }

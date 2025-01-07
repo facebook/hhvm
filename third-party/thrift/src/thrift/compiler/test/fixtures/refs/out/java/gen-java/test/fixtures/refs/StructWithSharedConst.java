@@ -39,7 +39,7 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
       this.sharedConst = null;
       this.reqSharedConst = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
         private test.fixtures.refs.MyField sharedConst = null;
         private test.fixtures.refs.MyField reqSharedConst = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="opt_shared_const", requiredness=Requiredness.OPTIONAL)
-        public Builder setOptSharedConst(test.fixtures.refs.MyField optSharedConst) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="opt_shared_const", requiredness=Requiredness.OPTIONAL)    public Builder setOptSharedConst(test.fixtures.refs.MyField optSharedConst) {
             this.optSharedConst = optSharedConst;
             return this;
         }
     
         public test.fixtures.refs.MyField getOptSharedConst() { return optSharedConst; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="shared_const", requiredness=Requiredness.NONE)
-        public Builder setSharedConst(test.fixtures.refs.MyField sharedConst) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="shared_const", requiredness=Requiredness.NONE)    public Builder setSharedConst(test.fixtures.refs.MyField sharedConst) {
             this.sharedConst = sharedConst;
             return this;
         }
     
         public test.fixtures.refs.MyField getSharedConst() { return sharedConst; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="req_shared_const", requiredness=Requiredness.REQUIRED)
-        public Builder setReqSharedConst(test.fixtures.refs.MyField reqSharedConst) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="req_shared_const", requiredness=Requiredness.REQUIRED)    public Builder setReqSharedConst(test.fixtures.refs.MyField reqSharedConst) {
             this.reqSharedConst = reqSharedConst;
             return this;
         }
@@ -94,7 +91,7 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="opt_shared_const", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.refs.MyField getOptSharedConst() { return optSharedConst; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="shared_const", requiredness=Requiredness.NONE)
     public test.fixtures.refs.MyField getSharedConst() { return sharedConst; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="req_shared_const", requiredness=Requiredness.REQUIRED)
     public test.fixtures.refs.MyField getReqSharedConst() { return reqSharedConst; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
         helper.add("reqSharedConst", reqSharedConst);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
             Objects.equals(reqSharedConst, other.reqSharedConst) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
             reqSharedConst
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithSharedConst> asReader() {
       return StructWithSharedConst::read0;
@@ -216,7 +213,7 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (optSharedConst != null) {
@@ -237,7 +234,7 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithSharedConstLazy {
         private static final StructWithSharedConst _DEFAULT = new StructWithSharedConst.Builder().build();
     }

@@ -36,7 +36,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
       this.stringField = null;
       this.injectedField = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
         private String stringField = null;
         private String injectedField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="string_field", requiredness=Requiredness.NONE)
-        public Builder setStringField(String stringField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="string_field", requiredness=Requiredness.NONE)    public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
         }
     
         public String getStringField() { return stringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=-1100, name="injected_field", isLegacyId=true, requiredness=Requiredness.NONE)
-        public Builder setInjectedField(String injectedField) {
+            @com.facebook.swift.codec.ThriftField(value=-1100, name="injected_field", isLegacyId=true, requiredness=Requiredness.NONE)    public Builder setInjectedField(String injectedField) {
             this.injectedField = injectedField;
             return this;
         }
@@ -80,7 +78,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="string_field", requiredness=Requiredness.NONE)
     public String getStringField() { return stringField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=-1100, name="injected_field", isLegacyId=true, requiredness=Requiredness.NONE)
     public String getInjectedField() { return injectedField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
         helper.add("injectedField", injectedField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
             Objects.equals(injectedField, other.injectedField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
             injectedField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<FieldsInjectedToStruct> asReader() {
       return FieldsInjectedToStruct::read0;
@@ -180,7 +178,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (stringField != null) {
@@ -196,7 +194,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _FieldsInjectedToStructLazy {
         private static final FieldsInjectedToStruct _DEFAULT = new FieldsInjectedToStruct.Builder().build();
     }

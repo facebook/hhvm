@@ -36,7 +36,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
       this.id = 0L;
       this.password = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,8 +49,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
         private long id = 0L;
         private String password = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)
-        public Builder setId(long id) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)    public Builder setId(long id) {
             this.id = id;
             return this;
         }
@@ -58,8 +57,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
         public long getId() { return id; }
     
             @org.apache.thrift.annotations.Sensitive
-        @com.facebook.swift.codec.ThriftField(value=2, name="password", requiredness=Requiredness.NONE)
-        public Builder setPassword(String password) {
+        @com.facebook.swift.codec.ThriftField(value=2, name="password", requiredness=Requiredness.NONE)    public Builder setPassword(String password) {
             this.password = password;
             return this;
         }
@@ -81,7 +79,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -105,12 +103,12 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
     
     @com.facebook.swift.codec.ThriftField(value=1, name="id", requiredness=Requiredness.NONE)
     public long getId() { return id; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="password", requiredness=Requiredness.NONE)
     public String getPassword() { return password; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -118,7 +116,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
         helper.add("password", "<SENSITIVE FIELD>");
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -135,7 +133,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
             Objects.equals(password, other.password) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -143,7 +141,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
             password
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<SecretStruct> asReader() {
       return SecretStruct::read0;
@@ -182,7 +180,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(ID_FIELD_DESC);
@@ -196,7 +194,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _SecretStructLazy {
         private static final SecretStruct _DEFAULT = new SecretStruct.Builder().build();
     }

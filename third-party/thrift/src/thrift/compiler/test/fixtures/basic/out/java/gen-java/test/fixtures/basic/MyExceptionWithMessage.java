@@ -79,39 +79,35 @@ public final class MyExceptionWithMessage extends org.apache.thrift.TBaseExcepti
       this.myStruct = null;
       this.myUnion = null;
     }
-    
+
     public static class Builder {
         private long myIntField = 0L;
         private String myStringField = null;
         private test.fixtures.basic.MyStruct myStruct = null;
         private test.fixtures.basic.MyUnion myUnion = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
-        public Builder setMyIntField(long myIntField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)    public Builder setMyIntField(long myIntField) {
             this.myIntField = myIntField;
             return this;
         }
     
         public long getMyIntField() { return myIntField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
-        public Builder setMyStringField(String myStringField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
     
         public String getMyStringField() { return myStringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="myStruct", requiredness=Requiredness.NONE)
-        public Builder setMyStruct(test.fixtures.basic.MyStruct myStruct) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="myStruct", requiredness=Requiredness.NONE)    public Builder setMyStruct(test.fixtures.basic.MyStruct myStruct) {
             this.myStruct = myStruct;
             return this;
         }
     
         public test.fixtures.basic.MyStruct getMyStruct() { return myStruct; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE)
-        public Builder setMyUnion(test.fixtures.basic.MyUnion myUnion) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.basic.MyUnion myUnion) {
             this.myUnion = myUnion;
             return this;
         }
@@ -137,24 +133,24 @@ public final class MyExceptionWithMessage extends org.apache.thrift.TBaseExcepti
             return result;
         }
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="myStruct", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyStruct getMyStruct() { return myStruct; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="myUnion", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyUnion getMyUnion() { return myUnion; }
-        
+    
     @java.lang.Override
     public String getMessage() {
       return myStringField;
@@ -213,7 +209,7 @@ public final class MyExceptionWithMessage extends org.apache.thrift.TBaseExcepti
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
@@ -237,7 +233,7 @@ public final class MyExceptionWithMessage extends org.apache.thrift.TBaseExcepti
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyExceptionWithMessageLazy {
         private static final MyExceptionWithMessage _DEFAULT = new MyExceptionWithMessage.Builder().build();
     }

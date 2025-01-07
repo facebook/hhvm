@@ -38,7 +38,7 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
     }
     
     
-    
+
     public static class Builder {
     
     public Builder() { }
@@ -52,7 +52,7 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
             return result;
         }
     }
-    
+
 
     
     public static com.facebook.thrift.payload.Reader<MyException> asReader() {
@@ -76,13 +76,13 @@ public final class MyException extends org.apache.thrift.TBaseException implemen
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyExceptionLazy {
         private static final MyException _DEFAULT = new MyException.Builder().build();
     }

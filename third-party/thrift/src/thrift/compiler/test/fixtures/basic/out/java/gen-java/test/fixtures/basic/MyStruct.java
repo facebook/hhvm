@@ -57,7 +57,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.floatSet = null;
       this.noHackCodegenField = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -77,72 +77,63 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private Set<Float> floatSet = null;
         private String noHackCodegenField = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
-        public Builder setMyIntField(long myIntField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)    public Builder setMyIntField(long myIntField) {
             this.myIntField = myIntField;
             return this;
         }
     
         public long getMyIntField() { return myIntField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
-        public Builder setMyStringField(String myStringField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)    public Builder setMyStringField(String myStringField) {
             this.myStringField = myStringField;
             return this;
         }
     
         public String getMyStringField() { return myStringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)
-        public Builder setMyDataField(test.fixtures.basic.MyDataItem myDataField) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)    public Builder setMyDataField(test.fixtures.basic.MyDataItem myDataField) {
             this.myDataField = myDataField;
             return this;
         }
     
         public test.fixtures.basic.MyDataItem getMyDataField() { return myDataField; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)
-        public Builder setMyEnum(test.fixtures.basic.MyEnum myEnum) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)    public Builder setMyEnum(test.fixtures.basic.MyEnum myEnum) {
             this.myEnum = myEnum;
             return this;
         }
     
         public test.fixtures.basic.MyEnum getMyEnum() { return myEnum; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="oneway", requiredness=Requiredness.NONE)
-        public Builder setOneway(boolean oneway) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="oneway", requiredness=Requiredness.NONE)    public Builder setOneway(boolean oneway) {
             this.oneway = oneway;
             return this;
         }
     
         public boolean isOneway() { return oneway; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="readonly", requiredness=Requiredness.NONE)
-        public Builder setReadonly(boolean readonly) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="readonly", requiredness=Requiredness.NONE)    public Builder setReadonly(boolean readonly) {
             this.readonly = readonly;
             return this;
         }
     
         public boolean isReadonly() { return readonly; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="idempotent", requiredness=Requiredness.NONE)
-        public Builder setIdempotent(boolean idempotent) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="idempotent", requiredness=Requiredness.NONE)    public Builder setIdempotent(boolean idempotent) {
             this.idempotent = idempotent;
             return this;
         }
     
         public boolean isIdempotent() { return idempotent; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="floatSet", requiredness=Requiredness.NONE)
-        public Builder setFloatSet(Set<Float> floatSet) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="floatSet", requiredness=Requiredness.NONE)    public Builder setFloatSet(Set<Float> floatSet) {
             this.floatSet = floatSet;
             return this;
         }
     
         public Set<Float> getFloatSet() { return floatSet; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="no_hack_codegen_field", requiredness=Requiredness.NONE)
-        public Builder setNoHackCodegenField(String noHackCodegenField) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="no_hack_codegen_field", requiredness=Requiredness.NONE)    public Builder setNoHackCodegenField(String noHackCodegenField) {
             this.noHackCodegenField = noHackCodegenField;
             return this;
         }
@@ -178,7 +169,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -246,47 +237,47 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyStringField", requiredness=Requiredness.NONE)
     public String getMyStringField() { return myStringField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="MyDataField", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyDataItem getMyDataField() { return myDataField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="myEnum", requiredness=Requiredness.NONE)
     public test.fixtures.basic.MyEnum getMyEnum() { return myEnum; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=5, name="oneway", requiredness=Requiredness.NONE)
     public boolean isOneway() { return oneway; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=6, name="readonly", requiredness=Requiredness.NONE)
     public boolean isReadonly() { return readonly; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=7, name="idempotent", requiredness=Requiredness.NONE)
     public boolean isIdempotent() { return idempotent; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="floatSet", requiredness=Requiredness.NONE)
     public Set<Float> getFloatSet() { return floatSet; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="no_hack_codegen_field", requiredness=Requiredness.NONE)
     public String getNoHackCodegenField() { return noHackCodegenField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -301,7 +292,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("noHackCodegenField", noHackCodegenField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -325,7 +316,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(noHackCodegenField, other.noHackCodegenField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -340,7 +331,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             noHackCodegenField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
@@ -413,16 +404,16 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         case _FLOATSET:
           if (__field.type == TType.SET) {
             Set<Float> floatSet;
-            {
-            TSet _set = oprot.readSetBegin();
-            floatSet = new HashSet<Float>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                float _value1 = oprot.readFloat();
-                floatSet.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                floatSet = new HashSet<Float>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    float _value1 = oprot.readFloat();
+                    floatSet.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setFloatSet(floatSet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -445,7 +436,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
@@ -477,10 +468,10 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldBegin(FLOAT_SET_FIELD_DESC);
         Set<Float> _iter0 = floatSet;
         oprot.writeSetBegin(new TSet(TType.FLOAT, _iter0.size()));
-        for (float _iter1 : _iter0) {
-          oprot.writeFloat(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (float _iter1 : _iter0) {
+              oprot.writeFloat(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (noHackCodegenField != null) {
@@ -491,7 +482,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructLazy {
         private static final MyStruct _DEFAULT = new MyStruct.Builder().build();
     }

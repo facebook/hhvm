@@ -31,31 +31,31 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
       this.myBool = true;
       this.myDouble = (double)42.42;
       this.mySet = com.google.common.collect.Sets.newHashSet(ImmutableSet.<String>builder()
-        .add("foo")
-        .add("bar")
-        .add("baz")
-        .build());
+            .add("foo")
+            .add("bar")
+            .add("baz")
+            .build());
       this.myDataItem = new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build();
       this.myList = com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
-        .build());
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
+            .build());
       this.myMapList = com.google.common.collect.Maps.newHashMap(ImmutableMap.<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>builder()
-        .put(1, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
-        .build()))
-        .put(2, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(33).setField2(34).build())
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(35).setField2(36).build())
-        .build()))
-        .build());
+            .put(1, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
+            .build()))
+            .put(2, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(33).setField2(34).build())
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(35).setField2(36).build())
+            .build()))
+            .build());
       this.myEmptyList = com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .build());
+            .build());
       this.myEmptyMapList = com.google.common.collect.Maps.newHashMap(ImmutableMap.<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>builder()
-        .build());
+            .build());
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -72,120 +72,108 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         private boolean myBool = true;
         private double myDouble = (double)42.42;
         private Set<String> mySet = com.google.common.collect.Sets.newHashSet(ImmutableSet.<String>builder()
-        .add("foo")
-        .add("bar")
-        .add("baz")
-        .build());
+            .add("foo")
+            .add("bar")
+            .add("baz")
+            .build());
         private test.fixtures.basic_swift_bean.MyDataItem myDataItem = new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build();
         private List<test.fixtures.basic_swift_bean.MyDataItem> myList = com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
-        .build());
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
+            .build());
         private Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myMapList = com.google.common.collect.Maps.newHashMap(ImmutableMap.<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>builder()
-        .put(1, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
-        .build()))
-        .put(2, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(33).setField2(34).build())
-        .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(35).setField2(36).build())
-        .build()))
-        .build());
+            .put(1, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(29).setField2(30).build())
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(31).setField2(32).build())
+            .build()))
+            .put(2, com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(33).setField2(34).build())
+            .add(new test.fixtures.basic_swift_bean.MyDataItem.Builder().setField1(35).setField2(36).build())
+            .build()))
+            .build());
         private List<test.fixtures.basic_swift_bean.MyDataItem> myEmptyList = com.google.common.collect.Lists.newArrayList(ImmutableList.<test.fixtures.basic_swift_bean.MyDataItem>builder()
-        .build());
+            .build());
         private Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myEmptyMapList = com.google.common.collect.Maps.newHashMap(ImmutableMap.<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>builder()
-        .build());
+            .build());
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="myInt16", requiredness=Requiredness.NONE)
-        public Builder setMyInt16(short myInt16) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="myInt16", requiredness=Requiredness.NONE)    public Builder setMyInt16(short myInt16) {
             this.myInt16 = myInt16;
             return this;
         }
     
         public short getMyInt16() { return myInt16; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="myInt32", requiredness=Requiredness.NONE)
-        public Builder setMyInt32(int myInt32) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="myInt32", requiredness=Requiredness.NONE)    public Builder setMyInt32(int myInt32) {
             this.myInt32 = myInt32;
             return this;
         }
     
         public int getMyInt32() { return myInt32; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="myInt64", requiredness=Requiredness.NONE)
-        public Builder setMyInt64(long myInt64) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="myInt64", requiredness=Requiredness.NONE)    public Builder setMyInt64(long myInt64) {
             this.myInt64 = myInt64;
             return this;
         }
     
         public long getMyInt64() { return myInt64; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="myString", requiredness=Requiredness.NONE)
-        public Builder setMyString(String myString) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="myString", requiredness=Requiredness.NONE)    public Builder setMyString(String myString) {
             this.myString = myString;
             return this;
         }
     
         public String getMyString() { return myString; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="myBool", requiredness=Requiredness.NONE)
-        public Builder setMyBool(boolean myBool) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="myBool", requiredness=Requiredness.NONE)    public Builder setMyBool(boolean myBool) {
             this.myBool = myBool;
             return this;
         }
     
         public boolean isMyBool() { return myBool; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="myDouble", requiredness=Requiredness.NONE)
-        public Builder setMyDouble(double myDouble) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="myDouble", requiredness=Requiredness.NONE)    public Builder setMyDouble(double myDouble) {
             this.myDouble = myDouble;
             return this;
         }
     
         public double getMyDouble() { return myDouble; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="mySet", requiredness=Requiredness.NONE)
-        public Builder setMySet(Set<String> mySet) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="mySet", requiredness=Requiredness.NONE)    public Builder setMySet(Set<String> mySet) {
             this.mySet = mySet;
             return this;
         }
     
         public Set<String> getMySet() { return mySet; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="MyDataItem", requiredness=Requiredness.NONE)
-        public Builder setMyDataItem(test.fixtures.basic_swift_bean.MyDataItem myDataItem) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="MyDataItem", requiredness=Requiredness.NONE)    public Builder setMyDataItem(test.fixtures.basic_swift_bean.MyDataItem myDataItem) {
             this.myDataItem = myDataItem;
             return this;
         }
     
         public test.fixtures.basic_swift_bean.MyDataItem getMyDataItem() { return myDataItem; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="myList", requiredness=Requiredness.NONE)
-        public Builder setMyList(List<test.fixtures.basic_swift_bean.MyDataItem> myList) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="myList", requiredness=Requiredness.NONE)    public Builder setMyList(List<test.fixtures.basic_swift_bean.MyDataItem> myList) {
             this.myList = myList;
             return this;
         }
     
         public List<test.fixtures.basic_swift_bean.MyDataItem> getMyList() { return myList; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="myMapList", requiredness=Requiredness.NONE)
-        public Builder setMyMapList(Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myMapList) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="myMapList", requiredness=Requiredness.NONE)    public Builder setMyMapList(Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myMapList) {
             this.myMapList = myMapList;
             return this;
         }
     
         public Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> getMyMapList() { return myMapList; }
     
-            @com.facebook.swift.codec.ThriftField(value=11, name="myEmptyList", requiredness=Requiredness.NONE)
-        public Builder setMyEmptyList(List<test.fixtures.basic_swift_bean.MyDataItem> myEmptyList) {
+            @com.facebook.swift.codec.ThriftField(value=11, name="myEmptyList", requiredness=Requiredness.NONE)    public Builder setMyEmptyList(List<test.fixtures.basic_swift_bean.MyDataItem> myEmptyList) {
             this.myEmptyList = myEmptyList;
             return this;
         }
     
         public List<test.fixtures.basic_swift_bean.MyDataItem> getMyEmptyList() { return myEmptyList; }
     
-            @com.facebook.swift.codec.ThriftField(value=12, name="myEmptyMapList", requiredness=Requiredness.NONE)
-        public Builder setMyEmptyMapList(Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myEmptyMapList) {
+            @com.facebook.swift.codec.ThriftField(value=12, name="myEmptyMapList", requiredness=Requiredness.NONE)    public Builder setMyEmptyMapList(Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myEmptyMapList) {
             this.myEmptyMapList = myEmptyMapList;
             return this;
         }
@@ -211,21 +199,21 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         @ThriftConstructor
         public MyStruct3 build() {
             MyStruct3 result = new MyStruct3();
-            result.myInt16 = this.myInt16;
-            result.myInt32 = this.myInt32;
-            result.myInt64 = this.myInt64;
-            result.myString = this.myString;
-            result.myBool = this.myBool;
-            result.myDouble = this.myDouble;
-            result.mySet = this.mySet;
-            result.myDataItem = this.myDataItem;
-            result.myList = this.myList;
-            result.myMapList = this.myMapList;
-            result.myEmptyList = this.myEmptyList;
-            result.myEmptyMapList = this.myEmptyMapList;
-        return result;    }
+                result.myInt16 = this.myInt16;
+                result.myInt32 = this.myInt32;
+                result.myInt64 = this.myInt64;
+                result.myString = this.myString;
+                result.myBool = this.myBool;
+                result.myDouble = this.myDouble;
+                result.mySet = this.mySet;
+                result.myDataItem = this.myDataItem;
+                result.myList = this.myList;
+                result.myMapList = this.myMapList;
+                result.myEmptyList = this.myEmptyList;
+                result.myEmptyMapList = this.myEmptyMapList;
+            return result;    }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -308,134 +296,134 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
     
     @com.facebook.swift.codec.ThriftField(value=1, name="myInt16", requiredness=Requiredness.NONE)
     public short getMyInt16() { return myInt16; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyInt16(short myInt16) {
         this.myInt16 = myInt16;
         return this;
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="myInt32", requiredness=Requiredness.NONE)
     public int getMyInt32() { return myInt32; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyInt32(int myInt32) {
         this.myInt32 = myInt32;
         return this;
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="myInt64", requiredness=Requiredness.NONE)
     public long getMyInt64() { return myInt64; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyInt64(long myInt64) {
         this.myInt64 = myInt64;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="myString", requiredness=Requiredness.NONE)
     public String getMyString() { return myString; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyString(String myString) {
         this.myString = myString;
         return this;
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=5, name="myBool", requiredness=Requiredness.NONE)
     public boolean isMyBool() { return myBool; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyBool(boolean myBool) {
         this.myBool = myBool;
         return this;
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=6, name="myDouble", requiredness=Requiredness.NONE)
     public double getMyDouble() { return myDouble; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyDouble(double myDouble) {
         this.myDouble = myDouble;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="mySet", requiredness=Requiredness.NONE)
     public Set<String> getMySet() { return mySet; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMySet(Set<String> mySet) {
         this.mySet = mySet;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="MyDataItem", requiredness=Requiredness.NONE)
     public test.fixtures.basic_swift_bean.MyDataItem getMyDataItem() { return myDataItem; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyDataItem(test.fixtures.basic_swift_bean.MyDataItem myDataItem) {
         this.myDataItem = myDataItem;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="myList", requiredness=Requiredness.NONE)
     public List<test.fixtures.basic_swift_bean.MyDataItem> getMyList() { return myList; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyList(List<test.fixtures.basic_swift_bean.MyDataItem> myList) {
         this.myList = myList;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="myMapList", requiredness=Requiredness.NONE)
     public Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> getMyMapList() { return myMapList; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyMapList(Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myMapList) {
         this.myMapList = myMapList;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=11, name="myEmptyList", requiredness=Requiredness.NONE)
     public List<test.fixtures.basic_swift_bean.MyDataItem> getMyEmptyList() { return myEmptyList; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyEmptyList(List<test.fixtures.basic_swift_bean.MyDataItem> myEmptyList) {
         this.myEmptyList = myEmptyList;
         return this;
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=12, name="myEmptyMapList", requiredness=Requiredness.NONE)
     public Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> getMyEmptyMapList() { return myEmptyMapList; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyStruct3 setMyEmptyMapList(Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myEmptyMapList) {
         this.myEmptyMapList = myEmptyMapList;
         return this;
     }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -453,7 +441,7 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         helper.add("myEmptyMapList", myEmptyMapList);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -480,7 +468,7 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
             Objects.equals(myEmptyMapList, other.myEmptyMapList) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -498,7 +486,7 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
             myEmptyMapList
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct3> asReader() {
       return MyStruct3::read0;
@@ -563,16 +551,16 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         case _MYSET:
           if (__field.type == TType.SET) {
             Set<String> mySet;
-            {
-            TSet _set = oprot.readSetBegin();
-            mySet = new HashSet<String>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                mySet.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                mySet = new HashSet<String>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    mySet.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setMySet(mySet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -589,16 +577,16 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         case _MYLIST:
           if (__field.type == TType.LIST) {
             List<test.fixtures.basic_swift_bean.MyDataItem> myList;
-            {
-            TList _list = oprot.readListBegin();
-            myList = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                test.fixtures.basic_swift_bean.MyDataItem _value1 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
-                myList.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                myList = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    test.fixtures.basic_swift_bean.MyDataItem _value1 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
+                    myList.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setMyList(myList);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -607,31 +595,31 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         case _MYMAPLIST:
           if (__field.type == TType.MAP) {
             Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myMapList;
-            {
-            TMap _map = oprot.readMapBegin();
-            myMapList = new HashMap<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                List<test.fixtures.basic_swift_bean.MyDataItem> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                test.fixtures.basic_swift_bean.MyDataItem _value2 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                myMapList.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                myMapList = new HashMap<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    List<test.fixtures.basic_swift_bean.MyDataItem> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    test.fixtures.basic_swift_bean.MyDataItem _value2 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    myMapList.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMyMapList(myMapList);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -640,16 +628,16 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         case _MYEMPTYLIST:
           if (__field.type == TType.LIST) {
             List<test.fixtures.basic_swift_bean.MyDataItem> myEmptyList;
-            {
-            TList _list = oprot.readListBegin();
-            myEmptyList = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                test.fixtures.basic_swift_bean.MyDataItem _value1 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
-                myEmptyList.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                myEmptyList = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    test.fixtures.basic_swift_bean.MyDataItem _value1 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
+                    myEmptyList.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setMyEmptyList(myEmptyList);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -658,31 +646,31 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         case _MYEMPTYMAPLIST:
           if (__field.type == TType.MAP) {
             Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myEmptyMapList;
-            {
-            TMap _map = oprot.readMapBegin();
-            myEmptyMapList = new HashMap<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                List<test.fixtures.basic_swift_bean.MyDataItem> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                test.fixtures.basic_swift_bean.MyDataItem _value2 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                myEmptyMapList.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                myEmptyMapList = new HashMap<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    List<test.fixtures.basic_swift_bean.MyDataItem> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<test.fixtures.basic_swift_bean.MyDataItem>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    test.fixtures.basic_swift_bean.MyDataItem _value2 = test.fixtures.basic_swift_bean.MyDataItem.read0(oprot);
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    myEmptyMapList.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMyEmptyMapList(myEmptyMapList);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -697,7 +685,7 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_INT16_FIELD_DESC);
@@ -724,10 +712,10 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeFieldBegin(MY_SET_FIELD_DESC);
         Set<String> _iter0 = mySet;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (myDataItem != null) {
@@ -739,55 +727,55 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeFieldBegin(MY_LIST_FIELD_DESC);
         List<test.fixtures.basic_swift_bean.MyDataItem> _iter0 = myList;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-        for (test.fixtures.basic_swift_bean.MyDataItem _iter1 : _iter0) {
-          _iter1.write0(oprot);
-        }
-        oprot.writeListEnd();
+            for (test.fixtures.basic_swift_bean.MyDataItem _iter1 : _iter0) {
+              _iter1.write0(oprot);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (myMapList != null) {
         oprot.writeFieldBegin(MY_MAP_LIST_FIELD_DESC);
         Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter0 = myMapList;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-        for (Map.Entry<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
-        for (test.fixtures.basic_swift_bean.MyDataItem _iter2 : _iter1.getValue()) {
-          _iter2.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
+            for (test.fixtures.basic_swift_bean.MyDataItem _iter2 : _iter1.getValue()) {
+              _iter2.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (myEmptyList != null) {
         oprot.writeFieldBegin(MY_EMPTY_LIST_FIELD_DESC);
         List<test.fixtures.basic_swift_bean.MyDataItem> _iter0 = myEmptyList;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-        for (test.fixtures.basic_swift_bean.MyDataItem _iter1 : _iter0) {
-          _iter1.write0(oprot);
-        }
-        oprot.writeListEnd();
+            for (test.fixtures.basic_swift_bean.MyDataItem _iter1 : _iter0) {
+              _iter1.write0(oprot);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (myEmptyMapList != null) {
         oprot.writeFieldBegin(MY_EMPTY_MAP_LIST_FIELD_DESC);
         Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter0 = myEmptyMapList;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-        for (Map.Entry<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
-        for (test.fixtures.basic_swift_bean.MyDataItem _iter2 : _iter1.getValue()) {
-          _iter2.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
+            for (test.fixtures.basic_swift_bean.MyDataItem _iter2 : _iter1.getValue()) {
+              _iter2.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
 
 }

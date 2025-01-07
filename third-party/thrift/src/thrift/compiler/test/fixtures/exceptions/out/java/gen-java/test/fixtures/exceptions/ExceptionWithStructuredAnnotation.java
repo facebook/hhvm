@@ -58,21 +58,19 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
       this.messageField = null;
       this.errorCode = 0;
     }
-    
+
     public static class Builder {
         private String messageField = null;
         private int errorCode = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="message_field", requiredness=Requiredness.NONE)
-        public Builder setMessageField(String messageField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="message_field", requiredness=Requiredness.NONE)    public Builder setMessageField(String messageField) {
             this.messageField = messageField;
             return this;
         }
     
         public String getMessageField() { return messageField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE)
-        public Builder setErrorCode(int errorCode) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE)    public Builder setErrorCode(int errorCode) {
             this.errorCode = errorCode;
             return this;
         }
@@ -94,16 +92,16 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="message_field", requiredness=Requiredness.NONE)
     public String getMessageField() { return messageField; }
-        
+    
     
     @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE)
     public int getErrorCode() { return errorCode; }
-        
+    
     @java.lang.Override
     public String getMessage() {
       return messageField;
@@ -146,7 +144,7 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (messageField != null) {
@@ -160,7 +158,7 @@ public final class ExceptionWithStructuredAnnotation extends org.apache.thrift.T
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ExceptionWithStructuredAnnotationLazy {
         private static final ExceptionWithStructuredAnnotation _DEFAULT = new ExceptionWithStructuredAnnotation.Builder().build();
     }

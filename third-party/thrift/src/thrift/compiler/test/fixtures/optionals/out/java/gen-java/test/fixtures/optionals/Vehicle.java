@@ -45,7 +45,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
       this.name = null;
       this.hasAC = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -61,40 +61,35 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
         private String name = null;
         private Boolean hasAC = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="color", requiredness=Requiredness.NONE)
-        public Builder setColor(test.fixtures.optionals.Color color) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="color", requiredness=Requiredness.NONE)    public Builder setColor(test.fixtures.optionals.Color color) {
             this.color = color;
             return this;
         }
     
         public test.fixtures.optionals.Color getColor() { return color; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="licensePlate", requiredness=Requiredness.OPTIONAL)
-        public Builder setLicensePlate(String licensePlate) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="licensePlate", requiredness=Requiredness.OPTIONAL)    public Builder setLicensePlate(String licensePlate) {
             this.licensePlate = licensePlate;
             return this;
         }
     
         public String getLicensePlate() { return licensePlate; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="description", requiredness=Requiredness.OPTIONAL)
-        public Builder setDescription(String description) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="description", requiredness=Requiredness.OPTIONAL)    public Builder setDescription(String description) {
             this.description = description;
             return this;
         }
     
         public String getDescription() { return description; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="name", requiredness=Requiredness.OPTIONAL)
-        public Builder setName(String name) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="name", requiredness=Requiredness.OPTIONAL)    public Builder setName(String name) {
             this.name = name;
             return this;
         }
     
         public String getName() { return name; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="hasAC", requiredness=Requiredness.OPTIONAL)
-        public Builder setHasAC(Boolean hasAC) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="hasAC", requiredness=Requiredness.OPTIONAL)    public Builder setHasAC(Boolean hasAC) {
             this.hasAC = hasAC;
             return this;
         }
@@ -122,7 +117,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -163,27 +158,27 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="color", requiredness=Requiredness.NONE)
     public test.fixtures.optionals.Color getColor() { return color; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="licensePlate", requiredness=Requiredness.OPTIONAL)
     public String getLicensePlate() { return licensePlate; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="description", requiredness=Requiredness.OPTIONAL)
     public String getDescription() { return description; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="name", requiredness=Requiredness.OPTIONAL)
     public String getName() { return name; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="hasAC", requiredness=Requiredness.OPTIONAL)
     public Boolean isHasAC() { return hasAC; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -194,7 +189,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
         helper.add("hasAC", hasAC);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -214,7 +209,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
             Objects.equals(hasAC, other.hasAC) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -225,7 +220,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
             hasAC
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Vehicle> asReader() {
       return Vehicle::read0;
@@ -249,7 +244,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
           break;
         case _LICENSEPLATE:
           if (__field.type == TType.STRING) {
-            String licensePlate = oprot.readString();
+            String  licensePlate = oprot.readString();
             builder.setLicensePlate(licensePlate);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -257,7 +252,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
           break;
         case _DESCRIPTION:
           if (__field.type == TType.STRING) {
-            String description = oprot.readString();
+            String  description = oprot.readString();
             builder.setDescription(description);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -265,7 +260,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
           break;
         case _NAME:
           if (__field.type == TType.STRING) {
-            String name = oprot.readString();
+            String  name = oprot.readString();
             builder.setName(name);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -273,7 +268,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
           break;
         case _HASAC:
           if (__field.type == TType.BOOL) {
-            Boolean hasAC = oprot.readBool();
+            Boolean  hasAC = oprot.readBool();
             builder.setHasAC(hasAC);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -288,7 +283,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (color != null) {
@@ -319,7 +314,7 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _VehicleLazy {
         private static final Vehicle _DEFAULT = new Vehicle.Builder().build();
     }

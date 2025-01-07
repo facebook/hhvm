@@ -49,12 +49,11 @@ public final class Fiery extends org.apache.thrift.TBaseException implements com
     protected Fiery() {
       this.message = null;
     }
-    
+
     public static class Builder {
         private String message = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.REQUIRED)
-        public Builder setMessage(String message) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.REQUIRED)    public Builder setMessage(String message) {
             this.message = message;
             return this;
         }
@@ -74,12 +73,12 @@ public final class Fiery extends org.apache.thrift.TBaseException implements com
             return result;
         }
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.REQUIRED)
     public String getMessage() { return message; }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Fiery> asReader() {
       return Fiery::read0;
@@ -110,7 +109,7 @@ public final class Fiery extends org.apache.thrift.TBaseException implements com
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (message != null) {
@@ -121,7 +120,7 @@ public final class Fiery extends org.apache.thrift.TBaseException implements com
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _FieryLazy {
         private static final Fiery _DEFAULT = new Fiery.Builder().build();
     }

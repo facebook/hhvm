@@ -39,7 +39,7 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
       this.intVal = 0;
       this.typedefValue = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
         private int intVal = 0;
         private Map<Short, String> typedefValue = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="strVal", requiredness=Requiredness.NONE)
-        public Builder setStrVal(String strVal) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="strVal", requiredness=Requiredness.NONE)    public Builder setStrVal(String strVal) {
             this.strVal = strVal;
             return this;
         }
     
         public String getStrVal() { return strVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="intVal", requiredness=Requiredness.NONE)
-        public Builder setIntVal(int intVal) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="intVal", requiredness=Requiredness.NONE)    public Builder setIntVal(int intVal) {
             this.intVal = intVal;
             return this;
         }
     
         public int getIntVal() { return intVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="typedefValue", requiredness=Requiredness.NONE)
-        public Builder setTypedefValue(Map<Short, String> typedefValue) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="typedefValue", requiredness=Requiredness.NONE)    public Builder setTypedefValue(Map<Short, String> typedefValue) {
             this.typedefValue = typedefValue;
             return this;
         }
@@ -94,7 +91,7 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="strVal", requiredness=Requiredness.NONE)
     public String getStrVal() { return strVal; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="intVal", requiredness=Requiredness.NONE)
     public int getIntVal() { return intVal; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="typedefValue", requiredness=Requiredness.NONE)
     public Map<Short, String> getTypedefValue() { return typedefValue; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
         helper.add("typedefValue", typedefValue);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
             Objects.equals(typedefValue, other.typedefValue) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
             typedefValue
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Val> asReader() {
       return Val::read0;
@@ -202,17 +199,17 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
         case _TYPEDEFVALUE:
           if (__field.type == TType.MAP) {
             Map<Short, String> typedefValue;
-            {
-            TMap _map = oprot.readMapBegin();
-            typedefValue = new HashMap<Short, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                short _key1 = oprot.readI16();
-                String _value1 = oprot.readString();
-                typedefValue.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                typedefValue = new HashMap<Short, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    short _key1 = oprot.readI16();
+                    String _value1 = oprot.readString();
+                    typedefValue.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setTypedefValue(typedefValue);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -227,7 +224,7 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (strVal != null) {
@@ -242,17 +239,17 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeFieldBegin(TYPEDEF_VALUE_FIELD_DESC);
         Map<Short, String> _iter0 = typedefValue;
         oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _iter0.size()));
-        for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI16(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI16(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ValLazy {
         private static final Val _DEFAULT = new Val.Builder().build();
     }

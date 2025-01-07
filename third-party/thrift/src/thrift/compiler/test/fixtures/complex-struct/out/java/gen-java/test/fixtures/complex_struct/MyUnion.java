@@ -234,6 +234,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
         res.id = 6;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="myEnum", requiredness=Requiredness.NONE)
@@ -471,7 +472,7 @@ public final class MyUnion implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyUnion> asReader() {
       return MyUnion::read0;

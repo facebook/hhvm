@@ -90,6 +90,7 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
         res.id = 1;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.NONE)
@@ -202,7 +203,7 @@ public final class NonTriviallyDestructibleUnion implements com.facebook.thrift.
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<NonTriviallyDestructibleUnion> asReader() {
       return NonTriviallyDestructibleUnion::read0;

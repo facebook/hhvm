@@ -36,7 +36,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.field = 0;
       this.setString = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private int field = 0;
         private Set<String> setString = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
-        public Builder setField(int field) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)    public Builder setField(int field) {
             this.field = field;
             return this;
         }
     
         public int getField() { return field; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)
-        public Builder setSetString(Set<String> setString) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)    public Builder setSetString(Set<String> setString) {
             this.setString = setString;
             return this;
         }
@@ -80,7 +78,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -106,12 +104,12 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
     public int getField() { return field; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="set_string", requiredness=Requiredness.NONE)
     public Set<String> getSetString() { return setString; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -119,7 +117,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("setString", setString);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -136,7 +134,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(setString, other.setString) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -144,7 +142,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             setString
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
@@ -169,16 +167,16 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         case _SET_STRING:
           if (__field.type == TType.SET) {
             Set<String> setString;
-            {
-            TSet _set = oprot.readSetBegin();
-            setString = new HashSet<String>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                setString.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setString = new HashSet<String>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    setString.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetString(setString);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -193,7 +191,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(FIELD_FIELD_DESC);
@@ -203,16 +201,16 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeFieldBegin(SET_STRING_FIELD_DESC);
         Set<String> _iter0 = setString;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructLazy {
         private static final MyStruct _DEFAULT = new MyStruct.Builder().build();
     }

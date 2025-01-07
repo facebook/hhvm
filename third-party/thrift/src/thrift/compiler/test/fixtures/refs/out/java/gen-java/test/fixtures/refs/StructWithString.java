@@ -45,7 +45,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
       this.uniqueStringRef = null;
       this.sharedStringRef = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -61,40 +61,35 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
         private String uniqueStringRef = null;
         private String sharedStringRef = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="def_unique_string_ref", requiredness=Requiredness.NONE)
-        public Builder setDefUniqueStringRef(String defUniqueStringRef) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="def_unique_string_ref", requiredness=Requiredness.NONE)    public Builder setDefUniqueStringRef(String defUniqueStringRef) {
             this.defUniqueStringRef = defUniqueStringRef;
             return this;
         }
     
         public String getDefUniqueStringRef() { return defUniqueStringRef; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="def_shared_string_ref", requiredness=Requiredness.NONE)
-        public Builder setDefSharedStringRef(String defSharedStringRef) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="def_shared_string_ref", requiredness=Requiredness.NONE)    public Builder setDefSharedStringRef(String defSharedStringRef) {
             this.defSharedStringRef = defSharedStringRef;
             return this;
         }
     
         public String getDefSharedStringRef() { return defSharedStringRef; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="def_shared_string_const_ref", requiredness=Requiredness.NONE)
-        public Builder setDefSharedStringConstRef(String defSharedStringConstRef) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="def_shared_string_const_ref", requiredness=Requiredness.NONE)    public Builder setDefSharedStringConstRef(String defSharedStringConstRef) {
             this.defSharedStringConstRef = defSharedStringConstRef;
             return this;
         }
     
         public String getDefSharedStringConstRef() { return defSharedStringConstRef; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="unique_string_ref", requiredness=Requiredness.NONE)
-        public Builder setUniqueStringRef(String uniqueStringRef) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="unique_string_ref", requiredness=Requiredness.NONE)    public Builder setUniqueStringRef(String uniqueStringRef) {
             this.uniqueStringRef = uniqueStringRef;
             return this;
         }
     
         public String getUniqueStringRef() { return uniqueStringRef; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="shared_string_ref", requiredness=Requiredness.NONE)
-        public Builder setSharedStringRef(String sharedStringRef) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="shared_string_ref", requiredness=Requiredness.NONE)    public Builder setSharedStringRef(String sharedStringRef) {
             this.sharedStringRef = sharedStringRef;
             return this;
         }
@@ -122,7 +117,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -163,27 +158,27 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="def_unique_string_ref", requiredness=Requiredness.NONE)
     public String getDefUniqueStringRef() { return defUniqueStringRef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="def_shared_string_ref", requiredness=Requiredness.NONE)
     public String getDefSharedStringRef() { return defSharedStringRef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="def_shared_string_const_ref", requiredness=Requiredness.NONE)
     public String getDefSharedStringConstRef() { return defSharedStringConstRef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="unique_string_ref", requiredness=Requiredness.NONE)
     public String getUniqueStringRef() { return uniqueStringRef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="shared_string_ref", requiredness=Requiredness.NONE)
     public String getSharedStringRef() { return sharedStringRef; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -194,7 +189,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
         helper.add("sharedStringRef", sharedStringRef);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -214,7 +209,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
             Objects.equals(sharedStringRef, other.sharedStringRef) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -225,7 +220,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
             sharedStringRef
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithString> asReader() {
       return StructWithString::read0;
@@ -288,7 +283,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (defUniqueStringRef != null) {
@@ -319,7 +314,7 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithStringLazy {
         private static final StructWithString _DEFAULT = new StructWithString.Builder().build();
     }

@@ -36,7 +36,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
       this.min = 0;
       this.max = 0;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
         private int min = 0;
         private int max = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="min", requiredness=Requiredness.REQUIRED)
-        public Builder setMin(int min) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="min", requiredness=Requiredness.REQUIRED)    public Builder setMin(int min) {
             this.min = min;
             return this;
         }
     
         public int getMin() { return min; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="max", requiredness=Requiredness.REQUIRED)
-        public Builder setMax(int max) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="max", requiredness=Requiredness.REQUIRED)    public Builder setMax(int max) {
             this.max = max;
             return this;
         }
@@ -80,7 +78,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
     
     @com.facebook.swift.codec.ThriftField(value=1, name="min", requiredness=Requiredness.REQUIRED)
     public int getMin() { return min; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="max", requiredness=Requiredness.REQUIRED)
     public int getMax() { return max; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
         helper.add("max", max);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
             Objects.equals(max, other.max) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
             max
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Range> asReader() {
       return Range::read0;
@@ -180,7 +178,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MIN_FIELD_DESC);
@@ -192,7 +190,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _RangeLazy {
         private static final Range _DEFAULT = new Range.Builder().build();
     }

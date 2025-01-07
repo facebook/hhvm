@@ -33,7 +33,7 @@ public final class SinkPayload implements com.facebook.thrift.payload.ThriftSeri
     protected SinkPayload() {
       this.content = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class SinkPayload implements com.facebook.thrift.payload.ThriftSeri
     public static class Builder {
         private String content = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="content", requiredness=Requiredness.NONE)
-        public Builder setContent(String content) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="content", requiredness=Requiredness.NONE)    public Builder setContent(String content) {
             this.content = content;
             return this;
         }
@@ -66,7 +65,7 @@ public final class SinkPayload implements com.facebook.thrift.payload.ThriftSeri
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class SinkPayload implements com.facebook.thrift.payload.ThriftSeri
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="content", requiredness=Requiredness.NONE)
     public String getContent() { return content; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("content", content);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class SinkPayload implements com.facebook.thrift.payload.ThriftSeri
             Objects.equals(content, other.content) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             content
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<SinkPayload> asReader() {
       return SinkPayload::read0;
@@ -144,7 +143,7 @@ public final class SinkPayload implements com.facebook.thrift.payload.ThriftSeri
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (content != null) {
@@ -155,7 +154,7 @@ public final class SinkPayload implements com.facebook.thrift.payload.ThriftSeri
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _SinkPayloadLazy {
         private static final SinkPayload _DEFAULT = new SinkPayload.Builder().build();
     }

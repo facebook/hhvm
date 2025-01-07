@@ -33,7 +33,7 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
     protected RenamedStructWithStructAdapterAndFieldAdapter() {
       this.field = 0;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
     public static class Builder {
         private int field = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
-        public Builder setField(int field) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)    public Builder setField(int field) {
             this.field = field;
             return this;
         }
@@ -66,7 +65,7 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -86,14 +85,14 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
     
     @com.facebook.swift.codec.ThriftField(value=1, name="field", requiredness=Requiredness.NONE)
     public int getField() { return field; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("field", field);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -109,14 +108,14 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
             Objects.equals(field, other.field) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             field
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<RenamedStructWithStructAdapterAndFieldAdapter> asReader() {
       return RenamedStructWithStructAdapterAndFieldAdapter::read0;
@@ -147,7 +146,7 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(FIELD_FIELD_DESC);
@@ -156,7 +155,7 @@ public final class RenamedStructWithStructAdapterAndFieldAdapter implements com.
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _RenamedStructWithStructAdapterAndFieldAdapterLazy {
         private static final RenamedStructWithStructAdapterAndFieldAdapter _DEFAULT = new RenamedStructWithStructAdapterAndFieldAdapter.Builder().build();
     }

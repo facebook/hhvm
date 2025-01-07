@@ -186,6 +186,7 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
         res.id = 4;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="myEnum", requiredness=Requiredness.NONE)
@@ -350,14 +351,14 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
         oprot.writeFieldBegin(SET_FLOAT_FIELD_DESC);
         List<List<Float>> _iter0 = (List<List<Float>>)this.value;
         oprot.writeListBegin(new TList(TType.LIST, _iter0.size()));
-        for (List<Float> _iter1 : _iter0) {
-          oprot.writeListBegin(new TList(TType.FLOAT, _iter1.size()));
-        for (float _iter2 : _iter1) {
-          oprot.writeFloat(_iter2);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
+            for (List<Float> _iter1 : _iter0) {
+              oprot.writeListBegin(new TList(TType.FLOAT, _iter1.size()));
+            for (float _iter2 : _iter1) {
+              oprot.writeFloat(_iter2);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -381,7 +382,7 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyUnionFloatFieldThrowExp> asReader() {
       return MyUnionFloatFieldThrowExp::read0;
@@ -404,30 +405,30 @@ public final class MyUnionFloatFieldThrowExp implements com.facebook.thrift.payl
           case _SETFLOAT:
             if (__field.type == SET_FLOAT_FIELD_DESC.type) {
               List<List<Float>> setFloat;
-            {
-            TList _list = oprot.readListBegin();
-            setFloat = new ArrayList<List<Float>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                List<Float> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<Float>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                float _value2 = oprot.readFloat();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                setFloat.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                setFloat = new ArrayList<List<Float>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    List<Float> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<Float>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    float _value2 = oprot.readFloat();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+    setFloat.add(_value1);
+                }
+                oprot.readListEnd();
+                }
               res.value = setFloat;
             }
             break;

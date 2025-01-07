@@ -39,7 +39,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
       this.b = 0;
       this.c = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
         private int b = 0;
         private test.fixtures.constants.Struct2 c = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
-        public Builder setA(String a) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)    public Builder setA(String a) {
             this.a = a;
             return this;
         }
     
         public String getA() { return a; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)
-        public Builder setB(int b) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)    public Builder setB(int b) {
             this.b = b;
             return this;
         }
     
         public int getB() { return b; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)
-        public Builder setC(test.fixtures.constants.Struct2 c) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)    public Builder setC(test.fixtures.constants.Struct2 c) {
             this.c = c;
             return this;
         }
@@ -94,7 +91,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="a", requiredness=Requiredness.NONE)
     public String getA() { return a; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="b", requiredness=Requiredness.NONE)
     public int getB() { return b; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="c", requiredness=Requiredness.NONE)
     public test.fixtures.constants.Struct2 getC() { return c; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
         helper.add("c", c);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
             Objects.equals(c, other.c) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
             c
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Struct3> asReader() {
       return Struct3::read0;
@@ -216,7 +213,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (a != null) {
@@ -235,7 +232,7 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _Struct3Lazy {
         private static final Struct3 _DEFAULT = new Struct3.Builder().build();
     }

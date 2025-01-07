@@ -85,66 +85,66 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
       this.myDoubleDFZero = (double)0;
       this.myDouble = 0.;
       this.field3 = ImmutableMap.<Integer, String>builder()
-        .put(15, "a_value")
-        .put(2, "b_value")
-        .build();
+            .put(15, "a_value")
+            .put(2, "b_value")
+            .build();
       this.myList = ImmutableList.<test.fixtures.complex_struct.MyEnum>builder()
-        .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .add(test.fixtures.complex_struct.MyEnum.MY_VALUE2)
-        .build();
+            .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .add(test.fixtures.complex_struct.MyEnum.MY_VALUE2)
+            .build();
       this.mySet = ImmutableSet.<String>builder()
-        .add("house")
-        .add("car")
-        .add("dog")
-        .build();
+            .add("house")
+            .add("car")
+            .add("dog")
+            .build();
       this.simpleStruct = new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("John").build();
       this.listStructDFset = ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
-        .build();
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
+            .build();
       this.myUnion = test.fixtures.complex_struct.Constants.CONST_ENUM_UNION;
       this.listUnionDFset = ImmutableList.<test.fixtures.complex_struct.MyUnion>builder()
-        .add(test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2))
-        .add(test.fixtures.complex_struct.MyUnion.fromIntValue(123))
-        .build();
+            .add(test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2))
+            .add(test.fixtures.complex_struct.MyUnion.fromIntValue(123))
+            .build();
       this.mapNestlistStructDfSet = ImmutableMap.<Integer, List<test.fixtures.complex_struct.SimpleStruct>>builder()
-        .put(1, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
-        .build())
-        .put(2, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(28L).setName("BatMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("Robin").build())
-        .build())
-        .put(5, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("RatMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(6L).setName("Catman").build())
-        .build())
-        .build();
+            .put(1, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
+            .build())
+            .put(2, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(28L).setName("BatMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("Robin").build())
+            .build())
+            .put(5, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("RatMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(6L).setName("Catman").build())
+            .build())
+            .build();
       this.mapJavaTypeDFset = ImmutableMap.<Long, String>builder()
-        .put(15L, "a_value")
-        .put(2L, "b_value")
-        .build();
+            .put(15L, "a_value")
+            .put(2L, "b_value")
+            .build();
       this.emptyMap = ImmutableMap.<Long, Integer>builder()
-        .build();
+            .build();
       this.enumMapDFset = ImmutableMap.<String, Map<Integer, test.fixtures.complex_struct.MyEnum>>builder()
-        .put("SANDY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
-        .put(16, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .build())
-        .put("IVY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
-        .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
-        .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
-        .build())
-        .put("HASWELL", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
-        .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
-        .put(128, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
-        .put(256, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
-        .build())
-        .build();
+            .put("SANDY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
+            .put(16, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .build())
+            .put("IVY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
+            .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
+            .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
+            .build())
+            .put("HASWELL", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
+            .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
+            .put(128, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
+            .put(256, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
+            .build())
+            .build();
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -166,235 +166,213 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         private double myDoubleDFZero = (double)0;
         private double myDouble = 0.;
         private Map<Integer, String> field3 = ImmutableMap.<Integer, String>builder()
-        .put(15, "a_value")
-        .put(2, "b_value")
-        .build();
+            .put(15, "a_value")
+            .put(2, "b_value")
+            .build();
         private List<test.fixtures.complex_struct.MyEnum> myList = ImmutableList.<test.fixtures.complex_struct.MyEnum>builder()
-        .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .add(test.fixtures.complex_struct.MyEnum.MY_VALUE2)
-        .build();
+            .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .add(test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .add(test.fixtures.complex_struct.MyEnum.MY_VALUE2)
+            .build();
         private Set<String> mySet = ImmutableSet.<String>builder()
-        .add("house")
-        .add("car")
-        .add("dog")
-        .build();
+            .add("house")
+            .add("car")
+            .add("dog")
+            .build();
         private test.fixtures.complex_struct.SimpleStruct simpleStruct = new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("John").build();
         private List<test.fixtures.complex_struct.SimpleStruct> listStructDFset = ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
-        .build();
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
+            .build();
         private test.fixtures.complex_struct.MyUnion myUnion = test.fixtures.complex_struct.Constants.CONST_ENUM_UNION;
         private List<test.fixtures.complex_struct.MyUnion> listUnionDFset = ImmutableList.<test.fixtures.complex_struct.MyUnion>builder()
-        .add(test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2))
-        .add(test.fixtures.complex_struct.MyUnion.fromIntValue(123))
-        .build();
+            .add(test.fixtures.complex_struct.MyUnion.fromMyEnum(test.fixtures.complex_struct.MyEnum.MY_VALUE2))
+            .add(test.fixtures.complex_struct.MyUnion.fromIntValue(123))
+            .build();
         private Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet = ImmutableMap.<Integer, List<test.fixtures.complex_struct.SimpleStruct>>builder()
-        .put(1, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
-        .build())
-        .put(2, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(28L).setName("BatMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("Robin").build())
-        .build())
-        .put(5, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("RatMan").build())
-        .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(6L).setName("Catman").build())
-        .build())
-        .build();
+            .put(1, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(40L).setName("IronMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(999L).setName("Thanos").build())
+            .build())
+            .put(2, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(28L).setName("BatMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("Robin").build())
+            .build())
+            .put(5, ImmutableList.<test.fixtures.complex_struct.SimpleStruct>builder()
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(12L).setName("RatMan").build())
+            .add(new test.fixtures.complex_struct.SimpleStruct.Builder().setAge(6L).setName("Catman").build())
+            .build())
+            .build();
         private it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset = ImmutableMap.<Long, String>builder()
-        .put(15L, "a_value")
-        .put(2L, "b_value")
-        .build();
+            .put(15L, "a_value")
+            .put(2L, "b_value")
+            .build();
         private Map<Long, Integer> emptyMap = ImmutableMap.<Long, Integer>builder()
-        .build();
+            .build();
         private Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset = ImmutableMap.<String, Map<Integer, test.fixtures.complex_struct.MyEnum>>builder()
-        .put("SANDY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
-        .put(16, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
-        .build())
-        .put("IVY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
-        .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
-        .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
-        .build())
-        .put("HASWELL", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
-        .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
-        .put(128, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
-        .put(256, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
-        .build())
-        .build();
+            .put("SANDY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
+            .put(16, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE1)
+            .build())
+            .put("IVY BRIDGE", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
+            .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
+            .put(144, test.fixtures.complex_struct.MyEnum.MY_VALUE2)
+            .build())
+            .put("HASWELL", ImmutableMap.<Integer, test.fixtures.complex_struct.MyEnum>builder()
+            .put(32, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
+            .put(128, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
+            .put(256, test.fixtures.complex_struct.MyEnum.MY_VALUE3)
+            .build())
+            .build();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="myLongDFset", requiredness=Requiredness.NONE)
-        public Builder setMyLongDFset(long myLongDFset) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="myLongDFset", requiredness=Requiredness.NONE)    public Builder setMyLongDFset(long myLongDFset) {
             this.myLongDFset = myLongDFset;
             return this;
         }
     
         public long getMyLongDFset() { return myLongDFset; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="myLongDF", requiredness=Requiredness.NONE)
-        public Builder setMyLongDF(long myLongDF) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="myLongDF", requiredness=Requiredness.NONE)    public Builder setMyLongDF(long myLongDF) {
             this.myLongDF = myLongDF;
             return this;
         }
     
         public long getMyLongDF() { return myLongDF; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="portDFset", requiredness=Requiredness.NONE)
-        public Builder setPortDFset(int portDFset) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="portDFset", requiredness=Requiredness.NONE)    public Builder setPortDFset(int portDFset) {
             this.portDFset = portDFset;
             return this;
         }
     
         public int getPortDFset() { return portDFset; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="portNum", requiredness=Requiredness.NONE)
-        public Builder setPortNum(int portNum) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="portNum", requiredness=Requiredness.NONE)    public Builder setPortNum(int portNum) {
             this.portNum = portNum;
             return this;
         }
     
         public int getPortNum() { return portNum; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="myBinaryDFset", requiredness=Requiredness.NONE)
-        public Builder setMyBinaryDFset(byte[] myBinaryDFset) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="myBinaryDFset", requiredness=Requiredness.NONE)    public Builder setMyBinaryDFset(byte[] myBinaryDFset) {
             this.myBinaryDFset = myBinaryDFset;
             return this;
         }
     
         public byte[] getMyBinaryDFset() { return myBinaryDFset; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="myBinary", requiredness=Requiredness.NONE)
-        public Builder setMyBinary(byte[] myBinary) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="myBinary", requiredness=Requiredness.NONE)    public Builder setMyBinary(byte[] myBinary) {
             this.myBinary = myBinary;
             return this;
         }
     
         public byte[] getMyBinary() { return myBinary; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="myByteDFSet", requiredness=Requiredness.NONE)
-        public Builder setMyByteDFSet(byte myByteDFSet) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="myByteDFSet", requiredness=Requiredness.NONE)    public Builder setMyByteDFSet(byte myByteDFSet) {
             this.myByteDFSet = myByteDFSet;
             return this;
         }
     
         public byte getMyByteDFSet() { return myByteDFSet; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="myByte", requiredness=Requiredness.NONE)
-        public Builder setMyByte(byte myByte) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="myByte", requiredness=Requiredness.NONE)    public Builder setMyByte(byte myByte) {
             this.myByte = myByte;
             return this;
         }
     
         public byte getMyByte() { return myByte; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="myDoubleDFset", requiredness=Requiredness.NONE)
-        public Builder setMyDoubleDFset(double myDoubleDFset) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="myDoubleDFset", requiredness=Requiredness.NONE)    public Builder setMyDoubleDFset(double myDoubleDFset) {
             this.myDoubleDFset = myDoubleDFset;
             return this;
         }
     
         public double getMyDoubleDFset() { return myDoubleDFset; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="myDoubleDFZero", requiredness=Requiredness.NONE)
-        public Builder setMyDoubleDFZero(double myDoubleDFZero) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="myDoubleDFZero", requiredness=Requiredness.NONE)    public Builder setMyDoubleDFZero(double myDoubleDFZero) {
             this.myDoubleDFZero = myDoubleDFZero;
             return this;
         }
     
         public double getMyDoubleDFZero() { return myDoubleDFZero; }
     
-            @com.facebook.swift.codec.ThriftField(value=12, name="myDouble", requiredness=Requiredness.NONE)
-        public Builder setMyDouble(double myDouble) {
+            @com.facebook.swift.codec.ThriftField(value=12, name="myDouble", requiredness=Requiredness.NONE)    public Builder setMyDouble(double myDouble) {
             this.myDouble = myDouble;
             return this;
         }
     
         public double getMyDouble() { return myDouble; }
     
-            @com.facebook.swift.codec.ThriftField(value=13, name="field3", requiredness=Requiredness.NONE)
-        public Builder setField3(Map<Integer, String> field3) {
+            @com.facebook.swift.codec.ThriftField(value=13, name="field3", requiredness=Requiredness.NONE)    public Builder setField3(Map<Integer, String> field3) {
             this.field3 = field3;
             return this;
         }
     
         public Map<Integer, String> getField3() { return field3; }
     
-            @com.facebook.swift.codec.ThriftField(value=14, name="myList", requiredness=Requiredness.NONE)
-        public Builder setMyList(List<test.fixtures.complex_struct.MyEnum> myList) {
+            @com.facebook.swift.codec.ThriftField(value=14, name="myList", requiredness=Requiredness.NONE)    public Builder setMyList(List<test.fixtures.complex_struct.MyEnum> myList) {
             this.myList = myList;
             return this;
         }
     
         public List<test.fixtures.complex_struct.MyEnum> getMyList() { return myList; }
     
-            @com.facebook.swift.codec.ThriftField(value=15, name="mySet", requiredness=Requiredness.NONE)
-        public Builder setMySet(Set<String> mySet) {
+            @com.facebook.swift.codec.ThriftField(value=15, name="mySet", requiredness=Requiredness.NONE)    public Builder setMySet(Set<String> mySet) {
             this.mySet = mySet;
             return this;
         }
     
         public Set<String> getMySet() { return mySet; }
     
-            @com.facebook.swift.codec.ThriftField(value=16, name="simpleStruct", requiredness=Requiredness.NONE)
-        public Builder setSimpleStruct(test.fixtures.complex_struct.SimpleStruct simpleStruct) {
+            @com.facebook.swift.codec.ThriftField(value=16, name="simpleStruct", requiredness=Requiredness.NONE)    public Builder setSimpleStruct(test.fixtures.complex_struct.SimpleStruct simpleStruct) {
             this.simpleStruct = simpleStruct;
             return this;
         }
     
         public test.fixtures.complex_struct.SimpleStruct getSimpleStruct() { return simpleStruct; }
     
-            @com.facebook.swift.codec.ThriftField(value=17, name="listStructDFset", requiredness=Requiredness.NONE)
-        public Builder setListStructDFset(List<test.fixtures.complex_struct.SimpleStruct> listStructDFset) {
+            @com.facebook.swift.codec.ThriftField(value=17, name="listStructDFset", requiredness=Requiredness.NONE)    public Builder setListStructDFset(List<test.fixtures.complex_struct.SimpleStruct> listStructDFset) {
             this.listStructDFset = listStructDFset;
             return this;
         }
     
         public List<test.fixtures.complex_struct.SimpleStruct> getListStructDFset() { return listStructDFset; }
     
-            @com.facebook.swift.codec.ThriftField(value=18, name="myUnion", requiredness=Requiredness.NONE)
-        public Builder setMyUnion(test.fixtures.complex_struct.MyUnion myUnion) {
+            @com.facebook.swift.codec.ThriftField(value=18, name="myUnion", requiredness=Requiredness.NONE)    public Builder setMyUnion(test.fixtures.complex_struct.MyUnion myUnion) {
             this.myUnion = myUnion;
             return this;
         }
     
         public test.fixtures.complex_struct.MyUnion getMyUnion() { return myUnion; }
     
-            @com.facebook.swift.codec.ThriftField(value=19, name="listUnionDFset", requiredness=Requiredness.NONE)
-        public Builder setListUnionDFset(List<test.fixtures.complex_struct.MyUnion> listUnionDFset) {
+            @com.facebook.swift.codec.ThriftField(value=19, name="listUnionDFset", requiredness=Requiredness.NONE)    public Builder setListUnionDFset(List<test.fixtures.complex_struct.MyUnion> listUnionDFset) {
             this.listUnionDFset = listUnionDFset;
             return this;
         }
     
         public List<test.fixtures.complex_struct.MyUnion> getListUnionDFset() { return listUnionDFset; }
     
-            @com.facebook.swift.codec.ThriftField(value=20, name="mapNestlistStructDfSet", requiredness=Requiredness.NONE)
-        public Builder setMapNestlistStructDfSet(Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet) {
+            @com.facebook.swift.codec.ThriftField(value=20, name="mapNestlistStructDfSet", requiredness=Requiredness.NONE)    public Builder setMapNestlistStructDfSet(Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet) {
             this.mapNestlistStructDfSet = mapNestlistStructDfSet;
             return this;
         }
     
         public Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> getMapNestlistStructDfSet() { return mapNestlistStructDfSet; }
     
-            @com.facebook.swift.codec.ThriftField(value=21, name="mapJavaTypeDFset", requiredness=Requiredness.NONE)
-        public Builder setMapJavaTypeDFset(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset) {
+            @com.facebook.swift.codec.ThriftField(value=21, name="mapJavaTypeDFset", requiredness=Requiredness.NONE)    public Builder setMapJavaTypeDFset(it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset) {
             this.mapJavaTypeDFset = mapJavaTypeDFset;
             return this;
         }
     
         public it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> getMapJavaTypeDFset() { return mapJavaTypeDFset; }
     
-            @com.facebook.swift.codec.ThriftField(value=22, name="emptyMap", requiredness=Requiredness.NONE)
-        public Builder setEmptyMap(Map<Long, Integer> emptyMap) {
+            @com.facebook.swift.codec.ThriftField(value=22, name="emptyMap", requiredness=Requiredness.NONE)    public Builder setEmptyMap(Map<Long, Integer> emptyMap) {
             this.emptyMap = emptyMap;
             return this;
         }
     
         public Map<Long, Integer> getEmptyMap() { return emptyMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=23, name="enumMapDFset", requiredness=Requiredness.NONE)
-        public Builder setEnumMapDFset(Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset) {
+            @com.facebook.swift.codec.ThriftField(value=23, name="enumMapDFset", requiredness=Requiredness.NONE)    public Builder setEnumMapDFset(Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset) {
             this.enumMapDFset = enumMapDFset;
             return this;
         }
@@ -456,7 +434,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -599,112 +577,112 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
     
     @com.facebook.swift.codec.ThriftField(value=1, name="myLongDFset", requiredness=Requiredness.NONE)
     public long getMyLongDFset() { return myLongDFset; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="myLongDF", requiredness=Requiredness.NONE)
     public long getMyLongDF() { return myLongDF; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="portDFset", requiredness=Requiredness.NONE)
     public int getPortDFset() { return portDFset; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=4, name="portNum", requiredness=Requiredness.NONE)
     public int getPortNum() { return portNum; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="myBinaryDFset", requiredness=Requiredness.NONE)
     public byte[] getMyBinaryDFset() { return myBinaryDFset; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="myBinary", requiredness=Requiredness.NONE)
     public byte[] getMyBinary() { return myBinary; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=7, name="myByteDFSet", requiredness=Requiredness.NONE)
     public byte getMyByteDFSet() { return myByteDFSet; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=8, name="myByte", requiredness=Requiredness.NONE)
     public byte getMyByte() { return myByte; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=9, name="myDoubleDFset", requiredness=Requiredness.NONE)
     public double getMyDoubleDFset() { return myDoubleDFset; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=10, name="myDoubleDFZero", requiredness=Requiredness.NONE)
     public double getMyDoubleDFZero() { return myDoubleDFZero; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=12, name="myDouble", requiredness=Requiredness.NONE)
     public double getMyDouble() { return myDouble; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=13, name="field3", requiredness=Requiredness.NONE)
     public Map<Integer, String> getField3() { return field3; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=14, name="myList", requiredness=Requiredness.NONE)
     public List<test.fixtures.complex_struct.MyEnum> getMyList() { return myList; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=15, name="mySet", requiredness=Requiredness.NONE)
     public Set<String> getMySet() { return mySet; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=16, name="simpleStruct", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.SimpleStruct getSimpleStruct() { return simpleStruct; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=17, name="listStructDFset", requiredness=Requiredness.NONE)
     public List<test.fixtures.complex_struct.SimpleStruct> getListStructDFset() { return listStructDFset; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=18, name="myUnion", requiredness=Requiredness.NONE)
     public test.fixtures.complex_struct.MyUnion getMyUnion() { return myUnion; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=19, name="listUnionDFset", requiredness=Requiredness.NONE)
     public List<test.fixtures.complex_struct.MyUnion> getListUnionDFset() { return listUnionDFset; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=20, name="mapNestlistStructDfSet", requiredness=Requiredness.NONE)
     public Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> getMapNestlistStructDfSet() { return mapNestlistStructDfSet; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=21, name="mapJavaTypeDFset", requiredness=Requiredness.NONE)
     public it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> getMapJavaTypeDFset() { return mapJavaTypeDFset; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=22, name="emptyMap", requiredness=Requiredness.NONE)
     public Map<Long, Integer> getEmptyMap() { return emptyMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=23, name="enumMapDFset", requiredness=Requiredness.NONE)
     public Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> getEnumMapDFset() { return enumMapDFset; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -732,7 +710,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         helper.add("enumMapDFset", enumMapDFset);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -769,7 +747,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
             Objects.equals(enumMapDFset, other.enumMapDFset) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -797,7 +775,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
             enumMapDFset
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<DefaultStruct> asReader() {
       return DefaultStruct::read0;
@@ -902,17 +880,17 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _FIELD3:
           if (__field.type == TType.MAP) {
             Map<Integer, String> field3;
-            {
-            TMap _map = oprot.readMapBegin();
-            field3 = new HashMap<Integer, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                String _value1 = oprot.readString();
-                field3.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                field3 = new HashMap<Integer, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    String _value1 = oprot.readString();
+                    field3.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setField3(field3);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -921,16 +899,16 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _MYLIST:
           if (__field.type == TType.LIST) {
             List<test.fixtures.complex_struct.MyEnum> myList;
-            {
-            TList _list = oprot.readListBegin();
-            myList = new ArrayList<test.fixtures.complex_struct.MyEnum>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                test.fixtures.complex_struct.MyEnum _value1 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
-                myList.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                myList = new ArrayList<test.fixtures.complex_struct.MyEnum>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    test.fixtures.complex_struct.MyEnum _value1 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
+                    myList.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setMyList(myList);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -939,16 +917,16 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _MYSET:
           if (__field.type == TType.SET) {
             Set<String> mySet;
-            {
-            TSet _set = oprot.readSetBegin();
-            mySet = new HashSet<String>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                mySet.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                mySet = new HashSet<String>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    mySet.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setMySet(mySet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -965,16 +943,16 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _LISTSTRUCTDFSET:
           if (__field.type == TType.LIST) {
             List<test.fixtures.complex_struct.SimpleStruct> listStructDFset;
-            {
-            TList _list = oprot.readListBegin();
-            listStructDFset = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                test.fixtures.complex_struct.SimpleStruct _value1 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
-                listStructDFset.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listStructDFset = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    test.fixtures.complex_struct.SimpleStruct _value1 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
+                    listStructDFset.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListStructDFset(listStructDFset);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -991,16 +969,16 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _LISTUNIONDFSET:
           if (__field.type == TType.LIST) {
             List<test.fixtures.complex_struct.MyUnion> listUnionDFset;
-            {
-            TList _list = oprot.readListBegin();
-            listUnionDFset = new ArrayList<test.fixtures.complex_struct.MyUnion>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                test.fixtures.complex_struct.MyUnion _value1 = test.fixtures.complex_struct.MyUnion.read0(oprot);
-                listUnionDFset.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listUnionDFset = new ArrayList<test.fixtures.complex_struct.MyUnion>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    test.fixtures.complex_struct.MyUnion _value1 = test.fixtures.complex_struct.MyUnion.read0(oprot);
+                    listUnionDFset.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListUnionDFset(listUnionDFset);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1009,31 +987,31 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _MAPNESTLISTSTRUCTDFSET:
           if (__field.type == TType.MAP) {
             Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> mapNestlistStructDfSet;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapNestlistStructDfSet = new HashMap<Integer, List<test.fixtures.complex_struct.SimpleStruct>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                List<test.fixtures.complex_struct.SimpleStruct> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                test.fixtures.complex_struct.SimpleStruct _value2 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                mapNestlistStructDfSet.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapNestlistStructDfSet = new HashMap<Integer, List<test.fixtures.complex_struct.SimpleStruct>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    List<test.fixtures.complex_struct.SimpleStruct> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<test.fixtures.complex_struct.SimpleStruct>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    test.fixtures.complex_struct.SimpleStruct _value2 = test.fixtures.complex_struct.SimpleStruct.read0(oprot);
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapNestlistStructDfSet.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapNestlistStructDfSet(mapNestlistStructDfSet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1042,17 +1020,17 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _MAPJAVATYPEDFSET:
           if (__field.type == TType.MAP) {
             it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> mapJavaTypeDFset;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapJavaTypeDFset = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                long _key1 = oprot.readI64();
-                String _value1 = oprot.readString();
-                mapJavaTypeDFset.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapJavaTypeDFset = new it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String>();
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    long _key1 = oprot.readI64();
+                    String _value1 = oprot.readString();
+                    mapJavaTypeDFset.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapJavaTypeDFset(mapJavaTypeDFset);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1061,17 +1039,17 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _EMPTYMAP:
           if (__field.type == TType.MAP) {
             Map<Long, Integer> emptyMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            emptyMap = new HashMap<Long, Integer>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                long _key1 = oprot.readI64();
-                int _value1 = oprot.readI32();
-                emptyMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                emptyMap = new HashMap<Long, Integer>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    long _key1 = oprot.readI64();
+                    int _value1 = oprot.readI32();
+                    emptyMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setEmptyMap(emptyMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1080,35 +1058,35 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         case _ENUMMAPDFSET:
           if (__field.type == TType.MAP) {
             Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> enumMapDFset;
-            {
-            TMap _map = oprot.readMapBegin();
-            enumMapDFset = new HashMap<String, Map<Integer, test.fixtures.complex_struct.MyEnum>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                String _key1 = oprot.readString();
-                Map<Integer, test.fixtures.complex_struct.MyEnum> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<Integer, test.fixtures.complex_struct.MyEnum>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                int _key2 = oprot.readI32();
-                                
-                
-                                
-                                test.fixtures.complex_struct.MyEnum _value2 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                                enumMapDFset.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                enumMapDFset = new HashMap<String, Map<Integer, test.fixtures.complex_struct.MyEnum>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    String _key1 = oprot.readString();
+                    Map<Integer, test.fixtures.complex_struct.MyEnum> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<Integer, test.fixtures.complex_struct.MyEnum>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    int _key2 = oprot.readI32();
+                                    
+                    
+                                    
+                                    test.fixtures.complex_struct.MyEnum _value2 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    enumMapDFset.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setEnumMapDFset(enumMapDFset);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1123,7 +1101,7 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_LONG_DFSET_FIELD_DESC);
@@ -1167,31 +1145,31 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         oprot.writeFieldBegin(FIELD3_FIELD_DESC);
         Map<Integer, String> _iter0 = field3;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
-        for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (myList != null) {
         oprot.writeFieldBegin(MY_LIST_FIELD_DESC);
         List<test.fixtures.complex_struct.MyEnum> _iter0 = myList;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
-        for (test.fixtures.complex_struct.MyEnum _iter1 : _iter0) {
-          oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1));
-        }
-        oprot.writeListEnd();
+            for (test.fixtures.complex_struct.MyEnum _iter1 : _iter0) {
+              oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1));
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (mySet != null) {
         oprot.writeFieldBegin(MY_SET_FIELD_DESC);
         Set<String> _iter0 = mySet;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeSetEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (simpleStruct != null) {
@@ -1203,10 +1181,10 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         oprot.writeFieldBegin(LIST_STRUCT_DFSET_FIELD_DESC);
         List<test.fixtures.complex_struct.SimpleStruct> _iter0 = listStructDFset;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-        for (test.fixtures.complex_struct.SimpleStruct _iter1 : _iter0) {
-          _iter1.write0(oprot);
-        }
-        oprot.writeListEnd();
+            for (test.fixtures.complex_struct.SimpleStruct _iter1 : _iter0) {
+              _iter1.write0(oprot);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (myUnion != null) {
@@ -1218,69 +1196,69 @@ public final class DefaultStruct implements com.facebook.thrift.payload.ThriftSe
         oprot.writeFieldBegin(LIST_UNION_DFSET_FIELD_DESC);
         List<test.fixtures.complex_struct.MyUnion> _iter0 = listUnionDFset;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-        for (test.fixtures.complex_struct.MyUnion _iter1 : _iter0) {
-          _iter1.write0(oprot);
-        }
-        oprot.writeListEnd();
+            for (test.fixtures.complex_struct.MyUnion _iter1 : _iter0) {
+              _iter1.write0(oprot);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (mapNestlistStructDfSet != null) {
         oprot.writeFieldBegin(MAP_NESTLIST_STRUCT_DF_SET_FIELD_DESC);
         Map<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _iter0 = mapNestlistStructDfSet;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-        for (Map.Entry<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
-        for (test.fixtures.complex_struct.SimpleStruct _iter2 : _iter1.getValue()) {
-          _iter2.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, List<test.fixtures.complex_struct.SimpleStruct>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
+            for (test.fixtures.complex_struct.SimpleStruct _iter2 : _iter1.getValue()) {
+              _iter2.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapJavaTypeDFset != null) {
         oprot.writeFieldBegin(MAP_JAVA_TYPE_DFSET_FIELD_DESC);
         it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = mapJavaTypeDFset;
         oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
-        for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI64(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI64(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (emptyMap != null) {
         oprot.writeFieldBegin(EMPTY_MAP_FIELD_DESC);
         Map<Long, Integer> _iter0 = emptyMap;
         oprot.writeMapBegin(new TMap(TType.I64, TType.I32, _iter0.size()));
-        for (Map.Entry<Long, Integer> _iter1 : _iter0.entrySet()) {
-          oprot.writeI64(_iter1.getKey());
-          oprot.writeI32(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Long, Integer> _iter1 : _iter0.entrySet()) {
+              oprot.writeI64(_iter1.getKey());
+              oprot.writeI32(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (enumMapDFset != null) {
         oprot.writeFieldBegin(ENUM_MAP_DFSET_FIELD_DESC);
         Map<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _iter0 = enumMapDFset;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.MAP, _iter0.size()));
-        for (Map.Entry<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _iter1 : _iter0.entrySet()) {
-          oprot.writeString(_iter1.getKey());
-          oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.getValue().size()));
-        for (Map.Entry<Integer, test.fixtures.complex_struct.MyEnum> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeI32(_iter2.getKey());
-          oprot.writeI32(_iter2 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter2.getValue()));
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<String, Map<Integer, test.fixtures.complex_struct.MyEnum>> _iter1 : _iter0.entrySet()) {
+              oprot.writeString(_iter1.getKey());
+              oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.getValue().size()));
+            for (Map.Entry<Integer, test.fixtures.complex_struct.MyEnum> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeI32(_iter2.getKey());
+              oprot.writeI32(_iter2 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter2.getValue()));
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _DefaultStructLazy {
         private static final DefaultStruct _DEFAULT = new DefaultStruct.Builder().build();
     }

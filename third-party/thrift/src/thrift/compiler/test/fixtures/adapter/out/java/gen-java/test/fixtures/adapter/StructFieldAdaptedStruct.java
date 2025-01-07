@@ -42,7 +42,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
       this.directlyAdapted = null;
       this.typedefOfAdapted = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
         private test.fixtures.adapter.DirectlyAdaptedStruct directlyAdapted = null;
         private test.fixtures.adapter.DirectlyAdaptedStruct typedefOfAdapted = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE)
-        public Builder setAdaptedStruct(test.fixtures.adapter.AdaptedStruct adaptedStruct) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE)    public Builder setAdaptedStruct(test.fixtures.adapter.AdaptedStruct adaptedStruct) {
             this.adaptedStruct = adaptedStruct;
             return this;
         }
     
         public test.fixtures.adapter.AdaptedStruct getAdaptedStruct() { return adaptedStruct; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="adaptedTypedef", requiredness=Requiredness.NONE)
-        public Builder setAdaptedTypedef(test.fixtures.adapter.AdaptedStruct adaptedTypedef) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="adaptedTypedef", requiredness=Requiredness.NONE)    public Builder setAdaptedTypedef(test.fixtures.adapter.AdaptedStruct adaptedTypedef) {
             this.adaptedTypedef = adaptedTypedef;
             return this;
         }
     
         public test.fixtures.adapter.AdaptedStruct getAdaptedTypedef() { return adaptedTypedef; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="directlyAdapted", requiredness=Requiredness.NONE)
-        public Builder setDirectlyAdapted(test.fixtures.adapter.DirectlyAdaptedStruct directlyAdapted) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="directlyAdapted", requiredness=Requiredness.NONE)    public Builder setDirectlyAdapted(test.fixtures.adapter.DirectlyAdaptedStruct directlyAdapted) {
             this.directlyAdapted = directlyAdapted;
             return this;
         }
     
         public test.fixtures.adapter.DirectlyAdaptedStruct getDirectlyAdapted() { return directlyAdapted; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="typedefOfAdapted", requiredness=Requiredness.NONE)
-        public Builder setTypedefOfAdapted(test.fixtures.adapter.DirectlyAdaptedStruct typedefOfAdapted) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="typedefOfAdapted", requiredness=Requiredness.NONE)    public Builder setTypedefOfAdapted(test.fixtures.adapter.DirectlyAdaptedStruct typedefOfAdapted) {
             this.typedefOfAdapted = typedefOfAdapted;
             return this;
         }
@@ -108,7 +104,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -146,22 +142,22 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="adaptedStruct", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.AdaptedStruct getAdaptedStruct() { return adaptedStruct; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="adaptedTypedef", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.AdaptedStruct getAdaptedTypedef() { return adaptedTypedef; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="directlyAdapted", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.DirectlyAdaptedStruct getDirectlyAdapted() { return directlyAdapted; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="typedefOfAdapted", requiredness=Requiredness.NONE)
     public test.fixtures.adapter.DirectlyAdaptedStruct getTypedefOfAdapted() { return typedefOfAdapted; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -171,7 +167,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
         helper.add("typedefOfAdapted", typedefOfAdapted);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -190,7 +186,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
             Objects.equals(typedefOfAdapted, other.typedefOfAdapted) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -200,7 +196,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
             typedefOfAdapted
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructFieldAdaptedStruct> asReader() {
       return StructFieldAdaptedStruct::read0;
@@ -255,7 +251,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (adaptedStruct != null) {
@@ -281,7 +277,7 @@ public final class StructFieldAdaptedStruct implements com.facebook.thrift.paylo
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructFieldAdaptedStructLazy {
         private static final StructFieldAdaptedStruct _DEFAULT = new StructFieldAdaptedStruct.Builder().build();
     }

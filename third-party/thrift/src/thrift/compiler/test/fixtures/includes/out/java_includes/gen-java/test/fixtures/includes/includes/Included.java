@@ -36,7 +36,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
       this.myIntField = 0L;
       this.myTransitiveField = test.fixtures.includes.transitive.Constants.EXAMPLE_FOO;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
         private long myIntField = 0L;
         private test.fixtures.includes.transitive.Foo myTransitiveField = test.fixtures.includes.transitive.Constants.EXAMPLE_FOO;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
-        public Builder setMyIntField(long myIntField) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)    public Builder setMyIntField(long myIntField) {
             this.myIntField = myIntField;
             return this;
         }
     
         public long getMyIntField() { return myIntField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="MyTransitiveField", requiredness=Requiredness.NONE)
-        public Builder setMyTransitiveField(test.fixtures.includes.transitive.Foo myTransitiveField) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="MyTransitiveField", requiredness=Requiredness.NONE)    public Builder setMyTransitiveField(test.fixtures.includes.transitive.Foo myTransitiveField) {
             this.myTransitiveField = myTransitiveField;
             return this;
         }
@@ -80,7 +78,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
     
     @com.facebook.swift.codec.ThriftField(value=1, name="MyIntField", requiredness=Requiredness.NONE)
     public long getMyIntField() { return myIntField; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="MyTransitiveField", requiredness=Requiredness.NONE)
     public test.fixtures.includes.transitive.Foo getMyTransitiveField() { return myTransitiveField; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("myTransitiveField", myTransitiveField);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(myTransitiveField, other.myTransitiveField) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
             myTransitiveField
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Included> asReader() {
       return Included::read0;
@@ -180,7 +178,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
@@ -194,7 +192,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _IncludedLazy {
         private static final Included _DEFAULT = new Included.Builder().build();
     }

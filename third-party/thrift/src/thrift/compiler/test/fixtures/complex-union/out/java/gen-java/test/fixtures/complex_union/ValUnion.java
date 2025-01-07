@@ -106,8 +106,8 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
         res.id = 2;
         return res;
     }
-    
-    @com.facebook.swift.codec.ThriftField
+
+        @com.facebook.swift.codec.ThriftField
     @Deprecated
     public void setV1(final test.fixtures.complex_union.Val v1) {
         this.value = v1;
@@ -119,6 +119,7 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
         this.value = v2;
         this.id = 2;
     }
+
 
     @com.facebook.swift.codec.ThriftField(value=1, name="v1", requiredness=Requiredness.NONE)
     public test.fixtures.complex_union.Val getV1() {
@@ -255,7 +256,7 @@ public final class ValUnion implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ValUnion> asReader() {
       return ValUnion::read0;

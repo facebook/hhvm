@@ -84,7 +84,7 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
       this.mapKeySetValInt = null;
       this.mapKeyListValSet = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -113,144 +113,126 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         private Map<Set<Boolean>, test.fixtures.complex_struct.MyEnum> mapKeySetValInt = null;
         private Map<List<Integer>, Set<Map<Double, String>>> mapKeyListValSet = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="setOfSetOfInt", requiredness=Requiredness.NONE)
-        public Builder setSetOfSetOfInt(Set<Set<Integer>> setOfSetOfInt) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="setOfSetOfInt", requiredness=Requiredness.NONE)    public Builder setSetOfSetOfInt(Set<Set<Integer>> setOfSetOfInt) {
             this.setOfSetOfInt = setOfSetOfInt;
             return this;
         }
     
         public Set<Set<Integer>> getSetOfSetOfInt() { return setOfSetOfInt; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="listofListOfListOfListOfEnum", requiredness=Requiredness.NONE)
-        public Builder setListofListOfListOfListOfEnum(List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> listofListOfListOfListOfEnum) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="listofListOfListOfListOfEnum", requiredness=Requiredness.NONE)    public Builder setListofListOfListOfListOfEnum(List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> listofListOfListOfListOfEnum) {
             this.listofListOfListOfListOfEnum = listofListOfListOfListOfEnum;
             return this;
         }
     
         public List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> getListofListOfListOfListOfEnum() { return listofListOfListOfListOfEnum; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="listOfListOfMyStruct", requiredness=Requiredness.NONE)
-        public Builder setListOfListOfMyStruct(List<List<test.fixtures.complex_struct.MyStruct>> listOfListOfMyStruct) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="listOfListOfMyStruct", requiredness=Requiredness.NONE)    public Builder setListOfListOfMyStruct(List<List<test.fixtures.complex_struct.MyStruct>> listOfListOfMyStruct) {
             this.listOfListOfMyStruct = listOfListOfMyStruct;
             return this;
         }
     
         public List<List<test.fixtures.complex_struct.MyStruct>> getListOfListOfMyStruct() { return listOfListOfMyStruct; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="setOfListOfListOfLong", requiredness=Requiredness.NONE)
-        public Builder setSetOfListOfListOfLong(Set<List<List<Long>>> setOfListOfListOfLong) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="setOfListOfListOfLong", requiredness=Requiredness.NONE)    public Builder setSetOfListOfListOfLong(Set<List<List<Long>>> setOfListOfListOfLong) {
             this.setOfListOfListOfLong = setOfListOfListOfLong;
             return this;
         }
     
         public Set<List<List<Long>>> getSetOfListOfListOfLong() { return setOfListOfListOfLong; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="setOfSetOfsetOfLong", requiredness=Requiredness.NONE)
-        public Builder setSetOfSetOfsetOfLong(Set<Set<Set<Long>>> setOfSetOfsetOfLong) {
+            @com.facebook.swift.codec.ThriftField(value=5, name="setOfSetOfsetOfLong", requiredness=Requiredness.NONE)    public Builder setSetOfSetOfsetOfLong(Set<Set<Set<Long>>> setOfSetOfsetOfLong) {
             this.setOfSetOfsetOfLong = setOfSetOfsetOfLong;
             return this;
         }
     
         public Set<Set<Set<Long>>> getSetOfSetOfsetOfLong() { return setOfSetOfsetOfLong; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="mapStructListOfListOfLong", requiredness=Requiredness.NONE)
-        public Builder setMapStructListOfListOfLong(Map<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> mapStructListOfListOfLong) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="mapStructListOfListOfLong", requiredness=Requiredness.NONE)    public Builder setMapStructListOfListOfLong(Map<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> mapStructListOfListOfLong) {
             this.mapStructListOfListOfLong = mapStructListOfListOfLong;
             return this;
         }
     
         public Map<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> getMapStructListOfListOfLong() { return mapStructListOfListOfLong; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="mKeyStructValInt", requiredness=Requiredness.NONE)
-        public Builder setMKeyStructValInt(Map<test.fixtures.complex_struct.MyStruct, Integer> mKeyStructValInt) {
+            @com.facebook.swift.codec.ThriftField(value=7, name="mKeyStructValInt", requiredness=Requiredness.NONE)    public Builder setMKeyStructValInt(Map<test.fixtures.complex_struct.MyStruct, Integer> mKeyStructValInt) {
             this.mKeyStructValInt = mKeyStructValInt;
             return this;
         }
     
         public Map<test.fixtures.complex_struct.MyStruct, Integer> getMKeyStructValInt() { return mKeyStructValInt; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="listOfMapKeyIntValInt", requiredness=Requiredness.NONE)
-        public Builder setListOfMapKeyIntValInt(List<Map<Integer, Integer>> listOfMapKeyIntValInt) {
+            @com.facebook.swift.codec.ThriftField(value=8, name="listOfMapKeyIntValInt", requiredness=Requiredness.NONE)    public Builder setListOfMapKeyIntValInt(List<Map<Integer, Integer>> listOfMapKeyIntValInt) {
             this.listOfMapKeyIntValInt = listOfMapKeyIntValInt;
             return this;
         }
     
         public List<Map<Integer, Integer>> getListOfMapKeyIntValInt() { return listOfMapKeyIntValInt; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="listOfMapKeyStrValList", requiredness=Requiredness.NONE)
-        public Builder setListOfMapKeyStrValList(List<Map<String, List<test.fixtures.complex_struct.MyStruct>>> listOfMapKeyStrValList) {
+            @com.facebook.swift.codec.ThriftField(value=9, name="listOfMapKeyStrValList", requiredness=Requiredness.NONE)    public Builder setListOfMapKeyStrValList(List<Map<String, List<test.fixtures.complex_struct.MyStruct>>> listOfMapKeyStrValList) {
             this.listOfMapKeyStrValList = listOfMapKeyStrValList;
             return this;
         }
     
         public List<Map<String, List<test.fixtures.complex_struct.MyStruct>>> getListOfMapKeyStrValList() { return listOfMapKeyStrValList; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="mapKeySetValLong", requiredness=Requiredness.NONE)
-        public Builder setMapKeySetValLong(Map<Set<Integer>, Long> mapKeySetValLong) {
+            @com.facebook.swift.codec.ThriftField(value=10, name="mapKeySetValLong", requiredness=Requiredness.NONE)    public Builder setMapKeySetValLong(Map<Set<Integer>, Long> mapKeySetValLong) {
             this.mapKeySetValLong = mapKeySetValLong;
             return this;
         }
     
         public Map<Set<Integer>, Long> getMapKeySetValLong() { return mapKeySetValLong; }
     
-            @com.facebook.swift.codec.ThriftField(value=11, name="mapKeyListValLong", requiredness=Requiredness.NONE)
-        public Builder setMapKeyListValLong(Map<List<String>, Integer> mapKeyListValLong) {
+            @com.facebook.swift.codec.ThriftField(value=11, name="mapKeyListValLong", requiredness=Requiredness.NONE)    public Builder setMapKeyListValLong(Map<List<String>, Integer> mapKeyListValLong) {
             this.mapKeyListValLong = mapKeyListValLong;
             return this;
         }
     
         public Map<List<String>, Integer> getMapKeyListValLong() { return mapKeyListValLong; }
     
-            @com.facebook.swift.codec.ThriftField(value=12, name="mapKeyMapValMap", requiredness=Requiredness.NONE)
-        public Builder setMapKeyMapValMap(Map<Map<Integer, String>, Map<Integer, String>> mapKeyMapValMap) {
+            @com.facebook.swift.codec.ThriftField(value=12, name="mapKeyMapValMap", requiredness=Requiredness.NONE)    public Builder setMapKeyMapValMap(Map<Map<Integer, String>, Map<Integer, String>> mapKeyMapValMap) {
             this.mapKeyMapValMap = mapKeyMapValMap;
             return this;
         }
     
         public Map<Map<Integer, String>, Map<Integer, String>> getMapKeyMapValMap() { return mapKeyMapValMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=13, name="mapKeySetValMap", requiredness=Requiredness.NONE)
-        public Builder setMapKeySetValMap(Map<Set<List<Integer>>, Map<List<Set<String>>, String>> mapKeySetValMap) {
+            @com.facebook.swift.codec.ThriftField(value=13, name="mapKeySetValMap", requiredness=Requiredness.NONE)    public Builder setMapKeySetValMap(Map<Set<List<Integer>>, Map<List<Set<String>>, String>> mapKeySetValMap) {
             this.mapKeySetValMap = mapKeySetValMap;
             return this;
         }
     
         public Map<Set<List<Integer>>, Map<List<Set<String>>, String>> getMapKeySetValMap() { return mapKeySetValMap; }
     
-            @com.facebook.swift.codec.ThriftField(value=14, name="NestedMaps", requiredness=Requiredness.NONE)
-        public Builder setNestedMaps(Map<Map<Map<Integer, String>, String>, Map<Integer, String>> nestedMaps) {
+            @com.facebook.swift.codec.ThriftField(value=14, name="NestedMaps", requiredness=Requiredness.NONE)    public Builder setNestedMaps(Map<Map<Map<Integer, String>, String>, Map<Integer, String>> nestedMaps) {
             this.nestedMaps = nestedMaps;
             return this;
         }
     
         public Map<Map<Map<Integer, String>, String>, Map<Integer, String>> getNestedMaps() { return nestedMaps; }
     
-            @com.facebook.swift.codec.ThriftField(value=15, name="mapKeyIntValList", requiredness=Requiredness.NONE)
-        public Builder setMapKeyIntValList(Map<Integer, List<test.fixtures.complex_struct.MyStruct>> mapKeyIntValList) {
+            @com.facebook.swift.codec.ThriftField(value=15, name="mapKeyIntValList", requiredness=Requiredness.NONE)    public Builder setMapKeyIntValList(Map<Integer, List<test.fixtures.complex_struct.MyStruct>> mapKeyIntValList) {
             this.mapKeyIntValList = mapKeyIntValList;
             return this;
         }
     
         public Map<Integer, List<test.fixtures.complex_struct.MyStruct>> getMapKeyIntValList() { return mapKeyIntValList; }
     
-            @com.facebook.swift.codec.ThriftField(value=16, name="mapKeyIntValSet", requiredness=Requiredness.NONE)
-        public Builder setMapKeyIntValSet(Map<Integer, Set<Boolean>> mapKeyIntValSet) {
+            @com.facebook.swift.codec.ThriftField(value=16, name="mapKeyIntValSet", requiredness=Requiredness.NONE)    public Builder setMapKeyIntValSet(Map<Integer, Set<Boolean>> mapKeyIntValSet) {
             this.mapKeyIntValSet = mapKeyIntValSet;
             return this;
         }
     
         public Map<Integer, Set<Boolean>> getMapKeyIntValSet() { return mapKeyIntValSet; }
     
-            @com.facebook.swift.codec.ThriftField(value=17, name="mapKeySetValInt", requiredness=Requiredness.NONE)
-        public Builder setMapKeySetValInt(Map<Set<Boolean>, test.fixtures.complex_struct.MyEnum> mapKeySetValInt) {
+            @com.facebook.swift.codec.ThriftField(value=17, name="mapKeySetValInt", requiredness=Requiredness.NONE)    public Builder setMapKeySetValInt(Map<Set<Boolean>, test.fixtures.complex_struct.MyEnum> mapKeySetValInt) {
             this.mapKeySetValInt = mapKeySetValInt;
             return this;
         }
     
         public Map<Set<Boolean>, test.fixtures.complex_struct.MyEnum> getMapKeySetValInt() { return mapKeySetValInt; }
     
-            @com.facebook.swift.codec.ThriftField(value=18, name="mapKeyListValSet", requiredness=Requiredness.NONE)
-        public Builder setMapKeyListValSet(Map<List<Integer>, Set<Map<Double, String>>> mapKeyListValSet) {
+            @com.facebook.swift.codec.ThriftField(value=18, name="mapKeyListValSet", requiredness=Requiredness.NONE)    public Builder setMapKeyListValSet(Map<List<Integer>, Set<Map<Double, String>>> mapKeyListValSet) {
             this.mapKeyListValSet = mapKeyListValSet;
             return this;
         }
@@ -304,7 +286,7 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -423,92 +405,92 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="setOfSetOfInt", requiredness=Requiredness.NONE)
     public Set<Set<Integer>> getSetOfSetOfInt() { return setOfSetOfInt; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="listofListOfListOfListOfEnum", requiredness=Requiredness.NONE)
     public List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> getListofListOfListOfListOfEnum() { return listofListOfListOfListOfEnum; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="listOfListOfMyStruct", requiredness=Requiredness.NONE)
     public List<List<test.fixtures.complex_struct.MyStruct>> getListOfListOfMyStruct() { return listOfListOfMyStruct; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="setOfListOfListOfLong", requiredness=Requiredness.NONE)
     public Set<List<List<Long>>> getSetOfListOfListOfLong() { return setOfListOfListOfLong; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=5, name="setOfSetOfsetOfLong", requiredness=Requiredness.NONE)
     public Set<Set<Set<Long>>> getSetOfSetOfsetOfLong() { return setOfSetOfsetOfLong; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="mapStructListOfListOfLong", requiredness=Requiredness.NONE)
     public Map<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> getMapStructListOfListOfLong() { return mapStructListOfListOfLong; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=7, name="mKeyStructValInt", requiredness=Requiredness.NONE)
     public Map<test.fixtures.complex_struct.MyStruct, Integer> getMKeyStructValInt() { return mKeyStructValInt; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="listOfMapKeyIntValInt", requiredness=Requiredness.NONE)
     public List<Map<Integer, Integer>> getListOfMapKeyIntValInt() { return listOfMapKeyIntValInt; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=9, name="listOfMapKeyStrValList", requiredness=Requiredness.NONE)
     public List<Map<String, List<test.fixtures.complex_struct.MyStruct>>> getListOfMapKeyStrValList() { return listOfMapKeyStrValList; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=10, name="mapKeySetValLong", requiredness=Requiredness.NONE)
     public Map<Set<Integer>, Long> getMapKeySetValLong() { return mapKeySetValLong; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=11, name="mapKeyListValLong", requiredness=Requiredness.NONE)
     public Map<List<String>, Integer> getMapKeyListValLong() { return mapKeyListValLong; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=12, name="mapKeyMapValMap", requiredness=Requiredness.NONE)
     public Map<Map<Integer, String>, Map<Integer, String>> getMapKeyMapValMap() { return mapKeyMapValMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=13, name="mapKeySetValMap", requiredness=Requiredness.NONE)
     public Map<Set<List<Integer>>, Map<List<Set<String>>, String>> getMapKeySetValMap() { return mapKeySetValMap; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=14, name="NestedMaps", requiredness=Requiredness.NONE)
     public Map<Map<Map<Integer, String>, String>, Map<Integer, String>> getNestedMaps() { return nestedMaps; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=15, name="mapKeyIntValList", requiredness=Requiredness.NONE)
     public Map<Integer, List<test.fixtures.complex_struct.MyStruct>> getMapKeyIntValList() { return mapKeyIntValList; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=16, name="mapKeyIntValSet", requiredness=Requiredness.NONE)
     public Map<Integer, Set<Boolean>> getMapKeyIntValSet() { return mapKeyIntValSet; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=17, name="mapKeySetValInt", requiredness=Requiredness.NONE)
     public Map<Set<Boolean>, test.fixtures.complex_struct.MyEnum> getMapKeySetValInt() { return mapKeySetValInt; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=18, name="mapKeyListValSet", requiredness=Requiredness.NONE)
     public Map<List<Integer>, Set<Map<Double, String>>> getMapKeyListValSet() { return mapKeyListValSet; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -532,7 +514,7 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         helper.add("mapKeyListValSet", mapKeyListValSet);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -565,7 +547,7 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
             Objects.equals(mapKeyListValSet, other.mapKeyListValSet) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -589,7 +571,7 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
             mapKeyListValSet
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ComplexNestedStruct> asReader() {
       return ComplexNestedStruct::read0;
@@ -606,30 +588,30 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _SETOFSETOFINT:
           if (__field.type == TType.SET) {
             Set<Set<Integer>> setOfSetOfInt;
-            {
-            TSet _set = oprot.readSetBegin();
-            setOfSetOfInt = new HashSet<Set<Integer>>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                Set<Integer> _value1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readSetEnd();
-                            }
-                setOfSetOfInt.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setOfSetOfInt = new HashSet<Set<Integer>>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    Set<Integer> _value1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _value1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+    setOfSetOfInt.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetOfSetOfInt(setOfSetOfInt);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -638,56 +620,56 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _LISTOFLISTOFLISTOFLISTOFENUM:
           if (__field.type == TType.LIST) {
             List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> listofListOfListOfListOfEnum;
-            {
-            TList _list = oprot.readListBegin();
-            listofListOfListOfListOfEnum = new ArrayList<List<List<List<test.fixtures.complex_struct.MyEnum>>>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                List<List<List<test.fixtures.complex_struct.MyEnum>>> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<List<List<test.fixtures.complex_struct.MyEnum>>>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                List<List<test.fixtures.complex_struct.MyEnum>> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<List<test.fixtures.complex_struct.MyEnum>>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                List<test.fixtures.complex_struct.MyEnum> _value3;
-            {
-            TList _list3 = oprot.readListBegin();
-            _value3 = new ArrayList<test.fixtures.complex_struct.MyEnum>(Math.max(0, _list3.size));
-            for (int _i3 = 0; (_list3.size < 0) ? oprot.peekList() : (_i3 < _list3.size); _i3++) {
-                
-                
-                test.fixtures.complex_struct.MyEnum _value4 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
-                
-                
-                _value3.add(_value4);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                listofListOfListOfListOfEnum.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listofListOfListOfListOfEnum = new ArrayList<List<List<List<test.fixtures.complex_struct.MyEnum>>>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    List<List<List<test.fixtures.complex_struct.MyEnum>>> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<List<List<test.fixtures.complex_struct.MyEnum>>>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    List<List<test.fixtures.complex_struct.MyEnum>> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<List<test.fixtures.complex_struct.MyEnum>>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    List<test.fixtures.complex_struct.MyEnum> _value3;
+                                {
+                                TList _list3 = oprot.readListBegin();
+                                _value3 = new ArrayList<test.fixtures.complex_struct.MyEnum>(Math.max(0, _list3.size));
+                                for (int _i3 = 0; (_list3.size < 0) ? oprot.peekList() : (_i3 < _list3.size); _i3++) {
+                                    
+                                    
+                                    test.fixtures.complex_struct.MyEnum _value4 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
+                                    
+                                    
+                                    _value3.add(_value4);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+    listofListOfListOfListOfEnum.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListofListOfListOfListOfEnum(listofListOfListOfListOfEnum);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -696,30 +678,30 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _LISTOFLISTOFMYSTRUCT:
           if (__field.type == TType.LIST) {
             List<List<test.fixtures.complex_struct.MyStruct>> listOfListOfMyStruct;
-            {
-            TList _list = oprot.readListBegin();
-            listOfListOfMyStruct = new ArrayList<List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                List<test.fixtures.complex_struct.MyStruct> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                listOfListOfMyStruct.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfListOfMyStruct = new ArrayList<List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    List<test.fixtures.complex_struct.MyStruct> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+    listOfListOfMyStruct.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfListOfMyStruct(listOfListOfMyStruct);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -728,43 +710,43 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _SETOFLISTOFLISTOFLONG:
           if (__field.type == TType.SET) {
             Set<List<List<Long>>> setOfListOfListOfLong;
-            {
-            TSet _set = oprot.readSetBegin();
-            setOfListOfListOfLong = new HashSet<List<List<Long>>>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                List<List<Long>> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<List<Long>>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                List<Long> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<Long>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                
-                long _value3 = oprot.readI64();
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                setOfListOfListOfLong.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setOfListOfListOfLong = new HashSet<List<List<Long>>>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    List<List<Long>> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<List<Long>>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    List<Long> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<Long>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    
+                                    long _value3 = oprot.readI64();
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+    setOfListOfListOfLong.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetOfListOfListOfLong(setOfListOfListOfLong);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -773,43 +755,43 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _SETOFSETOFSETOFLONG:
           if (__field.type == TType.SET) {
             Set<Set<Set<Long>>> setOfSetOfsetOfLong;
-            {
-            TSet _set = oprot.readSetBegin();
-            setOfSetOfsetOfLong = new HashSet<Set<Set<Long>>>(Math.max(0, _set.size));
-            for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
-                
-                Set<Set<Long>> _value1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _value1 = new HashSet<Set<Long>>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                Set<Long> _value2;
-            {
-            TSet _set2 = oprot.readSetBegin();
-            _value2 = new HashSet<Long>(Math.max(0, _set2.size));
-            for (int _i2 = 0; (_set2.size < 0) ? oprot.peekSet() : (_i2 < _set2.size); _i2++) {
-                
-                
-                long _value3 = oprot.readI64();
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readSetEnd();
-            }
-
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readSetEnd();
-                            }
-                setOfSetOfsetOfLong.add(_value1);
-            }
-            oprot.readSetEnd();
-            }
+                {
+                TSet _set = oprot.readSetBegin();
+                setOfSetOfsetOfLong = new HashSet<Set<Set<Long>>>(Math.max(0, _set.size));
+                for (int _i = 0; (_set.size < 0) ? oprot.peekSet() : (_i < _set.size); _i++) {
+                    
+                    Set<Set<Long>> _value1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _value1 = new HashSet<Set<Long>>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    Set<Long> _value2;
+                                {
+                                TSet _set2 = oprot.readSetBegin();
+                                _value2 = new HashSet<Long>(Math.max(0, _set2.size));
+                                for (int _i2 = 0; (_set2.size < 0) ? oprot.peekSet() : (_i2 < _set2.size); _i2++) {
+                                    
+                                    
+                                    long _value3 = oprot.readI64();
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+    setOfSetOfsetOfLong.add(_value1);
+                }
+                oprot.readSetEnd();
+                }
             builder.setSetOfSetOfsetOfLong(setOfSetOfsetOfLong);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -818,44 +800,44 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPSTRUCTLISTOFLISTOFLONG:
           if (__field.type == TType.MAP) {
             Map<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> mapStructListOfListOfLong;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapStructListOfListOfLong = new HashMap<Integer, List<List<test.fixtures.complex_struct.MyStruct>>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                List<List<test.fixtures.complex_struct.MyStruct>> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                List<test.fixtures.complex_struct.MyStruct> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                
-                test.fixtures.complex_struct.MyStruct _value3 = test.fixtures.complex_struct.MyStruct.read0(oprot);
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                mapStructListOfListOfLong.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapStructListOfListOfLong = new HashMap<Integer, List<List<test.fixtures.complex_struct.MyStruct>>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    List<List<test.fixtures.complex_struct.MyStruct>> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    List<test.fixtures.complex_struct.MyStruct> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    
+                                    test.fixtures.complex_struct.MyStruct _value3 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapStructListOfListOfLong.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapStructListOfListOfLong(mapStructListOfListOfLong);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -864,17 +846,17 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MKEYSTRUCTVALINT:
           if (__field.type == TType.MAP) {
             Map<test.fixtures.complex_struct.MyStruct, Integer> mKeyStructValInt;
-            {
-            TMap _map = oprot.readMapBegin();
-            mKeyStructValInt = new HashMap<test.fixtures.complex_struct.MyStruct, Integer>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                test.fixtures.complex_struct.MyStruct _key1 = test.fixtures.complex_struct.MyStruct.read0(oprot);
-                int _value1 = oprot.readI32();
-                mKeyStructValInt.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mKeyStructValInt = new HashMap<test.fixtures.complex_struct.MyStruct, Integer>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    test.fixtures.complex_struct.MyStruct _key1 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                    int _value1 = oprot.readI32();
+                    mKeyStructValInt.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMKeyStructValInt(mKeyStructValInt);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -883,34 +865,34 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _LISTOFMAPKEYINTVALINT:
           if (__field.type == TType.LIST) {
             List<Map<Integer, Integer>> listOfMapKeyIntValInt;
-            {
-            TList _list = oprot.readListBegin();
-            listOfMapKeyIntValInt = new ArrayList<Map<Integer, Integer>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                Map<Integer, Integer> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<Integer, Integer>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                int _key2 = oprot.readI32();
-                                
-                
-                                
-                                int _value2 = oprot.readI32();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                listOfMapKeyIntValInt.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfMapKeyIntValInt = new ArrayList<Map<Integer, Integer>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    Map<Integer, Integer> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<Integer, Integer>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    int _key2 = oprot.readI32();
+                                    
+                    
+                                    
+                                    int _value2 = oprot.readI32();
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+    listOfMapKeyIntValInt.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfMapKeyIntValInt(listOfMapKeyIntValInt);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -919,47 +901,47 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _LISTOFMAPKEYSTRVALLIST:
           if (__field.type == TType.LIST) {
             List<Map<String, List<test.fixtures.complex_struct.MyStruct>>> listOfMapKeyStrValList;
-            {
-            TList _list = oprot.readListBegin();
-            listOfMapKeyStrValList = new ArrayList<Map<String, List<test.fixtures.complex_struct.MyStruct>>>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                Map<String, List<test.fixtures.complex_struct.MyStruct>> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<String, List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                String _key2 = oprot.readString();
-                                
-                
-                                List<test.fixtures.complex_struct.MyStruct> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                
-                test.fixtures.complex_struct.MyStruct _value3 = test.fixtures.complex_struct.MyStruct.read0(oprot);
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                listOfMapKeyStrValList.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                listOfMapKeyStrValList = new ArrayList<Map<String, List<test.fixtures.complex_struct.MyStruct>>>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    Map<String, List<test.fixtures.complex_struct.MyStruct>> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<String, List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    String _key2 = oprot.readString();
+                                    
+                    
+                                    List<test.fixtures.complex_struct.MyStruct> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    
+                                    test.fixtures.complex_struct.MyStruct _value3 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+    listOfMapKeyStrValList.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setListOfMapKeyStrValList(listOfMapKeyStrValList);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -968,27 +950,27 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYSETVALLONG:
           if (__field.type == TType.MAP) {
             Map<Set<Integer>, Long> mapKeySetValLong;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeySetValLong = new HashMap<Set<Integer>, Long>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                Set<Integer> _key1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _key1 = new HashSet<Integer>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                int _value2 = oprot.readI32();
-                                _key1.add(_value2);
-                            }
-                            oprot.readSetEnd();
-                            }
-                                long _value1 = oprot.readI64();
-                mapKeySetValLong.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeySetValLong = new HashMap<Set<Integer>, Long>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    Set<Integer> _key1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _key1 = new HashSet<Integer>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    int _value2 = oprot.readI32();
+                                    _key1.add(_value2);
+                                }
+                                oprot.readSetEnd();
+                                }
+                    long _value1 = oprot.readI64();
+                    mapKeySetValLong.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeySetValLong(mapKeySetValLong);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -997,27 +979,27 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYLISTVALLONG:
           if (__field.type == TType.MAP) {
             Map<List<String>, Integer> mapKeyListValLong;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeyListValLong = new HashMap<List<String>, Integer>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                List<String> _key1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _key1 = new ArrayList<String>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                String _value2 = oprot.readString();
-                                _key1.add(_value2);
-                            }
-                            oprot.readListEnd();
-                            }
-                                int _value1 = oprot.readI32();
-                mapKeyListValLong.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeyListValLong = new HashMap<List<String>, Integer>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    List<String> _key1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _key1 = new ArrayList<String>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    String _value2 = oprot.readString();
+                                    _key1.add(_value2);
+                                }
+                                oprot.readListEnd();
+                                }
+                    int _value1 = oprot.readI32();
+                    mapKeyListValLong.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeyListValLong(mapKeyListValLong);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1026,47 +1008,47 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYMAPVALMAP:
           if (__field.type == TType.MAP) {
             Map<Map<Integer, String>, Map<Integer, String>> mapKeyMapValMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeyMapValMap = new HashMap<Map<Integer, String>, Map<Integer, String>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                Map<Integer, String> _key1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _key1 = new HashMap<Integer, String>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                int _key2 = oprot.readI32();
-                
-                                String _value2 = oprot.readString();
-                                _key1.put(_key2, _value2);
-                            }
-                            oprot.readMapEnd();
-                            }
-                                Map<Integer, String> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<Integer, String>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                int _key2 = oprot.readI32();
-                                
-                
-                                
-                                String _value2 = oprot.readString();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                                mapKeyMapValMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeyMapValMap = new HashMap<Map<Integer, String>, Map<Integer, String>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    Map<Integer, String> _key1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _key1 = new HashMap<Integer, String>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    int _key2 = oprot.readI32();
+                    
+                                    String _value2 = oprot.readString();
+                                    _key1.put(_key2, _value2);
+                                }
+                                oprot.readMapEnd();
+                                }
+                    Map<Integer, String> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<Integer, String>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    int _key2 = oprot.readI32();
+                                    
+                    
+                                    
+                                    String _value2 = oprot.readString();
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    mapKeyMapValMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeyMapValMap(mapKeyMapValMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1075,84 +1057,84 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYSETVALMAP:
           if (__field.type == TType.MAP) {
             Map<Set<List<Integer>>, Map<List<Set<String>>, String>> mapKeySetValMap;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeySetValMap = new HashMap<Set<List<Integer>>, Map<List<Set<String>>, String>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                Set<List<Integer>> _key1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _key1 = new HashSet<List<Integer>>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                List<Integer> _value2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _value2 = new ArrayList<Integer>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                
-                int _value3 = oprot.readI32();
-                
-                
-                _value2.add(_value3);
-                
-            }
-            oprot.readListEnd();
-            }
-
-                                _key1.add(_value2);
-                            }
-                            oprot.readSetEnd();
-                            }
-                                Map<List<Set<String>>, String> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<List<Set<String>>, String>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                List<Set<String>> _key2;
-            {
-            TList _list2 = oprot.readListBegin();
-            _key2 = new ArrayList<Set<String>>(Math.max(0, _list2.size));
-            for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
-                
-                Set<String> _value3;
-            {
-            TSet _set3 = oprot.readSetBegin();
-            _value3 = new HashSet<String>(Math.max(0, _set3.size));
-            for (int _i3 = 0; (_set3.size < 0) ? oprot.peekSet() : (_i3 < _set3.size); _i3++) {
-                
-                
-                String _value4 = oprot.readString();
-                
-                
-                _value3.add(_value4);
-                
-            }
-            oprot.readSetEnd();
-            }
-
-                _key2.add(_value3);
-            }
-            oprot.readListEnd();
-            }
-
-                
-                                
-                                String _value2 = oprot.readString();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                                mapKeySetValMap.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeySetValMap = new HashMap<Set<List<Integer>>, Map<List<Set<String>>, String>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    Set<List<Integer>> _key1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _key1 = new HashSet<List<Integer>>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    List<Integer> _value2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _value2 = new ArrayList<Integer>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    
+                                    int _value3 = oprot.readI32();
+                                    
+                                    
+                                    _value2.add(_value3);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                                    _key1.add(_value2);
+                                }
+                                oprot.readSetEnd();
+                                }
+                    Map<List<Set<String>>, String> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<List<Set<String>>, String>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    List<Set<String>> _key2;
+                                {
+                                TList _list2 = oprot.readListBegin();
+                                _key2 = new ArrayList<Set<String>>(Math.max(0, _list2.size));
+                                for (int _i2 = 0; (_list2.size < 0) ? oprot.peekList() : (_i2 < _list2.size); _i2++) {
+                                    
+                                    Set<String> _value3;
+                                {
+                                TSet _set3 = oprot.readSetBegin();
+                                _value3 = new HashSet<String>(Math.max(0, _set3.size));
+                                for (int _i3 = 0; (_set3.size < 0) ? oprot.peekSet() : (_i3 < _set3.size); _i3++) {
+                                    
+                                    
+                                    String _value4 = oprot.readString();
+                                    
+                                    
+                                    _value3.add(_value4);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+                    
+                                    _key2.add(_value3);
+                                }
+                                oprot.readListEnd();
+                                }
+                    
+                    
+                                    
+                                    String _value2 = oprot.readString();
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    mapKeySetValMap.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeySetValMap(mapKeySetValMap);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1161,60 +1143,60 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _NESTEDMAPS:
           if (__field.type == TType.MAP) {
             Map<Map<Map<Integer, String>, String>, Map<Integer, String>> nestedMaps;
-            {
-            TMap _map = oprot.readMapBegin();
-            nestedMaps = new HashMap<Map<Map<Integer, String>, String>, Map<Integer, String>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                Map<Map<Integer, String>, String> _key1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _key1 = new HashMap<Map<Integer, String>, String>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                Map<Integer, String> _key2;
-            {
-            TMap _map2 = oprot.readMapBegin();
-            _key2 = new HashMap<Integer, String>(Math.max(0, _map2.size));
-            for (int _i2 = 0; (_map2.size < 0) ? oprot.peekMap() : (_i2 < _map2.size); _i2++) {
-                
-                int _key3 = oprot.readI32();
-
-                String _value3 = oprot.readString();
-                _key2.put(_key3, _value3);
-            }
-            oprot.readMapEnd();
-            }
-
-                
-                                String _value2 = oprot.readString();
-                                _key1.put(_key2, _value2);
-                            }
-                            oprot.readMapEnd();
-                            }
-                                Map<Integer, String> _value1;
-                            {
-                            TMap _map1 = oprot.readMapBegin();
-                            _value1 = new HashMap<Integer, String>(Math.max(0, _map1.size));
-                            for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
-                                
-                                
-                                int _key2 = oprot.readI32();
-                                
-                
-                                
-                                String _value2 = oprot.readString();
-                                
-                                
-                                _value1.put(_key2, _value2);
-                                
-                            }
-                            }
-                            oprot.readMapEnd();
-                                nestedMaps.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                nestedMaps = new HashMap<Map<Map<Integer, String>, String>, Map<Integer, String>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    Map<Map<Integer, String>, String> _key1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _key1 = new HashMap<Map<Integer, String>, String>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    Map<Integer, String> _key2;
+                                {
+                                TMap _map2 = oprot.readMapBegin();
+                                _key2 = new HashMap<Integer, String>(Math.max(0, _map2.size));
+                                for (int _i2 = 0; (_map2.size < 0) ? oprot.peekMap() : (_i2 < _map2.size); _i2++) {
+                                    
+                                    int _key3 = oprot.readI32();
+                    
+                                    String _value3 = oprot.readString();
+                                    _key2.put(_key3, _value3);
+                                }
+                                oprot.readMapEnd();
+                                }
+                    
+                    
+                                    String _value2 = oprot.readString();
+                                    _key1.put(_key2, _value2);
+                                }
+                                oprot.readMapEnd();
+                                }
+                    Map<Integer, String> _value1;
+                                {
+                                TMap _map1 = oprot.readMapBegin();
+                                _value1 = new HashMap<Integer, String>(Math.max(0, _map1.size));
+                                for (int _i1 = 0; (_map1.size < 0) ? oprot.peekMap() : (_i1 < _map1.size); _i1++) {
+                                    
+                                    
+                                    int _key2 = oprot.readI32();
+                                    
+                    
+                                    
+                                    String _value2 = oprot.readString();
+                                    
+                                    
+                                    _value1.put(_key2, _value2);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    nestedMaps.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setNestedMaps(nestedMaps);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1223,31 +1205,31 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYINTVALLIST:
           if (__field.type == TType.MAP) {
             Map<Integer, List<test.fixtures.complex_struct.MyStruct>> mapKeyIntValList;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeyIntValList = new HashMap<Integer, List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                List<test.fixtures.complex_struct.MyStruct> _value1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _value1 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                
-                                test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readListEnd();
-                            }
-                                mapKeyIntValList.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeyIntValList = new HashMap<Integer, List<test.fixtures.complex_struct.MyStruct>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    List<test.fixtures.complex_struct.MyStruct> _value1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _value1 = new ArrayList<test.fixtures.complex_struct.MyStruct>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    
+                                    test.fixtures.complex_struct.MyStruct _value2 = test.fixtures.complex_struct.MyStruct.read0(oprot);
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readListEnd();
+                                }
+                    mapKeyIntValList.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeyIntValList(mapKeyIntValList);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1256,31 +1238,31 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYINTVALSET:
           if (__field.type == TType.MAP) {
             Map<Integer, Set<Boolean>> mapKeyIntValSet;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeyIntValSet = new HashMap<Integer, Set<Boolean>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                int _key1 = oprot.readI32();
-                Set<Boolean> _value1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _value1 = new HashSet<Boolean>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                
-                                boolean _value2 = oprot.readBool();
-                                
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readSetEnd();
-                            }
-                                mapKeyIntValSet.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeyIntValSet = new HashMap<Integer, Set<Boolean>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    int _key1 = oprot.readI32();
+                    Set<Boolean> _value1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _value1 = new HashSet<Boolean>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    
+                                    boolean _value2 = oprot.readBool();
+                                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+                    mapKeyIntValSet.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeyIntValSet(mapKeyIntValSet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1289,27 +1271,27 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYSETVALINT:
           if (__field.type == TType.MAP) {
             Map<Set<Boolean>, test.fixtures.complex_struct.MyEnum> mapKeySetValInt;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeySetValInt = new HashMap<Set<Boolean>, test.fixtures.complex_struct.MyEnum>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                Set<Boolean> _key1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _key1 = new HashSet<Boolean>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                boolean _value2 = oprot.readBool();
-                                _key1.add(_value2);
-                            }
-                            oprot.readSetEnd();
-                            }
-                                test.fixtures.complex_struct.MyEnum _value1 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
-                mapKeySetValInt.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeySetValInt = new HashMap<Set<Boolean>, test.fixtures.complex_struct.MyEnum>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    Set<Boolean> _key1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _key1 = new HashSet<Boolean>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    boolean _value2 = oprot.readBool();
+                                    _key1.add(_value2);
+                                }
+                                oprot.readSetEnd();
+                                }
+                    test.fixtures.complex_struct.MyEnum _value1 = test.fixtures.complex_struct.MyEnum.fromInteger(oprot.readI32());
+                    mapKeySetValInt.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeySetValInt(mapKeySetValInt);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1318,58 +1300,58 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
         case _MAPKEYLISTVALSET:
           if (__field.type == TType.MAP) {
             Map<List<Integer>, Set<Map<Double, String>>> mapKeyListValSet;
-            {
-            TMap _map = oprot.readMapBegin();
-            mapKeyListValSet = new HashMap<List<Integer>, Set<Map<Double, String>>>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                List<Integer> _key1;
-                            {
-                            TList _list1 = oprot.readListBegin();
-                            _key1 = new ArrayList<Integer>(Math.max(0, _list1.size));
-                            for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
-                                
-                                int _value2 = oprot.readI32();
-                                _key1.add(_value2);
-                            }
-                            oprot.readListEnd();
-                            }
-                                Set<Map<Double, String>> _value1;
-                            {
-                            TSet _set1 = oprot.readSetBegin();
-                            _value1 = new HashSet<Map<Double, String>>(Math.max(0, _set1.size));
-                            for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
-                                
-                                Map<Double, String> _value2;
-            {
-            TMap _map2 = oprot.readMapBegin();
-            _value2 = new HashMap<Double, String>(Math.max(0, _map2.size));
-            for (int _i2 = 0; (_map2.size < 0) ? oprot.peekMap() : (_i2 < _map2.size); _i2++) {
-                
-                
-                double _key3 = oprot.readDouble();
-                
-
-                
-                String _value3 = oprot.readString();
-                
-                
-                _value2.put(_key3, _value3);
-                
-            }
-            }
-            oprot.readMapEnd();
-
-                                
-                                _value1.add(_value2);
-                                
-                            }
-                            oprot.readSetEnd();
-                            }
-                                mapKeyListValSet.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                mapKeyListValSet = new HashMap<List<Integer>, Set<Map<Double, String>>>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    List<Integer> _key1;
+                                {
+                                TList _list1 = oprot.readListBegin();
+                                _key1 = new ArrayList<Integer>(Math.max(0, _list1.size));
+                                for (int _i1 = 0; (_list1.size < 0) ? oprot.peekList() : (_i1 < _list1.size); _i1++) {
+                                    
+                                    int _value2 = oprot.readI32();
+                                    _key1.add(_value2);
+                                }
+                                oprot.readListEnd();
+                                }
+                    Set<Map<Double, String>> _value1;
+                                {
+                                TSet _set1 = oprot.readSetBegin();
+                                _value1 = new HashSet<Map<Double, String>>(Math.max(0, _set1.size));
+                                for (int _i1 = 0; (_set1.size < 0) ? oprot.peekSet() : (_i1 < _set1.size); _i1++) {
+                                    
+                                    Map<Double, String> _value2;
+                                {
+                                TMap _map2 = oprot.readMapBegin();
+                                _value2 = new HashMap<Double, String>(Math.max(0, _map2.size));
+                                for (int _i2 = 0; (_map2.size < 0) ? oprot.peekMap() : (_i2 < _map2.size); _i2++) {
+                                    
+                                    
+                                    double _key3 = oprot.readDouble();
+                                    
+                    
+                                    
+                                    String _value3 = oprot.readString();
+                                    
+                                    
+                                    _value2.put(_key3, _value3);
+                                    
+                                }
+                                }
+                                oprot.readMapEnd();
+                    
+                                    
+                                    _value1.add(_value2);
+                                    
+                                }
+                                oprot.readSetEnd();
+                                }
+                    mapKeyListValSet.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
             builder.setMapKeyListValSet(mapKeyListValSet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -1384,341 +1366,341 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (setOfSetOfInt != null) {
         oprot.writeFieldBegin(SET_OF_SET_OF_INT_FIELD_DESC);
         Set<Set<Integer>> _iter0 = setOfSetOfInt;
         oprot.writeSetBegin(new TSet(TType.SET, _iter0.size()));
-        for (Set<Integer> _iter1 : _iter0) {
-          oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
-        for (int _iter2 : _iter1) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeSetEnd();
+            for (Set<Integer> _iter1 : _iter0) {
+              oprot.writeSetBegin(new TSet(TType.I32, _iter1.size()));
+            for (int _iter2 : _iter1) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (listofListOfListOfListOfEnum != null) {
         oprot.writeFieldBegin(LISTOF_LIST_OF_LIST_OF_LIST_OF_ENUM_FIELD_DESC);
         List<List<List<List<test.fixtures.complex_struct.MyEnum>>>> _iter0 = listofListOfListOfListOfEnum;
         oprot.writeListBegin(new TList(TType.LIST, _iter0.size()));
-        for (List<List<List<test.fixtures.complex_struct.MyEnum>>> _iter1 : _iter0) {
-          oprot.writeListBegin(new TList(TType.LIST, _iter1.size()));
-        for (List<List<test.fixtures.complex_struct.MyEnum>> _iter2 : _iter1) {
-          oprot.writeListBegin(new TList(TType.LIST, _iter2.size()));
-        for (List<test.fixtures.complex_struct.MyEnum> _iter3 : _iter2) {
-          oprot.writeListBegin(new TList(TType.I32, _iter3.size()));
-        for (test.fixtures.complex_struct.MyEnum _iter4 : _iter3) {
-          oprot.writeI32(_iter4 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter4));
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
+            for (List<List<List<test.fixtures.complex_struct.MyEnum>>> _iter1 : _iter0) {
+              oprot.writeListBegin(new TList(TType.LIST, _iter1.size()));
+            for (List<List<test.fixtures.complex_struct.MyEnum>> _iter2 : _iter1) {
+              oprot.writeListBegin(new TList(TType.LIST, _iter2.size()));
+            for (List<test.fixtures.complex_struct.MyEnum> _iter3 : _iter2) {
+              oprot.writeListBegin(new TList(TType.I32, _iter3.size()));
+            for (test.fixtures.complex_struct.MyEnum _iter4 : _iter3) {
+              oprot.writeI32(_iter4 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter4));
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (listOfListOfMyStruct != null) {
         oprot.writeFieldBegin(LIST_OF_LIST_OF_MY_STRUCT_FIELD_DESC);
         List<List<test.fixtures.complex_struct.MyStruct>> _iter0 = listOfListOfMyStruct;
         oprot.writeListBegin(new TList(TType.LIST, _iter0.size()));
-        for (List<test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.size()));
-        for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1) {
-          _iter2.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
+            for (List<test.fixtures.complex_struct.MyStruct> _iter1 : _iter0) {
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter1.size()));
+            for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1) {
+              _iter2.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (setOfListOfListOfLong != null) {
         oprot.writeFieldBegin(SET_OF_LIST_OF_LIST_OF_LONG_FIELD_DESC);
         Set<List<List<Long>>> _iter0 = setOfListOfListOfLong;
         oprot.writeSetBegin(new TSet(TType.LIST, _iter0.size()));
-        for (List<List<Long>> _iter1 : _iter0) {
-          oprot.writeListBegin(new TList(TType.LIST, _iter1.size()));
-        for (List<Long> _iter2 : _iter1) {
-          oprot.writeListBegin(new TList(TType.I64, _iter2.size()));
-        for (long _iter3 : _iter2) {
-          oprot.writeI64(_iter3);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeSetEnd();
+            for (List<List<Long>> _iter1 : _iter0) {
+              oprot.writeListBegin(new TList(TType.LIST, _iter1.size()));
+            for (List<Long> _iter2 : _iter1) {
+              oprot.writeListBegin(new TList(TType.I64, _iter2.size()));
+            for (long _iter3 : _iter2) {
+              oprot.writeI64(_iter3);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (setOfSetOfsetOfLong != null) {
         oprot.writeFieldBegin(SET_OF_SET_OFSET_OF_LONG_FIELD_DESC);
         Set<Set<Set<Long>>> _iter0 = setOfSetOfsetOfLong;
         oprot.writeSetBegin(new TSet(TType.SET, _iter0.size()));
-        for (Set<Set<Long>> _iter1 : _iter0) {
-          oprot.writeSetBegin(new TSet(TType.SET, _iter1.size()));
-        for (Set<Long> _iter2 : _iter1) {
-          oprot.writeSetBegin(new TSet(TType.I64, _iter2.size()));
-        for (long _iter3 : _iter2) {
-          oprot.writeI64(_iter3);
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeSetEnd();
+            for (Set<Set<Long>> _iter1 : _iter0) {
+              oprot.writeSetBegin(new TSet(TType.SET, _iter1.size()));
+            for (Set<Long> _iter2 : _iter1) {
+              oprot.writeSetBegin(new TSet(TType.I64, _iter2.size()));
+            for (long _iter3 : _iter2) {
+              oprot.writeI64(_iter3);
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
       if (mapStructListOfListOfLong != null) {
         oprot.writeFieldBegin(MAP_STRUCT_LIST_OF_LIST_OF_LONG_FIELD_DESC);
         Map<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> _iter0 = mapStructListOfListOfLong;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-        for (Map.Entry<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
-        for (List<test.fixtures.complex_struct.MyStruct> _iter2 : _iter1.getValue()) {
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter2.size()));
-        for (test.fixtures.complex_struct.MyStruct _iter3 : _iter2) {
-          _iter3.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, List<List<test.fixtures.complex_struct.MyStruct>>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.LIST, _iter1.getValue().size()));
+            for (List<test.fixtures.complex_struct.MyStruct> _iter2 : _iter1.getValue()) {
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter2.size()));
+            for (test.fixtures.complex_struct.MyStruct _iter3 : _iter2) {
+              _iter3.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mKeyStructValInt != null) {
         oprot.writeFieldBegin(M_KEY_STRUCT_VAL_INT_FIELD_DESC);
         Map<test.fixtures.complex_struct.MyStruct, Integer> _iter0 = mKeyStructValInt;
         oprot.writeMapBegin(new TMap(TType.STRUCT, TType.I32, _iter0.size()));
-        for (Map.Entry<test.fixtures.complex_struct.MyStruct, Integer> _iter1 : _iter0.entrySet()) {
-          _iter1.getKey().write0(oprot);
-          oprot.writeI32(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<test.fixtures.complex_struct.MyStruct, Integer> _iter1 : _iter0.entrySet()) {
+              _iter1.getKey().write0(oprot);
+              oprot.writeI32(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (listOfMapKeyIntValInt != null) {
         oprot.writeFieldBegin(LIST_OF_MAP_KEY_INT_VAL_INT_FIELD_DESC);
         List<Map<Integer, Integer>> _iter0 = listOfMapKeyIntValInt;
         oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<Integer, Integer> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.size()));
-        for (Map.Entry<Integer, Integer> _iter2 : _iter1.entrySet()) {
-          oprot.writeI32(_iter2.getKey());
-          oprot.writeI32(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeListEnd();
+            for (Map<Integer, Integer> _iter1 : _iter0) {
+              oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter1.size()));
+            for (Map.Entry<Integer, Integer> _iter2 : _iter1.entrySet()) {
+              oprot.writeI32(_iter2.getKey());
+              oprot.writeI32(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (listOfMapKeyStrValList != null) {
         oprot.writeFieldBegin(LIST_OF_MAP_KEY_STR_VAL_LIST_FIELD_DESC);
         List<Map<String, List<test.fixtures.complex_struct.MyStruct>>> _iter0 = listOfMapKeyStrValList;
         oprot.writeListBegin(new TList(TType.MAP, _iter0.size()));
-        for (Map<String, List<test.fixtures.complex_struct.MyStruct>> _iter1 : _iter0) {
-          oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter1.size()));
-        for (Map.Entry<String, List<test.fixtures.complex_struct.MyStruct>> _iter2 : _iter1.entrySet()) {
-          oprot.writeString(_iter2.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter2.getValue().size()));
-        for (test.fixtures.complex_struct.MyStruct _iter3 : _iter2.getValue()) {
-          _iter3.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeListEnd();
+            for (Map<String, List<test.fixtures.complex_struct.MyStruct>> _iter1 : _iter0) {
+              oprot.writeMapBegin(new TMap(TType.STRING, TType.LIST, _iter1.size()));
+            for (Map.Entry<String, List<test.fixtures.complex_struct.MyStruct>> _iter2 : _iter1.entrySet()) {
+              oprot.writeString(_iter2.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter2.getValue().size()));
+            for (test.fixtures.complex_struct.MyStruct _iter3 : _iter2.getValue()) {
+              _iter3.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeySetValLong != null) {
         oprot.writeFieldBegin(MAP_KEY_SET_VAL_LONG_FIELD_DESC);
         Map<Set<Integer>, Long> _iter0 = mapKeySetValLong;
         oprot.writeMapBegin(new TMap(TType.SET, TType.I64, _iter0.size()));
-        for (Map.Entry<Set<Integer>, Long> _iter1 : _iter0.entrySet()) {
-          oprot.writeSetBegin(new TSet(TType.I32, _iter1.getKey().size()));
-        for (int _iter2 : _iter1.getKey()) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeSetEnd();
-          oprot.writeI64(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Set<Integer>, Long> _iter1 : _iter0.entrySet()) {
+              oprot.writeSetBegin(new TSet(TType.I32, _iter1.getKey().size()));
+            for (int _iter2 : _iter1.getKey()) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeSetEnd();
+              oprot.writeI64(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeyListValLong != null) {
         oprot.writeFieldBegin(MAP_KEY_LIST_VAL_LONG_FIELD_DESC);
         Map<List<String>, Integer> _iter0 = mapKeyListValLong;
         oprot.writeMapBegin(new TMap(TType.LIST, TType.I32, _iter0.size()));
-        for (Map.Entry<List<String>, Integer> _iter1 : _iter0.entrySet()) {
-          oprot.writeListBegin(new TList(TType.STRING, _iter1.getKey().size()));
-        for (String _iter2 : _iter1.getKey()) {
-          oprot.writeString(_iter2);
-        }
-        oprot.writeListEnd();
-          oprot.writeI32(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<List<String>, Integer> _iter1 : _iter0.entrySet()) {
+              oprot.writeListBegin(new TList(TType.STRING, _iter1.getKey().size()));
+            for (String _iter2 : _iter1.getKey()) {
+              oprot.writeString(_iter2);
+            }
+            oprot.writeListEnd();
+              oprot.writeI32(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeyMapValMap != null) {
         oprot.writeFieldBegin(MAP_KEY_MAP_VAL_MAP_FIELD_DESC);
         Map<Map<Integer, String>, Map<Integer, String>> _iter0 = mapKeyMapValMap;
         oprot.writeMapBegin(new TMap(TType.MAP, TType.MAP, _iter0.size()));
-        for (Map.Entry<Map<Integer, String>, Map<Integer, String>> _iter1 : _iter0.entrySet()) {
-          oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getKey().size()));
-        for (Map.Entry<Integer, String> _iter2 : _iter1.getKey().entrySet()) {
-          oprot.writeI32(_iter2.getKey());
-          oprot.writeString(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-          oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getValue().size()));
-        for (Map.Entry<Integer, String> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeI32(_iter2.getKey());
-          oprot.writeString(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Map<Integer, String>, Map<Integer, String>> _iter1 : _iter0.entrySet()) {
+              oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getKey().size()));
+            for (Map.Entry<Integer, String> _iter2 : _iter1.getKey().entrySet()) {
+              oprot.writeI32(_iter2.getKey());
+              oprot.writeString(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+              oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getValue().size()));
+            for (Map.Entry<Integer, String> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeI32(_iter2.getKey());
+              oprot.writeString(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeySetValMap != null) {
         oprot.writeFieldBegin(MAP_KEY_SET_VAL_MAP_FIELD_DESC);
         Map<Set<List<Integer>>, Map<List<Set<String>>, String>> _iter0 = mapKeySetValMap;
         oprot.writeMapBegin(new TMap(TType.SET, TType.MAP, _iter0.size()));
-        for (Map.Entry<Set<List<Integer>>, Map<List<Set<String>>, String>> _iter1 : _iter0.entrySet()) {
-          oprot.writeSetBegin(new TSet(TType.LIST, _iter1.getKey().size()));
-        for (List<Integer> _iter2 : _iter1.getKey()) {
-          oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
-        for (int _iter3 : _iter2) {
-          oprot.writeI32(_iter3);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeSetEnd();
-          oprot.writeMapBegin(new TMap(TType.LIST, TType.STRING, _iter1.getValue().size()));
-        for (Map.Entry<List<Set<String>>, String> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeListBegin(new TList(TType.SET, _iter2.getKey().size()));
-        for (Set<String> _iter3 : _iter2.getKey()) {
-          oprot.writeSetBegin(new TSet(TType.STRING, _iter3.size()));
-        for (String _iter4 : _iter3) {
-          oprot.writeString(_iter4);
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeListEnd();
-          oprot.writeString(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Set<List<Integer>>, Map<List<Set<String>>, String>> _iter1 : _iter0.entrySet()) {
+              oprot.writeSetBegin(new TSet(TType.LIST, _iter1.getKey().size()));
+            for (List<Integer> _iter2 : _iter1.getKey()) {
+              oprot.writeListBegin(new TList(TType.I32, _iter2.size()));
+            for (int _iter3 : _iter2) {
+              oprot.writeI32(_iter3);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeSetEnd();
+              oprot.writeMapBegin(new TMap(TType.LIST, TType.STRING, _iter1.getValue().size()));
+            for (Map.Entry<List<Set<String>>, String> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeListBegin(new TList(TType.SET, _iter2.getKey().size()));
+            for (Set<String> _iter3 : _iter2.getKey()) {
+              oprot.writeSetBegin(new TSet(TType.STRING, _iter3.size()));
+            for (String _iter4 : _iter3) {
+              oprot.writeString(_iter4);
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeListEnd();
+              oprot.writeString(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (nestedMaps != null) {
         oprot.writeFieldBegin(NESTED_MAPS_FIELD_DESC);
         Map<Map<Map<Integer, String>, String>, Map<Integer, String>> _iter0 = nestedMaps;
         oprot.writeMapBegin(new TMap(TType.MAP, TType.MAP, _iter0.size()));
-        for (Map.Entry<Map<Map<Integer, String>, String>, Map<Integer, String>> _iter1 : _iter0.entrySet()) {
-          oprot.writeMapBegin(new TMap(TType.MAP, TType.STRING, _iter1.getKey().size()));
-        for (Map.Entry<Map<Integer, String>, String> _iter2 : _iter1.getKey().entrySet()) {
-          oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter2.getKey().size()));
-        for (Map.Entry<Integer, String> _iter3 : _iter2.getKey().entrySet()) {
-          oprot.writeI32(_iter3.getKey());
-          oprot.writeString(_iter3.getValue());
-        }
-        oprot.writeMapEnd();
-          oprot.writeString(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-          oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getValue().size()));
-        for (Map.Entry<Integer, String> _iter2 : _iter1.getValue().entrySet()) {
-          oprot.writeI32(_iter2.getKey());
-          oprot.writeString(_iter2.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Map<Map<Integer, String>, String>, Map<Integer, String>> _iter1 : _iter0.entrySet()) {
+              oprot.writeMapBegin(new TMap(TType.MAP, TType.STRING, _iter1.getKey().size()));
+            for (Map.Entry<Map<Integer, String>, String> _iter2 : _iter1.getKey().entrySet()) {
+              oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter2.getKey().size()));
+            for (Map.Entry<Integer, String> _iter3 : _iter2.getKey().entrySet()) {
+              oprot.writeI32(_iter3.getKey());
+              oprot.writeString(_iter3.getValue());
+            }
+            oprot.writeMapEnd();
+              oprot.writeString(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+              oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter1.getValue().size()));
+            for (Map.Entry<Integer, String> _iter2 : _iter1.getValue().entrySet()) {
+              oprot.writeI32(_iter2.getKey());
+              oprot.writeString(_iter2.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeyIntValList != null) {
         oprot.writeFieldBegin(MAP_KEY_INT_VAL_LIST_FIELD_DESC);
         Map<Integer, List<test.fixtures.complex_struct.MyStruct>> _iter0 = mapKeyIntValList;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
-        for (Map.Entry<Integer, List<test.fixtures.complex_struct.MyStruct>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
-        for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1.getValue()) {
-          _iter2.write0(oprot);
-        }
-        oprot.writeListEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, List<test.fixtures.complex_struct.MyStruct>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeListBegin(new TList(TType.STRUCT, _iter1.getValue().size()));
+            for (test.fixtures.complex_struct.MyStruct _iter2 : _iter1.getValue()) {
+              _iter2.write0(oprot);
+            }
+            oprot.writeListEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeyIntValSet != null) {
         oprot.writeFieldBegin(MAP_KEY_INT_VAL_SET_FIELD_DESC);
         Map<Integer, Set<Boolean>> _iter0 = mapKeyIntValSet;
         oprot.writeMapBegin(new TMap(TType.I32, TType.SET, _iter0.size()));
-        for (Map.Entry<Integer, Set<Boolean>> _iter1 : _iter0.entrySet()) {
-          oprot.writeI32(_iter1.getKey());
-          oprot.writeSetBegin(new TSet(TType.BOOL, _iter1.getValue().size()));
-        for (boolean _iter2 : _iter1.getValue()) {
-          oprot.writeBool(_iter2);
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Integer, Set<Boolean>> _iter1 : _iter0.entrySet()) {
+              oprot.writeI32(_iter1.getKey());
+              oprot.writeSetBegin(new TSet(TType.BOOL, _iter1.getValue().size()));
+            for (boolean _iter2 : _iter1.getValue()) {
+              oprot.writeBool(_iter2);
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeySetValInt != null) {
         oprot.writeFieldBegin(MAP_KEY_SET_VAL_INT_FIELD_DESC);
         Map<Set<Boolean>, test.fixtures.complex_struct.MyEnum> _iter0 = mapKeySetValInt;
         oprot.writeMapBegin(new TMap(TType.SET, TType.I32, _iter0.size()));
-        for (Map.Entry<Set<Boolean>, test.fixtures.complex_struct.MyEnum> _iter1 : _iter0.entrySet()) {
-          oprot.writeSetBegin(new TSet(TType.BOOL, _iter1.getKey().size()));
-        for (boolean _iter2 : _iter1.getKey()) {
-          oprot.writeBool(_iter2);
-        }
-        oprot.writeSetEnd();
-          oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getValue()));
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Set<Boolean>, test.fixtures.complex_struct.MyEnum> _iter1 : _iter0.entrySet()) {
+              oprot.writeSetBegin(new TSet(TType.BOOL, _iter1.getKey().size()));
+            for (boolean _iter2 : _iter1.getKey()) {
+              oprot.writeBool(_iter2);
+            }
+            oprot.writeSetEnd();
+              oprot.writeI32(_iter1 == null ? 0 : com.facebook.thrift.util.EnumUtil.getValue(_iter1.getValue()));
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       if (mapKeyListValSet != null) {
         oprot.writeFieldBegin(MAP_KEY_LIST_VAL_SET_FIELD_DESC);
         Map<List<Integer>, Set<Map<Double, String>>> _iter0 = mapKeyListValSet;
         oprot.writeMapBegin(new TMap(TType.LIST, TType.SET, _iter0.size()));
-        for (Map.Entry<List<Integer>, Set<Map<Double, String>>> _iter1 : _iter0.entrySet()) {
-          oprot.writeListBegin(new TList(TType.I32, _iter1.getKey().size()));
-        for (int _iter2 : _iter1.getKey()) {
-          oprot.writeI32(_iter2);
-        }
-        oprot.writeListEnd();
-          oprot.writeSetBegin(new TSet(TType.MAP, _iter1.getValue().size()));
-        for (Map<Double, String> _iter2 : _iter1.getValue()) {
-          oprot.writeMapBegin(new TMap(TType.DOUBLE, TType.STRING, _iter2.size()));
-        for (Map.Entry<Double, String> _iter3 : _iter2.entrySet()) {
-          oprot.writeDouble(_iter3.getKey());
-          oprot.writeString(_iter3.getValue());
-        }
-        oprot.writeMapEnd();
-        }
-        oprot.writeSetEnd();
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<List<Integer>, Set<Map<Double, String>>> _iter1 : _iter0.entrySet()) {
+              oprot.writeListBegin(new TList(TType.I32, _iter1.getKey().size()));
+            for (int _iter2 : _iter1.getKey()) {
+              oprot.writeI32(_iter2);
+            }
+            oprot.writeListEnd();
+              oprot.writeSetBegin(new TSet(TType.MAP, _iter1.getValue().size()));
+            for (Map<Double, String> _iter2 : _iter1.getValue()) {
+              oprot.writeMapBegin(new TMap(TType.DOUBLE, TType.STRING, _iter2.size()));
+            for (Map.Entry<Double, String> _iter3 : _iter2.entrySet()) {
+              oprot.writeDouble(_iter3.getKey());
+              oprot.writeString(_iter3.getValue());
+            }
+            oprot.writeMapEnd();
+            }
+            oprot.writeSetEnd();
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ComplexNestedStructLazy {
         private static final ComplexNestedStruct _DEFAULT = new ComplexNestedStruct.Builder().build();
     }

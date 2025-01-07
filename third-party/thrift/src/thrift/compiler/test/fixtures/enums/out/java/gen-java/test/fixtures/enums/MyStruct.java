@@ -42,7 +42,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       this.me1T1 = test.fixtures.enums.MyEnum1.ME1_1;
       this.me1T2 = test.fixtures.enums.MyEnum1.ME1_1;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private test.fixtures.enums.MyEnum1 me1T1 = test.fixtures.enums.MyEnum1.ME1_1;
         private test.fixtures.enums.MyEnum1 me1T2 = test.fixtures.enums.MyEnum1.ME1_1;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="me2_3", requiredness=Requiredness.NONE)
-        public Builder setMe23(test.fixtures.enums.MyEnum2 me23) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="me2_3", requiredness=Requiredness.NONE)    public Builder setMe23(test.fixtures.enums.MyEnum2 me23) {
             this.me23 = me23;
             return this;
         }
     
         public test.fixtures.enums.MyEnum2 getMe23() { return me23; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="me3_n3", requiredness=Requiredness.NONE)
-        public Builder setMe3N3(test.fixtures.enums.MyEnum3 me3N3) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="me3_n3", requiredness=Requiredness.NONE)    public Builder setMe3N3(test.fixtures.enums.MyEnum3 me3N3) {
             this.me3N3 = me3N3;
             return this;
         }
     
         public test.fixtures.enums.MyEnum3 getMe3N3() { return me3N3; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="me1_t1", requiredness=Requiredness.NONE)
-        public Builder setMe1T1(test.fixtures.enums.MyEnum1 me1T1) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="me1_t1", requiredness=Requiredness.NONE)    public Builder setMe1T1(test.fixtures.enums.MyEnum1 me1T1) {
             this.me1T1 = me1T1;
             return this;
         }
     
         public test.fixtures.enums.MyEnum1 getMe1T1() { return me1T1; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="me1_t2", requiredness=Requiredness.NONE)
-        public Builder setMe1T2(test.fixtures.enums.MyEnum1 me1T2) {
+            @com.facebook.swift.codec.ThriftField(value=6, name="me1_t2", requiredness=Requiredness.NONE)    public Builder setMe1T2(test.fixtures.enums.MyEnum1 me1T2) {
             this.me1T2 = me1T2;
             return this;
         }
@@ -108,7 +104,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -146,22 +142,22 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="me2_3", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum2 getMe23() { return me23; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="me3_n3", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum3 getMe3N3() { return me3N3; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=4, name="me1_t1", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum1 getMe1T1() { return me1T1; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=6, name="me1_t2", requiredness=Requiredness.NONE)
     public test.fixtures.enums.MyEnum1 getMe1T2() { return me1T2; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -171,7 +167,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         helper.add("me1T2", me1T2);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -190,7 +186,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             Objects.equals(me1T2, other.me1T2) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -200,7 +196,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
             me1T2
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyStruct> asReader() {
       return MyStruct::read0;
@@ -255,7 +251,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(ME2_3_FIELD_DESC);
@@ -273,7 +269,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _MyStructLazy {
         private static final MyStruct _DEFAULT = new MyStruct.Builder().build();
     }

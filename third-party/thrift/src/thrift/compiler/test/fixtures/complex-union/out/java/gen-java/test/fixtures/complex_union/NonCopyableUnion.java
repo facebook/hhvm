@@ -96,6 +96,7 @@ public final class NonCopyableUnion implements com.facebook.thrift.payload.Thrif
         res.id = 1;
         return res;
     }
+
     
 
     @com.facebook.swift.codec.ThriftField(value=1, name="s", requiredness=Requiredness.NONE)
@@ -208,7 +209,7 @@ public final class NonCopyableUnion implements com.facebook.thrift.payload.Thrif
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<NonCopyableUnion> asReader() {
       return NonCopyableUnion::read0;

@@ -33,7 +33,7 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
     protected RecursiveStruct() {
       this.mes = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -45,8 +45,7 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
     public static class Builder {
         private List<test.fixtures.refs.RecursiveStruct> mes = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="mes", requiredness=Requiredness.OPTIONAL, isRecursive=Recursiveness.TRUE)
-        public Builder setMes(List<test.fixtures.refs.RecursiveStruct> mes) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="mes", requiredness=Requiredness.OPTIONAL, isRecursive=Recursiveness.TRUE)    public Builder setMes(List<test.fixtures.refs.RecursiveStruct> mes) {
             this.mes = mes;
             return this;
         }
@@ -66,7 +65,7 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -83,14 +82,14 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="mes", requiredness=Requiredness.OPTIONAL, isRecursive=Recursiveness.TRUE)
     public List<test.fixtures.refs.RecursiveStruct> getMes() { return mes; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
         helper.add("mes", mes);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -106,14 +105,14 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
             Objects.equals(mes, other.mes) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
             mes
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<RecursiveStruct> asReader() {
       return RecursiveStruct::read0;
@@ -130,16 +129,16 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
         case _MES:
           if (__field.type == TType.LIST) {
             List<test.fixtures.refs.RecursiveStruct> mes;
-            {
-            TList _list = oprot.readListBegin();
-            mes = new ArrayList<test.fixtures.refs.RecursiveStruct>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                test.fixtures.refs.RecursiveStruct _value1 = test.fixtures.refs.RecursiveStruct.read0(oprot);
-                mes.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                mes = new ArrayList<test.fixtures.refs.RecursiveStruct>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    test.fixtures.refs.RecursiveStruct _value1 = test.fixtures.refs.RecursiveStruct.read0(oprot);
+                    mes.add(_value1);
+                }
+                oprot.readListEnd();
+                }
             builder.setMes(mes);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -154,23 +153,23 @@ public final class RecursiveStruct implements com.facebook.thrift.payload.Thrift
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (mes != null) {
         oprot.writeFieldBegin(MES_FIELD_DESC);
-        List<test.fixtures.refs.RecursiveStruct> _iter0 = mes;
+        List<test.fixtures.refs.RecursiveStruct>  _iter0 = mes;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
-        for (test.fixtures.refs.RecursiveStruct _iter1 : _iter0) {
-          _iter1.write0(oprot);
-        }
-        oprot.writeListEnd();
+            for (test.fixtures.refs.RecursiveStruct _iter1 : _iter0) {
+              _iter1.write0(oprot);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _RecursiveStructLazy {
         private static final RecursiveStruct _DEFAULT = new RecursiveStruct.Builder().build();
     }

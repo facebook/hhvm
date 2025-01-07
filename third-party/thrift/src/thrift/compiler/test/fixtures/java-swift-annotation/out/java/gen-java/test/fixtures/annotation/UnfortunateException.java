@@ -58,21 +58,19 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
       this.anSnakeString = null;
       this.aCamelI32 = 0;
     }
-    
+
     public static class Builder {
         private String anSnakeString = null;
         private int aCamelI32 = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="an_snake_string", requiredness=Requiredness.NONE)
-        public Builder setAnSnakeString(String anSnakeString) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="an_snake_string", requiredness=Requiredness.NONE)    public Builder setAnSnakeString(String anSnakeString) {
             this.anSnakeString = anSnakeString;
             return this;
         }
     
         public String getAnSnakeString() { return anSnakeString; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="aCamelI32", requiredness=Requiredness.NONE)
-        public Builder setACamelI32(int aCamelI32) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="aCamelI32", requiredness=Requiredness.NONE)    public Builder setACamelI32(int aCamelI32) {
             this.aCamelI32 = aCamelI32;
             return this;
         }
@@ -94,16 +92,16 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="an_snake_string", requiredness=Requiredness.NONE)
     public String getAnSnakeString() { return anSnakeString; }
-        
+    
     
     @com.facebook.swift.codec.ThriftField(value=2, name="aCamelI32", requiredness=Requiredness.NONE)
     public int getACamelI32() { return aCamelI32; }
-    
+
     
     public static com.facebook.thrift.payload.Reader<UnfortunateException> asReader() {
       return UnfortunateException::read0;
@@ -142,7 +140,7 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (anSnakeString != null) {
@@ -156,7 +154,7 @@ public final class UnfortunateException extends org.apache.thrift.TBaseException
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _UnfortunateExceptionLazy {
         private static final UnfortunateException _DEFAULT = new UnfortunateException.Builder().build();
     }

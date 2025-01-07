@@ -36,7 +36,7 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
       this.field1 = test.fixtures.refs.Empty.defaultInstance();
       this.field2 = test.fixtures.refs.MyField.defaultInstance();
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -49,16 +49,14 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
         private test.fixtures.refs.Empty field1 = test.fixtures.refs.Empty.defaultInstance();
         private test.fixtures.refs.MyField field2 = test.fixtures.refs.MyField.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
-        public Builder setField1(test.fixtures.refs.Empty field1) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)    public Builder setField1(test.fixtures.refs.Empty field1) {
             this.field1 = field1;
             return this;
         }
     
         public test.fixtures.refs.Empty getField1() { return field1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)
-        public Builder setField2(test.fixtures.refs.MyField field2) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)    public Builder setField2(test.fixtures.refs.MyField field2) {
             this.field2 = field2;
             return this;
         }
@@ -80,7 +78,7 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -103,12 +101,12 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
     public test.fixtures.refs.Empty getField1() { return field1; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)
     public test.fixtures.refs.MyField getField2() { return field2; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -116,7 +114,7 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
         helper.add("field2", field2);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -133,7 +131,7 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
             Objects.equals(field2, other.field2) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -141,7 +139,7 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
             field2
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<StructWithTerseInternBox> asReader() {
       return StructWithTerseInternBox::read0;
@@ -180,7 +178,7 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       int structStart = 0;
@@ -209,7 +207,7 @@ public final class StructWithTerseInternBox implements com.facebook.thrift.paylo
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _StructWithTerseInternBoxLazy {
         private static final StructWithTerseInternBox _DEFAULT = new StructWithTerseInternBox.Builder().build();
     }

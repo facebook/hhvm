@@ -58,21 +58,19 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
       this.message = null;
       this.errorCode = null;
     }
-    
+
     public static class Builder {
         private String message = null;
         private Integer errorCode = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.OPTIONAL)
-        public Builder setMessage(String message) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.OPTIONAL)    public Builder setMessage(String message) {
             this.message = message;
             return this;
         }
     
         public String getMessage() { return message; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="errorCode", requiredness=Requiredness.OPTIONAL)
-        public Builder setErrorCode(Integer errorCode) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="errorCode", requiredness=Requiredness.OPTIONAL)    public Builder setErrorCode(Integer errorCode) {
             this.errorCode = errorCode;
             return this;
         }
@@ -94,16 +92,16 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.OPTIONAL)
     public String getMessage() { return message; }
-        
+    
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="errorCode", requiredness=Requiredness.OPTIONAL)
     public Integer getErrorCode() { return errorCode; }
-    
+
     
     public static com.facebook.thrift.payload.Reader<OptXcep> asReader() {
       return OptXcep::read0;
@@ -119,7 +117,7 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
         switch (__field.id) {
         case _MESSAGE:
           if (__field.type == TType.STRING) {
-            String message = oprot.readString();
+            String  message = oprot.readString();
             builder.setMessage(message);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -127,7 +125,7 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
           break;
         case _ERRORCODE:
           if (__field.type == TType.I32) {
-            Integer errorCode = oprot.readI32();
+            Integer  errorCode = oprot.readI32();
             builder.setErrorCode(errorCode);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -142,7 +140,7 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (message != null) {
@@ -158,7 +156,7 @@ public final class OptXcep extends org.apache.thrift.TBaseException implements c
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _OptXcepLazy {
         private static final OptXcep _DEFAULT = new OptXcep.Builder().build();
     }

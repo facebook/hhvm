@@ -49,12 +49,11 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
     protected Serious() {
       this.sonnet = null;
     }
-    
+
     public static class Builder {
         private String sonnet = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="sonnet", requiredness=Requiredness.OPTIONAL)
-        public Builder setSonnet(String sonnet) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="sonnet", requiredness=Requiredness.OPTIONAL)    public Builder setSonnet(String sonnet) {
             this.sonnet = sonnet;
             return this;
         }
@@ -74,12 +73,12 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="sonnet", requiredness=Requiredness.OPTIONAL)
     public String getSonnet() { return sonnet; }
-        
+    
     @java.lang.Override
     public String getMessage() {
       return sonnet;
@@ -99,7 +98,7 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
         switch (__field.id) {
         case _SONNET:
           if (__field.type == TType.STRING) {
-            String sonnet = oprot.readString();
+            String  sonnet = oprot.readString();
             builder.setSonnet(sonnet);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -114,7 +113,7 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (sonnet != null) {
@@ -125,7 +124,7 @@ public final class Serious extends org.apache.thrift.TBaseException implements c
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _SeriousLazy {
         private static final Serious _DEFAULT = new Serious.Builder().build();
     }

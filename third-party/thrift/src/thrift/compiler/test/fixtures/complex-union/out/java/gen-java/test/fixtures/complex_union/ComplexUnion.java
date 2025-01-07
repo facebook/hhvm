@@ -183,8 +183,8 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         res.id = 14;
         return res;
     }
-    
-    @com.facebook.swift.codec.ThriftField
+
+        @com.facebook.swift.codec.ThriftField
     @Deprecated
     public void setIntValue(final long intValue) {
         this.value = intValue;
@@ -220,6 +220,7 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         this.value = stringRef;
         this.id = 14;
     }
+
 
     @com.facebook.swift.codec.ThriftField(value=1, name="intValue", requiredness=Requiredness.NONE)
     public long getIntValue() {
@@ -426,10 +427,10 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         oprot.writeFieldBegin(INT_LIST_VALUE_FIELD_DESC);
         List<Long> _iter0 = (List<Long>)this.value;
         oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
-        for (long _iter1 : _iter0) {
-          oprot.writeI64(_iter1);
-        }
-        oprot.writeListEnd();
+            for (long _iter1 : _iter0) {
+              oprot.writeI64(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -437,10 +438,10 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         oprot.writeFieldBegin(STRING_LIST_VALUE_FIELD_DESC);
         List<String> _iter0 = (List<String>)this.value;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
-        for (String _iter1 : _iter0) {
-          oprot.writeString(_iter1);
-        }
-        oprot.writeListEnd();
+            for (String _iter1 : _iter0) {
+              oprot.writeString(_iter1);
+            }
+            oprot.writeListEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -448,11 +449,11 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
         oprot.writeFieldBegin(TYPEDEF_VALUE_FIELD_DESC);
         Map<Short, String> _iter0 = (Map<Short, String>)this.value;
         oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _iter0.size()));
-        for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
-          oprot.writeI16(_iter1.getKey());
-          oprot.writeString(_iter1.getValue());
-        }
-        oprot.writeMapEnd();
+            for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
+              oprot.writeI16(_iter1.getKey());
+              oprot.writeString(_iter1.getValue());
+            }
+            oprot.writeMapEnd();
         oprot.writeFieldEnd();
         break;
       }
@@ -469,7 +470,7 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ComplexUnion> asReader() {
       return ComplexUnion::read0;
@@ -498,49 +499,49 @@ public final class ComplexUnion implements com.facebook.thrift.payload.ThriftSer
           case _INTLISTVALUE:
             if (__field.type == INT_LIST_VALUE_FIELD_DESC.type) {
               List<Long> intListValue;
-            {
-            TList _list = oprot.readListBegin();
-            intListValue = new ArrayList<Long>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                long _value1 = oprot.readI64();
-                intListValue.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                intListValue = new ArrayList<Long>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    long _value1 = oprot.readI64();
+                    intListValue.add(_value1);
+                }
+                oprot.readListEnd();
+                }
               res.value = intListValue;
             }
             break;
           case _STRINGLISTVALUE:
             if (__field.type == STRING_LIST_VALUE_FIELD_DESC.type) {
               List<String> stringListValue;
-            {
-            TList _list = oprot.readListBegin();
-            stringListValue = new ArrayList<String>(Math.max(0, _list.size));
-            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
-                
-                String _value1 = oprot.readString();
-                stringListValue.add(_value1);
-            }
-            oprot.readListEnd();
-            }
+                {
+                TList _list = oprot.readListBegin();
+                stringListValue = new ArrayList<String>(Math.max(0, _list.size));
+                for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                    
+                    String _value1 = oprot.readString();
+                    stringListValue.add(_value1);
+                }
+                oprot.readListEnd();
+                }
               res.value = stringListValue;
             }
             break;
           case _TYPEDEFVALUE:
             if (__field.type == TYPEDEF_VALUE_FIELD_DESC.type) {
               Map<Short, String> typedefValue;
-            {
-            TMap _map = oprot.readMapBegin();
-            typedefValue = new HashMap<Short, String>(Math.max(0, _map.size));
-            for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
-                
-                short _key1 = oprot.readI16();
-                String _value1 = oprot.readString();
-                typedefValue.put(_key1, _value1);
-            }
-            }
-            oprot.readMapEnd();
+                {
+                TMap _map = oprot.readMapBegin();
+                typedefValue = new HashMap<Short, String>(Math.max(0, _map.size));
+                for (int _i = 0; (_map.size < 0) ? oprot.peekMap() : (_i < _map.size); _i++) {
+                    
+                    short _key1 = oprot.readI16();
+                    String _value1 = oprot.readString();
+                    typedefValue.put(_key1, _value1);
+                }
+                }
+                oprot.readMapEnd();
               res.value = typedefValue;
             }
             break;

@@ -27,7 +27,7 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
       this.field1 = 0;
       this.field2 = 0;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -40,16 +40,14 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
         private int field1 = 0;
         private int field2 = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
-        public Builder setField1(int field1) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)    public Builder setField1(int field1) {
             this.field1 = field1;
             return this;
         }
     
         public int getField1() { return field1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)
-        public Builder setField2(int field2) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)    public Builder setField2(int field2) {
             this.field2 = field2;
             return this;
         }
@@ -65,11 +63,11 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
         @ThriftConstructor
         public MyDataItem build() {
             MyDataItem result = new MyDataItem();
-            result.field1 = this.field1;
-            result.field2 = this.field2;
-        return result;    }
+                result.field1 = this.field1;
+                result.field2 = this.field2;
+            return result;    }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -92,24 +90,24 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
     
     @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
     public int getField1() { return field1; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyDataItem setField1(int field1) {
         this.field1 = field1;
         return this;
     }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)
     public int getField2() { return field2; }
-    
+
     @com.facebook.swift.codec.ThriftField
     public MyDataItem setField2(int field2) {
         this.field2 = field2;
         return this;
     }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -117,7 +115,7 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
         helper.add("field2", field2);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -134,7 +132,7 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
             Objects.equals(field2, other.field2) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -142,7 +140,7 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
             field2
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<MyDataItem> asReader() {
       return MyDataItem::read0;
@@ -181,7 +179,7 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(FIELD1_FIELD_DESC);
@@ -193,6 +191,6 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
 
 }

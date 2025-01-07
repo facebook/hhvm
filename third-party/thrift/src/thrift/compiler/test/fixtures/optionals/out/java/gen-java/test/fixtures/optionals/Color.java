@@ -42,7 +42,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
       this.blue = 0.;
       this.alpha = 0.;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -57,32 +57,28 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
         private double blue = 0.;
         private double alpha = 0.;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="red", requiredness=Requiredness.NONE)
-        public Builder setRed(double red) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="red", requiredness=Requiredness.NONE)    public Builder setRed(double red) {
             this.red = red;
             return this;
         }
     
         public double getRed() { return red; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="green", requiredness=Requiredness.NONE)
-        public Builder setGreen(double green) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="green", requiredness=Requiredness.NONE)    public Builder setGreen(double green) {
             this.green = green;
             return this;
         }
     
         public double getGreen() { return green; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="blue", requiredness=Requiredness.NONE)
-        public Builder setBlue(double blue) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="blue", requiredness=Requiredness.NONE)    public Builder setBlue(double blue) {
             this.blue = blue;
             return this;
         }
     
         public double getBlue() { return blue; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="alpha", requiredness=Requiredness.NONE)
-        public Builder setAlpha(double alpha) {
+            @com.facebook.swift.codec.ThriftField(value=4, name="alpha", requiredness=Requiredness.NONE)    public Builder setAlpha(double alpha) {
             this.alpha = alpha;
             return this;
         }
@@ -108,7 +104,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -143,22 +139,22 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
     
     @com.facebook.swift.codec.ThriftField(value=1, name="red", requiredness=Requiredness.NONE)
     public double getRed() { return red; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=2, name="green", requiredness=Requiredness.NONE)
     public double getGreen() { return green; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=3, name="blue", requiredness=Requiredness.NONE)
     public double getBlue() { return blue; }
-    
+
     
     
     @com.facebook.swift.codec.ThriftField(value=4, name="alpha", requiredness=Requiredness.NONE)
     public double getAlpha() { return alpha; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -168,7 +164,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
         helper.add("alpha", alpha);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -187,7 +183,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
             Objects.equals(alpha, other.alpha) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -197,7 +193,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
             alpha
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Color> asReader() {
       return Color::read0;
@@ -252,7 +248,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(RED_FIELD_DESC);
@@ -270,7 +266,7 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ColorLazy {
         private static final Color _DEFAULT = new Color.Builder().build();
     }

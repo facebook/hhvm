@@ -39,7 +39,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
       this.title = null;
       this.employer = null;
     }
-    
+
     public static Builder builder() {
       return new Builder();
     }
@@ -53,24 +53,21 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
         private String title = null;
         private test.fixtures.lazy_constants.Company employer = null;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="weeks", requiredness=Requiredness.REQUIRED)
-        public Builder setWeeks(int weeks) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="weeks", requiredness=Requiredness.REQUIRED)    public Builder setWeeks(int weeks) {
             this.weeks = weeks;
             return this;
         }
     
         public int getWeeks() { return weeks; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)
-        public Builder setTitle(String title) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)    public Builder setTitle(String title) {
             this.title = title;
             return this;
         }
     
         public String getTitle() { return title; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)
-        public Builder setEmployer(test.fixtures.lazy_constants.Company employer) {
+            @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)    public Builder setEmployer(test.fixtures.lazy_constants.Company employer) {
             this.employer = employer;
             return this;
         }
@@ -94,7 +91,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
             return result;
         }
     }
-        
+    
     public static final Map<String, Integer> NAMES_TO_IDS = new HashMap<>();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap<>();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
@@ -123,17 +120,17 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     
     @com.facebook.swift.codec.ThriftField(value=1, name="weeks", requiredness=Requiredness.REQUIRED)
     public int getWeeks() { return weeks; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=2, name="title", requiredness=Requiredness.NONE)
     public String getTitle() { return title; }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=3, name="employer", requiredness=Requiredness.OPTIONAL)
     public test.fixtures.lazy_constants.Company getEmployer() { return employer; }
-    
+
     @java.lang.Override
     public String toString() {
         ToStringHelper helper = toStringHelper(this);
@@ -142,7 +139,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
         helper.add("employer", employer);
         return helper.toString();
     }
-    
+
     @java.lang.Override
     public boolean equals(java.lang.Object o) {
         if (this == o) {
@@ -160,7 +157,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
             Objects.equals(employer, other.employer) &&
             true;
     }
-    
+
     @java.lang.Override
     public int hashCode() {
         return Arrays.deepHashCode(new java.lang.Object[] {
@@ -169,7 +166,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
             employer
         });
     }
-    
+
     
     public static com.facebook.thrift.payload.Reader<Internship> asReader() {
       return Internship::read0;
@@ -201,7 +198,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
           break;
         case _EMPLOYER:
           if (__field.type == TType.I32) {
-            test.fixtures.lazy_constants.Company employer = test.fixtures.lazy_constants.Company.fromInteger(oprot.readI32());
+            test.fixtures.lazy_constants.Company  employer = test.fixtures.lazy_constants.Company .fromInteger(oprot.readI32());
             builder.setEmployer(employer);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
@@ -216,7 +213,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       oprot.writeFieldBegin(WEEKS_FIELD_DESC);
@@ -235,7 +232,7 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _InternshipLazy {
         private static final Internship _DEFAULT = new Internship.Builder().build();
     }

@@ -58,21 +58,19 @@ public final class ExceptionWithPrimitiveField extends org.apache.thrift.TBaseEx
       this.message = null;
       this.errorCode = 0;
     }
-    
+
     public static class Builder {
         private String message = null;
         private int errorCode = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE)
-        public Builder setMessage(String message) {
+        @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE)    public Builder setMessage(String message) {
             this.message = message;
             return this;
         }
     
         public String getMessage() { return message; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE)
-        public Builder setErrorCode(int errorCode) {
+            @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE)    public Builder setErrorCode(int errorCode) {
             this.errorCode = errorCode;
             return this;
         }
@@ -94,16 +92,16 @@ public final class ExceptionWithPrimitiveField extends org.apache.thrift.TBaseEx
             return result;
         }
     }
-    
+
     
     @Nullable
     @com.facebook.swift.codec.ThriftField(value=1, name="message", requiredness=Requiredness.NONE)
     public String getMessage() { return message; }
-        
+    
     
     @com.facebook.swift.codec.ThriftField(value=2, name="error_code", requiredness=Requiredness.NONE)
     public int getErrorCode() { return errorCode; }
-    
+
     
     public static com.facebook.thrift.payload.Reader<ExceptionWithPrimitiveField> asReader() {
       return ExceptionWithPrimitiveField::read0;
@@ -142,7 +140,7 @@ public final class ExceptionWithPrimitiveField extends org.apache.thrift.TBaseEx
       oprot.readStructEnd();
       return builder.build();
     }
-    
+
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
       if (message != null) {
@@ -156,7 +154,7 @@ public final class ExceptionWithPrimitiveField extends org.apache.thrift.TBaseEx
       oprot.writeFieldStop();
       oprot.writeStructEnd();
     }
-    
+
     private static class _ExceptionWithPrimitiveFieldLazy {
         private static final ExceptionWithPrimitiveField _DEFAULT = new ExceptionWithPrimitiveField.Builder().build();
     }

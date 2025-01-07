@@ -359,6 +359,47 @@ void validate_filename_is_not_reserved(sema_context& ctx, const t_named& node) {
       node.name());
 }
 
+/**
+ * Checks that the given program has the recommended python namespaces, i.e.
+ * either:
+ * 1. no Python namespace at all, or
+ * 2. at least namespace py3 (in addition to any py-deprecated namespace)
+ */
+void validate_python_namespaces(sema_context& ctx, const t_program& program) {
+  // If a (non-empty) package is defined, all namespaces are effectively
+  // defined, so return.
+  if (!program.package().empty()) {
+    return;
+  }
+
+  const std::map<std::string, std::string>& namespaces = program.namespaces();
+
+  // If there are no Python namespaces, there is nothing to do.
+  if (std::none_of(
+          namespaces.begin(),
+          namespaces.end(),
+          [](const std::pair<const std::string, std::string>& it) {
+            const std::string& key = it.first;
+            return key.find("py") == 0; // i.e., key.starts_with("py")
+          })) {
+    return;
+  }
+
+  // There is at least one namespace that begins with "py", which is used as a
+  // heuristic for "Python target language".
+
+  // Require a "py3" namespace
+  if (namespaces.find("py3") != namespaces.end()) {
+    return;
+  }
+
+  ctx.warning(
+      program,
+      "File has namespaces only for deprecated Thrift Python variants. Please "
+      "add `namespace py3` (or a non-empty `package`) to allow generation of "
+      "the only officially supported variant: thrift-python.");
+}
+
 void validate_interface_function_name_uniqueness(
     sema_context& ctx, const t_interface& node) {
   // Check for a redefinition of a function in the same interface.
@@ -1420,6 +1461,7 @@ ast_validator standard_validator() {
   ast_validator validator;
   validator.add_definition_visitor(&validate_identifier_is_not_reserved);
   validator.add_program_visitor(&validate_filename_is_not_reserved);
+  validator.add_program_visitor(&validate_python_namespaces);
 
   validator.add_interface_visitor(&validate_interface_function_name_uniqueness);
   validator.add_interface_visitor(&validate_function_priority_annotation);

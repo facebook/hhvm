@@ -319,15 +319,7 @@ void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {
 }
 
 void RepoOptionsFlags::initParserFlags(hackc::ParserFlags& flags) const {
-  flags.abstract_static_props = AbstractStaticProps;
-  flags.allow_unstable_features = AllowUnstableFeatures;
-  flags.const_default_func_args = ConstDefaultFuncArgs;
-  flags.const_static_props = ConstStaticProps;
-  flags.disable_lval_as_an_expression = DisableLvalAsAnExpression;
-  flags.disable_xhp_element_mangling = DisableXHPElementMangling;
-  flags.disallow_func_ptrs_in_constants = DisallowFuncPtrsInConstants;
-  flags.enable_xhp_class_modifier = EnableXHPClassModifier;
-  flags.enable_class_pointer_hint = EnableClassPointerHint;
+  Cfg::InitHackcParserFlags(*this, flags);
 }
 
 void RepoOptionsFlags::calcCachedQuery() {

@@ -1058,6 +1058,12 @@ pub fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
             }
             false
         });
+        let has_hackc_parser_flags = section.configs.iter().any(|c| {
+            if let Some(hackc_flag) = &c.features.hackc_flag {
+                return hackc_flag.type_ == HackcFlagType::Parser;
+            }
+            false
+        });
 
         let has_repo_option_flags = section
             .configs
@@ -1107,6 +1113,9 @@ pub fn generate_loader(sections: Vec<ConfigSection>, output_dir: PathBuf) {
 
         if has_hackc_hhbc_flags {
             public_methods.push("  static void InitHackcHHBCFlags(const RepoOptionsFlags& repo_flags, hackc::HhbcFlags& flags);".to_string());
+        }
+        if has_hackc_parser_flags {
+            public_methods.push("  static void InitHackcParserFlags(const RepoOptionsFlags& repo_flags, hackc::ParserFlags& flags);".to_string());
         }
 
         let has_compiler_option = section
@@ -1165,6 +1174,7 @@ struct RepoOptionsFlags;
 
 namespace hackc {{
 struct HhbcFlags;
+struct ParserFlags;
 }}
 
 namespace Cfg {{
@@ -1203,6 +1213,7 @@ private:
         let mut repo_options_flags_from_config_calls = vec![];
         let mut repo_options_flags_for_systemlib_calls = vec![];
         let mut init_hhbc_flags_calls = vec![];
+        let mut init_parser_flags_calls = vec![];
         for config in section.configs.iter() {
             let shortname = config.shortname(&section.name);
             let snake_shortname = shortname.from_case(Case::Camel).to_case(Case::Snake);
@@ -1237,6 +1248,12 @@ private:
                 if let Some(hackc_flag) = &config.features.hackc_flag {
                     if hackc_flag.type_ == HackcFlagType::HHBC {
                         init_hhbc_flags_calls.push(format!(
+                            r#"  flags.{} = repo_flags.{};"#,
+                            snake_shortname, shortname,
+                        ));
+                    }
+                    if hackc_flag.type_ == HackcFlagType::Parser {
+                        init_parser_flags_calls.push(format!(
                             r#"  flags.{} = repo_flags.{};"#,
                             snake_shortname, shortname,
                         ));
@@ -1311,6 +1328,12 @@ private:
                             snake_shortname, section_shortname, shortname,
                         ));
                     }
+                    if hackc_flag.type_ == HackcFlagType::Parser {
+                        init_parser_flags_calls.push(format!(
+                            r#"  flags.{} = Cfg::{}::{};"#,
+                            snake_shortname, section_shortname, shortname,
+                        ));
+                    }
                 }
             }
         }
@@ -1363,6 +1386,16 @@ void {}Loader::GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags) {{
 }}"#,
                                 section_shortname,
                                 init_hhbc_flags_calls.join("\n"),
+                            ));
+        }
+
+        if has_hackc_parser_flags {
+            methods.push(format!(
+                                r#"void {}Loader::InitHackcParserFlags(const RepoOptionsFlags& repo_flags, hackc::ParserFlags& flags) {{
+{}
+}}"#,
+                                section_shortname,
+                                init_parser_flags_calls.join("\n"),
                             ));
         }
 
@@ -1528,6 +1561,7 @@ namespace HPHP::Cfg {{
     let mut repo_options_flags_from_config_calls = vec![];
     let mut repo_options_flags_for_systemlib_calls = vec![];
     let mut hackc_hhbc_flags_calls = vec![];
+    let mut hackc_parser_flags_calls = vec![];
 
     for section in sections.iter() {
         let section_shortname = section.shortname();
@@ -1616,6 +1650,17 @@ namespace HPHP::Cfg {{
                 section_shortname,
             ));
         }
+        if section.configs.iter().any(|c| {
+            if let Some(hackc_flag) = &c.features.hackc_flag {
+                return hackc_flag.type_ == HackcFlagType::Parser;
+            }
+            false
+        }) {
+            hackc_parser_flags_calls.push(format!(
+                "  Cfg::{}Loader::InitHackcParserFlags(repo_flags, flags);",
+                section_shortname,
+            ));
+        }
     }
 
     let configs_load_content = format!(
@@ -1631,6 +1676,7 @@ struct RepoOptionsFlags;
 
 namespace hackc {{
 struct HhbcFlags;
+struct ParserFlags;
 }}
 
 namespace Cfg {{
@@ -1671,6 +1717,10 @@ void InitHackcHHBCFlags(const RepoOptionsFlags& repo_flags, hackc::HhbcFlags& fl
 {}
 }}
 
+void InitHackcParserFlags(const RepoOptionsFlags& repo_flags, hackc::ParserFlags& flags) {{
+{}
+}}
+
 }} // namespace Cfg
 
 }} // namespace HPHP
@@ -1685,6 +1735,7 @@ void InitHackcHHBCFlags(const RepoOptionsFlags& repo_flags, hackc::HhbcFlags& fl
         repo_options_flags_from_config_calls.join("\n"),
         repo_options_flags_for_systemlib_calls.join("\n"),
         hackc_hhbc_flags_calls.join("\n"),
+        hackc_parser_flags_calls.join("\n"),
     );
     let mut configs_load_file = output_dir.clone();
     configs_load_file.push("configs-generated.cpp");

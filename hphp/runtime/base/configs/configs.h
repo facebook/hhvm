@@ -34,6 +34,7 @@ struct RepoOptionsFlags;
 
 namespace hackc {
 struct HhbcFlags;
+struct ParserFlags;
 }
 
 namespace Cfg {
@@ -49,6 +50,7 @@ void GetRepoOptionsFlagsFromConfig(RepoOptionsFlags& flags, const Hdf& config,
                                    const RepoOptionsFlags& default_flags);
 void GetRepoOptionsFlagsForSystemlib(RepoOptionsFlags& flags);
 void InitHackcHHBCFlags(const RepoOptionsFlags& repo_flags, hackc::HhbcFlags& flags);
+void InitHackcParserFlags(const RepoOptionsFlags& repo_flags, hackc::ParserFlags& flags);
 
 using StringStringMap = std::map<std::string, std::string>;
 using StringVector = std::vector<std::string>;

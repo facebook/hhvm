@@ -44,6 +44,7 @@
 #include "hphp/zend/zend-string.h"
 #include "unit-emitter.h"
 
+#include <stdexcept>
 #include <folly/Likely.h>
 #include <folly/Range.h>
 
@@ -258,6 +259,10 @@ Unit* get_systemlib(const std::string& path, const Extension* extension) {
   }
 
   auto buffer = get_embedded_section(path+".ue");
+
+  if (buffer.empty()) {
+    throw std::invalid_argument("Missing systemlib unit emitter for path: " + path);
+  }
 
   UnitEmitterSerdeWrapper uew;
   BlobDecoder decoder(buffer.data(), buffer.size());

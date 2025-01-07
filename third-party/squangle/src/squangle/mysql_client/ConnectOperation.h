@@ -65,8 +65,7 @@ class ConnectOperationImpl : virtual public OperationBase {
 
   void setCertValidationCallback(
       CertValidatorCallback callback,
-      const void* context = nullptr,
-      bool opPtrAsContext = false);
+      std::weak_ptr<Operation> wptr);
 
   const CertValidatorCallback& getCertValidationCallback() const {
     return conn_options_.getCertValidationCallback();
@@ -273,10 +272,8 @@ class ConnectOperation : public Operation {
   }
   ConnectOperation& setCertValidationCallback(
       CertValidatorCallback callback,
-      const void* context = nullptr,
-      bool opPtrAsContext = false) {
-    impl()->setCertValidationCallback(
-        std::move(callback), context, opPtrAsContext);
+      std::weak_ptr<Operation> wptr) {
+    impl()->setCertValidationCallback(std::move(callback), std::move(wptr));
     return *this;
   }
 
@@ -298,7 +295,7 @@ class ConnectOperation : public Operation {
       const std::string& sslCertCn,
       const std::vector<std::string>& sslCertSan,
       const std::vector<std::string>& sslCertIdentities,
-      bool isValidated) {
+      bool isValidated) const override {
     // Make sure we have an impl - it is possible to not have one.
     if (auto* implPtr = impl()) {
       implPtr->withOptionalConnectionContext([&](auto& ctx) {

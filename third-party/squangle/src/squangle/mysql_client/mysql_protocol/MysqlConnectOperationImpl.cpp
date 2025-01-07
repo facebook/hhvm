@@ -373,15 +373,13 @@ int MysqlConnectOperationImpl::mysqlCertValidator(
   const CertValidatorCallback callback =
       self->getConnectionOptions().getCertValidationCallback();
   CHECK(callback);
-  const void* callbackContext =
-      self->getConnectionOptions().isOpPtrAsValidationContext()
-      ? self
-      : self->getConnectionOptions().getCertValidationContext();
+  const auto& wptrOperation =
+      self->getConnectionOptions().getCertValidationContext();
   folly::StringPiece errorMessage;
 
   // "libmysql" expects this callback to return "0" if the cert validation was
   // successful, and return "1" if validation failed.
-  int result = callback(server_cert, callbackContext, errorMessage) ? 0 : 1;
+  int result = callback(server_cert, wptrOperation, errorMessage) ? 0 : 1;
   if (!errorMessage.empty()) {
     *errptr = errorMessage.data();
   }

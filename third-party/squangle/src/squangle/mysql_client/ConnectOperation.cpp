@@ -47,8 +47,7 @@ void ConnectOperationImpl::setConnectionOptions(
   if (conn_opts.getCertValidationCallback()) {
     setCertValidationCallback(
         conn_opts.getCertValidationCallback(),
-        conn_opts.getCertValidationContext(),
-        conn_opts.isOpPtrAsValidationContext());
+        conn_opts.getCertValidationContext());
   }
   if (auto cats = conn_opts.getCryptoAuthTokenList()) {
     setCryptoAuthTokenList(std::move(*cats));
@@ -85,12 +84,10 @@ void ConnectOperationImpl::enableChangeUser() {
 
 void ConnectOperationImpl::setCertValidationCallback(
     CertValidatorCallback callback,
-    const void* context,
-    bool opPtrAsContext) {
+    std::weak_ptr<Operation> wptr) {
   CHECK_THROW(
       state() == OperationState::Unstarted, db::OperationStateException);
-  conn_options_.setCertValidationCallback(
-      std::move(callback), context, opPtrAsContext);
+  conn_options_.setCertValidationCallback(std::move(callback), std::move(wptr));
 }
 
 void ConnectOperationImpl::setTimeout(Duration timeout) {

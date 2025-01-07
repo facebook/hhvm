@@ -166,7 +166,7 @@ static std::shared_ptr<am::AsyncMysqlClient> getClient() {
 static std::vector<std::string> certLoggingImpl(
     X509* cert,
     const std::vector<std::string>& extNames,
-    am::ConnectOperation& op,
+    const am::Operation& op,
     bool validated) {
   // Capture the certificare Common Name
   std::string cn =
@@ -217,12 +217,13 @@ static bool certValidationImpl(
 
 static bool serverCertLoggingCallback(
     X509* server_cert,
-    const void* context,
+    const std::weak_ptr<am::Operation>& wptr,
     folly::StringPiece& /*errMsg*/,
     const std::vector<std::string>& extNames) {
-  am::ConnectOperation* op = reinterpret_cast<am::ConnectOperation*>(
-          const_cast<void*>(context));
-  CHECK(op);
+  auto op = wptr.lock();
+  if (!op) {
+    return false;
+  }
 
   // Log the server cert content
   certLoggingImpl(server_cert, extNames, *op, false);
@@ -232,38 +233,41 @@ static bool serverCertLoggingCallback(
 
 static bool serverCertValidationCallback(
     X509* server_cert,
-    const void* context,
+    const std::weak_ptr<am::Operation>& wptr,
     folly::StringPiece& /* errMsg */,
     const std::vector<std::string>& extNames,
     const std::vector<std::string>& extValues) {
-  facebook::common::mysql_client::ConnectOperation* op =
-      reinterpret_cast<facebook::common::mysql_client::ConnectOperation*>(
-          const_cast<void*>(context));
-  CHECK(op);
+  auto op = wptr.lock();
+  if (!op) {
+    return false;
+  }
 
   // Log the server cert content
   auto certValues = certLoggingImpl(server_cert, extNames, *op, true);
   return certValidationImpl(extValues, certValues);
 }
 
-static facebook::common::mysql_client::CertValidatorCallback
-generateCertValidationCallback(
+static am::CertValidatorCallback generateCertValidationCallback(
     const std::string& serverCertExtNames,
     const std::string& extensionValues) {
   std::vector<std::string> extNames;
   folly::split(',', serverCertExtNames, extNames);
   if (extensionValues.empty()) {
     return [extNames = std::move(extNames)] (
-          X509* server_cert, const void* context, folly::StringPiece& errMsg) {
-      return serverCertLoggingCallback(server_cert, context, errMsg, extNames);
+          X509* server_cert,
+          const std::weak_ptr<am::Operation>& wptr,
+          folly::StringPiece& errMsg) {
+      return serverCertLoggingCallback(server_cert, wptr, errMsg, extNames);
     };
   } else {
     std::vector<std::string> extValues;
     folly::split(',', extensionValues, extValues);
     return [extNames = std::move(extNames), extValues = std::move(extValues)] (
-          X509* server_cert, const void* context, folly::StringPiece& errMsg) {
+          X509* server_cert,
+          const std::weak_ptr<am::Operation>& wptr,
+          folly::StringPiece& errMsg) {
         return serverCertValidationCallback(
-            server_cert, context, errMsg, extNames, extValues);
+            server_cert, wptr, errMsg, extNames, extValues);
     };
   }
 }
@@ -489,8 +493,7 @@ HHVM_METHOD(AsyncMysqlConnectionOptions,
   data->m_conn_opts.setCertValidationCallback(
       generateCertValidationCallback(
           std::string(serverCertExtNames), std::string(extensionValues)),
-      nullptr,
-      true);
+      {} /* empty weak_ptr<Operation> */);
   #endif
 }
 
@@ -679,8 +682,7 @@ Object HHVM_STATIC_METHOD(
     op->setCertValidationCallback(
         generateCertValidationCallback(
             std::string(serverCertExtNames), std::string(serverCertExtValues)),
-        nullptr,
-        true);
+        {} /* empty weak_ptr<Operation> */);
   }
 
   return newAsyncMysqlConnectEvent(std::move(op), getClient());
@@ -880,8 +882,7 @@ static Object HHVM_METHOD(
     op->setCertValidationCallback(
         generateCertValidationCallback(
             std::string(serverCertExtNames), std::string(serverCertExtValues)),
-        nullptr,
-        true);
+        {} /* empty weak_ptr<Operation> */);
   }
 
   return newAsyncMysqlConnectEvent(

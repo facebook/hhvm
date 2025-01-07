@@ -395,11 +395,11 @@ class DateTimeZone {
     int $timestamp_begin = PHP_INT_MIN,
     int $timestamp_end = PHP_INT_MAX,
   )[]: HH\FIXME\MISSING_RETURN_TYPE;
-  static public function listAbbreviations()[]: HH\FIXME\MISSING_RETURN_TYPE;
+  static public function listAbbreviations(): HH\FIXME\MISSING_RETURN_TYPE;
   static public function listIdentifiers(
     int $what = 2047,
     string $country = '',
-  )[]: HH\FIXME\MISSING_RETURN_TYPE;
+  ): HH\FIXME\MISSING_RETURN_TYPE;
 }
 
 class DateInterval {

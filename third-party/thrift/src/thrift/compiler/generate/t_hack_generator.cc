@@ -125,12 +125,10 @@ class t_hack_generator : public t_concat_generator {
         option_is_specified(options, "shapes_allow_unknown_fields");
     array_migration_ = option_is_specified(options, "array_migration");
     arrays_ = option_is_specified(options, "arrays");
-    no_use_hack_collections_ =
-        option_is_specified(options, "no_use_hack_collections");
+    legacy_arrays_ = option_is_specified(options, "legacy_arrays");
     // Set the future state of compiler options based on the current state.
     // A subsequent change will remove the current compiler options.
-    hack_collections_ = !arrays_ && !no_use_hack_collections_;
-    legacy_arrays_ = no_use_hack_collections_;
+    hack_collections_ = !arrays_ && !legacy_arrays_;
 
     nullable_everything_ = option_is_specified(options, "nullable_everything");
     const_collections_ = option_is_specified(options, "const_collections");
@@ -147,16 +145,11 @@ class t_hack_generator : public t_concat_generator {
     has_hack_namespace = ns_type_ == HackThriftNamespaceType::HACK ||
         ns_type_ == HackThriftNamespaceType::PACKAGE;
     has_nested_ns = false;
-    // no_use_hack_collections_ is only used to migrate away from php gen
-    if (no_use_hack_collections_ && strict_types_) {
-      throw std::runtime_error(
-          "Don't use no_use_hack_collections with strict_types");
-    } else if (no_use_hack_collections_ && !arraysets_) {
-      throw std::runtime_error(
-          "Don't use no_use_hack_collections without arraysets");
-    } else if (no_use_hack_collections_ && arrays_) {
-      throw std::runtime_error(
-          "Don't use no_use_hack_collections with arrays. Just use arrays");
+    // legacy_arrays_ is only used to migrate away from php gen
+    if (legacy_arrays_ && strict_types_) {
+      throw std::runtime_error("Don't use legacy_arrays with strict_types");
+    } else if (legacy_arrays_ && !arraysets_) {
+      throw std::runtime_error("Don't use legacy_arrays without arraysets");
     } else if (arraysets_ && !(legacy_arrays_ || hack_collections_)) {
       throw std::runtime_error(
           "Don't use arraysets without either legacy_arrays or hack_collections");
@@ -1203,7 +1196,6 @@ class t_hack_generator : public t_concat_generator {
    * True to never use hack collection objects. Only used for migrations
    */
   bool legacy_arrays_;
-  bool no_use_hack_collections_;
 
   /**
    * True to use hack collection objects.

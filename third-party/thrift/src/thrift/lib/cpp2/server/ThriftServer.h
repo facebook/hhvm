@@ -2316,8 +2316,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
         [observer = std::move(contextObserver),
          tlsRevocationObserver = enableTLSCertRevocation(),
          tlsRevocationEnforcementObserver = enforceTLSCertRevocation(),
-         tlsCertRevocationInitializeObserver =
-             migrateTLSCertRevocationInitializer(),
          hybridKexObserver = enableHybridKex(),
          aegisObserver = enableAegis(),
          pskModeObserver = preferPskKe(),
@@ -2325,7 +2323,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
          dcObserver = enablePresentingDelegatedCredentials()]() {
           (void)**tlsRevocationObserver;
           (void)**tlsRevocationEnforcementObserver;
-          (void)**tlsCertRevocationInitializeObserver;
           (void)**hybridKexObserver;
           (void)**aegisObserver;
           (void)**pskModeObserver;
@@ -2533,7 +2530,6 @@ class ThriftServer : public apache::thrift::concurrency::Runnable,
 
   static folly::observer::Observer<bool> enableTLSCertRevocation();
   static folly::observer::Observer<bool> enforceTLSCertRevocation();
-  static folly::observer::Observer<bool> migrateTLSCertRevocationInitializer();
 
   static folly::observer::Observer<bool> enableReceivingDelegatedCreds();
 

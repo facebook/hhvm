@@ -1,0 +1,9 @@
+---
+InheritParentConfig: true
+Checks: '
+modernize-concat-nested-namespaces,
+modernize-type-traits,
+modernize-use-override,
+modernize-raw-string-literal,
+'
+...

@@ -68,23 +68,21 @@ class {{struct:py_name}}Patch(
     Base{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
 ):
     pass
-{{#struct:fields_ordered_by_id}}
+{{#struct:fields_ordered_by_id}}{{#field:type}}
     @property
     def {{field:py_name}}(self) -> {{> types/field_patch_type}}[
-            {{#field:type}}{{> ../python/types/unadapted_pep484_type}}{{/field:type}},
-            {{#field:type}}{{> ../python/types/unadapted_pep484_patch_type}}{{/field:type}}]:
+            {{> ../python/types/unadapted_pep484_type}},
+            {{> ../python/types/unadapted_pep484_patch_type}}]:
 
-        {{#field:type}}
         {{! e.g., if field is an i32, this function convert DynamicPatch --> I32Patch }}
-        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> {{#field:type}}{{> ../python/types/unadapted_pep484_patch_type}}{{/field:type}}:
+        def cast_dynamic_patch_to_typed_field_patch(patch: DynamicPatch, type_info) -> {{> ../python/types/unadapted_pep484_patch_type}}:
             {{> ../python/common/thrift_patch_callback}}
-        {{/field:type}}
 
         return {{> types/field_patch_type}}(
             cast_dynamic_patch_to_typed_field_patch,
             self._patch,
             {{field:key}},
-            {{#field:type}}{{> ../python/types/typeinfo }}{{/field:type}})
+            {{> ../python/types/typeinfo }})
     {{#if (not program:safe_patch?)}}{{! If the program is already a safe patch, we should not generate to_safe_patch/from_safe_patch, otherwise it becomes a safe patch of safe patch}}
 
     def to_safe_patch(self) -> _fbthrift_safe_patch_types.{{struct:name}}SafePatch:
@@ -101,5 +99,5 @@ class {{struct:py_name}}Patch(
     {{/if (not program:safe_patch?)}}
 
 
-{{/struct:fields_ordered_by_id}}
+{{/field:type}}{{/struct:fields_ordered_by_id}}
 {{/program:structs}}

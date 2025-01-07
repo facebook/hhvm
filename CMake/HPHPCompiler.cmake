@@ -132,8 +132,8 @@ if (${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang" OR ${CMAKE_CXX_COMPILER_ID} STREQU
       endif()
     endif()
 
-    if(CLANG_FORCE_LIBSTDCXX)
-      list(APPEND GENERAL_CXX_OPTIONS "stdlib=libstdc++")
+    if(CLANG_FORCE_LIBCPP)
+      list(APPEND GENERAL_CXX_OPTIONS "stdlib=libc++")
     endif()
   else() # using GCC
     list(APPEND DISABLED_NAMED_WARNINGS

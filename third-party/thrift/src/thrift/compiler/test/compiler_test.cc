@@ -2350,3 +2350,10 @@ TEST(CompilerTest, not_bundled_annotation) {
       {},
       options);
 }
+
+TEST(CompilerTest, circular_typedef) {
+  check_compile(R"(
+    typedef Foo Bar # expected-error: Circular typedef: Foo --> Bar --> Foo
+    typedef Bar Foo
+  )");
+}

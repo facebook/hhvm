@@ -32,6 +32,12 @@ struct sema {
   // successful and reporting any errors via diags.
   bool resolve_all_types(sema_context& diags, t_program_bundle& bundle);
 
+  // Check whether we have circular typedef, returning true if successful and
+  // reporting any errors via diags. Example of circular typedef:
+  //    typedef Foo Bar
+  //    typedef Bar Foo
+  bool check_circular_typedef(sema_context& diags, t_program_bundle& bundle);
+
  public:
   explicit sema(bool use_legacy_type_ref_resolution)
       : use_legacy_type_ref_resolution_(use_legacy_type_ref_resolution) {}

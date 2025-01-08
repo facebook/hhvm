@@ -610,7 +610,33 @@ bool sema::resolve_all_types(sema_context& diags, t_program_bundle& bundle) {
     assert(!td.resolve());
     success = false;
   }
-  return success;
+  return success && check_circular_typedef(diags, bundle);
+}
+
+bool sema::check_circular_typedef(
+    sema_context& diags, t_program_bundle& bundle) {
+  std::unordered_set<const t_type*> checked;
+  for (auto& td : bundle.root_program()->scope()->placeholder_typedefs()) {
+    if (checked.count(td.get_type())) {
+      continue;
+    }
+    std::unordered_set<const t_type*> visited;
+    std::vector<const t_type*> chain;
+    if (nullptr != t_typedef::find_type_if(td.get_type(), [&](const t_type* t) {
+          // Find the first typedef which insertion failed
+          checked.insert(t);
+          chain.push_back(t);
+          return visited.insert(t).second == false;
+        })) {
+      std::string msg;
+      for (const auto& i : chain) {
+        msg += i->name() + (&i != &chain.back() ? " --> " : "");
+      }
+      diags.error(td, "Circular typedef: {}", msg);
+      return false;
+    }
+  }
+  return true;
 }
 
 sema::result sema::run(sema_context& ctx, t_program_bundle& bundle) {

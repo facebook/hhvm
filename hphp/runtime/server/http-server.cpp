@@ -259,6 +259,7 @@ void HttpServer::onServerShutdown() {
   if (HPHP::alloc::BumpEmergencyMapper::
       s_emergencyFlag.load(std::memory_order_acquire)) {
     // Server is shutting down when it almost exhausted low memory.
+    Logger::Error("emergency restart: terminating due to lowptr exhaustion!");
     if (StructuredLog::enabled()) {
       auto record = StructuredLogEntry{};
       record.setInt("low_mapped", alloc::getLowMapped());

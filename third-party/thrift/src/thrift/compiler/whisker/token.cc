@@ -91,6 +91,7 @@ constexpr token_kind_info info[] = {
     {tok::pipe, "`|`"},
     {tok::gt, "`>`"},
     {tok::eq, "`=`"},
+    {tok::star, "`*`"},
 
 #define WHISKER_KEYWORD(kw) {tok::kw_##kw, "`" #kw "`"},
     WHISKER_KEYWORDS()

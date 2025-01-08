@@ -62,6 +62,7 @@ enum class tok : unsigned {
   pipe,      // "|"
   gt,        // ">"
   eq,        // "="
+  star,      // "*"
   // clang-format on
 
   // Literals:
@@ -114,6 +115,7 @@ constexpr tok to_tok(char c) {
     case '|': return tok::pipe;
     case '>': return tok::gt;
     case '=': return tok::eq;
+    case '*': return tok::star;
     default:
       return tok::error;
   }

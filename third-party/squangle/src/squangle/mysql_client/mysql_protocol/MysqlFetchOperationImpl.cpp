@@ -163,7 +163,11 @@ void MysqlFetchOperationImpl::actionable() {
     //  - CompleteQuery: an error occurred or rows finished to fetch
     //  - WaitForConsumer: in case `pause` is called during `notifyRowsReady`
     if (active_fetch_action_ == FetchAction::Fetch) {
-      DCHECK(current_row_stream_.has_value());
+      if (!current_row_stream_) {
+        active_fetch_action_ = FetchAction::CompleteQuery;
+        continue;
+      }
+
       // Try to catch when the user didn't pause or consumed the rows
       if (current_row_stream_->getCurrentRow().has_value()) {
         // This should help

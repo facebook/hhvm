@@ -335,7 +335,7 @@ cdef class MutableStruct(MutableStructOrUnion):
         assert self._fbthrift_has_struct_instance(self._fbthrift_data)
         return self._fbthrift_create(copy.deepcopy(self._fbthrift_data[:-1]))
 
-        
+
 
     cdef _initStructListWithValues(self, kwargs) except *:
         """
@@ -851,11 +851,11 @@ cdef object _fbthrift_compare_union_less(
     rhs_union = <MutableUnion>(rhs)
 
     lhs_tuple = (
-        lhs_union.fbthrift_current_field.value,
+        _fbthrift_get_MutableUnion_type_int(lhs_union),
         lhs_union.fbthrift_current_value,
     )
     rhs_tuple = (
-        rhs_union.fbthrift_current_field.value,
+        _fbthrift_get_MutableUnion_type_int(rhs_union),
         rhs_union.fbthrift_current_value,
     )
 
@@ -864,11 +864,14 @@ cdef object _fbthrift_compare_union_less(
     else:
         return lhs_tuple < rhs_tuple
 
+cdef inline int _fbthrift_get_MutableUnion_type_int(MutableUnion u):
+        return u._fbthrift_data[0]
 
 cdef class MutableUnion(MutableStructOrUnion):
     def __cinit__(self):
         self._fbthrift_data = createMutableUnionDataHolder()
         self._fbthrift_data.append(self)
+        self.py_fbthrift_current_field = None
 
     def __init__(self, **kwargs):
         self_type = type(self)
@@ -890,8 +893,7 @@ cdef class MutableUnion(MutableStructOrUnion):
 
         Following this call, the following are true:
             * the current value (`self.fbthrift_current_value`) is`None`
-            * the current field (`self.fbthrift_current_field`) is the (special)
-              `EMPTY` value.
+            * the current field (`self.py_fbthrift_current_field`) is `None`.
         """
         self._fbthrift_set_mutable_union_value(field_id=0, field_python_value=None)
 
@@ -983,12 +985,24 @@ cdef class MutableUnion(MutableStructOrUnion):
         value if this union is empty).
         """
         cdef int current_field_enum_value = self._fbthrift_data[0]
-        self.fbthrift_current_field  = type(self).FbThriftUnionFieldEnum(
-            current_field_enum_value
-        )
+        self.py_fbthrift_current_field  = None
         self.fbthrift_current_value = self._fbthrift_get_current_field_python_value(
             current_field_enum_value
         )
+
+    cdef object _fbthrift_current_field_enum(self):
+        '''
+        Initializes self.py_fbthrift_current_field enum if None.
+        '''
+        if self.py_fbthrift_current_field is None:
+            self.py_fbthrift_current_field = type(self).FbThriftUnionFieldEnum(
+                _fbthrift_get_MutableUnion_type_int(self)
+            )
+        return self.py_fbthrift_current_field
+
+    @property
+    def fbthrift_current_field(MutableUnion self not None):
+        return self._fbthrift_current_field_enum()
 
     cdef object _fbthrift_get_current_field_python_value(
         self, int current_field_enum_value
@@ -1050,14 +1064,14 @@ cdef class MutableUnion(MutableStructOrUnion):
                 `field_id` (i.e., it either holds a value for another field, or is
                 empty).
         """
-        current_field_enum = self.fbthrift_current_field
-        cdef int current_field_enum_value = current_field_enum.value
+        cdef int current_field_enum_value = _fbthrift_get_MutableUnion_type_int(self)
         if (current_field_enum_value == field_id):
             return self.fbthrift_current_value
 
         # ERROR: Requested field_id does not match current field.
         union_class = type(self)
         requested_field_enum = union_class.FbThriftUnionFieldEnum(field_id)
+        current_field_enum = self._fbthrift_current_field_enum()
         raise AttributeError(
             f"Error retrieving Thrift union ({union_class.__name__}) field: requested "
             f"'{requested_field_enum.name}', but currently holds "
@@ -1095,7 +1109,7 @@ cdef class MutableUnion(MutableStructOrUnion):
         """
         `MutableUnion._fbthrift_data` is populated by multiple sources, such as
         `MutableUnion.__cinit__()` or `MutableUnion._fbthrift_deserialize()`.
-        It stores the `fbthrift_current_field` and `fbthrift_current_value`.
+        It stores the `py_fbthrift_current_field` and `fbthrift_current_value`.
         If a `MutableUnion` instance is created for a specific `_fbthrift_data`,
         that instance is appended as the last element. The instance is not
         considered by the serialization/deserialization logic; it ensures
@@ -1117,7 +1131,7 @@ cdef class MutableUnion(MutableStructOrUnion):
             return False
 
         other_union = <MutableUnion>(other)
-        if other_union.fbthrift_current_field != self.fbthrift_current_field:
+        if _fbthrift_get_MutableUnion_type_int(other_union) != _fbthrift_get_MutableUnion_type_int(self):
             return False
 
         return other_union.fbthrift_current_value == self.fbthrift_current_value
@@ -1152,10 +1166,10 @@ cdef class MutableUnion(MutableStructOrUnion):
         return dir(type(self))
 
     def get_type(self):
-        return self.fbthrift_current_field
+        return self._fbthrift_current_field_enum()
 
     def __repr__(self):
-        return f"{type(self).__name__}({self.fbthrift_current_field.name}={self.fbthrift_current_value!r})"
+        return f"{type(self).__name__}({self._fbthrift_current_field_enum().name}={self.fbthrift_current_value!r})"
 
 def _gen_mutable_union_field_enum_members(field_infos):
     yield ("EMPTY", 0)

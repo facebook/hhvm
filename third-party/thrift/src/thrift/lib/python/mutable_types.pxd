@@ -138,7 +138,7 @@ cdef class _MutableUnionFieldDescriptor:
     cdef FieldInfo _field_info
 
 cdef class MutableUnion(MutableStructOrUnion):
-    cdef readonly object fbthrift_current_field
+    cdef object py_fbthrift_current_field
     cdef readonly object fbthrift_current_value
     cdef void _fbthrift_update_current_field_attributes(self) except *
 
@@ -154,6 +154,8 @@ cdef class MutableUnion(MutableStructOrUnion):
             self, int field_id, object field_python_value)
 
     cdef object _fbthrift_get_field_value(self, int16_t field_id)
+
+    cdef object _fbthrift_current_field_enum(self)
 
 cdef object _mutable_struct_meta_new(
     object cls, object cls_name, object bases, object dct

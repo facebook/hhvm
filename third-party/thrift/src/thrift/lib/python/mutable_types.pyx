@@ -335,7 +335,19 @@ cdef class MutableStruct(MutableStructOrUnion):
         assert self._fbthrift_has_struct_instance(self._fbthrift_data)
         return self._fbthrift_create(copy.deepcopy(self._fbthrift_data[:-1]))
 
+    def fbthrift_copy_from(self, other):
+        """
+        Copies the content of `other` into the current struct.
 
+        It resets the current struct and then it assigns each field of `other`
+        to `self`.
+        """
+        if type(self) is not type(other):
+            raise TypeError(f"Cannot copy from {type(other)} to {type(self)}")
+
+        self.fbthrift_reset()
+        # Last element is the `MutableStruct` instance, do not copy
+        self._fbthrift_data[:-1] = (<MutableStruct>other)._fbthrift_data[:-1]
 
     cdef _initStructListWithValues(self, kwargs) except *:
         """

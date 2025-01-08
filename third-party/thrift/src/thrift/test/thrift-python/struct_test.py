@@ -2233,3 +2233,77 @@ class ThriftPython_MutableStruct_Test(unittest.TestCase):
                 self.assertIsNone(y)
             case _:
                 self.fail("Expected match, got none.")
+
+    def test_fbthrift_copy_from(self) -> None:
+        """
+        `lhs.fbthrift_copy_from(rhs)` copies the content of the `rhs` struct
+        into the lhs struct. It is semantically equivalent to assigning each
+        field of `rhs` to `lhs`."
+        """
+        # Struct with primitive fields
+        s1 = TestStructAllThriftPrimitiveTypesMutable(
+            unqualified_bool=True,
+            optional_byte=0,
+            unqualified_i16=1,
+            optional_i32=2,
+            unqualified_i64=3,
+            optional_float=4.0,
+            unqualified_double=5.0,
+            optional_string="abc",
+        )
+
+        s2 = TestStructAllThriftPrimitiveTypesMutable()
+        self.assertNotEqual(s1, s2)
+        s2.fbthrift_copy_from(s1)
+        self.assertEqual(s1, s2)
+
+        # Struct with container fields
+        s3 = TestStructAllThriftContainerTypesMutable(
+            unqualified_list_i32=to_thrift_list([1, 2, 3]),
+            optional_set_string=to_thrift_set({"a", "b", "c"}),
+            unqualified_map_string_i32=to_thrift_map({"a": 1, "b": 2}),
+        )
+
+        s4 = TestStructAllThriftContainerTypesMutable()
+        self.assertNotEqual(s3, s4)
+        s4.fbthrift_copy_from(s3)
+        self.assertEqual(s3, s4)
+
+        # Container assignment is refernce semantics, after `fbthrift_copy_from()`
+        # s3 and s4 container fields are the "same" containers.
+        self.assertEqual([1, 2, 3], s3.unqualified_list_i32)
+        self.assertEqual([1, 2, 3], s4.unqualified_list_i32)
+
+        s3.unqualified_list_i32.append(4)
+
+        self.assertEqual([1, 2, 3, 4], s3.unqualified_list_i32)
+        self.assertEqual([1, 2, 3, 4], s4.unqualified_list_i32)
+
+        # Struct with struct fields
+        n2 = TestStructNested_2_Mutable(i32_field=2)
+        n1 = TestStructNested_1_Mutable(i32_field=3, nested_2=n2)
+        s5 = TestStructNested_0_Mutable(i32_field=5, nested_1=n1)
+
+        s6 = TestStructNested_0_Mutable()
+        self.assertNotEqual(s5, s6)
+        s6.fbthrift_copy_from(s5)
+        self.assertEqual(s5, s6)
+
+        # Struct assignment is refernce semantics, after `fbthrift_copy_from()`
+        # s5 and s4 struct fields are the "same" structs.
+        self.assertEqual(3, s5.nested_1.i32_field)
+        self.assertEqual(3, s6.nested_1.i32_field)
+
+        s5.nested_1.i32_field = 33
+
+        self.assertEqual(33, s5.nested_1.i32_field)
+        self.assertEqual(33, s6.nested_1.i32_field)
+
+        # `lhs` and `rhs` must be the same type
+        s7 = TestStructAllThriftPrimitiveTypesMutable()
+        with self.assertRaisesRegex(
+            TypeError,
+            "Cannot copy from.*TestStructAllThriftContainerTypes.*to"
+            ".*TestStructAllThriftPrimitiveTypes",
+        ):
+            s7.fbthrift_copy_from(TestStructAllThriftContainerTypesMutable())

@@ -913,8 +913,7 @@ class cpp_mstch_service : public mstch_service {
     return escape_binary_string(s.identify_definition(*service_));
   }
   mstch::node definition_key_length() {
-    schematizer s(*service_->program()->scope(), sm_, {});
-    return escape_binary_string(s.identify_definition(*service_)).length();
+    return schematizer::definition_identifier_length();
   }
 
  private:

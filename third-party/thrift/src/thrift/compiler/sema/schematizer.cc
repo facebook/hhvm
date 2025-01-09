@@ -949,6 +949,10 @@ std::string_view schematizer::program_checksum(const t_program& program) {
           std::string(reinterpret_cast<const char*>(hash), sizeof(hash)));
 }
 
+size_t schematizer::definition_identifier_length() {
+  return 16;
+}
+
 std::string schematizer::identify_definition(const t_named& node) {
   // @lint-ignore CLANGTIDY facebook-hte-CArray
   unsigned char hash[SHA256_DIGEST_LENGTH];
@@ -958,8 +962,8 @@ std::string schematizer::identify_definition(const t_named& node) {
       node.program()->path(),
       node.name());
   SHA256(reinterpret_cast<const unsigned char*>(val.c_str()), val.size(), hash);
-  constexpr size_t num_bytes = 16;
-  return std::string(reinterpret_cast<const char*>(hash), num_bytes);
+  return std::string(
+      reinterpret_cast<const char*>(hash), definition_identifier_length());
 }
 
 int64_t schematizer::identify_program(const t_program& node) {

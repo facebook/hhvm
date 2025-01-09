@@ -86,6 +86,7 @@ class schematizer {
   // across runs on different including programs.
   std::string identify_definition(const t_named& node);
   int64_t identify_program(const t_program& node);
+  static size_t definition_identifier_length();
 
   // Get the name of the program's schema const.
   static std::string name_schema(source_manager& sm, const t_program& node);

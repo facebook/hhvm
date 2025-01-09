@@ -124,7 +124,6 @@ class t_hack_generator : public t_concat_generator {
     shapes_allow_unknown_fields_ =
         option_is_specified(options, "shapes_allow_unknown_fields");
     array_migration_ = option_is_specified(options, "array_migration");
-    arrays_ = option_is_specified(options, "arrays");
     legacy_arrays_ = option_is_specified(options, "legacy_arrays");
     hack_collections_ = option_is_specified(options, "hack_collections");
 
@@ -1184,11 +1183,6 @@ class t_hack_generator : public t_concat_generator {
    * True to use darrays instead of dicts for internal constructs
    */
   bool array_migration_;
-
-  /**
-   * True to use Hack arrays instead of collections
-   */
-  bool arrays_;
 
   /**
    * True to never use hack collection objects. Only used for migrations
@@ -7632,8 +7626,6 @@ THRIFT_REGISTER_GENERATOR(
     "    shapes_allow_unknown_fields Allow unknown fields and implicit "
     "subtyping for shapes \n"
     "    frommap_construct Generate fromMap_DEPRECATED method.\n"
-    "    arrays           Use Hack arrays for maps/lists/sets instead of "
-    "objects.\n"
     "    hack_collections Generate hack collections instead of hack arrays.\n"
     "    const_collections Use ConstCollection objects rather than their "
     "mutable counterparts.\n"

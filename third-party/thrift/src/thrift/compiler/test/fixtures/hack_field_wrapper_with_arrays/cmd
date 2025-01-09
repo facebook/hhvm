@@ -1,4 +1,4 @@
-hack: hack:json,arrays,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/module.thrift
-hack_include: hack:json,arrays,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/include.thrift
-hack_annotations: hack:json,arrays,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/annotations.thrift
-hack_constants: hack:json,arrays,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/constants.thrift
+hack: hack:json,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/module.thrift
+hack_include: hack:json,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/include.thrift
+hack_annotations: hack:json,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/annotations.thrift
+hack_constants: hack:json,shapes,shape_arraykeys,frommap_construct,typedef,server,shapes_use_pipe_structure src/constants.thrift

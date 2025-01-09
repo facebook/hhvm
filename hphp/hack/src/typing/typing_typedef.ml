@@ -205,6 +205,22 @@ let casetype_def env typedef =
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) err2;
     env
 
+let check_cycles env (t_pos, t_name) hints =
+  let (env, cycles) =
+    List.fold_left hints ~init:(env, []) ~f:(fun (env, cycles) hint ->
+        let ((env, _ty_err_opt, new_cycles), _ty) =
+          Phase.localize_hint_no_subst_report_cycles
+            env
+            ~ignore_errors:true
+            ~report_cycle:(t_pos, Type_expansions.Expandable.Type_alias t_name)
+            hint
+        in
+        (env, new_cycles @ cycles))
+  in
+  Type_expansions.report cycles
+  |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
+  env
+
 let typedef_def ctx typedef =
   let env = EnvFromDef.typedef_env ~origin:Decl_counters.TopLevel ctx typedef in
   let {
@@ -242,7 +258,6 @@ let typedef_def ctx typedef =
           not (recursive_case_types env)),
         List.map (variant :: variants) ~f:(fun v -> v.tctv_hint) )
   in
-  let (t_pos, t_name_) = t_name in
   let env = Env.set_current_module env t_module in
   let env = Env.set_internal env t_internal in
   let env = Env.set_current_package_membership env t_package in
@@ -260,28 +275,24 @@ let typedef_def ctx typedef =
   Typing_variance.typedef env typedef;
 
   let env =
-    let (env, ty_err_opt2, cycles, tys) =
+    if do_report_cycles env then
+      check_cycles env t_name hints
+    else
+      env
+  in
+  let env =
+    let (env, ty_err_opt2, tys) =
       List.fold_left
         hints
-        ~init:(env, None, [], [])
-        ~f:(fun (env, ty_err_opt2, cycles, tys) hint ->
-          let ((env, new_ty_err_opt2, new_cycles), ty) =
-            (* This also detects cyclic definitions *)
-            Phase.localize_hint_no_subst_report_cycles
-              env
-              ~ignore_errors:false
-              ~report_cycle:
-                (t_pos, Type_expansions.Expandable.Type_alias t_name_)
-              hint
+        ~init:(env, None, [])
+        ~f:(fun (env, ty_err_opt2, tys) hint ->
+          let ((env, new_ty_err_opt2), ty) =
+            Phase.localize_hint_no_subst env ~ignore_errors:false hint
           in
           ( env,
             Option.merge ~f:Typing_error.both new_ty_err_opt2 ty_err_opt2,
-            new_cycles @ cycles,
             ty :: tys ))
     in
-    if do_report_cycles env then
-      Type_expansions.report cycles
-      |> Option.iter ~f:(Typing_error_utils.add_typing_error ~env);
     let env = casetype_def env typedef in
     Option.iter ~f:(Typing_error_utils.add_typing_error ~env) ty_err_opt2;
 

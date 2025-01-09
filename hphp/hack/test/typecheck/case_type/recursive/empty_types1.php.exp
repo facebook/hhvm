@@ -44,13 +44,13 @@ ERROR: File "empty_types1.php", line 27, characters 20-29:
 Invalid type hint (Typing[4062])
   File "empty_types1.php", line 27, characters 29-29:
   You are trying to access the type constant `T` but this is a mixed value
-  File "empty_types1.php", line 27, characters 21-29:
+  File "empty_types1.php", line 27, characters 11-16:
   Definition is here
 ERROR: File "empty_types1.php", line 28, characters 21-30:
 Invalid type hint (Typing[4062])
   File "empty_types1.php", line 28, characters 30-30:
   You are trying to access the type constant `T` but this is a mixed value
-  File "empty_types1.php", line 28, characters 21-30:
+  File "empty_types1.php", line 28, characters 11-17:
   Definition is here
 ERROR: File "empty_types1.php", line 29, characters 11-15:
 Invalid case type declaration. More than one variant of `Acces` could contain values with the same runtime tag (Typing[4475])

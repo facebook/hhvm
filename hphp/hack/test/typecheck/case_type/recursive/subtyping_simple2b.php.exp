@@ -6,9 +6,3 @@ Invalid case type declaration. More than one variant of `A` could contain values
     via this variant of the case type `A`
   File "subtyping_simple2b.php", line 5, characters 5-7:
   It overlaps with `int`, which also includes **ints**
-ERROR: File "subtyping_simple2b.php", line 4, characters 11-11:
-Invalid constraint on `newtype` (Typing[4332])
-  File "subtyping_simple2b.php", line 4, characters 16-18:
-  Expected `int`
-  File "subtyping_simple2b.php", line 4, characters 22-22:
-  But got `mixed`. Using `mixed` instead of A because this is an illegal recursive use of A in the definition of A

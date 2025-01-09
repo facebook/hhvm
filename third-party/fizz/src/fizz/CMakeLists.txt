@@ -97,7 +97,7 @@ else()
   list(APPEND FIZZ_INCLUDE_DIRECTORIES ${LIBEVENT_INCLUDE_DIR})
 endif()
 
-find_package(liboqs CONFIG)
+find_package(liboqs 0.11.0 CONFIG)
 if (liboqs_FOUND)
   set(FIZZ_HAVE_OQS TRUE)
 endif()

@@ -46,12 +46,8 @@ void XReqAsioBoolEvent::unserialize(TypedValue& result) {
 ///////////////////////////////////////////////////////////////////////////////
 // XReqCallback
 
-XReqCallback::XReqCallback(XReqAsioBoolEvent* event) : 
-  m_event(event), 
-  m_invalidated(false),
-  m_expireAt(AsioSession::TimePoint::min()) {}
-
-XReqCallback::XReqCallback(XReqAsioBoolEvent* event, AsioSession::TimePoint expireAt) : 
+XReqCallback::XReqCallback(XReqAsioBoolEvent* event, AsioSession::TimePoint expireAt, req_id waiterId) : 
+  m_waiterId(waiterId),
   m_event(event), 
   m_invalidated(false),
   m_expireAt(expireAt) {}
@@ -116,6 +112,7 @@ bool XReqSyncImpl::mutex_try_unlock(req_id unlocker) {
     auto next = std::move(m_waiters.back());
     m_waiters.pop_back();
     if (next->isValid()) {
+      m_mutex_owner.store(next->getWaiterId());
       next->call();
       break;
     }
@@ -284,7 +281,7 @@ c_Awaitable* XReqSync::genLock(int64_t timeout_ms) {
     auto expiration = timeout_ms > 0
         ? AsioSession::TimePoint::clock::now() + std::chrono::milliseconds(timeout_ms)
         : AsioSession::TimePoint::min();
-    callback = std::make_shared<XReqCallback>(event, expiration);
+    callback = std::make_shared<XReqCallback>(event, expiration, m_self_id);
 
     // Store the callback in per-request queue for invalidation when we die
     this->m_waiters.push_back(callback);

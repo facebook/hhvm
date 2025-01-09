@@ -86,15 +86,16 @@ struct XReqAsioBoolEvent : XReqAsioEvent<bool> {
   */
 class XReqCallback {
   public:
-    explicit XReqCallback(XReqAsioBoolEvent* event);
-    XReqCallback(XReqAsioBoolEvent* event, AsioSession::TimePoint expireAt);
+    XReqCallback(XReqAsioBoolEvent* event, AsioSession::TimePoint expireAt, req_id waiterId);
     void call();
     bool isValid();
     void invalidate() { m_invalidated = true; }
+    req_id getWaiterId() { return m_waiterId; }
     AsioSession::TimePoint getExpireAt() { return m_expireAt; }
     static bool earlier(std::shared_ptr<XReqCallback> x, const std::shared_ptr<XReqCallback> y);
 
   private:
+    req_id m_waiterId;
     XReqAsioBoolEvent* m_event;
     bool m_invalidated;
     AsioSession::TimePoint m_expireAt;

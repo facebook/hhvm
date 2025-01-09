@@ -255,9 +255,6 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
 
   void apply(type::AnyData& val) const { apply(val.toThrift()); }
 
-  // TODO(dokwon): Consider migrating it to be part of patch splitting when it
-  // is available.
-
   /// Extracts the patch for the given patch type.
   template <typename VPatch>
   VPatch extractPatchAsIf() const {
@@ -287,7 +284,7 @@ class AnyPatch : public BaseClearPatch<Patch, AnyPatch<Patch>> {
       }
 
       VPatch patch;
-      const type::Type type_ = type::Type::get<VTag>();
+      const type::Type& type_ = type::Type::get<VTag>();
     };
     AnyPatchExtractionVisitor visitor;
     customVisit(visitor);

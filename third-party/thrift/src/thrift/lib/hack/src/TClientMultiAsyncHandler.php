@@ -52,7 +52,7 @@ final class TClientMultiAsyncHandler extends TClientAsyncHandler {
     string $service_name,
     string $func_name,
     ?IThriftStruct $args = null,
-  )[zoned_shallow]: Awaitable<void> {
+  ): Awaitable<void> {
     await Vec\map_async(
       $this->handlers,
       async $handler ==>

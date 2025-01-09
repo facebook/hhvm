@@ -19,6 +19,8 @@
 <<Oncalls('thrift')>>
 final class ThriftUnionSerializationTraitTest extends WWWTest {
 
+  use ClassLevelTest;
+
   public static function provideUnionSerialize(
   ): dict<string, (SerializerTestUnion, string, SerializerTestUnionEnum)> {
     return dict[

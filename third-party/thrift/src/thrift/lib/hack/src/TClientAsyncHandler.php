@@ -34,7 +34,7 @@ class TClientAsyncHandler {
     string $service_name,
     string $func_name,
     ?IThriftStruct $args = null,
-  )[zoned_local]: Awaitable<void> {
+  ): Awaitable<void> {
     // Do nothing
   }
 

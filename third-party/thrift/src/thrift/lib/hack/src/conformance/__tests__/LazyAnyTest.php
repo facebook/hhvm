@@ -4,6 +4,8 @@
 <<Oncalls('search_topaggr'), Feature('FBApp_Search_IndexServe')>>
 final class LazyAnyTest extends LazyAnyTestBase {
 
+  use ClassLevelTest;
+
   const classname<IThriftStruct> CLASSNAME = unicorn_test_MainStruct::class;
   const classname<TProtocolSerializer> DATA_SERIALIZER =
     TCompactSerializer::class;
@@ -14,6 +16,8 @@ final class LazyAnyTest extends LazyAnyTestBase {
 
 <<Oncalls('search_topaggr'), Feature('FBApp_Search_IndexServe')>>
 final class LazyAnySimpleJsonTest extends LazyAnyTestBase {
+
+  use ClassLevelTest;
 
   const classname<IThriftStruct> CLASSNAME =
     unicorn_test_MainStructSimpleJson::class;

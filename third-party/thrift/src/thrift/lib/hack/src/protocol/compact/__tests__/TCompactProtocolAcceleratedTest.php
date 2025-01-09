@@ -21,6 +21,7 @@
  */
 <<Oncalls('thrift')>>
 final class TCompactProtocolAcceleratedTest extends WWWTest {
+  use ClassLevelTest;
   private function getReferenceProtocol(): TCompactProtocolUnaccelerated {
     return new TCompactProtocolUnaccelerated(new TMemoryBuffer());
   }

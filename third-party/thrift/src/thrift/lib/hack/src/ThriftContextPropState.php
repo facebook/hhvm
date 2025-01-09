@@ -233,6 +233,53 @@ final class ThriftContextPropState {
     return $this->getModelInfo()?->get_model_type_id();
   }
 
+  // user id getters
+  public function getUserIds()[]: ?ContextProp\UserIds {
+    return $this->getBaggage()?->user_ids;
+  }
+
+  public function getFBUserId()[]: ?int {
+    return $this->getUserIds()?->fb_user_id;
+  }
+
+  public function getIGUserId()[]: ?int {
+    return $this->getUserIds()?->ig_user_id;
+  }
+
+  // user id setters
+  public function setUserIds(
+    ?ContextProp\UserIds $user_ids,
+  )[write_props]: void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+
+    $baggage = $this->storage->baggage as nonnull;
+    $baggage->user_ids = $user_ids;
+    $this->dirty();
+  }
+
+  public function setFBUserId(int $fb_user_id)[write_props]: void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+    $baggage = $this->storage->baggage as nonnull;
+
+    $baggage->user_ids =
+      $baggage->user_ids ?? ContextProp\UserIds::withDefaultValues();
+    $baggage->user_ids->fb_user_id = $fb_user_id;
+    $this->dirty();
+  }
+
+  public function setIGUserId(int $ig_user_id)[write_props]: void {
+    $this->storage->baggage =
+      $this->storage->baggage ?? ContextProp\Baggage::withDefaultValues();
+    $baggage = $this->storage->baggage as nonnull;
+
+    $baggage->user_ids =
+      $baggage->user_ids ?? ContextProp\UserIds::withDefaultValues();
+    $baggage->user_ids->ig_user_id = $ig_user_id;
+    $this->dirty();
+  }
+
   public function getTraceContext()[]: ?ContextProp\TraceContext {
     if ($this->storage->baggage is nonnull) {
       $trace_context = $this->storage->baggage?->trace_context;

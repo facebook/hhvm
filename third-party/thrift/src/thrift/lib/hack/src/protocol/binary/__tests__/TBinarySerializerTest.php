@@ -24,6 +24,8 @@
 <<Oncalls('thrift')>>
 final class TBinarySerializerTest extends WWWTest {
 
+  use ClassLevelTest;
+
   // Verifies if two objects of type CountersInformation
   // have the same content (counters value).
   private function checkEqualCounters(

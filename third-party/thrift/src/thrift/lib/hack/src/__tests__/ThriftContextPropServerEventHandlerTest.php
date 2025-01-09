@@ -3,6 +3,7 @@
 
 <<Oncalls('xdc_artillery')>>
 final class ThriftContextPropServerEventHandlerTest extends WWWTest {
+  use ClassLevelTest;
   public async function testThriftContextPropResponsePath(): Awaitable<void> {
     ThriftContextPropState::get()->addExperimentId(1);
 

@@ -19,6 +19,8 @@
 <<Oncalls('thrift')>>
 final class ThriftUtilTest extends WWWTest {
 
+  use ClassLevelTest;
+
   public async function testGetUnionTypeFromShape(): Awaitable<void> {
     expect(
       ThriftUtil::getUnionTypeFromShape<

@@ -21,6 +21,8 @@ final class ThriftSerializationHelperTest
   extends WWWTest
   implements ISnapshotTest {
 
+  use ClassLevelTest;
+
   <<__LateInit>> public SimpleStruct $simpleStruct;
   <<__LateInit>> public ContainerStruct $containerStruct;
   <<__LateInit>> public ComplexStruct $complexStruct;
@@ -283,5 +285,26 @@ final class ThriftSerializationHelperTest
 
     // Snapshot for manual verification
     expect(JSONThriftSerializer::serialize($terse_struct))->toMatchSnapshot();
+  }
+
+  public function testCorruptedData(): void {
+    $transport = new TMemoryBuffer();
+    $protocol = new TBinaryProtocolAccelerated($transport);
+    ThriftSerializationHelper::writeStruct(
+      $protocol,
+      CorruptedDataStruct1::fromShape(
+        shape(
+          "string_i64_map" => Map {"foo" => 1, "bar" => 10},
+        ),
+      ),
+    );
+
+    expect(
+      () ==> ThriftSerializationHelper::readStruct(
+        $protocol,
+        CorruptedDataStruct2::withDefaultValues(),
+      ),
+    )
+      ->toThrow(TTransportException::class);
   }
 }

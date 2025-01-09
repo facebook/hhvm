@@ -4,6 +4,8 @@
 <<Oncalls('thrift')>>
 final class TFileStreamTest extends WWWTest {
 
+  use ClassLevelTest;
+
   public async function testRead(): Awaitable<void> {
     using IntegrationTestDangerousFunctionGuard::forFopen();
 

@@ -4,6 +4,8 @@
 <<Oncalls('signals_infra')>>
 final class ThriftImmutableWrapperTest extends WWWTest {
 
+  use ClassLevelTest;
+
   public async function testGetSerializedThrift(): Awaitable<void> {
     $underlying = AdsConsentPlatformParams::fromShape(shape(
       'traceID' => '123',

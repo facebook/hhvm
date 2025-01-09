@@ -4,6 +4,7 @@ module privacylib;
 
 <<Oncalls('www_privacy_frameworks')>>
 final class ThriftPolicyEnforcerTest extends WWWTest {
+  use ClassLevelTest;
   use TPolicyEnforcerTest;
 
   const int FAKE_CALLER_0 = 0;
@@ -15,7 +16,6 @@ final class ThriftPolicyEnforcerTest extends WWWTest {
   public async function beforeEach(): Awaitable<void> {
     MockJustKnobs::setInt('privacy:emergency_sampling_backoff_www', 1);
     MockPZ2::disableSampling();
-    MockPZ::alwaysLog();
     MockPrivacyLib::neverDisableLibrary();
   }
 

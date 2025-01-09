@@ -19,6 +19,8 @@
 <<Oncalls('thrift')>>
 final class TBinaryProtocolAcceleratedTestCase extends WWWTest {
 
+  use ClassLevelTest;
+
   public static function providerTBinaryProtocolAccelerated(
   ): vec<(KeyedContainer<int, LogEntry>)> {
     return vec[

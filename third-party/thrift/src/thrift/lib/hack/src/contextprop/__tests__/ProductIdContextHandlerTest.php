@@ -24,6 +24,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     );
 
     // verify that TagManager::getLatestOriginID() was called
+
     expect($mock)->wasCalledOnce();
 
     // verify that TFM was updated
@@ -49,6 +50,7 @@ final class ProductIdContextHandlerTest extends WWWTest {
     );
 
     // verify that TagManager::getLatestOriginID() was called
+
     expect($mock)->wasCalledOnce();
 
     // verify that TFM was NOT updated

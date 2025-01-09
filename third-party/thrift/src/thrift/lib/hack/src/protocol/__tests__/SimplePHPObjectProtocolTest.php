@@ -19,6 +19,8 @@
 <<Oncalls('webfoundation', 'thrift')>>
 final class SimplePHPObjectProtocolTest extends WWWTest {
 
+  use ClassLevelTest;
+
   public function testSameAsTSimpleJSON(): void {
     $grandchild = SimpleObjectTest_TestStruct::withDefaultValues();
     $grandchild->stringval = 'grandchild';

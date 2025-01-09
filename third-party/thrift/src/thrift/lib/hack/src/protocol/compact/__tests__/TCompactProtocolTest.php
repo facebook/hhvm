@@ -22,6 +22,7 @@
  */
 <<Oncalls('thrift')>>
 final class TCompactProtocolTest extends WWWTest {
+  use ClassLevelTest;
   public function testSimple(): void {
     $prot = new TCompactProtocolUnaccelerated(new TMemoryBuffer());
 

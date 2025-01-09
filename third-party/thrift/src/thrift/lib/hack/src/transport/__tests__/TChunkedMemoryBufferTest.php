@@ -3,6 +3,7 @@
 
 <<Oncalls('thrift')>>
 final class TChunkedMemoryBufferTest extends WWWTest {
+  use ClassLevelTest;
   const string TEST_DATA = <<<EOD
 The FitnessGram™ Pacer Test is a multistage aerobic capacity test that
 progressively gets more difficult as it continues. The 20 meter pacer test will

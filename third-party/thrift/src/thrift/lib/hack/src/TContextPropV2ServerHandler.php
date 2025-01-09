@@ -41,6 +41,29 @@ final class TContextPropV2ServerHandler extends TProcessorEventHandler {
     string $fn_name,
     mixed $result,
   ): void {
+    // keeping this logic in tact from v1 and not moving it to handlers
+    // because we write to ARTILLERY_TRACING_HEADERS and not TFMR
+    if (
+      JustKnobs::eval('artillery/sdk_www:response_header_propagation_rollout')
+    ) {
+      $context_manager = ContextManager::get();
+      if ($context_manager->getCoreContext() !== null) {
+        $ctx_prop_headers = $context_manager->processOutgoingResponse(shape());
+
+        if (
+          C\contains_key(
+            $ctx_prop_headers,
+            HTTPResponseHeader::ARTILLERY_TRACING_HEADERS,
+          )
+        ) {
+          $this->thriftServer->addHTTPHeader(
+            HTTPResponseHeader::ARTILLERY_TRACING_HEADERS,
+            $ctx_prop_headers[HTTPResponseHeader::ARTILLERY_TRACING_HEADERS],
+          );
+        }
+      }
+    }
+
     $full_params = $this->params;
     $full_params['fn_name'] = $fn_name;
     $full_params['fn_result'] = $result;
@@ -68,29 +91,6 @@ final class TContextPropV2ServerHandler extends TProcessorEventHandler {
       HTTPResponseHeader::THRIFT_FRAMEWORK_METADATA_RESPONSE,
       $encoded_response_tfm,
     );
-
-    // keeping this logic in tact from v1 and not moving it to handlers
-    // because we write to ARTILLERY_TRACING_HEADERS and not TFMR
-    if (
-      JustKnobs::eval('artillery/sdk_www:response_header_propagation_rollout')
-    ) {
-      $context_manager = ContextManager::get();
-      if ($context_manager->getCoreContext() !== null) {
-        $ctx_prop_headers = $context_manager->processOutgoingResponse(shape());
-
-        if (
-          C\contains_key(
-            $ctx_prop_headers,
-            HTTPResponseHeader::ARTILLERY_TRACING_HEADERS,
-          )
-        ) {
-          $this->thriftServer->addHTTPHeader(
-            HTTPResponseHeader::ARTILLERY_TRACING_HEADERS,
-            $ctx_prop_headers[HTTPResponseHeader::ARTILLERY_TRACING_HEADERS],
-          );
-        }
-      }
-    }
   }
 
 }

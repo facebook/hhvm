@@ -20,6 +20,7 @@
 final class TypeWrapperTest
   extends WWWTest
   implements IAllowUnrecognizedPublicMethodsInTestClass_MIGRATION_ONLY_FIXME {
+  use ClassLevelTest;
   public static async function genNestedStruct(
   ): Awaitable<WrapperTest\MyNestedStruct> {
     return await WrapperTest\MyNestedStruct::genFromShape(shape(

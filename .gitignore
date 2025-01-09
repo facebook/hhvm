@@ -100,3 +100,6 @@ CPackSourceConfig.cmake
 
 # python scripts
 *.pyc
+
+# clangd JSON Compilation Database
+compile_commands.json

@@ -245,7 +245,7 @@ struct Generator {
   explicit Generator(const std::string&, bool skip);
 
   // Turn the layouts into C++ code, writing to the specified ostream.
-  void operator()(std::ostream&) const;
+  void operator()(std::ostream&, bool skip) const;
  private:
   static bool isTemplateName(const std::string& candidate,
                              const std::string& name);
@@ -687,9 +687,8 @@ Generator::Generator(const std::string& filename, bool skip) {
   // Complain if it looks like we don't have any debug info enabled.
   // (falls back to conservative scanning for everything)
   if (collectable_markers.empty() && indexer_types.empty()) {
-    std::cerr << "gen-type-scanners: warning: "
-                 "No collectable or indexed types found. "
-                 "Is debug-info enabled?" << std::endl;
+    throw Exception("No collectable or indexed types found. "
+                    "Is debug-info enabled?");
   }
 
   // Extract all the types that Mark[Scannable]Collectable<> was instantiated on
@@ -3224,7 +3223,11 @@ void Generator::genMetrics(std::ostream& os) const {
 }
 
 // Generate the entire C++ file.
-void Generator::operator()(std::ostream& os) const {
+void Generator::operator()(std::ostream& os, bool skip) const {
+  if (!skip && m_layouts.empty()) {
+    throw Exception{"No layouts generated"};
+  }
+
   os << "#include <limits>\n\n";
 
   os << "#include \"hphp/util/assertions.h\"\n";
@@ -3449,7 +3452,7 @@ int main(int argc, char** argv) {
       }
       Generator generator{source_executable, skip};
       std::ofstream output_file{output_filename};
-      generator(output_file);
+      generator(output_file, skip);
     } catch (const debug_parser::Exception& exn) {
       std::cerr << "\nError generating type scanners:\n"
                 << exn.what() << std::endl << std::endl;

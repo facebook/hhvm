@@ -55,11 +55,11 @@ import {{program:safe_patch_module_path}}.thrift_types as _fbthrift_safe_patch_t
 {{/if (not program:safe_patch?)}}
 
 {{#program:include_namespaces}}
-{{#has_types?}}
+{{#if has_types?}}{{#if (not is_unsafe_patch?)}}
 
 import {{included_module_path}}.{{> ../python/types/types_import_path}} as {{included_module_mangle}}__{{> ../python/types/types_import_path}}
 import {{included_module_path}}.thrift_patch
-{{/has_types?}}
+{{/if (not is_unsafe_patch?)}}{{/if has_types?}}
 {{/program:include_namespaces}}
 
 {{#program:structs}}
@@ -68,7 +68,7 @@ class {{struct:py_name}}Patch(
     Base{{#if struct:union?}}Union{{#else}}Struct{{/if struct:union?}}Patch[{{program:module_mangle}}__thrift_types.{{struct:py_name}}]
 ):
     pass
-{{#struct:fields_ordered_by_id}}{{#field:type}}
+{{#struct:fields_ordered_by_id}}{{#field:type}}{{#if (not type:contains_unsafe_patch?)}}
     @property
     def {{field:py_name}}(self) -> {{> types/field_patch_type}}[
             {{> ../python/types/unadapted_pep484_type}},
@@ -99,5 +99,5 @@ class {{struct:py_name}}Patch(
     {{/if (not program:safe_patch?)}}
 
 
-{{/field:type}}{{/struct:fields_ordered_by_id}}
+{{/if (not type:contains_unsafe_patch?)}}{{/field:type}}{{/struct:fields_ordered_by_id}}
 {{/program:structs}}

@@ -37,6 +37,10 @@ bool is_type_iobuf(std::string_view name);
 
 bool is_type_iobuf(const t_type* type);
 
+bool is_unsafe_patch_program(const t_program* prog);
+
+bool type_contains_unsafe_patch(const t_type* type);
+
 std::vector<std::string> get_py3_namespace(const t_program* prog);
 
 std::string get_py3_namespace_with_name_and_prefix(

@@ -824,6 +824,8 @@ class cpp_mstch_service : public mstch_service {
              &cpp_mstch_service::has_service_schema},
             {"service:reduced_client?", &cpp_mstch_service::reduced_client},
             {"service:definition_key", &cpp_mstch_service::definition_key},
+            {"service:definition_key_length",
+             &cpp_mstch_service::definition_key_length},
         });
 
     const auto all_functions = mstch_service::get_functions();
@@ -909,6 +911,10 @@ class cpp_mstch_service : public mstch_service {
   mstch::node definition_key() {
     schematizer s(*service_->program()->scope(), sm_, {});
     return escape_binary_string(s.identify_definition(*service_));
+  }
+  mstch::node definition_key_length() {
+    schematizer s(*service_->program()->scope(), sm_, {});
+    return escape_binary_string(s.identify_definition(*service_)).length();
   }
 
  private:

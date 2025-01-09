@@ -18,6 +18,7 @@
 
 <<Oncalls('thrift')>>
 final class AdapterTest extends WWWTest {
+  use ClassLevelTest;
   public static function getTestCases(
   ): dict<string, (AdapterTest\Foo, AdapterTest\FooWithoutAdapters)> {
     return dict[

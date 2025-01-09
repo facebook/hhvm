@@ -19,6 +19,8 @@
 <<Oncalls('thrift')>>
 final class TSimpleJSONProtocolTest extends WWWTest {
 
+  use ClassLevelTest;
+
   public static function provideStringEncodings(): dict<string, shape(
     'val' => string,
     'json' => string,

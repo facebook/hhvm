@@ -19,6 +19,8 @@
 <<Oncalls('thrift')>>
 final class TTransportExceptionTestCase extends WWWTest {
 
+  use ClassLevelTest;
+
   public function testSimple(): void {
     $short_message = null;
     $code = null;

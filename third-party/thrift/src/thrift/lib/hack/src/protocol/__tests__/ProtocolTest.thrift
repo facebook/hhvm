@@ -76,3 +76,15 @@ struct TestTerseWriteStruct {
   11: set<i32> set_of_ints;
   12: map<string, ComplexStruct> map_of_str_to_struct;
 }
+
+struct CorruptedDataStruct1 {
+  1: list<string> string_list;
+  2: set<string> string_set;
+  3: map<string, i64> string_i64_map;
+}
+
+struct CorruptedDataStruct2 {
+  1: list<i64> i64_list;
+  2: set<i64> i64_set;
+  3: map<i64, i64> i64_i64_map;
+}

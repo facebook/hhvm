@@ -19,6 +19,8 @@
 <<Oncalls('thrift')>>
 final class TMemoryBufferTest extends WWWTest {
 
+  use ClassLevelTest;
+
   public static function providePeekCases(): dict<string, shape(
     'buffer_contents' => string,
     'length' => int,

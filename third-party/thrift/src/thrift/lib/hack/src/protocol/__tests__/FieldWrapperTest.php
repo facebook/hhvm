@@ -18,6 +18,7 @@
 
 <<Oncalls('thrift')>>
 final class FieldWrapperTest extends WWWTest {
+  use ClassLevelTest;
   public static async function genTestCases(
   ): Awaitable<dict<string, vec<FieldWrapperTest\MyStruct>>> {
     return dict[

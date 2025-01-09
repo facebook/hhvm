@@ -5,6 +5,8 @@
 final class ThriftLazyAnyTestForStruct
   extends ThriftLazyAnyTestBase<facebook\thrift\test\ExampleStruct> {
 
+  use ClassLevelTest;
+
   const ThriftStructGenericSpecImpl TYPE_SPEC = shape(
     'type' => TType::STRUCT,
     'class' => facebook\thrift\test\ExampleStruct::class,
@@ -45,6 +47,8 @@ final class ThriftLazyAnyTestForStruct
 <<Oncalls('thrift')>>
 final class ThriftLazyAnyTestForString extends ThriftLazyAnyTestBase<string> {
 
+  use ClassLevelTest;
+
   const ThriftStructGenericSpecImpl TYPE_SPEC = shape('type' => TType::STRING);
 
   const self::TPerProtocolSerializedStrings CPP_HEX_BINARY_SERIALIZED_STRINGS =
@@ -75,6 +79,8 @@ final class ThriftLazyAnyTestForString extends ThriftLazyAnyTestBase<string> {
 <<Oncalls('thrift')>>
 final class ThriftLazyAnyTestForEnum
   extends ThriftLazyAnyTestBase<facebook\thrift\test\ExampleEnum> {
+
+  use ClassLevelTest;
 
   const ThriftStructGenericSpecImpl TYPE_SPEC = shape(
     'type' => TType::I32,
@@ -113,6 +119,8 @@ final class ThriftLazyAnyTestForEnum
 <<Oncalls('thrift')>>
 final class ThriftLazyAnyTestForContainer
   extends ThriftLazyAnyTestBase<dict<int, string>> {
+
+  use ClassLevelTest;
 
   const ThriftStructGenericSpecImpl TYPE_SPEC = shape(
     'type' => TType::MAP,
@@ -154,6 +162,8 @@ final class ThriftLazyAnyTestForContainer
 <<Oncalls('thrift')>>
 final class ThriftLazyAnyTestForBool extends ThriftLazyAnyTestBase<bool> {
 
+  use ClassLevelTest;
+
   const ThriftStructGenericSpecImpl TYPE_SPEC = shape('type' => TType::BOOL);
 
   const self::TPerProtocolSerializedStrings CPP_HEX_BINARY_SERIALIZED_STRINGS =
@@ -189,6 +199,7 @@ final class ThriftLazyAnyTestForNestedStructInContainers
       facebook\thrift\test\ExampleStruct,
     >>,
   > {
+  use ClassLevelTest;
   const type THackType = dict<
     int,
     dict<facebook\thrift\test\ExampleEnum, facebook\thrift\test\ExampleStruct>,

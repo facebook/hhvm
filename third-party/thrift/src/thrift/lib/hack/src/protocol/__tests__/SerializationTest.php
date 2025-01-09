@@ -20,6 +20,8 @@
 <<Oncalls('thrift')>>
 final class SerializationTest extends WWWTest {
 
+  use ClassLevelTest;
+
   <<__LateInit>> private CompactTestStruct $testValue;
   <<__LateInit>> private string $compactSerialized;
   <<__LateInit>> private string $binarySerialized;

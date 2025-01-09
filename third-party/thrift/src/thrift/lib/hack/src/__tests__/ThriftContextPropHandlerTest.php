@@ -3,6 +3,7 @@
 
 <<Oncalls('thrift')>>
 final class ThriftContextPropHandlerTest extends WWWTest {
+  use ClassLevelTest;
   private static function readTFMForTest(string $v): ThriftFrameworkMetadata {
     $transport = Base64::decode($v);
     $buf = new TMemoryBuffer($transport);

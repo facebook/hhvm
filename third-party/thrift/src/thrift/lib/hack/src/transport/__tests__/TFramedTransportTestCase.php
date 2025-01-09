@@ -25,6 +25,8 @@
 <<Oncalls('thrift')>>
 final class TFramedTransportTestCase extends WWWTest {
 
+  use ClassLevelTest;
+
   public static function providerTFramedTransport(
   ): vec<(classname<TTransport>, string)> {
     $transports = vec[TBufferedTransport::class, TFramedTransport::class];

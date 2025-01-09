@@ -4,6 +4,8 @@
 <<Oncalls('xdc_artillery')>>
 final class ExperimentIdContextHandlerTest extends WWWTest {
 
+  use ClassLevelTest;
+
   <<__Override>>
   public async function beforeEach(): Awaitable<void> {
     ThriftContextPropState::get()->clear();

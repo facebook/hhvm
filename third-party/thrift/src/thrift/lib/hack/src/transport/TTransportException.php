@@ -59,9 +59,4 @@ final class TTransportException extends TException {
   public function getShortMessage()[]: string {
     return $this->shortMessage;
   }
-
-  public function addTAALCategorization(string $datatype): void {
-    $datatype_safe = TAAL::stripInvalidCategoryCharacters($datatype);
-    $this->message = TAAL::forceCategory($this->message, $datatype_safe);
-  }
 }

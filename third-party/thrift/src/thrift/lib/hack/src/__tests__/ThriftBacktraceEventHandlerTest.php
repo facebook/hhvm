@@ -69,6 +69,7 @@ final class BacktraceClientEventHandlerTest extends WWWTest {
 
 <<Oncalls('xdc_artillery')>>
 final class ThriftBacktraceServerEventHandlerTest extends WWWTest {
+  use ClassLevelTest;
   public async function testSetsHeaderWhenBacktraceActive(): Awaitable<void> {
     $thrift_server = mock(ThriftServer::class);
     $handler = new ThriftBacktraceServerEventHandler($thrift_server);

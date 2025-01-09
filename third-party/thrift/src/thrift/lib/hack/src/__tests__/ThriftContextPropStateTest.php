@@ -3,6 +3,7 @@
 
 <<Oncalls('thrift')>>
 final class ThriftContextPropStateTest extends WWWTest {
+  use ClassLevelTest;
   public function testAccess(): void {
     $tcps = ThriftContextPropState::get();
     expect($tcps->getRequestId())->toEqual("");
@@ -35,6 +36,39 @@ final class ThriftContextPropStateTest extends WWWTest {
     // back to null
     $tcps->setRegionalizationEntity(null);
     expect($tcps->getRegionalizationEntity())->toBeNull();
+  }
+
+  public function testUserIdsNullable(): void {
+    $tcps = ThriftContextPropState::get();
+    expect($tcps->getUserIds())->toBeNull();
+
+    // 0 is different from null
+    $tcps->setUserIds(ContextProp\UserIds::withDefaultValues());
+    expect($tcps->getUserIds())->toNotBeNull();
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(0);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(0);
+
+    // override existing value
+    $tcps->setUserIds(new ContextProp\UserIds(1, 2));
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(1);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(2);
+
+    // back to null
+    $tcps->setUserIds(null);
+    expect($tcps->getUserIds())->toBeNull();
+
+    // set FB Id only
+    $tcps->setFBUserId(3);
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
+    expect($tcps->getFBUserId())->toEqual(3);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(0);
+
+    // set IG Id only
+    $tcps->setIGUserId(4);
+    expect($tcps->getUserIds()?->fb_user_id)->toEqual(3);
+    expect($tcps->getUserIds()?->ig_user_id)->toEqual(4);
+    expect($tcps->getIGUserId())->toEqual(4);
+
   }
 
   public function testBaggage(): void {

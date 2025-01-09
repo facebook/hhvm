@@ -3,6 +3,7 @@
 
 <<Oncalls('smint')>>
 final class ThriftTypeStructAdapterTest extends WWWTest {
+  use ClassLevelTest;
   public async function testFromHackType(): Awaitable<void> {
     // Struct type
 

@@ -3,6 +3,7 @@
 
 <<Oncalls('thrift')>>
 final class ThriftUniversalNameTest extends WWWTest {
+  use ClassLevelTest;
   public async function testUniversalHashSha256(): Awaitable<void> {
     $expected = non_crypto_sha256("fbthrift://foo.com/my/type", true);
 

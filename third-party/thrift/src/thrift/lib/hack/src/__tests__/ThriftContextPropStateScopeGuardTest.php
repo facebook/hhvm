@@ -4,6 +4,8 @@
 <<Oncalls('xdc_artillery')>>
 final class ThriftContextPropStateScopeGuardTest extends WWWTest {
 
+  use ClassLevelTest;
+
   private function getSerializedTFMHeaders(
     string $overriden_request_id,
     int $overriden_origin_id,

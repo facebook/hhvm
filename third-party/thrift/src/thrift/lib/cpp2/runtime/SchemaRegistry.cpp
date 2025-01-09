@@ -31,7 +31,8 @@ namespace {
 void mergeInto(
     type::Schema& dst,
     type::Schema&& src,
-    std::unordered_set<type::ProgramId>& includedPrograms) {
+    std::unordered_set<type::ProgramId>& includedPrograms,
+    bool allowDuplicateDefinitionKeys) {
   for (auto& program : *src.programs()) {
     auto id = *program.id();
     if (!includedPrograms.insert(id).second) {
@@ -51,7 +52,8 @@ void mergeInto(
   dst.definitionsMap()->insert(
       std::make_move_iterator(src.definitionsMap()->begin()),
       std::make_move_iterator(src.definitionsMap()->end()));
-  if (dst.definitionsMap()->size() != ndefs + src.definitionsMap()->size()) {
+  if (!allowDuplicateDefinitionKeys &&
+      dst.definitionsMap()->size() != ndefs + src.definitionsMap()->size()) {
     throw std::runtime_error("DefinitionKey collision");
   }
 }
@@ -85,7 +87,11 @@ SchemaRegistry::Ptr SchemaRegistry::getMergedSchema() {
   mergedSchema_ = std::make_shared<type::Schema>();
   for (auto& [name, data] : base_.rawSchemas_) {
     if (auto schema = readSchema(data.data)) {
-      mergeInto(*mergedSchema_, std::move(*schema), includedPrograms_);
+      mergeInto(
+          *mergedSchema_,
+          std::move(*schema),
+          includedPrograms_,
+          /*allowDuplicateDefinitionKeys*/ false);
     }
   }
 
@@ -98,7 +104,11 @@ SchemaRegistry::Ptr SchemaRegistry::getMergedSchema() {
     }
 
     if (auto schema = readSchema(data)) {
-      mergeInto(*mergedSchema_, std::move(*schema), includedPrograms_);
+      mergeInto(
+          *mergedSchema_,
+          std::move(*schema),
+          includedPrograms_,
+          /*allowDuplicateDefinitionKeys*/ false);
     }
   };
 
@@ -113,7 +123,11 @@ type::Schema SchemaRegistry::mergeSchemas(
 
   for (const auto& data : schemas) {
     if (auto schema = readSchema(data)) {
-      mergeInto(mergedSchema, std::move(*schema), includedPrograms);
+      mergeInto(
+          mergedSchema,
+          std::move(*schema),
+          includedPrograms,
+          /*allowDuplicateDefinitionKeys*/ false);
     }
   }
 
@@ -125,7 +139,18 @@ type::Schema SchemaRegistry::mergeSchemas(std::vector<type::Schema>&& schemas) {
   std::unordered_set<type::ProgramId> includedPrograms;
 
   for (auto& schema : schemas) {
-    mergeInto(mergedSchema, std::move(schema), includedPrograms);
+    /*
+     * allowDuplicateDefinitionKeys is true here because this is called by
+     * MultiplexAsyncProcessor, which may hold services with a shared base
+     * service.
+     * Additionally, since this function accepts deserialized schemas
+     * those schemas were probably already checked for duplicates earlier.
+     */
+    mergeInto(
+        mergedSchema,
+        std::move(schema),
+        includedPrograms,
+        /*allowDuplicateDefinitionKeys*/ true);
   }
 
   return mergedSchema;

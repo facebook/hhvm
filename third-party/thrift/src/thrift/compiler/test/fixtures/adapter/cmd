@@ -1,5 +1,5 @@
 android: android src/module.thrift
-hack: hack:json,typedef,shapes=1,shapes_use_pipe_structure=1 src/module.thrift
+hack: hack:json,typedef,shapes=1,shapes_use_pipe_structure=1,hack_collections=1 src/module.thrift
 java_deprecated: java_deprecated src/module.thrift
 json: json src/module.thrift
 cpp2: mstch_cpp2:includes=\"adapter_dependency.h\" src/module.thrift

@@ -126,9 +126,7 @@ class t_hack_generator : public t_concat_generator {
     array_migration_ = option_is_specified(options, "array_migration");
     arrays_ = option_is_specified(options, "arrays");
     legacy_arrays_ = option_is_specified(options, "legacy_arrays");
-    // Set the future state of compiler options based on the current state.
-    // A subsequent change will remove the current compiler options.
-    hack_collections_ = !arrays_ && !legacy_arrays_;
+    hack_collections_ = option_is_specified(options, "hack_collections");
 
     nullable_everything_ = option_is_specified(options, "nullable_everything");
     const_collections_ = option_is_specified(options, "const_collections");
@@ -7622,6 +7620,7 @@ THRIFT_REGISTER_GENERATOR(
     "    stricttypes      Use Collection classes everywhere rather than "
     "KeyedContainer.\n"
     "    arraysets        Use legacy arrays for sets rather than objects.\n"
+    "                     Either legacy_arrays or hack_collections must be present.\n"
     "    nonullables      Instantiate struct fields within structs, rather "
     "than nullable\n"
     "    structtrait      Add 'use [StructName]Trait;' to generated classes\n"
@@ -7635,6 +7634,7 @@ THRIFT_REGISTER_GENERATOR(
     "    frommap_construct Generate fromMap_DEPRECATED method.\n"
     "    arrays           Use Hack arrays for maps/lists/sets instead of "
     "objects.\n"
+    "    hack_collections Generate hack collections instead of hack arrays.\n"
     "    const_collections Use ConstCollection objects rather than their "
     "mutable counterparts.\n"
     "    typedef          Generate type aliases for all the types defined\n"

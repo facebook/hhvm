@@ -1,3 +1,3 @@
-hack: hack:typedef src/module.thrift
-hack_include: hack:typedef src/include.thrift
-hack_php_module: hack:typedef src/php_module.thrift
+hack: hack:typedef,hack_collections=1 src/module.thrift
+hack_include: hack:typedef,hack_collections=1 src/include.thrift
+hack_php_module: hack:typedef,hack_collections=1 src/php_module.thrift

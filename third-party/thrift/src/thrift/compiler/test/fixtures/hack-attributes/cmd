@@ -1,1 +1,1 @@
-hack: hack src/module1.thrift
+hack: hack:hack_collections=1 src/module1.thrift

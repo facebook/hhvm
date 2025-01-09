@@ -1,6 +1,6 @@
-hack: hack src/module.thrift
-hack_module2: hack:server src/module2.thrift
-hack_typedef: hack:typedef src/module.thrift
-hack_module2_typedef: hack:server,typedef src/module2.thrift
-hack_with_patch: hack src/module.thrift
-hack_module2_with_patch: hack:server src/module2_with_patch.thrift
+hack: hack:hack_collections=1 src/module.thrift
+hack_module2: hack:server,hack_collections=1 src/module2.thrift
+hack_typedef: hack:typedef,hack_collections=1 src/module.thrift
+hack_module2_typedef: hack:server,typedef,hack_collections=1 src/module2.thrift
+hack_with_patch: hack:hack_collections=1 src/module.thrift
+hack_module2_with_patch: hack:server,hack_collections=1 src/module2_with_patch.thrift

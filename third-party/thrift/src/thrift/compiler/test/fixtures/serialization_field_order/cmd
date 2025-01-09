@@ -1,5 +1,5 @@
 android: android src/module.thrift
-hack: hack:json,shapes=1 src/module.thrift
+hack: hack:json,shapes=1,hack_collections=1 src/module.thrift
 json: json src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
 go: mstch_go src/module.thrift

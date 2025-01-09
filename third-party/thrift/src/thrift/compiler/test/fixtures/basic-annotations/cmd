@@ -1,6 +1,6 @@
 android: android src/module.thrift
 java_deprecated: java_deprecated src/module.thrift
-hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1,shapes_use_pipe_structure=1 src/module.thrift
+hack: hack:json,server=1,shapes=1,shapes_allow_unknown_fields=1,shapes_use_pipe_structure=1,hack_collections=1 src/module.thrift
 cpp2: mstch_cpp2 src/module.thrift
 go: mstch_go src/module.thrift
 rust: mstch_rust src/module.thrift

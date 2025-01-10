@@ -614,6 +614,7 @@ module CodeAction = struct
     kind: CodeActionKind.t;
     diagnostics: PublishDiagnostics.diagnostic list;
     action: 'a edit_and_or_command;
+    isAI: bool option;
   }
 
   and 'a edit_and_or_command =

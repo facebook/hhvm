@@ -804,6 +804,7 @@ module CodeAction : sig
             If both are supplied, the `edit` is applied first, then the `command` is executed.
             If neither is supplied, the client requests 'edit' be resolved using "codeAction/resolve"
         *)
+    isAI: bool option;  (** Marks this as an AI code action *)
   }
 
   (**

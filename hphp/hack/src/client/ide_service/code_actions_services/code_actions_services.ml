@@ -113,6 +113,7 @@ let to_action
       kind = lsp_kind;
       diagnostics = [];
       action = Lsp.CodeAction.UnresolvedEdit action;
+      isAI = None;
     }
 
 let find

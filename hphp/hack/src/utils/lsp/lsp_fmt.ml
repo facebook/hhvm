@@ -590,12 +590,12 @@ let parse_codeActionResolveRequest (j : json option) :
 (************************************************************************)
 
 let print_codeAction
-    (c : 'a CodeAction.t)
+    (CodeAction.{ title; kind; diagnostics; action; isAI } : 'a CodeAction.t)
     ~(unresolved_to_code_action_request : 'a -> CodeActionRequest.params) : json
     =
   CodeAction.(
     let (edit, command, params_opt) =
-      match c.action with
+      match action with
       | EditOnly e -> (Some e, None, None)
       | CommandOnly c -> (None, Some c, None)
       | BothEditThenCommand (e, c) -> (Some e, Some c, None)
@@ -622,14 +622,23 @@ let print_codeAction
         ]
     in
     let data_opt =
-      Option.map params_opt ~f:(fun params ->
-          Hh_json.JSON_Object [("originalRequest", print_params params)])
+      let fields =
+        List.filter_opt
+        @@ [
+             Option.map params_opt ~f:(fun params ->
+                 ("originalRequest", print_params params));
+             Option.map isAI ~f:(fun isAI -> ("isAI", Hh_json.JSON_Bool isAI));
+           ]
+      in
+      match fields with
+      | [] -> None
+      | _ -> Some (Hh_json.JSON_Object fields)
     in
     Jprint.object_opt
       [
-        ("title", Some (JSON_String c.title));
-        ("kind", Some (JSON_String (CodeActionKind.string_of_kind c.kind)));
-        ("diagnostics", Some (print_diagnostic_list c.diagnostics));
+        ("title", Some (JSON_String title));
+        ("kind", Some (JSON_String (CodeActionKind.string_of_kind kind)));
+        ("diagnostics", Some (print_diagnostic_list diagnostics));
         ("edit", Option.map edit ~f:print_workspaceEdit);
         ("command", Option.map command ~f:print_command);
         ("data", data_opt);

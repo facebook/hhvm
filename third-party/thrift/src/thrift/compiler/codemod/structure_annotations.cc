@@ -59,16 +59,15 @@ class structure_annotations {
                 fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));
             fm_.add_include("thrift/annotation/cpp.thrift");
           }
-        }
-        if (name == "cpp.type" || name == "cpp2.type") {
+        } else if (name == "cpp.type" || name == "cpp2.type") {
           to_remove.emplace_back(name, data);
           if (!std::exchange(has_cpp_type, true)) {
             to_add.insert(
                 fmt::format("@cpp.Type{{name = \"{}\"}}", data.value));
             fm_.add_include("thrift/annotation/cpp.thrift");
           }
-        }
-        if (name == "cpp.ref" || name == "cpp2.ref" || name == "cpp.ref_type" ||
+        } else if (
+            name == "cpp.ref" || name == "cpp2.ref" || name == "cpp.ref_type" ||
             name == "cpp2.ref_type") {
           to_remove.emplace_back(name, data);
         }
@@ -103,6 +102,7 @@ class structure_annotations {
     for (const auto& [name, data] : node.annotations()) {
       // cpp type
       bool is_typedef = dynamic_cast<const t_typedef*>(&node);
+      bool is_field = dynamic_cast<const t_field*>(&node);
       if (name == "cpp.template" || name == "cpp2.template") {
         to_remove.emplace_back(name, data);
         if (is_typedef &&
@@ -113,8 +113,7 @@ class structure_annotations {
               fmt::format("@cpp.Type{{template = \"{}\"}}", data.value));
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      }
-      if (name == "cpp.type" || name == "cpp2.type") {
+      } else if (name == "cpp.type" || name == "cpp2.type") {
         to_remove.emplace_back(name, data);
         if (is_typedef && !std::exchange(has_cpp_type, true)) {
           to_add.insert(fmt::format("@cpp.Type{{name = \"{}\"}}", data.value));
@@ -123,22 +122,19 @@ class structure_annotations {
       }
 
       // cpp ref
-      bool is_field = dynamic_cast<const t_field*>(&node);
-      if (name == "thrift.box") {
+      else if (name == "thrift.box") {
         to_remove.emplace_back(name, data);
         if (is_field && !std::exchange(has_cpp_ref, true)) {
           to_add.insert("@thrift.Box");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
-      }
-      if (name == "cpp.name") {
+      } else if (name == "cpp.name") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kCppNameUri)) {
           to_add.insert(fmt::format("@cpp.Name{{value = \"{}\"}}", data.value));
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      }
-      if (name == "cpp.ref_type" || name == "cpp2.ref_type") {
+      } else if (name == "cpp.ref_type" || name == "cpp2.ref_type") {
         to_remove.emplace_back(name, data);
         if (is_field &&
             !node.find_annotation_or_null({"cpp.box", "thrift.box"}) &&
@@ -152,8 +148,7 @@ class structure_annotations {
           }
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      }
-      if (name == "cpp.ref" || name == "cpp2.ref") {
+      } else if (name == "cpp.ref" || name == "cpp2.ref") {
         to_remove.emplace_back(name, data);
         if (is_field &&
             !node.find_annotation_or_null(
@@ -165,7 +160,7 @@ class structure_annotations {
       }
 
       // thrift
-      if (name == "priority") {
+      else if (name == "priority") {
         if (!dynamic_cast<const t_function*>(&node)) {
           // pydeprecated consumes this annotation on services as well
           continue;
@@ -182,8 +177,7 @@ class structure_annotations {
               "@thrift.Priority{{level = thrift.RpcPriority.{}}}", data.value));
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
-      }
-      if (name == "serial") {
+      } else if (name == "serial") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kSerialUri)) {
           to_add.insert("@thrift.Serial");
@@ -192,17 +186,15 @@ class structure_annotations {
       }
 
       // cpp
-      if (name == "cpp.coroutine") {
+      else if (name == "cpp.coroutine") {
         to_remove.emplace_back(name, data);
-      }
-      if (name == "cpp.minimize_padding") {
+      } else if (name == "cpp.minimize_padding") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kCppMinimizePaddingUri)) {
           to_add.insert("@cpp.MinimizePadding");
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      }
-      if (name == "cpp.enum_type" || name == "cpp2.enum_type") {
+      } else if (name == "cpp.enum_type" || name == "cpp2.enum_type") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kCppEnumTypeUri)) {
           std::string_view value = data.value;
@@ -232,8 +224,8 @@ class structure_annotations {
               "@cpp.EnumType{{type = cpp.EnumUnderlyingType.{}}}", type));
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      }
-      if (name == "cpp.declare_bitwise_ops" ||
+      } else if (
+          name == "cpp.declare_bitwise_ops" ||
           name == "cpp2.declare_bitwise_ops") {
         // This annotation is a subset of @thrift.BitmaskEnum, which carries
         // additional restrictions. We can't turn this into that but we can use
@@ -242,22 +234,19 @@ class structure_annotations {
             node.has_annotation("bitmask")) {
           to_remove.emplace_back(name, data);
         }
-      }
-      if (name == "cpp.mixin") {
+      } else if (name == "cpp.mixin") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kMixinUri)) {
           to_add.insert("@thrift.Mixin");
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
-      }
-      if (name == "cpp.experimental.lazy") {
+      } else if (name == "cpp.experimental.lazy") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kCppLazyUri)) {
           to_add.insert("@cpp.Lazy");
           fm_.add_include("thrift/annotation/cpp.thrift");
         }
-      }
-      if (name == "thread" || name == "process_in_event_base") {
+      } else if (name == "thread" || name == "process_in_event_base") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(
                 kCppProcessInEbThreadUri) &&
@@ -268,7 +257,7 @@ class structure_annotations {
       }
 
       // hack
-      if (name == "hack.attributes") {
+      else if (name == "hack.attributes") {
         const char* pos = sm_.get_text(data.src_range.begin);
         const char* end = sm_.get_text(data.src_range.end);
         for (; pos != end && *pos != '"' && *pos != '\''; ++pos) {
@@ -310,16 +299,13 @@ class structure_annotations {
               "@hack.Attributes{{attributes = [{}]}}", fmt::join(attrs, ", ")));
           fm_.add_include("thrift/annotation/hack.thrift");
         }
-      }
-      if (name == "hack.name") {
+      } else if (name == "hack.name") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format("@hack.Name{{name = \"{}\"}}", data.value));
         fm_.add_include("thrift/annotation/hack.thrift");
-      }
-      if (name == "code") {
+      } else if (name == "code") {
         to_remove.emplace_back(name, data);
-      }
-      if (name == "message") {
+      } else if (name == "message") {
         to_remove.emplace_back(name, data);
         if (auto field =
                 dynamic_cast<const t_structured&>(node).get_field_by_name(
@@ -332,8 +318,7 @@ class structure_annotations {
                "@thrift.ExceptionMessage\n"});
           fm_.add_include("thrift/annotation/thrift.thrift");
         }
-      }
-      if (name == "bitmask") {
+      } else if (name == "bitmask") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kBitmaskEnumUri)) {
           to_add.insert("@thrift.BitmaskEnum");
@@ -342,22 +327,20 @@ class structure_annotations {
       }
 
       // python
-      if (name == "py3.hidden") {
+      else if (name == "py3.hidden") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kPythonPy3HiddenUri)) {
           to_add.insert("@python.Py3Hidden");
           fm_.add_include("thrift/annotation/python.thrift");
         }
-      }
-      if (name == "py3.name") {
+      } else if (name == "py3.name") {
         to_remove.emplace_back(name, data);
         if (!node.find_structured_annotation_or_null(kPythonNameUri)) {
           to_add.insert(
               fmt::format("@python.Name{{name = \"{}\"}}", data.value));
           fm_.add_include("thrift/annotation/python.thrift");
         }
-      }
-      if (name == "py3.flags") {
+      } else if (name == "py3.flags") {
         to_remove.emplace_back(name, data);
         if (dynamic_cast<const t_enum*>(&node) &&
             !node.find_structured_annotation_or_null(kPythonFlagsUri)) {
@@ -367,7 +350,7 @@ class structure_annotations {
       }
 
       // java
-      if (name == "java.swift.mutable") {
+      else if (name == "java.swift.mutable") {
         to_remove.emplace_back(name, data);
         if (data.value == "true" &&
             (dynamic_cast<const t_struct*>(&node) &&
@@ -375,8 +358,7 @@ class structure_annotations {
           to_add.insert("@java.Mutable");
           fm_.add_include("thrift/annotation/java.thrift");
         }
-      }
-      if (name == "java.swift.annotations") {
+      } else if (name == "java.swift.annotations") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@java.Annotation{{java_annotation = \"{}\"}}", data.value));
@@ -384,39 +366,35 @@ class structure_annotations {
       }
 
       // go
-      if (name == "go.name") {
+      else if (name == "go.name") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format("@go.Name{{name = \"{}\"}}", data.value));
         fm_.add_include("thrift/annotation/go.thrift");
-      }
-      if (name == "go.tag") {
+      } else if (name == "go.tag") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format("@go.Tag{{tag = '{}'}}", data.value));
         fm_.add_include("thrift/annotation/go.thrift");
       }
 
       // erlang
-      if (name == "erl.name") {
+      else if (name == "erl.name") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@annotation.NameOverride{{name = \"{}\"}}", data.value));
         fm_.add_include("thrift/annotation/erlang.thrift");
-      }
-      if (name == "erl.struct_repr") {
+      } else if (name == "erl.struct_repr") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@annotation.StructRepr{{repr = {}}}",
             data.value == "record" ? "annotation.StructReprType.RECORD"
                                    : "annotation.StructReprType.MAP"));
         fm_.add_include("thrift/annotation/erlang.thrift");
-      }
-      if (name == "erl.default_value") {
+      } else if (name == "erl.default_value") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@annotation.DefaultValue{{value = \"{}\"}}", data.value));
         fm_.add_include("thrift/annotation/erlang.thrift");
-      }
-      if (name == "iq.node_type") {
+      } else if (name == "iq.node_type") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@annotation.Iq{{node_type = {}}}",

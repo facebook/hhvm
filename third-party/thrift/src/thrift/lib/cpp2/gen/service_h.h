@@ -28,6 +28,7 @@
 #include <thrift/lib/cpp2/async/FutureRequest.h>
 #include <thrift/lib/cpp2/async/HeaderChannel.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <thrift/lib/cpp2/async/ServiceInfoHolder.h>
 
 namespace folly {
 

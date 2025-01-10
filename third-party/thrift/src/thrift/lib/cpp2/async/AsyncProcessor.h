@@ -50,7 +50,6 @@
 #include <thrift/lib/cpp2/async/SchemaV1.h>
 #include <thrift/lib/cpp2/async/ServerRequestData.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
-#include <thrift/lib/cpp2/async/ServiceInfoHolder.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerInterface.h>

@@ -92,6 +92,7 @@ class structure_annotations {
     } else if (auto field = dynamic_cast<const t_field*>(&node)) {
       to_add = visit_type(field->type(), node);
     }
+    std::map<std::string, std::string> remaining;
 
     std::vector<t_annotation> to_remove;
     bool has_cpp_type = node.find_structured_annotation_or_null(kCppTypeUri);
@@ -458,6 +459,12 @@ class structure_annotations {
         to_add.insert(fmt::format("@rust.Derive{{derive = [{}]}}", derives));
         fm_.add_include("thrift/annotation/rust.thrift");
       }
+
+      // catch-all
+      else {
+        to_remove.emplace_back(name, data);
+        remaining.emplace(name, data.value);
+      }
     }
 
     if (!to_remove.empty() && to_remove.size() == node.annotations().size()) {
@@ -466,6 +473,17 @@ class structure_annotations {
       for (const auto& annot : to_remove) {
         fm_.remove(annot);
       }
+    }
+
+    if (!remaining.empty()) {
+      std::vector<std::string> remaining_strs;
+      for (const auto& [name, value] : remaining) {
+        remaining_strs.push_back(fmt::format(R"("{}": "{}")", name, value));
+      }
+      to_add.insert(fmt::format(
+          "@thrift.DeprecatedUnvalidatedAnnotations{{items = {{{}}}}}",
+          fmt::join(remaining_strs, ", ")));
+      fm_.add_include("thrift/annotation/thrift.thrift");
     }
 
     if (!to_add.empty()) {

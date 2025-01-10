@@ -120,7 +120,8 @@ class StructureAnnotations(unittest.TestCase):
                     @cpp.Ref{type = cpp.RefType.Shared}
                     11: i32 overwrite ;
                     @cpp.Ref{type = cpp.RefType.Unique}
-                    12: i32 NOT ( objc.box);
+                    @thrift.DeprecatedUnvalidatedAnnotations{items = {"objc.box": "1"}}
+                    12: i32 NOT ;
                 }
                 """
             ),
@@ -468,6 +469,47 @@ class StructureAnnotations(unittest.TestCase):
                   @rust.Type{name = "foo"}
                   1: i32 f ;
                 }
+                """
+            ),
+        )
+
+    def test_remaining(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                struct S {
+                    1: i32 field1 (foo);
+                }(foo, bar = "baz")
+
+                typedef i32 T (foo, bar = "baz")
+
+                enum E {QUX = 1} (foo, bar = "baz")
+
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/thrift.thrift"
+
+                @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
+                struct S {
+                    @thrift.DeprecatedUnvalidatedAnnotations{items = {"foo": "1"}}
+                    1: i32 field1 ;
+                }
+
+                @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
+                typedef i32 T
+
+                @thrift.DeprecatedUnvalidatedAnnotations{items = {"bar": "baz", "foo": "1"}}
+                enum E {QUX = 1}
                 """
             ),
         )

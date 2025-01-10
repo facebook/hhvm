@@ -159,7 +159,7 @@ class t_mstch_java_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
-  std::optional<whisker_options> use_whisker() const override {
+  whisker_options render_options() const override {
     whisker_options opts;
     opts.allowed_undefined_variables = {
         "type:typedef_type", // in UnionWrite.mustache

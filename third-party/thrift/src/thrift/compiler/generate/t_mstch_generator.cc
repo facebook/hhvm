@@ -575,29 +575,8 @@ t_mstch_generator::gen_whisker_render_state(whisker_options whisker_opts) {
 
 std::string t_mstch_generator::render(
     const std::string& template_name, const mstch::node& context) {
-  if (std::holds_alternative<std::monostate>(whisker_render_state_)) {
-    auto whisker_requested = use_whisker();
-    whisker_render_state_ = whisker_requested
-        ? gen_whisker_render_state(*whisker_requested)
-        : std::optional<whisker_render_state>();
-  }
-  auto& render_state =
-      std::get<std::optional<whisker_render_state>>(whisker_render_state_);
-
-  if (!render_state.has_value()) {
-    // The implementation chose not to use Whisker.
-
-    // Remove the template prefix from the template map
-    std::map<std::string, std::string> partials;
-    auto prefix = template_prefix() + '/';
-    for (const auto& [k, v] : get_template_map()) {
-      if (k.substr(0, prefix.size()) == prefix) {
-        partials[k.substr(prefix.size())] = v;
-      }
-    }
-
-    return mstch::render(
-        get_template(prefix + template_name), context, partials);
+  if (!whisker_render_state_.has_value()) {
+    whisker_render_state_ = gen_whisker_render_state(render_options());
   }
 
   std::vector<std::string> partial_path;
@@ -605,8 +584,8 @@ std::string t_mstch_generator::render(
       partial_path, template_name, [](char c) { return c == '/'; });
 
   std::optional<whisker::ast::root> ast =
-      render_state->template_resolver->resolve(
-          partial_path, {}, render_state->diagnostic_engine);
+      whisker_render_state_->template_resolver->resolve(
+          partial_path, {}, whisker_render_state_->diagnostic_engine);
   if (!ast.has_value()) {
     throw std::runtime_error{
         fmt::format("Could not find template \"{}\"", template_name)};
@@ -617,8 +596,8 @@ std::string t_mstch_generator::render(
           out,
           *ast,
           whisker::from_mstch(context),
-          render_state->diagnostic_engine,
-          render_state->render_options)) {
+          whisker_render_state_->diagnostic_engine,
+          whisker_render_state_->render_options)) {
     throw std::runtime_error{
         fmt::format("Failed to render template \"{}\"", template_name)};
   }

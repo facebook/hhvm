@@ -56,10 +56,6 @@ class t_json_experimental_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
-  std::optional<whisker_options> use_whisker() const override {
-    return whisker_options();
-  }
-
   std::string template_prefix() const override { return "json"; }
 
   void generate_program() override;

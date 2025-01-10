@@ -59,11 +59,9 @@ class t_mstch_generator : public t_generator {
     std::unordered_set<std::string> allowed_undefined_variables;
   };
   /**
-   * If true, uses the Whisker template engine instead of Mustache.
+   * Customization point for Whisker's rendering options.
    */
-  virtual std::optional<whisker_options> use_whisker() const {
-    return std::nullopt;
-  }
+  virtual whisker_options render_options() const { return {}; }
 
   /**
    * If true, typedefs will be automatically resolved to their underlying type.
@@ -237,12 +235,7 @@ class t_mstch_generator : public t_generator {
     std::shared_ptr<whisker::template_resolver> template_resolver;
     whisker::render_options render_options;
   };
-  // std::monostate implies that we have not yet checked if the implemented
-  // requested the use of Whisker.
-  // empty optional implies that we have checked and the implementation is NOT
-  // using Whisker.
-  std::variant<std::monostate, std::optional<whisker_render_state>>
-      whisker_render_state_;
+  std::optional<whisker_render_state> whisker_render_state_;
   whisker_render_state gen_whisker_render_state(whisker_options);
 
   /**

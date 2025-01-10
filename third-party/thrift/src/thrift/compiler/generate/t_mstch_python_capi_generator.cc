@@ -659,10 +659,6 @@ class t_mstch_python_capi_generator : public t_mstch_generator {
  public:
   using t_mstch_generator::t_mstch_generator;
 
-  std::optional<whisker_options> use_whisker() const override {
-    return whisker_options();
-  }
-
   std::string template_prefix() const override { return "python_capi"; }
 
   void generate_program() override {

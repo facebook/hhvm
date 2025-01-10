@@ -61,7 +61,7 @@ func WithUpgradeToRocket() ClientOption {
 	}
 }
 
-// Deprecated: Use WithUpgradeToRocket. This is only used for testing purposes.
+// WithRocket sets the transport to Rocket.
 func WithRocket() ClientOption {
 	return func(opts *clientOptions) {
 		opts.transport = TransportIDRocket

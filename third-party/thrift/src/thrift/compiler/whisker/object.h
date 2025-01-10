@@ -266,6 +266,22 @@ class native_object {
   virtual bool operator==(const native_object& other) const;
 };
 
+namespace detail {
+/**
+ * Determines the result of trying to access a typed argument via
+ * argument<T>(...) or named_argument<T>(...).
+ *
+ * Small primitive types (i64, f64, boolean) are returned by value.
+ * The larger primitive type (string) is returned as a maybe_managed_ptr<T>.
+ *
+ * Maps and arrays are wrapped by helper classes, in order to abstract away
+ * differences with native_object::array_like and native_object::map_like
+ * respectively.
+ */
+template <typename T>
+struct native_function_argument_result;
+} // namespace detail
+
 /**
  *
  * A native_function represents a user-defined function in Whisker. Its behavior
@@ -295,8 +311,8 @@ class native_function {
    *       object::ptr invoke(context ctx) override {
    *         ctx.declare_arity(2);
    *         ctx.declare_named_arguments({});
-   *         i64 a = *ctx.argument<i64>(0);
-   *         i64 b = *ctx.argument<i64>(1);
+   *         i64 a = ctx.argument<i64>(0);
+   *         i64 b = ctx.argument<i64>(1);
    *         return object::managed(whisker::make::boolean(a == b));
    *       }
    *     };
@@ -392,6 +408,80 @@ class native_function {
     const positional_arguments& arguments() const { return positional_args_; }
 
     /**
+     * A class that abstracts over the difference between a whisker::array and a
+     * native_object::array_like object.
+     *
+     * This is useful for the common case where native_function implementations
+     * are ambivalent to the underlying array-like type.
+     */
+    class array_like final : public native_object::array_like {
+     public:
+      std::size_t size() const final;
+      const object& at(std::size_t index) const final;
+
+      // Avoids incomplete type (whisker::object) errors on MSVC.
+      ~array_like() noexcept override;
+      array_like(const array_like&);
+      array_like& operator=(const array_like&);
+      array_like(array_like&&) noexcept;
+      array_like& operator=(array_like&&) noexcept;
+
+     private:
+      explicit array_like(native_object::array_like::ptr&& arr);
+      explicit array_like(maybe_managed_ptr<array>&& arr);
+
+      std::variant<native_object::array_like::ptr, maybe_managed_ptr<array>>
+          which_;
+
+      friend class context;
+    };
+
+    /**
+     * A class that abstracts over the difference between a whisker::map and a
+     * native_object::map_like object.
+     *
+     * This is useful for the common case where native_function implementations
+     * are ambivalent to the underlying map-like type.
+     */
+    class map_like final : public native_object::map_like {
+     public:
+      const object* lookup_property(std::string_view identifier) const final;
+
+      // Avoids incomplete type (whisker::object) errors on MSVC.
+      ~map_like() noexcept override;
+      map_like(const map_like&);
+      map_like& operator=(const map_like&);
+      map_like(map_like&&) noexcept;
+      map_like& operator=(map_like&&) noexcept;
+
+     private:
+      explicit map_like(native_object::map_like::ptr&& m);
+      explicit map_like(maybe_managed_ptr<map>&& m);
+
+      std::variant<native_object::map_like::ptr, maybe_managed_ptr<map>> which_;
+
+      friend class context;
+    };
+
+    template <typename T>
+    using argument_result_t =
+        typename detail::native_function_argument_result<T>::type;
+    /**
+     * Returns a reference to a positional argument, checked against the desired
+     * type `T`.
+     *
+     * If the argument is not of the correct type, then this throws an error.
+     *
+     * Preconditions:
+     *  - index < arity()
+     *
+     * Postconditions:
+     *   - The returned object is non-null.
+     */
+    template <typename T>
+    argument_result_t<T> argument(std::size_t index) const;
+
+    /**
      * Signals the intent of a named argument. Named arguments are often used as
      * options, but not always.
      */
@@ -428,20 +518,6 @@ class native_function {
     maybe_managed_ptr<T> named_argument(
         std::string_view name,
         named_argument_presence = named_argument_presence::required) const;
-
-    /**
-     * Returns a pointer to a positional argument.
-     *
-     * If the argument is not of type `T`, then this throws an error.
-     *
-     * Preconditions:
-     *  - index < arity()
-     *
-     * Postconditions:
-     *   - The returned object is non-null.
-     */
-    template <typename T>
-    maybe_managed_ptr<T> argument(std::size_t index) const;
 
     /**
      * Logs a fatal error in function evaluation.
@@ -510,6 +586,30 @@ using object_base = std::variant<
     std::vector<Self>,
     std::map<std::string, Self, std::less<>>>;
 
+template <>
+struct native_function_argument_result<i64> {
+  using type = i64;
+};
+template <>
+struct native_function_argument_result<f64> {
+  using type = f64;
+};
+template <>
+struct native_function_argument_result<boolean> {
+  using type = boolean;
+};
+template <>
+struct native_function_argument_result<string> {
+  using type = maybe_managed_ptr<string>;
+};
+template <>
+struct native_function_argument_result<array> {
+  using type = native_function::context::array_like;
+};
+template <>
+struct native_function_argument_result<map> {
+  using type = native_function::context::map_like;
+};
 } // namespace detail
 
 /**
@@ -844,13 +944,48 @@ maybe_managed_ptr<T> native_function::context::named_argument(
 }
 
 template <typename T>
-maybe_managed_ptr<T> native_function::context::argument(size_t index) const {
+native_function::context::argument_result_t<T>
+native_function::context::argument(size_t index) const {
   const object::ptr& o = positional_args_.at(index);
-  if (!o->is<T>()) {
+  if constexpr (std::is_same_v<T, array>) {
+    if (o->is_array()) {
+      return array_like(
+          maybe_managed_ptr<array>(o, std::addressof(o->as_array())));
+    }
+    if (o->is_native_object()) {
+      if (native_object::array_like::ptr arr =
+              o->as_native_object()->as_array_like()) {
+        return array_like(std::move(arr));
+      }
+    }
     // Ideally, we want to output a string representation of the types here.
-    error("Argument at index {} is of an unexpected type.", index);
+    error(
+        "Argument at index {} is not an array or array-like native_object.",
+        index);
+  } else if constexpr (std::is_same_v<T, map>) {
+    if (o->is_map()) {
+      return map_like(maybe_managed_ptr<map>(o, std::addressof(o->as_map())));
+    }
+    if (o->is_native_object()) {
+      if (native_object::map_like::ptr m =
+              o->as_native_object()->as_map_like()) {
+        return map_like(std::move(m));
+      }
+    }
+    // Ideally, we want to output a string representation of the types here.
+    error(
+        "Argument at index {} is not a map or map-like native_object.", index);
+  } else {
+    if (!o->is<T>()) {
+      // Ideally, we want to output a string representation of the types here.
+      error("Argument at index {} is of an unexpected type.", index);
+    }
+    if constexpr (std::is_same_v<T, string>) {
+      return maybe_managed_ptr<T>(o, std::addressof(o->as<T>()));
+    } else {
+      return o->as<T>();
+    }
   }
-  return maybe_managed_ptr<T>(o, std::addressof(o->as<T>()));
 }
 
 /**

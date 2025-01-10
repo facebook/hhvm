@@ -16,6 +16,8 @@
 
 #include <thrift/compiler/whisker/object.h>
 
+#include <thrift/compiler/whisker/detail/overload.h>
+
 #include <cassert>
 #include <ostream>
 #include <set>
@@ -139,6 +141,75 @@ void native_object::print_to(
 
 bool native_object::operator==(const native_object& other) const {
   return &other == this;
+}
+
+native_function::context::array_like::array_like(
+    native_object::array_like::ptr&& arr)
+    : which_(std::move(arr)) {}
+native_function::context::array_like::array_like(maybe_managed_ptr<array>&& arr)
+    : which_(std::move(arr)) {}
+
+native_function::context::array_like::~array_like() noexcept = default;
+
+native_function::context::array_like::array_like(const array_like&) = default;
+
+native_function::context::array_like&
+native_function::context::array_like::operator=(const array_like&) = default;
+
+native_function::context::array_like::array_like(array_like&&) noexcept =
+    default;
+
+native_function::context::array_like&
+native_function::context::array_like::operator=(array_like&&) noexcept =
+    default;
+
+std::size_t native_function::context::array_like::size() const {
+  return detail::variant_match(
+      which_, [](const auto& arr) -> std::size_t { return arr->size(); });
+}
+
+const object& native_function::context::array_like::at(
+    std::size_t index) const {
+  return detail::variant_match(
+      which_,
+      [&](const native_object::array_like::ptr& arr) -> const object& {
+        return arr->at(index);
+      },
+      [&](const maybe_managed_ptr<array>& arr) -> const object& {
+        return (*arr)[index];
+      });
+}
+
+native_function::context::map_like::map_like(native_object::map_like::ptr&& m)
+    : which_(std::move(m)) {}
+native_function::context::map_like::map_like(maybe_managed_ptr<map>&& m)
+    : which_(std::move(m)) {}
+
+native_function::context::map_like::~map_like() noexcept = default;
+
+native_function::context::map_like::map_like(const map_like&) = default;
+
+native_function::context::map_like&
+native_function::context::map_like::operator=(const map_like&) = default;
+
+native_function::context::map_like::map_like(map_like&&) noexcept = default;
+
+native_function::context::map_like&
+native_function::context::map_like::operator=(map_like&&) noexcept = default;
+
+const object* native_function::context::map_like::lookup_property(
+    std::string_view identifier) const {
+  return detail::variant_match(
+      which_,
+      [&](const native_object::map_like::ptr& m) -> const object* {
+        return m->lookup_property(identifier);
+      },
+      [&](const maybe_managed_ptr<map>& m) -> const object* {
+        if (auto it = m->find(identifier); it != m->end()) {
+          return &it->second;
+        }
+        return nullptr;
+      });
 }
 
 maybe_managed_ptr<object> native_function::context::named_argument(

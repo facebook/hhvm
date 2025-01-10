@@ -29,6 +29,48 @@ namespace {
 
 class empty_native_object : public native_object {};
 
+class array_like_native_object
+    : public native_object,
+      public native_object::array_like,
+      public std::enable_shared_from_this<array_like_native_object> {
+ public:
+  explicit array_like_native_object(array values)
+      : values_(std::move(values)) {}
+
+  native_object::array_like::ptr as_array_like() const override {
+    return shared_from_this();
+  }
+  std::size_t size() const override { return values_.size(); }
+  const object& at(std::size_t index) const override {
+    return values_.at(index);
+  }
+
+ private:
+  array values_;
+};
+
+class map_like_native_object
+    : public native_object,
+      public native_object::map_like,
+      public std::enable_shared_from_this<map_like_native_object> {
+ public:
+  explicit map_like_native_object(map values) : values_(std::move(values)) {}
+
+  native_object::map_like::ptr as_map_like() const override {
+    return shared_from_this();
+  }
+
+  const object* lookup_property(std::string_view id) const override {
+    if (auto value = values_.find(id); value != values_.end()) {
+      return &value->second;
+    }
+    return nullptr;
+  }
+
+ private:
+  map values_;
+};
+
 /**
  * When looking up a property, always returns a whisker::string that is the
  * property name repeated twice.
@@ -196,26 +238,6 @@ TEST_F(RenderTest, section_block_array_asymmetric_nested_scopes) {
 }
 
 TEST_F(RenderTest, section_block_array_iterable_native_object) {
-  class array_like_native_object
-      : public native_object,
-        public native_object::array_like,
-        public std::enable_shared_from_this<array_like_native_object> {
-   public:
-    explicit array_like_native_object(array values)
-        : values_(std::move(values)) {}
-
-    native_object::array_like::ptr as_array_like() const override {
-      return shared_from_this();
-    }
-    std::size_t size() const override { return values_.size(); }
-    const object& at(std::size_t index) const override {
-      return values_.at(index);
-    }
-
-   private:
-    array values_;
-  };
-
   auto factorials = w::map(
       {{"factorials",
         w::make_native_object<array_like_native_object>(array(
@@ -286,28 +308,6 @@ TEST_F(RenderTest, section_block_map) {
 }
 
 TEST_F(RenderTest, section_block_map_like_native_object) {
-  class map_like_native_object
-      : public native_object,
-        public native_object::map_like,
-        public std::enable_shared_from_this<map_like_native_object> {
-   public:
-    explicit map_like_native_object(map values) : values_(std::move(values)) {}
-
-    native_object::map_like::ptr as_map_like() const override {
-      return shared_from_this();
-    }
-
-    const object* lookup_property(std::string_view id) const override {
-      if (auto value = values_.find(id); value != values_.end()) {
-        return &value->second;
-      }
-      return nullptr;
-    }
-
-   private:
-    map values_;
-  };
-
   auto factorials = w::map(
       {{"factorials",
         w::make_native_object<map_like_native_object>(map(
@@ -710,7 +710,7 @@ class add : public native_function {
     }();
     i64 result = 0;
     for (std::size_t i = 0; i < ctx.arity(); ++i) {
-      result += *ctx.argument<i64>(i);
+      result += ctx.argument<i64>(i);
     }
     return object::managed(w::i64(negate ? -result : result));
   }
@@ -723,8 +723,8 @@ class i64_eq : public native_function {
   object::ptr invoke(context ctx) override {
     ctx.declare_arity(2);
     ctx.declare_named_arguments({});
-    i64 a = *ctx.argument<i64>(0);
-    i64 b = *ctx.argument<i64>(1);
+    i64 a = ctx.argument<i64>(0);
+    i64 b = ctx.argument<i64>(1);
     return object::managed(w::boolean(a == b));
   }
 };
@@ -748,6 +748,36 @@ class str_concat : public native_function {
       result += *ctx.argument<string>(i);
     }
     return object::managed(w::string(std::move(result)));
+  }
+};
+
+/**
+ * Returns the length of an array.
+ */
+class array_len : public native_function {
+  object::ptr invoke(context ctx) override {
+    ctx.declare_arity(1);
+    ctx.declare_named_arguments({});
+    auto len = i64(ctx.argument<array>(0).size());
+    return object::managed(w::i64(len));
+  }
+};
+
+/**
+ * Dynamically accesses a property by name in a map, throwing an error if not
+ * present.
+ */
+class map_get : public native_function {
+  object::ptr invoke(context ctx) override {
+    ctx.declare_arity(1);
+    ctx.declare_named_arguments({"key"});
+    auto m = ctx.argument<map>(0);
+    auto key = ctx.named_argument<string>("key", context::required);
+
+    if (const object* result = m.lookup_property(*key)) {
+      return object::as_ref(*result);
+    }
+    ctx.error("Key '{}' not found.", *key);
   }
 };
 
@@ -886,6 +916,75 @@ TEST_F(RenderTest, user_defined_function_nested) {
       ) }})",
       w::map({{"concat", w::make_native_function<functions::str_concat>()}}));
   EXPECT_EQ(*result, "James Bond, Alan Turing");
+}
+
+TEST_F(RenderTest, user_defined_function_array_like_argument) {
+  const array arr{w::i64(1), w::string("foo"), w::i64(100)};
+  const auto context = w::map(
+      {{"array", w::array(array(arr))},
+       {"array_like",
+        w::make_native_object<array_like_native_object>(array(arr))},
+       {"not_array", w::string("not an array")},
+       {"len", w::make_native_function<functions::array_len>()}});
+
+  {
+    auto result = render(
+        "{{(len array)}}\n"
+        "{{(len array_like)}}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "3\n"
+        "3\n");
+  }
+
+  {
+    auto result = render("{{(len not_array)}}\n", context);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'len' threw an error:\n"
+            "Argument at index 0 is not an array or array-like native_object.",
+            path_to_file,
+            1)));
+  }
+}
+
+TEST_F(RenderTest, user_defined_function_map_like_argument) {
+  const map m{{"a", w::i64(1)}, {"b", w::string("foo")}, {"c", w::i64(100)}};
+  const auto context = w::map(
+      {{"map", w::map(map(m))},
+       {"map_like", w::make_native_object<map_like_native_object>(map(m))},
+       {"not_map", w::string("not a map")},
+       {"get", w::make_native_function<functions::map_get>()}});
+
+  {
+    auto result = render(
+        "{{ (get map      key=\"b\") }}\n"
+        "{{ (get map_like key=\"b\") }}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "foo\n"
+        "foo\n");
+  }
+
+  {
+    auto result = render("{{(get not_map)}}\n", context);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'get' threw an error:\n"
+            "Argument at index 0 is not a map or map-like native_object.",
+            path_to_file,
+            1)));
+  }
 }
 
 TEST_F(RenderTest, let_statement) {

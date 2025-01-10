@@ -20,6 +20,13 @@ import (
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift/types"
 )
 
+// Default initial size for serializer/deserializer memory buffer.
+// The buffer grows automatically when needed during ser/des.
+// The initial bufer size is meant to fit most messages, in order to
+// completely avoid buffer growth/reallocation and improve ser/des
+// performance for the most common usecase (a.k.a. a <1KB message).
+const defaultMemoryBufferSize = 1024 // 1KB
+
 type Deserializer struct {
 	Transport *MemoryBuffer
 	Protocol  types.Decoder
@@ -27,28 +34,28 @@ type Deserializer struct {
 
 // NewBinaryDeserializer creates a new deserializer using the binary protocol
 func NewBinaryDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewBinaryFormat(transport)
 	return &Deserializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactDeserializer creates a new deserializer using the compact protocol
 func NewCompactDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewCompactFormat(transport)
 	return &Deserializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactJSONDeserializer creates a new deserializer using the JSON protocol
 func NewCompactJSONDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewCompactJSONFormat(transport)
 	return &Deserializer{Transport: transport, Protocol: protocol}
 }
 
 // NewSimpleJSONDeserializer creates a new deserializer using the simple JSON protocol
 func NewSimpleJSONDeserializer() *Deserializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewSimpleJSONFormat(transport)
 	return &Deserializer{Transport: transport, Protocol: protocol}
 }
@@ -65,17 +72,14 @@ func DecodeBinary(data []byte, msg types.Struct) error {
 
 // ReadString deserializes a Thrift struct from a string
 func (t *Deserializer) ReadString(msg types.Struct, s string) error {
-	if _, err := t.Transport.Write([]byte(s)); err != nil {
-		return err
-	}
-	if err := msg.Read(t.Protocol); err != nil {
-		return err
-	}
-	return nil
+	return t.Read(msg, []byte(s))
 }
 
 // Read deserializes a Thrift struct from a byte slice
 func (t *Deserializer) Read(msg types.Struct, b []byte) error {
+	// Reset the internal buffer (while keeping the underlying storage)
+	t.Transport.Reset()
+
 	if _, err := t.Transport.Write(b); err != nil {
 		return err
 	}

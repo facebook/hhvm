@@ -28,28 +28,28 @@ type Serializer struct {
 
 // NewBinarySerializer create a new serializer using the binary format
 func NewBinarySerializer() *Serializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewBinaryFormat(transport)
 	return &Serializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactSerializer creates a new serializer using the compact format
 func NewCompactSerializer() *Serializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewCompactFormat(transport)
 	return &Serializer{Transport: transport, Protocol: protocol}
 }
 
 // NewCompactJSONSerializer creates a new serializer using the compact JSON format
 func NewCompactJSONSerializer() *Serializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewCompactJSONFormat(transport)
 	return &Serializer{Transport: transport, Protocol: protocol}
 }
 
 // NewSimpleJSONSerializer creates a new serializer using the SimpleJSON format
 func NewSimpleJSONSerializer() *Serializer {
-	transport := NewMemoryBufferLen(1024)
+	transport := NewMemoryBufferLen(defaultMemoryBufferSize)
 	protocol := NewSimpleJSONFormat(transport)
 	return &Serializer{Transport: transport, Protocol: protocol}
 }
@@ -66,17 +66,11 @@ func EncodeBinary(msg types.Struct) ([]byte, error) {
 
 // WriteString writes msg to the serializer and returns it as a string
 func (s *Serializer) WriteString(msg types.Struct) (string, error) {
-	s.Transport.Reset()
-
-	if err := msg.Write(s.Protocol); err != nil {
+	serBytes, err := s.Write(msg)
+	if err != nil {
 		return "", err
 	}
-
-	if err := s.Protocol.Flush(); err != nil {
-		return "", err
-	}
-
-	return s.Transport.String(), nil
+	return string(serBytes), nil
 }
 
 // Write writes msg to the serializer and returns it as a byte array
@@ -91,5 +85,13 @@ func (s *Serializer) Write(msg types.Struct) ([]byte, error) {
 		return nil, err
 	}
 
-	return s.Transport.Bytes(), nil
+	// Copy the bytes from our internal Transport buffer into
+	// a separate fresh buffer that will be fully owned by the caller.
+	// The contents of the internal Transport buffer will be overwritten
+	// on the next call to Write()/WriteString(). We don't want that to
+	// affect the caller's buffer. Hence, the copy.
+	serBytes := make([]byte, s.Transport.Len())
+	copy(serBytes, s.Transport.Bytes())
+
+	return serBytes, nil
 }

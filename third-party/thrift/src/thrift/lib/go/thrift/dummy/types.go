@@ -17,6 +17,188 @@ var _ = fmt.Printf
 var _ = reflect.Ptr
 var _ = thrift.ZERO
 
+type DummyStruct1 struct {
+    Field1 int8 `thrift:"field1,1" json:"field1" db:"field1"`
+    Field2 bool `thrift:"field2,2" json:"field2" db:"field2"`
+    Field3 int16 `thrift:"field3,3" json:"field3" db:"field3"`
+    Field4 int32 `thrift:"field4,4" json:"field4" db:"field4"`
+    Field5 int64 `thrift:"field5,5" json:"field5" db:"field5"`
+    Field6 float32 `thrift:"field6,6" json:"field6" db:"field6"`
+    Field7 float64 `thrift:"field7,7" json:"field7" db:"field7"`
+    Field8 []byte `thrift:"field8,8" json:"field8" db:"field8"`
+    Field9 string `thrift:"field9,9" json:"field9" db:"field9"`
+}
+// Compile time interface enforcer
+var _ thrift.Struct = (*DummyStruct1)(nil)
+
+func NewDummyStruct1() *DummyStruct1 {
+    return (&DummyStruct1{}).setDefaults()
+}
+
+func (x *DummyStruct1) GetField1() int8 {
+    return x.Field1
+}
+
+func (x *DummyStruct1) GetField2() bool {
+    return x.Field2
+}
+
+func (x *DummyStruct1) GetField3() int16 {
+    return x.Field3
+}
+
+func (x *DummyStruct1) GetField4() int32 {
+    return x.Field4
+}
+
+func (x *DummyStruct1) GetField5() int64 {
+    return x.Field5
+}
+
+func (x *DummyStruct1) GetField6() float32 {
+    return x.Field6
+}
+
+func (x *DummyStruct1) GetField7() float64 {
+    return x.Field7
+}
+
+func (x *DummyStruct1) GetField8() []byte {
+    if !x.IsSetField8() {
+        return []byte("")
+    }
+    return x.Field8
+}
+
+func (x *DummyStruct1) GetField9() string {
+    return x.Field9
+}
+
+func (x *DummyStruct1) SetField1NonCompat(value int8) *DummyStruct1 {
+    x.Field1 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField1(value int8) *DummyStruct1 {
+    x.Field1 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField2NonCompat(value bool) *DummyStruct1 {
+    x.Field2 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField2(value bool) *DummyStruct1 {
+    x.Field2 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField3NonCompat(value int16) *DummyStruct1 {
+    x.Field3 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField3(value int16) *DummyStruct1 {
+    x.Field3 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField4NonCompat(value int32) *DummyStruct1 {
+    x.Field4 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField4(value int32) *DummyStruct1 {
+    x.Field4 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField5NonCompat(value int64) *DummyStruct1 {
+    x.Field5 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField5(value int64) *DummyStruct1 {
+    x.Field5 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField6NonCompat(value float32) *DummyStruct1 {
+    x.Field6 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField6(value float32) *DummyStruct1 {
+    x.Field6 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField7NonCompat(value float64) *DummyStruct1 {
+    x.Field7 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField7(value float64) *DummyStruct1 {
+    x.Field7 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField8NonCompat(value []byte) *DummyStruct1 {
+    x.Field8 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField8(value []byte) *DummyStruct1 {
+    x.Field8 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField9NonCompat(value string) *DummyStruct1 {
+    x.Field9 = value
+    return x
+}
+
+func (x *DummyStruct1) SetField9(value string) *DummyStruct1 {
+    x.Field9 = value
+    return x
+}
+
+func (x *DummyStruct1) IsSetField8() bool {
+    return x != nil && x.Field8 != nil
+}
+
+
+
+func (x *DummyStruct1) Write(p thrift.Encoder) error {
+    return thrift.WriteStructSpec(p, x, x.getStructSpec())
+}
+
+func (x *DummyStruct1) Read(p thrift.Decoder) error {
+    return thrift.ReadStructSpec(p, x, x.getStructSpec())
+}
+
+func (x *DummyStruct1) String() string {
+    return thrift.StructToString(reflect.ValueOf(x))
+}
+
+func (x *DummyStruct1) setDefaults() *DummyStruct1 {
+    return x.
+        SetField1NonCompat(0).
+        SetField2NonCompat(false).
+        SetField3NonCompat(0).
+        SetField4NonCompat(0).
+        SetField5NonCompat(0).
+        SetField6NonCompat(0.0).
+        SetField7NonCompat(0.0).
+        SetField8NonCompat([]byte("")).
+        SetField9NonCompat("")
+}
+
+func (x *DummyStruct1) getStructSpec() *thrift.StructSpec {
+    return premadeStructSpec_DummyStruct1
+}
+
 
 // Service req/resp structs (below)
 type reqDummyEcho struct {
@@ -221,3 +403,9 @@ func (x *respDummyOnewayRPC) getStructSpec() *thrift.StructSpec {
 }
 
 
+// RegisterTypes registers types found in this file that have a thrift_uri with the passed in registry.
+func RegisterTypes(registry interface {
+  RegisterType(name string, initializer func() any)
+}) {
+
+}

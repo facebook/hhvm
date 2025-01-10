@@ -22,6 +22,18 @@ namespace go thrift.test.go.if.dummy
 // server/client implementations in 'thrift/lib/go/thrift'.
 // It needs to stay simple - the way it currently is.
 
+struct DummyStruct1 {
+  1: byte field1;
+  2: bool field2;
+  3: i16 field3;
+  4: i32 field4;
+  5: i64 field5;
+  6: float field6;
+  7: double field7;
+  8: binary field8;
+  9: string field9;
+}
+
 service Dummy {
   string Echo(1: string value);
   oneway void OnewayRPC(1: string value);

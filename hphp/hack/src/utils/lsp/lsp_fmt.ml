@@ -579,7 +579,11 @@ let parse_codeActionRequest (j : json option) : CodeActionRequest.params =
 
 let parse_codeActionResolveRequest (j : json option) :
     CodeActionResolveRequest.params =
-  let data = Jget.obj_exn j "data" |> parse_codeActionRequest in
+  let data =
+    let all = Jget.obj_exn j "data" in
+    let request = Jget.obj_opt all "originalRequest" in
+    parse_codeActionRequest request
+  in
   let title = Jget.string_exn j "title" in
   CodeActionResolveRequest.{ data; title }
 
@@ -590,7 +594,7 @@ let print_codeAction
     ~(unresolved_to_code_action_request : 'a -> CodeActionRequest.params) : json
     =
   CodeAction.(
-    let (edit, command, data) =
+    let (edit, command, params_opt) =
       match c.action with
       | EditOnly e -> (Some e, None, None)
       | CommandOnly c -> (None, Some c, None)
@@ -617,6 +621,10 @@ let print_codeAction
               ] );
         ]
     in
+    let data_opt =
+      Option.map params_opt ~f:(fun params ->
+          Hh_json.JSON_Object [("originalRequest", print_params params)])
+    in
     Jprint.object_opt
       [
         ("title", Some (JSON_String c.title));
@@ -624,7 +632,7 @@ let print_codeAction
         ("diagnostics", Some (print_diagnostic_list c.diagnostics));
         ("edit", Option.map edit ~f:print_workspaceEdit);
         ("command", Option.map command ~f:print_command);
-        ("data", Option.map data ~f:print_params);
+        ("data", data_opt);
       ])
 
 let print_codeActionResult

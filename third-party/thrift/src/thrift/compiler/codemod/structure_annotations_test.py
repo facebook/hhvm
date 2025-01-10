@@ -418,7 +418,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
             self.trim(read_file("foo.thrift")),
             self.trim(
                 """\
-                include "thrift/facebook/erlang/annotation.thrift"
+                include "thrift/annotation/erlang.thrift"
 
                 @annotation.NameOverride{name = "T"}
                 @annotation.StructRepr{repr = annotation.StructReprType.RECORD}

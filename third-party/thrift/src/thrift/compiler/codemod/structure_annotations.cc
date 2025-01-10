@@ -400,7 +400,7 @@ class structure_annotations {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@annotation.NameOverride{{name = \"{}\"}}", data.value));
-        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
+        fm_.add_include("thrift/annotation/erlang.thrift");
       }
       if (name == "erl.struct_repr") {
         to_remove.emplace_back(name, data);
@@ -408,13 +408,13 @@ class structure_annotations {
             "@annotation.StructRepr{{repr = {}}}",
             data.value == "record" ? "annotation.StructReprType.RECORD"
                                    : "annotation.StructReprType.MAP"));
-        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
+        fm_.add_include("thrift/annotation/erlang.thrift");
       }
       if (name == "erl.default_value") {
         to_remove.emplace_back(name, data);
         to_add.insert(fmt::format(
             "@annotation.DefaultValue{{value = \"{}\"}}", data.value));
-        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
+        fm_.add_include("thrift/annotation/erlang.thrift");
       }
       if (name == "iq.node_type") {
         to_remove.emplace_back(name, data);
@@ -424,7 +424,7 @@ class structure_annotations {
                 : data.value == "xmlnode"
                 ? "annotation.IqNodeType.XMLNODE"
                 : "annotation.IqNodeType.XMLATTRIBUTE"));
-        fm_.add_include("thrift/facebook/erlang/annotation.thrift");
+        fm_.add_include("thrift/annotation/erlang.thrift");
       }
     }
 

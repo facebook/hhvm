@@ -5,6 +5,7 @@
   %{project_root}/hack/test/verify.py
   %{project_root}/hack/test/review.sh
   (glob_files %{project_root}/hack/test/ide_code_actions/extract_method/HH_FLAGS)
+  (glob_files %{project_root}/hack/test/ide_code_actions/hhi/*.hhi)
   (glob_files %{project_root}/hack/test/ide_code_actions/extract_method/*.php)
   (glob_files %{project_root}/hack/test/ide_code_actions/extract_method/*.exp))
  (action

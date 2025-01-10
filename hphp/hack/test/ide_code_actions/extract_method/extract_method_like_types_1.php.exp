@@ -1,0 +1,48 @@
+Code actions available:
+------------------------------------------
+slog variable (CodeActionKind: refactor)
+Extract into method (CodeActionKind: refactor) SELECTED
+
+JSON for selected code action:
+------------------------------------------
+{
+  "diagnostics":[],
+  "edit":{
+    "changes":{
+      "FILE.php":[
+        {
+          "newText":"  private function ${0:method0}(~Awaitable<int> $y): (~Awaitable<int>, ~Awaitable<int>) {\n  $x1 = $y;\n      $x2 = ExtraBuiltins\\genInt()\n      return tuple($x1, $x2);\n  }\n\n",
+          "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
+        },
+        {
+          "newText":"list($x1, $x2) = $this->${0:method0}($y);",
+          "range":{"end":{"character":32,"line":7},"start":{"character":4,"line":6}}
+        }
+      ]
+    }
+  },
+  "kind":"refactor",
+  "title":"Extract into method"
+}
+
+Applied edit for code action:
+------------------------------------------
+<?hh
+
+class Klass {
+  private function ${0:method0}(~Awaitable<int> $y): (~Awaitable<int>, ~Awaitable<int>) {
+  $x1 = $y;
+      $x2 = ExtraBuiltins\genInt()
+      return tuple($x1, $x2);
+  }
+
+  public async function foo(vec<int> $vec): Awaitable<void> {
+    $y = ExtraBuiltins\genInt();
+    /*range-start*/
+    list($x1, $x2) = $this->${0:method0}($y);
+    /*range-end*/
+    echo $x1;
+    echo await $x2;
+  }
+}
+

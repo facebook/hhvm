@@ -503,22 +503,22 @@ class render_engine {
     return detail::variant_match(
         expr.which,
         [](const expression::string_literal& s) -> object::ptr {
-          return object::managed(whisker::make::string(s.text));
+          return object::owned(whisker::make::string(s.text));
         },
         [](const expression::i64_literal& i) -> object::ptr {
-          return object::managed(whisker::make::i64(i.value));
+          return object::owned(whisker::make::i64(i.value));
         },
         [](const expression::null_literal&) -> object::ptr {
-          return object::as_ref(whisker::make::null);
+          return object::as_static(whisker::make::null);
         },
         [](const expression::true_literal&) -> object::ptr {
-          return object::as_ref(whisker::make::true_);
+          return object::as_static(whisker::make::true_);
         },
         [](const expression::false_literal&) -> object::ptr {
-          return object::as_ref(whisker::make::false_);
+          return object::as_static(whisker::make::false_);
         },
         [&](const ast::variable_lookup& variable_lookup) -> object::ptr {
-          return object::as_ref(lookup_variable(variable_lookup));
+          return object::as_static(lookup_variable(variable_lookup));
         },
         [&](const function_call& func) -> object::ptr {
           return detail::variant_match(
@@ -528,28 +528,28 @@ class render_engine {
                 assert(func.positional_arguments.size() == 1);
                 assert(func.named_arguments.empty());
                 return evaluate_as_bool(func.positional_arguments[0])
-                    ? object::as_ref(whisker::make::false_)
-                    : object::as_ref(whisker::make::true_);
+                    ? object::as_static(whisker::make::false_)
+                    : object::as_static(whisker::make::true_);
               },
               [&](function_call::builtin_and) -> object::ptr {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const expression& arg : func.positional_arguments) {
                   if (!evaluate_as_bool(arg)) {
-                    return object::as_ref(whisker::make::false_);
+                    return object::as_static(whisker::make::false_);
                   }
                 }
-                return object::as_ref(whisker::make::true_);
+                return object::as_static(whisker::make::true_);
               },
               [&](function_call::builtin_or) -> object::ptr {
                 // enforced by the parser
                 assert(func.named_arguments.empty());
                 for (const expression& arg : func.positional_arguments) {
                   if (evaluate_as_bool(arg)) {
-                    return object::as_ref(whisker::make::true_);
+                    return object::as_static(whisker::make::true_);
                   }
                 }
-                return object::as_ref(whisker::make::false_);
+                return object::as_static(whisker::make::false_);
               },
               [&](const function_call::user_defined& user_defined)
                   -> object::ptr {

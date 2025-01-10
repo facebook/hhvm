@@ -146,7 +146,8 @@ bool native_object::operator==(const native_object& other) const {
 native_function::context::array_like::array_like(
     native_object::array_like::ptr&& arr)
     : which_(std::move(arr)) {}
-native_function::context::array_like::array_like(maybe_managed_ptr<array>&& arr)
+native_function::context::array_like::array_like(
+    managed_object_ptr<array>&& arr)
     : which_(std::move(arr)) {}
 
 native_function::context::array_like::~array_like() noexcept = default;
@@ -175,21 +176,20 @@ const object& native_function::context::array_like::at(
       [&](const native_object::array_like::ptr& arr) -> const object& {
         return arr->at(index);
       },
-      [&](const maybe_managed_ptr<array>& arr) -> const object& {
+      [&](const managed_object_ptr<array>& arr) -> const object& {
         return (*arr)[index];
       });
 }
 
 native_function::context::map_like::map_like(native_object::map_like::ptr&& m)
     : which_(std::move(m)) {}
-native_function::context::map_like::map_like(maybe_managed_ptr<map>&& m)
+native_function::context::map_like::map_like(managed_object_ptr<map>&& m)
     : which_(std::move(m)) {}
 
 /* static */ std::optional<native_function::context::array_like>
 native_function::context::array_like::try_from(const object::ptr& o) {
   if (o->is_array()) {
-    return array_like(
-        maybe_managed_ptr<array>(o, std::addressof(o->as_array())));
+    return array_like(object::derive(o, o->as_array()));
   }
   if (o->is_native_object()) {
     if (native_object::array_like::ptr arr =
@@ -219,7 +219,7 @@ const object* native_function::context::map_like::lookup_property(
       [&](const native_object::map_like::ptr& m) -> const object* {
         return m->lookup_property(identifier);
       },
-      [&](const maybe_managed_ptr<map>& m) -> const object* {
+      [&](const managed_object_ptr<map>& m) -> const object* {
         if (auto it = m->find(identifier); it != m->end()) {
           return &it->second;
         }
@@ -230,7 +230,7 @@ const object* native_function::context::map_like::lookup_property(
 /* static */ std::optional<native_function::context::map_like>
 native_function::context::map_like::try_from(const object::ptr& o) {
   if (o->is_map()) {
-    return map_like(maybe_managed_ptr<map>(o, std::addressof(o->as_map())));
+    return map_like(object::derive(o, o->as_map()));
   }
   if (o->is_native_object()) {
     if (native_object::map_like::ptr m = o->as_native_object()->as_map_like()) {

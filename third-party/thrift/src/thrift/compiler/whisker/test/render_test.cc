@@ -712,7 +712,7 @@ class add : public native_function {
     for (std::size_t i = 0; i < ctx.arity(); ++i) {
       result += ctx.argument<i64>(i);
     }
-    return object::managed(w::i64(negate ? -result : result));
+    return object::owned(w::i64(negate ? -result : result));
   }
 };
 
@@ -725,7 +725,7 @@ class i64_eq : public native_function {
     ctx.declare_named_arguments({});
     i64 a = ctx.argument<i64>(0);
     i64 b = ctx.argument<i64>(1);
-    return object::managed(w::boolean(a == b));
+    return object::owned(w::boolean(a == b));
   }
 };
 
@@ -747,7 +747,7 @@ class str_concat : public native_function {
       }
       result += *ctx.argument<string>(i);
     }
-    return object::managed(w::string(std::move(result)));
+    return object::owned(w::string(std::move(result)));
   }
 };
 
@@ -759,7 +759,7 @@ class array_len : public native_function {
     ctx.declare_arity(1);
     ctx.declare_named_arguments({});
     auto len = i64(ctx.argument<array>(0).size());
-    return object::managed(w::i64(len));
+    return object::owned(w::i64(len));
   }
 };
 
@@ -775,7 +775,7 @@ class map_get : public native_function {
     auto key = ctx.named_argument<string>("key", context::required);
 
     if (const object* result = m.lookup_property(*key)) {
-      return object::as_ref(*result);
+      return object::as_static(*result);
     }
     ctx.error("Key '{}' not found.", *key);
   }
@@ -959,7 +959,7 @@ TEST_F(RenderTest, user_defined_function_array_like_named_argument) {
       ctx.declare_arity(0);
       ctx.declare_named_arguments({"input"});
       auto len = i64(ctx.named_argument<array>("input")->size());
-      return object::managed(w::string(fmt::format("length is {}", len)));
+      return object::owned(w::string(fmt::format("length is {}", len)));
     }
   };
 
@@ -1041,8 +1041,7 @@ TEST_F(RenderTest, user_defined_function_map_like_named_argument) {
 
       std::string_view result =
           m->lookup_property(*key) == nullptr ? "missing" : "present";
-      return object::managed(
-          w::string(fmt::format("map element is {}", result)));
+      return object::owned(w::string(fmt::format("map element is {}", result)));
     }
   };
 

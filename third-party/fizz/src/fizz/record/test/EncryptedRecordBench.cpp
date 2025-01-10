@@ -237,6 +237,7 @@ BENCHMARK_NAMED_PARAM(encryptOCB, 4000, 4000);
 BENCHMARK_NAMED_PARAM(encryptOCB, 8000, 8000);
 #endif
 
+#if FIZZ_HAVE_LIBAEGIS
 void encryptAEGIS(uint32_t n, size_t size) {
   std::unique_ptr<Aead> aead;
   std::vector<fizz::TLSMessage> msgs;
@@ -297,6 +298,7 @@ BENCHMARK_PARAM(encryptAEGIS, 8000);
 BENCHMARK_PARAM(decryptAEGIS, 10);
 BENCHMARK_PARAM(decryptAEGIS, 1000);
 BENCHMARK_PARAM(decryptAEGIS, 8000);
+#endif
 
 BENCHMARK_NAMED_PARAM(
     encryptGCM,

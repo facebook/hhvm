@@ -53,6 +53,8 @@ namespace whisker {
 //               identifier, and the value is a `whisker::object` (recursive)
 //   * native_object —
 //               User-defined (C++) type with lazily evaluated properties.
+//   * native_function —
+//               User-defined (C++) function that operates on `whisker::object`.
 //
 // Currently, the Whisker templating language only supports i64, null, string,
 // and boolean as literals. However, the evaluation engine can recognize all of

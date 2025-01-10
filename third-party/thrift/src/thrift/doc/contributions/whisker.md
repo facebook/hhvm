@@ -176,10 +176,6 @@ There are three types of `expression`s in Whisker:
   * `{{ (uppercase "hello") }}`
   * `{{ (concat (uppercase person.firstName) " " (uppercase person.lastName)) }}`
 
-:::warning
-Function call expressions are only partially implemented.
-:::
-
 :::note
 The `and` and `or` builtin functions short-circuit their evaluation, meaning additional arguments will not be evaluated or checked for errors once the result is determined.
 :::

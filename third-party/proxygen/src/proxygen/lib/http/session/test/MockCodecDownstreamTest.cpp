@@ -770,8 +770,7 @@ TEST_F(MockCodecDownstreamTest, Buffering) {
   codecCallback_->onMessageComplete(HTTPCodec::StreamID(1), false);
 
   EXPECT_CALL(handler, _onBodyWithOffset(_, _))
-      .WillOnce(ExpectString(chunkStr))
-      .WillOnce(ExpectString(chunkStr));
+      .WillOnce(ExpectString(chunkStr + chunkStr));
 
   EXPECT_CALL(handler, _onEOM());
 

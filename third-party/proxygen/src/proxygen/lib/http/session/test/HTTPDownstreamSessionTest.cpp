@@ -3431,7 +3431,7 @@ TEST_F(HTTP2DownstreamSessionTest, PaddingFlowControl) {
     handler->txn_->pauseIngress();
     eventBase_.runAfterDelay([&] { handler->txn_->resumeIngress(); }, 100);
   });
-  EXPECT_CALL(*handler, _onBodyWithOffset(_, _)).Times(129);
+  EXPECT_CALL(*handler, _onBodyWithOffset(_, _)).Times(1);
   handler->expectError();
   handler->expectDetachTransaction();
 

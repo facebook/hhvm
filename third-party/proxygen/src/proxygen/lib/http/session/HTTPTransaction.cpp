@@ -339,9 +339,22 @@ void HTTPTransaction::onIngressBody(unique_ptr<IOBuf> chain, uint16_t padding) {
   }
   if (mustQueueIngress()) {
     checkCreateDeferredIngress();
-    deferredIngress_->emplace(id_, HTTPEvent::Type::BODY, std::move(chain));
-    VLOG(4) << "Queued ingress event of type " << HTTPEvent::Type::BODY
-            << " size=" << len << " " << *this;
+
+    HTTPEvent* tailEvent =
+        deferredIngress_->empty() ? nullptr : &deferredIngress_->back();
+    bool shouldCoalesce =
+        tailEvent && tailEvent->getEvent() == HTTPEvent::Type::BODY &&
+        (tailEvent->getBodyLength() + len <= kMaxBufferPerTxn);
+
+    if (shouldCoalesce) {
+      VLOG(4) << "Coalesced ingress event of type " << HTTPEvent::Type::BODY
+              << " size=" << len << " " << *this;
+      tailEvent->appendChunk(std::move(chain));
+    } else {
+      VLOG(4) << "Queued ingress event of type " << HTTPEvent::Type::BODY
+              << " size=" << len << " " << *this;
+      deferredIngress_->emplace(id_, HTTPEvent::Type::BODY, std::move(chain));
+    }
   } else {
     INVARIANT(recvWindow_.free(len));
     processIngressBody(std::move(chain), len);
@@ -1752,10 +1765,9 @@ void HTTPTransaction::resumeIngress() {
         processIngressHeadersComplete(callback.getHeaders());
         break;
       case HTTPEvent::Type::BODY: {
-        unique_ptr<IOBuf> data = callback.getBody();
-        auto len = data->computeChainDataLength();
+        auto len = callback.getBodyLength();
         INVARIANT(recvWindow_.free(len));
-        processIngressBody(std::move(data), len);
+        processIngressBody(callback.getBody(), len);
       } break;
       case HTTPEvent::Type::CHUNK_HEADER:
         processIngressChunkHeader(callback.getChunkLength());

@@ -559,8 +559,7 @@ class MockUpstreamController : public HTTPUpstreamSessionController {
 };
 
 ACTION_P(ExpectString, expected) {
-  std::string bodystr((const char*)arg1->data(), arg1->length());
-  EXPECT_EQ(bodystr, expected);
+  EXPECT_EQ(arg1->toString(), expected);
 }
 
 ACTION_P(ExpectBodyLen, expectedLen) {

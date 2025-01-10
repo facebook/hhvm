@@ -65,11 +65,8 @@ class HTTPEvent {
   HTTPEvent(HTTPCodec::StreamID streamID,
             Type event,
             std::unique_ptr<folly::IOBuf> body)
-      : body_(std::move(body)),
-        streamID_(streamID),
-        length_(0),
-        event_(event),
-        upgrade_(false) {
+      : streamID_(streamID), length_(0), event_(event), upgrade_(false) {
+    body_.append(std::move(body));
   }
 
   HTTPEvent(HTTPCodec::StreamID streamID,
@@ -112,7 +109,15 @@ class HTTPEvent {
   }
 
   std::unique_ptr<folly::IOBuf> getBody() {
-    return std::move(body_);
+    return body_.move();
+  }
+
+  size_t getBodyLength() {
+    return body_.chainLength();
+  }
+
+  void appendChunk(std::unique_ptr<folly::IOBuf>&& chain) {
+    body_.append(std::move(chain));
   }
 
   std::unique_ptr<HTTPException> getError() {
@@ -139,7 +144,7 @@ class HTTPEvent {
 
  private:
   std::unique_ptr<HTTPMessage> headers_;
-  std::unique_ptr<folly::IOBuf> body_;
+  folly::IOBufQueue body_{folly::IOBufQueue::cacheChainLength()};
   std::unique_ptr<HTTPHeaders> trailers_;
   std::unique_ptr<HTTPException> error_;
   HTTPCodec::StreamID streamID_;

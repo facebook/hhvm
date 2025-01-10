@@ -1,4 +1,0 @@
-ERROR: File "bkscStrict1.php", line 3, characters 9-18:
-Unbound name: `BKSCStrict` (an object type) (Naming[2049])
-ERROR: File "bkscStrict1.php", line 3, characters 9-18:
-Unrecognized user attribute: `BKSCStrict` does not have a class. Please declare a class for the attribute. (Naming[2049])

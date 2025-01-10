@@ -7,8 +7,6 @@
   core_kernel
   nast
   remove_dead_unsafe_casts
-  tast_check_pluggin
-  tast_check_handler
   tast_env
   typing_deps
   typing_pessimisation_deps

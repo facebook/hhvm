@@ -11,7 +11,7 @@ JSON for selected code action:
     "changes":{
       "FILE.php":[
         {
-          "newText":"  private function ${0:method0}(~Awaitable<int> $y): (~Awaitable<int>, ~Awaitable<int>) {\n  $x1 = $y;\n      $x2 = ExtraBuiltins\\genInt()\n      return tuple($x1, $x2);\n  }\n\n",
+          "newText":"  private function ${0:method0}(Awaitable<int> $y): (Awaitable<int>, Awaitable<int>) {\n  $x1 = $y;\n      $x2 = ExtraBuiltins\\genInt()\n      return tuple($x1, $x2);\n  }\n\n",
           "range":{"end":{"character":0,"line":3},"start":{"character":0,"line":3}}
         },
         {
@@ -30,7 +30,7 @@ Applied edit for code action:
 <?hh
 
 class Klass {
-  private function ${0:method0}(~Awaitable<int> $y): (~Awaitable<int>, ~Awaitable<int>) {
+  private function ${0:method0}(Awaitable<int> $y): (Awaitable<int>, Awaitable<int>) {
   $x1 = $y;
       $x2 = ExtraBuiltins\genInt()
       return tuple($x1, $x2);

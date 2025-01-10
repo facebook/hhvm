@@ -41,6 +41,36 @@ type find_quickfix =
 module Type_string = struct
   type t = string Lazy.t
 
+  let deep_strip_like_types tenv ty =
+    let is_dynamic ty =
+      let (_r, ty) = Typing_defs_core.deref ty in
+      match ty with
+      | Typing_defs_core.Tdynamic -> true
+      | _ -> false
+    in
+    let visitor =
+      object (this)
+        inherit ['env] Type_mapper_generic.deep_type_mapper as super
+
+        method! on_type env ty =
+          let (reason, ty_) = Typing_defs_core.deref ty in
+          let (env, reason) = this#on_reason env reason in
+          match ty_ with
+          | Typing_defs_core.Tunion tyl ->
+            let filtered = List.filter ~f:(Fn.non is_dynamic) tyl in
+            let tyl =
+              if List.is_empty filtered then
+                (* Avoid accidentally creating a bottom a type. Unlikely to be reached *)
+                tyl
+              else
+                filtered
+            in
+            this#on_tunion env reason tyl
+          | _ -> super#on_type env ty
+      end
+    in
+    snd @@ visitor#on_type tenv ty
+
   (** Don't truncate types in printing unless they are really big,
      so we almost always generate valid code.
      The number is somewhat arbitrary: it's the smallest power of 2
@@ -52,8 +82,7 @@ module Type_string = struct
 
   let of_locl_ty tast_env locl_ty =
     lazy
-      (let locl_ty = Tast_env.fully_expand tast_env locl_ty in
-       let typing_env =
+      (let typing_env =
          tast_env
          |> Tast_env.tast_env_as_typing_env
          |> Typing_env.map_tcopt ~f:(fun tcopt ->
@@ -63,7 +92,10 @@ module Type_string = struct
                     lots_of_typing_print_fuel;
                 })
        in
-       Typing_print.full_strip_ns ~hide_internals:true typing_env locl_ty)
+       locl_ty
+       |> Tast_env.fully_expand tast_env
+       |> deep_strip_like_types typing_env
+       |> Typing_print.full_strip_ns ~hide_internals:true typing_env)
 
   let to_string = Lazy.force
 end

@@ -50,6 +50,7 @@
 #include <thrift/lib/cpp2/async/SchemaV1.h>
 #include <thrift/lib/cpp2/async/ServerRequestData.h>
 #include <thrift/lib/cpp2/async/ServerStream.h>
+#include <thrift/lib/cpp2/async/ServiceInfoHolder.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/server/ConcurrencyControllerInterface.h>
@@ -81,36 +82,6 @@ class AsyncProcessor;
 class ServiceHandlerBase;
 class ServerRequest;
 class IResourcePoolAcceptor;
-
-// This contains information about a request that is required in the thrift
-// server prior to the AsyncProcessor::executeRequest interface.
-struct ServiceRequestInfo {
-  bool isSync; // True if this has thread='eb'
-  RpcKind rpcKind; // Type of this request
-  // The qualified function name is currently an input to TProcessorEventHandler
-  // callbacks. We will refactor TProcessorEventHandler to remove the
-  // requirement to pass this as a single string. T112104402
-  const char* functionName_deprecated; // Qualified function name (includes
-                                       // service name)
-  std::optional<std::string>
-      interactionName; // Interaction name if part of an interaction
-  concurrency::PRIORITY priority; // Method priority set in the IDL
-  std::optional<std::string>
-      createdInteraction; // The name of the interaction created by the RPC
-};
-
-using ServiceRequestInfoMap =
-    folly::F14ValueMap<std::string, ServiceRequestInfo>;
-
-// The base class for generated code that contains information about a service.
-// Each service generates a subclass of this.
-class ServiceInfoHolder {
- public:
-  virtual ~ServiceInfoHolder() = default;
-
-  // This function is generated from the thrift IDL.
-  virtual const ServiceRequestInfoMap& requestInfoMap() const = 0;
-};
 
 // Returned by resource pool components when a request is rejected.
 class ServerRequestRejection {

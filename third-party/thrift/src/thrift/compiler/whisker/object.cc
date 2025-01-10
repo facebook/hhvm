@@ -186,8 +186,7 @@ native_function::context::map_like::map_like(maybe_managed_ptr<map>&& m)
     : which_(std::move(m)) {}
 
 /* static */ std::optional<native_function::context::array_like>
-native_function::context::array_like::try_from(
-    const maybe_managed_ptr<object>& o) {
+native_function::context::array_like::try_from(const object::ptr& o) {
   if (o->is_array()) {
     return array_like(
         maybe_managed_ptr<array>(o, std::addressof(o->as_array())));
@@ -229,8 +228,7 @@ const object* native_function::context::map_like::lookup_property(
 }
 
 /* static */ std::optional<native_function::context::map_like>
-native_function::context::map_like::try_from(
-    const maybe_managed_ptr<object>& o) {
+native_function::context::map_like::try_from(const object::ptr& o) {
   if (o->is_map()) {
     return map_like(maybe_managed_ptr<map>(o, std::addressof(o->as_map())));
   }
@@ -242,7 +240,7 @@ native_function::context::map_like::try_from(
   return std::nullopt;
 }
 
-maybe_managed_ptr<object> native_function::context::named_argument(
+object::ptr native_function::context::named_argument(
     std::string_view name, named_argument_presence presence) const {
   auto arg = named_args_.find(name);
   if (arg == named_args_.end()) {

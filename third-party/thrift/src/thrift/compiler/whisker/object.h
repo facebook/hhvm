@@ -125,6 +125,7 @@ struct object_print_options {
  */
 template <typename T>
 using maybe_managed_ptr = std::shared_ptr<const T>;
+using object_ptr = maybe_managed_ptr<object>;
 
 /**
  * A native_object is the most powerful type in Whisker. Its properties and
@@ -351,7 +352,7 @@ class native_function {
    * Postconditions:
    *  - The returned object is non-null.
    */
-  virtual maybe_managed_ptr<object> invoke(context) = 0;
+  virtual object_ptr invoke(context) = 0;
 
   /**
    * An exception that can be thrown to indicate a fatal error in function
@@ -430,8 +431,7 @@ class native_function {
        * Tries to marshal the provided object into an array-like object, if the
        * underlying type matches. Otherwise, returns an empty optional.
        */
-      static std::optional<array_like> try_from(
-          const maybe_managed_ptr<object>&);
+      static std::optional<array_like> try_from(const object_ptr&);
 
      private:
       explicit array_like(native_object::array_like::ptr&& arr);
@@ -465,7 +465,7 @@ class native_function {
        * Tries to marshal the provided object into an map-like object, if the
        * underlying type matches. Otherwise, returns an empty optional.
        */
-      static std::optional<map_like> try_from(const maybe_managed_ptr<object>&);
+      static std::optional<map_like> try_from(const object_ptr&);
 
      private:
       explicit map_like(native_object::map_like::ptr&& m);
@@ -514,7 +514,7 @@ class native_function {
      * If the argument is not present and presence is required, then this throws
      * an error. Otherwise, returns nullptr.
      */
-    maybe_managed_ptr<object> named_argument(
+    object_ptr named_argument(
         std::string_view name,
         named_argument_presence = named_argument_presence::required) const;
 
@@ -689,7 +689,7 @@ class object final : private detail::object_base<object> {
     return std::get<T>(*this);
   }
 
-  using ptr = maybe_managed_ptr<object>;
+  using ptr = object_ptr;
 
   /**
    * Returns a shared_ptr which is an unmanaged reference to the provided

@@ -918,12 +918,13 @@ class parser {
         scan};
   }
 
-  // variable-lookup → { "." | (identifier ~ ("." ~ identifier)*) }
+  // variable-lookup → { "." | "this" | (identifier ~ ("." ~ identifier)*) }
   parse_result<ast::variable_lookup> parse_variable_lookup(
       parser_scan_window scan) {
     assert(scan.empty());
     const auto scan_start = scan.start;
-    if (try_consume_token(&scan, tok::dot)) {
+    if (try_consume_token(&scan, tok::dot) ||
+        try_consume_token(&scan, tok::kw_this)) {
       return {
           ast::variable_lookup{
               scan.with_start(scan_start).range(),

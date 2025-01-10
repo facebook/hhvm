@@ -111,7 +111,7 @@ TEST_F(ParserTest, variable_is_dot) {
   EXPECT_EQ(
       to_string(*ast),
       "root [path/to/test-1.whisker]\n"
-      "|- interpolation <line:1:1, col:7> '.'\n");
+      "|- interpolation <line:1:1, col:7> 'this'\n");
 }
 
 TEST_F(ParserTest, variable_starts_with_dot) {
@@ -801,6 +801,16 @@ TEST_F(ParserTest, let_statement) {
       "|- let-statement <line:1:1, col:32>\n"
       "| `- identifier 'foo'\n"
       "| `- expression <line:1:14, col:30> '(not true_value)'\n");
+}
+
+TEST_F(ParserTest, let_statement_with_implicit_context) {
+  auto ast = parse_ast("{{#let foo = (a.b.c this)}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- let-statement <line:1:1, col:28>\n"
+      "| `- identifier 'foo'\n"
+      "| `- expression <line:1:14, col:26> '(a.b.c this)'\n");
 }
 
 TEST_F(ParserTest, let_statement_dotted_name) {

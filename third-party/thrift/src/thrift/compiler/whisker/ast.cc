@@ -45,7 +45,7 @@ std::string to_joined_string(
 std::string variable_lookup::chain_string() const {
   return detail::variant_match(
       chain,
-      [](this_ref) -> std::string { return "."; },
+      [](this_ref) -> std::string { return "this"; },
       [](const std::vector<identifier>& ids) -> std::string {
         return to_joined_string(
             ids, '.', [](const identifier& id) -> const std::string& {

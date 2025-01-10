@@ -171,7 +171,7 @@ There are three types of `expression`s in Whisker:
   * `boolean-literal` — either `true` or `false`.
   * `null-literal` — *exactly* `null`.
 * ***Variable*** — values interpolated from the *context*, like `{{ person.name }}`. Variables allow scoped access into the context using a series of *identifiers* separated by dots (`.`).
-  * Additionally, the special *implicit context* variable, `{{ . }}`, refers to the *context* object itself.
+  * Additionally, the special *implicit context* variable, `{{ . }}` or `{{ this }}`, refers to the *context* object itself.
 * ***Function call*** — [lisp-like](https://en.wikipedia.org/wiki/Lisp_(programming_language)#Syntax_and_semantics) syntax for invoking functions, often referred to as [S-expressions](https://en.wikipedia.org/wiki/S-expression). Functions are defined in the [*data model*](#data-model). Examples:
   * `{{ (uppercase "hello") }}`
   * `{{ (concat (uppercase person.firstName) " " (uppercase person.lastName)) }}`
@@ -216,7 +216,7 @@ interpolation → { "{{" ~ expression ~ "}}" }
 expression    → { literal | variable | function-call }
 
 literal             → { string-literal | i64-literal | boolean-literal | null-literal }
-variable            → { "." | (identifier ~ ("." ~ identifier)*) }
+variable            → { "." | "this" | (identifier ~ ("." ~ identifier)*) }
 function-call       → { "(" ~ (builtin-call | user-defined-call) ~ ")" }
 
 string-literal  → { <see above> }

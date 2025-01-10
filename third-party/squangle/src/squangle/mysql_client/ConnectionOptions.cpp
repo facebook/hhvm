@@ -16,8 +16,6 @@
 
 namespace facebook::common::mysql_client {
 
-class Operation;
-
 ConnectionOptions::ConnectionOptions()
     : connection_timeout_(FLAGS_async_mysql_connect_timeout_micros),
       total_timeout_(FLAGS_async_mysql_timeout_micros * 2),
@@ -79,9 +77,11 @@ ConnectionOptions& ConnectionOptions::setDscp(uint8_t dscp) {
 
 ConnectionOptions& ConnectionOptions::setCertValidationCallback(
     CertValidatorCallback callback,
-    std::weak_ptr<Operation> wptr) noexcept {
+    const void* context,
+    bool opPtrAsContext) noexcept {
   certValidationCallback_ = std::move(callback);
-  certValidationWeakPtr_ = std::move(wptr);
+  opPtrAsCertValidationContext_ = opPtrAsContext;
+  certValidationContext_ = opPtrAsCertValidationContext_ ? nullptr : context;
   return *this;
 }
 

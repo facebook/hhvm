@@ -15,13 +15,10 @@
 
 namespace facebook::common::mysql_client {
 
-class Operation;
 class SSLOptionsProviderBase;
 
-using CertValidatorCallback = std::function<bool(
-    X509* server_cert,
-    const std::weak_ptr<Operation>& context,
-    folly::StringPiece& errMsg)>;
+using CertValidatorCallback = std::function<
+    bool(X509* server_cert, const void* context, folly::StringPiece& errMsg)>;
 
 class ConnectionOptions {
  public:
@@ -195,14 +192,19 @@ class ConnectionOptions {
 
   ConnectionOptions& setCertValidationCallback(
       CertValidatorCallback callback,
-      std::weak_ptr<Operation> wptr) noexcept;
+      const void* context,
+      bool opPtrAsContext) noexcept;
 
   const CertValidatorCallback& getCertValidationCallback() const noexcept {
     return certValidationCallback_;
   }
 
-  const std::weak_ptr<Operation>& getCertValidationContext() const noexcept {
-    return certValidationWeakPtr_;
+  const void* getCertValidationContext() const noexcept {
+    return certValidationContext_;
+  }
+
+  bool isOpPtrAsValidationContext() const noexcept {
+    return opPtrAsCertValidationContext_;
   }
 
   ConnectionOptions& setCryptoAuthTokenList(const std::string& tokenList) {
@@ -231,7 +233,8 @@ class ConnectionOptions {
   bool delayed_reset_conn_ = false;
   bool change_user_ = false;
   CertValidatorCallback certValidationCallback_{nullptr};
-  std::weak_ptr<Operation> certValidationWeakPtr_;
+  const void* certValidationContext_{nullptr};
+  bool opPtrAsCertValidationContext_{false};
 };
 
 } // namespace facebook::common::mysql_client

@@ -235,7 +235,7 @@ class OperationBase {
     return connection_context_.get();
   }
   void withOptionalConnectionContext(
-      std::function<void(db::ConnectionContextBase&)> func) const {
+      std::function<void(db::ConnectionContextBase&)> func) {
     if (connection_context_) {
       func(*connection_context_);
     }
@@ -622,12 +622,6 @@ class Operation : public std::enable_shared_from_this<Operation> {
   Timepoint endTime() const {
     return impl()->endTime();
   }
-
-  virtual void reportServerCertContent(
-      const std::string& /*sslCertCn*/,
-      const std::vector<std::string>& /*sslCertSan*/,
-      const std::vector<std::string>& /*sslCertIdentities*/,
-      bool /*isValidated*/) const {}
 
   static folly::StringPiece toString(OperationState state);
   static folly::StringPiece toString(OperationResult result);

@@ -702,6 +702,7 @@ TEST(CompilerTest, annotation_positions) {
     }
     struct Foo {
       1: i32 (annot) f
+      # expected-error@-1: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       @Type{name="foo"}
       2: i32 g
     }
@@ -808,6 +809,7 @@ TEST(CompilerTest, cpp_type_compatibility) {
     struct B {
       @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
       1: i32 (cpp.type = "std::uint32_t") field; # expected-warning@-1: The cpp.type/cpp.template annotations are deprecated, use @cpp.Type instead
+      # expected-error@-2: Annotations are not allowed in this position. Extract the type into a named typedef instead.
       @cpp.Adapter{name="Adapter"} # expected-warning: At most one of @cpp.Type/@cpp.Adapter/cpp.type/cpp.template can be specified on a definition.
       @cpp.Type{name="std::uint32_t"}
       2: i32 field2;

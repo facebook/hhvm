@@ -426,6 +426,13 @@ class native_function {
       array_like(array_like&&) noexcept;
       array_like& operator=(array_like&&) noexcept;
 
+      /**
+       * Tries to marshal the provided object into an array-like object, if the
+       * underlying type matches. Otherwise, returns an empty optional.
+       */
+      static std::optional<array_like> try_from(
+          const maybe_managed_ptr<object>&);
+
      private:
       explicit array_like(native_object::array_like::ptr&& arr);
       explicit array_like(maybe_managed_ptr<array>&& arr);
@@ -453,6 +460,12 @@ class native_function {
       map_like& operator=(const map_like&);
       map_like(map_like&&) noexcept;
       map_like& operator=(map_like&&) noexcept;
+
+      /**
+       * Tries to marshal the provided object into an map-like object, if the
+       * underlying type matches. Otherwise, returns an empty optional.
+       */
+      static std::optional<map_like> try_from(const maybe_managed_ptr<object>&);
 
      private:
       explicit map_like(native_object::map_like::ptr&& m);
@@ -504,18 +517,22 @@ class native_function {
     maybe_managed_ptr<object> named_argument(
         std::string_view name,
         named_argument_presence = named_argument_presence::required) const;
+
+    template <typename T>
+    using argument_result_optional_t =
+        typename detail::native_function_argument_result<T>::optional_type;
     /**
-     * Returns a pointer to a named argument, checked against the desired type
+     * Returns a reference to a named argument, checked against the desired type
      * `T`, if present.
      *
      * If the argument is not present and presence is required, then this throws
-     * an error. Otherwise, returns nullptr.
+     * an error. Otherwise, returns nullptr (or empty optional).
      *
-     * If the argument is present but is not of type `T`, then this throws an
-     * error.
+     * If the argument is present but is not of the correct type, then this
+     * throws an error.
      */
     template <typename T>
-    maybe_managed_ptr<T> named_argument(
+    argument_result_optional_t<T> named_argument(
         std::string_view name,
         named_argument_presence = named_argument_presence::required) const;
 
@@ -589,26 +606,32 @@ using object_base = std::variant<
 template <>
 struct native_function_argument_result<i64> {
   using type = i64;
+  using optional_type = std::optional<type>;
 };
 template <>
 struct native_function_argument_result<f64> {
   using type = f64;
+  using optional_type = std::optional<type>;
 };
 template <>
 struct native_function_argument_result<boolean> {
   using type = boolean;
+  using optional_type = std::optional<type>;
 };
 template <>
 struct native_function_argument_result<string> {
   using type = maybe_managed_ptr<string>;
+  using optional_type = type;
 };
 template <>
 struct native_function_argument_result<array> {
   using type = native_function::context::array_like;
+  using optional_type = std::optional<type>;
 };
 template <>
 struct native_function_argument_result<map> {
   using type = native_function::context::map_like;
+  using optional_type = std::optional<type>;
 };
 } // namespace detail
 
@@ -929,48 +952,20 @@ class object final : private detail::object_base<object> {
 };
 
 template <typename T>
-maybe_managed_ptr<T> native_function::context::named_argument(
-    std::string_view name, named_argument_presence presence) const {
-  const object::ptr& o = this->named_argument(name, presence);
-  if (o == nullptr) {
-    assert(presence == named_argument_presence::optional);
-    return nullptr;
-  }
-  if (!o->is<T>()) {
-    // Ideally, we want to output a string representation of the types here.
-    error("Named argument '{}' is of an unexpected type.", name);
-  }
-  return maybe_managed_ptr<T>(o, std::addressof(o->as<T>()));
-}
-
-template <typename T>
 native_function::context::argument_result_t<T>
 native_function::context::argument(size_t index) const {
   const object::ptr& o = positional_args_.at(index);
   if constexpr (std::is_same_v<T, array>) {
-    if (o->is_array()) {
-      return array_like(
-          maybe_managed_ptr<array>(o, std::addressof(o->as_array())));
-    }
-    if (o->is_native_object()) {
-      if (native_object::array_like::ptr arr =
-              o->as_native_object()->as_array_like()) {
-        return array_like(std::move(arr));
-      }
+    if (auto arr = array_like::try_from(o)) {
+      return std::move(*arr);
     }
     // Ideally, we want to output a string representation of the types here.
     error(
         "Argument at index {} is not an array or array-like native_object.",
         index);
   } else if constexpr (std::is_same_v<T, map>) {
-    if (o->is_map()) {
-      return map_like(maybe_managed_ptr<map>(o, std::addressof(o->as_map())));
-    }
-    if (o->is_native_object()) {
-      if (native_object::map_like::ptr m =
-              o->as_native_object()->as_map_like()) {
-        return map_like(std::move(m));
-      }
+    if (auto m = map_like::try_from(o)) {
+      return std::move(*m);
     }
     // Ideally, we want to output a string representation of the types here.
     error(
@@ -979,6 +974,44 @@ native_function::context::argument(size_t index) const {
     if (!o->is<T>()) {
       // Ideally, we want to output a string representation of the types here.
       error("Argument at index {} is of an unexpected type.", index);
+    }
+    if constexpr (std::is_same_v<T, string>) {
+      return maybe_managed_ptr<T>(o, std::addressof(o->as<T>()));
+    } else {
+      return o->as<T>();
+    }
+  }
+}
+
+template <typename T>
+native_function::context::argument_result_optional_t<T>
+native_function::context::named_argument(
+    std::string_view name, named_argument_presence presence) const {
+  const object::ptr& o = this->named_argument(name, presence);
+  if (o == nullptr) {
+    assert(presence == named_argument_presence::optional);
+    // either nullptr or empty optional
+    return {};
+  }
+
+  if constexpr (std::is_same_v<T, array>) {
+    if (auto arr = array_like::try_from(o)) {
+      return std::move(*arr);
+    }
+    // Ideally, we want to output a string representation of the types here.
+    error(
+        "Named argument '{}' is not an array or array-like native_object.",
+        name);
+  } else if constexpr (std::is_same_v<T, map>) {
+    if (auto m = map_like::try_from(o)) {
+      return std::move(*m);
+    }
+    // Ideally, we want to output a string representation of the types here.
+    error("Named argument '{}' is not a map or map-like native_object.", name);
+  } else {
+    if (!o->is<T>()) {
+      // Ideally, we want to output a string representation of the types here.
+      error("Named argument '{}' is of an unexpected type.", name);
     }
     if constexpr (std::is_same_v<T, string>) {
       return maybe_managed_ptr<T>(o, std::addressof(o->as<T>()));

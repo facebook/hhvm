@@ -706,7 +706,7 @@ class add : public native_function {
     ctx.declare_named_arguments({"negate"});
     const bool negate = [&] {
       auto arg = ctx.named_argument<boolean>("negate", context::optional);
-      return arg == nullptr ? false : *arg;
+      return arg.value_or(false);
     }();
     i64 result = 0;
     for (std::size_t i = 0; i < ctx.arity(); ++i) {
@@ -953,6 +953,50 @@ TEST_F(RenderTest, user_defined_function_array_like_argument) {
   }
 }
 
+TEST_F(RenderTest, user_defined_function_array_like_named_argument) {
+  class describe_array_len : public native_function {
+    object::ptr invoke(context ctx) override {
+      ctx.declare_arity(0);
+      ctx.declare_named_arguments({"input"});
+      auto len = i64(ctx.named_argument<array>("input")->size());
+      return object::managed(w::string(fmt::format("length is {}", len)));
+    }
+  };
+
+  const array arr{w::i64(1), w::string("foo"), w::i64(100)};
+  const auto context = w::map(
+      {{"array", w::array(array(arr))},
+       {"array_like",
+        w::make_native_object<array_like_native_object>(array(arr))},
+       {"not_array", w::string("not an array")},
+       {"describe_len", w::make_native_function<describe_array_len>()}});
+
+  {
+    auto result = render(
+        "{{(describe_len input=array)}}\n"
+        "{{(describe_len input=array_like)}}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "length is 3\n"
+        "length is 3\n");
+  }
+
+  {
+    auto result = render("{{(describe_len input=not_array)}}\n", context);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'describe_len' threw an error:\n"
+            "Named argument 'input' is not an array or array-like native_object.",
+            path_to_file,
+            1)));
+  }
+}
+
 TEST_F(RenderTest, user_defined_function_map_like_argument) {
   const map m{{"a", w::i64(1)}, {"b", w::string("foo")}, {"c", w::i64(100)}};
   const auto context = w::map(
@@ -982,6 +1026,57 @@ TEST_F(RenderTest, user_defined_function_map_like_argument) {
             diagnostic_level::error,
             "Function 'get' threw an error:\n"
             "Argument at index 0 is not a map or map-like native_object.",
+            path_to_file,
+            1)));
+  }
+}
+
+TEST_F(RenderTest, user_defined_function_map_like_named_argument) {
+  class describe_map_get : public native_function {
+    object::ptr invoke(context ctx) override {
+      ctx.declare_arity(0);
+      ctx.declare_named_arguments({"input", "key"});
+      auto m = ctx.named_argument<map>("input", context::required);
+      auto key = ctx.named_argument<string>("key", context::required);
+
+      std::string_view result =
+          m->lookup_property(*key) == nullptr ? "missing" : "present";
+      return object::managed(
+          w::string(fmt::format("map element is {}", result)));
+    }
+  };
+
+  const map m{{"a", w::i64(1)}, {"b", w::string("foo")}, {"c", w::i64(100)}};
+  const auto context = w::map(
+      {{"map", w::map(map(m))},
+       {"map_like", w::make_native_object<map_like_native_object>(map(m))},
+       {"not_map", w::string("not a map")},
+       {"describe_get", w::make_native_function<describe_map_get>()}});
+
+  {
+    auto result = render(
+        "{{ (describe_get input=map      key=\"b\") }}\n"
+        "{{ (describe_get input=map_like key=\"b\") }}\n"
+        "{{ (describe_get input=map_like key=\"missing\") }}\n",
+        context);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "map element is present\n"
+        "map element is present\n"
+        "map element is missing\n");
+  }
+
+  {
+    auto result =
+        render("{{(describe_get input=not_map key=\"b\")}}\n", context);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'describe_get' threw an error:\n"
+            "Named argument 'input' is not a map or map-like native_object.",
             path_to_file,
             1)));
   }

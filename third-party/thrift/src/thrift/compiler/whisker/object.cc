@@ -185,6 +185,22 @@ native_function::context::map_like::map_like(native_object::map_like::ptr&& m)
 native_function::context::map_like::map_like(maybe_managed_ptr<map>&& m)
     : which_(std::move(m)) {}
 
+/* static */ std::optional<native_function::context::array_like>
+native_function::context::array_like::try_from(
+    const maybe_managed_ptr<object>& o) {
+  if (o->is_array()) {
+    return array_like(
+        maybe_managed_ptr<array>(o, std::addressof(o->as_array())));
+  }
+  if (o->is_native_object()) {
+    if (native_object::array_like::ptr arr =
+            o->as_native_object()->as_array_like()) {
+      return array_like(std::move(arr));
+    }
+  }
+  return std::nullopt;
+}
+
 native_function::context::map_like::~map_like() noexcept = default;
 
 native_function::context::map_like::map_like(const map_like&) = default;
@@ -210,6 +226,20 @@ const object* native_function::context::map_like::lookup_property(
         }
         return nullptr;
       });
+}
+
+/* static */ std::optional<native_function::context::map_like>
+native_function::context::map_like::try_from(
+    const maybe_managed_ptr<object>& o) {
+  if (o->is_map()) {
+    return map_like(maybe_managed_ptr<map>(o, std::addressof(o->as_map())));
+  }
+  if (o->is_native_object()) {
+    if (native_object::map_like::ptr m = o->as_native_object()->as_map_like()) {
+      return map_like(std::move(m));
+    }
+  }
+  return std::nullopt;
 }
 
 maybe_managed_ptr<object> native_function::context::named_argument(

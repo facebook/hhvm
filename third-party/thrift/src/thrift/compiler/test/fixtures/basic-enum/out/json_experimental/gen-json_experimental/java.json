@@ -24,21 +24,21 @@
         "name" : "Mutable",
         "structured_annotations": {
           "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Exception" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Exception",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Exception",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -48,37 +48,37 @@
         "name" : "Annotation",
         "structured_annotations": {
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Union" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Union",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Union",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Exception" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Exception",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Exception",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "java_annotation" : {
@@ -97,13 +97,13 @@
         "name" : "BinaryString",
         "structured_annotations": {
           "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -113,29 +113,29 @@
         "name" : "Adapter",
         "structured_annotations": {
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Structured" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Structured",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Structured",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "adapterClassName" : {
@@ -161,13 +161,13 @@
         "name" : "Wrapper",
         "structured_annotations": {
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "wrapperClassName" : {
@@ -193,13 +193,13 @@
         "name" : "Recursive",
         "structured_annotations": {
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -209,13 +209,13 @@
         "name" : "FieldUseUnmangledName",
         "structured_annotations": {
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -225,19 +225,19 @@
         "name" : "UseIntrinsicDefault",
         "structured_annotations": {
           "scope.Enum" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Enum",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Enum",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 86
       }
-      },
+  },
   "source_path" : "thrift/annotation/java",
   "py_namespace" : "thrift.annotation.java"
 }

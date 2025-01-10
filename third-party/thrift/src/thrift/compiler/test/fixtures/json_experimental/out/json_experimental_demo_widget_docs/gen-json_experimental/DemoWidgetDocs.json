@@ -45,7 +45,7 @@
         "docstring" : "What kinds of widgets can we buy and sell?\n",
         "lineno" : 25
       }
-      },
+  },
   "structs" :
   {
       "WidgetRequisition" : {
@@ -58,9 +58,9 @@
             "lineno" : 46,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "WidgetType"
-}
+      "type" : "enum",
+      "name" : "WidgetType"
+    }
                   },
           "budgetCents" : {
             "name" : "budgetCents",
@@ -119,9 +119,9 @@
             "lineno" : 77,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "WidgetRequisition"
-}
+      "type" : "struct",
+      "name" : "WidgetRequisition"
+    }
                   },
           "numWidgets" : {
             "name" : "numWidgets",
@@ -159,7 +159,7 @@
         "is_union" : false,
         "lineno" : 75
       }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/json_experimental/src/DemoWidgetDocs",
   "py_namespace" : "thrift.compiler.test.fixtures.json_experimental.src.DemoWidgetDocs"
 }

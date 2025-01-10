@@ -111,33 +111,33 @@
         "name" : "Structured",
         "structured_annotations": {
           "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct"
+        },
+            "value" : {}
+          },
           "scope.Union" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Union"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Union"
+        },
+            "value" : {}
+          },
           "scope.Exception" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Exception"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Exception"
+        },
+            "value" : {}
+          },
           "scope.Transitive" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Transitive"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Transitive"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "A scope that includes all 'structured' definitions.\n",
         "is_exception" : false,
@@ -148,26 +148,26 @@
         "name" : "Interface",
         "structured_annotations": {
           "scope.Service" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Service"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Service"
+        },
+            "value" : {}
+          },
           "scope.Interaction" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Interaction"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Interaction"
+        },
+            "value" : {}
+          },
           "scope.Transitive" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Transitive"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Transitive"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "A scope that includes all 'interface' definitions.\n",
         "is_exception" : false,
@@ -178,47 +178,47 @@
         "name" : "RootDefinition",
         "structured_annotations": {
           "scope.Structured" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Structured"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Structured"
+        },
+            "value" : {}
+          },
           "scope.Interface" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Interface"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Interface"
+        },
+            "value" : {}
+          },
           "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef"
+        },
+            "value" : {}
+          },
           "scope.Enum" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Enum"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Enum"
+        },
+            "value" : {}
+          },
           "scope.Const" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Const"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Const"
+        },
+            "value" : {}
+          },
           "scope.Transitive" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Transitive"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Transitive"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "A scope that includes all program-scoped definition.\n",
         "is_exception" : false,
@@ -229,40 +229,40 @@
         "name" : "Definition",
         "structured_annotations": {
           "scope.RootDefinition" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "RootDefinition"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "RootDefinition"
+        },
+            "value" : {}
+          },
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Field"
+        },
+            "value" : {}
+          },
           "scope.Function" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Function"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Function"
+        },
+            "value" : {}
+          },
           "scope.EnumValue" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "EnumValue"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "EnumValue"
+        },
+            "value" : {}
+          },
           "scope.Transitive" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Transitive"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Transitive"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "A scope that includes all definitions.\n",
         "is_exception" : false,
@@ -273,19 +273,19 @@
         "name" : "DisableSchemaConst",
         "structured_annotations": {
           "scope.Program" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Program"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Program"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "Not a scope, just here for dependency cycle reasons.\nDisables schema const injection for the program.\n",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 148
       }
-      },
+  },
   "source_path" : "thrift/annotation/scope",
   "py_namespace" : "thrift.annotation.scope"
 }

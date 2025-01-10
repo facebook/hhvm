@@ -39,7 +39,7 @@
         },
         "lineno" : 24
       }
-      },
+  },
   "structs" :
   {
       "MyStruct" : {
@@ -120,9 +120,9 @@
             "lineno" : 41,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
                   },
           "list_field" : {
             "name" : "list_field",
@@ -130,9 +130,9 @@
             "lineno" : 42,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "list",
-  "inner_type" : "i16"
-}
+      "type" : "list",
+      "inner_type" : "i16"
+    }
                   },
           "set_field" : {
             "name" : "set_field",
@@ -140,9 +140,9 @@
             "lineno" : 43,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "set",
-  "inner_type" : "i16"
-}
+      "type" : "set",
+      "inner_type" : "i16"
+    }
                   },
           "map_field" : {
             "name" : "map_field",
@@ -150,10 +150,10 @@
             "lineno" : 44,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "map",
-  "key_type" : "i16",
-  "value_type" : "i16"
-}
+      "type" : "map",
+      "key_type" : "i16",
+      "value_type" : "i16"
+    }
                   },
           "struct_field" : {
             "name" : "struct_field",
@@ -161,9 +161,9 @@
             "lineno" : 45,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
                   }
         },
         "is_exception" : false,
@@ -190,13 +190,13 @@
         "name" : "StructLevelTerseStruct",
         "structured_annotations": {
           "thrift.TerseWrite" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "TerseWrite",
+          "path" : "thrift/annotation/thrift.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "bool_field" : {
@@ -258,55 +258,55 @@
             "key" : 10,
             "lineno" : 63,
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
                   },
           "list_field" : {
             "name" : "list_field",
             "key" : 11,
             "lineno" : 64,
             "type" : {
-  "type" : "list",
-  "inner_type" : "i16"
-}
+      "type" : "list",
+      "inner_type" : "i16"
+    }
                   },
           "set_field" : {
             "name" : "set_field",
             "key" : 12,
             "lineno" : 65,
             "type" : {
-  "type" : "set",
-  "inner_type" : "i16"
-}
+      "type" : "set",
+      "inner_type" : "i16"
+    }
                   },
           "map_field" : {
             "name" : "map_field",
             "key" : 13,
             "lineno" : 66,
             "type" : {
-  "type" : "map",
-  "key_type" : "i16",
-  "value_type" : "i16"
-}
+      "type" : "map",
+      "key_type" : "i16",
+      "value_type" : "i16"
+    }
                   },
           "struct_field" : {
             "name" : "struct_field",
             "key" : 14,
             "lineno" : 67,
             "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
                   },
           "union_field" : {
             "name" : "union_field",
             "key" : 15,
             "lineno" : 68,
             "type" : {
-  "type" : "struct",
-  "name" : "MyUnion"
-}
+      "type" : "struct",
+      "name" : "MyUnion"
+    }
                   }
         },
         "is_exception" : false,
@@ -324,14 +324,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_byte_field" : {
             "name" : "terse_byte_field",
@@ -341,14 +341,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_short_field" : {
             "name" : "terse_short_field",
@@ -358,14 +358,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_int_field" : {
             "name" : "terse_int_field",
@@ -375,14 +375,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_long_field" : {
             "name" : "terse_long_field",
@@ -392,14 +392,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_float_field" : {
             "name" : "terse_float_field",
@@ -409,14 +409,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_double_field" : {
             "name" : "terse_double_field",
@@ -426,14 +426,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_string_field" : {
             "name" : "terse_string_field",
@@ -443,14 +443,14 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_binary_field" : {
             "name" : "terse_binary_field",
@@ -460,135 +460,135 @@
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_enum_field" : {
             "name" : "terse_enum_field",
             "key" : 10,
             "lineno" : 91,
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_list_field" : {
             "name" : "terse_list_field",
             "key" : 11,
             "lineno" : 93,
             "type" : {
-  "type" : "list",
-  "inner_type" : "i16"
-}
+      "type" : "list",
+      "inner_type" : "i16"
+    }
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_set_field" : {
             "name" : "terse_set_field",
             "key" : 12,
             "lineno" : 95,
             "type" : {
-  "type" : "set",
-  "inner_type" : "i16"
-}
+      "type" : "set",
+      "inner_type" : "i16"
+    }
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_map_field" : {
             "name" : "terse_map_field",
             "key" : 13,
             "lineno" : 97,
             "type" : {
-  "type" : "map",
-  "key_type" : "i16",
-  "value_type" : "i16"
-}
+      "type" : "map",
+      "key_type" : "i16",
+      "value_type" : "i16"
+    }
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_struct_field" : {
             "name" : "terse_struct_field",
             "key" : 14,
             "lineno" : 99,
             "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "terse_union_field" : {
             "name" : "terse_union_field",
             "key" : 29,
             "lineno" : 101,
             "type" : {
-  "type" : "struct",
-  "name" : "MyUnion"
-}
+      "type" : "struct",
+      "name" : "MyUnion"
+    }
             ,
             "structured_annotations": {
               "thrift.TerseWrite" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "TerseWrite",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "bool_field" : {
             "name" : "bool_field",
@@ -659,9 +659,9 @@
             "lineno" : 114,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
                   },
           "list_field" : {
             "name" : "list_field",
@@ -669,9 +669,9 @@
             "lineno" : 115,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "list",
-  "inner_type" : "i16"
-}
+      "type" : "list",
+      "inner_type" : "i16"
+    }
                   },
           "set_field" : {
             "name" : "set_field",
@@ -679,9 +679,9 @@
             "lineno" : 116,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "set",
-  "inner_type" : "i16"
-}
+      "type" : "set",
+      "inner_type" : "i16"
+    }
                   },
           "map_field" : {
             "name" : "map_field",
@@ -689,10 +689,10 @@
             "lineno" : 117,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "map",
-  "key_type" : "i16",
-  "value_type" : "i16"
-}
+      "type" : "map",
+      "key_type" : "i16",
+      "value_type" : "i16"
+    }
                   },
           "struct_field" : {
             "name" : "struct_field",
@@ -700,9 +700,9 @@
             "lineno" : 118,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
                   },
           "union_field" : {
             "name" : "union_field",
@@ -710,9 +710,9 @@
             "lineno" : 119,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyUnion"
-}
+      "type" : "struct",
+      "name" : "MyUnion"
+    }
                   }
         },
         "is_exception" : false,
@@ -723,13 +723,13 @@
         "name" : "TerseStructWithCustomDefault",
         "structured_annotations": {
           "thrift.TerseWrite" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "TerseWrite",
+          "path" : "thrift/annotation/thrift.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "bool_field" : {
@@ -801,9 +801,9 @@
             "key" : 10,
             "lineno" : 133,
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
                   },
           "list_field" : {
             "name" : "list_field",
@@ -811,9 +811,9 @@
             "key" : 11,
             "lineno" : 134,
             "type" : {
-  "type" : "list",
-  "inner_type" : "i16"
-}
+      "type" : "list",
+      "inner_type" : "i16"
+    }
                   },
           "set_field" : {
             "name" : "set_field",
@@ -821,9 +821,9 @@
             "key" : 12,
             "lineno" : 135,
             "type" : {
-  "type" : "set",
-  "inner_type" : "i16"
-}
+      "type" : "set",
+      "inner_type" : "i16"
+    }
                   },
           "map_field" : {
             "name" : "map_field",
@@ -831,19 +831,19 @@
             "key" : 13,
             "lineno" : 136,
             "type" : {
-  "type" : "map",
-  "key_type" : "i16",
-  "value_type" : "i16"
-}
+      "type" : "map",
+      "key_type" : "i16",
+      "value_type" : "i16"
+    }
                   },
           "struct_field" : {
             "name" : "struct_field",
             "key" : 14,
             "lineno" : 137,
             "type" : {
-  "type" : "struct",
-  "name" : "MyStructWithCustomDefault"
-}
+      "type" : "struct",
+      "name" : "MyStructWithCustomDefault"
+    }
                   }
         },
         "is_exception" : false,
@@ -854,13 +854,13 @@
         "name" : "AdaptedFields",
         "structured_annotations": {
           "thrift.TerseWrite" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "TerseWrite",
+          "path" : "thrift/annotation/thrift.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "field1" : {
@@ -877,22 +877,22 @@
             ,
             "structured_annotations": {
               "hack.Adapter" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"name": "\\Adapter1"}
-          },
-                  "cpp.Adapter" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-            "value" : {"name": "::my::Adapter"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "Adapter",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"name": "\\Adapter1"}
+              },
+              "cpp.Adapter" : {
+                "type" : {
+              "type" : "struct",
+              "name" : "Adapter",
+              "path" : "thrift/annotation/cpp.thrift"
+            },
+                "value" : {"name": "::my::Adapter"}
+              }
+            }
           },
           "field3" : {
             "name" : "field3",
@@ -902,14 +902,14 @@
             ,
             "structured_annotations": {
               "cpp.Adapter" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "Adapter",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-            "value" : {"name": "::my::Adapter"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "Adapter",
+              "path" : "thrift/annotation/cpp.thrift"
+            },
+                "value" : {"name": "::my::Adapter"}
+              }
+            }
           }
         },
         "is_exception" : false,
@@ -920,13 +920,13 @@
         "name" : "WrappedFields",
         "structured_annotations": {
           "thrift.TerseWrite" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "TerseWrite",
+          "path" : "thrift/annotation/thrift.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "field1" : {
@@ -938,14 +938,14 @@
             ,
             "structured_annotations": {
               "hack.FieldWrapper" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "FieldWrapper",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"name": "\\MyFieldWrapper"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "FieldWrapper",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"name": "\\MyFieldWrapper"}
+              }
+            }
           }
         },
         "is_exception" : false,
@@ -956,13 +956,13 @@
         "name" : "TerseException",
         "structured_annotations": {
           "thrift.TerseWrite" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "TerseWrite",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "TerseWrite",
+          "path" : "thrift/annotation/thrift.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "msg" : {
@@ -973,21 +973,21 @@
             ,
             "structured_annotations": {
               "thrift.ExceptionMessage" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "ExceptionMessage",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "ExceptionMessage",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           }
         },
         "is_exception" : true,
         "is_union" : false,
         "lineno" : 160
       }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/terse_write/src/terse_write",
   "py_namespace" : ""
 }

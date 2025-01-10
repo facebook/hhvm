@@ -28,7 +28,7 @@
         "is_union" : false,
         "lineno" : 23
       }
-      },
+  },
   "services" :
   {
       "PubSubStreamingService" : { 
@@ -54,8 +54,8 @@
                           }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
+      "type" : "streamresponse",
+      "inner_type" : "i32"},
             "lineno" : 26
           },
           "streamthrows" : {
@@ -70,8 +70,8 @@
                           }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
+      "type" : "streamresponse",
+      "inner_type" : "i32"},
             "lineno" : 27
           },
           "servicethrows" : {
@@ -89,15 +89,15 @@
               "e" : {
                 "name": "e",
                 "type" : {
-  "type" : "struct",
-  "name" : "FooEx"
-},
+      "type" : "struct",
+      "name" : "FooEx"
+    },
                 "id" : 1
               }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
+      "type" : "streamresponse",
+      "inner_type" : "i32"},
             "lineno" : 28
           },
           "servicethrows2" : {
@@ -115,23 +115,23 @@
               "e1" : {
                 "name": "e1",
                 "type" : {
-  "type" : "struct",
-  "name" : "FooEx"
-},
+      "type" : "struct",
+      "name" : "FooEx"
+    },
                 "id" : 1
               },
               "e2" : {
                 "name": "e2",
                 "type" : {
-  "type" : "struct",
-  "name" : "FooEx2"
-},
+      "type" : "struct",
+      "name" : "FooEx2"
+    },
                 "id" : 2
               }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
+      "type" : "streamresponse",
+      "inner_type" : "i32"},
             "lineno" : 29
           },
           "boththrows" : {
@@ -149,15 +149,15 @@
               "e" : {
                 "name": "e",
                 "type" : {
-  "type" : "struct",
-  "name" : "FooEx"
-},
+      "type" : "struct",
+      "name" : "FooEx"
+    },
                 "id" : 1
               }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
+      "type" : "streamresponse",
+      "inner_type" : "i32"},
             "lineno" : 30
           },
           "responseandstreamstreamthrows" : {
@@ -172,10 +172,10 @@
                           }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32",
-  "first_response_type" : "i32"
-},
+      "type" : "streamresponse",
+      "inner_type" : "i32",
+      "first_response_type" : "i32"
+    },
             "lineno" : 33
           },
           "responseandstreamservicethrows" : {
@@ -193,17 +193,17 @@
               "e" : {
                 "name": "e",
                 "type" : {
-  "type" : "struct",
-  "name" : "FooEx"
-},
+      "type" : "struct",
+      "name" : "FooEx"
+    },
                 "id" : 1
               }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32",
-  "first_response_type" : "i32"
-},
+      "type" : "streamresponse",
+      "inner_type" : "i32",
+      "first_response_type" : "i32"
+    },
             "lineno" : 36
           },
           "responseandstreamboththrows" : {
@@ -221,17 +221,17 @@
               "e" : {
                 "name": "e",
                 "type" : {
-  "type" : "struct",
-  "name" : "FooEx"
-},
+      "type" : "struct",
+      "name" : "FooEx"
+    },
                 "id" : 1
               }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32",
-  "first_response_type" : "i32"
-},
+      "type" : "streamresponse",
+      "inner_type" : "i32",
+      "first_response_type" : "i32"
+    },
             "lineno" : 39
           },
           "returnstreamFast" : {
@@ -253,23 +253,23 @@
                           }
             },
             "returnType" : {
-  "type" : "streamresponse",
-  "inner_type" : "i32"},
+      "type" : "streamresponse",
+      "inner_type" : "i32"},
             "lineno" : 42,
             "structured_annotations": {
               "cpp.ProcessInEbThreadUnsafe" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "ProcessInEbThreadUnsafe",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "ProcessInEbThreadUnsafe",
+              "path" : "thrift/annotation/cpp.thrift"
+            },
+                "value" : {}
+              }
+            }
           }
         }
           }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/stream/src/module",
   "py_namespace" : ""
 }

@@ -24,13 +24,13 @@
         "name" : "FieldWrapper",
         "structured_annotations": {
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "An experimental annotation that applies a Hack wrapper to fields.\nFor example:\n\n  struct User {\n    @hack.FieldWrapper{name=\"MyWrapper\"}\n    1: i64 id;\n  }\n",
         "fields" : {
@@ -51,29 +51,29 @@
         "name" : "Wrapper",
         "structured_annotations": {
           "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "An annotation that applies a Hack wrapper to fields, typedef or structs.\nFor example:\n\n  struct User {\n    @hack.FieldWrapper{name=\"MyWrapper\"}\n    1: i64 id;\n  }\n",
         "fields" : {
@@ -110,21 +110,21 @@
         "name" : "Adapter",
         "structured_annotations": {
           "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "An annotation that applies a Hack adapter to types. For example:\n@hack.Adapter{name=\"\\\\TimestampAdapter\"}\ntypedef i64 Timestamp;\n\n  struct User {\n    1: Timestamp account_creation_time;\n  }\n\nHere the field `account_creation_time` will have type TimestampAdapter::THackType instead of i64.\n\nin hack:\n```\nfinal class TimestampAdapter implements IThriftAdapter {\n  const type TThriftType = int;\n  const type THackType = Time;\n  public static function fromThrift(int $seconds)[]: Time {\n    return Time::fromEpochSeconds($seconds);\n  }\n  public static function toThrift(Time $time): int {\n    return $hack_value->asFullSecondsSinceEpoch();\n  }\n}\n```\nelsewhere in hack:\n```\nfunction timeSinceCreated(Document $doc): Duration {\n  // $doc->created_time is of type Time\n  return Duration::between(Time::now(), $doc->created_time);\n}\n```\nThis completely replaces the underlying type of a thrift for a custom implementation and uses\nthe specified adapter to convert to and from the underlying Thrift type during (de)serialization.\n",
         "fields" : {
@@ -145,29 +145,29 @@
         "name" : "SkipCodegen",
         "structured_annotations": {
           "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Function" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Function",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Function",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "fields" : {
           "reason" : {
@@ -186,13 +186,13 @@
         "name" : "Name",
         "structured_annotations": {
           "scope.Definition" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Definition",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Definition",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "This annotation is mainly used to rename symbols which can result in symbol\nconflict errors in Hack codegen.\nFor ex: reserved keywords in Hack language, symbols with similar names from\nother files in Hack\n",
         "fields" : {
@@ -219,13 +219,13 @@
         "name" : "UnionEnumAttributes",
         "structured_annotations": {
           "scope.Union" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Union",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Union",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "This annotation is for adding Hack attributes to union enums.\n",
         "fields" : {
@@ -235,9 +235,9 @@
             "lineno" : 125,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "list",
-  "inner_type" : "string"
-}
+      "type" : "list",
+      "inner_type" : "string"
+    }
                   }
         },
         "is_exception" : false,
@@ -248,29 +248,29 @@
         "name" : "StructTrait",
         "structured_annotations": {
           "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Union" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Union",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Union",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Exception" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Exception",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Exception",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "This annotation is for using a custom trait for structs.\n",
         "fields" : {
@@ -296,9 +296,9 @@
             "lineno" : 176,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "list",
-  "inner_type" : "string"
-}
+      "type" : "list",
+      "inner_type" : "string"
+    }
                   }
         },
         "is_exception" : false,
@@ -309,29 +309,29 @@
         "name" : "StructAsTrait",
         "structured_annotations": {
           "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Union" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Union",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Union",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Exception" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Exception",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Exception",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -341,68 +341,68 @@
         "name" : "ModuleInternal",
         "structured_annotations": {
           "scope.Struct" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Struct",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Struct",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Union" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Union",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Union",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Enum" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Enum",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Enum",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Field" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Field",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Field",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Typedef" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Typedef",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Typedef",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Function" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Function",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      },
+            "type" : {
+          "type" : "struct",
+          "name" : "Function",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          },
           "scope.Service" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Service",
-  "path" : "thrift/annotation/scope.thrift"
-},
-        "value" : {}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Service",
+          "path" : "thrift/annotation/scope.thrift"
+        },
+            "value" : {}
+          }
         },
         "docstring" : "This annotation is to generate an entity as internal\n",
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 185
       }
-      },
+  },
   "source_path" : "thrift/annotation/hack",
   "py_namespace" : "thrift.annotation.hack"
 }

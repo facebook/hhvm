@@ -241,7 +241,7 @@
         "docstring" : "Some doc text goes here.  Wow I am [nesting these] (no more nesting.)\n",
         "lineno" : 39
       }
-      },
+  },
   "structs" :
   {
       "DefaultValue" : {
@@ -255,13 +255,13 @@
             "lineno" : 61,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : {
-  "type" : "list",
-  "inner_type" : "i32"
-}
-}
+      "type" : "map",
+      "key_type" : "string",
+      "value_type" : {
+      "type" : "list",
+      "inner_type" : "i32"
+    }
+    }
                   },
           "map_three" : {
             "name" : "map_three",
@@ -270,14 +270,14 @@
             "lineno" : 62,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "map",
-  "key_type" : "i32",
-  "value_type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "string"
-}
-}
+      "type" : "map",
+      "key_type" : "i32",
+      "value_type" : {
+      "type" : "map",
+      "key_type" : "string",
+      "value_type" : "string"
+    }
+    }
                   }
         },
         "is_exception" : false,
@@ -340,9 +340,9 @@
             "lineno" : 87,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "Xtruct"
-}
+      "type" : "struct",
+      "name" : "Xtruct"
+    }
                   },
           "i32_thing" : {
             "name" : "i32_thing",
@@ -367,13 +367,13 @@
             "lineno" : 94,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "map",
-  "key_type" : {
-  "type" : "enum",
-  "name" : "Numberz"
-},
-  "value_type" : "i64"
-}
+      "type" : "map",
+      "key_type" : {
+      "type" : "enum",
+      "name" : "Numberz"
+    },
+      "value_type" : "i64"
+    }
                   },
           "xtructs" : {
             "name" : "xtructs",
@@ -382,12 +382,12 @@
             "lineno" : 97,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "list",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "Xtruct"
-}
-}
+      "type" : "list",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "Xtruct"
+    }
+    }
                   }
         },
         "is_exception" : false,
@@ -432,9 +432,9 @@
             "lineno" : 107,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "Xtruct"
-}
+      "type" : "struct",
+      "name" : "Xtruct"
+    }
                   }
         },
         "is_exception" : true,
@@ -457,16 +457,16 @@
             "lineno" : 117,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "EmptyStruct"
-}
+      "type" : "struct",
+      "name" : "EmptyStruct"
+    }
                   }
         },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 116
       }
-      },
+  },
   "services" :
   {
       "ThriftTest" : { 
@@ -557,18 +557,18 @@
               "thing": {
                 "name" : "thing",
                 "type" : {
-  "type" : "struct",
-  "name" : "Xtruct"
-},
+      "type" : "struct",
+      "name" : "Xtruct"
+    },
                 "key" : 1,
                 "lineno" : 131,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : {
-  "type" : "struct",
-  "name" : "Xtruct"
-},
+      "type" : "struct",
+      "name" : "Xtruct"
+    },
             "lineno" : 131
           },
           "testNest" : {
@@ -577,18 +577,18 @@
               "thing": {
                 "name" : "thing",
                 "type" : {
-  "type" : "struct",
-  "name" : "Xtruct2"
-},
+      "type" : "struct",
+      "name" : "Xtruct2"
+    },
                 "key" : 1,
                 "lineno" : 132,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : {
-  "type" : "struct",
-  "name" : "Xtruct2"
-},
+      "type" : "struct",
+      "name" : "Xtruct2"
+    },
             "lineno" : 132
           },
           "testMap" : {
@@ -597,20 +597,20 @@
               "thing": {
                 "name" : "thing",
                 "type" : {
-  "type" : "map",
-  "key_type" : "i32",
-  "value_type" : "i32"
-},
+      "type" : "map",
+      "key_type" : "i32",
+      "value_type" : "i32"
+    },
                 "key" : 1,
                 "lineno" : 133,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : {
-  "type" : "map",
-  "key_type" : "i32",
-  "value_type" : "i32"
-},
+      "type" : "map",
+      "key_type" : "i32",
+      "value_type" : "i32"
+    },
             "lineno" : 133
           },
           "testSet" : {
@@ -619,18 +619,18 @@
               "thing": {
                 "name" : "thing",
                 "type" : {
-  "type" : "set",
-  "inner_type" : "i32"
-},
+      "type" : "set",
+      "inner_type" : "i32"
+    },
                 "key" : 1,
                 "lineno" : 134,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : {
-  "type" : "set",
-  "inner_type" : "i32"
-},
+      "type" : "set",
+      "inner_type" : "i32"
+    },
             "lineno" : 134
           },
           "testList" : {
@@ -639,18 +639,18 @@
               "thing": {
                 "name" : "thing",
                 "type" : {
-  "type" : "list",
-  "inner_type" : "i32"
-},
+      "type" : "list",
+      "inner_type" : "i32"
+    },
                 "key" : 1,
                 "lineno" : 135,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : {
-  "type" : "list",
-  "inner_type" : "i32"
-},
+      "type" : "list",
+      "inner_type" : "i32"
+    },
             "lineno" : 135
           },
           "testEnum" : {
@@ -660,9 +660,9 @@
               "thing": {
                 "name" : "thing",
                 "type" : {
-  "type" : "enum",
-  "name" : "Numberz"
-},
+      "type" : "enum",
+      "name" : "Numberz"
+    },
                 "docstring" : "This param is a thing\n",
                 "key" : 1,
                 "lineno" : 140,
@@ -670,9 +670,9 @@
                           }
             },
             "returnType" : {
-  "type" : "enum",
-  "name" : "Numberz"
-},
+      "type" : "enum",
+      "name" : "Numberz"
+    },
             "lineno" : 138
           },
           "testTypedef" : {
@@ -701,14 +701,14 @@
                           }
             },
             "returnType" : {
-  "type" : "map",
-  "key_type" : "i32",
-  "value_type" : {
-  "type" : "map",
-  "key_type" : "i32",
-  "value_type" : "i32"
-}
-},
+      "type" : "map",
+      "key_type" : "i32",
+      "value_type" : {
+      "type" : "map",
+      "key_type" : "i32",
+      "value_type" : "i32"
+    }
+    },
             "lineno" : 145
           },
           "testInsanity" : {
@@ -717,34 +717,34 @@
               "argument": {
                 "name" : "argument",
                 "type" : {
-  "type" : "struct",
-  "name" : "Insanity"
-},
+      "type" : "struct",
+      "name" : "Insanity"
+    },
                 "key" : 1,
                 "lineno" : 148,
                 "required" : "opt-in-req-out"
                           }
             },
             "returnType" : {
-  "type" : "map",
-  "key_type" : "i64",
-  "value_type" : {
-  "type" : "map",
-  "key_type" : {
-  "type" : "enum",
-  "name" : "Numberz"
-},
-  "value_type" : {
-  "type" : "struct",
-  "name" : "Insanity"
-}
-}
-},
+      "type" : "map",
+      "key_type" : "i64",
+      "value_type" : {
+      "type" : "map",
+      "key_type" : {
+      "type" : "enum",
+      "name" : "Numberz"
+    },
+      "value_type" : {
+      "type" : "struct",
+      "name" : "Insanity"
+    }
+    }
+    },
             "lineno" : 148
           }
         }
           }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/json_experimental/src/ThriftdocTest",
   "py_namespace" : "thrift.compiler.test.fixtures.json_experimental.src.ThriftdocTest"
 }

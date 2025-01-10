@@ -205,7 +205,7 @@
         },
         "lineno" : 84
       }
-      },
+  },
   "structs" :
   {
       "SomeStruct" : {
@@ -218,9 +218,9 @@
             "lineno" : 33,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "Metasyntactic"
-}
+      "type" : "enum",
+      "name" : "Metasyntactic"
+    }
                   },
           "fine" : {
             "name" : "fine",
@@ -229,9 +229,9 @@
             "lineno" : 34,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "Metasyntactic"
-}
+      "type" : "enum",
+      "name" : "Metasyntactic"
+    }
                   },
           "questionable" : {
             "name" : "questionable",
@@ -240,9 +240,9 @@
             "lineno" : 35,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "Metasyntactic"
-}
+      "type" : "enum",
+      "name" : "Metasyntactic"
+    }
                   },
           "tags" : {
             "name" : "tags",
@@ -251,9 +251,9 @@
             "lineno" : 36,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "set",
-  "inner_type" : "i32"
-}
+      "type" : "set",
+      "inner_type" : "i32"
+    }
                   }
         },
         "is_exception" : false,
@@ -270,9 +270,9 @@
             "lineno" : 71,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum2"
-}
+      "type" : "enum",
+      "name" : "MyEnum2"
+    }
                   },
           "me3_n3" : {
             "name" : "me3_n3",
@@ -281,9 +281,9 @@
             "lineno" : 72,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum3"
-}
+      "type" : "enum",
+      "name" : "MyEnum3"
+    }
                   },
           "me1_t1" : {
             "name" : "me1_t1",
@@ -292,9 +292,9 @@
             "lineno" : 73,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum1"
-}
+      "type" : "enum",
+      "name" : "MyEnum1"
+    }
                   },
           "me1_t2" : {
             "name" : "me1_t2",
@@ -303,16 +303,16 @@
             "lineno" : 74,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum1"
-}
+      "type" : "enum",
+      "name" : "MyEnum1"
+    }
                   }
         },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 70
       }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/enums/src/module",
   "py_namespace" : ""
 }

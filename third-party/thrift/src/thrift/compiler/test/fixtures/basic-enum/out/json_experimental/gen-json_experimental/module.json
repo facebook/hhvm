@@ -175,7 +175,7 @@
         },
         "lineno" : 39
       }
-      },
+  },
   "structs" :
   {
       "MyStruct" : {
@@ -187,9 +187,9 @@
             "lineno" : 67,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
                   },
           "myBigEnum" : {
             "name" : "myBigEnum",
@@ -198,16 +198,16 @@
             "lineno" : 68,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyBigEnum"
-}
+      "type" : "enum",
+      "name" : "MyBigEnum"
+    }
                   }
         },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 66
       }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/basic-enum/src/module",
   "py_namespace" : ""
 }

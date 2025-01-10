@@ -31,7 +31,7 @@
         "is_union" : false,
         "lineno" : 30
       }
-      },
+  },
   "services" :
   {
       "TestService" : { 
@@ -54,7 +54,7 @@
           }
         }
           }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/namespace_from_package/src/module",
   "py_namespace" : "namespace_from_package.module"
 }

@@ -128,7 +128,7 @@
         },
         "lineno" : 100
       }
-      },
+  },
   "structs" :
   {
       "MyStruct" : {
@@ -154,9 +154,9 @@
             "lineno" : 51,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyDataItemAlias"
-}
+      "type" : "struct",
+      "name" : "MyDataItemAlias"
+    }
                   },
           "myEnum" : {
             "name" : "myEnum",
@@ -164,9 +164,9 @@
             "lineno" : 52,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnum"
-}
+      "type" : "enum",
+      "name" : "MyEnum"
+    }
                   },
           "oneway" : {
             "name" : "oneway",
@@ -195,20 +195,20 @@
             "lineno" : 56,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "set",
-  "inner_type" : "float"
-}
+      "type" : "set",
+      "inner_type" : "float"
+    }
             ,
             "structured_annotations": {
               "hack.SkipCodegen" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "SkipCodegen",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"reason": "Invalid key type"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "SkipCodegen",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"reason": "Invalid key type"}
+              }
+            }
           },
           "no_hack_codegen_field" : {
             "name" : "no_hack_codegen_field",
@@ -219,14 +219,14 @@
             ,
             "structured_annotations": {
               "hack.SkipCodegen" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "SkipCodegen",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"reason": "skip field codegen for deprecation"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "SkipCodegen",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"reason": "skip field codegen for deprecation"}
+              }
+            }
           }
         },
         "is_exception" : false,
@@ -242,9 +242,9 @@
             "lineno" : 63,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "list",
-  "inner_type" : "i32"
-}
+      "type" : "list",
+      "inner_type" : "i32"
+    }
                   },
           "StringSet" : {
             "name" : "StringSet",
@@ -252,9 +252,9 @@
             "lineno" : 64,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "set",
-  "inner_type" : "string"
-}
+      "type" : "set",
+      "inner_type" : "string"
+    }
                   },
           "StringToI64Map" : {
             "name" : "StringToI64Map",
@@ -262,10 +262,10 @@
             "lineno" : 65,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "map",
-  "key_type" : "string",
-  "value_type" : "i64"
-}
+      "type" : "map",
+      "key_type" : "string",
+      "value_type" : "i64"
+    }
                   }
         },
         "is_exception" : false,
@@ -287,9 +287,9 @@
             "lineno" : 72,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "enum",
-  "name" : "MyEnumAlias"
-}
+      "type" : "enum",
+      "name" : "MyEnumAlias"
+    }
                   },
           "myStruct" : {
             "name" : "myStruct",
@@ -297,9 +297,9 @@
             "lineno" : 73,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
                   },
           "myDataItem" : {
             "name" : "myDataItem",
@@ -307,9 +307,9 @@
             "lineno" : 74,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyDataItem"
-}
+      "type" : "struct",
+      "name" : "MyDataItem"
+    }
                   },
           "floatSet" : {
             "name" : "floatSet",
@@ -317,20 +317,20 @@
             "lineno" : 75,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "set",
-  "inner_type" : "float"
-}
+      "type" : "set",
+      "inner_type" : "float"
+    }
             ,
             "structured_annotations": {
               "hack.SkipCodegen" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "SkipCodegen",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"reason": "Invalid key type"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "SkipCodegen",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"reason": "Invalid key type"}
+              }
+            }
           }
         },
         "is_exception" : false,
@@ -360,9 +360,9 @@
             "lineno" : 82,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
                   },
           "myUnion" : {
             "name" : "myUnion",
@@ -370,9 +370,9 @@
             "lineno" : 83,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyUnion"
-}
+      "type" : "struct",
+      "name" : "MyUnion"
+    }
                   }
         },
         "is_exception" : true,
@@ -398,14 +398,14 @@
             ,
             "structured_annotations": {
               "thrift.ExceptionMessage" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "ExceptionMessage",
-  "path" : "thrift/annotation/thrift.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "ExceptionMessage",
+              "path" : "thrift/annotation/thrift.thrift"
+            },
+                "value" : {}
+              }
+            }
           },
           "myStruct" : {
             "name" : "myStruct",
@@ -413,9 +413,9 @@
             "lineno" : 90,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyStruct"
-}
+      "type" : "struct",
+      "name" : "MyStruct"
+    }
                   },
           "myUnion" : {
             "name" : "myUnion",
@@ -423,9 +423,9 @@
             "lineno" : 91,
             "required" : "opt-in-req-out",
             "type" : {
-  "type" : "struct",
-  "name" : "MyUnion"
-}
+      "type" : "struct",
+      "name" : "MyUnion"
+    }
                   }
         },
         "is_exception" : true,
@@ -436,13 +436,13 @@
         "name" : "ReservedKeyword",
         "structured_annotations": {
           "hack.Name" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Name",
-  "path" : "thrift/annotation/hack.thrift"
-},
-        "value" : {"name": "MyRenamedStruct"}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Name",
+          "path" : "thrift/annotation/hack.thrift"
+        },
+            "value" : {"name": "MyRenamedStruct"}
+          }
         },
         "fields" : {
           "reserved_field" : {
@@ -454,14 +454,14 @@
             ,
             "structured_annotations": {
               "hack.Name" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "Name",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"name": "renamed_field"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "Name",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"name": "renamed_field"}
+              }
+            }
           }
         },
         "is_exception" : false,
@@ -472,13 +472,13 @@
         "name" : "UnionToBeRenamed",
         "structured_annotations": {
           "hack.Name" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Name",
-  "path" : "thrift/annotation/hack.thrift"
-},
-        "value" : {"name": "MyRenamedUnion"}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Name",
+          "path" : "thrift/annotation/hack.thrift"
+        },
+            "value" : {"name": "MyRenamedUnion"}
+          }
         },
         "fields" : {
           "reserved_field" : {
@@ -490,21 +490,21 @@
             ,
             "structured_annotations": {
               "hack.Name" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "Name",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"name": "renamed_field"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "Name",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"name": "renamed_field"}
+              }
+            }
           }
         },
         "is_exception" : false,
         "is_union" : true,
         "lineno" : 107
       }
-      },
+  },
   "services" :
   {
       "FooService" : { 
@@ -520,13 +520,13 @@
         ,
         "structured_annotations": {
           "hack.Name" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Name",
-  "path" : "thrift/annotation/hack.thrift"
-},
-        "value" : {"name": "RenamedService"}
-      }
+            "type" : {
+          "type" : "struct",
+          "name" : "Name",
+          "path" : "thrift/annotation/hack.thrift"
+        },
+            "value" : {"name": "RenamedService"}
+          }
         }
       },
       "FB303Service" : { 
@@ -545,31 +545,31 @@
                 ,
                 "structured_annotations": {
                   "hack.Name" : {
-                "type" : {
-  "type" : "struct",
-  "name" : "Name",
-  "path" : "thrift/annotation/hack.thrift"
-},
-                "value" : {"name": "renamed_parameter"}
-              }
-                        }
+                    "type" : {
+                  "type" : "struct",
+                  "name" : "Name",
+                  "path" : "thrift/annotation/hack.thrift"
+                },
+                    "value" : {"name": "renamed_parameter"}
+                  }
+                }
               }
             },
             "returnType" : {
-  "type" : "struct",
-  "name" : "ReservedKeyword"
-},
+      "type" : "struct",
+      "name" : "ReservedKeyword"
+    },
             "lineno" : 119,
             "structured_annotations": {
               "hack.Name" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "Name",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"name": "renamed_rpc"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "Name",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"name": "renamed_rpc"}
+              }
+            }
           }
         }
           },
@@ -688,20 +688,20 @@
           "invalid_return_for_hack" : {
             "name" : "invalid_return_for_hack",
             "returnType" : {
-  "type" : "set",
-  "inner_type" : "float"
-},
+      "type" : "set",
+      "inner_type" : "float"
+    },
             "lineno" : 137,
             "structured_annotations": {
               "hack.SkipCodegen" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "SkipCodegen",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"reason": "Invalid key type"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "SkipCodegen",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"reason": "Invalid key type"}
+              }
+            }
           },
           "rpc_skipped_codegen" : {
             "name" : "rpc_skipped_codegen",
@@ -709,14 +709,14 @@
             "lineno" : 140,
             "structured_annotations": {
               "hack.SkipCodegen" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "SkipCodegen",
-  "path" : "thrift/annotation/hack.thrift"
-},
-            "value" : {"reason": "Skip function deprecation"}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "SkipCodegen",
+              "path" : "thrift/annotation/hack.thrift"
+            },
+                "value" : {"reason": "Skip function deprecation"}
+              }
+            }
           }
         }
           },
@@ -754,7 +754,7 @@
           }
         }
           }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/basic/src/module",
   "py_namespace" : ""
 }

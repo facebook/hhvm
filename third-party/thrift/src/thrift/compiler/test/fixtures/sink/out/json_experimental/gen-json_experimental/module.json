@@ -115,7 +115,7 @@
         "is_union" : false,
         "lineno" : 46
       }
-      },
+  },
   "services" :
   {
       "SinkService" : { 
@@ -125,35 +125,35 @@
           "method" : {
             "name" : "method",
             "returnType" : {
-  "type" : "sink",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "SinkPayload"
-},
-  "final_response_type" : {
-  "type" : "struct",
-  "name" : "FinalResponse"
-}
-},
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
             "lineno" : 51
           },
           "methodAndReponse" : {
             "name" : "methodAndReponse",
             "returnType" : {
-  "type" : "sink",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "SinkPayload"
-},
-  "first_response_type" : {
-  "type" : "struct",
-  "name" : "InitialResponse"
-},
-  "final_response_type" : {
-  "type" : "struct",
-  "name" : "FinalResponse"
-}
-},
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "first_response_type" : {
+      "type" : "struct",
+      "name" : "InitialResponse"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
             "lineno" : 52
           },
           "methodThrow" : {
@@ -162,98 +162,98 @@
               "ex" : {
                 "name": "ex",
                 "type" : {
-  "type" : "struct",
-  "name" : "InitialException"
-},
+      "type" : "struct",
+      "name" : "InitialException"
+    },
                 "id" : 1
               }
             },
             "returnType" : {
-  "type" : "sink",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "SinkPayload"
-},
-  "final_response_type" : {
-  "type" : "struct",
-  "name" : "FinalResponse"
-}
-},
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
             "lineno" : 53
           },
           "methodSinkThrow" : {
             "name" : "methodSinkThrow",
             "returnType" : {
-  "type" : "sink",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "SinkPayload"
-},
-  "final_response_type" : {
-  "type" : "struct",
-  "name" : "FinalResponse"
-}
-},
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
             "lineno" : 56
           },
           "methodFinalThrow" : {
             "name" : "methodFinalThrow",
             "returnType" : {
-  "type" : "sink",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "SinkPayload"
-},
-  "final_response_type" : {
-  "type" : "struct",
-  "name" : "FinalResponse"
-}
-},
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
             "lineno" : 60
           },
           "methodBothThrow" : {
             "name" : "methodBothThrow",
             "returnType" : {
-  "type" : "sink",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "SinkPayload"
-},
-  "final_response_type" : {
-  "type" : "struct",
-  "name" : "FinalResponse"
-}
-},
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
             "lineno" : 64
           },
           "methodFast" : {
             "name" : "methodFast",
             "returnType" : {
-  "type" : "sink",
-  "inner_type" : {
-  "type" : "struct",
-  "name" : "SinkPayload"
-},
-  "final_response_type" : {
-  "type" : "struct",
-  "name" : "FinalResponse"
-}
-},
+      "type" : "sink",
+      "inner_type" : {
+      "type" : "struct",
+      "name" : "SinkPayload"
+    },
+      "final_response_type" : {
+      "type" : "struct",
+      "name" : "FinalResponse"
+    }
+    },
             "lineno" : 68,
             "structured_annotations": {
               "cpp.ProcessInEbThreadUnsafe" : {
-            "type" : {
-  "type" : "struct",
-  "name" : "ProcessInEbThreadUnsafe",
-  "path" : "thrift/annotation/cpp.thrift"
-},
-            "value" : {}
-          }
-                }
+                "type" : {
+              "type" : "struct",
+              "name" : "ProcessInEbThreadUnsafe",
+              "path" : "thrift/annotation/cpp.thrift"
+            },
+                "value" : {}
+              }
+            }
           }
         }
           }
-      },
+  },
   "source_path" : "thrift/compiler/test/fixtures/sink/src/module",
   "py_namespace" : ""
 }

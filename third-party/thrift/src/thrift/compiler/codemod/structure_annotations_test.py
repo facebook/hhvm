@@ -147,6 +147,12 @@ class HoistAnnotatedTypes(unittest.TestCase):
                 } (cpp.minimize_padding)
                 struct M {}
 
+                exception E {
+                    1: string m;
+                    2: i32 c;
+                } (message="m", cpp.minimize_padding)
+                exception EE {}
+
                 enum E8 {} (cpp.enum_type="char")
                 enum E16 {} (cpp.enum_type="int16_t")
                 enum E32 {} (cpp.enum_type="int")
@@ -199,6 +205,14 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     1: M mixin ;
                 }
                 struct M {}
+
+                @cpp.MinimizePadding
+                exception E {
+                    @thrift.ExceptionMessage
+                    1: string m;
+                    2: i32 c;
+                }
+                exception EE {}
 
                 @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
                 enum E8 {}

@@ -1239,6 +1239,10 @@ class MinimizePadding implements \IThriftSyncStruct, \IThriftStructMetadata, \IT
           shape(
           )
         ),
+        '\facebook\thrift\annotation\Exception' => \facebook\thrift\annotation\Exception::fromShape(
+          shape(
+          )
+        ),
       ],
       'fields' => dict[
       ],

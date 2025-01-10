@@ -217,6 +217,7 @@ struct PackIsset {
   which gives the size of 16 bytes compared to 32 bytes if `cpp.MinimizePadding` was not specified.
 */
 @scope.Struct
+@scope.Exception
 struct MinimizePadding {}
 
 @scope.Union

@@ -323,14 +323,38 @@ module CodeActionKind : sig
   (** Create a new sub-kind of an existing kind *)
   val sub_kind : t -> string -> t
 
-  (** A constant defined by the spec *)
+  (* -- Constants defined by the spec -- *)
+
+  (** Base kind for quickfix actions: 'quickfix'. *)
   val quickfix : t
 
-  (** A constant defined by the spec *)
+  (** Base kind for refactoring actions: 'refactor'. *)
   val refactor : t
+
+  (** Base kind for refactoring extraction actions: 'refactor.extract'. *)
+  val refactor_extract : t
+
+  (** Base kind for refactoring inline actions: 'refactor.inline'. *)
+  val refactor_inline : t
+
+  (** Base kind for refactoring rewrite actions: 'refactor.rewrite'. *)
+  val refactor_rewrite : t
 
   (** Document-wide code actions *)
   val source : t
+
+  (** Base kind for an organize imports source action: `source.organizeImports`. *)
+  val source_organize_imports : t
+
+  (**  Base kind for a 'fix all' source action: `source.fixAll`.
+
+       'Fix all' actions automatically fix errors that have a clear fix that
+	     do not require user input. They should not suppress errors or perform
+	     unsafe fixes such as generating new types or classes. *)
+  val source_fix_all : t
+
+  (** Empty kind  *)
+  val empty : t
 end
 
 (** Initialize request, method="initialize" *)
@@ -777,8 +801,8 @@ module CodeAction : sig
         (** The diagnostics that this code action resolves. *)
     action: 'resolution_phase edit_and_or_command;
         (* A CodeAction must set either `edit`, a `command` (or neither iff only resolved lazily)
-           If both are supplied, the `edit` is applied first, then the `command` is executed.
-           If neither is supplied, the client requests 'edit' be resolved using "codeAction/resolve"
+            If both are supplied, the `edit` is applied first, then the `command` is executed.
+            If neither is supplied, the client requests 'edit' be resolved using "codeAction/resolve"
         *)
   }
 

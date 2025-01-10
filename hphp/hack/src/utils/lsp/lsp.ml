@@ -241,7 +241,19 @@ module CodeActionKind = struct
 
   let refactor = kind_of_string "refactor"
 
+  let refactor_extract = kind_of_string "refactor.extract"
+
+  let refactor_inline = kind_of_string "refactor.inline"
+
+  let refactor_rewrite = kind_of_string "refactor.rewrite"
+
   let source = kind_of_string "source"
+
+  let source_organize_imports = kind_of_string "source.organizeImports"
+
+  let source_fix_all = kind_of_string "source.fixAll"
+
+  let empty = kind_of_string ""
 end
 
 module CancelRequest = struct

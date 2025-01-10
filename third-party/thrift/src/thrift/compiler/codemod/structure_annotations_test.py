@@ -25,7 +25,7 @@ import pkg_resources
 from thrift.compiler.codemod.test_utils import read_file, run_binary, write_file
 
 
-class HoistAnnotatedTypes(unittest.TestCase):
+class StructureAnnotations(unittest.TestCase):
     def setUp(self):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp, True)
@@ -81,7 +81,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     8: i32 shared_mutable (cpp.ref_type = "shared_mutable");
                     10: i32 box (thrift.box);
                     11: i32 overwrite (cpp.ref, cpp.ref_type = "shared_const");
-                    12: i32 NOT (cpp.ref = "true", cpp2.ref = "true", rust.box);
+                    12: i32 NOT (cpp.ref = "true", cpp2.ref = "true", objc.box);
                 }
 
                 """
@@ -120,7 +120,7 @@ class HoistAnnotatedTypes(unittest.TestCase):
                     @cpp.Ref{type = cpp.RefType.Shared}
                     11: i32 overwrite ;
                     @cpp.Ref{type = cpp.RefType.Unique}
-                    12: i32 NOT ( rust.box);
+                    12: i32 NOT ( objc.box);
                 }
                 """
             ),
@@ -429,6 +429,45 @@ class HoistAnnotatedTypes(unittest.TestCase):
 
                 @annotation.DefaultValue{value = "QUX"}
                 enum E {QUX = 1}
+                """
+            ),
+        )
+
+    def test_rust(self):
+        write_file(
+            "foo.thrift",
+            textwrap.dedent(
+                """\
+                struct S {
+                    1: i32 f (rust.name = "foo", rust.box, rust.type = "foo");
+                } (rust.arc, rust.copy, rust.exhaustive, rust.ord, rust.serde = "true", rust.mod = "foo", rust.derive = "Foo, Bar")
+
+                """
+            ),
+        )
+
+        binary = pkg_resources.resource_filename(__name__, "codemod")
+        run_binary(binary, "foo.thrift")
+
+        self.assertEqual(
+            self.trim(read_file("foo.thrift")),
+            self.trim(
+                """\
+                include "thrift/annotation/rust.thrift"
+
+                @rust.Arc
+                @rust.Copy
+                @rust.Derive{derive = ["Foo","Bar"]}
+                @rust.Exhaustive
+                @rust.Mod{name = "foo"}
+                @rust.Ord
+                @rust.Serde{enabled = true}
+                struct S {
+                  @rust.Box
+                  @rust.Name{name = "foo"}
+                  @rust.Type{name = "foo"}
+                  1: i32 f ;
+                }
                 """
             ),
         )

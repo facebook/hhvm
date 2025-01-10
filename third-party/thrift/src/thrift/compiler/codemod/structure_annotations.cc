@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-#include <algorithm>
-#include <map>
 #include <string>
 #include <fmt/core.h>
+#include <range/v3/view.hpp>
 
 #include <thrift/compiler/ast/ast_visitor.h>
 #include <thrift/compiler/ast/t_program_bundle.h>
@@ -403,6 +402,61 @@ class structure_annotations {
                 ? "annotation.IqNodeType.XMLNODE"
                 : "annotation.IqNodeType.XMLATTRIBUTE"));
         fm_.add_include("thrift/annotation/erlang.thrift");
+      }
+
+      // rust
+      else if (name == "rust.name") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format("@rust.Name{{name = \"{}\"}}", data.value));
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.copy") {
+        to_remove.emplace_back(name, data);
+        to_add.insert("@rust.Copy");
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.arc") {
+        to_remove.emplace_back(name, data);
+        to_add.insert("@rust.Arc");
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.box") {
+        to_remove.emplace_back(name, data);
+        to_add.insert("@rust.Box");
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.exhaustive") {
+        to_remove.emplace_back(name, data);
+        to_add.insert("@rust.Exhaustive");
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.ord") {
+        to_remove.emplace_back(name, data);
+        to_add.insert("@rust.Ord");
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.newtype") {
+        to_remove.emplace_back(name, data);
+        to_add.insert("@rust.NewType");
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.type") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format("@rust.Type{{name = \"{}\"}}", data.value));
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.serde") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format("@rust.Serde{{enabled = {}}}", data.value));
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.mod") {
+        to_remove.emplace_back(name, data);
+        to_add.insert(fmt::format("@rust.Mod{{name = \"{}\"}}", data.value));
+        fm_.add_include("thrift/annotation/rust.thrift");
+      } else if (name == "rust.derive") {
+        to_remove.emplace_back(name, data);
+        auto derives =
+            data.value | ranges::views::split(',') |
+            ranges::views::transform([](auto s) {
+              auto str = s | ranges::to<std::string>;
+              str.erase(remove_if(str.begin(), str.end(), isspace), str.end());
+              return fmt::format("\"{}\"", str);
+            }) |
+            ranges::views::join(',') | ranges::to<std::string>;
+        to_add.insert(fmt::format("@rust.Derive{{derive = [{}]}}", derives));
+        fm_.add_include("thrift/annotation/rust.thrift");
       }
     }
 

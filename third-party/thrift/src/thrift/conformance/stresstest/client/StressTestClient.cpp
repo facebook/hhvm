@@ -182,8 +182,8 @@ folly::coro::Task<void> ThriftStressTestClient::timedExecute(Fn&& fn) {
     LOG(ERROR) << e.what();
     connectionGood_ = false;
     co_return;
-  } catch (std::exception& e) {
-    LOG(WARNING) << "Request failed: " << e.what();
+  } catch (...) {
+    // LOG(1) << "Request failed: " << e.what();
     stats_.numFailure++;
     co_return;
   }

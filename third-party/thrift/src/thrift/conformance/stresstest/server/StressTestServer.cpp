@@ -22,7 +22,7 @@
 
 #include <thrift/conformance/stresstest/util/IoUringUtil.h>
 
-#include <rroeser/scripts/src/executor/WorkStealingExecutor.h>
+#include <scripts/rroeser/src/executor/WorkStealingExecutor.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/SEParallelConcurrencyController.h>
@@ -198,10 +198,12 @@ std::shared_ptr<ThriftServer> createStressTestServer(
     auto t = sanitizeNumThreads(FLAGS_cpu_threads);
     if (enableWorkStealing()) {
       LOG(INFO) << "Work stealing executor enabled";
-      executor = std::make_shared<folly::WorkStealingExecutor>(t, 4 * t);
+      executor =
+          std::make_shared<folly::WorkStealingExecutor>(FLAGS_cpu_threads);
       if (FLAGS_work_stealing_executor_only) {
         LOG(INFO) << "Request pile and concurrency controller disabled";
       } else {
+        LOG(INFO) << "Work Stealing with controller";
         RoundRobinRequestPile::Options options;
         requestPile =
             std::make_unique<RoundRobinRequestPile>(std::move(options));

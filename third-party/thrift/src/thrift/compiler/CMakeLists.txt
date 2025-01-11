@@ -181,6 +181,7 @@ add_library(
   whisker/parser.cc
   whisker/print_ast.cc
   whisker/render.cc
+  whisker/standard_library.cc
   whisker/token.cc
   whisker/tree_printer.cc
 )

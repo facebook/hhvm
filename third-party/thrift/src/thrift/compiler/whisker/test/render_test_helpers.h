@@ -25,6 +25,7 @@
 #include <thrift/compiler/whisker/parser.h>
 #include <thrift/compiler/whisker/render.h>
 
+#include <functional>
 #include <optional>
 #include <sstream>
 #include <stdexcept>
@@ -89,6 +90,7 @@ class RenderTest : public testing::Test {
     std::optional<diagnostic_level> strict_undefined_variables;
     // Backtraces are disabled by default since they add generally add noise.
     bool show_source_backtrace_on_failure = false;
+    std::vector<std::function<void(map&)>> libraries_to_load;
 
     void apply_to(render_options& options) const {
       if (strict_boolean_conditional.has_value()) {
@@ -103,10 +105,14 @@ class RenderTest : public testing::Test {
       options.show_source_backtrace_on_failure =
           show_source_backtrace_on_failure ? diagnostic_level::error
                                            : diagnostic_level::info;
+      for (const auto& load : libraries_to_load) {
+        load(options.globals);
+      }
     }
   };
   render_test_options render_test_options_;
 
+ protected:
   void SetUp() override {
     last_render_ = std::nullopt;
     render_test_options_ = {};
@@ -124,6 +130,9 @@ class RenderTest : public testing::Test {
   }
   void show_source_backtrace_on_failure(bool enabled) {
     render_test_options_.show_source_backtrace_on_failure = enabled;
+  }
+  void use_library(std::function<void(map&)> library_loader) {
+    render_test_options_.libraries_to_load.push_back(std::move(library_loader));
   }
 
   struct partials_by_path {
@@ -165,7 +174,6 @@ class RenderTest : public testing::Test {
     }
 
     render_options options;
-    render_test_options_.apply_to(options);
     if (!partials.value.empty()) {
       auto partial_resolver =
           std::make_unique<in_memory_template_resolver>(current.src_manager);
@@ -175,6 +183,7 @@ class RenderTest : public testing::Test {
       options.partial_resolver = std::move(partial_resolver);
     }
     options.globals = std::move(globals.value);
+    render_test_options_.apply_to(options);
 
     std::ostringstream out;
     if (whisker::render(

@@ -16,7 +16,6 @@
 
 #include <thrift/compiler/generate/t_mstch_generator.h>
 
-#include <algorithm>
 #include <cassert>
 #include <cstdio>
 #include <fstream>
@@ -34,6 +33,7 @@
 #include <thrift/compiler/whisker/mstch_compat.h>
 #include <thrift/compiler/whisker/parser.h>
 #include <thrift/compiler/whisker/source_location.h>
+#include <thrift/compiler/whisker/standard_library.h>
 
 #include <thrift/compiler/detail/system.h>
 #include <thrift/compiler/generate/t_generator.h>
@@ -559,6 +559,7 @@ t_mstch_generator::gen_whisker_render_state(whisker_options whisker_opts) {
   render_options.strict_printable_types = whisker::diagnostic_level::debug;
   render_options.strict_undefined_variables = whisker::diagnostic_level::error;
 
+  whisker::load_standard_library(render_options.globals);
   for (const auto& undefined_name : whisker_opts.allowed_undefined_variables) {
     render_options.globals.insert({undefined_name, whisker::make::null});
   }

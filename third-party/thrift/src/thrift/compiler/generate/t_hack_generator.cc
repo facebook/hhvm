@@ -125,7 +125,8 @@ class t_hack_generator : public t_concat_generator {
         option_is_specified(options, "shapes_allow_unknown_fields");
     array_migration_ = option_is_specified(options, "array_migration");
     legacy_arrays_ = option_is_specified(options, "legacy_arrays");
-    hack_collections_ = option_is_specified(options, "hack_collections");
+    auto explicit_hack_collections =
+        option_is_specified(options, "hack_collections");
 
     nullable_everything_ = option_is_specified(options, "nullable_everything");
     const_collections_ = option_is_specified(options, "const_collections");
@@ -142,6 +143,12 @@ class t_hack_generator : public t_concat_generator {
     has_hack_namespace = ns_type_ == HackThriftNamespaceType::HACK ||
         ns_type_ == HackThriftNamespaceType::PACKAGE;
     has_nested_ns = false;
+
+    if (const_collections_ && explicit_hack_collections) {
+      throw std::runtime_error(
+          "Don't use hack_collections with const_collections, because const_collections implies hack_collections.");
+    }
+    hack_collections_ = explicit_hack_collections || const_collections_;
     // legacy_arrays_ is only used to migrate away from php gen
     if (legacy_arrays_ && strict_types_) {
       throw std::runtime_error("Don't use legacy_arrays with strict_types");

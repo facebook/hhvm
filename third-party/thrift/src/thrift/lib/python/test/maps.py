@@ -20,6 +20,8 @@ from __future__ import annotations
 
 import unittest
 
+from collections.abc import ItemsView, KeysView, ValuesView
+
 from enum import Enum
 from typing import Dict, Type, TypeVar
 
@@ -173,6 +175,18 @@ class MapTests(unittest.TestCase):
         self.assertIn(self.Color.red, cmap.colorMap)
         self.assertIn(self.Color.blue, cmap.colorMap)
         self.assertNotIn(self.Color.green, cmap.colorMap)
+
+    def test_dict_views(self) -> None:
+        dmap = self.StrStrMap({"test": "value"})
+        dmap_keys = dmap.keys()
+        dmap_values = dmap.values()
+        dmap_items = dmap.items()
+        self.assertEqual(len(dmap_keys), 1)
+        self.assertEqual(len(dmap_values), 1)
+        self.assertEqual(len(dmap_items), 1)
+        self.assertIsInstance(dmap_keys, KeysView)
+        self.assertIsInstance(dmap_values, ValuesView)
+        self.assertIsInstance(dmap_items, ItemsView)
 
     def test_items_values(self) -> None:
         x = {"test": "value"}

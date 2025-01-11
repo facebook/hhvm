@@ -2153,7 +2153,6 @@ cdef class Set(Container):
 
 pySet.register(Set)
 
-
 cdef class MapTypeFactory:
     cdef object key_info
     cdef object val_info

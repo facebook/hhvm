@@ -116,7 +116,7 @@ class t_hack_generator : public t_concat_generator {
     json_ = option_is_specified(options, "json");
     phps_ = option_is_specified(options, "server");
     strict_types_ = option_is_specified(options, "stricttypes");
-    arraysets_ = option_is_specified(options, "arraysets");
+    auto explicit_arraysets = option_is_specified(options, "arraysets");
     no_nullables_ = option_is_specified(options, "nonullables");
     from_map_construct_ = option_is_specified(options, "frommap_construct");
     shapes_ = option_is_specified(options, "shapes");
@@ -144,16 +144,21 @@ class t_hack_generator : public t_concat_generator {
         ns_type_ == HackThriftNamespaceType::PACKAGE;
     has_nested_ns = false;
 
+    if (legacy_arrays_ && explicit_arraysets) {
+      throw std::runtime_error(
+          "Don't use arraysets with legacy_arrays, because legacy_arrays implies arraysets.");
+    }
+    arraysets_ = explicit_arraysets || legacy_arrays_;
+
     if (const_collections_ && explicit_hack_collections) {
       throw std::runtime_error(
           "Don't use hack_collections with const_collections, because const_collections implies hack_collections.");
     }
     hack_collections_ = explicit_hack_collections || const_collections_;
+
     // legacy_arrays_ is only used to migrate away from php gen
     if (legacy_arrays_ && strict_types_) {
       throw std::runtime_error("Don't use legacy_arrays with strict_types");
-    } else if (legacy_arrays_ && !arraysets_) {
-      throw std::runtime_error("Don't use legacy_arrays without arraysets");
     } else if (arraysets_ && !(legacy_arrays_ || hack_collections_)) {
       throw std::runtime_error(
           "Don't use arraysets without either legacy_arrays or hack_collections");

@@ -25,8 +25,8 @@ This is a top-level file that gets imported by the CythonClients.pyx file. That
 file exposes Python wrappers of the services client to the end user.
 
 }}
-{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
+{{^program:auto_migrate?}}
 cimport thrift.py3.client
 
 {{#program:includeNamespaces}}

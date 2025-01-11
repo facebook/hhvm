@@ -22,8 +22,8 @@ The generated file is pretty big, but the bulk of the generation is done inside
 the clients/callback partial.
 
 }}
-{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
+{{^program:auto_migrate?}}
 from libc.stdint cimport (
     int8_t as cint8_t,
     int16_t as cint16_t,

@@ -19,8 +19,8 @@
 Pxd file to expose the interface defined in ServicesWrapper.h to the pyx files.
 
 }}
-{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
+{{^program:auto_migrate?}}
 
 from cpython.ref cimport PyObject
 from libcpp.memory cimport shared_ptr

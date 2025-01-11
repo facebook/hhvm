@@ -23,8 +23,8 @@ The generated file is pretty big, but the bulk of the generation is done inside
 the services/promise and services/callback partials.
 
 }}
-{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
+{{^program:auto_migrate?}}
 
 cimport cython
 from typing import AsyncIterator

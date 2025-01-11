@@ -19,8 +19,8 @@
 Pxd file to expose the interface defined in ClientsWrapper.h to CythonClients.pyx classes.
 
 }}
-{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
+{{^program:auto_migrate?}}
 
 from cpython.ref cimport PyObject
 from libc.stdint cimport (

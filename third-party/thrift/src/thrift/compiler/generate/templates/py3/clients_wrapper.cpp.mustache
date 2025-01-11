@@ -21,8 +21,8 @@ interface. Each client method adds a callback to run in the C++ EventBase IO
 thread that will pass data to the cython callback.
 
 }}
-{{^program:auto_migrate?}}
 {{> common/auto_generated_c}}
+{{^program:auto_migrate?}}
 
 #include <{{program:includePrefix}}gen-py3/{{program:name}}/clients_wrapper.h>
 

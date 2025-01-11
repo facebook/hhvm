@@ -15,8 +15,8 @@
   limitations under the License.
 
 }}
-{{^program:auto_migrate?}}
 {{> common/auto_generated_py}}
+{{^program:auto_migrate?}}
 cimport cython as __cython
 from cython.operator cimport dereference as deref
 from libcpp.utility cimport move as cmove

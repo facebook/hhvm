@@ -16,11 +16,7 @@
 
 #include <thrift/lib/cpp2/type/Type.h>
 
-#include <list>
 #include <stdexcept>
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
@@ -301,5 +297,39 @@ TEST(TypeTest, IdenticalTypeStructHash) {
   }
 }
 
+TEST(TypeTest, DebugString) {
+  TypeStruct scopedStruct;
+  scopedStruct.name()->structType_ref().emplace().scopedName_ref() =
+      "foo.bar.Baz";
+
+  TypeStruct hashedUnion;
+  hashedUnion.name()->unionType_ref().emplace().typeHashPrefixSha2_256_ref() =
+      "\x00\x01\x02\x03";
+
+  TypeStruct keyedEnum;
+  keyedEnum.name()->enumType_ref().emplace().definitionKey_ref() = "abcde";
+
+  auto testCases = std::list<std::pair<Type, std::string>>{
+      {Type::get<bool_t>(), "bool"},
+      {Type::get<string_t>(), "string"},
+      {Type::get<list<i64_t>>(), "list<i64>"},
+      {Type::get<map<i32_t, double_t>>(), "map<i32, double>"},
+      {Type::create<struct_c>("meta.com/foo/Bar"), "struct<Bar>"},
+      {Type(scopedStruct), "struct<Baz>"},
+      {Type(hashedUnion), "union<?>"},
+      {Type(keyedEnum), "enum<?>"},
+      {Type(
+           map_c{},
+           Type::get<i16_t>(),
+           Type::create<struct_c>("meta.com/foo/Bar")),
+       "map<i16, struct<Bar>>"},
+  };
+
+  for (const auto& [type, expected] : testCases) {
+    EXPECT_EQ(type.debugString(), expected);
+  }
+
+  EXPECT_THROW(Type().debugString(), std::runtime_error);
+}
 } // namespace
 } // namespace apache::thrift::type

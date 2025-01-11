@@ -111,6 +111,11 @@ class Type : public detail::Wrap<TypeStruct> {
   // parameters and have full, human-readable, Thrift URIs.
   bool isValid() const { return isFull(data_, true, true); }
 
+  // Human readable string describing the type.
+  // DISCLAIMER: We provide NO guarantees of stability on the format used.
+  // DO NOT ATTEMPT TO PARSE THIS!!!
+  std::string debugString() const;
+
  private:
   static bool isFull(const TypeUri& typeUri, bool validate_uri);
   static bool isFull(const TypeName& typeName, bool validate_uri);

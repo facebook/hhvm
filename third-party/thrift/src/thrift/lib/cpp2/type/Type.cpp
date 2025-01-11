@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/type/Type.h>
 
+#include <fmt/format.h>
 #include <folly/lang/Exception.h>
 #include <thrift/lib/cpp2/type/UniversalName.h>
 
@@ -172,6 +173,97 @@ bool identicalTypeStruct(const TypeStruct& lhs, const TypeStruct& rhs) {
       // unreachable
       folly::terminate_with<std::runtime_error>("Invalid type.");
   }
+}
+
+namespace {
+
+// meta.com/a/B -> B
+std::string debugUri(std::string_view uri) {
+  auto pos = uri.find_last_of("/");
+  if (pos == std::string::npos) {
+    return "?";
+  } else {
+    return std::string(uri.begin() + pos + 1, uri.end());
+  }
+}
+
+// a.b.c.D -> D
+std::string debugScopedName(std::string_view name) {
+  auto pos = name.find_last_of(".");
+  if (pos == std::string::npos) {
+    return "?";
+  } else {
+    return std::string(name.begin() + pos + 1, name.end());
+  }
+}
+
+std::string debugUri(const TypeUri& type) {
+  switch (type.getType()) {
+    case TypeUri::Type::uri:
+      return debugUri(*type.uri_ref());
+    case TypeUri::Type::scopedName:
+      return debugScopedName(*type.scopedName_ref());
+    case TypeUri::Type::typeHashPrefixSha2_256:
+    case TypeUri::Type::definitionKey:
+      // Need schema information!
+      return "?";
+    default:
+      folly::throw_exception<std::runtime_error>("Invalid type.");
+  }
+}
+
+std::string debugStringImpl(const TypeStruct& type) {
+  switch (type.name()->getType()) {
+    case TypeName::boolType:
+      return "bool";
+    case TypeName::byteType:
+      return "byte";
+    case TypeName::i16Type:
+      return "i16";
+    case TypeName::i32Type:
+      return "i32";
+    case TypeName::i64Type:
+      return "i64";
+    case TypeName::floatType:
+      return "float";
+    case TypeName::doubleType:
+      return "double";
+    case TypeName::stringType:
+      return "string";
+    case TypeName::binaryType:
+      return "binary";
+    case TypeName::enumType:
+      return fmt::format("enum<{}>", debugUri(*type.name()->enumType_ref()));
+    case TypeName::typedefType:
+      // Need schema to resolve :(
+      return fmt::format(
+          "typedef<{}>", debugUri(*type.name()->typedefType_ref()));
+    case TypeName::structType:
+      return fmt::format(
+          "struct<{}>", debugUri(*type.name()->structType_ref()));
+    case TypeName::unionType:
+      return fmt::format("union<{}>", debugUri(*type.name()->unionType_ref()));
+    case TypeName::exceptionType:
+      return fmt::format(
+          "exception<{}>", debugUri(*type.name()->exceptionType_ref()));
+    case TypeName::listType:
+      return fmt::format("list<{}>", debugStringImpl(type.params()->at(0)));
+    case TypeName::setType:
+      return fmt::format("set<{}>", debugStringImpl(type.params()->at(0)));
+    case TypeName::mapType:
+      return fmt::format(
+          "map<{}, {}>",
+          debugStringImpl(type.params()->at(0)),
+          debugStringImpl(type.params()->at(1)));
+    default:
+      folly::throw_exception<std::runtime_error>("Invalid type.");
+  }
+}
+
+} // namespace
+
+std::string Type::debugString() const {
+  return debugStringImpl(toThrift());
 }
 
 } // namespace apache::thrift::type

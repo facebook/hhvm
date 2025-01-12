@@ -169,15 +169,14 @@ std::size_t native_function::context::array_like::size() const {
       which_, [](const auto& arr) -> std::size_t { return arr->size(); });
 }
 
-const object& native_function::context::array_like::at(
-    std::size_t index) const {
+object::ptr native_function::context::array_like::at(std::size_t index) const {
   return detail::variant_match(
       which_,
-      [&](const native_object::array_like::ptr& arr) -> const object& {
+      [&](const native_object::array_like::ptr& arr) -> object::ptr {
         return arr->at(index);
       },
-      [&](const managed_object_ptr<array>& arr) -> const object& {
-        return (*arr)[index];
+      [&](const managed_object_ptr<array>& arr) -> object::ptr {
+        return object::derive(arr, (*arr)[index]);
       });
 }
 
@@ -212,16 +211,16 @@ native_function::context::map_like::map_like(map_like&&) noexcept = default;
 native_function::context::map_like&
 native_function::context::map_like::operator=(map_like&&) noexcept = default;
 
-const object* native_function::context::map_like::lookup_property(
+object::ptr native_function::context::map_like::lookup_property(
     std::string_view identifier) const {
   return detail::variant_match(
       which_,
-      [&](const native_object::map_like::ptr& m) -> const object* {
+      [&](const native_object::map_like::ptr& m) -> object::ptr {
         return m->lookup_property(identifier);
       },
-      [&](const managed_object_ptr<map>& m) -> const object* {
+      [&](const managed_object_ptr<map>& m) -> object::ptr {
         if (auto it = m->find(identifier); it != m->end()) {
-          return &it->second;
+          return object::as_static(it->second);
         }
         return nullptr;
       });

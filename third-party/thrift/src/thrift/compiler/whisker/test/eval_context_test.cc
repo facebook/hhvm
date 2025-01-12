@@ -47,14 +47,14 @@ class double_property_name
     return shared_from_this();
   }
 
-  const object* lookup_property(std::string_view id) const override {
+  object::ptr lookup_property(std::string_view id) const override {
     if (auto cached = cached_.find(id); cached != cached_.end()) {
-      return &cached->second;
+      return object::as_static(cached->second);
     }
     auto [result, inserted] =
         cached_.insert({std::string(id), w::string(fmt::format("{0}{0}", id))});
     assert(inserted);
-    return &result->second;
+    return object::as_static(result->second);
   }
 
   mutable std::map<std::string, object, std::less<>> cached_;
@@ -76,8 +76,8 @@ class delegate_to : public native_object,
     return shared_from_this();
   }
 
-  const object* lookup_property(std::string_view) const override {
-    return &delegate_;
+  object::ptr lookup_property(std::string_view) const override {
+    return object::as_static(delegate_);
   }
 
   whisker::object delegate_;
@@ -88,12 +88,12 @@ TEST(EvalContextTest, basic_name_resolution) {
   auto root =
       w::map({{"foo", w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}})}});
   auto ctx = eval_context::with_root_scope(root);
-  EXPECT_EQ(*ctx.lookup_object({"foo", "bar"}), i64(3));
-  EXPECT_EQ(*ctx.lookup_object({"foo", "baz"}), i64(4));
+  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), i64(3));
+  EXPECT_EQ(**ctx.lookup_object({"foo", "baz"}), i64(4));
   EXPECT_EQ(
-      *ctx.lookup_object({"foo"}),
+      **ctx.lookup_object({"foo"}),
       w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}}));
-  EXPECT_EQ(*ctx.lookup_object({}), root);
+  EXPECT_EQ(**ctx.lookup_object({}), root);
 }
 
 TEST(EvalContextTest, parent_scope) {
@@ -116,8 +116,8 @@ TEST(EvalContextTest, parent_scope) {
         std::vector<object>({child_2, child_1, root, ctx.global_scope()}));
   }
 
-  EXPECT_EQ(*ctx.lookup_object({}), child_2);
-  EXPECT_EQ(*ctx.lookup_object({"foo", "abc"}), i64(5));
+  EXPECT_EQ(**ctx.lookup_object({}), child_2);
+  EXPECT_EQ(**ctx.lookup_object({"foo", "abc"}), i64(5));
   // child_1 should shadow `foo` from root
   {
     auto err = get_error<eval_property_lookup_error>(
@@ -127,20 +127,20 @@ TEST(EvalContextTest, parent_scope) {
     EXPECT_EQ(err.success_path(), std::vector<std::string>{"foo"});
   }
   // Unshadowed names from root should still be accessible
-  EXPECT_EQ(*ctx.lookup_object({"parent"}), "works");
+  EXPECT_EQ(**ctx.lookup_object({"parent"}), "works");
   // Subobjects from shadowed names should be accessible
-  EXPECT_EQ(*ctx.lookup_object({"bar", "baz"}), true);
+  EXPECT_EQ(**ctx.lookup_object({"bar", "baz"}), true);
 
   // Should still be shadowing after popping unrelated scope
   ctx.pop_scope();
-  EXPECT_EQ(*ctx.lookup_object({}), child_1);
+  EXPECT_EQ(**ctx.lookup_object({}), child_1);
   EXPECT_TRUE(
       has_error<eval_property_lookup_error>(ctx.lookup_object({"foo", "bar"})));
 
   // Shadowing should stop
   ctx.pop_scope();
-  EXPECT_EQ(*ctx.lookup_object({}), root);
-  EXPECT_EQ(*ctx.lookup_object({"foo", "bar"}), i64(3));
+  EXPECT_EQ(**ctx.lookup_object({}), root);
+  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), i64(3));
 }
 
 TEST(EvalContextTest, locals) {
@@ -152,21 +152,21 @@ TEST(EvalContextTest, locals) {
   auto ctx = eval_context::with_root_scope(root);
   ctx.push_scope(child_1);
 
-  EXPECT_EQ(*ctx.lookup_object({"foo-2"}), "shadowed");
+  EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "shadowed");
   // Locals shadow objects in current scope.
   ctx.bind_local("foo-2", w::string("local")).value();
-  EXPECT_EQ(*ctx.lookup_object({"foo-2"}), "local");
+  EXPECT_EQ(**ctx.lookup_object({"foo-2"}), "local");
 
   // Locals shadow objects in parent scopes.
   ctx.bind_local("foo", w::string("local")).value();
-  EXPECT_EQ(*ctx.lookup_object({"foo"}), "local");
+  EXPECT_EQ(**ctx.lookup_object({"foo"}), "local");
 
   // Locals are unbound when the current scope is popped.
   ctx.pop_scope();
   EXPECT_EQ(
-      *ctx.lookup_object({"foo"}),
+      **ctx.lookup_object({"foo"}),
       w::map({{"bar", w::i64(3)}, {"baz", w::i64(4)}}));
-  EXPECT_EQ(*ctx.lookup_object({"foo-2"}), 2.0);
+  EXPECT_EQ(**ctx.lookup_object({"foo-2"}), 2.0);
 }
 
 TEST(EvalContextTest, self_reference) {
@@ -182,15 +182,15 @@ TEST(EvalContextTest, self_reference) {
 
   for (const auto& obj : objects) {
     auto ctx = eval_context::with_root_scope(obj);
-    EXPECT_EQ(*ctx.lookup_object({}), obj);
+    EXPECT_EQ(**ctx.lookup_object({}), obj);
   }
 }
 
 TEST(EvalContextTest, native_object_basic) {
   auto o = w::make_native_object<double_property_name>();
   auto ctx = eval_context::with_root_scope(o);
-  EXPECT_EQ(*ctx.lookup_object({"foo"}), string("foofoo"));
-  EXPECT_EQ(*ctx.lookup_object({"bar"}), string("barbar"));
+  EXPECT_EQ(**ctx.lookup_object({"foo"}), string("foofoo"));
+  EXPECT_EQ(**ctx.lookup_object({"bar"}), string("barbar"));
 }
 
 TEST(EvalContextTest, native_object_delegator) {
@@ -200,15 +200,15 @@ TEST(EvalContextTest, native_object_delegator) {
   object delegator = w::make_native_object<delegate_to>(doubler);
 
   auto ctx = eval_context::with_root_scope(delegator);
-  EXPECT_EQ(*ctx.lookup_object({"foo"}), doubler);
-  EXPECT_EQ(*ctx.lookup_object({"foo", "bar"}), string("barbar"));
+  EXPECT_EQ(**ctx.lookup_object({"foo"}), doubler);
+  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), string("barbar"));
 
   ctx.push_scope(delegator);
-  EXPECT_EQ(*ctx.lookup_object({"foo"}), doubler);
-  EXPECT_EQ(*ctx.lookup_object({"foo", "bar"}), string("barbar"));
+  EXPECT_EQ(**ctx.lookup_object({"foo"}), doubler);
+  EXPECT_EQ(**ctx.lookup_object({"foo", "bar"}), string("barbar"));
 
   ctx.push_scope(doubler);
-  EXPECT_EQ(*ctx.lookup_object({"foo"}), "foofoo");
+  EXPECT_EQ(**ctx.lookup_object({"foo"}), "foofoo");
 }
 
 TEST(EvalContextTest, globals) {
@@ -216,14 +216,14 @@ TEST(EvalContextTest, globals) {
   object root;
 
   auto ctx = eval_context::with_root_scope(root, globals);
-  EXPECT_EQ(*ctx.lookup_object({"global"}), i64(1));
+  EXPECT_EQ(**ctx.lookup_object({"global"}), i64(1));
 
   object shadowing = w::map({{"global", w::i64(2)}});
   ctx.push_scope(shadowing);
-  EXPECT_EQ(*ctx.lookup_object({"global"}), i64(2));
+  EXPECT_EQ(**ctx.lookup_object({"global"}), i64(2));
 
   ctx.pop_scope();
-  EXPECT_EQ(*ctx.lookup_object({"global"}), i64(1));
+  EXPECT_EQ(**ctx.lookup_object({"global"}), i64(1));
 }
 
 } // namespace whisker

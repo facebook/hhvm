@@ -418,7 +418,7 @@ class render_engine {
 
   // Performs a lookup of a variable in the current scope or reports diagnostics
   // on failure. Failing to lookup a variable is a fatal error.
-  const object& lookup_variable(const ast::variable_lookup& variable_lookup) {
+  object::ptr lookup_variable(const ast::variable_lookup& variable_lookup) {
     using path_type = std::vector<std::string>;
     const path_type path = detail::variant_match(
         variable_lookup.chain,
@@ -439,8 +439,8 @@ class render_engine {
 
     return whisker::visit(
         eval_context_.lookup_object(path),
-        [](const object& value) -> const object& { return value; },
-        [&](const eval_scope_lookup_error& err) -> const object& {
+        [](const object::ptr& value) -> object::ptr { return value; },
+        [&](const eval_scope_lookup_error& err) -> object::ptr {
           auto scope_trace = [&]() -> std::string {
             std::string result =
                 "Tried to search through the following scopes:\n";
@@ -468,9 +468,9 @@ class render_engine {
             // Fail rendering in strict mode
             abort_rendering(variable_lookup.loc.begin);
           }
-          return whisker::make::null;
+          return object::as_static(whisker::make::null);
         },
-        [&](const eval_property_lookup_error& err) -> const object& {
+        [&](const eval_property_lookup_error& err) -> object::ptr {
           auto src_range = detail::variant_match(
               variable_lookup.chain,
               [&](ast::variable_lookup::this_ref) -> source_range {
@@ -493,7 +493,7 @@ class render_engine {
             // Fail rendering in strict mode
             abort_rendering(variable_lookup.loc.begin);
           }
-          return whisker::make::null;
+          return object::as_static(whisker::make::null);
         });
   }
 
@@ -518,7 +518,7 @@ class render_engine {
           return object::as_static(whisker::make::false_);
         },
         [&](const ast::variable_lookup& variable_lookup) -> object::ptr {
-          return object::as_static(lookup_variable(variable_lookup));
+          return lookup_variable(variable_lookup);
         },
         [&](const function_call& func) -> object::ptr {
           return detail::variant_match(
@@ -554,16 +554,16 @@ class render_engine {
               [&](const function_call::user_defined& user_defined)
                   -> object::ptr {
                 const ast::variable_lookup& name = user_defined.name;
-                const object& lookup_result = lookup_variable(name);
-                if (!lookup_result.is_native_function()) {
+                object::ptr lookup_result = lookup_variable(name);
+                if (!lookup_result->is_native_function()) {
                   report_fatal_error(
                       name.loc.begin,
                       "Object '{}' is not a function. The encountered value is:\n{}",
                       name.chain_string(),
-                      to_string(lookup_result));
+                      to_string(*lookup_result));
                 }
                 const native_function::ptr& f =
-                    lookup_result.as_native_function();
+                    lookup_result->as_native_function();
 
                 native_function::context::positional_arguments positional_args;
                 positional_args.reserve(func.positional_arguments.size());
@@ -694,12 +694,12 @@ class render_engine {
   }
 
   void visit(const ast::section_block& section) {
-    const object& section_variable = lookup_variable(section.variable);
+    object::ptr section_variable = lookup_variable(section.variable);
 
     const auto maybe_report_coercion = [&] {
       maybe_report_boolean_coercion(
           ast::expression{section.variable.loc, section.variable},
-          section_variable);
+          *section_variable);
     };
 
     const auto do_visit = [&](const object& scope) {
@@ -710,13 +710,13 @@ class render_engine {
 
     const auto do_conditional_visit = [&](bool condition) {
       if (condition ^ section.inverted) {
-        do_visit(section_variable);
+        do_visit(*section_variable);
       }
     };
 
     // See render_options::strict_boolean_conditional for the coercion
     // rules
-    section_variable.visit(
+    section_variable->visit(
         [&](const array& value) {
           if (section.inverted) {
             // This array is being used as a conditional
@@ -751,12 +751,12 @@ class render_engine {
           if (auto array_like = value->as_array_like()) {
             const std::size_t size = array_like->size();
             for (std::size_t i = 0; i < size; ++i) {
-              do_visit(array_like->at(i));
+              do_visit(*array_like->at(i));
             }
             return;
           }
           if (auto map_like = value->as_map_like()) {
-            do_visit(section_variable);
+            do_visit(*section_variable);
             return;
           }
 
@@ -776,7 +776,7 @@ class render_engine {
           // When maps are used in sections, they are "unpacked" into the block.
           // In other words, their properties become available in the current
           // scope.
-          do_visit(section_variable);
+          do_visit(*section_variable);
         },
         [&](boolean value) { do_conditional_visit(value); },
         [&](const auto& value) {
@@ -898,7 +898,7 @@ class render_engine {
             return;
           }
           for (std::size_t i = 0; i < size; ++i) {
-            do_visit(i64(i), array_like->at(i));
+            do_visit(i64(i), *array_like->at(i));
           }
         },
         [&](auto&&) {

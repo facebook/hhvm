@@ -48,7 +48,7 @@ class mstch_array_proxy final
 
   std::size_t size() const override { return proxied_.size(); }
 
-  const object& at(std::size_t index) const override {
+  object::ptr at(std::size_t index) const override {
     assert(index < proxied_.size());
     // Only allocate the converted vector when the array is used
     if (converted_.size() == 0) {
@@ -57,7 +57,7 @@ class mstch_array_proxy final
         converted_.emplace_back(from_mstch(std::move(node)));
       }
     }
-    return converted_[index];
+    return object::as_static(converted_[index]);
   }
 
   void print_to(tree_printer::scope scope, const object_print_options& options)
@@ -69,7 +69,7 @@ class mstch_array_proxy final
     for (std::size_t i = 0; i < size; ++i) {
       auto element_scope = scope.open_transparent_property();
       element_scope.println("[{}]", i);
-      whisker::print_to(at(i), element_scope.open_node(), options);
+      whisker::print_to(*at(i), element_scope.open_node(), options);
     }
   }
 
@@ -83,7 +83,7 @@ class mstch_array_proxy final
       return false;
     }
     for (std::size_t i = 0; i < sz; ++i) {
-      if (at(i) != other->at(i)) {
+      if (*at(i) != *other->at(i)) {
         return false;
       }
     }
@@ -111,9 +111,9 @@ class mstch_map_proxy final
     return shared_from_this();
   }
 
-  const object* lookup_property(std::string_view id) const override {
+  object::ptr lookup_property(std::string_view id) const override {
     if (auto cached = converted_.find(id); cached != converted_.end()) {
-      return &cached->second;
+      return object::as_static(cached->second);
     }
     // mstch does not support heterogenous lookups, so we need a temporary
     // std::string.
@@ -122,7 +122,7 @@ class mstch_map_proxy final
       auto [result, inserted] = converted_.insert(
           {std::move(id_string), from_mstch(std::move(property->second))});
       assert(inserted);
-      return &result->second;
+      return object::as_static(result->second);
     }
     return nullptr;
   }
@@ -182,7 +182,7 @@ class mstch_object_proxy
     return shared_from_this();
   }
 
-  const object* lookup_property(std::string_view id) const override {
+  object::ptr lookup_property(std::string_view id) const override {
     // mstch does not support heterogenous lookups, so we need a temporary
     // std::string.
     std::string id_string{id};
@@ -192,7 +192,7 @@ class mstch_object_proxy
 
     auto [result, _] = keep_alive_.insert_or_assign(
         id_string, from_mstch(proxied_->at(id_string)));
-    return &result->second;
+    return object::as_static(result->second);
   }
 
   void print_to(

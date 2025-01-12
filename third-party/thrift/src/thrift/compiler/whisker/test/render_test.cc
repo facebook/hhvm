@@ -41,8 +41,8 @@ class array_like_native_object
     return shared_from_this();
   }
   std::size_t size() const override { return values_.size(); }
-  const object& at(std::size_t index) const override {
-    return values_.at(index);
+  object::ptr at(std::size_t index) const override {
+    return object::as_static(values_.at(index));
   }
 
  private:
@@ -60,9 +60,9 @@ class map_like_native_object
     return shared_from_this();
   }
 
-  const object* lookup_property(std::string_view id) const override {
+  object::ptr lookup_property(std::string_view id) const override {
     if (auto value = values_.find(id); value != values_.end()) {
-      return &value->second;
+      return object::as_static(value->second);
     }
     return nullptr;
   }
@@ -84,14 +84,14 @@ class double_property_name
     return shared_from_this();
   }
 
-  const object* lookup_property(std::string_view id) const override {
+  object::ptr lookup_property(std::string_view id) const override {
     if (auto cached = cached_.find(id); cached != cached_.end()) {
-      return &cached->second;
+      return object::as_static(cached->second);
     }
     auto [result, inserted] =
         cached_.insert({std::string(id), w::string(fmt::format("{0}{0}", id))});
     assert(inserted);
-    return &result->second;
+    return object::as_static(result->second);
   }
 
   mutable std::map<std::string, object, std::less<>> cached_;
@@ -774,8 +774,8 @@ class map_get : public native_function {
     auto m = ctx.argument<map>(0);
     auto key = ctx.named_argument<string>("key", context::required);
 
-    if (const object* result = m.lookup_property(*key)) {
-      return object::as_static(*result);
+    if (object::ptr result = m.lookup_property(*key)) {
+      return result;
     }
     ctx.error("Key '{}' not found.", *key);
   }

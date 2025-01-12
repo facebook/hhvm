@@ -221,7 +221,7 @@ class eval_context {
    *     the chain of resolved whisker::objects.
    */
   expected<
-      std::reference_wrapper<const object>,
+      managed_object_ptr<>,
       std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
   lookup_object(const std::vector<std::string>& path);
 
@@ -262,7 +262,7 @@ class eval_context {
      *   1. Locals
      *   2. Backing object (this_ref())
      */
-    const object* lookup_property(std::string_view identifier);
+    object::ptr lookup_property(std::string_view identifier);
 
     // Before C++20, std::unordered_map does not support heterogenous lookups
     using locals_map = std::map<std::string, object, std::less<>>;

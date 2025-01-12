@@ -173,7 +173,7 @@ class native_object {
      * Preconditions:
      *   - The provided string is a valid Whisker identifier
      */
-    virtual const object* lookup_property(
+    virtual managed_object_ptr<> lookup_property(
         std::string_view identifier) const = 0;
   };
   /**
@@ -218,7 +218,7 @@ class native_object {
      * Preconditions:
      *   - index < size()
      */
-    virtual const object& at(std::size_t index) const = 0;
+    virtual managed_object_ptr<> at(std::size_t index) const = 0;
   };
   /**
    * Returns an implementation of array_like if this object supports array-like
@@ -417,7 +417,7 @@ class native_function {
     class array_like final : public native_object::array_like {
      public:
       std::size_t size() const final;
-      const object& at(std::size_t index) const final;
+      managed_object_ptr<> at(std::size_t index) const final;
 
       // Avoids incomplete type (whisker::object) errors on MSVC.
       ~array_like() noexcept override;
@@ -451,7 +451,8 @@ class native_function {
      */
     class map_like final : public native_object::map_like {
      public:
-      const object* lookup_property(std::string_view identifier) const final;
+      managed_object_ptr<> lookup_property(
+          std::string_view identifier) const final;
 
       // Avoids incomplete type (whisker::object) errors on MSVC.
       ~map_like() noexcept override;

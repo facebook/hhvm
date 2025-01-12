@@ -28,8 +28,8 @@ namespace whisker {
 
 namespace {
 
-const object* find_property(const object& o, std::string_view identifier) {
-  using result = const object*;
+object::ptr find_property(const object& o, std::string_view identifier) {
+  using result = object::ptr;
   return o.visit(
       [](null) -> result { return nullptr; },
       [](i64) -> result { return nullptr; },
@@ -46,7 +46,7 @@ const object* find_property(const object& o, std::string_view identifier) {
       [](const native_function::ptr&) -> result { return nullptr; },
       [identifier](const map& m) -> result {
         if (auto it = m.find(identifier); it != m.end()) {
-          return &it->second;
+          return object::as_static(it->second);
         }
         return nullptr;
       });
@@ -71,10 +71,10 @@ class global_scope_object
     return shared_from_this();
   }
 
-  const object* lookup_property(std::string_view identifier) const override {
+  object::ptr lookup_property(std::string_view identifier) const override {
     if (auto property = properties_.find(identifier);
         property != properties_.end()) {
-      return &property->second;
+      return object::as_static(property->second);
     }
     return nullptr;
   }
@@ -95,10 +95,10 @@ class global_scope_object
 
 } // namespace
 
-const object* eval_context::lexical_scope::lookup_property(
+object::ptr eval_context::lexical_scope::lookup_property(
     std::string_view identifier) {
   if (auto local = locals_.find(identifier); local != locals_.end()) {
-    return &local->second;
+    return object::as_static(local->second);
   }
   return find_property(this_ref_, identifier);
 }
@@ -149,17 +149,17 @@ eval_context::bind_local(std::string name, object value) {
 }
 
 expected<
-    std::reference_wrapper<const object>,
+    object::ptr,
     std::variant<eval_scope_lookup_error, eval_property_lookup_error>>
 eval_context::lookup_object(const std::vector<std::string>& path) {
   assert(!stack_.empty());
 
   if (path.empty()) {
     // Lookup is {{.}}
-    return stack_.back().this_ref();
+    return object::as_static(stack_.back().this_ref());
   }
 
-  auto current = std::invoke([&]() -> const object* {
+  auto current = std::invoke([&]() -> object::ptr {
     const auto& id = path.front();
     // Crawl up through the scope stack since names can be shadowed.
     for (auto scope = stack_.rbegin(); scope != stack_.rend(); ++scope) {
@@ -185,7 +185,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
 
   for (auto component = std::next(path.begin()); component != path.end();
        ++component) {
-    const object* next = find_property(*current, *component);
+    object::ptr next = find_property(*current, *component);
     if (next == nullptr) {
       return unexpected(eval_property_lookup_error(
           *current, /* missing_from */
@@ -196,7 +196,7 @@ eval_context::lookup_object(const std::vector<std::string>& path) {
   }
 
   assert(current != nullptr);
-  return *current;
+  return current;
 }
 
 } // namespace whisker

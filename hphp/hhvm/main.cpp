@@ -184,7 +184,6 @@ static FUNC_PTR forking_wrapper(FUNC_PTR* real_func, const char* func_name) {
   return nullptr;
 }
 
-
 extern "C" {
   // Note: in glibc, fork is a weak symbol aliasing to __fork.  Here we redefine
   // fork to intercept the call (only for Linux).  To make it works reliably,

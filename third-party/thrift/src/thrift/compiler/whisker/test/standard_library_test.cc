@@ -102,6 +102,48 @@ TEST_F(StandardLibraryTest, array_empty) {
   }
 }
 
+TEST_F(StandardLibraryTest, array_at) {
+  {
+    auto result = render(
+        "{{ (array.at (array.of 1 \"foo\" 2) 0) }}\n"
+        "{{ (array.at (array.of 1 \"foo\" 2) 1) }}\n"
+        "{{ (array.at (array.of 1 \"foo\" 2) 2) }}\n",
+        w::null);
+    EXPECT_THAT(diagnostics(), testing::IsEmpty());
+    EXPECT_EQ(
+        *result,
+        "1\n"
+        "foo\n"
+        "2\n");
+  }
+
+  {
+    auto result = render("{{ (array.at (array.of) 0) }}\n", w::null);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'array.at' threw an error:\n"
+            "Index '0' is out of bounds (size is 0).",
+            path_to_file,
+            1)));
+  }
+
+  {
+    auto result = render("{{ (array.at (array.of 0 1 2) -1) }}\n", w::null);
+    EXPECT_FALSE(result.has_value());
+    EXPECT_THAT(
+        diagnostics(),
+        testing::ElementsAre(diagnostic(
+            diagnostic_level::error,
+            "Function 'array.at' threw an error:\n"
+            "Index '-1' is out of bounds (size is 3).",
+            path_to_file,
+            1)));
+  }
+}
+
 TEST_F(StandardLibraryTest, string_len) {
   {
     auto result = render(

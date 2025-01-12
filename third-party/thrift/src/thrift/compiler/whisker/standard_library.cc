@@ -121,6 +121,41 @@ map::value_type create_array_functions() {
     array_functions["empty?"] = w::make_native_function<array_empty>();
   }
 
+  {
+    /**
+     * Gets the object from an array at a given index. If the index is negative,
+     * or larger than the size of the array, then an error is thrown.
+     *
+     * Name: array.at
+     *
+     * Arguments:
+     *   - [whisker::array] — The array to get from
+     *   - [i64] — The index of the item to get
+     *
+     * Returns:
+     *   [object] the item at the given index.
+     */
+    class array_at : public named_native_function {
+     public:
+      array_at() : named_native_function("array.at") {}
+
+      object::ptr invoke(context ctx) override {
+        ctx.declare_named_arguments({});
+        ctx.declare_arity(2);
+
+        auto a = ctx.argument<array>(0);
+        auto index = ctx.argument<i64>(1);
+
+        if (index < 0 || std::size_t(index) >= a.size()) {
+          ctx.error(
+              "Index '{}' is out of bounds (size is {}).", index, a.size());
+        }
+        return a.at(index);
+      }
+    };
+    array_functions["at"] = w::make_native_function<array_at>();
+  }
+
   return map::value_type{"array", std::move(array_functions)};
 }
 

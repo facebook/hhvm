@@ -87,7 +87,7 @@ struct ast_visitor {
       visit(else_if_clause.body_elements, else_if_scope.open_node());
     }
 
-    if (auto else_clause = conditional_block.else_clause) {
+    if (const auto& else_clause = conditional_block.else_clause) {
       auto else_scope = scope.open_property();
       else_scope.println(" else-block {}", location(else_clause->loc));
       visit(else_clause->body_elements, else_scope.open_node());
@@ -98,6 +98,24 @@ struct ast_visitor {
     scope.println(" with-block {}", location(with_block.loc));
     visit(with_block.value, scope.open_property());
     visit(with_block.body_elements, scope.open_node());
+  }
+  void visit(
+      const ast::each_block& each_block, tree_printer::scope scope) const {
+    scope.println(" each-block {}", location(each_block.loc));
+    visit(each_block.iterable, scope.open_property());
+    if (const auto& captured = each_block.captured) {
+      scope.open_property().println(
+          " element-capture '{}'", captured->element.name);
+      if (const auto& index = captured->index) {
+        scope.open_property().println(" index-capture '{}'", index->name);
+      }
+    }
+    visit(each_block.body_elements, scope.open_node());
+    if (const auto& else_clause = each_block.else_clause) {
+      auto else_scope = scope.open_property();
+      else_scope.println(" else-block {}", location(else_clause->loc));
+      visit(else_clause->body_elements, else_scope.open_node());
+    }
   }
   void visit(const ast::partial_apply& partial_apply, tree_printer::scope scope)
       const {

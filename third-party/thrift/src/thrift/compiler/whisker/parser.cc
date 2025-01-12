@@ -220,6 +220,14 @@ bool try_consume_tokens(
 }
 
 /**
+ * Creates an identifier AST node from identifier token.
+ */
+ast::identifier make_identifier(const token& t) {
+  assert(t.kind == tok::identifier);
+  return ast::identifier{t.range, std::string(t.string_value())};
+}
+
+/**
  * The Mustache spec contains this concept called "standalone lines".
  *   https://github.com/mustache/spec/blob/v1.4.2/specs/sections.yml#L279-L305
  *
@@ -625,42 +633,6 @@ class parser {
     }
   }
 
-  // Parses the "{{#else if}}" clause which is a separator between two
-  // ast::bodies.
-  //
-  // else-if-block →
-  //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
-  parse_result<ast::conditional_block::else_if_block> parse_else_if_clause(
-      parser_scan_window scan) {
-    assert(scan.empty());
-    const auto scan_start = scan.start;
-
-    if (!try_consume_tokens(
-            &scan, {tok::open, tok::pound, tok::kw_else, tok::kw_if})) {
-      return no_parse_result();
-    }
-    scan = scan.make_fresh();
-
-    parse_result condition = parse_expression(scan);
-    if (!condition.has_value()) {
-      report_fatal_expected(scan, "expression in else-if clause");
-    }
-    ast::expression cond = std::move(condition).consume_and_advance(&scan);
-    if (!try_consume_token(&scan, tok::close)) {
-      report_fatal_expected(scan, "{} in else-if clause", tok::close);
-    }
-    scan = scan.make_fresh();
-
-    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
-
-    return parse_result{
-        ast::conditional_block::else_if_block{
-            scan.with_start(scan_start).range(),
-            std::move(cond),
-            std::move(bodies)},
-        scan};
-  }
-
   // Parses the "{{#else}}" clause which is a separator between two ast::bodies.
   //
   // else-clause → { "{{" ~ "#" ~ "else" ~ "}}" }
@@ -678,6 +650,63 @@ class parser {
   // { "{{" ~ "#" ~ "else" }
   bool peek_else_clause(parser_scan_window scan) {
     return try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_else});
+  }
+
+  // Parses the "{{#else}}" block which is a separator between two
+  // ast::bodies.
+  //
+  // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
+  parse_result<ast::else_block> parse_else_block(parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (parse_result e = parse_else_clause(scan)) {
+      std::ignore = std::move(e).consume_and_advance(&scan);
+    } else {
+      return no_parse_result();
+    }
+    scan = scan.make_fresh();
+    auto else_bodies = parse_bodies(scan).consume_and_advance(&scan);
+    return parse_result{
+        ast::else_block{
+            scan.with_start(scan_start).range(), std::move(else_bodies)},
+        scan};
+  }
+
+  // Parses the "{{#else if}}" block which is a separator between two
+  // ast::bodies.
+  //
+  // else-if-block →
+  //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
+  parse_result<ast::conditional_block::else_if_block> parse_else_if_block(
+      parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!try_consume_tokens(
+            &scan, {tok::open, tok::pound, tok::kw_else, tok::kw_if})) {
+      return no_parse_result();
+    }
+    scan = scan.make_fresh();
+
+    parse_result condition = parse_expression(scan);
+    if (!condition.has_value()) {
+      report_fatal_expected(scan, "expression in else-if block");
+    }
+    ast::expression cond = std::move(condition).consume_and_advance(&scan);
+    if (!try_consume_token(&scan, tok::close)) {
+      report_fatal_expected(scan, "{} in else-if block", tok::close);
+    }
+    scan = scan.make_fresh();
+
+    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
+
+    return parse_result{
+        ast::conditional_block::else_if_block{
+            scan.with_start(scan_start).range(),
+            std::move(cond),
+            std::move(bodies)},
+        scan};
   }
 
   // Returns an empty parse result if no body was found.
@@ -826,6 +855,7 @@ class parser {
       ast::section_block,
       ast::conditional_block,
       ast::with_block,
+      ast::each_block,
       ast::let_statement,
       ast::pragma_statement,
       ast::partial_apply>;
@@ -858,6 +888,8 @@ class parser {
       templ = std::move(conditional_block).consume_and_advance(&scan);
     } else if (parse_result with_block = parse_with_block(scan)) {
       templ = std::move(with_block).consume_and_advance(&scan);
+    } else if (parse_result each_block = parse_each_block(scan)) {
+      templ = std::move(each_block).consume_and_advance(&scan);
     } else if (parse_result let_statement = parse_let_statement(scan)) {
       templ = std::move(let_statement).consume_and_advance(&scan);
     } else if (parse_result pragma_statement = parse_pragma_statement(scan)) {
@@ -938,13 +970,11 @@ class parser {
       return no_parse_result();
     }
     std::vector<ast::identifier> path;
-    path.emplace_back(
-        ast::identifier{first_id.range, std::string(first_id.string_value())});
+    path.emplace_back(make_identifier(first_id));
 
     while (try_consume_token(&scan, tok::dot)) {
       if (const token* id_part = try_consume_token(&scan, tok::identifier)) {
-        path.emplace_back(ast::identifier{
-            id_part->range, std::string(id_part->string_value())});
+        path.emplace_back(make_identifier(*id_part));
       } else {
         report_fatal_expected(scan, "identifier in variable-lookup");
       }
@@ -1122,7 +1152,7 @@ class parser {
               named_argument_entry{
                   id.string_value(),
                   function_call::named_argument{
-                      ast::identifier{id.range, std::string(id.string_value())},
+                      make_identifier(id),
                       std::make_unique<expression>(
                           std::move(expr).consume_and_advance(&scan))}},
               scan};
@@ -1258,7 +1288,7 @@ class parser {
     return {
         ast::let_statement{
             scan.with_start(scan_start).range(),
-            ast::identifier{id->range, std::string(id->string_value())},
+            make_identifier(*id),
             std::move(value)},
         scan};
   }
@@ -1296,12 +1326,11 @@ class parser {
 
   // conditional-block →
   //   { cond-block-open ~ body* ~ else-if-block* ~ else-block? ~
-  //   cond-block-close }
+  //     cond-block-close }
   // cond-block-open →
   //   { "{{" ~ "#" ~ "if" ~ expression ~ "}}" }
   // else-if-block →
   //   { "{{" ~ "#" ~ "else" ~ " " ~ "if" ~ expression ~ "}}" ~ body* }
-  // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
   // cond-block-close →
   //   { "{{" ~ "/" ~ "if" ~ expression ~ "}}" }
   //
@@ -1329,27 +1358,17 @@ class parser {
     ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
 
     std::vector<ast::conditional_block::else_if_block> else_if_blocks;
-    while (parse_result else_if = parse_else_if_clause(scan)) {
+    while (parse_result else_if = parse_else_if_block(scan)) {
       else_if_blocks.push_back(std::move(else_if).consume_and_advance(&scan));
     }
 
-    auto else_block =
-        std::invoke([&]() -> std::optional<ast::conditional_block::else_block> {
-          const auto else_scan_start = scan.start;
-          if (parse_result e = parse_else_clause(scan)) {
-            std::ignore = std::move(e).consume_and_advance(&scan);
-          } else {
-            return std::nullopt;
-          }
-          scan = scan.make_fresh();
-          auto else_bodies = parse_bodies(scan).consume_and_advance(&scan);
-          return parse_result{
-              ast::conditional_block::else_block{
-                  scan.with_start(else_scan_start).range(),
-                  std::move(else_bodies)},
-              scan}
-              .consume_and_advance(&scan);
-        });
+    auto else_block = std::invoke([&]() -> std::optional<ast::else_block> {
+      if (parse_result e = parse_else_block(scan)) {
+        return std::move(e).consume_and_advance(&scan);
+      } else {
+        return std::nullopt;
+      }
+    });
 
     const auto expect_on_close = [&](tok kind) {
       if (!try_consume_token(&scan, kind)) {
@@ -1429,6 +1448,97 @@ class parser {
             scan.with_start(scan_start).range(),
             std::move(expr),
             std::move(bodies),
+        },
+        scan};
+  }
+
+  // each-block →
+  //   { each-block-open ~ body* ~ else-block ~ each-block-close }
+  // each-block-open →
+  //   { "{{" ~ "#" ~ "each" ~ expression ~ each-block-capture? ~ "}}" }
+  // each-block-capture →
+  //   { "as" ~ "|" ~ identifier ~ identifier? ~ "|" }
+  // else-block → { "{{" ~ "#" ~ "else" ~ "}}" ~ body* }
+  // each-block-close → { "{{" ~ "/" ~ "each" ~ "}}"  }
+  parse_result<ast::each_block> parse_each_block(parser_scan_window scan) {
+    assert(scan.empty());
+    const auto scan_start = scan.start;
+
+    if (!try_consume_tokens(&scan, {tok::open, tok::pound, tok::kw_each})) {
+      return no_parse_result();
+    }
+    scan = scan.make_fresh();
+
+    parse_result parsed_iterable = parse_expression(scan);
+    if (!parsed_iterable.has_value()) {
+      report_fatal_expected(scan, "expression to open each-block");
+    }
+    ast::expression iterable =
+        std::move(parsed_iterable).consume_and_advance(&scan);
+
+    auto captured =
+        std::invoke([&]() -> std::optional<ast::each_block::captures> {
+          if (!try_consume_token(&scan, tok::kw_as)) {
+            return std::nullopt;
+          }
+          std::optional<ast::identifier> element_capture;
+          std::optional<ast::identifier> index_capture;
+          if (!try_consume_token(&scan, tok::pipe)) {
+            report_fatal_expected(
+                scan, "{} to open each-block capture", tok::pipe);
+          };
+          if (const token* element =
+                  try_consume_token(&scan, tok::identifier)) {
+            element_capture = make_identifier(*element);
+          } else {
+            report_fatal_expected(
+                scan, "element-capture identifier in each-block capture");
+          }
+          if (const token* index = try_consume_token(&scan, tok::identifier)) {
+            index_capture = make_identifier(*index);
+          }
+          if (!try_consume_token(&scan, tok::pipe)) {
+            report_fatal_expected(
+                scan, "{} to close each-block capture", tok::pipe);
+          };
+          return ast::each_block::captures{
+              std::move(*element_capture), std::move(index_capture)};
+        });
+
+    if (!try_consume_token(&scan, tok::close)) {
+      report_fatal_expected(scan, "{} to open each-block", tok::close);
+    }
+    scan = scan.make_fresh();
+
+    ast::bodies bodies = parse_bodies(scan).consume_and_advance(&scan);
+
+    auto else_block = std::invoke([&]() -> std::optional<ast::else_block> {
+      if (parse_result e = parse_else_block(scan)) {
+        return std::move(e).consume_and_advance(&scan);
+      } else {
+        return std::nullopt;
+      }
+    });
+
+    const auto expect_on_close = [&](tok kind) {
+      if (!try_consume_token(&scan, kind)) {
+        report_fatal_expected(
+            scan, "{} to close each-block '{}'", kind, iterable.to_string());
+      }
+    };
+
+    expect_on_close(tok::open);
+    expect_on_close(tok::slash);
+    expect_on_close(tok::kw_each);
+    expect_on_close(tok::close);
+
+    return {
+        ast::each_block{
+            scan.with_start(scan_start).range(),
+            std::move(iterable),
+            std::move(captured),
+            std::move(bodies),
+            std::move(else_block),
         },
         scan};
   }

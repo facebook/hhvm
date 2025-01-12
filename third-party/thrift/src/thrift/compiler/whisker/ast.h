@@ -33,6 +33,7 @@ struct comment;
 struct section_block;
 struct conditional_block;
 struct with_block;
+struct each_block;
 struct partial_apply;
 struct interpolation;
 struct let_statement;
@@ -49,6 +50,7 @@ using body = std::variant<
     section_block,
     conditional_block,
     with_block,
+    each_block,
     let_statement,
     pragma_statement,
     partial_apply>;
@@ -391,6 +393,14 @@ struct section_block {
 };
 
 /**
+ * The {{#else}} clause of {{#if}} or {{#each}} blocks.
+ */
+struct else_block {
+  source_range loc;
+  bodies body_elements;
+};
+
+/**
  * A Whisker construct for conditionals, i.e. the if-block.
  * This matches Handlebars:
  *   https://handlebarsjs.com/guide/builtin-helpers.html#if
@@ -409,11 +419,6 @@ struct conditional_block {
   };
   std::vector<else_if_block> else_if_clauses;
 
-  // The {{#else}} clause, if present.
-  struct else_block {
-    source_range loc;
-    bodies body_elements;
-  };
   std::optional<else_block> else_clause;
 };
 
@@ -427,6 +432,32 @@ struct with_block {
 
   expression value;
   bodies body_elements;
+};
+
+/**
+ * A Whisker construct for iteration.
+ * This matches Handlebars:
+ *   https://handlebarsjs.com/guide/builtin-helpers.html#each
+ */
+struct each_block {
+  source_range loc;
+
+  expression iterable;
+  struct captures {
+    /**
+     * The name of the variable to assign to each element of the iterable.
+     */
+    identifier element;
+    /**
+     * The name of the variable to assign to the index of each element of the
+     * iterable.
+     */
+    std::optional<identifier> index;
+  };
+  std::optional<captures> captured;
+
+  bodies body_elements;
+  std::optional<else_block> else_clause;
 };
 
 /*

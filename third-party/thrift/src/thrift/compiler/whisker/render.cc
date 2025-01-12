@@ -842,6 +842,11 @@ class render_engine {
     eval_context_.pop_scope();
   }
 
+  [[noreturn]] void visit(const ast::each_block& each_block) {
+    report_fatal_error(
+        each_block.loc.begin, "each blocks have not been implemented yet");
+  }
+
   void visit(const ast::partial_apply& partial_apply) {
     std::vector<std::string> path;
     path.reserve(partial_apply.path.parts.size());

@@ -561,6 +561,289 @@ TEST_F(ParserTest, conditional_block_not_wrong_arity) {
           1)));
 }
 
+TEST_F(ParserTest, basic_each) {
+  auto ast = parse_ast(
+      "{{#each news.updates}}\n"
+      "  {{.}}\n"
+      "{{/each}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- each-block <line:1:1, line:3:10>\n"
+      "| `- expression <line:1:9, col:21> 'news.updates'\n"
+      "| |- text <line:2:1, col:3> '  '\n"
+      "| |- interpolation <line:2:3, col:8> 'this'\n"
+      "| |- newline <line:2:8, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, basic_each_else) {
+  auto ast = parse_ast(
+      "{{#each news.updates}}\n"
+      "  {{.}}\n"
+      "{{#else}}\n"
+      "  Got nothing!\n"
+      "{{/each}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- each-block <line:1:1, line:5:10>\n"
+      "| `- expression <line:1:9, col:21> 'news.updates'\n"
+      "| |- text <line:2:1, col:3> '  '\n"
+      "| |- interpolation <line:2:3, col:8> 'this'\n"
+      "| |- newline <line:2:8, line:3:1> '\\n'\n"
+      "| `- else-block <line:3:1, line:5:1>\n"
+      "|   |- text <line:4:1, col:15> '  Got nothing!'\n"
+      "|   |- newline <line:4:15, line:5:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, each_with_element_capture) {
+  auto ast = parse_ast(
+      "{{#each news.updates as |update|}}\n"
+      "  {{update}}\n"
+      "{{/each}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- each-block <line:1:1, line:3:10>\n"
+      "| `- expression <line:1:9, col:21> 'news.updates'\n"
+      "| `- element-capture 'update'\n"
+      "| |- text <line:2:1, col:3> '  '\n"
+      "| |- interpolation <line:2:3, col:13> 'update'\n"
+      "| |- newline <line:2:13, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, each_with_element_and_index_captures) {
+  auto ast = parse_ast(
+      "{{#each news.updates as |update index|}}\n"
+      "  {{index}}. {{update}}\n"
+      "{{/each}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- each-block <line:1:1, line:3:10>\n"
+      "| `- expression <line:1:9, col:21> 'news.updates'\n"
+      "| `- element-capture 'update'\n"
+      "| `- index-capture 'index'\n"
+      "| |- text <line:2:1, col:3> '  '\n"
+      "| |- interpolation <line:2:3, col:12> 'index'\n"
+      "| |- text <line:2:12, col:14> '. '\n"
+      "| |- interpolation <line:2:14, col:24> 'update'\n"
+      "| |- newline <line:2:24, line:3:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, each_block_nested) {
+  auto ast = parse_ast(
+      "{{#each news.updates as |update|}}\n"
+      "  {{#each update.headlines as |headline index|}}\n"
+      "    {{index}}. {{headline}}\n"
+      "  {{#else}}\n"
+      "    No headlines!\n"
+      "  {{/each}}\n"
+      "{{#else}}\n"
+      "  No updates!\n"
+      "{{/each}}");
+  EXPECT_EQ(
+      to_string(*ast),
+      "root [path/to/test-1.whisker]\n"
+      "|- each-block <line:1:1, line:9:10>\n"
+      "| `- expression <line:1:9, col:21> 'news.updates'\n"
+      "| `- element-capture 'update'\n"
+      "| |- each-block <line:2:3, line:6:12>\n"
+      "| | `- expression <line:2:11, col:27> 'update.headlines'\n"
+      "| | `- element-capture 'headline'\n"
+      "| | `- index-capture 'index'\n"
+      "| | |- text <line:3:1, col:5> '    '\n"
+      "| | |- interpolation <line:3:5, col:14> 'index'\n"
+      "| | |- text <line:3:14, col:16> '. '\n"
+      "| | |- interpolation <line:3:16, col:28> 'headline'\n"
+      "| | |- newline <line:3:28, line:4:1> '\\n'\n"
+      "| | `- else-block <line:4:3, line:6:3>\n"
+      "| |   |- text <line:5:1, col:18> '    No headlines!'\n"
+      "| |   |- newline <line:5:18, line:6:1> '\\n'\n"
+      "| `- else-block <line:7:1, line:9:1>\n"
+      "|   |- text <line:8:1, col:14> '  No updates!'\n"
+      "|   |- newline <line:8:14, line:9:1> '\\n'\n");
+}
+
+TEST_F(ParserTest, each_block_unclosed_with_else) {
+  auto ast = parse_ast("{{#each news.updates}}{{#else}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `{{` to close each-block 'news.updates' but found EOF",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_by_itself) {
+  auto ast = parse_ast("{{#each}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression to open each-block but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_close_by_itself) {
+  auto ast = parse_ast("{{/each}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected text, template, or comment but found `{{`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_missing_captures) {
+  auto ast = parse_ast(
+      "{{#each (foo 1 2 3) as}}\n"
+      "{{/each}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `|` to open each-block capture but found `}}`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_empty_captures) {
+  auto ast = parse_ast(
+      "{{#each (foo 1 2 3) as ||}}\n"
+      "{{/each}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected element-capture identifier in each-block capture but found `|`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_too_many_captures) {
+  auto ast = parse_ast(
+      "{{#each (foo 1 2 3) as |c1 c2 c3|}}\n"
+      "{{/each}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `|` to close each-block capture but found identifier",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_extra_tokens_after_captures) {
+  auto ast = parse_ast(
+      "{{#each (foo 1 2 3) as |update| true}}\n"
+      "{{/each}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to open each-block but found `true`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_missing_as) {
+  auto ast = parse_ast(
+      "{{#each (foo 1 2 3) |update|}}\n"
+      "{{/each}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `}}` to open each-block but found `|`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_missing_expr) {
+  auto ast = parse_ast(
+      "{{#each as |update|}}\n"
+      "{{/each}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression to open each-block but found `as`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_missing_expr_and_as) {
+  auto ast = parse_ast(
+      "{{#each |name index|}}\n"
+      "{{/each}}\n");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected expression to open each-block but found `|`",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_multiple_else) {
+  auto ast = parse_ast(
+      "{{#each news.updates}}\n"
+      "  {{.}}\n"
+      "{{#else}}\n"
+      "  Got nothing!\n"
+      "{{#else}}\n"
+      "  Got nothing again!\n"
+      "{{/each}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `/` to close each-block 'news.updates' but found `#`",
+          path_to_file(1),
+          5)));
+}
+
+TEST_F(ParserTest, each_missing_close) {
+  auto ast = parse_ast("{{#each news.updates}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `{{` to close each-block 'news.updates' but found EOF",
+          path_to_file(1),
+          1)));
+}
+
+TEST_F(ParserTest, each_else_missing_close) {
+  auto ast = parse_ast(
+      "{{#each news.updates}}\n"
+      "{{#else}}");
+  EXPECT_FALSE(ast.has_value());
+  EXPECT_THAT(
+      diagnostics,
+      testing::ElementsAre(diagnostic(
+          diagnostic_level::error,
+          "expected `{{` to close each-block 'news.updates' but found EOF",
+          path_to_file(1),
+          2)));
+}
+
 TEST_F(ParserTest, literals) {
   auto ast = parse_ast(
       "{{null}}\n"
